@@ -43,6 +43,18 @@ const RANKED_TYPES: LaunchContentType[] = [
   'OFFICIAL_VIDEO', 'LYRIC_VIDEO', 'VISUALIZER', 'LIVE', 'BTS',
 ];
 
+/**
+ * The plural, because "Live" + "s" is "Lives" and "BTS" + "s" is "BTSs".
+ * The card leads with this noun, so it is the first thing read.
+ */
+export const FORMAT_PLURAL: Record<string, string> = {
+  OFFICIAL_VIDEO: 'Official videos',
+  LYRIC_VIDEO: 'Lyric videos',
+  VISUALIZER: 'Visualisers',
+  LIVE: 'Live videos',
+  BTS: 'BTS',
+};
+
 export const FORMAT_LABEL: Record<string, string> = {
   OFFICIAL_VIDEO: 'Official video',
   LYRIC_VIDEO: 'Lyric video',

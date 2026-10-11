@@ -24,7 +24,7 @@
    LIFETIME NEVER TAKES THE BIG TYPE. See FormatBlock.
    ═══════════════════════════════════════════════════════════════════════ */
 
-import { formatPerformance, ROSTER_SUPPORT_BENCHMARK, FORMAT_LABEL, PROVISIONAL_AT } from '@/lib/formatPerformance';
+import { formatPerformance, ROSTER_SUPPORT_BENCHMARK, FORMAT_LABEL, FORMAT_PLURAL, PROVISIONAL_AT } from '@/lib/formatPerformance';
 import { commentDemand, ROSTER_COMMENTS_PER_1K } from '@/lib/commentDemand';
 import {
   fmtNum, daysSince, STATUS_COLOR,
@@ -374,14 +374,14 @@ export default async function ArtistOverview({
               <>
             {perf.bestSupport && (
               <div className="text-[13px] text-ink mt-2.5 leading-snug">
-                <strong>{perf.bestSupport.label}s</strong>
+                <strong>{FORMAT_PLURAL[perf.bestSupport.type] ?? `${perf.bestSupport.label}s`}</strong>
                 {perf.bestSupport.vsHero != null && (
                   <span className="text-ink/55">
                     {' '}— {Math.round(perf.bestSupport.vsHero * 100)}% of an official video here
                   </span>
                 )}
                 {!perf.clear && perf.support.length > 1 && (
-                  <span className="text-ink/40">, but close to {perf.support[1].label.toLowerCase()}s</span>
+                  <span className="text-ink/40">, but close to {(FORMAT_PLURAL[perf.support[1].type] ?? `${perf.support[1].label}s`).toLowerCase()}</span>
                 )}
               </div>
             )}
