@@ -371,18 +371,6 @@ export default async function TeamBoard({ team, linkPrefix, linkSuffix = '' }: {
         </p>
       </div>
       <div className="flex items-center gap-3 flex-wrap justify-end">
-        <a
-          href={plannerHref}
-          className="text-[11px] font-bold px-3 py-2 rounded-md border border-ink/12 hover:bg-ink/[0.04] transition-colors whitespace-nowrap"
-        >
-          Content Planner
-        </a>
-        <a
-          href={weeklyHref}
-          className="text-[11px] font-bold px-3 py-2 rounded-md border border-ink/12 hover:bg-ink/[0.04] transition-colors whitespace-nowrap"
-        >
-          Priority Campaigns
-        </a>
         <AddArtistModal team={team.slug} regionTag={team.regionTag} />
         {syncMeta && (
           <span className="text-[10px] uppercase tracking-[0.14em] text-ink/35 text-right">
@@ -419,6 +407,44 @@ export default async function TeamBoard({ team, linkPrefix, linkSuffix = '' }: {
   return (
     <TeamBoardShell
       header={header}
+      /* ─── TOOLS ──────────────────────────────────────────────────────
+         These two were unlabelled buttons in the header, sitting beside
+         "+ Add Artist" as if they were the same kind of thing. They are
+         not: Add Artist changes this board, while these two build a
+         separate document for somebody else to read. Nothing on the
+         button said so, and nothing said what either one produces, so
+         the only way to find out was to click and leave the board.
+
+         Given a tab of their own they can carry the sentence that makes
+         them legible. */
+      toolsTab={
+        <div className="grid sm:grid-cols-2 gap-4">
+          {[
+            {
+              href: plannerHref,
+              title: 'Content Planner',
+              line: 'Add your release timeline and get a YouTube plan back — what to publish, and when.',
+            },
+            {
+              href: weeklyHref,
+              title: 'Priority Campaigns',
+              line: 'A live page for YouTube, kept up to date, covering every campaign this team has pinned as a priority.',
+            },
+          ].map((t) => (
+            <a
+              key={t.href}
+              href={t.href}
+              className="block no-underline rounded-card border border-line bg-white p-5 hover:shadow-card transition-shadow"
+            >
+              <div className="font-black text-[17px] leading-tight text-ink">{t.title}</div>
+              <p className="text-[12px] text-ink/50 leading-relaxed mt-2">{t.line}</p>
+              <div className="text-[10px] font-bold uppercase tracking-[0.14em] text-ink/35 mt-4">
+                Open &rarr;
+              </div>
+            </a>
+          ))}
+        </div>
+      }
       allCount={rows.length}
       priorityCount={campaignCards.length}
       rail={campaignCards.map((c) => ({

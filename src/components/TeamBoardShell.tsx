@@ -71,19 +71,21 @@ export function useOpenBehaviour() {
   return useContext(OpenBehaviourContext);
 }
 
-type Tab = 'all' | 'priority' | 'behaviour';
-const TABS: Tab[] = ['all', 'priority', 'behaviour'];
+type Tab = 'all' | 'priority' | 'behaviour' | 'tools';
+const TABS: Tab[] = ['all', 'priority', 'behaviour', 'tools'];
 
 const TAB_LABEL: Record<Tab, (n: { all: number; priority: number }) => string> = {
   all:       (n) => `All Artists (${n.all})`,
   priority:  (n) => `Priority (${n.priority})`,
   behaviour: () => 'Channel Behaviour',
+  tools:     () => 'Tools',
 };
 
 const TAB_BLURB: Record<Tab, string> = {
   all:       'Every channel this team is watching',
   priority:  'Pinned artists — the ones this team is working right now',
   behaviour: 'What a pinned channel has actually been publishing, and what moved after it',
+  tools:     'Things this board can build for you, and what each one is for',
 };
 
 const STATUS_DOT: Record<string, string> = {
@@ -95,7 +97,7 @@ const STATUS_DOT: Record<string, string> = {
 };
 
 export default function TeamBoardShell({
-  header, allTab, priorityTab, allCount, priorityCount, rail, emptyPriority,
+  header, allTab, priorityTab, allCount, priorityCount, rail, emptyPriority, toolsTab,
 }: {
   /** The board's title block. */
   header: ReactNode;
@@ -107,6 +109,8 @@ export default function TeamBoardShell({
   rail: BehaviourRailArtist[];
   /** Shown in the Priority tab when nothing is pinned yet. */
   emptyPriority: ReactNode;
+  /** The Tools tab: what this board can build, each with a line saying why. */
+  toolsTab: ReactNode;
 }) {
   const [tab, setTab] = useState<Tab>('all');
   const [behaviourSlug, setBehaviourSlug] = useState<string | null>(null);
@@ -306,6 +310,9 @@ export default function TeamBoardShell({
       <div hidden={tab !== 'priority'}>
         {priorityCount > 0 ? priorityTab : emptyPriority}
       </div>
+      {/* Rendered only when open. Unlike the two boards above it holds no
+          typed-in state to lose, and nothing in it needs to be warm. */}
+      {tab === 'tools' && toolsTab}
 
     </OpenBehaviourContext.Provider>
     </div>
