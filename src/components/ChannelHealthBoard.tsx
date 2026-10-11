@@ -1034,7 +1034,15 @@ export default function ChannelHealthBoard({
                 style={{ background: st.rowBg }}
                 onClick={() => setExpandedRow(isExpanded ? null : r.slug)}
               >
-                <div className="min-w-0 relative">
+                {/* ── ARTWORK IN THE ROW ──────────────────────────────
+                    A roster of 119 names is a list of strings; the same
+                    roster with faces is something you scan. Every premium
+                    music dashboard does this and the watcher was the
+                    outlier — and the avatar is already on the row, so it
+                    costs nothing to show. */}
+                <div className="min-w-0 relative flex items-center gap-2.5">
+                  <ChannelAvatar src={r.thumbnail} name={r.name} size={30} />
+                  <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2">
                     <Link
                       href={`${linkPrefix}/${r.slug}${linkSuffix}`}
@@ -1103,6 +1111,7 @@ export default function ChannelHealthBoard({
                       {removingId === r.channelId ? '…' : '✕'}
                     </button>
                   )}
+                  </div>
                 </div>
                 <div className="flex items-center">
                   <Sparkline data={r.subsSeries} width={80} height={28} stroke={sp.stroke} fill={sp.fill} />
