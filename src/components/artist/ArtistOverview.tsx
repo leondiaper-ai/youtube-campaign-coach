@@ -24,7 +24,7 @@
    LIFETIME NEVER TAKES THE BIG TYPE. See FormatBlock.
    ═══════════════════════════════════════════════════════════════════════ */
 
-import { formatPerformance, ROSTER_SUPPORT_BENCHMARK } from '@/lib/formatPerformance';
+import { formatPerformance, ROSTER_SUPPORT_BENCHMARK, FORMAT_LABEL, PROVISIONAL_AT } from '@/lib/formatPerformance';
 import {
   fmtNum, daysSince, STATUS_COLOR,
   type ChannelState, type RecentUpload, type Artist,
@@ -245,9 +245,45 @@ export default async function ArtistOverview({
             the number, and the one comparison that makes the number
             mean anything — this channel against the roster. The rest
             moved into the row's own tooltip. */}
-        {perf.support.length > 0 && (
-          <div>
+        <div>
             <Eyebrow>Best asset after the video</Eyebrow>
+            {/* ── NOTHING READABLE YET ──────────────────────────────
+                The section still prints. The question it answers —
+                what should we make after the video — does not stop
+                being worth answering because this channel has not made
+                enough yet to answer it from its own history. So the
+                roster figures stand in, which is what a team has to aim
+                at until the channel has its own number. */}
+            {perf.support.length === 0 && (
+              <>
+                <div className="text-[13px] text-ink/70 mt-2.5 leading-snug">
+                  Not enough support assets here yet to read this channel&rsquo;s own.
+                </div>
+                <div className="mt-3 space-y-1.5">
+                  {(['VISUALIZER', 'LIVE', 'LYRIC_VIDEO', 'BTS'] as const).map((t) => {
+                    const b = ROSTER_SUPPORT_BENCHMARK[t];
+                    return (
+                      <div key={t} className="flex items-center gap-2 text-[11px] whitespace-nowrap">
+                        <span className="w-[76px] shrink-0 text-ink/70">{FORMAT_LABEL[t]}</span>
+                        <span className="flex-1 h-[6px] rounded-sm overflow-hidden" style={{ background: RULE }}>
+                          <span className="block h-full" style={{ width: `${(b.ratio / 0.4) * 100}%`, background: '#B8B0A2' }} />
+                        </span>
+                        <span className="w-[92px] shrink-0 text-right tabular-nums text-ink/45">
+                          {Math.round(b.ratio * 100)}% of video
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
+                <div className="text-[10px] text-ink/35 mt-2.5 leading-relaxed">
+                  What each format typically reaches across the roster, as a share of
+                  the official video on the same channel. Aim here until this channel
+                  has its own history.
+                </div>
+              </>
+            )}
+            {perf.support.length > 0 && (
+              <>
             {perf.bestSupport && (
               <div className="text-[13px] text-ink mt-2.5 leading-snug">
                 <strong>{perf.bestSupport.label}s</strong>
@@ -273,7 +309,10 @@ export default async function ArtistOverview({
                     className="flex items-center gap-2 text-[11px] whitespace-nowrap"
                     title={`${r.count} upload${r.count === 1 ? '' : 's'}, median age ${r.medianAgeDays} days. Median views per upload, so one hit does not carry a format. Views accumulate, so an older format has had longer to gather them.`}
                   >
-                    <span className="w-[76px] shrink-0 text-ink/70">{r.label}</span>
+                    <span className="w-[76px] shrink-0 text-ink/70">
+                      {r.label}
+                      {r.count <= PROVISIONAL_AT && <span className="text-ink/30"> ·</span>}
+                    </span>
                     <span className="flex-1 h-[6px] rounded-sm overflow-hidden" style={{ background: RULE }}>
                       <span
                         className="block h-full"
@@ -302,9 +341,13 @@ export default async function ArtistOverview({
               Share of this channel&rsquo;s official video / what the format
               does across the roster.
               {perf.hero && <> Official video median {fmtNum(perf.hero.median)}.</>}
+              {perf.support.some((r) => r.count <= PROVISIONAL_AT) && (
+                <> A dot marks a format with only two uploads — indicative, not settled.</>
+              )}
             </div>
+              </>
+            )}
           </div>
-        )}
         </div>
 
         {/* The movement-provenance line ("7-day movement figures are

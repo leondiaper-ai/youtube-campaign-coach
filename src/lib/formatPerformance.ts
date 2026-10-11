@@ -129,8 +129,25 @@ export interface FormatPerformance {
   windowDays: number;
 }
 
-/** Below this, a median is one or two videos and says nothing. */
-const MIN_PER_FORMAT = 3;
+/**
+ * Minimum uploads before a format's median is shown.
+ *
+ * Was 3, which kept the section off most pages. Nickelback is the case:
+ * two visualisers and two BTS clips, both just under the bar, so a
+ * channel that plainly HAS a support strategy showed nothing at all. And
+ * the binding constraint is not the 12-month window, it is the cache —
+ * only 50 uploads are held per channel, four months for a channel that
+ * posts often.
+ *
+ * At 2 a "median" is the mean of two, which is fragile, so the count
+ * travels with every row and a two-upload row is marked provisional. A
+ * thin number the reader can see is thin beats no number at all, when
+ * the question is "what should we make next".
+ */
+const MIN_PER_FORMAT = 2;
+
+/** At or below this, say so: the figure is indicative, not settled. */
+export const PROVISIONAL_AT = 2;
 
 /** The lead has to beat the runner-up by this much to be called. */
 const CLEAR_MARGIN = 1.25;
