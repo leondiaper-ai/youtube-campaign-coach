@@ -601,6 +601,12 @@ export default function ChannelHealthBoard({
      different cuts of the same roster, and an intersection can easily be
      empty, which reads as a broken board rather than as a true answer. */
   const [mfFilter, setMfFilter] = useState<'strong' | 'partial' | 'weak' | null>(null);
+  /* Both behaviour cards show a handful and hide the rest. That is right
+     for a glance and wrong as a dead end — the figures on this board are
+     filters precisely because the next question is always "which ones?".
+     So each card can open to its full list. */
+  const [showAllLatent, setShowAllLatent] = useState(false);
+  const [showAllStacks, setShowAllStacks] = useState(false);
   /* A 120-row table is a long scroll to reach anything underneath it.
      Twenty is roughly a screen and a half, which is enough to scan a
      group without the page becoming a corridor. */
@@ -704,16 +710,16 @@ export default function ChannelHealthBoard({
     .sort((a, b) =>
       Number(b.inCampaign) - Number(a.inCampaign)
       || b.stack.formats.length - a.stack.formats.length
-      || b.stack.latestAt.localeCompare(a.stack.latestAt))
-    .slice(0, 5);
+      || b.stack.latestAt.localeCompare(a.stack.latestAt));
+  const stacksShown = showAllStacks ? formatStacks : formatStacks.slice(0, 5);
 
   /* Quiet channels whose audience is still turning up. Ranked by how far
      above the roster norm they are, not by raw comments — otherwise this
      is a list of the biggest artists every week. */
   const latentDemand = activeRows
     .filter((r): r is RowData & { commentDemand: CommentDemand } => !!r.commentDemand?.isLatent)
-    .sort((a, b) => b.commentDemand.vsRoster - a.commentDemand.vsRoster)
-    .slice(0, 6);
+    .sort((a, b) => b.commentDemand.vsRoster - a.commentDemand.vsRoster);
+  const latentShown = showAllLatent ? latentDemand : latentDemand.slice(0, 6);
 
   const mfRows = activeRows.filter((r) => r.multiformat);
   const mfStrong = mfRows.filter((r) => mfBand(r) === 'strong').length;
@@ -1441,15 +1447,15 @@ export default function ChannelHealthBoard({
       )}
 
       {/* ─── STILL BEING TALKED ABOUT ──────────────────────────────── */}
-      {view === 'managed' && latentDemand.length > 0 && (
+      {view === 'managed' && latentShown.length > 0 && (
         <div className="mb-8">
           <SectionHead
             title="Quiet, but still being talked about"
-            meta="Comment rate vs the roster norm"
+            meta={`${latentDemand.length} channel${latentDemand.length === 1 ? '' : 's'} · comment rate vs the roster norm`}
           />
           <div className="bg-surface border border-line rounded-card overflow-hidden">
             <div className="divide-y divide-line-faint">
-              {latentDemand.map(({ commentDemand: cd, ...row }) => (
+              {latentShown.map(({ commentDemand: cd, ...row }) => (
                 <Link
                   key={row.slug}
                   href={`${linkPrefix}/${row.slug}${linkSuffix}`}
@@ -1477,6 +1483,17 @@ export default function ChannelHealthBoard({
                 </Link>
               ))}
             </div>
+            {latentDemand.length > 6 && (
+              <button
+                type="button"
+                onClick={() => setShowAllLatent(!showAllLatent)}
+                className="w-full px-5 py-2.5 border-t border-line text-micro font-semibold text-secondary hover:text-ink hover:bg-raised transition-colors text-left"
+              >
+                {showAllLatent
+                  ? 'Show fewer'
+                  : `Show all ${latentDemand.length} →`}
+              </button>
+            )}
             <div className="px-5 py-3 border-t border-line bg-raised/50 text-micro text-muted leading-relaxed">
               Channels posting little or nothing whose audience is still commenting
               well above the roster norm of {ROSTER_COMMENTS_PER_1K} per 1,000 views.
@@ -1489,15 +1506,15 @@ export default function ChannelHealthBoard({
       )}
 
       {/* ─── FORMAT STACKS: multiformat around ONE release ───────────── */}
-      {view === 'managed' && formatStacks.length > 0 && (
+      {view === 'managed' && stacksShown.length > 0 && (
         <div className="mb-8">
           <SectionHead
             title="Top multiformat strategy"
-            meta="More than one format around the same release, last 120 days"
+            meta={`${formatStacks.length} release${formatStacks.length === 1 ? '' : 's'} · more than one format, last 120 days`}
           />
           <div className="bg-surface border border-line rounded-card overflow-hidden">
             <div className="divide-y divide-line-faint">
-              {formatStacks.map(({ row, stack, inCampaign }) => (
+              {stacksShown.map(({ row, stack, inCampaign }) => (
                 <Link
                   key={row.slug}
                   href={`${linkPrefix}/${row.slug}${linkSuffix}`}
@@ -1545,6 +1562,15 @@ export default function ChannelHealthBoard({
                 </Link>
               ))}
             </div>
+            {formatStacks.length > 5 && (
+              <button
+                type="button"
+                onClick={() => setShowAllStacks(!showAllStacks)}
+                className="w-full px-5 py-2.5 border-t border-line text-micro font-semibold text-secondary hover:text-ink hover:bg-raised transition-colors text-left"
+              >
+                {showAllStacks ? 'Show fewer' : `Show all ${formatStacks.length} →`}
+              </button>
+            )}
             <div className="px-5 py-3 border-t border-line bg-raised/50 text-micro text-muted leading-relaxed">
               Campaigns we are tracking sort first, then by how many formats deep
               the stack is. This counts formats around ONE RELEASE — video,
