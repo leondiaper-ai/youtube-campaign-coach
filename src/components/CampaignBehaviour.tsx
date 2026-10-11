@@ -211,14 +211,30 @@ function dateToX(date: string, startDate: string, endDate: string, width: number
    is an absence of picture, and the ring says so.
    ─────────────────────────────────────────────────────────────────────── */
 
-/* A circle of radius r has roughly 1.7r of usable width across its middle,
-   and a bold sans character occupies about 0.62 of its own font size. So
-   the size that just fits N characters is 1.7r / 0.62N — capped at 1.1r for
-   one or two characters, where height rather than width is the limit. */
-function bulletFontSize(code: string, r: number): number {
-  const n = Math.max(1, code.length);
-  const byWidth = (1.7 * r) / (0.62 * n);
-  return Math.round(Math.min(byWidth, 1.1 * r) * 10) / 10;
+/* ── FITTING THE CODE TO THE CIRCLE ───────────────────────────────────────
+   Deriving a font size from an assumed character width does not work here.
+   The codes are not average text: OMV is three of the widest capitals in
+   the alphabet and measured 23px inside a 21px circle, while LF at the
+   same size left 7px of slack. Any single ratio is wrong for both.
+
+   So the width is declared rather than predicted. `textLength` with
+   `lengthAdjust="spacingAndGlyphs"` tells the renderer the exact width the
+   string must occupy, and it condenses or opens the glyphs to hit it —
+   measuring the real font instead of guessing at it. Two things follow:
+   the code cannot overflow the circle whatever letters it contains, and
+   every three-character code is now exactly as wide as every other, which
+   is the discipline the markers were missing.
+
+   Font size is then free to be set for height alone. */
+
+const BULLET_WIDTH: Record<number, number> = { 2: 1.15, 3: 1.55, 4: 1.8 };
+const BULLET_SIZE: Record<number, number> = { 1: 1.05, 2: 0.8, 3: 0.68, 4: 0.6 };
+
+function bulletText(code: string, r: number): { fontSize: number; textLength?: number } {
+  const n = Math.min(4, Math.max(1, code.length));
+  const fontSize = Math.round(r * (BULLET_SIZE[n] ?? 0.6) * 10) / 10;
+  const w = BULLET_WIDTH[n];
+  return w ? { fontSize, textLength: Math.round(r * w * 10) / 10 } : { fontSize };
 }
 
 function FormatBullet({
@@ -233,7 +249,7 @@ function FormatBullet({
 }) {
   const color = FORMAT_COLORS[format];
   const hollow = format === 'audio';
-  const fs = bulletFontSize(code, r);
+  const { fontSize, textLength } = bulletText(code, r);
   return (
     <g>
       <circle
@@ -244,8 +260,8 @@ function FormatBullet({
       />
       <text
         x={cx} y={cy} textAnchor="middle" dominantBaseline="central"
-        fontSize={fs} fontWeight={700} fill={hollow ? color : 'white'}
-        letterSpacing={code.length > 2 ? -0.2 : 0}
+        fontSize={fontSize} fontWeight={700} fill={hollow ? color : 'white'}
+        textLength={textLength} lengthAdjust={textLength ? 'spacingAndGlyphs' : undefined}
         style={{ pointerEvents: 'none', userSelect: 'none' } as React.CSSProperties}
       >
         {code}
@@ -733,6 +749,22 @@ function StoryChart({
         onShortGroupHover(null, null);
       }}
     >
+      {/* Area fills fade to nothing at the baseline rather than sitting on it
+          as a flat slab. The slab was only 6% opacity, but it ran the whole
+          width of the chart at full height, so it read as the heaviest thing
+          on the page and buried the line it was meant to support. A gradient
+          keeps the sense of magnitude under the peaks and lets the troughs
+          go quiet. */}
+      <defs>
+        <linearGradient id="cbViewArea" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor={SIGNAL} stopOpacity={0.14} />
+          <stop offset="100%" stopColor={SIGNAL} stopOpacity={0} />
+        </linearGradient>
+        <linearGradient id="cbSubsArea" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor={MINT} stopOpacity={0.18} />
+          <stop offset="100%" stopColor={MINT} stopOpacity={0} />
+        </linearGradient>
+      </defs>
       <g transform={`translate(${M.left},${M.top})`}>
         {/* ═══ FUTURE ZONE — greyed out area beyond today ═══ */}
         {futureStartX != null && futureStartX < chartW && (
@@ -954,12 +986,19 @@ function StoryChart({
           </g>
         )}
 
-        {/* ═══ VIEW MOMENTUM — subtle area fill ═══ */}
-        {velArea && <path d={velArea} fill={SIGNAL} opacity={0.06} />}
+        {/* ═══ VIEW MOMENTUM — area fades out toward the baseline ═══ */}
+        {velArea && <path d={velArea} fill="url(#cbViewArea)" />}
 
         {/* ═══ VIEW MOMENTUM — THE HERO LINE ═══ */}
         {velLine && (
-          <path d={velLine} fill="none" stroke={SIGNAL} strokeWidth={2} />
+          <path
+            d={velLine}
+            fill="none"
+            stroke={SIGNAL}
+            strokeWidth={1.5}
+            strokeLinejoin="round"
+            strokeLinecap="round"
+          />
         )}
 
         {/* ═══ CONTENT MARKER ZONE ═══ */}
@@ -999,7 +1038,7 @@ function StoryChart({
           {longform.map((u) => {
             const x = toX(u.publishedAt);
             const isSelected = selectedUpload === u.id;
-            const size = isSelected ? 12 : 10.5;
+            const size = isSelected ? 12.5 : 11;
             const labelPos = labelPositions.get(u.id) ?? 'below';
             const labelAbove = labelPos === 'above';
             const labelHidden = labelPos === 'hidden';
@@ -1131,13 +1170,14 @@ function StoryChart({
           )}
           {/* Sparkline area */}
           {subsSparkArea && (
-            <path d={subsSparkArea} fill={MINT} opacity={0.12} />
+            <path d={subsSparkArea} fill="url(#cbSubsArea)" />
           )}
           {/* Sparkline line */}
           {subsSparkline && (
             <path
               d={subsSparkline} fill="none"
-              stroke={MINT} strokeWidth={1.5} opacity={0.45}
+              stroke={MINT} strokeWidth={1}
+              strokeLinejoin="round" strokeLinecap="round" opacity={0.55}
             />
           )}
           {/* SUBS label */}
