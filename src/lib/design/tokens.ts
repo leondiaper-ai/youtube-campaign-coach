@@ -27,19 +27,29 @@ export const color = {
   /* ── Surfaces ──────────────────────────────────────────────────────
      Three levels, warm. `page` is the app background, `surface` is a
      card or table sitting on it, `raised` is a panel inside a card.
-     The brief asked for depth without decoration: that comes from this
-     separation plus a hairline, never from a shadow. */
-  page: '#FAF7F2',
+
+     The warmth is dialled back from the original cream. #FAF7F2 is a
+     yellow-leaning paper, and at full-page scale yellow reads as dated
+     rather than as warm — the character survives at #F7F6F2 while the
+     whites on top of it stay clean. The greys above it moved the same
+     distance so the family stays coherent.
+
+     Depth used to come from a hairline alone, deliberately. That holds
+     for panels INSIDE a card; it does not hold for the cards
+     themselves, which is why the board read flat next to every other
+     product in this category. See the `card` shadow in the Tailwind
+     config. */
+  page: '#F7F6F2',
   surface: '#FFFFFF',
-  raised: '#F6F1E7',
-  sunken: '#F1ECE3',
+  raised: '#F4F2EC',
+  sunken: '#EFEDE6',
 
   /* ── Lines ─────────────────────────────────────────────────────────
      `line` is the standard hairline. `lineStrong` is for a divider that
      has to carry hierarchy — a table header rule, a section break. */
-  line: '#E8E3DA',
-  lineStrong: '#D9D2C6',
-  lineFaint: '#F0EBE2',
+  line: '#E7E4DC',
+  lineStrong: '#D7D3C9',
+  lineFaint: '#EFEDE6',
 
   /* ── Text ──────────────────────────────────────────────────────────
      Four steps, and no more. The old interface had secondary text at

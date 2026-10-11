@@ -788,7 +788,7 @@ export default function ChannelHealthBoard({
           Each state keeps the colour it carries everywhere else in the
           product, and the definition is now visible rather than hidden in
           a title attribute nobody hovers. */}
-      <div className="bg-surface border border-line rounded-card mb-8">
+      <div className="bg-surface border border-line rounded-card shadow-card mb-8">
         <div className="grid grid-cols-2 lg:grid-cols-4 divide-y lg:divide-y-0 divide-x-0 lg:divide-x divide-line">
           {([
             ['GROWING', growingCount, 'Growing', CLASSIFICATION_STYLE.GROWING.fg, 'Strong cadence, positive momentum'],
@@ -966,9 +966,9 @@ export default function ChannelHealthBoard({
           a figure belongs to is otherwise a guess by the time you scroll.
           Header labels move off 9px — they were the smallest type on the
           page and they are the key to everything under them. */}
-      <div className="bg-surface border border-line rounded-card overflow-hidden">
+      <div className="bg-surface border border-line rounded-card shadow-card overflow-hidden">
         <div
-          className="grid grid-cols-[1.4fr_0.6fr_0.65fr_0.55fr_0.7fr_0.7fr_0.5fr_0.7fr_0.5fr] gap-2 px-4 py-2.5 text-[11px] font-bold uppercase tracking-label text-muted border-b border-line bg-raised/60 sticky top-0 z-10"
+          className="grid grid-cols-[1.75fr_0.6fr_0.65fr_0.55fr_0.7fr_0.7fr_0.5fr_0.7fr_0.5fr] gap-2 px-5 py-3 text-[11px] font-bold uppercase tracking-label text-muted border-b border-line bg-raised/60 sticky top-0 z-10"
         >
           <div>Artist</div>
           <div title="Subscriber trend over the last 30 days">30d trend</div>
@@ -1028,7 +1028,7 @@ export default function ChannelHealthBoard({
                 /* hover:brightness dimmed the text along with the row, which
                    made the thing you were pointing at the hardest to read.
                    A background change leaves the content alone. */
-                className={`group/row grid grid-cols-[1.4fr_0.6fr_0.65fr_0.55fr_0.7fr_0.7fr_0.5fr_0.7fr_0.5fr] gap-2 px-4 py-3 items-center transition-colors cursor-pointer hover:bg-raised ${
+                className={`group/row grid grid-cols-[1.75fr_0.6fr_0.65fr_0.55fr_0.7fr_0.7fr_0.5fr_0.7fr_0.5fr] gap-2 px-5 py-3.5 items-center transition-colors cursor-pointer hover:bg-raised ${
                   i === paged.length - 1 && !isExpanded ? '' : 'border-b border-line-faint'
                 }`}
                 style={{ background: st.rowBg }}
@@ -1300,7 +1300,7 @@ export default function ChannelHealthBoard({
               on the page background with only a rule above them, so a long
               board read as one undifferentiated column — the card is what
               tells you where one answer ends and the next begins. */}
-          <div className="bg-surface border border-line rounded-card divide-y divide-line-faint">
+          <div className="bg-surface border border-line rounded-card shadow-card divide-y divide-line-faint">
             {insights.map((ins, i) => {
               const ic = INSIGHT_ICON[ins.tone];
               const body = (
@@ -1346,7 +1346,7 @@ export default function ChannelHealthBoard({
                 ten — and with thumbnails the formats are different shapes,
                 so columns of unequal tile heights never line up. Long-form
                 first because that is the format the board argues for. */}
-            <div className="bg-surface border border-line rounded-card p-5 space-y-5">
+            <div className="bg-surface border border-line rounded-card shadow-card p-5 space-y-5">
               {topLongform.length > 0 && (
                 <div>
                   <div className="text-[11px] font-bold uppercase tracking-eyebrow text-muted mb-2.5">Long-form</div>
@@ -1383,7 +1383,7 @@ export default function ChannelHealthBoard({
               you had to ask for — and it is twelve rows, not a long tail
               worth hiding. */}
           <SectionHead title="Top movers" meta="Last 7 days" />
-          <div className="bg-surface border border-line rounded-card p-5 grid grid-cols-2 gap-5 lg:grid-cols-4">
+          <div className="bg-surface border border-line rounded-card shadow-card p-5 grid grid-cols-2 gap-5 lg:grid-cols-4">
             <MoverColumn title="Views gainers" items={topMovers.topViews} linkPrefix={linkPrefix} linkSuffix={linkSuffix} />
             <MoverColumn title="Sub gainers" items={topMovers.topSubs} linkPrefix={linkPrefix} linkSuffix={linkSuffix} />
             <MoverColumn title="Biggest decline" items={topMovers.biggestDecline} linkPrefix={linkPrefix} linkSuffix={linkSuffix} />
@@ -1396,7 +1396,7 @@ export default function ChannelHealthBoard({
       {view === 'market' && benchmarkRead && (
         <div className="mb-8">
           <SectionHead title="Market benchmark read" />
-          <div className="bg-surface border border-line rounded-card overflow-hidden">
+          <div className="bg-surface border border-line rounded-card shadow-card overflow-hidden">
 
           {/* Stats grid */}
           <div className="grid grid-cols-2 gap-x-6 gap-y-3 px-5 py-4 lg:grid-cols-4">
@@ -1466,7 +1466,7 @@ export default function ChannelHealthBoard({
             title="Active fans, quiet channel"
             meta={`${latentDemand.length} channel${latentDemand.length === 1 ? '' : 's'} · vs our average channel`}
           />
-          <div className="bg-surface border border-line rounded-card overflow-hidden">
+          <div className="bg-surface border border-line rounded-card shadow-card overflow-hidden">
             <div className="divide-y divide-line-faint">
               {latentShown.map(({ commentDemand: cd, ...row }) => (
                 <Link
@@ -1530,7 +1530,7 @@ export default function ChannelHealthBoard({
             title="Top multiformat strategy"
             meta={`${formatStacks.length} release${formatStacks.length === 1 ? '' : 's'} · more than one format, last 120 days`}
           />
-          <div className="bg-surface border border-line rounded-card overflow-hidden">
+          <div className="bg-surface border border-line rounded-card shadow-card overflow-hidden">
             <div className="divide-y divide-line-faint">
               {stacksShown.map(({ row, stack, inCampaign }) => (
                 <Link
@@ -1610,7 +1610,7 @@ export default function ChannelHealthBoard({
               class" no longer says which class. The meta drops the
               repeat of the word now the title carries it. */}
           <SectionHead title="Best in class cadence" meta="Last 30 days" />
-          <div className="bg-surface border border-line rounded-card overflow-hidden">
+          <div className="bg-surface border border-line rounded-card shadow-card overflow-hidden">
           <div className="divide-y divide-line-faint">
             {consistencyLeaders.map((c, i) => {
               const st = STATUS_STYLE[c.status];

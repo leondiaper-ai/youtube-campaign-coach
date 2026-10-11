@@ -27,7 +27,7 @@ const config: Config = {
           70: "rgba(14, 14, 14, 0.70)",
           80: "rgba(14, 14, 14, 0.80)",
         },
-        paper: "#FAF7F2",
+        paper: "#F7F6F2",
         signal: "#FF4A1C",    // decision / alert
         electric: "#2C25FF",  // artist / health
         mint: "#1FBE7A",      // youtube / content
@@ -39,8 +39,8 @@ const config: Config = {
            reach into an inline style object or an SVG fill, so both
            forms have to exist. */
         surface: "#FFFFFF",
-        raised: "#F6F1E7",
-        sunken: "#F1ECE3",
+        raised: "#F4F2EC",
+        sunken: "#EFEDE6",
         line: { DEFAULT: "#E8E3DA", strong: "#D9D2C6", faint: "#F0EBE2" },
         secondary: "#55504A",
         muted: "#7D776E",
@@ -84,8 +84,10 @@ const config: Config = {
         eyebrow: "0.16em",
       },
       borderRadius: {
-        card: "10px",
-        control: "7px",
+        /* 10px reads as a rounded rectangle; 14px reads as a card. The
+           difference is small in the file and large on the page. */
+        card: "14px",
+        control: "8px",
       },
       /* Depth comes from a hairline and a surface change, not a shadow.
          The one exception is a lifted control, which needs to read as
@@ -93,6 +95,11 @@ const config: Config = {
       boxShadow: {
         control: "0 1px 2px rgba(14,14,14,0.05)",
         lifted: "0 1px 3px rgba(14,14,14,0.07), 0 0 0 1px rgba(14,14,14,0.04)",
+        /* A card sits ABOVE the page; a panel inside one does not. Two
+           stacked shadows rather than one: a tight contact shadow to
+           seat the edge, and a wide soft one for the lift. A single
+           large blur reads as a glow. */
+        card: "0 1px 2px rgba(14,14,14,0.04), 0 8px 24px -8px rgba(14,14,14,0.08)",
       },
     },
   },
