@@ -295,6 +295,15 @@ function generateRecommendation(p: ReportProps): string {
 // Communication update builders
 // ═══════════════════════════════════════════════════════════════════════════════
 
+/* Exported so a surface can SHOW the text before it is copied. The
+   campaign cards put it in a modal with a Copy button, the way the
+   handover page's quick-report box does — a button that silently fills
+   the clipboard gives the reader no way to check what they are about to
+   paste into a message to YouTube. */
+export function buildQuickUpdate(p: ReportProps): string {
+  return buildSlackUpdate(p);
+}
+
 function buildSlackUpdate(p: ReportProps): string {
   const bullets = gatherInsights(p);
   const rec = generateRecommendation(p);

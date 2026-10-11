@@ -20,6 +20,7 @@ import { useState, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { fmtNum, trustedViewDelta, type ChannelState } from '@/lib/artists';
+import { buildQuickUpdate, type ReportProps } from '@/components/WatcherReport';
 import type { CampaignNote } from '@/lib/campaignStore';
 import {
   type GrowthInput, type GrowthRead,
@@ -350,146 +351,80 @@ function momentumLine(ct: CampaignTrendData): string {
     : `${curr} this week`;
 }
 
-// ─── Campaign Progress Report generator ────────────────────────────────
-function generateSnapshot(card: CardData): string {
+/* ═══════════════════════════════════════════════════════════════════════
+   THE CARD AS A REPORT
+
+   The card had two buttons, Slack and Email, that looked the same and
+   produced near-identical text — the email one was the Slack one with
+   "Hi all," on top. Two controls for one job, and neither showed you
+   what it had put on your clipboard.
+
+   They are replaced by one Report button, and the text it produces comes
+   from WatcherReport — the same generator behind the quick-report box on
+   the handover page. That generator already knows how to turn a channel
+   into the plain bullets somebody can paste into a message to YouTube,
+   and it is maintained in one place, so the board stops carrying a
+   second, weaker copy of the same idea.
+
+   What the card holds does not quite match what the generator asks for,
+   and the gaps are filled honestly rather than invented: no upload
+   history means no lastUpDays, and missedReach belongs to the artist
+   page, which has the per-format analysis this card does not.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+function cardToReportProps(card: CardData): ReportProps {
   const read = getGrowthRead(card);
   const cw = card.campaignWindow;
-  const ct = card.campaignTrend;
-  const hasCampaign = !!cw;
+  const doNow = read.actions.doNow;
+  const recent = card.recentVideos ?? [];
 
-  const lines: string[] = [];
-
-  if (hasCampaign) {
-    lines.push(`CAMPAIGN PROGRESS REPORT — ${card.name.toUpperCase()}`);
-    lines.push(`Campaign: ${cw!.campaignName} · Day ${cw!.campaignDay}`);
-    lines.push(`Channel: ${card.channelHealth} · Campaign: ${card.campaignSignalLabel}`);
-  } else {
-    lines.push(`YOUTUBE GROWTH READ — ${card.name.toUpperCase()}`);
-    lines.push(`Channel: ${card.channelHealth}`);
-  }
-
-  const spk = subsPerKViews(card);
-  if (spk != null) {
-    lines.push(`Subs / 1K views: ${spk.toFixed(1)} (${conversionLabel(spk).text})`);
-  }
-
-  lines.push('', '1. WHAT\'S HAPPENING');
-  lines.push(whatHappening(card));
-  lines.push(`Why: ${whyCause(read, card)}`);
-
-  const isStaleExport = card.movementConfidence === 'stale';
-  lines.push('', '2. CURRENT WEEK');
-  const exportViews7d = trustedViewDelta(card.views7Delta);
-  lines.push(`Views (7d): ${!isStaleExport && exportViews7d != null ? `+${fmtNum(exportViews7d)}` : isStaleExport || exportViews7d == null ? 'Updating' : '—'}`);
-  lines.push(`Subs (7d): ${!isStaleExport && card.subs7Delta != null ? `${card.subs7Delta >= 0 ? '+' : ''}${fmtNum(card.subs7Delta)}` : isStaleExport ? 'Updating' : '—'}`);
-  lines.push(`Uploads (30d): ${card.uploads30d}`);
-  lines.push(`Cadence: ${card.cadenceLine}`);
-
-  if (hasCampaign && cw && ct) {
-    lines.push('', '3. CAMPAIGN SO FAR');
-    /* The campaign's own assets first, and the channel around them
-       second, explicitly labelled. These two lines used to be one line
-       that said "Campaign views" over a whole-channel delta. */
-    lines.push(`Campaign views (assets published since campaign start): ${ct.campaignViews != null ? fmtNum(ct.campaignViews) : '—'}`);
-    lines.push(`Channel view delta (whole channel, catalogue included): ${ct.totalChannelViews != null ? fmtNum(ct.totalChannelViews) : '—'}`);
-    lines.push(`Channel subs delta: ${ct.totalChannelSubs != null ? `${ct.totalChannelSubs >= 0 ? '+' : ''}${fmtNum(ct.totalChannelSubs)}` : '—'}`);
-    lines.push(`Content: ${cw.contentMix.uploads} uploads (${cw.contentMix.shorts} Shorts · ${cw.contentMix.videos} videos)`);
-    lines.push(`Channel momentum: ${momentumLine(ct)}`);
-  }
-
-  if (card.weeklyProgress.length > 0) {
-    const gapCount = card.weeklyProgress.filter(w => w.status === 'missing').length;
-    lines.push('', `WEEKLY PROGRESS:${gapCount > 0 ? ` (${gapCount} monitoring gap${gapCount !== 1 ? 's' : ''})` : ''}`);
-    for (const w of card.weeklyProgress) {
-      if (w.status === 'missing') {
-        lines.push(`Week ${w.week}: Monitoring gap`);
-      } else if (w.status === 'partial') {
-        const parts: string[] = [];
-        if (w.views7d != null) parts.push(`${w.views7d >= 0 ? '+' : ''}${fmtNum(w.views7d)} views`);
-        if (w.subs7d != null) parts.push(`${w.subs7d >= 0 ? '+' : ''}${fmtNum(w.subs7d)} subs`);
-        lines.push(`Week ${w.week}: ${parts.join(' · ')} (partial)`);
-      } else {
-        lines.push(`Week ${w.week}: ${w.views7d != null ? `${w.views7d >= 0 ? '+' : ''}${fmtNum(w.views7d)} views` : '— views'} · ${w.subs7d != null ? `${w.subs7d >= 0 ? '+' : ''}${fmtNum(w.subs7d)} subs` : '— subs'} · ${w.campaignSignal}`);
-      }
-    }
-  }
-
-  const nextNum = hasCampaign ? 4 : 3;
-  lines.push('', `${nextNum}. ACTION THIS WEEK`);
-  read.actions.doNow.slice(0, 3).forEach((a) => lines.push(`→ ${a}`));
-
-  lines.push('', `${nextNum + 1}. WATCH NEXT`);
-  lines.push(read.watch);
-
-  if (card.impact && card.impact.daysSinceTakeover >= 2) {
-    /* "Takeover" is accurate here — this is measured from the moment we
-       started watching, not from when the campaign began — but the figures
-       under it are whole-channel, so the heading says both. */
-    lines.push('', `CHANNEL TOTALS SINCE TAKEOVER (${card.impact.daysSinceTakeover} days — whole channel, not campaign attribution)`);
-    lines.push(`${card.impact.subsDelta != null ? `${card.impact.subsDelta >= 0 ? '+' : ''}${fmtNum(card.impact.subsDelta)} subs` : '— subs'}`);
-    lines.push(`${card.impact.viewsDelta != null ? `${card.impact.viewsDelta >= 0 ? '+' : ''}${fmtNum(card.impact.viewsDelta)} views` : '— views'}`);
-  }
-
-  const latestNote = card.notes.length > 0 ? card.notes[0] : null;
-  if (latestNote) {
-    lines.push('', 'CONTEXT:');
-    lines.push(`- ${latestNote.tag ? `${latestNote.tag}: ` : ''}${latestNote.text}`);
-  }
-
-  return lines.join('\n');
+  return {
+    artistName: card.name,
+    channelState: card.channelHealth,
+    stateReason: whyCause(read, card),
+    /* 'NONE' is a real finding — nothing is blocking this channel — and
+       printing its description as a risk would turn that into a warning. */
+    riskLine: read.blocker.blocker !== 'NONE' ? read.blocker.description : null,
+    primaryMove: {
+      label: read.decision,
+      action: doNow[0] ?? read.nextCampaignMove,
+    },
+    secondaryMove: doNow[1] ? { label: 'Then', action: doNow[1] } : null,
+    /* The per-format reach analysis lives on the artist page, which holds
+       the uploads to compute it. An empty list is the truthful answer
+       here, not a missing one. */
+    missedReach: [],
+    stats: {
+      subs: card.subs ?? null,
+      views7d: trustedViewDelta(card.views7Delta),
+      subs7d: card.subs7Delta ?? null,
+      uploads30d: card.uploads30d,
+      lastUpDays: recent.length ? Math.min(...recent.map((v) => v.daysAgo)) : null,
+      shorts30d: card.shorts30d,
+    },
+    campaign: card.campaign ?? null,
+    campaignContentViews: cw?.contentViews ?? null,
+    campaignContentCount: cw?.contentMix.uploads ?? 0,
+    campaignShortsCount: cw?.contentMix.shorts ?? 0,
+    campaignDaysSinceStart: cw?.campaignDay ?? null,
+    campaignSubsDelta: cw?.subsGained ?? null,
+    campaignViewsDelta: cw?.channelViewsDelta ?? null,
+    recentUploads: recent.map((v) => ({
+      title: v.title,
+      views: v.views,
+      kind: (v.isShort ? 'Short' : 'Video') as 'Short' | 'Video',
+      daysAgo: v.daysAgo,
+    })),
+  };
 }
 
-// ─── Slack / Email update builders (card-level) ───────────────────────
-export function generateSlackUpdate(card: CardData): string {
-  const read = getGrowthRead(card);
-  const cw = card.campaignWindow;
-  const ct = card.campaignTrend;
-  const campaignContext = card.campaign ? ` following ${card.campaign}` : '';
-
-  const lines: string[] = [];
-  lines.push(`Quick ${card.name} YouTube update${campaignContext}:`);
-  lines.push('');
-
-  // What's happening
-  lines.push(`• ${whatHappening(card)} — ${whyCause(read, card)}`);
-
-  // Metrics
-  const isStale = card.movementConfidence === 'stale';
-  const slackViews7d = trustedViewDelta(card.views7Delta);
-  if (!isStale && slackViews7d != null) {
-    lines.push(`• +${fmtNum(slackViews7d)} views (7d)${card.subs7Delta != null ? ` · ${card.subs7Delta >= 0 ? '+' : ''}${fmtNum(card.subs7Delta)} subs (7d)` : ''}`);
-  }
-
-  // Campaign totals
-  if (cw && ct) {
-    /* Slack-pasteable, so this one has to be right on its own: it gets
-       read without the page around it. */
-    lines.push(`• Day ${cw.campaignDay} — ${ct.campaignViews != null ? fmtNum(ct.campaignViews) + ' campaign views' : '—'}${ct.campaignAssets != null ? ` across ${ct.campaignAssets} asset${ct.campaignAssets === 1 ? '' : 's'}` : ''}`);
-    lines.push(`• ${cw.contentMix.uploads} uploads (${cw.contentMix.shorts} Shorts · ${cw.contentMix.videos} videos)`);
-  } else {
-    lines.push(`• ${card.uploads30d} uploads in 30 days · ${card.cadenceLine}`);
-  }
-
-  // Conversion
-  const spk = subsPerKViews(card);
-  if (spk != null) {
-    lines.push(`• Conversion: ${spk.toFixed(1)} subs/1K views (${conversionLabel(spk).text})`);
-  }
-
-  lines.push('');
-  lines.push('This week:');
-  read.actions.doNow.slice(0, 2).forEach((a) => lines.push(`→ ${a}`));
-
-  return lines.join('\n');
-}
-
-export function generateEmailUpdate(card: CardData): string {
-  const lines: string[] = [];
-  lines.push('Hi all,');
-  lines.push('');
-  lines.push(generateSlackUpdate(card));
-  return lines.join('\n');
-}
+/* The three card-level text generators that used to live here —
+   generateSnapshot, generateSlackUpdate and generateEmailUpdate — are
+   gone. generateEmailUpdate was generateSlackUpdate with "Hi all," on
+   top, and all three were a second implementation of what
+   WatcherReport already does for every other surface. The Report button
+   now calls cardToReportProps and WatcherReport's own builder, so there
+   is one generator to fix when the wording is wrong. */
 
 // ─── Snapshot Modal ─────────────────────────────────────────────────────
 function SnapshotModal({ text, onClose }: { text: string; onClose: () => void }) {
@@ -514,7 +449,7 @@ function SnapshotModal({ text, onClose }: { text: string; onClose: () => void })
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between mb-4">
-          <h3 className="text-[13px] font-bold uppercase tracking-[0.12em] text-ink/50">Snapshot</h3>
+          <h3 className="text-[13px] font-bold uppercase tracking-[0.12em] text-ink/50">Report</h3>
           <button onClick={onClose} className="text-ink/30 hover:text-ink/60 text-[18px]">&times;</button>
         </div>
         <pre
@@ -819,15 +754,6 @@ export function DecisionCard({
   const [showDetail, setShowDetail] = useState(false);
   const [showWeeks, setShowWeeks] = useState(false);
   const [snapshot, setSnapshot] = useState<string | null>(null);
-  const [cardCopied, setCardCopied] = useState<'idle' | 'slack' | 'email'>('idle');
-
-  function copyCardText(type: 'slack' | 'email') {
-    const text = type === 'slack' ? generateSlackUpdate(card) : generateEmailUpdate(card);
-    navigator.clipboard.writeText(text).then(() => {
-      setCardCopied(type);
-      setTimeout(() => setCardCopied('idle'), 2000);
-    });
-  }
 
   const gs = gsFor(card.boardStatus);
   const read = getGrowthRead(card);
@@ -942,24 +868,11 @@ export function DecisionCard({
               </button>
             )}
             <button
-              onClick={() => copyCardText('slack')}
+              onClick={() => setSnapshot(buildQuickUpdate(cardToReportProps(card)))}
               className="px-2.5 py-1 rounded text-[10px] font-bold uppercase tracking-[0.08em] transition-colors"
-              style={{
-                background: cardCopied === 'slack' ? '#E6F8EE' : SOFT,
-                color: cardCopied === 'slack' ? '#0C6A3F' : 'rgba(14,14,14,0.55)',
-              }}
+              style={{ background: SOFT, color: 'rgba(14,14,14,0.55)' }}
             >
-              {cardCopied === 'slack' ? 'Copied' : 'Slack'}
-            </button>
-            <button
-              onClick={() => copyCardText('email')}
-              className="px-2.5 py-1 rounded text-[10px] font-bold uppercase tracking-[0.08em] transition-colors"
-              style={{
-                background: cardCopied === 'email' ? '#E6F8EE' : SOFT,
-                color: cardCopied === 'email' ? '#0C6A3F' : 'rgba(14,14,14,0.55)',
-              }}
-            >
-              {cardCopied === 'email' ? 'Copied' : 'Email'}
+              Report
             </button>
           </div>
         </div>
@@ -1376,12 +1289,6 @@ export function DecisionCard({
               {saving ? '…' : 'Add'}
             </button>
           )}
-          <button
-            onClick={() => setSnapshot(generateSnapshot(card))}
-            className="text-[10px] text-ink/25 hover:text-ink/50 shrink-0 transition-colors"
-          >
-            Report
-          </button>
         </div>
       </div>
         </div>
