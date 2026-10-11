@@ -373,33 +373,41 @@ const TOTAL_CHART_H = VIEWS_H + CONTENT_H + AXIS_H + SUBS_GAP + SUBS_H;
 function computeLabelPositions(
   longform: ClassifiedUpload[],
   toX: (date: string) => number,
-): Map<string, boolean> {
-  // Map of uploadId -> labelAbove (true = above marker, false = below)
-  const positions = new Map<string, boolean>();
+): Map<string, 'above' | 'below' | 'hidden'> {
+  /* ── WHY LABELS GET DROPPED ────────────────────────────────────────
+     The old rule alternated above/below whenever two markers came within
+     50px. That works for a pair and fails for a cluster: Ezra Collective
+     released fifteen visualisers on one day, so a dozen labels landed on
+     two lines at the same x and became a smear.
 
-  // Compute x positions for all longform
-  const xPositions = longform.map((u) => ({
-    id: u.id,
-    x: toX(u.publishedAt),
-  }));
+     A label that cannot be read is not information, it is texture. So
+     each lane now remembers where its last label was placed and a label
+     is only drawn when it clears that by MIN_GAP. The MARKER is always
+     drawn — the event is never hidden, only its caption — and the title
+     is still on hover.
 
-  // Simple pass: check pairwise distances and alternate
-  for (let i = 0; i < xPositions.length; i++) {
-    if (i === 0) {
-      positions.set(xPositions[i].id, false); // First is always below
-      continue;
-    }
+     Densest-first would be wrong here: the earliest upload in a cluster
+     is the release the rest orbit, so left-to-right keeps the label on
+     the asset that opened the day. */
+  const positions = new Map<string, 'above' | 'below' | 'hidden'>();
+  const MIN_GAP = 46;
 
-    const prevX = xPositions[i - 1].x;
-    const currX = xPositions[i].x;
-    const prevAbove = positions.get(xPositions[i - 1].id) ?? false;
+  const xs = longform
+    .map((u) => ({ id: u.id, x: toX(u.publishedAt) }))
+    .sort((p, q) => p.x - q.x);
 
-    if (Math.abs(currX - prevX) < 50) {
-      // Too close — alternate from previous
-      positions.set(xPositions[i].id, !prevAbove);
+  let lastBelow = -Infinity;
+  let lastAbove = -Infinity;
+
+  for (const { id, x } of xs) {
+    if (x - lastBelow >= MIN_GAP) {
+      positions.set(id, 'below');
+      lastBelow = x;
+    } else if (x - lastAbove >= MIN_GAP) {
+      positions.set(id, 'above');
+      lastAbove = x;
     } else {
-      // Far enough apart — default to below
-      positions.set(xPositions[i].id, false);
+      positions.set(id, 'hidden');
     }
   }
 
@@ -980,7 +988,9 @@ function StoryChart({
             const x = toX(u.publishedAt);
             const isSelected = selectedUpload === u.id;
             const size = isSelected ? 10 : 8;
-            const labelAbove = labelPositions.get(u.id) ?? false;
+            const labelPos = labelPositions.get(u.id) ?? 'below';
+            const labelAbove = labelPos === 'above';
+            const labelHidden = labelPos === 'hidden';
 
             // Truncate shortTitle for label if needed
             const shortTitle = u.shortTitle && u.shortTitle.length > 14
@@ -1017,8 +1027,8 @@ function StoryChart({
                   opacity={isSelected ? 1 : 0.9}
                 />
 
-                {/* Two-line labels */}
-                {labelAbove ? (
+                {/* Two-line labels, when there is room for them. */}
+                {labelHidden ? null : labelAbove ? (
                   <>
                     {/* Line 2 (shortTitle) — ABOVE, furthest from marker */}
                     {shortTitle && (
