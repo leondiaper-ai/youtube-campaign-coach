@@ -130,6 +130,9 @@ export type CardData = {
   priority: 'high' | 'normal';
   subs7Delta: number | null;
   views7Delta: number | null;
+  /** The 30-day window the pasteable report leads on. */
+  subs30Delta?: number | null;
+  views30Delta?: number | null;
   uploads30d: number;
   shorts30d: number;
   boardStatus: ChannelState;
@@ -401,6 +404,8 @@ function cardToReportProps(card: CardData): ReportProps {
       uploads30d: card.uploads30d,
       lastUpDays: recent.length ? Math.min(...recent.map((v) => v.daysAgo)) : null,
       shorts30d: card.shorts30d,
+      views30d: trustedViewDelta(card.views30Delta ?? null),
+      subs30d: card.subs30Delta ?? null,
     },
     campaign: card.campaign ?? null,
     campaignContentViews: cw?.contentViews ?? null,

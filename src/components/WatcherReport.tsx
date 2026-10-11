@@ -48,6 +48,10 @@ export type ReportProps = {
     uploads30d: number;
     lastUpDays: number | null;
     shorts30d: number;
+    /* Optional so existing callers keep working. Where they are absent
+       the report simply does not make a 30-day claim. */
+    views30d?: number | null;
+    subs30d?: number | null;
   };
   // Campaign-period data
   campaign: string | null;
@@ -90,17 +94,46 @@ function gatherInsights(p: ReportProps): string[] {
   const pool: Insight[] = [];
   const { stats, recentUploads, conv7, campaign } = p;
 
-  // ── 1. Major campaign growth ───────────────────────────────────────────
-  if (p.campaignViewsDelta != null && p.campaignViewsDelta > 100_000) {
+  /* ── 1. THE WINDOW THE REPORT IS ABOUT ────────────────────────────────
+     These two lines used to lead with "channel views since campaign
+     start (day 144)" for every artist on the board, and most artists on
+     the board are not in a campaign — they are being monitored. Peter
+     Gabriel's "day 144" was not a campaign running for five months, it
+     was how long we had been watching, and a 34.6M total over that
+     window says almost nothing about the last fortnight.
+
+     So the report leads on fixed, comparable windows: the last 7 days
+     and the last 30. Every channel has both, they mean the same thing on
+     every card, and they are short enough to still be news.
+
+     The campaign total is kept only where there is a named campaign to
+     attribute it to — `campaign` is null unless somebody set one, which
+     is exactly the signal that distinguishes a release from a channel we
+     happen to be watching. Even then it follows the recent windows
+     rather than leading, and it stays labelled as CHANNEL views, which
+     is what the figure measures. */
+  if (stats.views30d != null && stats.views30d > 0) {
     pool.push({
       priority: 10,
-      text: `${fmtDelta(p.campaignViewsDelta)} channel views since campaign start${p.campaignDaysSinceStart ? ` (day ${p.campaignDaysSinceStart})` : ''}`,
+      text: `${fmtDelta(stats.views30d)} channel views in the last 30 days`,
     });
   }
-  if (p.campaignSubsDelta != null && p.campaignSubsDelta > 500) {
+  if (stats.subs30d != null && stats.subs30d > 0) {
     pool.push({
-      priority: 9,
-      text: `${fmtDelta(p.campaignSubsDelta)} subscribers gained during the campaign period`,
+      priority: 8.5,
+      text: `${fmtDelta(stats.subs30d)} subscribers in the last 30 days`,
+    });
+  }
+  if (campaign && p.campaignViewsDelta != null && p.campaignViewsDelta > 100_000) {
+    pool.push({
+      priority: 4,
+      text: `${fmtDelta(p.campaignViewsDelta)} channel views across the whole ${campaign} campaign${p.campaignDaysSinceStart ? ` so far (day ${p.campaignDaysSinceStart})` : ''}`,
+    });
+  }
+  if (campaign && p.campaignSubsDelta != null && p.campaignSubsDelta > 500) {
+    pool.push({
+      priority: 3.5,
+      text: `${fmtDelta(p.campaignSubsDelta)} subscribers across the whole ${campaign} campaign so far`,
     });
   }
 

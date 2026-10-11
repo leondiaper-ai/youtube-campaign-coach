@@ -94,6 +94,10 @@ export type StatusCardData = {
   // Hero metrics
   subs7Delta: number | null;
   views7Delta: number | null;
+  /* The 30-day window the pasteable report leads on. Same source as the
+     7-day pair, one window wider. */
+  subs30Delta: number | null;
+  views30Delta: number | null;
   // Cadence data
   uploads30d: number;
   shorts30d: number;
@@ -183,6 +187,8 @@ async function loadCard(
     priority: pin.priority ?? 'normal',
     subs7Delta: null,
     views7Delta: null,
+    subs30Delta: null,
+    views30Delta: null,
     uploads30d: 0,
     shorts30d: 0,
     boardStatus: 'COLD',
@@ -443,6 +449,8 @@ async function loadCard(
     // Core metrics from normalized data layer
     subs7Delta: rawDelta(nc.subs7d),
     views7Delta: rawDelta(nc.views7d),
+    subs30Delta: rawDelta(nc.subs30d),
+    views30Delta: rawDelta(nc.views30d),
     subs: nc.subs,
     views: nc.views,
     lastUploadDaysAgo: nc.cadence.lastUploadDaysAgo,
