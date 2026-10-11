@@ -149,12 +149,12 @@ export type CardData = {
   campaignSignalLabel: string;
   /** YouTube channel thumbnail URL — the round avatar. */
   thumbnail?: string;
-  /** Wide banner for the card head, from the channel's own recent work. */
-  heroImage?: string;
   /** The channel's uploads, ranked by views added in the last week.
       Shown as a strip at the foot of the card so a campaign is judged
       against the work, not only against its numbers. */
   recentVideos?: { id: string; title: string; views: number; recentGain: number | null; daysAgo: number; isShort: boolean }[];
+  /** The channel's Shorts, ranked the same way, shown in their own row. */
+  recentShorts?: { id: string; title: string; views: number; recentGain: number | null; daysAgo: number }[];
   /** Plain-English note on how that ranking was decided. */
   recentVideosNote?: string;
   /** Artist relationship type — value model only applies to 'managed' */
@@ -863,74 +863,6 @@ export function DecisionCard({
         boxShadow: isFix ? `0 0 0 1px ${dStyle.border}40` : undefined,
       }}
     >
-      {/* ─── Banner ──────────────────────────────────────────────────
-          A pinned campaign is the work a team is actually doing, and a
-          row of figures under a plain name does not read like that. The
-          banner is the channel's own best recent upload with the artist
-          over it — the same treatment the partner-facing featured cards
-          use, so the two surfaces describe one campaign the same way.
-
-          It only appears when there is a real image. A gradient block
-          standing in for artwork looks like a loading state that never
-          finished, so a channel with no recent uploads keeps the plain
-          head it had before. */}
-      {card.heroImage && (
-        <div className="relative h-[132px] overflow-hidden bg-sunken">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={card.heroImage}
-            alt=""
-            loading="lazy"
-            className="w-full h-full object-cover"
-            /* A 404 or a blocked thumbnail should not leave a broken-image
-               icon sitting in the header of a campaign card. */
-            onError={(e) => { (e.currentTarget.parentElement as HTMLElement).style.display = 'none'; }}
-          />
-          <div
-            className="absolute inset-0"
-            style={{ background: 'linear-gradient(transparent 22%, rgba(0,0,0,0.78) 100%)' }}
-          />
-          {/* The decision is the loudest thing on the card, so it keeps
-              the strongest position. */}
-          <div className="absolute top-3 right-3">
-            <span
-              className="px-2.5 py-1 rounded text-[11px] font-black uppercase tracking-label"
-              style={{ background: dStyle.bg, color: dStyle.fg, border: `1px solid ${dStyle.border}` }}
-            >
-              {read.decision}
-            </span>
-          </div>
-          <div className="absolute bottom-3 left-4 right-4 flex items-end gap-3">
-            {card.thumbnail && (
-              /* eslint-disable-next-line @next/next/no-img-element */
-              <img
-                src={card.thumbnail}
-                alt=""
-                loading="lazy"
-                className="w-9 h-9 rounded-full object-cover shrink-0"
-                style={{ border: '2px solid rgba(255,255,255,0.35)' }}
-              />
-            )}
-            <div className="min-w-0">
-              <div
-                className="text-[21px] font-black leading-none truncate"
-                style={{ color: '#FFFFFF', textShadow: '0 1px 6px rgba(0,0,0,0.45)' }}
-              >
-                {card.name}
-              </div>
-              {card.campaign && (
-                <div
-                  className="text-micro font-semibold mt-1.5 truncate"
-                  style={{ color: 'rgba(255,255,255,0.78)' }}
-                >
-                  {card.campaign}
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
-
       <div className="p-5">
       {/* Remove — hover only */}
       {/* On a bannered card this sits over the image, where the decision
@@ -939,11 +871,7 @@ export function DecisionCard({
           it. */}
       <button
         onClick={() => onUnpin(card.slug)}
-        className={`absolute w-6 h-6 rounded-full flex items-center justify-center text-[14px] transition-all ${
-          card.heroImage
-            ? 'top-3 left-3 text-white/0 group-hover:text-white/70 hover:!text-white hover:bg-black/30'
-            : 'top-3 right-3 text-ink/0 group-hover:text-ink/40 hover:!text-ink/70 hover:bg-black/5'
-        }`}
+        className="absolute top-3 right-3 w-6 h-6 rounded-full flex items-center justify-center text-[14px] text-ink/0 group-hover:text-ink/40 hover:!text-ink/70 hover:bg-black/5 transition-all"
         title="Remove"
       >
         &times;
@@ -953,9 +881,23 @@ export function DecisionCard({
       <div className="mb-3">
         <div className="flex items-center justify-between mb-1">
           <div className="flex items-center gap-2.5">
-            {/* The banner already carries the name and the decision, so
-                they are not repeated under it. */}
-            {!card.heroImage && <h2 className="font-black text-[20px] leading-tight">{card.name}</h2>}
+            {card.thumbnail && (
+              /* eslint-disable-next-line @next/next/no-img-element */
+              <img
+                src={card.thumbnail}
+                alt=""
+                loading="lazy"
+                className="w-10 h-10 rounded-full object-cover shrink-0 border border-line"
+              />
+            )}
+            <div className="min-w-0">
+              <h2 className="font-black text-[20px] leading-tight truncate">{card.name}</h2>
+              {card.campaign && (
+                <div className="text-micro font-semibold text-muted mt-0.5 truncate">
+                  {card.campaign}
+                </div>
+              )}
+            </div>
           {card.confidence === 'LOW' && (
             <span className="text-[8px] font-bold uppercase tracking-[0.08em] px-1.5 py-0.5 rounded" style={{ background: '#F3F0EA', color: 'rgba(14,14,14,0.35)' }} title={card.healthNote ?? 'Limited data'}>
               Limited
@@ -966,9 +908,7 @@ export function DecisionCard({
               Partial
             </span>
           )}
-          {/* The banner carries the decision when there is one, so it is
-              not printed twice on the same card. */}
-          {!card.heroImage && (
+          {(
             <span
               className="px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-[0.1em]"
               style={{ background: dStyle.bg, color: dStyle.fg, border: `1px solid ${dStyle.border}` }}
@@ -1427,7 +1367,7 @@ export function DecisionCard({
         <div className="mt-4 pt-4" style={{ borderTop: '1px solid rgba(14,14,14,0.07)' }}>
           <div className="flex flex-wrap items-baseline justify-between gap-2 mb-2.5">
             <div className="text-[11px] font-bold uppercase tracking-eyebrow text-muted">
-              Moving now
+              Moving now · Long-form
             </div>
             {card.recentVideosNote && (
               /* The order is a claim about what is being watched, so the
@@ -1453,15 +1393,6 @@ export function DecisionCard({
                     loading="lazy"
                     className="w-full h-full object-cover transition-transform duration-300 group-hover/vid:scale-[1.03]"
                   />
-                  <span
-                    className="absolute top-1.5 left-1.5 px-1.5 py-0.5 rounded text-[10px] font-bold uppercase tracking-label"
-                    style={{
-                      background: v.isShort ? '#C77A16' : '#2C6BFF',
-                      color: '#FFFFFF',
-                    }}
-                  >
-                    {v.isShort ? 'Short' : 'Long-form'}
-                  </span>
                 </div>
                 <div className="text-[12px] font-semibold text-ink leading-snug mt-1.5 line-clamp-2">
                   {v.title}
@@ -1480,6 +1411,65 @@ export function DecisionCard({
                     </>
                   ) : (
                     <span className="text-muted">{fmtNum(v.views)} views · {v.daysAgo}d ago</span>
+                  )}
+                </div>
+              </a>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* ─── Top Shorts ────────────────────────────────────────────
+          Shorts used to compete with long-form for the same three
+          slots, so a channel whose Shorts were moving pushed its own
+          music videos off the card — and a Short in a 16:9 tile is a
+          centre-crop of a vertical frame, which shows the least useful
+          part of it. They get their own row, in their own aspect, at a
+          size that says they are the support rather than the release.
+
+          Ranked by the same seven-day momentum as the row above, so the
+          two rows answer the same question about different formats. */}
+      {card.recentShorts && card.recentShorts.length > 0 && (
+        <div className="mt-4">
+          <div className="text-[11px] font-bold uppercase tracking-eyebrow text-muted mb-2.5">
+            Top shorts
+          </div>
+          <div className="grid grid-cols-4 gap-3">
+            {card.recentShorts.map((v) => (
+              <a
+                key={v.id}
+                href={`https://www.youtube.com/shorts/${v.id}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="group/sh no-underline"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <div className="relative rounded-lg overflow-hidden bg-sunken" style={{ aspectRatio: '9 / 16' }}>
+                  {/* oardefault is the only endpoint that returns the full
+                      vertical frame. It 200s with a grey placeholder for
+                      anything that is not a Short, which is why this row
+                      is only ever given Shorts. */}
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={`https://i.ytimg.com/vi/${v.id}/oardefault.jpg`}
+                    alt=""
+                    loading="lazy"
+                    className="w-full h-full object-cover transition-transform duration-300 group-hover/sh:scale-[1.03]"
+                  />
+                </div>
+                <div className="text-[11px] font-semibold text-ink leading-snug mt-1.5 line-clamp-2">
+                  {v.title}
+                </div>
+                <div className="text-[10px] mt-0.5 tabular-nums">
+                  {v.recentGain != null ? (
+                    <>
+                      <span className="font-bold" style={{ color: '#0C6A3F' }}>
+                        +{fmtNum(v.recentGain)}
+                      </span>
+                      <span className="text-muted"> · {fmtNum(v.views)}</span>
+                    </>
+                  ) : (
+                    <span className="text-muted">{fmtNum(v.views)} views</span>
                   )}
                 </div>
               </a>

@@ -125,11 +125,11 @@ export type StatusCardData = {
   // YouTube channel thumbnail URL
   thumbnail?: string;
   // Wide banner for the card head, from the channel's own recent work
-  heroImage?: string;
   // The channel's uploads, ranked by what is moving
   recentVideos?: { id: string; title: string; views: number; recentGain: number | null; daysAgo: number; isShort: boolean }[];
   // How that ranking was decided, in words
   recentVideosNote?: string;
+  recentShorts?: { id: string; title: string; views: number; recentGain: number | null; daysAgo: number }[];
   // Artist type for value model scoping
   artistType?: 'managed' | 'observed' | 'external';
   // Revenue ownership — only 'virgin' gets value calculations
@@ -275,15 +275,29 @@ async function loadCard(
   const shortIds = new Set(
     uploadsForRank.filter((u) => (u.durationSec ?? 0) <= 62).map((u) => u.id),
   );
-  const recentRanked = await rankByMomentum(
+  /* One ranking pass, then split by format.
+     The card used to show a single mixed row of three, so a channel
+     whose Shorts were moving fastest pushed its own music videos off
+     the card entirely — and a Short rendered in a 16:9 tile is a
+     centre-crop of a vertical frame, which is the worst way to show
+     one. Ranking once and partitioning afterwards keeps the order
+     identical to what it was and costs no extra reads: the limit is
+     applied at the end of rankByMomentum, so raising it does not change
+     the scoring, only how many of the already-scored items come back. */
+  const rankedAll = await rankByMomentum(
     uploadsForRank.map((u) => ({
       id: u.id,
       title: u.title,
       views: u.viewCount ?? 0,
       publishedAt: u.publishedAt,
     })),
-    { windowDays: 7, limit: 3 },
+    { windowDays: 7, limit: 24 },
   );
+  const recentRanked = {
+    ...rankedAll,
+    items: rankedAll.items.filter((v) => !shortIds.has(v.id)).slice(0, 3),
+  };
+  const shortsRanked = rankedAll.items.filter((v) => shortIds.has(v.id)).slice(0, 4);
 
   // ── Campaign window data ──────────────────────────────────────────────
   // campaignStart already computed above for normalizeChannelData
@@ -431,16 +445,6 @@ async function loadCard(
     campaignSignal: campSig.signal,
     campaignSignalLabel: campSig.label,
     thumbnail: snap.thumbnail ?? undefined,
-    /* The card's banner. The most-viewed of the recent uploads, because a
-       campaign tile should be fronted by the work rather than by a round
-       avatar stretched across a wide frame. hqdefault exists for every
-       public video; maxres does not, which would leave holes. */
-    heroImage: (() => {
-      const ups = snap.recentUploads ?? [];
-      if (ups.length === 0) return undefined;
-      const best = [...ups].sort((a, b) => (b.viewCount ?? 0) - (a.viewCount ?? 0))[0];
-      return best?.id ? `https://i.ytimg.com/vi/${best.id}/hqdefault.jpg` : undefined;
-    })(),
     /* Ranked by views added in the last week, not by publish date.
        Newest-first answers "what went out", which the cadence figures
        already cover; a campaign card should lead with what is actually
@@ -455,6 +459,13 @@ async function loadCard(
       isShort: shortIds.has(v.id),
     })),
     recentVideosNote: recentRanked.note,
+    recentShorts: shortsRanked.map((v) => ({
+      id: v.id,
+      title: v.title,
+      views: v.views,
+      recentGain: v.recentGain,
+      daysAgo: Math.max(0, Math.floor((Date.now() - Date.parse(v.publishedAt)) / 86400000)),
+    })),
     artistType: artist.artistType ?? 'managed',
     ownership: artist.ownership,
     structureWarning: checkContentStructure(snap.recentUploads ?? []),
