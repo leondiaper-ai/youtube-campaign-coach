@@ -142,7 +142,11 @@ export default function TeamDetailClient({
   campaignTracking,
   hasCampaign,
   initialCampaignName,
+  /* Defaults ON so the original /team-watcher route is untouched; the
+     regional views pass false. */
+  showNotes = true,
 }: {
+  showNotes?: boolean;
   team?: string;
   channelId: string;
   initialNotes: Note[];
@@ -463,7 +467,14 @@ export default function TeamDetailClient({
         </div>
       )}
 
-      {/* Notes section */}
+      {/* ── NOTES, WHERE THEY ARE USED ──────────────────────────────
+          Off on the regional views. Every regional artist page carried
+          an empty "Add a note… / No notes yet." block, which is a lot of
+          furniture for a feature nobody on those boards has used — and
+          an empty input reads as something broken rather than something
+          available. Still on for /team-watcher, which is where notes
+          were actually being written. */}
+      {showNotes && (
       <div className="mt-8">
         <div className="text-[10px] font-bold uppercase tracking-[0.14em] text-ink/40 mb-3">
           Team Notes
@@ -518,6 +529,7 @@ export default function TeamDetailClient({
           </div>
         )}
       </div>
+      )}
     </>
   );
 }

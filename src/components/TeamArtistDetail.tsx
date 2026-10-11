@@ -273,6 +273,7 @@ export default async function TeamArtistDetail({ slug, team = 'nordics', backHre
         <div className="mt-10">
           <TeamDetailClient
             team={team}
+            showNotes={false}
             channelId={entry.channelId}
             initialNotes={entry.teamNotes}
             campaignState={entry.campaignState}
