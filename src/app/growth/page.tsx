@@ -16,6 +16,7 @@ import { normalizeChannelData, rawDelta, computeWoW } from '@/lib/youtube/normal
 import ChannelHealthBoard, { type RowData, type TopVideo, type MarketFormatStats } from '@/components/ChannelHealthBoard';
 import { computeMultiformat } from '@/lib/contentStructure';
 import { bestFormatStack } from '@/lib/formatStack';
+import { commentDemand } from '@/lib/commentDemand';
 import { resolveRowFormatSplit } from '@/lib/formatSplit';
 import { readFormatDaysBatch } from '@/lib/formatHistory';
 import AddArtistButton from '@/components/AddArtistButton';
@@ -142,6 +143,10 @@ export default async function ControlPage({
         /* Release-level, unlike multiformat above, which is channel-level.
            Both are kept because they answer different questions — see the
            header of formatStack.ts. */
+        /* Free: commentCount is already on every cached upload. */
+        commentDemand: snap?.recentUploads
+          ? commentDemand(snap.recentUploads) ?? undefined
+          : undefined,
         formatStack: snap?.recentUploads
           ? bestFormatStack(snap.recentUploads, a.name) ?? undefined
           : undefined,

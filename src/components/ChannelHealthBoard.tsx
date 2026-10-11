@@ -1,6 +1,7 @@
 'use client';
 
 import type { FormatStack } from '@/lib/formatStack';
+import { ROSTER_COMMENTS_PER_1K, type CommentDemand } from '@/lib/commentDemand';
 import { useState, useMemo, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
@@ -59,6 +60,8 @@ export type RowData = {
   /** Multiformat strategy — which YouTube formats are active in the last 90d */
   /** Deepest set of formats built around one release. See formatStack.ts. */
   formatStack?: FormatStack;
+  /** How much the audience is talking. See commentDemand.ts. */
+  commentDemand?: CommentDemand;
   multiformat?: {
     hasShorts: boolean;
     hasOfficialVideo: boolean;
@@ -701,6 +704,14 @@ export default function ChannelHealthBoard({
       || b.stack.formats.length - a.stack.formats.length
       || b.stack.latestAt.localeCompare(a.stack.latestAt))
     .slice(0, 5);
+
+  /* Quiet channels whose audience is still turning up. Ranked by how far
+     above the roster norm they are, not by raw comments — otherwise this
+     is a list of the biggest artists every week. */
+  const latentDemand = activeRows
+    .filter((r): r is RowData & { commentDemand: CommentDemand } => !!r.commentDemand?.isLatent)
+    .sort((a, b) => b.commentDemand.vsRoster - a.commentDemand.vsRoster)
+    .slice(0, 6);
 
   const mfRows = activeRows.filter((r) => r.multiformat);
   const mfStrong = mfRows.filter((r) => mfBand(r) === 'strong').length;
@@ -1423,6 +1434,53 @@ export default function ChannelHealthBoard({
               )}
             </div>
           )}
+          </div>
+        </div>
+      )}
+
+      {/* ─── STILL BEING TALKED ABOUT ──────────────────────────────── */}
+      {view === 'managed' && latentDemand.length > 0 && (
+        <div className="mb-8">
+          <SectionHead
+            title="Quiet, but still being talked about"
+            meta="Comment rate vs the roster norm"
+          />
+          <div className="bg-surface border border-line rounded-card overflow-hidden">
+            <div className="divide-y divide-line-faint">
+              {latentDemand.map(({ commentDemand: cd, ...row }) => (
+                <Link
+                  key={row.slug}
+                  href={`${linkPrefix}/${row.slug}${linkSuffix}`}
+                  className="flex items-center gap-3 px-5 py-3 transition-colors hover:bg-raised no-underline"
+                  style={{ textDecoration: 'none' }}
+                >
+                  <div className="min-w-0 flex-1">
+                    <div className="text-body font-bold text-ink truncate">{row.name}</div>
+                    <div className="text-micro text-muted">
+                      {cd.uploads90 === 0
+                        ? 'No uploads in 90 days'
+                        : `${cd.uploads90} upload${cd.uploads90 === 1 ? '' : 's'} in 90 days`}
+                      {' · '}{fmtNum(cd.comments)} comments
+                    </div>
+                  </div>
+                  <div className="text-right shrink-0">
+                    <div className="text-[15px] font-black tabular-nums" style={{ color: '#0C6A3F' }}>
+                      {cd.vsRoster.toFixed(1)}×
+                    </div>
+                    <div className="text-micro text-muted tabular-nums">
+                      {cd.perThousand.toFixed(2)} per 1k views
+                    </div>
+                  </div>
+                </Link>
+              ))}
+            </div>
+            <div className="px-5 py-3 border-t border-line bg-raised/50 text-micro text-muted leading-relaxed">
+              Channels posting little or nothing whose audience is still commenting
+              well above the roster norm of {ROSTER_COMMENTS_PER_1K} per 1,000 views.
+              A rate, so a big catalogue cannot win it by being big. This counts how
+              much people are talking, NOT whether they are being nice — a comment
+              count cannot tell praise from a pile-on, and only reading them can.
+            </div>
           </div>
         </div>
       )}

@@ -25,6 +25,7 @@
    ═══════════════════════════════════════════════════════════════════════ */
 
 import { formatPerformance, ROSTER_SUPPORT_BENCHMARK, FORMAT_LABEL, PROVISIONAL_AT } from '@/lib/formatPerformance';
+import { commentDemand, ROSTER_COMMENTS_PER_1K } from '@/lib/commentDemand';
 import {
   fmtNum, daysSince, STATUS_COLOR,
   type ChannelState, type RecentUpload, type Artist,
@@ -106,6 +107,8 @@ export default async function ArtistOverview({
      that says which one to build. Computed from the uploads already
      loaded — no extra call. */
   const perf = formatPerformance(uploads);
+  /* Free — commentCount is already on every cached upload. */
+  const demand = commentDemand(uploads);
 
   const shorts = uploads.filter(u => classifyUploadFormat(u) === 'short');
   const longform = uploads.filter(u => classifyUploadFormat(u) !== 'short');
@@ -206,6 +209,36 @@ export default async function ArtistOverview({
             the coverage caveat sits in amber directly beneath the
             percentages rather than a tooltip away: a split measured over
             part of the catalogue is not a fact about the channel. */}
+        {/* ── THE AUDIENCE HAS NOT LEFT ──────────────────────────────
+            Only prints when the channel is quiet AND the comment rate is
+            well above the roster norm, because that combination is the
+            argument: this looks finished and is not. On a busy channel
+            the same number is just a number, so it stays off.
+
+            Says "talked about", never "positive". A comment count cannot
+            tell praise from a pile-on — that needs the text, which is
+            what the per-artist comment scan is for. */}
+        {demand?.isLatent && (
+          <div
+            className="mt-7 rounded-lg px-4 py-3"
+            style={{ background: 'rgba(12,106,63,0.06)', border: '1px solid rgba(12,106,63,0.18)' }}
+          >
+            <div className="text-[13px] font-bold text-ink leading-snug">
+              The audience is still here
+              <span className="font-normal text-ink/60">
+                {' '}— {demand.vsRoster.toFixed(1)}× the roster&rsquo;s comment rate
+                {demand.uploads90 === 0
+                  ? ', with nothing posted in 90 days'
+                  : `, on ${demand.uploads90} upload${demand.uploads90 === 1 ? '' : 's'} in 90 days`}
+              </span>
+            </div>
+            <div className="text-[11px] text-ink/45 mt-1 tabular-nums">
+              {fmtNum(demand.comments)} comments · {demand.perThousand.toFixed(2)} per 1,000 views
+              <span className="text-ink/35"> vs {ROSTER_COMMENTS_PER_1K} across the roster</span>
+            </div>
+          </div>
+        )}
+
         {/* Lifetime split and the format read share a row. The split was
             a 340px block with the rest of the width empty beside it, and
             the format read was a full-width section further down that
