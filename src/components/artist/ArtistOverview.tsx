@@ -311,7 +311,12 @@ export default async function ArtistOverview({
                   >
                     <span className="w-[76px] shrink-0 text-ink/70">
                       {r.label}
-                      {r.count <= PROVISIONAL_AT && <span className="text-ink/30"> ·</span>}
+                      {r.count <= PROVISIONAL_AT && (
+                        <span
+                          className="text-ink/30"
+                          title={`Only ${r.count} uploads — indicative, not settled.`}
+                        > ·</span>
+                      )}
                     </span>
                     <span className="flex-1 h-[6px] rounded-sm overflow-hidden" style={{ background: RULE }}>
                       <span
@@ -337,14 +342,12 @@ export default async function ArtistOverview({
               })}
             </div>
 
-            <div className="text-[10px] text-ink/35 mt-2.5 leading-relaxed">
-              Share of this channel&rsquo;s official video / what the format
-              does across the roster.
-              {perf.hero && <> Official video median {fmtNum(perf.hero.median)}.</>}
-              {perf.support.some((r) => r.count <= PROVISIONAL_AT) && (
-                <> A dot marks a format with only two uploads — indicative, not settled.</>
-              )}
-            </div>
+            {/* The caption that stood here explained the two percentages,
+                printed the official-video median and defined the dot. Cut:
+                the pair reads as "ours / theirs" without being told, and
+                everything else it said is on the row it qualifies — the
+                dot carries its own title, and the row tooltip has the
+                upload count, the median age and the age-bias caveat. */}
               </>
             )}
           </div>
