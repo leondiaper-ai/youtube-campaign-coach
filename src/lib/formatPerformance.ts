@@ -108,6 +108,30 @@ export const ROSTER_SUPPORT_BENCHMARK: Record<string, { ratio: number; artists: 
 /** The hero asset. It wins almost every time, so it is a YARDSTICK here. */
 const HERO_TYPE: LaunchContentType = 'OFFICIAL_VIDEO';
 
+/**
+ * A format this CHANNEL invented, which our vocabulary does not name.
+ *
+ * Peter Gabriel is the case. He is one of the most active channels on the
+ * roster — 45 long-form uploads in a year — and the support ranking was
+ * blank, which read as "we cannot tell". The truth was better: in twelve
+ * months he published ZERO lyric videos, ZERO visualisers, ZERO BTS and
+ * zero official videos. There was nothing of those kinds to compare.
+ *
+ * What he does publish is the same song twice, as a Bright-Side Mix and a
+ * Dark-Side Mix — ten of each. That is a format strategy, it is repeated,
+ * and it has an answer: the Bright-Side mixes do roughly twice what the
+ * Dark-Side ones do. The vocabulary was the limitation, not the channel.
+ *
+ * So when none of the known formats are present, the channel's own
+ * parenthetical tags are read instead and compared the same way.
+ */
+export interface VariantRow {
+  /** The tag exactly as the channel writes it, e.g. "Bright-Side Mix". */
+  label: string;
+  median: number;
+  count: number;
+}
+
 export interface FormatPerformance {
   /** Every readable format including the official video, ranked. */
   rows: FormatRow[];
@@ -126,6 +150,12 @@ export interface FormatPerformance {
    */
   clear: boolean;
   shorts: { median: number; count: number } | null;
+  /**
+   * The channel's own repeated variant tags, ranked. Only populated when
+   * NO known support format is present — otherwise two vocabularies would
+   * compete to describe the same catalogue.
+   */
+  variants: VariantRow[];
   windowDays: number;
 }
 
@@ -158,6 +188,23 @@ const median = (nums: number[]): number => {
   const m = Math.floor(s.length / 2);
   return s.length % 2 ? s[m] : Math.round((s[m - 1] + s[m]) / 2);
 };
+
+/**
+ * Words that mean "this is a known format", so a parenthetical carrying
+ * one is not a channel-invented variant — it is already in the ranking.
+ */
+const KNOWN_TAG = /official|music video|lyric|visuali[sz]er|live|audio|behind the scenes|bts|trailer|teaser|short/i;
+
+/** Pull the channel's own tag out of "Song (Bright-Side Mix)". */
+function variantTag(title: string): string | null {
+  const m = /[([]\s*([^)\]]{2,40})\s*[)\]]\s*$/.exec((title ?? '').trim());
+  if (!m) return null;
+  const tag = m[1].trim();
+  if (KNOWN_TAG.test(tag)) return null;
+  /* A year, a number or a date in brackets is metadata, not a format. */
+  if (/^\d[\d\s/.-]*$/.test(tag)) return null;
+  return tag;
+}
 
 export function formatPerformance(
   uploads: RecentUpload[],
@@ -224,11 +271,39 @@ export function formatPerformance(
      comparison — it is the only thing we could measure. */
   const clear = !!bestSupport && !!runnerUp && bestSupport.median >= runnerUp.median * CLEAR_MARGIN;
 
+  /* ── THE CHANNEL'S OWN FORMATS ────────────────────────────────────
+     Only when nothing known was found. A channel that publishes lyric
+     videos AND calls something a "(Radio Edit)" should be read through
+     the shared vocabulary, not have two competing ones on the same card. */
+  let variants: VariantRow[] = [];
+  if (support.length === 0) {
+    const byTag = new Map<string, { label: string; views: number[] }>();
+    for (const u of uploads) {
+      const ts = new Date(u.publishedAt).getTime();
+      if (!Number.isFinite(ts) || ts < cutoff) continue;
+      if (!(u.viewCount > 0)) continue;
+      if (u.durationSec > 0 && u.durationSec <= 62) continue;
+      const tag = variantTag(u.title);
+      if (!tag) continue;
+      const key = tag.toLowerCase();
+      const g = byTag.get(key) ?? { label: tag, views: [] };
+      g.views.push(u.viewCount);
+      byTag.set(key, g);
+    }
+    const built = Array.from(byTag.values())
+      .filter((g) => g.views.length >= MIN_PER_FORMAT)
+      .map((g) => ({ label: g.label, median: median(g.views), count: g.views.length }))
+      .sort((a, b) => b.median - a.median);
+    /* One variant is not a comparison — it is just what they call things. */
+    variants = built.length >= 2 ? built : [];
+  }
+
   return {
     rows,
     hero,
     support,
     bestSupport,
+    variants,
     best,
     clear,
     shorts: shortViews.length >= MIN_PER_FORMAT

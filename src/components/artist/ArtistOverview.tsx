@@ -287,7 +287,47 @@ export default async function ArtistOverview({
                 enough yet to answer it from its own history. So the
                 roster figures stand in, which is what a team has to aim
                 at until the channel has its own number. */}
-            {perf.support.length === 0 && (
+            {/* ── THE CHANNEL'S OWN FORMATS ──────────────────────────
+                Shown before falling back to the roster, because this is
+                the channel's real answer. Peter Gabriel publishes no
+                lyric videos, visualisers or BTS at all — he publishes
+                every song twice, as a Bright-Side and a Dark-Side mix.
+                Blank read as "we cannot tell"; this says what he does. */}
+            {perf.support.length === 0 && perf.variants.length > 0 && (
+              <>
+                <div className="text-[13px] text-ink mt-2.5 leading-snug">
+                  <strong>{perf.variants[0].label}</strong>
+                  <span className="text-ink/55">
+                    {' '}— {(perf.variants[0].median / (perf.variants[1].median || 1)).toFixed(1)}× the{' '}
+                    {perf.variants[1].label}
+                  </span>
+                </div>
+                <div className="mt-3 space-y-1.5">
+                  {perf.variants.map((v, i) => (
+                    <div key={v.label} className="flex items-center gap-2 text-[11px] whitespace-nowrap">
+                      <span className="w-[108px] shrink-0 text-ink/70 truncate" title={v.label}>{v.label}</span>
+                      <span className="flex-1 h-[6px] rounded-sm overflow-hidden" style={{ background: RULE }}>
+                        <span
+                          className="block h-full"
+                          style={{ width: `${Math.max((v.median / perf.variants[0].median) * 100, 3)}%`, background: i === 0 ? GAIN : '#B8B0A2' }}
+                        />
+                      </span>
+                      <span className="w-[46px] shrink-0 text-right tabular-nums font-bold text-ink">
+                        {fmtNum(v.median)}
+                      </span>
+                      <span className="w-[34px] shrink-0 text-right tabular-nums text-ink/35">
+                        n{v.count}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+                <div className="text-[10px] text-ink/35 mt-2.5 leading-relaxed">
+                  This channel&rsquo;s own formats. No lyric videos, visualisers or
+                  BTS to compare.
+                </div>
+              </>
+            )}
+            {perf.support.length === 0 && perf.variants.length === 0 && (
               <>
                 <div className="text-[13px] text-ink/70 mt-2.5 leading-snug">
                   Not enough support assets here yet to read this channel&rsquo;s own.
