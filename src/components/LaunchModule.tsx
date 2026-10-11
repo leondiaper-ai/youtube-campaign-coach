@@ -636,7 +636,10 @@ export default function LaunchModule({
                 <span className="text-[10px] text-ink/40">Pre-launch:</span>
                 <StateBadge label={preLaunch.state} style={PRELAUNCH_STYLE[preLaunch.state]} />
                 <span className="text-[10px] text-ink/20">·</span>
-                <span className="text-[10px] text-ink/40">Momentum:</span>
+                {/* Same figure, same qualifier. This badge sits between
+                    two launch-video signals, so unqualified "Momentum"
+                    reads as the third one. */}
+                <span className="text-[10px] text-ink/40">Channel momentum:</span>
                 <StateBadge label={momentum.state} style={MOMENTUM_STYLE[momentum.state]} />
               </div>
             </div>
@@ -669,13 +672,15 @@ export default function LaunchModule({
             {/* Momentum Comparison */}
             {(momentum.week1Avg != null || momentum.week2Avg != null) && (
               <div>
-                {/* "Daily views" read as the launch video's views. It is
-                    the CHANNEL's — computeMomentum averages the same
-                    sparklineViews30d deltas the chart above plots, which
-                    are whole-channel daily gains. The launch video is the
-                    reason for the window, not the subject of the figure. */}
+                {/* Leads with the SUBJECT. computeMomentum averages the
+                    same sparklineViews30d deltas the chart above plots,
+                    which are whole-channel daily gains — the launch video
+                    is the reason for the window, not what is being
+                    measured. Qualifying "views" at the end of the line
+                    still let the eye read "Momentum" as the video's; the
+                    noun has to be "channel momentum" from the first word. */}
                 <div className="text-[10px] font-black uppercase tracking-[0.14em] text-ink/40 mb-2">
-                  Momentum · Weekly avg daily channel views
+                  Channel momentum · Weekly avg daily views
                 </div>
                 <div className="grid grid-cols-3 gap-3">
                   <MomentumWeek label="Week 1" value={momentum.week1Avg} />
