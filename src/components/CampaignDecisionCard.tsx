@@ -1419,18 +1419,13 @@ export function DecisionCard({
                 </a>
               ))}
             </div>
-            {card.recentVideosNote && (
-              /* The order is a claim about what is being watched, so the
-                 basis for it is printed rather than assumed. */
-              <div className="text-[10px] text-faint mt-2 leading-tight">{card.recentVideosNote}</div>
-            )}
           </div>
         )}
 
         {card.recentShorts && card.recentShorts.length > 0 && (
           <div className="mt-4 pt-4" style={{ borderTop: '1px solid rgba(14,14,14,0.07)' }}>
             <div className="text-[11px] font-bold uppercase tracking-eyebrow text-muted mb-2">
-              Top shorts
+              Moving now · Shorts
             </div>
             <div className="grid grid-cols-4 gap-2">
               {card.recentShorts.map((v) => (
@@ -1457,6 +1452,15 @@ export function DecisionCard({
               ))}
             </div>
           </div>
+        )}
+
+        {/* The order of BOTH rows is a claim about what is being watched,
+            so the basis for it is printed rather than assumed — and it is
+            printed once, at the foot, because one ranking pass produces
+            both rows on one basis. Under the long-form row alone it read
+            as a caveat about long-form. */}
+        {card.recentVideosNote && (
+          <div className="text-[10px] text-faint mt-3 leading-tight">{card.recentVideosNote}</div>
         )}
       </aside>
 
