@@ -223,18 +223,23 @@ export default async function ArtistOverview({
             className="mt-7 rounded-lg px-4 py-3"
             style={{ background: 'rgba(12,106,63,0.06)', border: '1px solid rgba(12,106,63,0.18)' }}
           >
+            {/* "2.4x the roster's comment rate" asks the reader to hold
+                two abstractions — what a roster is, and what a comment
+                rate is — before the sentence means anything. "Our average
+                channel" is the same fact with nothing to decode, and the
+                multiple reads instantly against it. */}
             <div className="text-[13px] font-bold text-ink leading-snug">
               The audience is still here
               <span className="font-normal text-ink/60">
-                {' '}— {demand.vsRoster.toFixed(1)}× the roster&rsquo;s comment rate
+                {' '}— they comment {demand.vsRoster.toFixed(1)}× more than on our average channel
                 {demand.uploads90 === 0
-                  ? ', with nothing posted in 90 days'
-                  : `, on ${demand.uploads90} upload${demand.uploads90 === 1 ? '' : 's'} in 90 days`}
+                  ? ', and nothing has been posted in 90 days'
+                  : `, on just ${demand.uploads90} upload${demand.uploads90 === 1 ? '' : 's'} in 90 days`}
               </span>
             </div>
             <div className="text-[11px] text-ink/45 mt-1 tabular-nums">
-              {fmtNum(demand.comments)} comments · {demand.perThousand.toFixed(2)} per 1,000 views
-              <span className="text-ink/35"> vs {ROSTER_COMMENTS_PER_1K} across the roster</span>
+              {fmtNum(demand.comments)} comments · {demand.perThousand.toFixed(2)} comments per 1,000 views
+              <span className="text-ink/35">, against {ROSTER_COMMENTS_PER_1K} on an average channel</span>
             </div>
             {/* The finding is only half of it. A card that says an audience
                 is waiting and then stops is an observation; the reason to

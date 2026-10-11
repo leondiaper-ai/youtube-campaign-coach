@@ -1451,7 +1451,7 @@ export default function ChannelHealthBoard({
         <div className="mb-8">
           <SectionHead
             title="Quiet, but still being talked about"
-            meta={`${latentDemand.length} channel${latentDemand.length === 1 ? '' : 's'} · comment rate vs the roster norm`}
+            meta={`${latentDemand.length} channel${latentDemand.length === 1 ? '' : 's'} · vs our average channel`}
           />
           <div className="bg-surface border border-line rounded-card overflow-hidden">
             <div className="divide-y divide-line-faint">
@@ -1477,7 +1477,7 @@ export default function ChannelHealthBoard({
                       {cd.vsRoster.toFixed(1)}×
                     </div>
                     <div className="text-micro text-muted tabular-nums">
-                      {cd.perThousand.toFixed(2)} per 1k views
+                      more comments
                     </div>
                   </div>
                 </Link>
@@ -1495,10 +1495,11 @@ export default function ChannelHealthBoard({
               </button>
             )}
             <div className="px-5 py-3 border-t border-line bg-raised/50 text-micro text-muted leading-relaxed">
-              Channels posting little or nothing whose audience is still commenting
-              well above the roster norm of {ROSTER_COMMENTS_PER_1K} per 1,000 views.
-              A rate, so a big catalogue cannot win it by being big. This counts how
-              much people are talking, NOT whether they are being nice — a comment
+              Channels posting little or nothing whose fans are still commenting far
+              more than usual. The multiple compares comments per 1,000 views against
+              an average channel on this roster, which gets {ROSTER_COMMENTS_PER_1K} —
+              a rate, so a big catalogue cannot win it by being big. It counts how
+              much people are talking, NOT whether they are being nice: a comment
               count cannot tell praise from a pile-on, and only reading them can.
             </div>
           </div>
