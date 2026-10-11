@@ -188,58 +188,70 @@ function dateToX(date: string, startDate: string, endDate: string, width: number
   return ((current - start) / range) * width;
 }
 
-function getFormatShape(format: UploadFormat, cx: number, cy: number, size: number): string {
-  const s = size;
-  switch (format) {
-    case 'omv':
-      // Circle
-      return `M${cx},${cy - s} A${s},${s} 0 1,1 ${cx},${cy + s} A${s},${s} 0 1,1 ${cx},${cy - s}`;
-    case 'acoustic': {
-      // Circle at 85% size
-      const sa = s * 0.85;
-      return `M${cx},${cy - sa} A${sa},${sa} 0 1,1 ${cx},${cy + sa} A${sa},${sa} 0 1,1 ${cx},${cy - sa}`;
-    }
-    case 'lyric':
-    case 'interview':
-      // Diamond
-      return `M${cx},${cy - s} L${cx + s},${cy} L${cx},${cy + s} L${cx - s},${cy} Z`;
-    case 'visualiser':
-    case 'documentary':
-      // Square
-      return `M${cx - s},${cy - s} L${cx + s},${cy - s} L${cx + s},${cy + s} L${cx - s},${cy + s} Z`;
-    case 'live':
-      // Star
-      return starPath(cx, cy, s, s * 0.45, 5);
-    case 'tour': {
-      // Star at 85% size
-      const st = s * 0.85;
-      return starPath(cx, cy, st, st * 0.45, 5);
-    }
-    case 'bts':
-      // Triangle
-      return `M${cx},${cy - s} L${cx + s},${cy + s * 0.7} L${cx - s},${cy + s * 0.7} Z`;
-    case 'audio':
-      // Diamond (same as lyric)
-      return `M${cx},${cy - s} L${cx + s},${cy} L${cx},${cy + s} L${cx - s},${cy} Z`;
-    case 'short':
-      // Inverted triangle
-      return `M${cx - s},${cy - s * 0.5} L${cx + s},${cy - s * 0.5} L${cx},${cy + s * 0.7} Z`;
-    default:
-      // Default circle
-      return `M${cx},${cy - s} A${s},${s} 0 1,1 ${cx},${cy + s} A${s},${s} 0 1,1 ${cx},${cy - s}`;
-  }
+/* ── THE FORMAT BULLET ────────────────────────────────────────────────────
+   Every upload on the event lane is a filled circle carrying its own
+   format code — OMV, LYR, VIS, LIVE — the way a transit map numbers its
+   lines. It replaces a vocabulary of six abstract shapes (circle, diamond,
+   square, star, triangle, inverted triangle) that this chart had no legend
+   to explain, so a diamond meant "lyric video" only to whoever wrote it.
+
+   Three things follow from putting the code inside the marker:
+
+   1. IT NAMES ITSELF. A reader needs no legend and no hover.
+   2. COLOUR STOPS CARRYING THE MEANING ALONE. Code and colour say the same
+      thing twice, so the lane survives colour blindness and greyscale.
+   3. THE LABEL LANE EMPTIES. The format label used to sit beside the
+      marker as its own line of text, competing with the song title for
+      the same strip. With it inside the circle, the title gets the lane
+      to itself — which is why fewer titles are now hidden for collision.
+
+   Font size steps down with code length so four characters still sit
+   inside the circle rather than spilling over the edge. AUD keeps the
+   hollow treatment it had as a shape: audio-only is the one format that
+   is an absence of picture, and the ring says so.
+   ─────────────────────────────────────────────────────────────────────── */
+
+/* A circle of radius r has roughly 1.7r of usable width across its middle,
+   and a bold sans character occupies about 0.62 of its own font size. So
+   the size that just fits N characters is 1.7r / 0.62N — capped at 1.1r for
+   one or two characters, where height rather than width is the limit. */
+function bulletFontSize(code: string, r: number): number {
+  const n = Math.max(1, code.length);
+  const byWidth = (1.7 * r) / (0.62 * n);
+  return Math.round(Math.min(byWidth, 1.1 * r) * 10) / 10;
 }
 
-function starPath(cx: number, cy: number, outerR: number, innerR: number, points: number): string {
-  const parts: string[] = [];
-  for (let i = 0; i < points * 2; i++) {
-    const angle = (Math.PI * i) / points - Math.PI / 2;
-    const r = i % 2 === 0 ? outerR : innerR;
-    const x = cx + r * Math.cos(angle);
-    const y = cy + r * Math.sin(angle);
-    parts.push(`${i === 0 ? 'M' : 'L'}${x.toFixed(1)},${y.toFixed(1)}`);
-  }
-  return parts.join(' ') + ' Z';
+function FormatBullet({
+  format, code, cx, cy, r, emphasis = false,
+}: {
+  format: UploadFormat;
+  code: string;
+  cx: number;
+  cy: number;
+  r: number;
+  emphasis?: boolean;
+}) {
+  const color = FORMAT_COLORS[format];
+  const hollow = format === 'audio';
+  const fs = bulletFontSize(code, r);
+  return (
+    <g>
+      <circle
+        cx={cx} cy={cy} r={r}
+        fill={hollow ? 'white' : color}
+        stroke={color}
+        strokeWidth={hollow ? 2 : emphasis ? 1.5 : 0}
+      />
+      <text
+        x={cx} y={cy} textAnchor="middle" dominantBaseline="central"
+        fontSize={fs} fontWeight={700} fill={hollow ? color : 'white'}
+        letterSpacing={code.length > 2 ? -0.2 : 0}
+        style={{ pointerEvents: 'none', userSelect: 'none' } as React.CSSProperties}
+      >
+        {code}
+      </text>
+    </g>
+  );
 }
 
 // ── Headline generator (V5 — behaviour-focused) ─────────────────────────
@@ -987,7 +999,7 @@ function StoryChart({
           {longform.map((u) => {
             const x = toX(u.publishedAt);
             const isSelected = selectedUpload === u.id;
-            const size = isSelected ? 10 : 8;
+            const size = isSelected ? 12 : 10.5;
             const labelPos = labelPositions.get(u.id) ?? 'below';
             const labelAbove = labelPos === 'above';
             const labelHidden = labelPos === 'hidden';
@@ -1018,58 +1030,25 @@ function StoryChart({
                   stroke={FORMAT_COLORS[u.format]} strokeWidth={0.5} opacity={0.12}
                 />
 
-                {/* The marker — big and obvious */}
-                <path
-                  d={getFormatShape(u.format, x, LF_OFFSET, size)}
-                  fill={u.format === 'audio' ? 'none' : FORMAT_COLORS[u.format]}
-                  stroke={FORMAT_COLORS[u.format]}
-                  strokeWidth={u.format === 'audio' ? 2.5 : isSelected ? 2 : 0}
-                  opacity={isSelected ? 1 : 0.9}
+                {/* The marker — a bullet carrying its own format code */}
+                <FormatBullet
+                  format={u.format}
+                  code={u.formatMeta.shortLabel}
+                  cx={x} cy={LF_OFFSET} r={size}
+                  emphasis={isSelected}
                 />
 
-                {/* Two-line labels, when there is room for them. */}
-                {labelHidden ? null : labelAbove ? (
-                  <>
-                    {/* Line 2 (shortTitle) — ABOVE, furthest from marker */}
-                    {shortTitle && (
-                      <text
-                        x={x} y={LF_OFFSET - size - 14} textAnchor="middle"
-                        fontSize={7} fill={FORMAT_COLORS[u.format]} opacity={0.7}
-                        fontWeight={400}
-                      >
-                        {shortTitle}
-                      </text>
-                    )}
-                    {/* Line 1 (format label) — ABOVE, closer to marker */}
-                    <text
-                      x={x} y={LF_OFFSET - size - 4} textAnchor="middle"
-                      fontSize={8} fill={FORMAT_COLORS[u.format]} fontWeight={700}
-                      style={{ textTransform: 'uppercase' } as React.CSSProperties}
-                    >
-                      {u.formatMeta.shortLabel}
-                    </text>
-                  </>
-                ) : (
-                  <>
-                    {/* Line 1 (format label) — BELOW marker */}
-                    <text
-                      x={x} y={LF_OFFSET + size + 9} textAnchor="middle"
-                      fontSize={8} fill={FORMAT_COLORS[u.format]} fontWeight={700}
-                      style={{ textTransform: 'uppercase' } as React.CSSProperties}
-                    >
-                      {u.formatMeta.shortLabel}
-                    </text>
-                    {/* Line 2 (shortTitle) — BELOW, further from marker */}
-                    {shortTitle && (
-                      <text
-                        x={x} y={LF_OFFSET + size + 19} textAnchor="middle"
-                        fontSize={7} fill={FORMAT_COLORS[u.format]} opacity={0.7}
-                        fontWeight={400}
-                      >
-                        {shortTitle}
-                      </text>
-                    )}
-                  </>
+                {/* Song title only — the format code is inside the bullet now. */}
+                {labelHidden || !shortTitle ? null : (
+                  <text
+                    x={x}
+                    y={labelAbove ? LF_OFFSET - size - 5 : LF_OFFSET + size + 10}
+                    textAnchor="middle"
+                    fontSize={7.5} fill={FORMAT_COLORS[u.format]} opacity={0.75}
+                    fontWeight={500}
+                  >
+                    {shortTitle}
+                  </text>
                 )}
               </g>
             );
@@ -1591,11 +1570,11 @@ function UploadDetailPanel({
                     }}
                   >
                     <svg width={10} height={10}>
-                      <path
-                        d={getFormatShape(fu.format, 5, 5, 3)}
-                        fill={fu.format === 'audio' ? 'none' : FORMAT_COLORS[fu.format]}
+                      <circle
+                        cx={5} cy={5} r={3.5}
+                        fill={fu.format === 'audio' ? 'white' : FORMAT_COLORS[fu.format]}
                         stroke={FORMAT_COLORS[fu.format]}
-                        strokeWidth={fu.format === 'audio' ? 1 : 0}
+                        strokeWidth={fu.format === 'audio' ? 1.5 : 0}
                       />
                     </svg>
                     <span style={{ color: INK, fontWeight: 500 }}>
@@ -1668,9 +1647,9 @@ function FormatBreakdownPanel({ breakdown }: { breakdown: FormatBreakdown[] }) {
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6 }}>
             <svg width={12} height={12}>
-              <path
-                d={getFormatShape(fb.format, 6, 6, 4)}
-                fill={fb.format === 'audio' ? 'none' : FORMAT_COLORS[fb.format]}
+              <circle
+                cx={6} cy={6} r={4.5}
+                fill={fb.format === 'audio' ? 'white' : FORMAT_COLORS[fb.format]}
                 stroke={FORMAT_COLORS[fb.format]}
                 strokeWidth={fb.format === 'audio' ? 1.5 : 0}
               />
