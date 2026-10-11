@@ -62,6 +62,8 @@ export type RowData = {
   formatStack?: FormatStack;
   /** How much the audience is talking. See commentDemand.ts. */
   commentDemand?: CommentDemand;
+  /** Channel avatar from the cached snap. */
+  thumbnail?: string;
   multiformat?: {
     hasShorts: boolean;
     hasOfficialVideo: boolean;
@@ -1454,6 +1456,7 @@ export default function ChannelHealthBoard({
                   className="flex items-center gap-3 px-5 py-3 transition-colors hover:bg-raised no-underline"
                   style={{ textDecoration: 'none' }}
                 >
+                  <ChannelAvatar src={row.thumbnail} name={row.name} />
                   <div className="min-w-0 flex-1">
                     <div className="text-body font-bold text-ink truncate">{row.name}</div>
                     <div className="text-micro text-muted">
@@ -1501,6 +1504,7 @@ export default function ChannelHealthBoard({
                   className="flex items-center gap-3 px-5 py-3 transition-colors hover:bg-raised no-underline"
                   style={{ textDecoration: 'none' }}
                 >
+                  <ChannelAvatar src={row.thumbnail} name={row.name} />
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-2">
                       <span className="text-body font-bold text-ink truncate">{row.name}</span>
@@ -2125,3 +2129,25 @@ const MF_LABEL: Record<'strong' | 'partial' | 'weak', string> = {
   partial: 'partial multiformat',
   weak: 'weak multiformat',
 };
+
+/* ─── Channel avatar ──────────────────────────────────────────────────
+   From the cached snap, so it costs nothing. Falls back to the artist's
+   initial rather than a broken image or an empty circle — a row with no
+   avatar should still look like a row, not like a loading state that
+   never finished. */
+function ChannelAvatar({ src, name, size = 30 }: { src?: string; name: string; size?: number }) {
+  return (
+    <span
+      className="shrink-0 rounded-full overflow-hidden bg-raised flex items-center justify-center"
+      style={{ width: size, height: size }}
+      aria-hidden
+    >
+      {src ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img src={src} alt="" loading="lazy" className="w-full h-full object-cover" />
+      ) : (
+        <span className="text-[11px] font-black text-muted">{name.slice(0, 1).toUpperCase()}</span>
+      )}
+    </span>
+  );
+}

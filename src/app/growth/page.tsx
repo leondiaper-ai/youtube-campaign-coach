@@ -143,6 +143,9 @@ export default async function ControlPage({
         /* Release-level, unlike multiformat above, which is channel-level.
            Both are kept because they answer different questions — see the
            header of formatStack.ts. */
+        /* The channel avatar is already on the snap — the campaigns
+           sidebar has been using it. No fetch, no extra field to sync. */
+        thumbnail: snap?.thumbnail ?? undefined,
         /* Free: commentCount is already on every cached upload. */
         commentDemand: snap?.recentUploads
           ? commentDemand(snap.recentUploads) ?? undefined
