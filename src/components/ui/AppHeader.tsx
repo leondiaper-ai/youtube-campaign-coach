@@ -52,10 +52,14 @@ export function AppHeader({
             sentence. */}
         <div className="flex items-center justify-between gap-6 h-[52px] border-b border-line-faint">
           <div className="flex items-center gap-3 min-w-0">
-            <Link href="/" className="no-underline shrink-0">
+            {/* The wordmark is a mark, not navigation. It linked to "/",
+                a separate landing page that is not where anybody working
+                wants to end up — and every destination that matters is
+                already one click away in the nav directly below it. */}
+            <span className="shrink-0">
               <span className="text-[13px] font-black tracking-[0.1em] text-ink">VMG</span>
               <span className="text-[13px] font-black tracking-[0.1em] text-signal ml-1.5">YOUTUBE</span>
-            </Link>
+            </span>
             {workspace && (
               <>
                 <span className="w-px h-3.5 bg-line-strong shrink-0" aria-hidden />
