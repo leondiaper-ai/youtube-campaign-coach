@@ -206,8 +206,15 @@ export default async function ArtistOverview({
             the coverage caveat sits in amber directly beneath the
             percentages rather than a tooltip away: a split measured over
             part of the catalogue is not a fact about the channel. */}
+        {/* Lifetime split and the format read share a row. The split was
+            a 340px block with the rest of the width empty beside it, and
+            the format read was a full-width section further down that
+            said the same KIND of thing — what this channel's output is
+            made of, and which part of it works. Together they are one
+            glance instead of two. */}
+        <div className="mt-8 grid gap-10 lg:grid-cols-[340px_1fr] items-start">
         {split?.lifetime && (
-          <div className="mt-8 max-w-[340px]">
+          <div>
             <Eyebrow>Lifetime split</Eyebrow>
             <div
               className="flex h-[8px] w-full overflow-hidden rounded-sm mt-2.5"
@@ -230,6 +237,76 @@ export default async function ArtistOverview({
           </div>
         )}
 
+        {/* ── BEST ASSET AFTER THE VIDEO ───────────────────────────
+            Condensed to a glance. The full version carried its own
+            headline sentence, upload counts, median ages and a
+            four-line caption; all of that is still true and almost
+            none of it was being read. What survives is the ranking,
+            the number, and the one comparison that makes the number
+            mean anything — this channel against the roster. The rest
+            moved into the row's own tooltip. */}
+        {perf.support.length > 0 && (
+          <div>
+            <Eyebrow>Best asset after the video</Eyebrow>
+            {perf.bestSupport && (
+              <div className="text-[13px] text-ink mt-2.5 leading-snug">
+                <strong>{perf.bestSupport.label}s</strong>
+                {perf.bestSupport.vsHero != null && (
+                  <span className="text-ink/55">
+                    {' '}— {Math.round(perf.bestSupport.vsHero * 100)}% of an official video here
+                  </span>
+                )}
+                {!perf.clear && perf.support.length > 1 && (
+                  <span className="text-ink/40">, but close to {perf.support[1].label.toLowerCase()}s</span>
+                )}
+              </div>
+            )}
+
+            <div className="mt-3 space-y-1.5">
+              {perf.support.map((r) => {
+                const top = perf.support[0].median || 1;
+                const bench = ROSTER_SUPPORT_BENCHMARK[r.type];
+                const ahead = bench && r.vsHero != null && r.vsHero >= bench.ratio;
+                return (
+                  <div
+                    key={r.type}
+                    className="flex items-center gap-2 text-[11px] whitespace-nowrap"
+                    title={`${r.count} upload${r.count === 1 ? '' : 's'}, median age ${r.medianAgeDays} days. Median views per upload, so one hit does not carry a format. Views accumulate, so an older format has had longer to gather them.`}
+                  >
+                    <span className="w-[76px] shrink-0 text-ink/70">{r.label}</span>
+                    <span className="flex-1 h-[6px] rounded-sm overflow-hidden" style={{ background: RULE }}>
+                      <span
+                        className="block h-full"
+                        style={{ width: `${Math.max((r.median / top) * 100, 3)}%`, background: r === perf.support[0] ? GAIN : '#B8B0A2' }}
+                      />
+                    </span>
+                    <span className="w-[46px] shrink-0 text-right tabular-nums font-bold text-ink">
+                      {fmtNum(r.median)}
+                    </span>
+                    {/* Against the roster, because this channel's own
+                        number alone does not say whether it is good. */}
+                    <span className="w-[92px] shrink-0 text-right tabular-nums text-ink/40">
+                      {r.vsHero != null ? `${Math.round(r.vsHero * 100)}%` : '—'}
+                      {bench && (
+                        <span style={ahead ? { color: GAIN } : undefined}>
+                          {' '}/ {Math.round(bench.ratio * 100)}%
+                        </span>
+                      )}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+
+            <div className="text-[10px] text-ink/35 mt-2.5 leading-relaxed">
+              Share of this channel&rsquo;s official video / what the format
+              does across the roster.
+              {perf.hero && <> Official video median {fmtNum(perf.hero.median)}.</>}
+            </div>
+          </div>
+        )}
+        </div>
+
         {/* The movement-provenance line ("7-day movement figures are
             stale — from the last successful sync, not a live read") used
             to sit here. Removed: it printed on essentially every artist,
@@ -243,97 +320,6 @@ export default async function ArtistOverview({
             reading is old enough to change a decision, rather than on
             every render. */}
       </section>
-
-      {/* ═══ 3b. WHAT TO AIM FOR AFTER THE VIDEO ═════════════════ */}
-      {perf.support.length > 0 && (
-        <section className="mt-12 pt-8" style={{ borderTop: `1px solid ${RULE}` }}>
-          <Eyebrow>Best asset after the music video · last 12 months</Eyebrow>
-
-          {/* The official video is a YARDSTICK, not a contender. It wins
-              almost every time — 19 of 23 clear calls across 70 sampled
-              artists — so leading on it tells a team nothing they can act
-              on. The question worth answering is what to make NEXT. */}
-          {perf.bestSupport && (
-            <div className="mt-4 text-[15px] font-bold leading-snug text-ink">
-              {perf.bestSupport.label}s are the strongest asset here after the video
-              {perf.bestSupport.vsHero != null && (
-                <span className="font-normal text-ink/50">
-                  {' '}— {Math.round(perf.bestSupport.vsHero * 100)}% of what an official video does on this channel
-                </span>
-              )}
-            </div>
-          )}
-          {!perf.clear && perf.support.length > 1 && (
-            <div className="mt-1 text-[12px] text-ink/45">
-              Close to {perf.support[1].label.toLowerCase()}s though — treat this as
-              no clear difference rather than a winner.
-            </div>
-          )}
-
-          <div className="mt-5 space-y-2" style={{ maxWidth: 620 }}>
-            {perf.support.map((r) => {
-              const topMedian = perf.support[0].median || 1;
-              const pct = (r.median / topMedian) * 100;
-              const bench = ROSTER_SUPPORT_BENCHMARK[r.type];
-              return (
-                <div key={r.type} className="flex items-center gap-3 text-[12px]">
-                  <span className="w-[104px] shrink-0 font-bold text-ink">{r.label}</span>
-                  <span className="flex-1 h-[7px] rounded-full overflow-hidden" style={{ background: RULE }}>
-                    <span
-                      className="block h-full rounded-full"
-                      style={{ width: `${Math.max(pct, 2)}%`, background: r === perf.support[0] ? GAIN : '#B8B0A2' }}
-                    />
-                  </span>
-                  <span className="w-[62px] shrink-0 text-right tabular-nums font-bold text-ink">
-                    {fmtNum(r.median)}
-                  </span>
-                  {/* Against the artist's own video, then against what the
-                      format does across the roster — the second is what
-                      turns "this is our number" into "this is good or bad". */}
-                  <span className="w-[118px] shrink-0 text-right tabular-nums text-ink/45">
-                    {r.vsHero != null ? `${Math.round(r.vsHero * 100)}% of video` : '—'}
-                    {bench && r.vsHero != null && (
-                      <span className={r.vsHero >= bench.ratio ? 'text-[#0C6A3F]' : 'text-ink/35'}>
-                        {' '}· roster {Math.round(bench.ratio * 100)}%
-                      </span>
-                    )}
-                  </span>
-                  <span className="w-[72px] shrink-0 text-right tabular-nums text-ink/35">
-                    {r.count} · {r.medianAgeDays}d
-                  </span>
-                </div>
-              );
-            })}
-            {perf.hero && (
-              <div className="flex items-center gap-3 text-[12px] pt-2" style={{ borderTop: `1px solid ${RULE}` }}>
-                <span className="w-[104px] shrink-0 font-bold text-ink/45">{perf.hero.label}</span>
-                <span className="flex-1 text-ink/35">the yardstick</span>
-                <span className="w-[62px] shrink-0 text-right tabular-nums font-bold text-ink/45">
-                  {fmtNum(perf.hero.median)}
-                </span>
-                <span className="w-[118px] shrink-0" />
-                <span className="w-[72px] shrink-0 text-right tabular-nums text-ink/35">
-                  {perf.hero.count} · {perf.hero.medianAgeDays}d
-                </span>
-              </div>
-            )}
-          </div>
-
-          <div className="mt-3 text-[11px] leading-relaxed text-ink/40" style={{ maxWidth: 620 }}>
-            Median views per upload, so one hit does not carry a format. The roster
-            figure is what each format does as a share of the official video across
-            the whole roster, so a big artist and a small one count the same — a
-            visualiser typically reaches 40% of the video, a lyric video or a live
-            cut around 20%, BTS under 10%. Views accumulate, so an older format has
-            had longer to gather them; the median age sits beside each row.
-            {perf.shorts && (
-              <> Shorts are excluded ({fmtNum(perf.shorts.median)} median across{' '}
-              {perf.shorts.count}): YouTube changed how Shorts views are counted in
-              March 2025, so they are not the same unit as long-form.</>
-            )}
-          </div>
-        </section>
-      )}
 
       {/* ═══ 4+5. FORMAT + MARKETS, side by side ════════════════ */}
       <section className="mt-12 pt-8 grid gap-12 lg:grid-cols-2" style={{ borderTop: `1px solid ${RULE}` }}>
