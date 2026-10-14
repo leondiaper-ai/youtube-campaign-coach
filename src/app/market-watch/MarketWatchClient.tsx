@@ -60,6 +60,10 @@ export default function MarketWatchClient() {
   const [progress, setProgress] = useState('');
   const [win, setWin] = useState(90);
 
+  /* Every hook runs on every render. This useMemo used to sit below the
+     loading and empty-state early returns, so React saw a different number
+     of hooks once data arrived and threw #310. Hooks before branches. */
+  const rows: Row[] = useMemo(()=> chans.flatMap(c=>c.items.map(v=>({...v, ch:c.name, chKey:c.key}))), [chans]);
   const have = new Set(chans.map(c => c.key));
   const missing = MW_REGISTRY.filter(c => !have.has(c.key)).map(c => c.key);
 
@@ -94,7 +98,6 @@ export default function MarketWatchClient() {
     </Shell>;
   }
 
-  const rows: Row[] = useMemo(()=> chans.flatMap(c=>c.items.map(v=>({...v, ch:c.name, chKey:c.key}))), [chans]);
 
   return (
     <Shell busy={busy} progress={progress} onCollect={()=>collect(missing.length?missing:MW_REGISTRY.map(c=>c.key))}
