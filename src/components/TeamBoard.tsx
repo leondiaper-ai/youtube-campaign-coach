@@ -162,12 +162,29 @@ export default async function TeamBoard({ team, linkPrefix, linkSuffix = '' }: {
       const shortIds = new Set(
         uploadsForRank.filter((u) => (u.durationSec ?? 0) <= 62).map((u) => u.id),
       );
-      const ranked = await rankByMomentum(
+      /* ── ONE RANKING PASS, THEN SPLIT BY FORMAT ──────────────────────
+         This asked for the top THREE of everything and handed all three to
+         the long-form row, so on a Shorts-heavy channel the Shorts took the
+         slots and rendered as 16:9 centre-crops of a vertical frame — and on
+         a long-form-heavy channel the Shorts row never appeared at all,
+         which is what Amyl and The Sniffers showed on the Australia board.
+         `shortIds` was already computed here and never used.
+
+         The campaigns board solved this; the team board had not caught up.
+         Ranking once and partitioning afterwards keeps the order identical
+         and costs no extra reads — rankByMomentum applies its limit after
+         scoring, so raising it changes how many come back, not the order. */
+      const rankedAll = await rankByMomentum(
         uploadsForRank.map((u) => ({
           id: u.id, title: u.title, views: u.viewCount ?? 0, publishedAt: u.publishedAt,
         })),
-        { windowDays: 7, limit: 3 },
+        { windowDays: 7, limit: 24 },
       );
+      const ranked = {
+        ...rankedAll,
+        items: rankedAll.items.filter((v) => !shortIds.has(v.id)).slice(0, 3),
+      };
+      const shortsRanked = rankedAll.items.filter((v) => shortIds.has(v.id)).slice(0, 4);
       const nc = normalizeChannelData(snap, history, campaignStart ? {
         campaignName: entry.campaignName || 'Tracking',
         campaignStartDate: campaignStart,
@@ -336,6 +353,13 @@ export default async function TeamBoard({ team, linkPrefix, linkSuffix = '' }: {
           isShort: shortIds.has(v.id),
         })),
         recentVideosNote: ranked.note,
+        recentShorts: shortsRanked.map((v) => ({
+          id: v.id,
+          title: v.title,
+          views: v.views,
+          recentGain: v.recentGain,
+          daysAgo: Math.max(0, Math.floor((Date.now() - Date.parse(v.publishedAt)) / 86400000)),
+        })),
         structureWarning: snap?.recentUploads
           ? checkContentStructure(snap.recentUploads)
           : null,
