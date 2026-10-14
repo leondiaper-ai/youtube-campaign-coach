@@ -21,7 +21,7 @@
    ═══════════════════════════════════════════════════════════════════════ */
 
 import { getAllArtists } from '@/lib/marketScope';
-import { readLiveSnapByHandle } from '@/lib/kvCache';
+import { readLiveSnapByHandle, readAllLiveSnaps } from '@/lib/kvCache';
 import type { Artist, RecentUpload } from '@/lib/artists';
 import { readAll, type MwChannelData } from './collect';
 
@@ -107,10 +107,15 @@ export interface VirginArtistSummary {
 
 export async function listWatchedArtists(): Promise<VirginArtistSummary[]> {
   const artists = await getAllArtists();
+  const handles = artists.map(a => a.channelHandle).filter((h): h is string => !!h);
+  /* One bulk read, not 252 sequential ones. The per-artist version timed the
+     endpoint out past 45 seconds — Watcher already had readAllLiveSnaps for
+     exactly this, chunked and batched, and it was simply not being used. */
+  const snaps = await readAllLiveSnaps(handles).catch(() => new Map());
   const out: VirginArtistSummary[] = [];
   for (const a of artists) {
     if (!a.channelHandle) continue;
-    const snap = await readLiveSnapByHandle(a.channelHandle).catch(() => null);
+    const snap = snaps.get(a.channelHandle) ?? null;
     const ups: RecentUpload[] = snap?.recentUploads ?? [];
     const keys = new Set(ups.map(u => songKey(u.title)).filter(Boolean));
     out.push({
