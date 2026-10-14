@@ -6,6 +6,8 @@ import { useState, useMemo, useEffect } from 'react';
 import { fmtNum } from '@/lib/artists';
 import type { MwChannelData, MwVideo } from '@/lib/marketWatch/collect';
 import { MW_REGISTRY, REL_LABEL, ROLE_LABEL } from '@/lib/marketWatch/channels';
+import ConnectView from './ConnectView';
+import PilotView from './PilotView';
 
 type Row = MwVideo & { ch: string; chKey: string };
 
@@ -54,7 +56,7 @@ export default function MarketWatchClient() {
           setChans(j.channels ?? []); } catch {}
     setLoading(false);
   })(); }, []);
-  const [view, setView] = useState<'home'|'channel'|'tracks'|'virgin'>('home');
+  const [view, setView] = useState<'home'|'channel'|'tracks'|'virgin'|'connect'|'pilot'>('home');
   const [current, setCurrent] = useState<string|null>(null);
   const [busy, setBusy] = useState(false);
   const [progress, setProgress] = useState('');
@@ -107,6 +109,8 @@ export default function MarketWatchClient() {
       {view==='channel'&& <Channel chans={chans} current={current} setCurrent={setCurrent} />}
       {view==='tracks' && <Tracks rows={rows} />}
       {view==='virgin' && <Virgin />}
+      {view==='connect' && <Connect />}
+      {view==='pilot' && <PilotView />}
     </Shell>
   );
 }
@@ -521,6 +525,8 @@ function Shell({ children, busy, progress, onCollect, missing, view, setView, ch
           <Tab on={view==='channel'} onClick={()=>setView('channel')}>Channels</Tab>
           <Tab on={view==='tracks'} onClick={()=>setView('tracks')}>Track examples</Tab>
           <Tab on={view==='virgin'} onClick={()=>setView('virgin')}>Virgin tracks</Tab>
+          <Tab on={view==='connect'} onClick={()=>setView('connect')}>Connect</Tab>
+          <Tab on={view==='pilot'} onClick={()=>setView('pilot')}>Pilot</Tab>
           {view==='home' && setWin && (
             <Sel value={String(win)} onChange={(v:string)=>setWin(+v)} opts={WINDOWS.map(([d,l])=>[String(d),l] as [string,string])} />
           )}
@@ -579,5 +585,31 @@ function VCard({ v, showCh }: { v: Row; showCh?: boolean }) {
         </div>
       </div>
     </a>
+  );
+}
+
+/* Connect needs the watched-artist list for its picker; everything else it
+   fetches itself. */
+function Connect() {
+  const [artists, setArtists] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  useEffect(() => { (async () => {
+    try {
+      const j = await (await fetch('/api/market-watch/virgin', { cache:'no-store' })).json();
+      setArtists((j.artists ?? []).filter((a:any)=>a.uploads>0));
+    } catch {}
+    setLoading(false);
+  })(); }, []);
+  if (loading) return <Card><p className="m-0 text-ink/45">Loading watched artists…</p></Card>;
+  return (
+    <>
+      <p className="text-meta text-ink/50 mb-4">
+        A previous appearance is <b>evidence</b>, not a gate. Three routes qualify a pairing: the destination has
+        published this artist (exact), another artist&rsquo;s track overlaps on description (inferred), or the
+        destination leans on a treatment this song lacks (observed on the destination only).
+        Fit is retrieved first; performance is attached afterwards as a distribution, never as a prediction.
+      </p>
+      <ConnectView artists={artists} />
+    </>
   );
 }

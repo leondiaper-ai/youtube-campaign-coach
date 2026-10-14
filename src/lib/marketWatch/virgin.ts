@@ -24,6 +24,7 @@ import { getAllArtists } from '@/lib/marketScope';
 import { readLiveSnapByHandle, readAllLiveSnaps } from '@/lib/kvCache';
 import type { Artist, RecentUpload } from '@/lib/artists';
 import { readAll, readArtistCatalogue, type MwChannelData } from './collect';
+import { buildSongs } from './songs';
 
 /* ── Containers and treatments are separate axes ──────────────────────
    A remix can be a Short. A lyric video can be long-form. Treatments are
@@ -144,14 +145,17 @@ export async function listWatchedArtists(): Promise<VirginArtistSummary[]> {
     if (!a.channelHandle) continue;
     const snap = snaps.get(a.channelHandle) ?? null;
     const ups: RecentUpload[] = snap?.recentUploads ?? [];
-    const keys = new Set(ups
-      .filter(u => artistFromTitle(u.title) || container(u.durationSec, u.live) !== 'short')
-      .map(u => songKey(u.title)).filter(Boolean));
+    /* Canonical songs, so the count is songs rather than captions. */
+    const songs = buildSongs(ups.map(u => ({
+      id: u.id, title: u.title, publishedAt: u.publishedAt,
+      durationSec: u.durationSec ?? null, live: (u as any).live ?? 'none',
+      views: u.viewCount ?? null,
+    })));
     out.push({
       slug: a.slug, name: a.name, handle: a.channelHandle,
       ownership: a.ownership ?? 'observed',
       markets: a.markets ?? ['uk'],
-      uploads: ups.length, tracks: keys.size, cachedWindowOnly: true,
+      uploads: ups.length, tracks: songs.length, cachedWindowOnly: true,
       lastUpload: ups.length ? ups.map(u => u.publishedAt).sort().slice(-1)[0] : null,
     });
   }
@@ -184,33 +188,32 @@ export async function tracksForArtist(slug: string): Promise<TrackEvidence[]> {
   const market = await readAll();
 
   /* ── WHAT COUNTS AS A TRACK ────────────────────────────────────────
-     A song is established by an upload titled like one — "Artist - Title"
-     — or by a long-form upload. Not by a Short captioned "The club saw it
-     first." or "Join the club at nickelback.com."
+     Delegated to buildSongs, which establishes songs from CONFIRMED
+     RECORDINGS first and only then attaches Shorts, promos and editorial
+     to them. The ordering is the whole fix: a promotional caption can be
+     evidence about a song but can never name one, so "APHRODITE out now"
+     attaches to APHRODITE instead of becoming a track called
+     "APHRODITE out now", and K-Trap's store and tour posts do not enter
+     the pool at all.
 
-     Grouping on every title made 44 "tracks" for Nickelback, nearly all of
-     them Shorts captions, each its own single-asset song. That is not a
-     catalogue, it is a caption list, and it would have put rubbish in
-     front of anyone using this to choose what to test.
-
-     Shorts with conversational titles still matter — they just attach to a
-     song when their words match one, and are counted as unattributed when
-     they do not. */
-  const titled = ups.filter(u => artistFromTitle(u.title) || container(u.durationSec, u.live) !== 'short');
+     The previous version only excluded caption *Shorts*, which left
+     promotional long-form free to name tracks — visible in the output as
+     headings like "Black Friday will be out on SEPTEMBER 22ND! presav". */
+  const canonical = buildSongs(ups.map(u => ({
+    id: u.id, title: u.title, publishedAt: u.publishedAt,
+    durationSec: u.durationSec ?? null, live: (u as any).live ?? 'none',
+    views: u.viewCount ?? null, likes: u.likeCount ?? null,
+    comments: (u as any).commentCount ?? null,
+  })));
+  const byId = new Map(ups.map(u => [u.id, u]));
   const groups = new Map<string, RecentUpload[]>();
-  for (const u of titled) {
-    const k = songKey(u.title);
-    if (!k || k.length < 3) continue;
-    if (!groups.has(k)) groups.set(k, []);
-    groups.get(k)!.push(u);
-  }
-  /* Attach caption-titled Shorts to a song whose words appear in them. */
-  const captionShorts = ups.filter(u => !titled.includes(u));
-  for (const u of captionShorts) {
-    const hay = norm(u.title);
-    for (const k of Array.from(groups.keys())) {
-      if (k.length >= 6 && hay.includes(k)) { groups.get(k)!.push(u); break; }
-    }
+  const canonicalName = new Map<string, string>();
+  for (const s of canonical) {
+    const list = [...s.recordings, ...s.shorts, ...s.promos, ...s.uncertain]
+      .map(x => byId.get(x.id)).filter((x): x is RecentUpload => !!x);
+    if (!list.length) continue;
+    groups.set(s.key, list);
+    canonicalName.set(s.key, s.name);
   }
 
   const out: TrackEvidence[] = [];
@@ -264,7 +267,9 @@ export async function tracksForArtist(slug: string): Promise<TrackEvidence[]> {
     out.push({
       slug: a.slug, artistName: a.name, ownership: a.ownership ?? 'observed',
       monitored: true, permission: 'unknown',
-      songKey: key, title: sorted[0].title,
+      /* The heading is the canonical song name, never the first upload's
+         title — the first upload is often a teaser. */
+      songKey: key, title: canonicalName.get(key) ?? sorted[0].title,
       firstSeen: sorted[0].publishedAt, latestSeen: sorted[sorted.length - 1].publishedAt,
       assets, containers, treatmentsFound: found,
       treatmentsNotFound: ALL_TREATMENTS.filter(t => !found.includes(t)),
