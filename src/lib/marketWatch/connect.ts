@@ -247,12 +247,31 @@ function build(
      opportunity that needs a cheap test; a weak fit with perfect timing is
      not an opportunity at all. */
   const hasHard = ROUTE_KIND[route] === 'exact' || sims.anyHardEvidence;
-  const statedAxes = sims.shared.filter(s => s.from === 'stated').length;
+
+  /* ── NOT ALL AXES ARE FIT ─────────────────────────────────────────────
+     The first real pilot run graded K-Trap's UK rap record a STRONG fit for
+     Chill Nation on `language=english`, `context=driving` and an energy
+     value one apart. Three "researched attributes agreed" and the grader
+     counted them equally, so a downtempo channel and an Afroswing record
+     looked like a match. They are not.
+
+     Genre and subgenre are the only axes that carry musical fit. Mood and
+     listening context support a genre match but cannot establish one.
+     Language and energy are near worthless as fit evidence — almost
+     everything here is in English, and energy is a 1–5 integer so any two
+     records agree within one about half the time. They are recorded, and
+     they are not counted. */
+  const stated = sims.shared.filter(s => s.from === 'stated');
+  const genreAgreed = stated.some(s => s.axis === 'genre' || s.axis === 'subgenre');
+  const supporting = stated.filter(s => s.axis === 'mood' || s.axis === 'context').length;
 
   const editorialFit: Assessment =
     ROUTE_KIND[route] === 'exact' ? 'strong'
-    : statedAxes >= 2 ? 'strong'
-    : statedAxes === 1 ? 'moderate'
+    : genreAgreed && supporting >= 1 ? 'strong'
+    : genreAgreed ? 'moderate'
+    /* Mood or context agreeing with no genre agreement is a hint worth
+       looking at, never a fit. */
+    : supporting >= 1 ? 'weak'
     : sims.shared.length ? 'weak'
     : 'none';
 
@@ -275,12 +294,12 @@ function build(
     (editorialFit === 'strong' || editorialFit === 'moderate') && !prof.suspect ? 'propose' : 'investigate';
 
   const readinessReason = readiness === 'propose'
-    ? `Editorial fit is ${editorialFit}${ROUTE_KIND[route] === 'exact' ? ' (observed — this destination has published this artist)' : ` (${statedAxes} researched attribute(s) agree)`}. Performance support ${performanceSupport}, timing ${timing} — neither blocks a test, they size it.`
+    ? `Editorial fit is ${editorialFit}${ROUTE_KIND[route] === 'exact' ? ' (observed — this destination has published this artist)' : ` (genre agrees: ${stated.filter(s => s.axis === 'genre' || s.axis === 'subgenre').map(s => s.values.join('/')).join(', ')}${supporting ? `; supported by ${stated.filter(s => s.axis === 'mood' || s.axis === 'context').map(s => s.axis).join(' and ')}` : ''})`}. Performance support ${performanceSupport}, timing ${timing} — neither blocks a test, they size it.`
     : editorialFit === 'none'
       ? 'No editorial case at all. The pairing exists only because the destination uses a treatment this song lacks, which says nothing about whether the song belongs there.'
       : prof.suspect
         ? 'Destination identity is unverified — the handle resolved to something implausible. Nothing else matters until that is settled.'
-        : `Editorial fit is weak: the only agreement is on ${sims.shared.map(s => s.axis).join(', ')}, ${sims.shared.every(s => s.from === 'parsed' || s.from === 'inferred') ? 'parsed from titles rather than researched' : 'thin'}. A treatment or language match is not musical fit.`;
+        : `Editorial fit is weak: GENRE DOES NOT AGREE. The only agreement is on ${sims.shared.map(s => s.axis).join(', ')}. Language, energy proximity and a shared treatment are not musical fit — almost everything collected here is in English, and energy is a 1-5 integer that agrees within one about half the time by chance.`;
 
   return {
     id: `${a.slug}::${song.key}::${prof.key}::${route}`,

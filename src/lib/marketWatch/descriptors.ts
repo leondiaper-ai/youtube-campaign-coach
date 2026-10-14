@@ -249,6 +249,29 @@ export async function readStatedMany(kind: 'track' | 'dest', ids: string[]): Pro
    Returns the axes that actually agreed, the axes that could not be
    compared, and NO SCORE. A number here would be read as a probability
    of success, which nothing in this data supports. */
+/* ── GENRE HIERARCHY, NOT STRING EQUALITY ────────────────────────────
+   Found in the first real pilot run: "uk rap" never matched "rap", so the
+   one axis that actually carries musical fit was silent on every pairing,
+   while `language=english` and an energy value one apart carried the whole
+   result. Every suggestion came back "strong fit". The grading was wrong,
+   but so was this: exact token equality cannot see that "uk rap" is rap and
+   "bass house" is house.
+
+   So two tags agree when one's WORD SET contains the other's. Whole words
+   within a short controlled field — not the substring matching that once
+   made "Y$" match every artist containing the letter y, because that
+   compared arbitrary names character by character. "uk rap" ⊇ "rap" is a
+   genre narrowing; "rap" vs "trap" stays a non-match, as it must. */
+export function tagsAgree(x: string, y: string): boolean {
+  const a = x.toLowerCase().trim(), b = y.toLowerCase().trim();
+  if (!a || !b) return false;
+  if (a === b) return true;
+  const wa = new Set(a.split(/\s+/)), wb = new Set(b.split(/\s+/));
+  const sup = (big: Set<string>, small: Set<string>) =>
+    small.size > 0 && Array.from(small).every(w => big.has(w));
+  return sup(wa, wb) || sup(wb, wa);
+}
+
 export interface Overlap {
   shared: { axis: string; values: string[]; from: Provenance }[];
   uncomparable: string[];
@@ -266,8 +289,7 @@ export function overlap(a: Description, b: Description): Overlap {
     const av = (a[axis] as Attr<string[]>).value ?? [];
     const bv = (b[axis] as Attr<string[]>).value ?? [];
     if (!av.length || !bv.length) { uncomparable.push(String(axis)); continue; }
-    const bset = new Set(bv.map(x => x.toLowerCase()));
-    const hit = av.filter(x => bset.has(x.toLowerCase()));
+    const hit = av.filter(x => bv.some(y => tagsAgree(x, y)));
     if (!hit.length) continue;
     const from: Provenance =
       (a[axis] as Attr<any>).from === 'stated' && (b[axis] as Attr<any>).from === 'stated' ? 'stated'
