@@ -280,10 +280,21 @@ export async function buildShortlistCandidates(
       key: id, slug: e.a.slug, artist: e.a.name.trim(), song: e.song.name, lens,
       featured: toRef(e.featured),
       scope: { headline: 'featured video', set: 'song assets' },
-      measured: e.gain ? {
-        gain: e.gain.gain, spanDays: e.gain.spanDays,
-        from: e.obs[0]?.ts ?? '', to: e.obs[e.obs.length - 1]?.ts ?? '',
-      } : null,
+      /* ── THE DATES MUST BE THE WINDOW, NOT THE SERIES ─────────────────
+         These were the first and last observation in the whole series, so a
+         7-day gain was labelled with a 26-day date range. The reader either
+         believes the gain covers 26 days or believes the dates are wrong;
+         both are our fault. `to` is the newest reading and `from` is the
+         reading recentGain actually measured back to. */
+      measured: e.gain ? (() => {
+        const to = e.obs[e.obs.length - 1]?.ts ?? '';
+        const toMs = Date.parse(to + 'T12:00:00Z');
+        const want = toMs - e.gain.spanDays * 864e5;
+        const from = [...e.obs].reverse()
+          .find(o => Math.abs(Date.parse(o.ts + 'T12:00:00Z') - want) < 432e5)?.ts
+          ?? e.obs[Math.max(0, e.obs.length - 1 - e.gain.spanDays)]?.ts ?? '';
+        return { gain: e.gain.gain, spanDays: e.gain.spanDays, from, to };
+      })() : null,
       trend: e.obs.map(o => ({ ts: o.ts, views: o.views })),
       trendNote: e.obs.length >= 2
         ? `${e.obs.length} dated observations, ${e.obs[0].ts} to ${e.obs[e.obs.length - 1].ts}.`

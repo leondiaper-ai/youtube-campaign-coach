@@ -52,17 +52,20 @@ function Trend({ points, note }: { points: { ts: string; views: number }[]; note
         ))}
       </svg>
       <div className="text-[9px] text-ink/35 tabular-nums mt-0.5">
-        {points.length} readings · {dt(points[0].ts)} – {dt(points[points.length - 1].ts)}
+        Full history: {points.length} readings · {dt(points[0].ts)} – {dt(points[points.length - 1].ts)}
       </div>
     </div>
   );
 }
 
-const Metric = ({ value, label, scope }: { value: string; label: string; scope?: string }) => (
+const Metric = ({ value, label, scope, scopeB }: { value: string; label: string; scope?: string; scopeB?: string }) => (
   <div className="min-w-0">
     <div className="m-fig text-[19px] font-black leading-none tabular-nums truncate">{value}</div>
     <div className="text-[9px] uppercase tracking-[0.1em] text-ink/40 mt-1 truncate">{label}</div>
     {scope && <div className="text-[9px] text-ink/30 truncate">{scope}</div>}
+    {/* The exact dates the figure covers, so the window can never be read
+        off the trend line underneath, which spans the whole series. */}
+    {scopeB && <div className="text-[9px] text-ink/30 truncate tabular-nums">{scopeB}</div>}
   </div>
 );
 
@@ -150,6 +153,7 @@ function Card({ c, saved, onSave, onRemove, destinations }: any) {
         <Metric
           value={c.measured ? `+${fmtNum(c.measured.gain)}` : '—'}
           label={c.measured ? `${c.measured.spanDays}d measured` : 'Not measured'}
+          scopeB={c.measured ? `${dt(c.measured.from)} – ${dt(c.measured.to)}` : undefined}
           scope="featured video" />
         <Metric value={c.featured.views == null ? '—' : fmtNum(c.featured.views)}
           label="Lifetime" scope="featured video" />
@@ -216,7 +220,7 @@ function Card({ c, saved, onSave, onRemove, destinations }: any) {
           )}
           <Row label="Measurement">
             {c.measured
-              ? `+${fmtNum(c.measured.gain)} views over ${c.measured.spanDays} days on the featured video. ${c.trendNote}`
+              ? `+${fmtNum(c.measured.gain)} views on the featured video between ${c.measured.from} and ${c.measured.to} (${c.measured.spanDays} days). The trend line above plots the full recorded history, which is a longer period: ${c.trendNote}`
               : c.trendNote}
           </Row>
           <Row label="Audience response">
