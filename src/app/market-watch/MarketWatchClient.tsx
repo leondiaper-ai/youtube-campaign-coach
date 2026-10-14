@@ -8,6 +8,7 @@ import type { MwChannelData, MwVideo } from '@/lib/marketWatch/collect';
 import { MW_REGISTRY, REL_LABEL, ROLE_LABEL } from '@/lib/marketWatch/channels';
 import ConnectView from './ConnectView';
 import PilotView from './PilotView';
+import SongShortlist from './SongShortlist';
 
 type Row = MwVideo & { ch: string; chKey: string };
 
@@ -56,7 +57,7 @@ export default function MarketWatchClient() {
           setChans(j.channels ?? []); } catch {}
     setLoading(false);
   })(); }, []);
-  const [view, setView] = useState<'home'|'channel'|'tracks'|'virgin'|'connect'|'pilot'>('home');
+  const [view, setView] = useState<'home'|'channel'|'tracks'|'virgin'|'connect'|'pilot'|'songs'>('songs');
   const [current, setCurrent] = useState<string|null>(null);
   const [busy, setBusy] = useState(false);
   const [progress, setProgress] = useState('');
@@ -109,6 +110,7 @@ export default function MarketWatchClient() {
       {view==='channel'&& <Channel chans={chans} current={current} setCurrent={setCurrent} />}
       {view==='tracks' && <Tracks rows={rows} />}
       {view==='virgin' && <Virgin />}
+      {view==='songs' && <SongShortlist />}
       {view==='connect' && <Connect />}
       {view==='pilot' && <PilotView />}
     </Shell>
@@ -521,6 +523,7 @@ function Shell({ children, busy, progress, onCollect, missing, view, setView, ch
         )}
 
         <div className="flex gap-4 items-center mb-5 flex-wrap">
+          <Tab on={view==='songs'} onClick={()=>setView('songs')}>Songs</Tab>
           <Tab on={view==='home'} onClick={()=>setView('home')}>Overview</Tab>
           <Tab on={view==='channel'} onClick={()=>setView('channel')}>Channels</Tab>
           <Tab on={view==='tracks'} onClick={()=>setView('tracks')}>Track examples</Tab>
