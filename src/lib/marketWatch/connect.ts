@@ -192,8 +192,21 @@ function build(
   const wn = whyNow(a, song);
   const missing = missingAxes(songDesc);
 
+  /* ── WHICH SIDE IS ACTUALLY MISSING ───────────────────────────────────
+     A real hole found while testing this: tagging the SONG changes nothing
+     if the destination carries no stated genre or mood, because the axis is
+     still uncomparable and the pairing silently stays at "investigate". The
+     tool has to name the side that is blocking it, or the obvious next
+     action — tag the song — is the wrong one. */
+  const destMissing = missingAxes(prof.description);
+  const bothMissing = missing.filter(m => destMissing.includes(m));
+  const songOnly = missing.filter(m => !destMissing.includes(m));
+  const destOnly = destMissing.filter(m => !missing.includes(m));
+
   const uncertainty: string[] = [];
-  if (missing.length) uncertainty.push(`No ${missing.join(', ')} recorded for this song, so those axes were not compared. Supplying them would change this result.`);
+  if (bothMissing.length) uncertainty.push(`Neither "${song.name}" nor ${prof.name} has ${bothMissing.join(', ')} recorded, so those axes were not compared. Both sides need tagging — tagging only the song will not change this result.`);
+  if (songOnly.length) uncertainty.push(`${prof.name} has ${songOnly.join(', ')} recorded but this song does not, so the comparison could not run. Tagging the song would change this result.`);
+  if (destOnly.length) uncertainty.push(`This song has ${destOnly.join(', ')} recorded but ${prof.name} does not. Tagging the destination would change this result.`);
   if (route === 'comparable_track' && !sims.anyHardEvidence) uncertainty.push('Every axis that matched is parsed or inferred — no stated or counted attribute agreed. This is a lead, not a finding.');
   if (prof.suspect) uncertainty.push('This destination resolved to a channel that looks like a handle collision (near-zero subscribers or no uploads). Verify the channel before acting.');
   if (!song.recordings.length) uncertainty.push('Song identity rests on supporting uploads only — no confirmed recording.');
@@ -252,7 +265,20 @@ function build(
     readiness, readinessReason,
     nextAction: readiness === 'propose'
       ? `Confirm who controls the recording of "${song.name}" and whether a ${treatment?.name ?? 'placement'} may be created and licensed. If yes, approach ${prof.name} with the ${perf.n} comparable uploads above as the basis, and agree in advance what result would count as nothing happening.`
-      : `Before anything else: ${!hasHard ? `review or supply genre, mood and context tags for "${song.name}" so fit can be checked on stated attributes` : !hasDist ? `collect more of ${prof.name}'s uploads so the performance context is a distribution rather than anecdotes` : prof.suspect ? `verify ${prof.name}'s real channel` : `establish a timing reason from campaign activity`}.`,
+      /* Names the ONE thing that would move this forward, and names the
+         right side of the comparison — see the destMissing note above. */
+      : `Before anything else: ${
+          !hasHard
+            ? bothMissing.length
+              ? `tag ${bothMissing.join(', ')} on BOTH "${song.name}" and ${prof.name} — tagging one side alone leaves the axis uncomparable`
+              : songOnly.length
+                ? `tag ${songOnly.join(', ')} on "${song.name}"; ${prof.name} already has those recorded`
+                : destOnly.length
+                  ? `tag ${destOnly.join(', ')} on ${prof.name}; this song already has those recorded`
+                  : `review the matched axes — they are parsed from titles rather than stated, so confirm or correct them`
+            : !hasDist ? `collect more of ${prof.name}'s uploads so the performance context is a distribution rather than anecdotes`
+            : prof.suspect ? `verify ${prof.name}'s real channel — the handle resolved to something implausible`
+            : `establish a timing reason from campaign activity; the editorial case already stands`}.`,
   };
 }
 
