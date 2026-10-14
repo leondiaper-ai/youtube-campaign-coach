@@ -189,7 +189,7 @@ const toRaw = (v: MwVideo): RawUpload => v;
 function build(
   route: Route, a: Artist, song: Song, songDesc: Description,
   prof: DestinationProfile, ch: MwChannelData,
-  support: { items: RawUpload[]; note: string },
+  support: { items: RawUpload[]; note: string; identified: boolean },
   sims: Overlap,
   treatment: { name: string; rationale: string } | null,
 ): Candidate {
@@ -199,6 +199,9 @@ function build(
   const perf = performance(support.items, treatment
     ? `${prof.name} uploads using "${treatment.name}"`
     : `${prof.name} supporting uploads`);
+  if (!support.identified) {
+    perf.caveat = `No individual upload on ${prof.name} could be identified as comparable to this song, so these figures describe the channel's whole output (${perf.n} uploads) and are NOT performance context for this pairing. Treat performance support as absent.`;
+  }
   const wn = whyNow(a, song);
   const missing = missingAxes(songDesc);
 
@@ -275,8 +278,20 @@ function build(
     : sims.shared.length ? 'weak'
     : 'none';
 
-  const performanceSupport: Assessment =
-    perf.n >= 8 ? 'strong' : perf.n >= 5 ? 'moderate' : perf.n >= 2 ? 'weak' : 'none';
+  /* ── PERFORMANCE MUST BE MEASURED ON COMPARABLES, NOT THE CHANNEL ────
+     Caught in the second pilot run: K-Trap -> Rap Nation reported
+     "performance support strong (n=858)". 858 is Rap Nation's ENTIRE
+     collected output, because when no individual upload can be matched the
+     support set falls back to the whole channel. A channel median is not
+     performance context for a pairing — it mixes in every record this one
+     is not comparable to, which is the fit/results conflation this design
+     is supposed to prevent.
+
+     So an unidentified support set scores 'none' regardless of how many
+     uploads it contains. A big number that means nothing is worse than an
+     honest zero. */
+  const performanceSupport: Assessment = !support.identified ? 'none'
+    : perf.n >= 8 ? 'strong' : perf.n >= 5 ? 'moderate' : perf.n >= 2 ? 'weak' : 'none';
 
   const timing: Assessment =
     wn.strength === 'supported' ? 'strong' : wn.strength === 'weak' ? 'moderate' : 'none';
@@ -382,7 +397,7 @@ export async function candidatesForSong(slug: string, songKey: string): Promise<
     const same = ch.items.filter(v => splitCredit(v.title)?.credits.includes(artistN));
     if (same.length) {
       out.push(build('same_artist', a, song, songDesc, prof, ch, {
-        items: same.map(toRaw),
+        items: same.map(toRaw), identified: true,
         note: `${same.length} upload(s) on ${prof.name} credit ${a.name} by name. Exact credit match, not a substring.`,
       }, sims, gap));
       continue; /* Route A supersedes B and C for this destination. */
@@ -397,7 +412,7 @@ export async function candidatesForSong(slug: string, songKey: string): Promise<
         treatmentsOf(v.title).some(t => axes.has(t.toLowerCase())));
       const items = (comparable.length ? comparable : ch.items).map(toRaw);
       out.push(build('comparable_track', a, song, songDesc, prof, ch, {
-        items,
+        items, identified: comparable.length > 0,
         note: comparable.length
           ? `${comparable.length} upload(s) on ${prof.name} share ${sims.shared.map(s => s.axis).join(' and ')} with this song. Different artists — the comparison is on the description, not on repertoire.`
           : `No upload on ${prof.name} could be matched individually; the overlap is with the channel's aggregate profile only, which is weaker.`,
@@ -412,6 +427,7 @@ export async function candidatesForSong(slug: string, songKey: string): Promise<
       const top = prof.treatments.find(t => t.name === gap.name)!;
       out.push(build('treatment_pattern', a, song, songDesc, prof, ch, {
         items: ch.items.filter(v => treatmentsOf(v.title).includes(gap.name)).map(toRaw),
+        identified: true,
         note: `${prof.name} uses "${gap.name}" on ${top.n} uploads. This is a pattern on the destination — it is not evidence that this particular song belongs there.`,
       }, { shared: [], uncomparable: sims.uncomparable, anyHardEvidence: false }, gap));
     }
@@ -482,7 +498,7 @@ export async function candidatesForDestination(
         const same = ch.items.filter(v => splitCredit(v.title)?.credits.includes(artistN));
         if (same.length) {
           out.push(build('same_artist', a, song, songDesc, prof, ch, {
-            items: same.map(toRaw),
+            items: same.map(toRaw), identified: true,
             note: `${same.length} upload(s) on ${prof.name} credit ${a.name} by name.`,
           }, sims, gap));
           continue;
@@ -493,6 +509,7 @@ export async function candidatesForDestination(
         const comparable = ch.items.filter(v => treatmentsOf(v.title).some(t => axes.has(t.toLowerCase())));
         out.push(build('comparable_track', a, song, songDesc, prof, ch, {
           items: (comparable.length ? comparable : ch.items).map(toRaw),
+          identified: comparable.length > 0,
           note: comparable.length
             ? `${comparable.length} upload(s) share ${sims.shared.map(s => s.axis).join(' and ')} with this song.`
             : 'Overlap is with the channel profile in aggregate, not with identifiable uploads.',
