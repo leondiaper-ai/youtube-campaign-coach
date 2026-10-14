@@ -450,7 +450,7 @@ function Virgin() {
                 </a>))}</Grid>
 
               <div className="mt-3"><button onClick={()=>explore(t.songKey)}
-                className="rounded-control bg-ink text-page text-[11px] font-bold uppercase tracking-[0.12em] px-3.5 py-2">
+                className="rounded-control bg-ink text-paper text-[11px] font-bold uppercase tracking-[0.12em] px-3.5 py-2">
                 Explore opportunities</button></div>
 
               {sugg && open===t.songKey && (
@@ -467,7 +467,7 @@ function Virgin() {
                           </div></div>
                         <div className="flex gap-1">{['Useful','Obvious','Unsuitable','Unsupported'].map(m=>(
                           <button key={m} onClick={()=>setMarks({...marks,[s.destination+i]:m})}
-                            className={`text-micro px-2 py-1 rounded border ${marks[s.destination+i]===m?'bg-ink text-page border-ink':'border-line text-ink/50'}`}>{m}</button>))}</div>
+                            className={`text-micro px-2 py-1 rounded border ${marks[s.destination+i]===m?'bg-ink text-paper border-ink':'border-line text-ink/50'}`}>{m}</button>))}</div>
                       </div>
                       <p className="text-meta m-0 mb-2">{s.why}</p>
                       <Det title="Watcher evidence" items={s.watcherEvidence} />
@@ -536,7 +536,7 @@ function Shell({ children, busy, progress, onCollect, missing, view, setView, ch
           <span className="ml-auto flex items-center gap-3">
             {progress && <span className="text-micro text-ink/45">{progress}</span>}
             <button onClick={onCollect} disabled={busy}
-              className="rounded-control bg-ink text-page text-[11px] font-bold uppercase tracking-[0.12em] px-3.5 py-2 disabled:opacity-40">
+              className="rounded-control bg-ink text-paper text-[11px] font-bold uppercase tracking-[0.12em] px-3.5 py-2 disabled:opacity-40">
               {busy?'Collecting…':missing>0?`Collect ${missing} missing`:'Refresh all'}
             </button>
           </span>

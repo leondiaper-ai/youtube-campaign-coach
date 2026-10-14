@@ -39,7 +39,7 @@ export default function SecretPrompt() {
         <button
           type="submit"
           disabled={busy || !v}
-          className="mt-3 w-full rounded-control bg-ink text-page text-[11px] font-bold uppercase tracking-[0.14em] py-2.5 disabled:opacity-40"
+          className="mt-3 w-full rounded-control bg-ink text-paper text-[11px] font-bold uppercase tracking-[0.14em] py-2.5 disabled:opacity-40"
         >
           {busy ? 'Checking…' : 'Continue'}
         </button>

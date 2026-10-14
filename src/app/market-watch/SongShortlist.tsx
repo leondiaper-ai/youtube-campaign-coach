@@ -26,7 +26,11 @@ const age = (d: number) => d < 1 ? 'today' : d < 60 ? `${d}d` : d < 730 ? `${Mat
 /* ── Trend from real observations only ──────────────────────────────── */
 function Trend({ points, note }: { points: { ts: string; views: number }[]; note: string }) {
   if (points.length < 2) {
-    return <div className="text-[10px] text-ink/35 leading-snug mt-1">{note}</div>;
+    /* One short line on the face of the card. The full explanation of why
+       there is no history belongs in the drawer, not in the scan view. */
+    return <div className="text-[10px] text-ink/35 mt-1">
+      {points.length === 1 ? 'One reading — a trend needs two.' : 'No recorded history for this video.'}
+    </div>;
   }
   const w = 132, h = 26;
   const xs = points.map(p => Date.parse(p.ts));
@@ -92,7 +96,7 @@ function SavePanel({ card, onSave, onCancel, destinations }: any) {
         {([['undecided', 'Undecided'], ['owned', 'VMG owned'], ['reference', 'Reference only']] as const).map(([k, l]) => (
           <button key={k} onClick={() => setKind(k)}
             className={`text-[10px] font-bold uppercase tracking-wider rounded px-2 py-1 border transition ${
-              kind === k ? 'bg-ink text-page border-ink' : 'bg-surface border-line text-ink/50'}`}>{l}</button>
+              kind === k ? 'bg-ink text-paper border-ink' : 'bg-surface border-line text-ink/50'}`}>{l}</button>
         ))}
       </div>
       <input value={note} onChange={e => setNote(e.target.value)} placeholder="Note (optional)"
@@ -100,7 +104,7 @@ function SavePanel({ card, onSave, onCancel, destinations }: any) {
       <div className="flex gap-2 mt-2">
         <button disabled={busy}
           onClick={async () => { setBusy(true); await onSave({ destination: dest, destinationKind: kind, treatment, note }); setBusy(false); }}
-          className="text-[11px] font-bold uppercase tracking-wider bg-ink text-page rounded-lg px-3 py-1.5 disabled:opacity-40">
+          className="text-[11px] font-bold uppercase tracking-wider bg-ink text-paper rounded-lg px-3 py-1.5 disabled:opacity-40">
           {busy ? 'Saving…' : 'Save to shortlist'}
         </button>
         <button onClick={onCancel} className="text-[11px] text-ink/45 px-2">Cancel</button>
@@ -177,7 +181,7 @@ function Card({ c, saved, onSave, onRemove, destinations }: any) {
         ) : (
           <div className="flex gap-2 border-t border-line px-3 py-2">
             <button onClick={() => setPanel(true)}
-              className="text-[11px] font-bold uppercase tracking-wider bg-ink text-page rounded-lg px-3 py-1.5">
+              className="text-[11px] font-bold uppercase tracking-wider bg-ink text-paper rounded-lg px-3 py-1.5">
               Add to shortlist
             </button>
             <button onClick={() => setDrawer(d => !d)}
