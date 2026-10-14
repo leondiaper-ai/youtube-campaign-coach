@@ -26,7 +26,7 @@ import { MW_REGISTRY } from '@/lib/marketWatch/channels';
 import {
   songsForArtist, candidatesForSong, describeSong, type Candidate,
 } from '@/lib/marketWatch/connect';
-import { readStated, profileDestination } from '@/lib/marketWatch/descriptors';
+import { readStated, readStatedMany, profileDestination } from '@/lib/marketWatch/descriptors';
 import { norm, splitCredit } from '@/lib/marketWatch/songs';
 import { readFeedback, tally } from '@/lib/marketWatch/feedback';
 
@@ -92,9 +92,12 @@ export async function GET(req: Request) {
        weak — selecting one would test the grader against missing data
        rather than against editorial judgement. */
     let chosen = solid[0], researched = false;
-    for (const s of solid.slice(0, 8)) {
-      if (await readStated('track', `${a.slug}:${s.key}`)) { chosen = s; researched = true; break; }
-    }
+    /* ONE batched read per artist. The per-song loop this replaces issued up
+       to eight KV round trips per artist and pushed the route past 45s. */
+    const cand = solid.slice(0, 8);
+    const tags = await readStatedMany('track', cand.map(s => `${a.slug}:${s.key}`));
+    const hit = cand.find(s => tags.has(`${a.slug}:${s.key}`));
+    if (hit) { chosen = hit; researched = true; }
     const prior = published.has(norm(a.name));
     const pick: Pick = { a, songKey: chosen.key, songName: chosen.name, priorAppearance: prior,
       recordings: chosen.recordings.length, researched };
