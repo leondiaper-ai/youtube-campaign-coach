@@ -60,7 +60,7 @@ function Trend({ points, note }: { points: { ts: string; views: number }[]; note
 
 const Metric = ({ value, label, scope }: { value: string; label: string; scope?: string }) => (
   <div className="min-w-0">
-    <div className="text-[19px] font-black leading-none tabular-nums truncate">{value}</div>
+    <div className="m-fig text-[19px] font-black leading-none tabular-nums truncate">{value}</div>
     <div className="text-[9px] uppercase tracking-[0.1em] text-ink/40 mt-1 truncate">{label}</div>
     {scope && <div className="text-[9px] text-ink/30 truncate">{scope}</div>}
   </div>
@@ -144,7 +144,9 @@ function Card({ c, saved, onSave, onRemove, destinations }: any) {
         </div>
       </div>
 
-      <div className="px-3 grid grid-cols-3 gap-2">
+      {/* Three metrics side by side are tight on a narrow phone, so the
+          figures step down a size below sm rather than truncating. */}
+      <div className="px-3 grid grid-cols-3 gap-2 [&_.m-fig]:text-[16px] sm:[&_.m-fig]:text-[19px]">
         <Metric
           value={c.measured ? `+${fmtNum(c.measured.gain)}` : '—'}
           label={c.measured ? `${c.measured.spanDays}d measured` : 'Not measured'}
@@ -361,8 +363,8 @@ export default function SongShortlist() {
               Nothing shortlisted yet.
             </div>
           ) : (
-            <div className="rounded-card border border-line bg-surface overflow-hidden">
-              <table className="w-full text-[12px]">
+            <div className="rounded-card border border-line bg-surface overflow-x-auto">
+              <table className="w-full text-[12px] min-w-[640px]">
                 <thead><tr className="text-[10px] uppercase tracking-wider text-ink/40 border-b border-line">
                   <th className="text-left font-bold px-3 py-2">Song</th>
                   <th className="text-left font-bold px-2">Why</th>
