@@ -1,14 +1,19 @@
-/* Read what was collected. Gated identically to everything else — the
-   data route is not a side door around the page. */
 import { authorised, notFound } from '@/lib/marketWatch/gate';
-import { loadCollection } from '@/lib/marketWatch/collect';
+import { readAll, readIndex, readChannel } from '@/lib/marketWatch/collect';
 
 export const dynamic = 'force-dynamic';
 
-export async function GET() {
+export async function GET(req: Request) {
   if (!(await authorised())) return notFound();
-  const c = await loadCollection();
-  return Response.json(c ?? { empty: true }, {
+  const url = new URL(req.url);
+  const key = url.searchParams.get('channel');
+  const indexOnly = url.searchParams.get('index') === '1';
+
+  const body = key ? await readChannel(key)
+             : indexOnly ? { index: await readIndex() }
+             : { channels: await readAll() };
+
+  return Response.json(body ?? { empty: true }, {
     headers: { 'cache-control': 'no-store', 'x-robots-tag': 'noindex, nofollow' },
   });
 }

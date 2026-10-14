@@ -1,25 +1,21 @@
-/* Manual collection. Never scheduled: nothing here is added to the cron,
-   so it cannot consume shared quota in the background. */
+/* Manual, batched collection. Never scheduled. */
 import { authorised, notFound } from '@/lib/marketWatch/gate';
-import { collectMarketWatch, saveCollection } from '@/lib/marketWatch/collect';
+import { collectBatch } from '@/lib/marketWatch/collect';
+import { MW_REGISTRY } from '@/lib/marketWatch/channels';
 
 export const dynamic = 'force-dynamic';
-export const maxDuration = 120;
+export const maxDuration = 300;
 
-export async function POST() {
+export async function POST(req: Request) {
   if (!(await authorised())) return notFound();
+  let keys: string[] = [];
+  try { keys = (await req.json())?.keys ?? []; } catch { /* default below */ }
+  if (!keys.length) keys = MW_REGISTRY.map(c => c.key);
   try {
-    const c = await collectMarketWatch();
-    const stored = await saveCollection(c);
-    return Response.json({
-      ok: true, stored,
-      collectedAt: c.collectedAt, quotaUnits: c.quotaUnits,
-      channels: c.channels.map(x => ({ name: x.name, retrieved: x.retrieved, complete: x.complete, statsMissing: x.statsMissing })),
-      errors: c.errors,
-    });
+    const r = await collectBatch(keys);
+    return Response.json({ ok: true, ...r });
   } catch (e) {
     return Response.json({ ok: false, error: (e as Error).message }, { status: 500 });
   }
 }
-
 export async function GET() { return notFound(); }
