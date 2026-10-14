@@ -73,6 +73,30 @@ export function artistFromTitle(title: string): string | null {
   return p.length > 1 ? p[0].trim() : null;
 }
 
+/* ── WHY THIS IS NOT A SUBSTRING MATCH ────────────────────────────────
+   The credit side of a title lists collaborators: "Marshmello, ILLENIUM",
+   "Alesso ft. Tove Lo", "League of Legends, PVRIS". So it has to be split
+   before comparing.
+
+   And the comparison has to be EXACT on a credited name, never a
+   substring either way. Substring matching produced nonsense at a scale
+   that would have been reported as a finding: "Y$" normalises to "y", so
+   `name.includes(key)` matched Lykke Li, Poppy, Rico Nasty and Bloc Party
+   to one unrelated upload; "IVE" is inside "Ezra Collective". Twenty-eight
+   of forty claimed matches were artefacts of that.
+
+   Minimum length three, because two-letter fragments collide with
+   everything. */
+export function creditedNames(title: string): string[] {
+  const t = (title || '').replace(/#[^\s#]+/g, ' ');
+  const p = t.split(/\s+[-–—]\s+/);
+  if (p.length < 2) return [];
+  return p[0]
+    .split(/,|&|\bft\.?\b|\bfeat\.?\b|\bx\b/i)
+    .map(x => norm(x))
+    .filter(x => x.length >= 3);
+}
+
 /* ── Evidence for one song on the artist's own channel ────────────── */
 export interface TrackAsset {
   id: string; title: string; publishedAt: string; url: string;
@@ -236,10 +260,7 @@ export async function suggestionsFor(slug: string, key: string): Promise<{ sugge
     /* Has this destination published this artist before? That is the
        strongest editorial-fit evidence available from public data, and it
        is still only evidence of fit, not of outcome. */
-    const sameArtist = ch.items.filter(v => {
-      const a = artistFromTitle(v.title);
-      return a ? norm(a).includes(artistNorm) || artistNorm.includes(norm(a)) : false;
-    });
+    const sameArtist = ch.items.filter(v => creditedNames(v.title).includes(artistNorm));
     if (!sameArtist.length) continue;
 
     const recent = sameArtist.filter(v => Date.parse(v.publishedAt) >= Date.now() - 540 * 864e5);
