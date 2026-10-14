@@ -25,6 +25,7 @@
    ═══════════════════════════════════════════════════════════════════════ */
 
 import { formatPerformance, ROSTER_SUPPORT_BENCHMARK, FORMAT_LABEL, FORMAT_PLURAL, PROVISIONAL_AT } from '@/lib/formatPerformance';
+import { readCatalogue, catalogueAsUploads } from '@/lib/catalogueStore';
 import { commentDemand, ROSTER_COMMENTS_PER_1K } from '@/lib/commentDemand';
 import {
   fmtNum, daysSince, STATUS_COLOR,
@@ -106,7 +107,20 @@ export default async function ArtistOverview({
      team to build more formats around a release; this is the only thing
      that says which one to build. Computed from the uploads already
      loaded — no extra call. */
-  const perf = formatPerformance(uploads);
+  /* ── CATALOGUE FIRST, CACHE AS FALLBACK ────────────────────────────
+     The cached window is ~100 recent uploads inside 365 days, which for a
+     heritage channel is nothing. CHVRCHES has 324M lifetime views and that
+     window returned NO readable format — so the panel fell back to roster
+     norms ranking visualiser first, when their own catalogue says lyric
+     video by a wide margin (median 1.68M across 12, against 100K across 3
+     visualisers). The fallback was not merely silent, it was backwards.
+
+     When a stored catalogue exists the window opens to the whole channel,
+     because a format's history is the point. Age bias is NOT corrected —
+     see the note rendered under the bars. */
+  const catalogue = await readCatalogue(slug).catch(() => null);
+  const perfUploads = catalogue?.videos.length ? catalogueAsUploads(catalogue) : uploads;
+  const perf = formatPerformance(perfUploads, catalogue?.videos.length ? 36_500 : 365);
   /* Free — commentCount is already on every cached upload. */
   const demand = commentDemand(uploads);
 
@@ -345,7 +359,9 @@ export default async function ArtistOverview({
             {perf.support.length === 0 && perf.variants.length === 0 && (
               <>
                 <div className="text-[13px] text-ink/70 mt-2.5 leading-snug">
-                  Not enough support assets here yet to read this channel&rsquo;s own.
+                  {catalogue?.videos.length
+                    ? <>No lyric videos, visualisers, live or BTS uploads found across all {catalogue.retrieved} uploads on this channel.</>
+                    : <>Not enough support assets here yet to read this channel&rsquo;s own &mdash; only the recent upload window has been read. Collect the full catalogue to answer this properly.</>}
                 </div>
                 <div className="mt-3 space-y-1.5">
                   {(['VISUALIZER', 'LIVE', 'LYRIC_VIDEO', 'BTS'] as const).map((t) => {
@@ -429,6 +445,30 @@ export default async function ArtistOverview({
                 );
               })}
             </div>
+
+            {/* ── WHERE THE NUMBERS CAME FROM, AND THEIR ONE BIAS ──────
+                At 365 days the age spread within a format was small enough
+                to leave in a tooltip. Read across a whole catalogue it is
+                not: CHVRCHES' lyric videos have a median age of 6.5 years
+                against 3.1 for their visualisers, so part of any gap is
+                simply time to accumulate. Stating the span and the oldest
+                format's age lets a reader discount it; hiding it on hover
+                would let the ranking read as settled. */}
+            {catalogue?.videos.length ? (
+              <div className="text-[10px] text-ink/35 mt-2.5 leading-relaxed">
+                Across all {catalogue.retrieved} uploads
+                {catalogue.oldest ? `, back to ${catalogue.oldest.slice(0, 7)}` : ''}.
+                Median views per upload, so one hit does not carry a format.
+                Views accumulate, so an older format has had longer to gather them
+                {perf.support.length > 0
+                  ? ` — ${FORMAT_PLURAL[perf.support[0].type] ?? perf.support[0].label} here have a median age of ${Math.round(perf.support[0].medianAgeDays / 30.44)} months.`
+                  : '.'}
+              </div>
+            ) : (
+              <div className="text-[10px] text-ink/35 mt-2.5 leading-relaxed">
+                From the recent upload window only, not the full catalogue.
+              </div>
+            )}
 
             {/* The caption that stood here explained the two percentages,
                 printed the official-video median and defined the dot. Cut:
