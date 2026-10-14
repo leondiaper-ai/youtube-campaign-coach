@@ -22,6 +22,8 @@ const nextConfig = {
       // The synthesis: live cockpit above, the existing K-Trap deep dive
       // below (embedded verbatim from /ktrap, not rebuilt).
       { source: '/ktrap-live', destination: '/ktrap-live/index.html' },
+      // Create Music Group × YouTube: exploratory review of public channel data.
+      { source: '/cmg-youtube', destination: '/cmg-youtube/index.html' },
     ];
   },
 };
