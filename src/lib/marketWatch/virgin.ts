@@ -238,10 +238,24 @@ export async function tracksForArtist(slug: string): Promise<TrackEvidence[]> {
       container(u.durationSec, u.live) === 'short' && songKey(u.title) !== key &&
       norm(u.title).includes(key.split(' ')[0] ?? '~~')).length;
 
+    /* ── THE ARTIST HAS TO MATCH TOO ──────────────────────────────────
+       Matching on title alone attributed Linkin Park's "Numb", Rod Wave's
+       "Numb", Frank Sinatra's "Have Yourself a Merry Little Christmas",
+       American Authors' "Best Day Of My Life" and Billy Joel's "Piano Man"
+       to Tom Odell. Sixteen of eighteen matches were different songs that
+       happen to share a title — which is precisely the merge this is
+       supposed to prevent.
+
+       So a market upload counts only when one of its credited names is
+       this artist. Covers of other people's songs are therefore excluded
+       as well, which is correct: Tom Odell performing "Piano Man" live is
+       not Billy Joel's recording appearing on a destination. */
+    const artistN = norm(a.name);
     const marketAppearances: TrackEvidence['marketAppearances'] = [];
     for (const ch of market) {
       for (const v of ch.items) {
         if (songKey(v.title) !== key) continue;
+        if (!creditedNames(v.title).includes(artistN)) continue;
         marketAppearances.push({ channel: ch.name, title: v.title,
           url: `https://www.youtube.com/watch?v=${v.id}`, publishedAt: v.publishedAt, views: v.views });
       }
