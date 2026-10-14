@@ -4,15 +4,15 @@
 <meta name="robots" content="noindex,nofollow">
 <title>Create Music Group × YouTube — exploratory review</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Inter:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>/* Create Music Group × YouTube — exploratory review
    Built on the deep-dive house structure (dark photographic slides, light
    evidence slides, Analysis sheet top right). Accent: warm gold, the colour
    of the deck version, with channel-world colours used only for identity. */
 :root{
-  --ink:#0C0B10;--coal:#14131B;--paper:#F3F1F7;--cream:#F4F1EA;--bone:#DAD6E4;
-  --gold:#F5B83D;--teal:#3CCFC5;--violet:#A17BFF;--lime:#D6F24A;--red:#EF4560;
-  --smoke:#9A97AD;--hair:rgba(243,241,247,.13);
+  --ink:#0F0F0F;--coal:#1A1A1A;--paper:#F5F2EC;--cream:#F6F1E7;--bone:#E8E3DA;
+  --gold:#FF4A1C;--teal:#1FBE7A;--violet:#7B76FF;--lime:#FFD24C;--red:#FF4A1C;
+  --smoke:#8A847A;--hair:rgba(243,241,247,.13);
   --an-accent:var(--gold);
 }
 *{margin:0;padding:0;box-sizing:border-box}
@@ -20,7 +20,7 @@ html{scroll-behavior:smooth}
 body{background:var(--ink);color:var(--paper);font-family:'Inter',system-ui,sans-serif;-webkit-font-smoothing:antialiased;line-height:1.5}
 a{color:inherit}
 img{display:block;max-width:100%}
-.display{font-family:'Space Grotesk',sans-serif;font-weight:700;letter-spacing:-.02em;line-height:1.06}
+.display{font-family:'Inter',sans-serif;font-weight:700;letter-spacing:-.02em;line-height:1.06}
 .xl{font-size:clamp(2.6rem,7.5vw,6rem);line-height:.96}
 .big{font-size:clamp(1.55rem,3.3vw,2.6rem);max-width:30ch;margin-bottom:1.8rem}
 .acc{color:var(--gold)} .acc2{color:var(--violet)}
@@ -29,8 +29,8 @@ img{display:block;max-width:100%}
 .prov{font-size:.85rem;color:var(--smoke);max-width:56ch;margin-top:1.4rem}
 .sub{font-size:.86rem;line-height:1.65;color:var(--smoke);margin-top:1.2rem;max-width:80ch}
 .sub.tight{margin:-1rem 0 1.4rem}
-.mini{font-family:'Space Grotesk',sans-serif;font-size:1rem;font-weight:700;margin:1.4rem 0 .7rem}
-.unknown{margin-top:2rem;padding:1.1rem 1.3rem;border-radius:10px;background:#221F17;font-size:.95rem;max-width:90ch}
+.mini{font-family:'Inter',sans-serif;font-size:1rem;font-weight:700;margin:1.4rem 0 .7rem}
+.unknown{margin-top:2rem;padding:1.1rem 1.3rem;border-radius:10px;background:#1A1A1A;font-size:.95rem;max-width:90ch}
 .unknown b,.box b{color:var(--gold);margin-right:.3rem}
 .ask{margin-top:1.2rem;font-size:.9rem;font-style:italic}
 .ask b{font-style:normal;color:var(--gold);font-size:.68rem;letter-spacing:.14em;text-transform:uppercase;margin-right:.5rem}
@@ -48,8 +48,8 @@ img{display:block;max-width:100%}
 /* slides */
 .slide{min-height:100vh;display:flex;align-items:center;position:relative;padding:6rem 0 4.5rem;border-bottom:1px solid var(--hair)}
 .slide.light{background:var(--cream);color:var(--ink)}
-.slide.light .sub,.slide.light .prov{color:#5B5868}
-.slide.light .label{color:#9C6A0A}
+.slide.light .sub,.slide.light .prov{color:#4A4640}
+.slide.light .label{color:#E8400F}
 .slide.coal{background:var(--coal)}
 .inner{width:100%;max-width:1200px;margin:0 auto;padding:0 2.2rem}
 .slide .inner>*{opacity:0;transform:translateY(14px);transition:opacity .6s ease,transform .6s ease}
@@ -73,7 +73,7 @@ img{display:block;max-width:100%}
 @media(max-width:900px){.cols3{grid-template-columns:1fr}}
 .col{background:var(--coal);border-radius:12px;padding:1.4rem}
 .col .avs{display:flex;gap:.4rem;margin-bottom:.9rem}
-.col h3{font-family:'Space Grotesk',sans-serif;font-size:1.25rem;margin-bottom:.7rem}
+.col h3{font-family:'Inter',sans-serif;font-size:1.25rem;margin-bottom:.7rem}
 .col.gold h3{color:var(--gold)} .col.teal h3{color:var(--teal)} .col.lime h3{color:var(--lime)}
 .col ul{list-style:none;display:grid;gap:.7rem;font-size:.92rem}
 .col li{padding-left:1rem;position:relative}
@@ -85,11 +85,11 @@ img{display:block;max-width:100%}
 @media(max-width:600px){.grps{grid-template-columns:1fr}}
 .grp{background:#fff;border-radius:12px;padding:1.2rem}
 .grp h4{font-size:.66rem;letter-spacing:.16em;text-transform:uppercase;margin-bottom:.9rem}
-.grp.gold h4{color:#9C6A0A}.grp.teal h4{color:#14837B}.grp.muted h4{color:#6C687C}.grp.red h4{color:#C42B45}
+.grp.gold h4{color:#E8400F}.grp.teal h4{color:#128A55}.grp.muted h4{color:#8A847A}.grp.red h4{color:#E8400F}
 .grp ul{list-style:none;display:grid;gap:.85rem}
 .grp li{display:flex;gap:.65rem;align-items:flex-start}
 .grp li b{display:block;font-size:.88rem;line-height:1.3}
-.grp li span{display:block;font-size:.78rem;color:#5B5868;line-height:1.35;margin-top:.15rem}
+.grp li span{display:block;font-size:.78rem;color:#4A4640;line-height:1.35;margin-top:.15rem}
 
 /* tables */
 .tbl{overflow-x:auto;-webkit-overflow-scrolling:touch;border-radius:10px;border:1px solid var(--hair)}
@@ -97,7 +97,7 @@ img{display:block;max-width:100%}
 .tbl th{font-size:.62rem;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);text-align:left;padding:.75rem .8rem;border-bottom:1px solid var(--hair)}
 .tbl td{padding:.5rem .8rem;border-bottom:1px solid var(--hair);vertical-align:middle}
 .tbl td.ch{display:flex;align-items:center;gap:.6rem;font-weight:600}
-.tbl td.n{font-family:'Space Grotesk',sans-serif;font-weight:500;white-space:nowrap}
+.tbl td.n{font-family:'Inter',sans-serif;font-weight:500;white-space:nowrap}
 .tbl td.hl{color:var(--gold);font-weight:700}
 .tbl td.q{color:var(--smoke);font-size:.8rem}
 
@@ -109,17 +109,17 @@ img{display:block;max-width:100%}
 .sb-r{display:grid;grid-template-columns:minmax(120px,190px) 1fr;gap:.8rem;align-items:center}
 .sb-l{font-size:.8rem;line-height:1.2}
 .sb-l em{font-style:normal;color:var(--smoke);font-size:.72rem;margin-left:.25rem}
-.slide.light .sb-l em{color:#6C687C}
+.slide.light .sb-l em{color:#8A847A}
 .sb-b{display:flex;height:22px;border-radius:4px;overflow:hidden;gap:2px}
-.seg{height:100%;font-size:.66rem;font-weight:700;color:#0C0B10;display:flex;align-items:center;justify-content:center;white-space:nowrap}
+.seg{height:100%;font-size:.66rem;font-weight:700;color:#0F0F0F;display:flex;align-items:center;justify-content:center;white-space:nowrap}
 @media(max-width:600px){.sb-r{grid-template-columns:1fr;gap:.25rem}}
 
 .pairs{display:grid;gap:1rem;align-content:start}
 .pair{display:flex;gap:.9rem;align-items:center}
-.pair b{display:block;font-family:'Space Grotesk',sans-serif;font-size:1.35rem;line-height:1.1}
-.pair span{font-size:.8rem;color:#5B5868}
+.pair b{display:block;font-family:'Inter',sans-serif;font-size:1.35rem;line-height:1.1}
+.pair span{font-size:.8rem;color:#4A4640}
 
-.huge{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:clamp(3.4rem,9vw,6.5rem);line-height:.9;letter-spacing:-.03em}
+.huge{font-family:'Inter',sans-serif;font-weight:700;font-size:clamp(3.4rem,9vw,6.5rem);line-height:.9;letter-spacing:-.03em}
 .huge-l{font-size:.95rem;max-width:44ch;margin:.7rem 0 1.4rem}
 
 /* thumbnail cards */
@@ -127,10 +127,10 @@ img{display:block;max-width:100%}
 .tc-i{aspect-ratio:16/9;overflow:hidden;border-radius:8px;background:#222;position:relative}
 .tc-i img{width:100%;height:100%;object-fit:cover;transition:transform .35s ease}
 .tc:hover .tc-i img{transform:scale(1.04)}
-.tc-v{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:1.3rem;margin-top:.5rem;color:var(--c,inherit)}
+.tc-v{font-family:'Inter',sans-serif;font-weight:700;font-size:1.3rem;margin-top:.5rem;color:var(--c,inherit)}
 .tc-l{font-size:.82rem;font-weight:600;line-height:1.3}
 .tc-s{font-size:.75rem;color:var(--smoke);line-height:1.35;margin-top:.15rem}
-.slide.light .tc-s{color:#5B5868}
+.slide.light .tc-s{color:#4A4640}
 .row5{display:grid;grid-template-columns:repeat(5,1fr);gap:1rem;margin-bottom:1.8rem}
 .row4{display:grid;grid-template-columns:repeat(4,1fr);gap:.8rem}
 .row3{display:grid;grid-template-columns:repeat(3,1fr);gap:.8rem}
@@ -138,7 +138,7 @@ img{display:block;max-width:100%}
 @media(max-width:900px){.row5{grid-template-columns:repeat(2,1fr)}.row4{grid-template-columns:repeat(2,1fr)}}
 @media(max-width:520px){.row3{grid-template-columns:repeat(2,1fr)}}
 
-blockquote{font-family:'Space Grotesk',sans-serif;font-size:clamp(1.2rem,2.2vw,1.7rem);font-weight:700;color:var(--gold);line-height:1.2}
+blockquote{font-family:'Inter',sans-serif;font-size:clamp(1.2rem,2.2vw,1.7rem);font-weight:700;color:var(--gold);line-height:1.2}
 blockquote cite{display:block;font-family:'Inter',sans-serif;font-style:normal;font-weight:400;font-size:.85rem;color:var(--paper);margin-top:.6rem;line-height:1.5}
 blockquote.dark{grid-column:1/-1;background:var(--ink);padding:1.2rem;border-radius:10px;color:var(--teal);font-size:1.15rem}
 .facts{list-style:none;display:grid;gap:.55rem;font-size:.92rem}
@@ -148,15 +148,15 @@ blockquote.dark{grid-column:1/-1;background:var(--ink);padding:1.2rem;border-rad
 /* horizontal bars (Chill) */
 .hbars{display:grid;gap:.75rem;align-content:start}
 .hb{display:grid;grid-template-columns:minmax(130px,200px) 1fr;gap:.8rem;align-items:center;font-size:.85rem}
-.hb em{font-style:normal;color:#6C687C;font-size:.75rem}
+.hb em{font-style:normal;color:#8A847A;font-size:.75rem}
 .hb div{display:flex;align-items:center;gap:.5rem}
-.hb i{display:block;height:22px;background:#14837B;border-radius:0 4px 4px 0;min-width:4px}
-.hb b{font-family:'Space Grotesk',sans-serif}
+.hb i{display:block;height:22px;background:#128A55;border-radius:0 4px 4px 0;min-width:4px}
+.hb b{font-family:'Inter',sans-serif}
 
 /* timeline */
 .tl{display:grid;grid-template-columns:repeat(6,minmax(150px,1fr));gap:1rem;overflow-x:auto;padding-bottom:.6rem;margin-bottom:1.6rem;-webkit-overflow-scrolling:touch}
 .tl-i{text-decoration:none;border-top:3px solid var(--smoke);padding-top:.6rem}
-.tl-i.teal{border-color:#14837B}.tl-i.red{border-color:var(--red)}
+.tl-i.teal{border-color:#128A55}.tl-i.red{border-color:var(--red)}
 .tl-d{font-size:.72rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;margin-bottom:.45rem}
 .tl-c{font-size:.8rem;font-weight:700}
 .box{background:#fff;border-radius:10px;padding:1.1rem 1.2rem;font-size:.9rem}
@@ -171,29 +171,29 @@ blockquote.dark{grid-column:1/-1;background:var(--ink);padding:1.2rem;border-rad
 .feats{display:grid;grid-template-columns:repeat(2,1fr);gap:1rem}
 @media(max-width:800px){.feats{grid-template-columns:1fr}}
 .feats div{background:var(--coal);border-radius:12px;padding:1.3rem}
-.feats h3{font-family:'Space Grotesk',sans-serif;color:var(--violet);margin-bottom:.5rem;font-size:1.1rem}
+.feats h3{font-family:'Inter',sans-serif;color:var(--violet);margin-bottom:.5rem;font-size:1.1rem}
 .feats p{font-size:.9rem}
 
 /* framing comparison */
 .frs{display:grid;gap:.7rem}
 .fr{display:grid;grid-template-columns:1.2fr auto 1.3fr 1.3fr;gap:1rem;align-items:center;background:#fff;border-radius:10px;padding:.9rem 1.1rem;font-size:.86rem}
 .fr-t{font-weight:700}
-.fr b{display:block;font-size:.6rem;letter-spacing:.14em;text-transform:uppercase;color:#6C687C;margin-bottom:.15rem}
+.fr b{display:block;font-size:.6rem;letter-spacing:.14em;text-transform:uppercase;color:#8A847A;margin-bottom:.15rem}
 .pill{font-size:.62rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:.35rem .6rem;border-radius:99px;white-space:nowrap}
-.pill.vis{background:#D7F5F2;color:#0E6B65}.pill.mixed{background:#FCEBC7;color:#8A5A00}.pill.na{background:#E7E5EE;color:#4F4C5E}
+.pill.vis{background:#D9F5E8;color:#0E6B45}.pill.mixed{background:#FFF0C4;color:#7A5600}.pill.na{background:#E8E3DA;color:#4A4640}
 @media(max-width:900px){.fr{grid-template-columns:1fr}.pill{justify-self:start}}
 
 /* discussion */
 .cards6{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem}
 @media(max-width:900px){.cards6{grid-template-columns:1fr}}
 .cards6 div{background:var(--coal);border-radius:12px;padding:1.3rem}
-.cards6 h3{font-family:'Space Grotesk',sans-serif;color:var(--gold);font-size:1.1rem;margin-bottom:.5rem}
+.cards6 h3{font-family:'Inter',sans-serif;color:var(--gold);font-size:1.1rem;margin-bottom:.5rem}
 .cards6 p{font-size:.9rem}
 .qs{list-style:none;counter-reset:q;display:grid;gap:1.1rem;max-width:80ch}
 .qs li{counter-increment:q;padding-left:2.6rem;position:relative}
-.qs li::before{content:counter(q);position:absolute;left:0;top:-.15rem;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:1.6rem;color:#9C6A0A}
+.qs li::before{content:counter(q);position:absolute;left:0;top:-.15rem;font-family:'Inter',sans-serif;font-weight:700;font-size:1.6rem;color:#E8400F}
 .qs b{display:block;font-size:1.05rem}
-.qs span{font-size:.88rem;color:#5B5868}
+.qs span{font-size:.88rem;color:#4A4640}
 .close{min-height:60vh}
 
 /* artists section */
@@ -202,14 +202,14 @@ blockquote.dark{grid-column:1/-1;background:var(--ink);padding:1.2rem;border-rad
 @media(max-width:520px){.rel{grid-template-columns:1fr}}
 .rel div{background:#fff;border-radius:10px;padding:.8rem .9rem;font-size:.8rem;line-height:1.35}
 .rel b{display:block;font-size:.9rem}
-.rel .tag{display:inline-block;margin-top:.35rem;font-size:.6rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:.2rem .45rem;border-radius:99px;background:#E7E5EE;color:#4F4C5E}
-.rel .tag.doc{background:#D7F5F2;color:#0E6B65}.rel .tag.part{background:#FCEBC7;color:#8A5A00}
+.rel .tag{display:inline-block;margin-top:.35rem;font-size:.6rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:.2rem .45rem;border-radius:99px;background:#E8E3DA;color:#4A4640}
+.rel .tag.doc{background:#D9F5E8;color:#0E6B45}.rel .tag.part{background:#FFF0C4;color:#7A5600}
 .crit{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:.6rem;margin-bottom:1.4rem}
 .crit div{font-size:.8rem;border:1px solid var(--hair);border-radius:8px;padding:.6rem .7rem}
 .crit b{color:var(--gold);display:block;font-size:.7rem;letter-spacing:.1em;text-transform:uppercase}
 .case{display:grid;grid-template-columns:1fr 1fr;gap:1.6rem;margin-bottom:2rem;padding-bottom:1.6rem;border-bottom:1px solid var(--hair)}
 @media(max-width:900px){.case{grid-template-columns:1fr}}
-.case h3{font-family:'Space Grotesk',sans-serif;font-size:1.3rem;display:flex;align-items:center;gap:.6rem;margin-bottom:.4rem}
+.case h3{font-family:'Inter',sans-serif;font-size:1.3rem;display:flex;align-items:center;gap:.6rem;margin-bottom:.4rem}
 .case .k{font-size:.82rem;color:var(--smoke);margin-bottom:.8rem}
 .case ul{list-style:none;display:grid;gap:.45rem;font-size:.86rem;margin-top:.8rem}
 .case li{padding-left:1rem;position:relative}
@@ -223,36 +223,120 @@ blockquote.dark{grid-column:1/-1;background:var(--ink);padding:1.2rem;border-rad
 @media(max-width:1000px){.gcs{grid-template-columns:repeat(2,1fr)}}
 @media(max-width:560px){.gcs{grid-template-columns:1fr}}
 .gc{background:#fff;border-radius:12px;padding:1.1rem 1.2rem}
-.gc h4{font-size:.64rem;letter-spacing:.16em;text-transform:uppercase;color:#9C6A0A;margin-bottom:.5rem}
-.gc-n{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:2rem;line-height:1}
-.gc-l{font-size:.78rem;color:#5B5868;margin:.35rem 0 .8rem}
+.gc h4{font-size:.64rem;letter-spacing:.16em;text-transform:uppercase;color:#E8400F;margin-bottom:.5rem}
+.gc-n{font-family:'Inter',sans-serif;font-weight:700;font-size:2rem;line-height:1}
+.gc-l{font-size:.78rem;color:#4A4640;margin:.35rem 0 .8rem}
 .gc dl{display:grid;grid-template-columns:1fr auto;gap:.3rem .6rem;font-size:.8rem;border-top:1px solid rgba(12,11,16,.1);padding-top:.7rem}
-.gc dt{color:#5B5868}.gc dd{font-family:'Space Grotesk',sans-serif;font-weight:600;text-align:right}
+.gc dt{color:#4A4640}.gc dd{font-family:'Inter',sans-serif;font-weight:600;text-align:right}
 .cbs{display:grid;gap:.42rem}
 .cb-g{font-size:.62rem;letter-spacing:.16em;text-transform:uppercase;color:var(--gold);margin-top:.8rem}
 .cb{display:grid;grid-template-columns:minmax(120px,190px) 1fr;gap:.7rem;align-items:center}
 .cb-l{font-size:.82rem;font-weight:600;line-height:1.2}
 .cb-l span{display:block;font-weight:400;font-size:.68rem;color:var(--smoke)}
 .cb-l em{font-style:normal;color:var(--red)}
-.cb-b{display:flex;height:16px;border-radius:3px;overflow:hidden;background:#3A3646}
+.cb-b{display:flex;height:16px;border-radius:3px;overflow:hidden;background:#2A2826}
 .cb-b i{display:block;height:100%}
 .shapes{list-style:none;display:grid;gap:1rem;margin-bottom:1.2rem}
-.shapes b{display:block;font-family:'Space Grotesk',sans-serif;font-size:1.02rem;margin-bottom:.15rem}
+.shapes b{display:block;font-family:'Inter',sans-serif;font-size:1.02rem;margin-bottom:.15rem}
 .shapes span{font-size:.86rem;color:var(--bone)}
 .tagl{display:inline-block;font-size:.72rem;line-height:1.3;padding:.2rem .5rem;border-radius:6px;background:rgba(243,241,247,.08);color:var(--bone)}
-.tagl.doc{background:rgba(60,207,197,.14);color:#9EEDE6}.tagl.part{background:rgba(245,184,61,.14);color:#F7D58F}
+.tagl.doc{background:rgba(60,207,197,.14);color:#8FE6BF}.tagl.part{background:rgba(245,184,61,.14);color:#FFB49E}
 .tbl td em{font-style:normal;color:var(--smoke);font-size:.7rem;margin-left:.2rem}
-.slide.light .tbl td em{color:#6C687C}
-.slide.light .shapes span{color:#3E3B4A}
+.slide.light .tbl td em{color:#8A847A}
+.slide.light .shapes span{color:#4A4640}
 .case .tc{max-width:420px}
 .box b{display:inline}
 .case p.sub{margin-top:.9rem !important;position:static}
 .crit{grid-template-columns:repeat(3,1fr)}
 @media(max-width:700px){.crit{grid-template-columns:1fr 1fr}}
 .gc dl{grid-template-columns:auto 1fr}
+
+/* ═══ Observatory theme — matches youtube-insights preview deck ═══
+   Dark #0F0F0F sections with #1A1A1A cards and a signal-orange rule;
+   cream / paper evidence sections with white 16px cards; Inter 800 at
+   -0.04em for every headline; orange eyebrows; sticky pill navigation. */
+:root{--ink:#0F0F0F;--coal:#1A1A1A;--paper:#F5F2EC;--cream:#F6F1E7;--paper2:#FAF7F2;--bone:#C9C3B8;
+  --gold:#FF4A1C;--signal:#FF4A1C;--electric:#2C25FF;--teal:#1FBE7A;--violet:#7B76FF;--lime:#FFD24C;--red:#FF4A1C;
+  --smoke:#8A847A;--hair:rgba(255,255,255,.08);--an-accent:#FF4A1C}
+body{font-family:'Inter',system-ui,sans-serif}
+.display{font-family:'Inter',sans-serif;font-weight:800;letter-spacing:-.04em;line-height:1.02}
+.big{font-size:clamp(1.9rem,4.2vw,3.4rem);max-width:24ch}
+.xl{font-weight:900;letter-spacing:-.045em}
+.label{font-size:.66rem;letter-spacing:.16em;color:var(--signal)}
+.mini,.col h3,.case h3,.gc-n,.shapes b,.tc-v,.huge{font-weight:800;letter-spacing:-.02em}
+
+/* sections */
+.slide{border-bottom:0;background:var(--ink)}
+.slide.coal{background:var(--ink)}
+.slide.light{background:var(--cream);color:#0E0E0E;
+  --hair:rgba(14,14,14,.10);--smoke:#8A847A;--bone:#4A4640;--coal:#FFFFFF}
+.slide.light + .slide.light{background:var(--paper2)}
+.slide.light .label{color:var(--signal)}
+.slide.light .sub,.slide.light .prov,.slide.light .tc-s{color:#6B655C}
+.slide.light .lede{color:#4A4640}
+
+/* top navigation (replaces the dot rail) */
+.chrome{display:none}
+.toc{position:fixed;top:0;left:0;right:0;transform:none;z-index:60;display:flex;flex-direction:row;gap:.35rem;
+  padding:.55rem 1rem;background:rgba(15,15,15,.96);border-bottom:1px solid rgba(255,255,255,.06);
+  overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+.toc::-webkit-scrollbar{display:none}
+.toc a{width:auto;height:auto;border-radius:99px;background:none;opacity:1;transform:none;
+  padding:.5rem .95rem;font-size:.82rem;font-weight:600;color:#BDB7AD;text-decoration:none;white-space:nowrap;transition:background .2s,color .2s}
+.toc a:hover{color:#fff}
+.toc a.on{background:var(--signal);color:#fff;transform:none}
+@media(max-width:760px){.toc{display:flex}.toc a{font-size:.76rem;padding:.42rem .75rem}}
+.pbar{top:auto;bottom:0;height:3px;background:var(--signal)}
+.slide{padding-top:7rem}
+.an-btn{top:4.1rem !important}
+
+/* cards — dark */
+.col,.box,.unknown{background:var(--coal);border-radius:14px;border-left:3px solid var(--signal)}
+.unknown{border-radius:14px}
+.col li::before,.case li::before,.facts li::before{background:var(--signal)}
+.col.teal h3{color:var(--teal)} .col.lime h3{color:var(--lime)} .col.gold h3{color:var(--signal)}
+/* cards — light */
+.slide.light .box,.slide.light .gc,.slide.light .grp,.slide.light .rel div,.slide.light .crit div,.slide.light .tbl{
+  background:#fff;border:1px solid rgba(14,14,14,.08);border-radius:16px;box-shadow:0 1px 0 rgba(14,14,14,.02)}
+.slide.light .box{border-left:3px solid var(--signal)}
+.slide.light .crit div{padding:.9rem 1rem}
+.slide.light .crit b,.case h4{color:var(--signal)}
+.case .net h4{color:var(--electric)}
+.case .net li::before{background:var(--electric)}
+.slide:not(.light) .case .net h4{color:var(--violet)}
+.slide:not(.light) .case .net li::before{background:var(--violet)}
+.case{border-bottom:1px solid var(--hair)}
+.slide.light .case{background:#fff;border:1px solid rgba(14,14,14,.08);border-radius:16px;padding:1.6rem}
+.gc h4,.grp h4{color:var(--signal)}
+.gc dl{border-top-color:rgba(14,14,14,.08)}
+
+/* tables */
+.tbl th{color:var(--signal)}
+.tbl td.hl{color:var(--signal)}
+.slide.light .tbl table{background:#fff}
+.slide:not(.light) .tbl{background:var(--coal);border-color:rgba(255,255,255,.06)}
+.tagl{background:rgba(255,255,255,.07);color:#D6D0C6}
+.tagl.doc{background:rgba(31,190,122,.16);color:#8FE6BF}.tagl.part{background:rgba(255,74,28,.16);color:#FFB49E}
+.slide.light .tagl{background:#F1ECE3;color:#4A4640}
+.slide.light .tagl.doc{background:#D9F5E8;color:#0E6B45}.slide.light .tagl.part{background:#FFE4DB;color:#A8300E}
+
+/* bars */
+.sb-b{background:rgba(255,255,255,.05);border-radius:6px}
+.slide.light .sb-b{background:rgba(14,14,14,.06)}
+.seg[style*="#2C25FF"],.seg[style*="#FF4A1C"]{color:#fff}
+.cb-b{background:#2A2826;border-radius:6px}
+.hb i{border-radius:0 6px 6px 0}
+.slide.light .hb i{background:var(--signal)}
+
+/* stat + thumbnail cards */
+.huge.acc,.acc{color:var(--signal)}
+.tc-i{border-radius:12px;overflow:hidden}
+.ask b{color:var(--signal)}
+.pill.vis{background:#D9F5E8;color:#0E6B45}.pill.mixed{background:#FFF0C4;color:#7A5600}.pill.na{background:#E8E3DA;color:#4A4640}
+.gc dl{grid-template-columns:1fr auto}.gc dd{white-space:nowrap}.gc dt{min-width:0}
 </style>
 <link rel="stylesheet" href="/shared/analysis-sheet.css">
-<style>:root{--an-accent:#C98A12}</style>
+<style>:root{--an-accent:#FF4A1C}</style>
 </head><body>
 <div class="pbar" id="pbar"></div>
 <div class="chrome"><div class="chrome-l">Create Music Group × YouTube · exploratory review</div></div>
@@ -318,7 +402,7 @@ blockquote.dark{grid-column:1/-1;background:var(--ink);padding:1.2rem;border-rad
     <div class="label">View distribution for a typical full track</div>
     <h2 class="display big">Subscriber scale and observed upload performance tell different stories across the network.</h2>
     <div class="split2 wide">
-      <div><div class="legend"><span><i style="background:#8E8AA3"></i>Under 10K</span><span><i style="background:#C9A65E"></i>10K–50K</span><span><i style="background:#C48A1F"></i>50K–250K</span><span><i style="background:#E7A72C"></i>250K–1M</span><span><i style="background:#FFD27A"></i>1M+</span></div><div class="sb"><div class="sb-r"><div class="sb-l">Trap Nation <em>127</em></div><div class="sb-b"><div class="seg" style="width:59.8%;background:#C9A65E" title="10K–50K: 59.8%">60%</div><div class="seg" style="width:37.0%;background:#C48A1F" title="50K–250K: 37.0%">37%</div><div class="seg" style="width:2.4%;background:#E7A72C" title="250K–1M: 2.4%"></div><div class="seg" style="width:0.8%;background:#FFD27A" title="1M+: 0.8%"></div></div></div><div class="sb-r"><div class="sb-l">Chill Nation <em>190</em></div><div class="sb-b"><div class="seg" style="width:0.5%;background:#8E8AA3" title="Under 10K: 0.5%"></div><div class="seg" style="width:60.5%;background:#C9A65E" title="10K–50K: 60.5%">60%</div><div class="seg" style="width:18.9%;background:#C48A1F" title="50K–250K: 18.9%">19%</div><div class="seg" style="width:14.7%;background:#E7A72C" title="250K–1M: 14.7%">15%</div><div class="seg" style="width:5.3%;background:#FFD27A" title="1M+: 5.3%"></div></div></div><div class="sb-r"><div class="sb-l">Monstercat Uncaged <em>200</em></div><div class="sb-b"><div class="seg" style="width:70.0%;background:#C9A65E" title="10K–50K: 70.0%">70%</div><div class="seg" style="width:29.5%;background:#C48A1F" title="50K–250K: 29.5%">30%</div><div class="seg" style="width:0.5%;background:#E7A72C" title="250K–1M: 0.5%"></div></div></div><div class="sb-r"><div class="sb-l">Monstercat Instinct <em>79</em></div><div class="sb-b"><div class="seg" style="width:6.3%;background:#8E8AA3" title="Under 10K: 6.3%"></div><div class="seg" style="width:78.5%;background:#C9A65E" title="10K–50K: 78.5%">78%</div><div class="seg" style="width:13.9%;background:#C48A1F" title="50K–250K: 13.9%">14%</div><div class="seg" style="width:1.3%;background:#E7A72C" title="250K–1M: 1.3%"></div></div></div><div class="sb-r"><div class="sb-l">Monstercat Silk <em>81</em></div><div class="sb-b"><div class="seg" style="width:22.2%;background:#8E8AA3" title="Under 10K: 22.2%">22%</div><div class="seg" style="width:71.6%;background:#C9A65E" title="10K–50K: 71.6%">72%</div><div class="seg" style="width:6.2%;background:#C48A1F" title="50K–250K: 6.2%"></div></div></div><div class="sb-r"><div class="sb-l">House Nation <em>147</em></div><div class="sb-b"><div class="seg" style="width:91.8%;background:#8E8AA3" title="Under 10K: 91.8%">92%</div><div class="seg" style="width:7.5%;background:#C9A65E" title="10K–50K: 7.5%"></div><div class="seg" style="width:0.7%;background:#E7A72C" title="250K–1M: 0.7%"></div></div></div><div class="sb-r"><div class="sb-l">Rap Nation tracks <em>133</em></div><div class="sb-b"><div class="seg" style="width:83.5%;background:#8E8AA3" title="Under 10K: 83.5%">84%</div><div class="seg" style="width:12.0%;background:#C9A65E" title="10K–50K: 12.0%">12%</div><div class="seg" style="width:3.0%;background:#C48A1F" title="50K–250K: 3.0%"></div><div class="seg" style="width:1.5%;background:#E7A72C" title="250K–1M: 1.5%"></div></div></div><div class="sb-r"><div class="sb-l">Bass Nation* <em>171</em></div><div class="sb-b"><div class="seg" style="width:89.5%;background:#8E8AA3" title="Under 10K: 89.5%">90%</div><div class="seg" style="width:9.4%;background:#C9A65E" title="10K–50K: 9.4%">9%</div><div class="seg" style="width:1.2%;background:#C48A1F" title="50K–250K: 1.2%"></div></div></div><div class="sb-r"><div class="sb-l">7clouds (benchmark) <em>447</em></div><div class="sb-b"><div class="seg" style="width:0.7%;background:#C9A65E" title="10K–50K: 0.7%"></div><div class="seg" style="width:37.1%;background:#C48A1F" title="50K–250K: 37.1%">37%</div><div class="seg" style="width:32.0%;background:#E7A72C" title="250K–1M: 32.0%">32%</div><div class="seg" style="width:30.2%;background:#FFD27A" title="1M+: 30.2%">30%</div></div></div><div class="sb-r"><div class="sb-l">Aureal (benchmark) <em>137</em></div><div class="sb-b"><div class="seg" style="width:16.8%;background:#8E8AA3" title="Under 10K: 16.8%">17%</div><div class="seg" style="width:32.8%;background:#C9A65E" title="10K–50K: 32.8%">33%</div><div class="seg" style="width:29.2%;background:#C48A1F" title="50K–250K: 29.2%">29%</div><div class="seg" style="width:16.1%;background:#E7A72C" title="250K–1M: 16.1%">16%</div><div class="seg" style="width:5.1%;background:#FFD27A" title="1M+: 5.1%"></div></div></div></div></div>
+      <div><div class="legend"><span><i style="background:#B8B1A6"></i>Under 10K</span><span><i style="background:#FFD3C9"></i>10K–50K</span><span><i style="background:#FF9A7A"></i>50K–250K</span><span><i style="background:#FF4A1C"></i>250K–1M</span><span><i style="background:#2C25FF"></i>1M+</span></div><div class="sb"><div class="sb-r"><div class="sb-l">Trap Nation <em>127</em></div><div class="sb-b"><div class="seg" style="width:59.8%;background:#FFD3C9" title="10K–50K: 59.8%">60%</div><div class="seg" style="width:37.0%;background:#FF9A7A" title="50K–250K: 37.0%">37%</div><div class="seg" style="width:2.4%;background:#FF4A1C" title="250K–1M: 2.4%"></div><div class="seg" style="width:0.8%;background:#2C25FF" title="1M+: 0.8%"></div></div></div><div class="sb-r"><div class="sb-l">Chill Nation <em>190</em></div><div class="sb-b"><div class="seg" style="width:0.5%;background:#B8B1A6" title="Under 10K: 0.5%"></div><div class="seg" style="width:60.5%;background:#FFD3C9" title="10K–50K: 60.5%">60%</div><div class="seg" style="width:18.9%;background:#FF9A7A" title="50K–250K: 18.9%">19%</div><div class="seg" style="width:14.7%;background:#FF4A1C" title="250K–1M: 14.7%">15%</div><div class="seg" style="width:5.3%;background:#2C25FF" title="1M+: 5.3%"></div></div></div><div class="sb-r"><div class="sb-l">Monstercat Uncaged <em>200</em></div><div class="sb-b"><div class="seg" style="width:70.0%;background:#FFD3C9" title="10K–50K: 70.0%">70%</div><div class="seg" style="width:29.5%;background:#FF9A7A" title="50K–250K: 29.5%">30%</div><div class="seg" style="width:0.5%;background:#FF4A1C" title="250K–1M: 0.5%"></div></div></div><div class="sb-r"><div class="sb-l">Monstercat Instinct <em>79</em></div><div class="sb-b"><div class="seg" style="width:6.3%;background:#B8B1A6" title="Under 10K: 6.3%"></div><div class="seg" style="width:78.5%;background:#FFD3C9" title="10K–50K: 78.5%">78%</div><div class="seg" style="width:13.9%;background:#FF9A7A" title="50K–250K: 13.9%">14%</div><div class="seg" style="width:1.3%;background:#FF4A1C" title="250K–1M: 1.3%"></div></div></div><div class="sb-r"><div class="sb-l">Monstercat Silk <em>81</em></div><div class="sb-b"><div class="seg" style="width:22.2%;background:#B8B1A6" title="Under 10K: 22.2%">22%</div><div class="seg" style="width:71.6%;background:#FFD3C9" title="10K–50K: 71.6%">72%</div><div class="seg" style="width:6.2%;background:#FF9A7A" title="50K–250K: 6.2%"></div></div></div><div class="sb-r"><div class="sb-l">House Nation <em>147</em></div><div class="sb-b"><div class="seg" style="width:91.8%;background:#B8B1A6" title="Under 10K: 91.8%">92%</div><div class="seg" style="width:7.5%;background:#FFD3C9" title="10K–50K: 7.5%"></div><div class="seg" style="width:0.7%;background:#FF4A1C" title="250K–1M: 0.7%"></div></div></div><div class="sb-r"><div class="sb-l">Rap Nation tracks <em>133</em></div><div class="sb-b"><div class="seg" style="width:83.5%;background:#B8B1A6" title="Under 10K: 83.5%">84%</div><div class="seg" style="width:12.0%;background:#FFD3C9" title="10K–50K: 12.0%">12%</div><div class="seg" style="width:3.0%;background:#FF9A7A" title="50K–250K: 3.0%"></div><div class="seg" style="width:1.5%;background:#FF4A1C" title="250K–1M: 1.5%"></div></div></div><div class="sb-r"><div class="sb-l">Bass Nation* <em>171</em></div><div class="sb-b"><div class="seg" style="width:89.5%;background:#B8B1A6" title="Under 10K: 89.5%">90%</div><div class="seg" style="width:9.4%;background:#FFD3C9" title="10K–50K: 9.4%">9%</div><div class="seg" style="width:1.2%;background:#FF9A7A" title="50K–250K: 1.2%"></div></div></div><div class="sb-r"><div class="sb-l">7clouds (benchmark) <em>447</em></div><div class="sb-b"><div class="seg" style="width:0.7%;background:#FFD3C9" title="10K–50K: 0.7%"></div><div class="seg" style="width:37.1%;background:#FF9A7A" title="50K–250K: 37.1%">37%</div><div class="seg" style="width:32.0%;background:#FF4A1C" title="250K–1M: 32.0%">32%</div><div class="seg" style="width:30.2%;background:#2C25FF" title="1M+: 30.2%">30%</div></div></div><div class="sb-r"><div class="sb-l">Aureal (benchmark) <em>137</em></div><div class="sb-b"><div class="seg" style="width:16.8%;background:#B8B1A6" title="Under 10K: 16.8%">17%</div><div class="seg" style="width:32.8%;background:#FFD3C9" title="10K–50K: 32.8%">33%</div><div class="seg" style="width:29.2%;background:#FF9A7A" title="50K–250K: 29.2%">29%</div><div class="seg" style="width:16.1%;background:#FF4A1C" title="250K–1M: 16.1%">16%</div><div class="seg" style="width:5.1%;background:#2C25FF" title="1M+: 5.1%"></div></div></div></div></div>
       <div class="pairs">
         <div class="pair"><img class="av" src="data:image/jpeg;base64,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" alt=""><div><b>30.1M → 43.8K</b><span>Middle half 31K–59K</span></div></div>
         <div class="pair"><img class="av" src="data:image/jpeg;base64,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" alt=""><div><b>7.46M → 35.7K</b><span>No full tracks under 10K</span></div></div>
@@ -363,7 +447,7 @@ blockquote.dark{grid-column:1/-1;background:var(--ink);padding:1.2rem;border-rad
     <div class="label">How each channel’s lifetime views are distributed</div>
     <h2 class="display big">Some channels rest on one upload; others spread their views across thousands.</h2>
     <div class="split2 wide">
-      <div><div class="legend"><span><i style="background:#FFD27A"></i>Largest upload</span><span><i style="background:#D9971F"></i>Uploads 2–10</span><span><i style="background:#7A6230"></i>Uploads 11–100</span><span><i style="background:#3A3646"></i>All other uploads</span></div><div class="cbs"><div class="cb-g">The Nations</div><div class="cb"><div class="cb-l">Trap Nation<span>15.11B · 3,118 uploads</span></div><div class="cb-b"><i style="width:3.76%;background:#FFD27A" title="Largest upload: 3.8%"></i><i style="width:23.19%;background:#D9971F" title="Uploads 2–10: 23.2%"></i><i style="width:38.47%;background:#7A6230" title="Uploads 11–100: 38.5%"></i><i style="width:34.58%;background:#3A3646" title="The rest: 34.6%"></i></div></div><div class="cb"><div class="cb-l">Chill Nation<span>4.66B · 2,800 uploads</span></div><div class="cb-b"><i style="width:26.72%;background:#FFD27A" title="Largest upload: 26.7%"></i><i style="width:27.90%;background:#D9971F" title="Uploads 2–10: 27.9%"></i><i style="width:24.30%;background:#7A6230" title="Uploads 11–100: 24.3%"></i><i style="width:21.08%;background:#3A3646" title="The rest: 21.1%"></i></div></div><div class="cb"><div class="cb-l">Rap Nation<span>1.09B · 3,028 uploads</span></div><div class="cb-b"><i style="width:8.47%;background:#FFD27A" title="Largest upload: 8.5%"></i><i style="width:33.41%;background:#D9971F" title="Uploads 2–10: 33.4%"></i><i style="width:32.85%;background:#7A6230" title="Uploads 11–100: 32.8%"></i><i style="width:25.28%;background:#3A3646" title="The rest: 25.3%"></i></div></div><div class="cb"><div class="cb-l">House Nation<span>1.06B · 2,386 uploads</span></div><div class="cb-b"><i style="width:6.33%;background:#FFD27A" title="Largest upload: 6.3%"></i><i style="width:28.19%;background:#D9971F" title="Uploads 2–10: 28.2%"></i><i style="width:39.47%;background:#7A6230" title="Uploads 11–100: 39.5%"></i><i style="width:26.01%;background:#3A3646" title="The rest: 26.0%"></i></div></div><div class="cb"><div class="cb-l">Bass Nation<span>606.5M · 2,126 uploads</span></div><div class="cb-b"><i style="width:11.92%;background:#FFD27A" title="Largest upload: 11.9%"></i><i style="width:28.08%;background:#D9971F" title="Uploads 2–10: 28.1%"></i><i style="width:23.96%;background:#7A6230" title="Uploads 11–100: 24.0%"></i><i style="width:36.04%;background:#3A3646" title="The rest: 36.0%"></i></div></div><div class="cb"><div class="cb-l">phonk<span>430M · 541 uploads</span></div><div class="cb-b"><i style="width:59.46%;background:#FFD27A" title="Largest upload: 59.5%"></i><i style="width:31.89%;background:#D9971F" title="Uploads 2–10: 31.9%"></i><i style="width:6.94%;background:#7A6230" title="Uploads 11–100: 6.9%"></i><i style="width:1.70%;background:#3A3646" title="The rest: 1.7%"></i></div></div><div class="cb"><div class="cb-l">Bass Boosted<span>395.2M · 2,805 uploads</span></div><div class="cb-b"><i style="width:10.50%;background:#FFD27A" title="Largest upload: 10.5%"></i><i style="width:35.07%;background:#D9971F" title="Uploads 2–10: 35.1%"></i><i style="width:25.06%;background:#7A6230" title="Uploads 11–100: 25.1%"></i><i style="width:29.37%;background:#3A3646" title="The rest: 29.4%"></i></div></div><div class="cb"><div class="cb-l">Latin Nation<span>31.6M · 549 uploads</span></div><div class="cb-b"><i style="width:32.98%;background:#FFD27A" title="Largest upload: 33.0%"></i><i style="width:43.02%;background:#D9971F" title="Uploads 2–10: 43.0%"></i><i style="width:15.39%;background:#7A6230" title="Uploads 11–100: 15.4%"></i><i style="width:8.61%;background:#3A3646" title="The rest: 8.6%"></i></div></div><div class="cb"><div class="cb-l">R&amp;B Nation<span>22.9M · 614 uploads</span></div><div class="cb-b"><i style="width:4.75%;background:#FFD27A" title="Largest upload: 4.7%"></i><i style="width:27.04%;background:#D9971F" title="Uploads 2–10: 27.0%"></i><i style="width:34.64%;background:#7A6230" title="Uploads 11–100: 34.6%"></i><i style="width:33.58%;background:#3A3646" title="The rest: 33.6%"></i></div></div><div class="cb"><div class="cb-l">Indie Nation<span>5.1M · 540 uploads <em>(14% of channel total collected)</em></span></div><div class="cb-b"><i style="width:7.16%;background:#FFD27A" title="Largest upload: 7.2%"></i><i style="width:21.80%;background:#D9971F" title="Uploads 2–10: 21.8%"></i><i style="width:27.10%;background:#7A6230" title="Uploads 11–100: 27.1%"></i><i style="width:43.94%;background:#3A3646" title="The rest: 43.9%"></i></div></div><div class="cb-g">Electronic / gaming</div><div class="cb"><div class="cb-l">Monstercat Uncaged<span>3.52B · 2,550 uploads</span></div><div class="cb-b"><i style="width:4.87%;background:#FFD27A" title="Largest upload: 4.9%"></i><i style="width:14.94%;background:#D9971F" title="Uploads 2–10: 14.9%"></i><i style="width:27.71%;background:#7A6230" title="Uploads 11–100: 27.7%"></i><i style="width:52.47%;background:#3A3646" title="The rest: 52.5%"></i></div></div><div class="cb"><div class="cb-l">Monstercat Instinct<span>668.5M · 783 uploads</span></div><div class="cb-b"><i style="width:65.55%;background:#FFD27A" title="Largest upload: 65.5%"></i><i style="width:5.37%;background:#D9971F" title="Uploads 2–10: 5.4%"></i><i style="width:14.36%;background:#7A6230" title="Uploads 11–100: 14.4%"></i><i style="width:14.72%;background:#3A3646" title="The rest: 14.7%"></i></div></div><div class="cb"><div class="cb-l">mau5trap<span>182.4M · 2,125 uploads</span></div><div class="cb-b"><i style="width:8.70%;background:#FFD27A" title="Largest upload: 8.7%"></i><i style="width:34.81%;background:#D9971F" title="Uploads 2–10: 34.8%"></i><i style="width:29.95%;background:#7A6230" title="Uploads 11–100: 30.0%"></i><i style="width:26.53%;background:#3A3646" title="The rest: 26.5%"></i></div></div><div class="cb"><div class="cb-l">Monstercat Silk<span>155.4M · 2,173 uploads</span></div><div class="cb-b"><i style="width:31.96%;background:#FFD27A" title="Largest upload: 32.0%"></i><i style="width:24.22%;background:#D9971F" title="Uploads 2–10: 24.2%"></i><i style="width:13.02%;background:#7A6230" title="Uploads 11–100: 13.0%"></i><i style="width:30.80%;background:#3A3646" title="The rest: 30.8%"></i></div></div><div class="cb"><div class="cb-l">Enhanced Music<span>44.6M · 4,615 uploads</span></div><div class="cb-b"><i style="width:1.41%;background:#FFD27A" title="Largest upload: 1.4%"></i><i style="width:6.61%;background:#D9971F" title="Uploads 2–10: 6.6%"></i><i style="width:19.94%;background:#7A6230" title="Uploads 11–100: 19.9%"></i><i style="width:72.05%;background:#3A3646" title="The rest: 72.0%"></i></div></div><div class="cb-g">Culture / youth</div><div class="cb"><div class="cb-l">Flighthouse<span>2.21B · 2,635 uploads</span></div><div class="cb-b"><i style="width:3.23%;background:#FFD27A" title="Largest upload: 3.2%"></i><i style="width:16.10%;background:#D9971F" title="Uploads 2–10: 16.1%"></i><i style="width:40.21%;background:#7A6230" title="Uploads 11–100: 40.2%"></i><i style="width:40.46%;background:#3A3646" title="The rest: 40.5%"></i></div></div><div class="cb"><div class="cb-l">GoodTalk<span>170.9M · 1,456 uploads</span></div><div class="cb-b"><i style="width:9.06%;background:#FFD27A" title="Largest upload: 9.1%"></i><i style="width:27.02%;background:#D9971F" title="Uploads 2–10: 27.0%"></i><i style="width:44.46%;background:#7A6230" title="Uploads 11–100: 44.5%"></i><i style="width:19.46%;background:#3A3646" title="The rest: 19.5%"></i></div></div><div class="cb-g">Scene-specific labels</div><div class="cb"><div class="cb-l">NettwerkMusic<span>1.22B · 1,713 uploads</span></div><div class="cb-b"><i style="width:18.19%;background:#FFD27A" title="Largest upload: 18.2%"></i><i style="width:37.53%;background:#D9971F" title="Uploads 2–10: 37.5%"></i><i style="width:32.41%;background:#7A6230" title="Uploads 11–100: 32.4%"></i><i style="width:11.87%;background:#3A3646" title="The rest: 11.9%"></i></div></div><div class="cb"><div class="cb-l">nettwerkbackstage<span>129.5M · 672 uploads</span></div><div class="cb-b"><i style="width:7.74%;background:#FFD27A" title="Largest upload: 7.7%"></i><i style="width:40.91%;background:#D9971F" title="Uploads 2–10: 40.9%"></i><i style="width:39.26%;background:#7A6230" title="Uploads 11–100: 39.3%"></i><i style="width:12.08%;background:#3A3646" title="The rest: 12.1%"></i></div></div><div class="cb"><div class="cb-l">Lowly<span>118.8M · 520 uploads</span></div><div class="cb-b"><i style="width:44.86%;background:#FFD27A" title="Largest upload: 44.9%"></i><i style="width:22.94%;background:#D9971F" title="Uploads 2–10: 22.9%"></i><i style="width:19.11%;background:#7A6230" title="Uploads 11–100: 19.1%"></i><i style="width:13.09%;background:#3A3646" title="The rest: 13.1%"></i></div></div><div class="cb"><div class="cb-l">broke.<span>113.1M · 800 uploads</span></div><div class="cb-b"><i style="width:21.89%;background:#FFD27A" title="Largest upload: 21.9%"></i><i style="width:45.67%;background:#D9971F" title="Uploads 2–10: 45.7%"></i><i style="width:29.00%;background:#7A6230" title="Uploads 11–100: 29.0%"></i><i style="width:3.44%;background:#3A3646" title="The rest: 3.4%"></i></div></div><div class="cb"><div class="cb-l">Strut Records<span>108.9M · 239 uploads</span></div><div class="cb-b"><i style="width:54.17%;background:#FFD27A" title="Largest upload: 54.2%"></i><i style="width:38.99%;background:#D9971F" title="Uploads 2–10: 39.0%"></i><i style="width:5.97%;background:#7A6230" title="Uploads 11–100: 6.0%"></i><i style="width:0.87%;background:#3A3646" title="The rest: 0.9%"></i></div></div><div class="cb"><div class="cb-l">!K7 Records<span>17.5M · 427 uploads</span></div><div class="cb-b"><i style="width:14.54%;background:#FFD27A" title="Largest upload: 14.5%"></i><i style="width:27.59%;background:#D9971F" title="Uploads 2–10: 27.6%"></i><i style="width:41.52%;background:#7A6230" title="Uploads 11–100: 41.5%"></i><i style="width:16.35%;background:#3A3646" title="The rest: 16.3%"></i></div></div></div></div>
+      <div><div class="legend"><span><i style="background:#FF4A1C"></i>Largest upload</span><span><i style="background:#FF9A7A"></i>Uploads 2–10</span><span><i style="background:#FFD3C9"></i>Uploads 11–100</span><span><i style="background:#2A2826"></i>All other uploads</span></div><div class="cbs"><div class="cb-g">The Nations</div><div class="cb"><div class="cb-l">Trap Nation<span>15.11B · 3,118 uploads</span></div><div class="cb-b"><i style="width:3.76%;background:#FF4A1C" title="Largest upload: 3.8%"></i><i style="width:23.19%;background:#FF9A7A" title="Uploads 2–10: 23.2%"></i><i style="width:38.47%;background:#FFD3C9" title="Uploads 11–100: 38.5%"></i><i style="width:34.58%;background:#2A2826" title="The rest: 34.6%"></i></div></div><div class="cb"><div class="cb-l">Chill Nation<span>4.66B · 2,800 uploads</span></div><div class="cb-b"><i style="width:26.72%;background:#FF4A1C" title="Largest upload: 26.7%"></i><i style="width:27.90%;background:#FF9A7A" title="Uploads 2–10: 27.9%"></i><i style="width:24.30%;background:#FFD3C9" title="Uploads 11–100: 24.3%"></i><i style="width:21.08%;background:#2A2826" title="The rest: 21.1%"></i></div></div><div class="cb"><div class="cb-l">Rap Nation<span>1.09B · 3,028 uploads</span></div><div class="cb-b"><i style="width:8.47%;background:#FF4A1C" title="Largest upload: 8.5%"></i><i style="width:33.41%;background:#FF9A7A" title="Uploads 2–10: 33.4%"></i><i style="width:32.85%;background:#FFD3C9" title="Uploads 11–100: 32.8%"></i><i style="width:25.28%;background:#2A2826" title="The rest: 25.3%"></i></div></div><div class="cb"><div class="cb-l">House Nation<span>1.06B · 2,386 uploads</span></div><div class="cb-b"><i style="width:6.33%;background:#FF4A1C" title="Largest upload: 6.3%"></i><i style="width:28.19%;background:#FF9A7A" title="Uploads 2–10: 28.2%"></i><i style="width:39.47%;background:#FFD3C9" title="Uploads 11–100: 39.5%"></i><i style="width:26.01%;background:#2A2826" title="The rest: 26.0%"></i></div></div><div class="cb"><div class="cb-l">Bass Nation<span>606.5M · 2,126 uploads</span></div><div class="cb-b"><i style="width:11.92%;background:#FF4A1C" title="Largest upload: 11.9%"></i><i style="width:28.08%;background:#FF9A7A" title="Uploads 2–10: 28.1%"></i><i style="width:23.96%;background:#FFD3C9" title="Uploads 11–100: 24.0%"></i><i style="width:36.04%;background:#2A2826" title="The rest: 36.0%"></i></div></div><div class="cb"><div class="cb-l">phonk<span>430M · 541 uploads</span></div><div class="cb-b"><i style="width:59.46%;background:#FF4A1C" title="Largest upload: 59.5%"></i><i style="width:31.89%;background:#FF9A7A" title="Uploads 2–10: 31.9%"></i><i style="width:6.94%;background:#FFD3C9" title="Uploads 11–100: 6.9%"></i><i style="width:1.70%;background:#2A2826" title="The rest: 1.7%"></i></div></div><div class="cb"><div class="cb-l">Bass Boosted<span>395.2M · 2,805 uploads</span></div><div class="cb-b"><i style="width:10.50%;background:#FF4A1C" title="Largest upload: 10.5%"></i><i style="width:35.07%;background:#FF9A7A" title="Uploads 2–10: 35.1%"></i><i style="width:25.06%;background:#FFD3C9" title="Uploads 11–100: 25.1%"></i><i style="width:29.37%;background:#2A2826" title="The rest: 29.4%"></i></div></div><div class="cb"><div class="cb-l">Latin Nation<span>31.6M · 549 uploads</span></div><div class="cb-b"><i style="width:32.98%;background:#FF4A1C" title="Largest upload: 33.0%"></i><i style="width:43.02%;background:#FF9A7A" title="Uploads 2–10: 43.0%"></i><i style="width:15.39%;background:#FFD3C9" title="Uploads 11–100: 15.4%"></i><i style="width:8.61%;background:#2A2826" title="The rest: 8.6%"></i></div></div><div class="cb"><div class="cb-l">R&amp;B Nation<span>22.9M · 614 uploads</span></div><div class="cb-b"><i style="width:4.75%;background:#FF4A1C" title="Largest upload: 4.7%"></i><i style="width:27.04%;background:#FF9A7A" title="Uploads 2–10: 27.0%"></i><i style="width:34.64%;background:#FFD3C9" title="Uploads 11–100: 34.6%"></i><i style="width:33.58%;background:#2A2826" title="The rest: 33.6%"></i></div></div><div class="cb"><div class="cb-l">Indie Nation<span>5.1M · 540 uploads <em>(14% of channel total collected)</em></span></div><div class="cb-b"><i style="width:7.16%;background:#FF4A1C" title="Largest upload: 7.2%"></i><i style="width:21.80%;background:#FF9A7A" title="Uploads 2–10: 21.8%"></i><i style="width:27.10%;background:#FFD3C9" title="Uploads 11–100: 27.1%"></i><i style="width:43.94%;background:#2A2826" title="The rest: 43.9%"></i></div></div><div class="cb-g">Electronic / gaming</div><div class="cb"><div class="cb-l">Monstercat Uncaged<span>3.52B · 2,550 uploads</span></div><div class="cb-b"><i style="width:4.87%;background:#FF4A1C" title="Largest upload: 4.9%"></i><i style="width:14.94%;background:#FF9A7A" title="Uploads 2–10: 14.9%"></i><i style="width:27.71%;background:#FFD3C9" title="Uploads 11–100: 27.7%"></i><i style="width:52.47%;background:#2A2826" title="The rest: 52.5%"></i></div></div><div class="cb"><div class="cb-l">Monstercat Instinct<span>668.5M · 783 uploads</span></div><div class="cb-b"><i style="width:65.55%;background:#FF4A1C" title="Largest upload: 65.5%"></i><i style="width:5.37%;background:#FF9A7A" title="Uploads 2–10: 5.4%"></i><i style="width:14.36%;background:#FFD3C9" title="Uploads 11–100: 14.4%"></i><i style="width:14.72%;background:#2A2826" title="The rest: 14.7%"></i></div></div><div class="cb"><div class="cb-l">mau5trap<span>182.4M · 2,125 uploads</span></div><div class="cb-b"><i style="width:8.70%;background:#FF4A1C" title="Largest upload: 8.7%"></i><i style="width:34.81%;background:#FF9A7A" title="Uploads 2–10: 34.8%"></i><i style="width:29.95%;background:#FFD3C9" title="Uploads 11–100: 30.0%"></i><i style="width:26.53%;background:#2A2826" title="The rest: 26.5%"></i></div></div><div class="cb"><div class="cb-l">Monstercat Silk<span>155.4M · 2,173 uploads</span></div><div class="cb-b"><i style="width:31.96%;background:#FF4A1C" title="Largest upload: 32.0%"></i><i style="width:24.22%;background:#FF9A7A" title="Uploads 2–10: 24.2%"></i><i style="width:13.02%;background:#FFD3C9" title="Uploads 11–100: 13.0%"></i><i style="width:30.80%;background:#2A2826" title="The rest: 30.8%"></i></div></div><div class="cb"><div class="cb-l">Enhanced Music<span>44.6M · 4,615 uploads</span></div><div class="cb-b"><i style="width:1.41%;background:#FF4A1C" title="Largest upload: 1.4%"></i><i style="width:6.61%;background:#FF9A7A" title="Uploads 2–10: 6.6%"></i><i style="width:19.94%;background:#FFD3C9" title="Uploads 11–100: 19.9%"></i><i style="width:72.05%;background:#2A2826" title="The rest: 72.0%"></i></div></div><div class="cb-g">Culture / youth</div><div class="cb"><div class="cb-l">Flighthouse<span>2.21B · 2,635 uploads</span></div><div class="cb-b"><i style="width:3.23%;background:#FF4A1C" title="Largest upload: 3.2%"></i><i style="width:16.10%;background:#FF9A7A" title="Uploads 2–10: 16.1%"></i><i style="width:40.21%;background:#FFD3C9" title="Uploads 11–100: 40.2%"></i><i style="width:40.46%;background:#2A2826" title="The rest: 40.5%"></i></div></div><div class="cb"><div class="cb-l">GoodTalk<span>170.9M · 1,456 uploads</span></div><div class="cb-b"><i style="width:9.06%;background:#FF4A1C" title="Largest upload: 9.1%"></i><i style="width:27.02%;background:#FF9A7A" title="Uploads 2–10: 27.0%"></i><i style="width:44.46%;background:#FFD3C9" title="Uploads 11–100: 44.5%"></i><i style="width:19.46%;background:#2A2826" title="The rest: 19.5%"></i></div></div><div class="cb-g">Scene-specific labels</div><div class="cb"><div class="cb-l">NettwerkMusic<span>1.22B · 1,713 uploads</span></div><div class="cb-b"><i style="width:18.19%;background:#FF4A1C" title="Largest upload: 18.2%"></i><i style="width:37.53%;background:#FF9A7A" title="Uploads 2–10: 37.5%"></i><i style="width:32.41%;background:#FFD3C9" title="Uploads 11–100: 32.4%"></i><i style="width:11.87%;background:#2A2826" title="The rest: 11.9%"></i></div></div><div class="cb"><div class="cb-l">nettwerkbackstage<span>129.5M · 672 uploads</span></div><div class="cb-b"><i style="width:7.74%;background:#FF4A1C" title="Largest upload: 7.7%"></i><i style="width:40.91%;background:#FF9A7A" title="Uploads 2–10: 40.9%"></i><i style="width:39.26%;background:#FFD3C9" title="Uploads 11–100: 39.3%"></i><i style="width:12.08%;background:#2A2826" title="The rest: 12.1%"></i></div></div><div class="cb"><div class="cb-l">Lowly<span>118.8M · 520 uploads</span></div><div class="cb-b"><i style="width:44.86%;background:#FF4A1C" title="Largest upload: 44.9%"></i><i style="width:22.94%;background:#FF9A7A" title="Uploads 2–10: 22.9%"></i><i style="width:19.11%;background:#FFD3C9" title="Uploads 11–100: 19.1%"></i><i style="width:13.09%;background:#2A2826" title="The rest: 13.1%"></i></div></div><div class="cb"><div class="cb-l">broke.<span>113.1M · 800 uploads</span></div><div class="cb-b"><i style="width:21.89%;background:#FF4A1C" title="Largest upload: 21.9%"></i><i style="width:45.67%;background:#FF9A7A" title="Uploads 2–10: 45.7%"></i><i style="width:29.00%;background:#FFD3C9" title="Uploads 11–100: 29.0%"></i><i style="width:3.44%;background:#2A2826" title="The rest: 3.4%"></i></div></div><div class="cb"><div class="cb-l">Strut Records<span>108.9M · 239 uploads</span></div><div class="cb-b"><i style="width:54.17%;background:#FF4A1C" title="Largest upload: 54.2%"></i><i style="width:38.99%;background:#FF9A7A" title="Uploads 2–10: 39.0%"></i><i style="width:5.97%;background:#FFD3C9" title="Uploads 11–100: 6.0%"></i><i style="width:0.87%;background:#2A2826" title="The rest: 0.9%"></i></div></div><div class="cb"><div class="cb-l">!K7 Records<span>17.5M · 427 uploads</span></div><div class="cb-b"><i style="width:14.54%;background:#FF4A1C" title="Largest upload: 14.5%"></i><i style="width:27.59%;background:#FF9A7A" title="Uploads 2–10: 27.6%"></i><i style="width:41.52%;background:#FFD3C9" title="Uploads 11–100: 41.5%"></i><i style="width:16.35%;background:#2A2826" title="The rest: 16.3%"></i></div></div></div></div>
       <div>
         <h3 class="mini">Four shapes in the network</h3>
         <ul class="shapes">
@@ -420,7 +504,7 @@ blockquote.dark{grid-column:1/-1;background:var(--ink);padding:1.2rem;border-rad
       </div>
       <div>
         <h3 class="mini">Exploratory: new views over 2h16m, by upload age</h3>
-        <div class="legend"><span><i style="background:#FFD27A"></i>Under 30 days</span><span><i style="background:#D9971F"></i>30 days – 1 year</span><span><i style="background:#7A6230"></i>1–3 years</span></div><div class="sb"><div class="sb-r"><div class="sb-l">Trap Nation <em>6.1K</em></div><div class="sb-b"><div class="seg" style="width:37%;background:#FFD27A" title="Under 30 days: 37.0%">37%</div><div class="seg" style="width:18%;background:#D9971F" title="30 days – 1 year: 18.0%">18%</div><div class="seg" style="width:46%;background:#7A6230" title="1–3 years: 46.0%">46%</div></div></div><div class="sb-r"><div class="sb-l">Chill Nation <em>18.6K</em></div><div class="sb-b"><div class="seg" style="width:16%;background:#FFD27A" title="Under 30 days: 16.0%">16%</div><div class="seg" style="width:49%;background:#D9971F" title="30 days – 1 year: 49.0%">49%</div><div class="seg" style="width:35%;background:#7A6230" title="1–3 years: 35.0%">35%</div></div></div><div class="sb-r"><div class="sb-l">Monstercat Instinct <em>1.0K</em></div><div class="sb-b"><div class="seg" style="width:27%;background:#FFD27A" title="Under 30 days: 27.0%">27%</div><div class="seg" style="width:48%;background:#D9971F" title="30 days – 1 year: 48.0%">48%</div><div class="seg" style="width:25%;background:#7A6230" title="1–3 years: 25.0%">25%</div></div></div><div class="sb-r"><div class="sb-l">Monstercat Silk <em>1.3K</em></div><div class="sb-b"><div class="seg" style="width:16%;background:#FFD27A" title="Under 30 days: 16.0%">16%</div><div class="seg" style="width:54%;background:#D9971F" title="30 days – 1 year: 54.0%">54%</div><div class="seg" style="width:30%;background:#7A6230" title="1–3 years: 30.0%">30%</div></div></div><div class="sb-r"><div class="sb-l">Rap Nation <em>14.6K</em></div><div class="sb-b"><div class="seg" style="width:81%;background:#D9971F" title="30 days – 1 year: 81.0%">81%</div><div class="seg" style="width:19%;background:#7A6230" title="1–3 years: 19.0%">19%</div></div></div><div class="sb-r"><div class="sb-l">Flighthouse <em>130K</em></div><div class="sb-b"><div class="seg" style="width:59%;background:#FFD27A" title="Under 30 days: 59.0%">59%</div><div class="seg" style="width:39%;background:#D9971F" title="30 days – 1 year: 39.0%">39%</div><div class="seg" style="width:2%;background:#7A6230" title="1–3 years: 2.0%"></div></div></div><div class="sb-r"><div class="sb-l">7clouds (benchmark) <em>648K</em></div><div class="sb-b"><div class="seg" style="width:6%;background:#FFD27A" title="Under 30 days: 6.0%"></div><div class="seg" style="width:24%;background:#D9971F" title="30 days – 1 year: 24.0%">24%</div><div class="seg" style="width:70%;background:#7A6230" title="1–3 years: 70.0%">70%</div></div></div><div class="sb-r"><div class="sb-l">Aureal (benchmark) <em>24.1K</em></div><div class="sb-b"><div class="seg" style="width:60%;background:#FFD27A" title="Under 30 days: 60.0%">60%</div><div class="seg" style="width:36%;background:#D9971F" title="30 days – 1 year: 36.0%">36%</div><div class="seg" style="width:5%;background:#7A6230" title="1–3 years: 5.0%"></div></div></div></div>
+        <div class="legend"><span><i style="background:#FF4A1C"></i>Under 30 days</span><span><i style="background:#FF9A7A"></i>30 days – 1 year</span><span><i style="background:#FFD3C9"></i>1–3 years</span></div><div class="sb"><div class="sb-r"><div class="sb-l">Trap Nation <em>6.1K</em></div><div class="sb-b"><div class="seg" style="width:37%;background:#FF4A1C" title="Under 30 days: 37.0%">37%</div><div class="seg" style="width:18%;background:#FF9A7A" title="30 days – 1 year: 18.0%">18%</div><div class="seg" style="width:46%;background:#FFD3C9" title="1–3 years: 46.0%">46%</div></div></div><div class="sb-r"><div class="sb-l">Chill Nation <em>18.6K</em></div><div class="sb-b"><div class="seg" style="width:16%;background:#FF4A1C" title="Under 30 days: 16.0%">16%</div><div class="seg" style="width:49%;background:#FF9A7A" title="30 days – 1 year: 49.0%">49%</div><div class="seg" style="width:35%;background:#FFD3C9" title="1–3 years: 35.0%">35%</div></div></div><div class="sb-r"><div class="sb-l">Monstercat Instinct <em>1.0K</em></div><div class="sb-b"><div class="seg" style="width:27%;background:#FF4A1C" title="Under 30 days: 27.0%">27%</div><div class="seg" style="width:48%;background:#FF9A7A" title="30 days – 1 year: 48.0%">48%</div><div class="seg" style="width:25%;background:#FFD3C9" title="1–3 years: 25.0%">25%</div></div></div><div class="sb-r"><div class="sb-l">Monstercat Silk <em>1.3K</em></div><div class="sb-b"><div class="seg" style="width:16%;background:#FF4A1C" title="Under 30 days: 16.0%">16%</div><div class="seg" style="width:54%;background:#FF9A7A" title="30 days – 1 year: 54.0%">54%</div><div class="seg" style="width:30%;background:#FFD3C9" title="1–3 years: 30.0%">30%</div></div></div><div class="sb-r"><div class="sb-l">Rap Nation <em>14.6K</em></div><div class="sb-b"><div class="seg" style="width:81%;background:#FF9A7A" title="30 days – 1 year: 81.0%">81%</div><div class="seg" style="width:19%;background:#FFD3C9" title="1–3 years: 19.0%">19%</div></div></div><div class="sb-r"><div class="sb-l">Flighthouse <em>130K</em></div><div class="sb-b"><div class="seg" style="width:59%;background:#FF4A1C" title="Under 30 days: 59.0%">59%</div><div class="seg" style="width:39%;background:#FF9A7A" title="30 days – 1 year: 39.0%">39%</div><div class="seg" style="width:2%;background:#FFD3C9" title="1–3 years: 2.0%"></div></div></div><div class="sb-r"><div class="sb-l">7clouds (benchmark) <em>648K</em></div><div class="sb-b"><div class="seg" style="width:6%;background:#FF4A1C" title="Under 30 days: 6.0%"></div><div class="seg" style="width:24%;background:#FF9A7A" title="30 days – 1 year: 24.0%">24%</div><div class="seg" style="width:70%;background:#FFD3C9" title="1–3 years: 70.0%">70%</div></div></div><div class="sb-r"><div class="sb-l">Aureal (benchmark) <em>24.1K</em></div><div class="sb-b"><div class="seg" style="width:60%;background:#FF4A1C" title="Under 30 days: 60.0%">60%</div><div class="seg" style="width:36%;background:#FF9A7A" title="30 days – 1 year: 36.0%">36%</div><div class="seg" style="width:5%;background:#FFD3C9" title="1–3 years: 5.0%"></div></div></div></div>
         <p class="sub">One reading on a weekday afternoon (UK), in-window uploads only. Indicative, not a trend.</p>
       </div>
     </div>
@@ -651,10 +735,10 @@ blockquote.dark{grid-column:1/-1;background:var(--ink);padding:1.2rem;border-rad
     <div class="split2 wide">
       <div class="hbars">
         <h3 class="mini">Share of each artist’s network views held by early uploads</h3>
-        <div class="hb"><span>Marshmello <em>58 uploads · 753M</em></span><div><i style="width:91%;background:#FFD27A"></i><b>91%</b> on 2016 uploads</div></div>
-        <div class="hb"><span>deadmau5 <em>127 · 94M, mostly mau5trap</em></span><div><i style="width:72%;background:#FFD27A"></i><b>72%</b> on 2014–17 uploads</div></div>
-        <div class="hb"><span>Audien <em>52 · 1.5M, mostly Enhanced</em></span><div><i style="width:59%;background:#FFD27A"></i><b>59%</b> on 2010–12 uploads</div></div>
-        <div class="hb"><span>bbno$ <em>40 · 6.9M</em></span><div><i style="width:47%;background:#FFD27A"></i><b>47%</b> on one 2019 feature</div></div>
+        <div class="hb"><span>Marshmello <em>58 uploads · 753M</em></span><div><i style="width:91%;background:#FF4A1C"></i><b>91%</b> on 2016 uploads</div></div>
+        <div class="hb"><span>deadmau5 <em>127 · 94M, mostly mau5trap</em></span><div><i style="width:72%;background:#FF4A1C"></i><b>72%</b> on 2014–17 uploads</div></div>
+        <div class="hb"><span>Audien <em>52 · 1.5M, mostly Enhanced</em></span><div><i style="width:59%;background:#FF4A1C"></i><b>59%</b> on 2010–12 uploads</div></div>
+        <div class="hb"><span>bbno$ <em>40 · 6.9M</em></span><div><i style="width:47%;background:#FF4A1C"></i><b>47%</b> on one 2019 feature</div></div>
       </div>
       <div>
         <div class="box"><b>Cumulative is not compounding.</b> A lifetime total says how many views an upload has gathered since it was published, not whether it is still gaining. Older placements show far larger totals than recent ones (Marshmello: median 940K for uploads over five years old, about 50K for those under two), but they have had years longer to accumulate, so the two are not comparable.</div>
@@ -812,8 +896,9 @@ blockquote.dark{grid-column:1/-1;background:var(--ink);padding:1.2rem;border-rad
 <script>
 (function(){
   var s=[].slice.call(document.querySelectorAll('.slide')),toc=document.getElementById('toc'),pb=document.getElementById('pbar');
-  s.forEach(function(x,i){var a=document.createElement('a');a.href='#s'+i;x.id='s'+i;a.title=x.dataset.t;toc.appendChild(a);});
-  var io=new IntersectionObserver(function(es){es.forEach(function(en){if(en.isIntersecting){en.target.classList.add('in');var i=s.indexOf(en.target);[].forEach.call(toc.children,function(a,j){a.classList.toggle('on',j===i)});}})},{threshold:.35});
+  var CH={'Cover':'Overview','Findings in brief':'Findings','Who controls what':'The network','Subscribers and views':'Performance','Where lifetime views sit':'Scale & concentration','New views by upload age':'New views','Trap Nation':'Channel examples','How a song moves':'Repertoire','Features':'Features','Featured artists':'Featured artists','Strategic framing':'Context','What this helps us understand':'Discussion'},cur=null,map=[];
+  s.forEach(function(x,i){x.id='s'+i;if(CH[x.dataset.t]){var a=document.createElement('a');a.href='#s'+i;a.textContent=CH[x.dataset.t];toc.appendChild(a);cur=a;}map.push(cur);});
+  var io=new IntersectionObserver(function(es){es.forEach(function(en){if(en.isIntersecting){en.target.classList.add('in');var i=s.indexOf(en.target);[].forEach.call(toc.children,function(a){var on=a===map[i];a.classList.toggle('on',on);if(on&&a.scrollIntoView&&toc.scrollWidth>toc.clientWidth)toc.scrollTo({left:a.offsetLeft-40,behavior:'smooth'});});}})},{threshold:.35});
   s.forEach(function(x){io.observe(x)});
   addEventListener('scroll',function(){var h=document.documentElement;pb.style.width=(h.scrollTop/(h.scrollHeight-h.clientHeight)*100)+'%'},{passive:true});
 })();
