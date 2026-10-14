@@ -54,7 +54,7 @@ export default function MarketWatchClient() {
           setChans(j.channels ?? []); } catch {}
     setLoading(false);
   })(); }, []);
-  const [view, setView] = useState<'home'|'channel'|'tracks'>('home');
+  const [view, setView] = useState<'home'|'channel'|'tracks'|'virgin'>('home');
   const [current, setCurrent] = useState<string|null>(null);
   const [busy, setBusy] = useState(false);
   const [progress, setProgress] = useState('');
@@ -106,6 +106,7 @@ export default function MarketWatchClient() {
       {view==='home'   && <Home chans={chans} win={win} open={(k)=>{setCurrent(k);setView('channel');}} />}
       {view==='channel'&& <Channel chans={chans} current={current} setCurrent={setCurrent} />}
       {view==='tracks' && <Tracks rows={rows} />}
+      {view==='virgin' && <Virgin />}
     </Shell>
   );
 }
@@ -328,6 +329,172 @@ function Tracks({ rows }: { rows: Row[] }) {
   );
 }
 
+
+/* ── Virgin watched artists → evidence → suggestions ─────────────────── */
+function Virgin() {
+  const [artists,setArtists]=useState<any[]>([]);
+  const [slug,setSlug]=useState('');
+  const [tracks,setTracks]=useState<any[]>([]);
+  const [open,setOpen]=useState<string|null>(null);
+  const [sugg,setSugg]=useState<any>(null);
+  const [loading,setLoading]=useState(true);
+  const [busy,setBusy]=useState(false);
+  const [marks,setMarks]=useState<Record<string,string>>({});
+
+  useEffect(()=>{(async()=>{
+    const j=await (await fetch('/api/market-watch/virgin')).json();
+    setArtists(j.artists??[]); setLoading(false);
+  })();},[]);
+  useEffect(()=>{ if(!slug) return; (async()=>{
+    setBusy(true); setTracks([]); setOpen(null); setSugg(null);
+    const j=await (await fetch(`/api/market-watch/virgin?artist=${slug}`)).json();
+    setTracks(j.tracks??[]); setBusy(false);
+  })();},[slug]);
+
+  async function explore(key:string){
+    setBusy(true); setSugg(null);
+    const j=await (await fetch(`/api/market-watch/virgin?artist=${slug}&track=${encodeURIComponent(key)}`)).json();
+    setSugg(j); setBusy(false);
+  }
+
+  if (loading) return <Card><p className="m-0 text-ink/45">Loading watched artists…</p></Card>;
+
+  const withUploads=artists.filter(a=>a.uploads>0);
+  return (
+    <>
+      <p className="text-meta text-ink/50 mb-4">
+        Read from Watcher&rsquo;s stored artist data. <b>Monitored</b>, <b>ownership</b> and <b>permission to create or place an asset</b>
+        are three different things — permission is recorded nowhere in this codebase and is always shown as unknown.
+      </p>
+      <div className="flex gap-2 items-center flex-wrap mb-4">
+        <Sel value={slug} onChange={setSlug}
+          opts={[['','Select a watched artist'],...withUploads.map((a:any)=>[a.slug,`${a.name} — ${a.tracks} tracks, ${a.uploads} uploads`] as [string,string])]} />
+        <span className="text-micro text-ink/40">{withUploads.length} artists with cached uploads</span>
+      </div>
+
+      {busy && <Card><p className="m-0 text-ink/45">Working…</p></Card>}
+
+      {!slug && !busy && (
+        <div className="rounded-card border border-line bg-surface shadow-card overflow-hidden">
+          <table className="w-full text-[13px]">
+            <thead><tr className="text-micro uppercase tracking-label text-ink/45">
+              <th className="text-left font-bold px-4 py-2.5">Artist</th>
+              <th className="text-left font-bold px-2">Ownership</th>
+              <th className="text-right font-bold px-2">Tracks</th>
+              <th className="text-right font-bold px-2">Uploads</th>
+              <th className="text-right font-bold px-4">Last upload</th>
+            </tr></thead>
+            <tbody>{withUploads.slice(0,40).map((a:any)=>(
+              <tr key={a.slug} onClick={()=>setSlug(a.slug)} className="border-t border-line hover:bg-raised cursor-pointer">
+                <td className="px-4 py-2.5"><b>{a.name}</b></td>
+                <td className="px-2"><Pill tone={a.ownership==='virgin'?'lf':'nt'}>{a.ownership}</Pill></td>
+                <td className="px-2 text-right tabular-nums">{a.tracks}</td>
+                <td className="px-2 text-right tabular-nums">{a.uploads}</td>
+                <td className="px-4 text-right text-ink/50">{a.lastUpload?dt(a.lastUpload):'—'}</td>
+              </tr>))}</tbody>
+          </table>
+        </div>
+      )}
+
+      {slug && !busy && tracks.length===0 && (
+        <Card><p className="m-0 text-ink/55">No cached uploads for this artist in Watcher&rsquo;s store.</p></Card>)}
+
+      {slug && tracks.map((t:any)=>(
+        <div key={t.songKey} className="rounded-card border border-line bg-surface shadow-card mb-2">
+          <button onClick={()=>setOpen(open===t.songKey?null:t.songKey)}
+            className="w-full flex justify-between items-center gap-3 px-4 py-3 text-left">
+            <span><span className="block font-bold text-body">{t.title}</span>
+              <span className="block text-meta text-ink/50">{t.assets.length} asset(s) · first {dt(t.firstSeen)}</span></span>
+            <span className="flex gap-1.5 items-center flex-wrap justify-end">
+              {Object.entries(t.containers).map(([k,n]:any)=><Pill key={k} tone={k==='short'?'sh':'lf'}>{k} {n}</Pill>)}
+              {t.marketAppearances.length>0 && <Pill tone="vv">{t.marketAppearances.length} market</Pill>}
+              <span className="text-ink/30 text-[11px]">{open===t.songKey?'▾':'▸'}</span></span>
+          </button>
+          {open===t.songKey && (
+            <div className="border-t border-line px-4 py-3">
+              <div className="grid gap-3 mb-3 [grid-template-columns:repeat(auto-fit,minmax(160px,1fr))]">
+                <Stat v={String(t.assets.length)} l="Assets found" />
+                <Stat v={String(t.shortsLinked.length)} l="Shorts named for it" s={t.shortsAmbiguous?`${t.shortsAmbiguous} ambiguous`:''} />
+                <Stat v={String(t.treatmentsFound.length)} l="Treatments present" />
+                <Stat v={String(t.marketAppearances.length)} l="Market appearances" />
+              </div>
+
+              <div className="text-micro font-bold uppercase tracking-label text-ink/45 mb-1">Treatments present</div>
+              <div className="flex gap-1.5 flex-wrap mb-3">{t.treatmentsFound.length
+                ? t.treatmentsFound.map((x:string)=><Pill key={x} tone="vv">{x}</Pill>)
+                : <span className="text-ink/40 text-meta">none tagged</span>}</div>
+
+              <div className="text-micro font-bold uppercase tracking-label text-ink/45 mb-1">
+                Not found in our coverage <span className="font-normal normal-case tracking-normal text-ink/35">— absence here is not proof it does not exist</span>
+              </div>
+              <div className="flex gap-1.5 flex-wrap mb-3">{t.treatmentsNotFound.map((x:string)=>
+                <span key={x} className="text-micro px-2 py-0.5 rounded-full bg-sunken text-ink/40">{x}</span>)}</div>
+
+              <Grid small>{t.assets.slice(0,8).map((a:any)=>(
+                <a key={a.id} href={a.url} target="_blank" rel="noopener noreferrer"
+                   className="no-underline rounded-control border border-line bg-raised p-2.5 block hover:border-lineStrong">
+                  <div className="text-[12px] font-semibold leading-snug line-clamp-2">{a.title}</div>
+                  <div className="flex gap-1 flex-wrap mt-1.5">
+                    <Pill tone={a.container==='short'?'sh':'lf'}>{a.container}</Pill>
+                    {a.treatments.filter((x:string)=>x!=='untagged').slice(0,2).map((x:string)=><Pill key={x} tone="vv">{x}</Pill>)}
+                  </div>
+                  <div className="text-micro text-ink/45 mt-1.5 flex justify-between">
+                    <span>{a.views!=null?fmtNum(a.views)+' views':'views unavailable'}</span>
+                    <span>{a.ageDays}d old</span></div>
+                </a>))}</Grid>
+
+              <div className="mt-3"><button onClick={()=>explore(t.songKey)}
+                className="rounded-control bg-ink text-page text-[11px] font-bold uppercase tracking-[0.12em] px-3.5 py-2">
+                Explore opportunities</button></div>
+
+              {sugg && open===t.songKey && (
+                <div className="mt-4">
+                  {sugg.suggestions?.length ? sugg.suggestions.map((s:any,i:number)=>(
+                    <div key={i} className="rounded-control border border-line bg-raised p-3.5 mb-2">
+                      <div className="flex justify-between items-start gap-3 mb-2">
+                        <div><b className="text-body">{s.destination}</b>
+                          <span className="text-meta text-ink/50"> · {s.asset}</span>
+                          <div className="flex gap-1.5 mt-1 flex-wrap">
+                            <Pill tone="nt">{s.destinationRole.replace(/_/g,' ')}</Pill>
+                            <Pill tone={s.destinationRelationship==='network_member'?'lf':'nt'}>{s.destinationRelationship.replace(/_/g,' ')}</Pill>
+                            <Pill tone="sh">permission unknown</Pill>
+                          </div></div>
+                        <div className="flex gap-1">{['Useful','Obvious','Unsuitable','Unsupported'].map(m=>(
+                          <button key={m} onClick={()=>setMarks({...marks,[s.destination+i]:m})}
+                            className={`text-micro px-2 py-1 rounded border ${marks[s.destination+i]===m?'bg-ink text-page border-ink':'border-line text-ink/50'}`}>{m}</button>))}</div>
+                      </div>
+                      <p className="text-meta m-0 mb-2">{s.why}</p>
+                      <Det title="Watcher evidence" items={s.watcherEvidence} />
+                      <div className="text-micro font-bold uppercase tracking-label text-ink/45 mt-2 mb-1">Market examples</div>
+                      {s.marketExamples.map((e:any,j:number)=>(
+                        <a key={j} href={e.url} target="_blank" rel="noopener noreferrer" className="block text-meta text-longform mb-0.5">
+                          {e.label} <span className="text-ink/40">— {e.note}</span></a>))}
+                      <Det title="Why comparable" items={[s.comparability]} />
+                      <Det title="Counter-evidence" items={s.counterEvidence} />
+                      <Det title="Test" items={[s.test]} />
+                      <Det title="Review criteria" items={[s.review]} />
+                    </div>
+                  )) : (
+                    <div className="rounded-control border border-line bg-raised p-3.5">
+                      <b className="text-body">Insufficient evidence</b>
+                      <p className="text-meta text-ink/55 m-0 mt-1">{sugg.reason}</p>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      ))}
+    </>
+  );
+}
+const Det = ({title,items}:any)=>(
+  <div className="mt-2">
+    <div className="text-micro font-bold uppercase tracking-label text-ink/45 mb-0.5">{title}</div>
+    {items.filter(Boolean).map((x:string,i:number)=><div key={i} className="text-meta text-ink/65 leading-snug">{x}</div>)}
+  </div>);
+
 /* ── Shell + primitives ──────────────────────────────────────────────── */
 function Shell({ children, busy, progress, onCollect, missing, view, setView, chans, win, setWin }: any) {
   const oldest = chans.length ? chans.map((c:MwChannelData)=>c.collectedAt).sort()[0] : null;
@@ -353,6 +520,7 @@ function Shell({ children, busy, progress, onCollect, missing, view, setView, ch
           <Tab on={view==='home'} onClick={()=>setView('home')}>Overview</Tab>
           <Tab on={view==='channel'} onClick={()=>setView('channel')}>Channels</Tab>
           <Tab on={view==='tracks'} onClick={()=>setView('tracks')}>Track examples</Tab>
+          <Tab on={view==='virgin'} onClick={()=>setView('virgin')}>Virgin tracks</Tab>
           {view==='home' && setWin && (
             <Sel value={String(win)} onChange={(v:string)=>setWin(+v)} opts={WINDOWS.map(([d,l])=>[String(d),l] as [string,string])} />
           )}

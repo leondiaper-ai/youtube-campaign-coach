@@ -65,7 +65,7 @@ export const MW_REGISTRY: MwChannelDef[] = [
   { key:'latin-nation', name:'Latin Nation', handle:'@LatinNation',
     relationship:'network_member', company:'The Nations', role:'genre_discovery',
     purpose:'Latin discovery.' },
-  { key:'lowly', name:'Lowly', handle:'@lowlypalace',
+  { key:'lowly', name:'Lowly', handle:'@lowly',
     relationship:'network_member', company:'Lowly', role:'label_catalogue',
     purpose:'Label channel acquired in the same transaction as The Nations.' },
   { key:'flighthouse', name:'Flighthouse', handle:'@Flighthouse',
