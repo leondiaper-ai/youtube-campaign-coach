@@ -127,6 +127,9 @@ export interface VirginArtistSummary {
   slug: string; name: string; handle: string | null;
   ownership: string; markets: string[];
   uploads: number; tracks: number; lastUpload: string | null;
+  /** Uploads Watcher holds. It caches a recent window, not the catalogue —
+      so a track that exists on YouTube may be absent here. */
+  cachedWindowOnly: true;
 }
 
 export async function listWatchedArtists(): Promise<VirginArtistSummary[]> {
@@ -141,12 +144,14 @@ export async function listWatchedArtists(): Promise<VirginArtistSummary[]> {
     if (!a.channelHandle) continue;
     const snap = snaps.get(a.channelHandle) ?? null;
     const ups: RecentUpload[] = snap?.recentUploads ?? [];
-    const keys = new Set(ups.map(u => songKey(u.title)).filter(Boolean));
+    const keys = new Set(ups
+      .filter(u => artistFromTitle(u.title) || container(u.durationSec, u.live) !== 'short')
+      .map(u => songKey(u.title)).filter(Boolean));
     out.push({
       slug: a.slug, name: a.name, handle: a.channelHandle,
       ownership: a.ownership ?? 'observed',
       markets: a.markets ?? ['uk'],
-      uploads: ups.length, tracks: keys.size,
+      uploads: ups.length, tracks: keys.size, cachedWindowOnly: true,
       lastUpload: ups.length ? ups.map(u => u.publishedAt).sort().slice(-1)[0] : null,
     });
   }
@@ -164,12 +169,34 @@ export async function tracksForArtist(slug: string): Promise<TrackEvidence[]> {
 
   const market = await readAll();
 
+  /* ── WHAT COUNTS AS A TRACK ────────────────────────────────────────
+     A song is established by an upload titled like one — "Artist - Title"
+     — or by a long-form upload. Not by a Short captioned "The club saw it
+     first." or "Join the club at nickelback.com."
+
+     Grouping on every title made 44 "tracks" for Nickelback, nearly all of
+     them Shorts captions, each its own single-asset song. That is not a
+     catalogue, it is a caption list, and it would have put rubbish in
+     front of anyone using this to choose what to test.
+
+     Shorts with conversational titles still matter — they just attach to a
+     song when their words match one, and are counted as unattributed when
+     they do not. */
+  const titled = ups.filter(u => artistFromTitle(u.title) || container(u.durationSec, u.live) !== 'short');
   const groups = new Map<string, RecentUpload[]>();
-  for (const u of ups) {
+  for (const u of titled) {
     const k = songKey(u.title);
     if (!k || k.length < 3) continue;
     if (!groups.has(k)) groups.set(k, []);
     groups.get(k)!.push(u);
+  }
+  /* Attach caption-titled Shorts to a song whose words appear in them. */
+  const captionShorts = ups.filter(u => !titled.includes(u));
+  for (const u of captionShorts) {
+    const hay = norm(u.title);
+    for (const k of Array.from(groups.keys())) {
+      if (k.length >= 6 && hay.includes(k)) { groups.get(k)!.push(u); break; }
+    }
   }
 
   const out: TrackEvidence[] = [];
