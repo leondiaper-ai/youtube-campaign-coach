@@ -23,7 +23,7 @@
 import { getAllArtists } from '@/lib/marketScope';
 import { readLiveSnapByHandle, readAllLiveSnaps } from '@/lib/kvCache';
 import type { Artist, RecentUpload } from '@/lib/artists';
-import { readAll, type MwChannelData } from './collect';
+import { readAll, readArtistCatalogue, type MwChannelData } from './collect';
 
 /* ── Containers and treatments are separate axes ──────────────────────
    A remix can be a Short. A lyric video can be long-form. Treatments are
@@ -163,8 +163,22 @@ export async function tracksForArtist(slug: string): Promise<TrackEvidence[]> {
   const artists = await getAllArtists();
   const a = artists.find((x: Artist) => x.slug === slug);
   if (!a?.channelHandle) return [];
-  const snap = await readLiveSnapByHandle(a.channelHandle).catch(() => null);
-  const ups: RecentUpload[] = snap?.recentUploads ?? [];
+  /* Prefer the deeper mw: catalogue where it has been collected. Watcher's
+     cached window is a hundred recent uploads, which cannot see the
+     catalogue the market destinations actually publish. */
+  const cat = await readArtistCatalogue(slug).catch(() => null);
+  let ups: RecentUpload[];
+  if (cat && cat.items.length) {
+    ups = cat.items.map(v => ({
+      id: v.id, title: v.title, description: '', publishedAt: v.publishedAt,
+      durationSec: v.durationSec ?? 0, live: (v.live as any) ?? 'none',
+      scheduledStart: null, actualStart: null, captions: false,
+      viewCount: v.views ?? 0, likeCount: v.likes ?? 0,
+    })) as unknown as RecentUpload[];
+  } else {
+    const snap = await readLiveSnapByHandle(a.channelHandle).catch(() => null);
+    ups = snap?.recentUploads ?? [];
+  }
   if (!ups.length) return [];
 
   const market = await readAll();

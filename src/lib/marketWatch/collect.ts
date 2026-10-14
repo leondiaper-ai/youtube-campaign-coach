@@ -222,3 +222,110 @@ export async function collectBatch(keys: string[]): Promise<BatchResult> {
   }
   return { done, failed, quotaUnits: units, remaining };
 }
+
+/* ═══════════════════════════════════════════════════════════════════════
+   ARTIST CATALOGUE — the missing half of the connection
+
+   Watcher caches a recent upload window per artist, about a hundred. That
+   is right for campaign monitoring and wrong for this: the destinations in
+   this market earn most of their views from catalogue. 7clouds' biggest
+   Nickelback uploads are Rockstar and Photograph, from 2005, and Watcher
+   has never heard of them — so the market side knew about songs the artist
+   side could not see, and every catalogue-led idea returned "insufficient
+   evidence" for the wrong reason.
+
+   This fetches an artist's own uploads the same way Market Watch fetches a
+   channel's, into the mw: namespace. Watcher's records are untouched; this
+   is a parallel, deeper copy for a deliberately short list, not a change
+   to how monitoring works.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+export interface MwArtistCatalogue {
+  slug: string; name: string; channelId: string; handle: string | null;
+  collectedAt: string; retrieved: number; pages: number;
+  reachedEnd: boolean; cappedAt: number | null;
+  oldest: string | null; newest: string | null;
+  items: MwVideo[];
+}
+
+const artKey = (slug: string) => `mw:artist:${slug}`;
+const ART_INDEX = 'mw:artist:index';
+
+export async function saveArtistCatalogue(c: MwArtistCatalogue) {
+  const r = await kv(); if (!r) return false;
+  await r.set(artKey(c.slug), JSON.stringify(c));
+  const idx = await readArtistIndex();
+  const next = idx.filter(e => e.slug !== c.slug);
+  next.push({ slug: c.slug, name: c.name, retrieved: c.retrieved, collectedAt: c.collectedAt });
+  await r.set(ART_INDEX, JSON.stringify(next));
+  return true;
+}
+export async function readArtistIndex(): Promise<{slug:string;name:string;retrieved:number;collectedAt:string}[]> {
+  const r = await kv(); if (!r) return [];
+  const raw = await r.get(ART_INDEX);
+  if (!raw) return [];
+  try { return typeof raw === 'string' ? JSON.parse(raw) : (raw as any); } catch { return []; }
+}
+export async function readArtistCatalogue(slug: string): Promise<MwArtistCatalogue | null> {
+  const r = await kv(); if (!r) return null;
+  const raw = await r.get(artKey(slug));
+  if (!raw) return null;
+  try { return typeof raw === 'string' ? JSON.parse(raw) : (raw as MwArtistCatalogue); } catch { return null; }
+}
+
+/** Walks an artist channel's whole uploads playlist, newest first. */
+export async function collectArtistCatalogue(
+  slug: string, name: string, handle: string, cap = 600,
+): Promise<MwArtistCatalogue> {
+  const key = KEY();
+  if (!key) throw new Error('YOUTUBE_API_KEY is not configured on this runtime');
+
+  const h = '@' + handle.replace(/^@/, '');
+  const ch = await jget(`${API}/channels?part=snippet,contentDetails&forHandle=${encodeURIComponent(h)}&key=${key}`);
+  const item = ch.items?.[0];
+  if (!item || ch.items.length !== 1) throw new Error(`could not resolve ${h}`);
+  const uploads = item.contentDetails?.relatedPlaylists?.uploads;
+  if (!uploads) throw new Error('no uploads playlist');
+
+  const items: MwVideo[] = [];
+  let token: string | undefined, pages = 0, reachedEnd = false, capped: number | null = null;
+  for (;;) {
+    const j = await jget(`${API}/playlistItems?part=snippet,contentDetails&maxResults=50&playlistId=${uploads}&key=${key}${token ? `&pageToken=${token}` : ''}`);
+    pages++;
+    for (const it of j.items ?? []) {
+      const id = it.contentDetails?.videoId || it.snippet?.resourceId?.videoId;
+      const at = it.contentDetails?.videoPublishedAt || it.snippet?.publishedAt;
+      if (!id || !at) continue;
+      items.push({ id, title: it.snippet?.title ?? '', publishedAt: at,
+        thumb: it.snippet?.thumbnails?.medium?.url || it.snippet?.thumbnails?.default?.url || null,
+        durationSec: null, live: 'none', views: null, likes: null, comments: null });
+    }
+    token = j.nextPageToken;
+    if (!token) { reachedEnd = true; break; }
+    if (items.length >= cap) { capped = cap; break; }
+  }
+
+  for (let i = 0; i < items.length; i += 50) {
+    const batch = items.slice(i, i + 50);
+    const j = await jget(`${API}/videos?part=snippet,contentDetails,statistics&id=${batch.map(v => v.id).join(',')}&key=${key}`);
+    const by = new Map<string, any>((j.items ?? []).map((v: any) => [v.id, v]));
+    for (const v of batch) {
+      const f = by.get(v.id); if (!f) continue;
+      v.durationSec = durationSec(f.contentDetails?.duration);
+      v.live = f.snippet?.liveBroadcastContent ?? 'none';
+      v.views = f.statistics?.viewCount != null ? +f.statistics.viewCount : null;
+      v.likes = f.statistics?.likeCount != null ? +f.statistics.likeCount : null;
+      v.comments = f.statistics?.commentCount != null ? +f.statistics.commentCount : null;
+    }
+  }
+
+  const dates = items.map(v => v.publishedAt).sort();
+  const out: MwArtistCatalogue = {
+    slug, name, channelId: item.id, handle: item.snippet?.customUrl ?? h,
+    collectedAt: new Date().toISOString(), retrieved: items.length, pages,
+    reachedEnd, cappedAt: capped,
+    oldest: dates[0] ?? null, newest: dates[dates.length - 1] ?? null, items,
+  };
+  await saveArtistCatalogue(out);
+  return out;
+}
