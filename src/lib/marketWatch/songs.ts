@@ -48,7 +48,15 @@ export const isShort = (u: RawUpload) =>
 
 /** Does the title read "Artist - Title"? */
 export function splitCredit(title: string): { credits: string[]; songPart: string } | null {
-  const t = (title || '').replace(/#[^\s#]+/g, ' ');
+  /* ── STRIP BRACKETS BEFORE SPLITTING ON THE DASH ───────────────────
+     Real title from the roster:
+       "The World At Large (Enough Love to Kill Us All / Jeremy Sherrer
+        Remix - Official Audio)"
+     The separator sits INSIDE the bracket, so splitting first made the
+     credit "The World At Large (Enough Love…Remix" and the song name
+     "Official Audio)". Packaging is removed first; what remains is the
+     part that can carry a credit. */
+  const t = (title || '').replace(/#[^\s#]+/g, ' ').replace(/[\[(][^\])]*[\])]?/g, ' ');
   const p = t.split(/\s+[-–—]\s+/);
   if (p.length < 2) return null;
   const credits = p[0].split(/,|&|\bft\.?\b|\bfeat\.?\b|\bx\b|\bvs\.?\b/i)
@@ -123,12 +131,26 @@ export const treatmentsOf = (title: string) =>
  * never create a song, so "APHRODITE out now" attaches to APHRODITE instead
  * of becoming a second entry titled after the caption.
  */
-export function buildSongs(uploads: RawUpload[]): Song[] {
+export function buildSongs(uploads: RawUpload[], artistName?: string): Song[] {
   const byKey = new Map<string, Song>();
+  const artistN = artistName ? norm(artistName) : null;
 
   for (const u of uploads) {
     if (classifyAsset(u) !== 'recording') continue;
-    const name = songName(u.title);
+    let name = songName(u.title);
+    /* ── SOME CHANNELS TITLE IT THE OTHER WAY ROUND ─────────────────
+       Hermanos Espinoza publish "29:11 - Hermanos Espinoza (Lyric
+       Video)" — song first, artist second. Read left-to-right that
+       makes every one of their songs "Hermanos Espinoza", collapsing a
+       whole catalogue into one record. When the name we derived IS the
+       artist, the title is reversed and the other side is the song. */
+    if (artistN && norm(name) === artistN) {
+      const flipped = splitCredit(u.title);
+      const lead = flipped ? flipped.credits.join(' ') : '';
+      if (lead && norm(lead) !== artistN) name = u.title
+        .replace(/#[^\s#]+/g, ' ').replace(/[\[(][^\])]*[\])]?/g, ' ')
+        .split(/\s+[-–—]\s+/)[0].replace(/\s+/g, ' ').trim();
+    }
     const key = norm(name);
     if (!key || key.length < 2) continue;
     if (!byKey.has(key)) {

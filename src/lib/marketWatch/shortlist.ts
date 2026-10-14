@@ -161,7 +161,7 @@ export async function buildShortlistCandidates(
        and the cache can both carry the same upload. */
     const seen = new Set<string>();
     const unique = ups.filter(u => (seen.has(u.id) ? false : (seen.add(u.id), true)));
-    for (const song of buildSongs(unique)) {
+    for (const song of buildSongs(unique, a.name)) {
       const featured = pickFeatured(song);
       if (!featured) continue;
       entries.push({ a, song, featured, coverage, raw });
@@ -192,20 +192,27 @@ export async function buildShortlistCandidates(
     .sort((x, y) => (y.gain!.gain) - (x.gain!.gain))
     .slice(0, perLens);
 
-  /* Worth extending needs a NAMED signal, not a leftover bucket. */
+  /* Worth extending needs a NAMED signal, not a leftover bucket.
+
+     And a floor. Without one the lens filled with songs whose record has
+     323 views and whose Short has 900: the ratio is real and the finding is
+     worthless, because nothing at that scale is evidence a follow-up would
+     land. The floor is on the SIGNAL asset, not the song, so a modest
+     record with a genuinely working Short still qualifies. */
+  const EXTEND_FLOOR = 25_000;
   type Ext = typeof withMeasure[number] & { signal: string };
   const extending: Ext[] = [];
   for (const e of withMeasure) {
     const shorts = e.song.shorts.filter(s => (s.views ?? 0) > 0);
     const bestShort = shorts.sort((a, b) => (b.views ?? 0) - (a.views ?? 0))[0];
     const fv = e.featured.views ?? 0;
-    if (bestShort && (bestShort.views ?? 0) > fv && fv > 0) {
+    if (bestShort && (bestShort.views ?? 0) >= EXTEND_FLOOR && (bestShort.views ?? 0) > fv && fv > 0) {
       extending.push({ ...e, signal:
         `A Short for this song has ${fmt(bestShort.views!)} views against ${fmt(fv)} on the record itself — short-form is doing more work than the full track.` });
       continue;
     }
     const tc = topCommentsFor(e.raw, e.featured.id);
-    if (tc.length >= 3) {
+    if (tc.length >= 3 && fv >= EXTEND_FLOOR) {
       extending.push({ ...e, signal:
         `${tc.length} comments have been read on the featured video, so there is actual audience text to work from rather than a count.` });
     }
