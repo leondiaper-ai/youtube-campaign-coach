@@ -40,8 +40,21 @@ export async function GET(req: Request) {
   const wantDests = Math.min(6, Math.max(1, Number(q.get('destinations')) || 3));
 
   const market = (await readAll()).filter(c => c.items.length >= 20);
+
+  /* ── A DESTINATION WE CANNOT READ IS NOT A DESTINATION ────────────────
+     Ranking purely by upload count put Flighthouse first: 1,178 of its
+     1,200 uploads are Shorts and the parser finds ONE credited artist name
+     in the whole channel. There is no repertoire to compare a song against,
+     so any "fit" would rest on its treatment counts alone — the generic
+     match this is supposed to reject. A channel whose repertoire cannot be
+     read is excluded and said so, rather than silently topping the list. */
+  const readable = (c: typeof market[number]) =>
+    profileDestination({ ...c, items: c.items }, undefined).artists.length >= 10;
+
+  const excluded = market.filter(c => !readable(c)).map(c => c.name);
   const verified = market
     .filter(c => !MW_REGISTRY.find(r => r.key === c.key)?.suspect)
+    .filter(readable)
     .sort((a, b) => b.items.length - a.items.length)
     .slice(0, wantDests);
 
@@ -64,20 +77,32 @@ export async function GET(req: Request) {
   const artists = (await getAllArtists()).filter((a: Artist) =>
     (a.ownership ?? 'observed') === 'virgin' && !!a.channelHandle);
 
-  type Pick = { a: Artist; songKey: string; songName: string; priorAppearance: boolean; recordings: number };
+  type Pick = { a: Artist; songKey: string; songName: string; priorAppearance: boolean; recordings: number; researched: boolean };
   const withPrior: Pick[] = [], withoutPrior: Pick[] = [];
 
-  for (const a of artists) {
+  /* Capped: the uncapped scan reads a catalogue per artist and took ~30s. */
+  for (const a of artists.slice(0, 45)) {
     const songs = await songsForArtist(a.slug).catch(() => []);
     /* Confirmed identity only. This is the gate that the old grouping
        lacked, and it is why "50 ballerinas. tonight" cannot be selected. */
     const solid = songs.filter(s => s.recordings.length >= 1);
     if (!solid.length) continue;
-    const s = solid[0];
+    /* Prefer a song someone has actually researched. Musical fit cannot be
+       assessed without genre, so an untagged song can only ever come back
+       weak — selecting one would test the grader against missing data
+       rather than against editorial judgement. */
+    let chosen = solid[0], researched = false;
+    for (const s of solid.slice(0, 8)) {
+      if (await readStated('track', `${a.slug}:${s.key}`)) { chosen = s; researched = true; break; }
+    }
     const prior = published.has(norm(a.name));
-    const pick: Pick = { a, songKey: s.key, songName: s.name, priorAppearance: prior, recordings: s.recordings.length };
+    const pick: Pick = { a, songKey: chosen.key, songName: chosen.name, priorAppearance: prior,
+      recordings: chosen.recordings.length, researched };
     (prior ? withPrior : withoutPrior).push(pick);
   }
+  /* Researched songs first within each group. */
+  const byResearch = (x: Pick, y: Pick) => Number(y.researched) - Number(x.researched);
+  withPrior.sort(byResearch); withoutPrior.sort(byResearch);
 
   /* Interleave so the sample is not all one kind. Two with prior history,
      three without — the harder direction gets the larger share. */
@@ -127,7 +152,9 @@ export async function GET(req: Request) {
         };
       }),
       songRule: 'Virgin-owned artist, at least one confirmed recording. Promotional captions cannot be selected.',
-      destinationRule: 'Collected, at least 20 uploads, not flagged as a handle collision, ranked by volume.',
+      destinationRule: 'Collected, 20+ uploads, identity not flagged as a handle collision, AND repertoire readable (10+ credited artist names). Ranked by volume.',
+      destinationsExcludedAsUnreadable: excluded,
+      researchedSongs: picks.filter(p => p.researched).length,
       priorSplit: { withPriorAppearance: picks.filter(p => p.priorAppearance).length, without: picks.filter(p => !p.priorAppearance).length },
       candidatePool: { virginArtists: artists.length, selectable: withPrior.length + withoutPrior.length },
     },
