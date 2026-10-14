@@ -19,6 +19,7 @@ import type { Artist } from '@/lib/artists';
 import {
   writeCatalogue, readCatalogueIndex, type ArtistCatalogue, type CatalogueVideo,
 } from '@/lib/catalogueStore';
+import { fetchFullCatalogue } from '@/lib/fullCatalogue';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 300;
@@ -59,7 +60,6 @@ export async function POST(req: NextRequest) {
   }
   targets = targets.slice(0, MAX_PER_REQUEST);
 
-  const origin = req.nextUrl.origin;
   const results: any[] = [];
   let units = 0;
 
@@ -69,21 +69,14 @@ export async function POST(req: NextRequest) {
       continue;
     }
     try {
-      /* slim=1 drops tags and descriptions. They are two thirds of the
-         payload and irrelevant here, and on a heritage channel the
-         oversized response truncates the OLDEST uploads — which is the
-         entire catalogue story. */
-      const r = await fetch(
-        `${origin}/api/full-catalogue?handle=${encodeURIComponent(a.channelHandle!)}&slim=1`,
-        { cache: 'no-store' },
-      );
-      const j = await r.json();
-      if (!r.ok || !Array.isArray(j?.videos)) {
-        results.push({ slug: a.slug, error: j?.error ?? `HTTP ${r.status}` });
-        continue;
-      }
+      /* Called directly rather than over HTTP to this deployment's own
+         origin. The first version used fetch and every request came back
+         as an HTML login page — Vercel Deployment Protection guards the
+         preview, and a deployment calling itself is just another
+         unauthenticated client. */
+      const j = await fetchFullCatalogue(a.channelHandle!);
       const videos: CatalogueVideo[] = j.videos.map((v: any) => ({
-        id: v.id, title: v.title, publishedAt: v.publishedAt,
+        id: v.id, title: v.title, publishedAt: v.publishedAt ?? '',
         durationSec: v.durationSec ?? 0, isShort: !!v.isShort,
         views: v.views ?? 0, likes: v.likes ?? null, comments: v.comments ?? null,
         wasLive: !!v.wasLive,
