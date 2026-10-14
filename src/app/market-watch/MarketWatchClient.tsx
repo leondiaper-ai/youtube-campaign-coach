@@ -2,7 +2,7 @@
 /* Three views: a comparison homepage, a per-channel page, and track examples.
    All read collected data — no API key reaches the browser. */
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { fmtNum } from '@/lib/artists';
 import type { MwChannelData, MwVideo } from '@/lib/marketWatch/collect';
 import { MW_REGISTRY, REL_LABEL, ROLE_LABEL } from '@/lib/marketWatch/channels';
@@ -46,8 +46,14 @@ const mmss = (s: number|null) => s==null?'—' : s>=3600?`${Math.floor(s/3600)}h
 
 const WINDOWS: [number, string][] = [[90,'Last 90 days'],[180,'Last 6 months'],[365,'Last year'],[1100,'All collected']];
 
-export default function MarketWatchClient({ initial }: { initial: MwChannelData[] }) {
-  const [chans, setChans] = useState<MwChannelData[]>(initial);
+export default function MarketWatchClient() {
+  const [chans, setChans] = useState<MwChannelData[]>([]);
+  const [loading, setLoading] = useState(true);
+  useEffect(() => { (async () => {
+    try { const j = await (await fetch('/api/market-watch/data', { cache:'no-store' })).json();
+          setChans(j.channels ?? []); } catch {}
+    setLoading(false);
+  })(); }, []);
   const [view, setView] = useState<'home'|'channel'|'tracks'>('home');
   const [current, setCurrent] = useState<string|null>(null);
   const [busy, setBusy] = useState(false);
@@ -78,6 +84,10 @@ export default function MarketWatchClient({ initial }: { initial: MwChannelData[
     setProgress(`${done} collected · ${units} quota units${failedAll.length?` · ${failedAll.length} failed: ${failedAll.map(f=>f.name).join(', ')}`:''}`);
   }
 
+  if (loading) {
+    return <Shell busy={busy} progress={progress} onCollect={()=>{}} missing={0} view={view} setView={setView} chans={[]}>
+      <Card><p className="text-ink/45 m-0 text-body">Loading collected data…</p></Card></Shell>;
+  }
   if (!chans.length) {
     return <Shell busy={busy} progress={progress} onCollect={()=>collect(MW_REGISTRY.map(c=>c.key))} missing={missing.length} view={view} setView={setView} chans={[]}>
       <Card><p className="text-body text-ink/60 m-0">Nothing collected. <b>Collect all</b> fetches up to 36 months of uploads from {MW_REGISTRY.length} channels, in batches.</p></Card>

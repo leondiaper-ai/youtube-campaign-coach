@@ -30,6 +30,9 @@ export interface MwChannelDef {
   role: Role;
   /** One line on what the channel is for. Factual, from observable positioning. */
   purpose: string;
+  /** Resolution returned something implausible — a near-zero subscriber count
+      or an empty channel. Shown as unverified rather than as findings. */
+  suspect?: boolean;
 }
 
 export const MW_REGISTRY: MwChannelDef[] = [
@@ -40,19 +43,23 @@ export const MW_REGISTRY: MwChannelDef[] = [
   { key:'chill-nation', name:'Chill Nation', handle:'@ChillNation', channelId:'UCM9KEEuzacwVlkt9JfJad7g',
     relationship:'network_member', company:'The Nations', role:'context_curation',
     purpose:'Downtempo and chill electronic, positioned by mood rather than genre.' },
-  { key:'rap-nation', name:'Rap Nation', handle:'@RapNation',
+  { key:'rap-nation', name:'Rap Nation', handle:'@allrapnation', channelId:'UC8QfB1wbfrNwNFHQxfyNJsw',
     relationship:'network_member', company:'The Nations', role:'genre_discovery',
     purpose:'Rap and hip-hop discovery.' },
   { key:'bass-nation', name:'Bass Nation', handle:'@BassNation',
     relationship:'network_member', company:'The Nations', role:'genre_discovery',
     purpose:'Bass music discovery.' },
-  { key:'house-nation', name:'House Nation', handle:'@HouseNation',
+  /* Resolution returned a 3,930-subscriber channel with no uploads — a handle
+     collision, not The Nations' House Nation. Left unresolved rather than
+     presented as data. */
+  { key:'house-nation', name:'House Nation', handle:'@HouseNation', suspect:true,
     relationship:'network_member', company:'The Nations', role:'genre_discovery',
     purpose:'House and dance discovery.' },
   { key:'indie-nation', name:'Indie Nation', handle:'@IndieNation',
     relationship:'network_member', company:'The Nations', role:'genre_discovery',
     purpose:'Indie and alternative discovery.' },
-  { key:'rnb-nation', name:'R&B Nation', handle:'@RnBNation',
+  /* Resolution returned a channel with ONE subscriber. Plainly not it. */
+  { key:'rnb-nation', name:'R&B Nation', handle:'@RnBNation', suspect:true,
     relationship:'network_member', company:'The Nations', role:'genre_discovery',
     purpose:'R&B discovery.' },
   { key:'latin-nation', name:'Latin Nation', handle:'@LatinNation',
@@ -72,7 +79,8 @@ export const MW_REGISTRY: MwChannelDef[] = [
   { key:'aureal', name:'Aureal', handle:'@Aureal',
     relationship:'external_reference', company:null, role:'genre_discovery',
     purpose:'Independent discovery channel.' },
-  { key:'monstercat-uncaged', name:'Monstercat Uncaged', handle:'@MonstercatUncaged',
+  /* Resolution returned a two-subscriber channel. Not Monstercat's. */
+  { key:'monstercat-uncaged', name:'Monstercat Uncaged', handle:'@MonstercatUncaged', suspect:true,
     relationship:'external_reference', company:'Monstercat', role:'label_catalogue',
     purpose:'Monstercat’s harder electronic imprint. Independent company.' },
   { key:'monstercat-instinct', name:'Monstercat Instinct', handle:'@MonstercatInstinct',
