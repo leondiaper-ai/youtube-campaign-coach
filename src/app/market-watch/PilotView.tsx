@@ -71,8 +71,7 @@ export default function PilotView() {
       {/* The scoreboard, misses included. */}
       <div className="border border-line rounded-xl bg-white p-4 mb-4">
         <div className="grid grid-cols-2 md:grid-cols-5 gap-2">
-          {[['Songs', s.songs], ['Candidates', s.candidates], ['Ready to propose', s.readyToPropose],
-            ['Worth investigating', s.worthInvestigating], ['Needing tags', s.songsNeedingTags]].map(([l, v]: any) => (
+          {[['Songs', s.songs], ['Candidates shown', s.candidates], ['Needing tags', s.songsNeedingTags]].map(([l, v]: any) => (
             <div key={l} className="bg-paper rounded-lg px-3 py-2">
               <div className="text-[22px] font-black tabular-nums leading-none">{v}</div>
               <div className="text-[9px] uppercase tracking-wider text-ink/45 mt-1">{l}</div>
@@ -136,11 +135,11 @@ export default function PilotView() {
               {r.notes.map((n: string, i: number) => (
                 <div key={i} className="text-[12px] text-amber-900 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2 mb-2 leading-snug">{n}</div>
               ))}
-              {r.candidates.length === 0 ? (
-                <div className="text-[12px] text-ink/50">No candidate on any of the three destinations.</div>
+              {r.candidates.filter((c: any) => c.editorialFit === 'strong' || c.editorialFit === 'moderate').length === 0 ? (
+                <div className="text-[12px] text-ink/50">No candidate with supported editorial fit. Pairings resting on language, format or broad genre are not shown.</div>
               ) : (
                 <div className="space-y-2">
-                  {r.candidates.map((c: any) => (
+                  {r.candidates.filter((c: any) => c.editorialFit === 'strong' || c.editorialFit === 'moderate').map((c: any) => (
                     <div key={c.id} className="border border-line rounded-lg p-3">
                       <div className="flex items-start justify-between gap-3">
                         <div className="min-w-0">

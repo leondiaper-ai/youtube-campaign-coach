@@ -358,8 +358,14 @@ export default function ConnectView({ artists }: { artists: { slug: string; name
   }, []);
 
   const song = songs.find(s => s.key === songKey);
-  const exact = res?.candidates.filter(c => c.routeKind === 'exact') ?? [];
-  const inferred = res?.candidates.filter(c => c.routeKind !== 'exact') ?? [];
+  /* Unsupported pairings are hidden rather than ranked low. A card that
+     exists at all reads as a recommendation, however softly it is worded —
+     and a screen of weak cards is what made the pilot look confident
+     without being discriminating. */
+  const supported = (c: any) => c.editorialFit === 'strong' || c.editorialFit === 'moderate';
+  const hidden = (res?.candidates ?? []).filter(c => !supported(c)).length;
+  const exact = res?.candidates.filter(c => c.routeKind === 'exact' && supported(c)) ?? [];
+  const inferred = res?.candidates.filter(c => c.routeKind !== 'exact' && supported(c)) ?? [];
 
   return (
     <div>
@@ -488,6 +494,16 @@ export default function ConnectView({ artists }: { artists: { slug: string; name
 
       {res && (
         <div>
+          {hidden > 0 && (
+            <div className="border border-line rounded-xl px-4 py-3 text-[12px] text-ink/55 mb-3 leading-snug">
+              {hidden} pairing(s) hidden: editorial fit rested on language, format or a broad genre word rather than on a specific genre match.
+            </div>
+          )}
+          {exact.length === 0 && inferred.length === 0 && (
+            <div className="border border-line rounded-xl px-4 py-3 text-[13px] text-ink/70 mb-3">
+              Nothing here has supported editorial fit. That is the honest answer, not an empty state to fill.
+            </div>
+          )}
           {res.notes.map((n, i) => (
             <div key={i} className="border border-amber-200 bg-amber-50 rounded-xl px-4 py-3 text-[12px] text-amber-900 mb-3 leading-snug">{n}</div>
           ))}
