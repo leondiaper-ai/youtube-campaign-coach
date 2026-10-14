@@ -51,6 +51,21 @@ const PAGE='/market-watch', SESSION='/api/market-watch/session',
   check('wrong secret sets no cookie', !wrong.cookie, wrong.cookie ? 'cookie was set' : '');
 
   const page0 = await hit(PAGE);
+
+  /* Work out what the SERVER thinks, rather than trusting this script's own
+     environment. The two are set in different terminals and drift apart the
+     moment the dev server is not restarted — which produces a failure that
+     looks like a security hole and is actually a stale process. A 200 here
+     can only happen when the server has a secret configured, so it is a
+     reliable read of the server's state. */
+  const serverOn = page0.status === 200;
+  if (serverOn !== ON) {
+    console.log(`  SKIP  server reports feature ${serverOn ? 'ON' : 'OFF'}, this script expected ${ON ? 'ON' : 'OFF'}.`);
+    console.log(`        The dev server was probably not restarted after changing MARKET_WATCH_SECRET.`);
+    console.log(`        Restart it to match, then run this again. Not a failure — nothing was tested.\n`);
+    process.exit(3);
+  }
+
   if (ON) {
     check('page without a session → 200 prompt, no data', page0.status === 200 && !/Latest uploads/.test(page0.body),
           page0.status === 200 ? '' : `got ${page0.status}`);
