@@ -80,6 +80,13 @@ export const TEAMS: Record<string, Team> = {
     regionTag: 'LATAM',
     token: 'la-9z5c4m2ytr63',
   },
+  asia: {
+    slug: 'asia',
+    name: 'Asia — Campaign Board',
+    blurb: 'Add the artists you are working, and watch how their channels move.',
+    regionTag: 'Asia',
+    token: 'as-3w7q9m2knp84',
+  },
 };
 
 export const TEAM_SLUGS = Object.keys(TEAMS);

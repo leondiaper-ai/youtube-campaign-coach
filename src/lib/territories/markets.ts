@@ -70,6 +70,12 @@ export const MARKETS: Record<string, Market> = {
   AR: { code: 'AR', name: 'Argentina', short: 'AR' },
   CO: { code: 'CO', name: 'Colombia', short: 'CO' },
   CL: { code: 'CL', name: 'Chile', short: 'CL' },
+  JP: { code: 'JP', name: 'Japan', short: 'JP' },
+  KR: { code: 'KR', name: 'South Korea', short: 'KR' },
+  IN: { code: 'IN', name: 'India', short: 'IN' },
+  ID: { code: 'ID', name: 'Indonesia', short: 'ID' },
+  PH: { code: 'PH', name: 'Philippines', short: 'PH' },
+  TH: { code: 'TH', name: 'Thailand', short: 'TH' },
 };
 
 export type Team = {
@@ -141,6 +147,17 @@ export const TEAMS: Record<string, Team> = {
     markets: ['BR', 'MX', 'AR', 'CO', 'CL'],
     roster: { ownership: ['latam', 'br', 'mx', 'ar', 'co', 'cl'] },
     description: 'Latin American roster and Brazilian, Mexican, Argentine, Colombian and Chilean YouTube audience.',
+  },
+  asia: {
+    id: 'asia',
+    name: 'Asia',
+    /* Japan first: largest Asian music market by revenue, so it anchors
+       the default sort. India and Indonesia are the big YouTube
+       audiences; Korea, the Philippines and Thailand round out the
+       region as it is worked. */
+    markets: ['JP', 'KR', 'IN', 'ID', 'PH', 'TH'],
+    roster: { ownership: ['asia', 'jp', 'kr', 'in', 'id', 'ph', 'th', 'sg'] },
+    description: 'Asian roster and Japanese, Korean, Indian, Indonesian, Filipino and Thai YouTube audience.',
   },
 };
 

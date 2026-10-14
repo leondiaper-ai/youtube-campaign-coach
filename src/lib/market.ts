@@ -187,6 +187,31 @@ export const MARKETS: Record<string, MarketDef> = {
        value figures are withheld here rather than converted. */
     currency: { code: 'USD', symbol: '$' },
   },
+  asia: {
+    id: 'asia',
+    name: 'Asia',
+    short: 'Asia',
+    orgName: 'Virgin Music Asia',
+    /* Japan first — the largest Asian music market by revenue, so it
+       anchors the default sort. India and Indonesia are the big YouTube
+       audiences; Korea, the Philippines and Thailand round out where a
+       regional campaign is actually worked. Which countries count as
+       "Asia" is a commercial decision — change this list and the mirror
+       in territories/markets.ts together. */
+    territories: ['JP', 'KR', 'IN', 'ID', 'PH', 'TH'],
+    teamSlug: 'asia',
+    /* Singapore — the regional hub, and it sits in the middle of a
+       region that spans four hours of offsets (Mumbai to Tokyo), so the
+       week boundary is wrong by the least for the most people. */
+    timeZone: 'Asia/Singapore',
+    /* Worked in English alongside the other boards, so dates match
+       rather than switching format per region. */
+    locale: 'en-GB',
+    /* No single currency across six countries. USD is the regional
+       reporting unit. As elsewhere, the RPM constants are UK-derived so
+       value figures are withheld here rather than converted. */
+    currency: { code: 'USD', symbol: '$' },
+  },
 };
 
 export const MARKET_IDS = Object.keys(MARKETS);
