@@ -237,6 +237,20 @@ function build(
   if (prof.windowDays < 180)
     counter.push(`Only ${prof.windowDays} days of this destination's uploads are collected, so its pattern may not be representative.`);
 
+  /* ── IN-HOUSE RELEASES ARE POOR COMPARABLES ──────────────────────────
+     Both 7clouds suggestions in the pilot were supported entirely by
+     "[7clouds Release]" uploads by Rachel Lorin, the channel's own artist.
+     A channel's own release is the least comparable thing on it to a
+     third-party placement: different economics, different promotion, and
+     the channel has reasons to push it that would not apply to us. */
+  const inHouse = support.items.filter(v =>
+    new RegExp(`\\[?${prof.name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\s+(release|exclusive)`, 'i').test(v.title));
+  if (inHouse.length && inHouse.length >= support.items.length / 2)
+    counter.push(`${inHouse.length} of ${support.items.length} supporting upload(s) are ${prof.name}'s OWN releases. A channel's own release is the least comparable thing on it to a third-party placement — different economics, different promotion, and reasons to push it that would not apply to us.`);
+
+  if (perf.median != null && prof.medianViews != null && perf.median < prof.medianViews / 3)
+    counter.push(`These comparables sit at ${perf.median.toLocaleString()} median against ${prof.name}'s channel-wide ${prof.medianViews.toLocaleString()}. The repertoire this song resembles performs well below what the channel does overall.`);
+
   /* ── FOUR AXES, NOT ONE GATE ──────────────────────────────────────────
      The previous version ANDed editorial fit, performance evidence and
      campaign timing into a single "ready to propose" flag. That was wrong
@@ -336,7 +350,7 @@ function build(
     editorialFit, performanceSupport, timing, execution,
     readiness, readinessReason,
     nextAction: readiness === 'propose'
-      ? `Confirm who controls the recording of "${song.name}" and whether a ${treatment?.name ?? 'placement'} may be created and licensed. If yes, approach ${prof.name} with the ${perf.n} comparable uploads above as the basis, and agree in advance what result would count as nothing happening.`
+      ? `Confirm who controls the recording of "${song.name}" and whether a ${treatment?.name ?? 'placement'} may be created and licensed. If yes, approach ${prof.name} ${support.identified ? `with the ${perf.n} comparable upload(s) above as the basis` : 'on the editorial case alone — no comparable upload could be identified, so there is no performance basis to show them'}, and agree in advance what result would count as nothing happening.`
       /* Names the ONE thing that would move this forward, and names the
          right side of the comparison — see the destMissing note above. */
       : `Before anything else: ${

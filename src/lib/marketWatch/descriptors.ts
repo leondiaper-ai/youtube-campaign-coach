@@ -262,6 +262,15 @@ export async function readStatedMany(kind: 'track' | 'dest', ids: string[]): Pro
    made "Y$" match every artist containing the letter y, because that
    compared arbitrary names character by character. "uk rap" ⊇ "rap" is a
    genre narrowing; "rap" vs "trap" stays a non-match, as it must. */
+/* Genre words too broad to carry fit by themselves. Found by inspecting the
+   pilot output: Tom Odell's "alternative pop" agreed with 7clouds' "pop" and
+   Precious Pepala's "dark pop" did the same, so a ballad and a Latin-pop
+   lyric channel came back as a genre match. "Pop" describes most commercial
+   music released; agreeing on it is agreeing on almost nothing. These still
+   match when BOTH sides say only the broad word, which is honest — it is
+   just never enough on its own. */
+const BROAD = new Set(['pop', 'music', 'electronic', 'alternative', 'indie', 'urban', 'contemporary']);
+
 export function tagsAgree(x: string, y: string): boolean {
   const a = x.toLowerCase().trim(), b = y.toLowerCase().trim();
   if (!a || !b) return false;
@@ -269,7 +278,11 @@ export function tagsAgree(x: string, y: string): boolean {
   const wa = new Set(a.split(/\s+/)), wb = new Set(b.split(/\s+/));
   const sup = (big: Set<string>, small: Set<string>) =>
     small.size > 0 && Array.from(small).every(w => big.has(w));
-  return sup(wa, wb) || sup(wb, wa);
+  if (!(sup(wa, wb) || sup(wb, wa))) return false;
+  /* A narrowing match ("dark pop" ⊇ "pop") only counts when the shared part
+     is specific. "dark pop" vs "pop" shares only "pop", so it does not. */
+  const shared = Array.from(wa).filter(w => wb.has(w));
+  return shared.some(w => !BROAD.has(w));
 }
 
 export interface Overlap {
