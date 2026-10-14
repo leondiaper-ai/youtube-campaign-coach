@@ -455,18 +455,7 @@ details.more .periods{margin-top:.4rem}
   </div>
 </section>
 
-<section class="slide light" data-t="How to read the numbers">
-  <div class="inner">
-    <div class="label">How to read the numbers</div>
-    <h2 class="display big">Three view measures appear throughout. Each answers a different question.</h2>
-    <div class="measures">
-      <div><h4>Lifetime views</h4><b>All public uploads</b><p>Everything an upload has gathered since it was published, read on 14 Oct 2026. Older uploads have had longer to accumulate.</p></div>
-      <div><h4>Typical upload views</h4><b>Uploads now 3–18 months old</b><p>The median: half the included uploads have more views, half have fewer. The age window is broad (published 21 Apr 2025 – 16 Jul 2026), so it narrows age differences without removing them.</p></div>
-      <div><h4>Views gained</h4><b>Between two exact dates</b><p>How much a channel’s public total grew between a dated earlier reading and 14 Oct 2026. Never scaled up to a year.</p></div>
-    </div>
-    <p class="sub">“Track upload” means a long-form upload under ten minutes that isn’t a mix, set or compilation; Shorts are counted separately. Three datasets are used: every public upload on the 23 reviewed channels, a closer three-year sample of 19 channels, and dated channel totals. Details are in the Analysis appendix.</p>
-  </div>
-</section>
+
 
 <section class="slide light" data-t="Who controls what">
   <div class="inner">
@@ -975,7 +964,7 @@ details.more .periods{margin-top:.4rem}
 <script>
 (function(){
   var s=[].slice.call(document.querySelectorAll('.slide')),toc=document.getElementById('toc'),pb=document.getElementById('pbar');
-  var CH={'Cover':'Overview','Findings in brief':'Findings','How to read the numbers':'Measures','Who controls what':'The network','Subscribers and views':'Recent results','Where lifetime views sit':'Lifetime views','Older uploads still earn':'Views gained','Trap Nation':'Channel examples','How a song moves':'Repertoire','Features':'Features','Featured artists':'Featured artists','What this helps us understand':'Discussion'},cur=null,map=[];
+  var CH={'Cover':'Overview','Findings in brief':'Findings','Who controls what':'The network','Subscribers and views':'Recent results','Where lifetime views sit':'Lifetime views','Older uploads still earn':'Views gained','Trap Nation':'Channel examples','How a song moves':'Repertoire','Features':'Features','Featured artists':'Featured artists','What this helps us understand':'Discussion'},cur=null,map=[];
   s.forEach(function(x,i){x.id='s'+i;if(CH[x.dataset.t]){var a=document.createElement('a');a.href='#s'+i;a.textContent=CH[x.dataset.t];toc.appendChild(a);cur=a;}map.push(cur);});
   var io=new IntersectionObserver(function(es){es.forEach(function(en){if(en.isIntersecting){en.target.classList.add('in');}})},{threshold:0,rootMargin:'0px 0px -20% 0px'});
   s.forEach(function(x){io.observe(x)});
