@@ -30,7 +30,9 @@ async function hit(path, opts={}) {
 }
 
 const PAGE='/market-watch', SESSION='/api/market-watch/session',
-      COLLECT='/api/market-watch/collect', DATA='/api/market-watch/data';
+      COLLECT='/api/market-watch/collect', DATA='/api/market-watch/data',
+      VIRGIN='/api/market-watch/virgin', CONNECT='/api/market-watch/connect',
+      PILOT='/api/market-watch/pilot';
 
 (async () => {
   console.log(`Target ${BASE} — feature expected ${ON?'ON':'OFF'}\n`);
@@ -38,6 +40,17 @@ const PAGE='/market-watch', SESSION='/api/market-watch/session',
   // ── Unauthenticated, always ────────────────────────────────────────
   const data0 = await hit(DATA);
   check('GET data route without a session → 404', data0.status === 404, `got ${data0.status}`);
+
+  /* Every route, not just the two that existed when this was written. A new
+     route added without a gate check is the obvious way this protection
+     quietly stops covering the feature. */
+  for (const [name, path] of [['virgin',VIRGIN],['connect',CONNECT],['pilot',PILOT]]) {
+    const r = await hit(path);
+    check(`GET ${name} route without a session → 404`, r.status === 404, `got ${r.status}`);
+  }
+  const connPost = await hit(CONNECT, { method:'POST', headers:{'content-type':'application/json'},
+    body: JSON.stringify({ kind:'track', id:'x:y', description:{ genre:'test' } }) });
+  check('POST connect (writes tags) without a session → 404', connPost.status === 404, `got ${connPost.status}`);
 
   const col0 = await hit(COLLECT, { method:'POST' });
   check('POST collect route without a session → 404', col0.status === 404, `got ${col0.status}`);
