@@ -830,14 +830,7 @@ details.more[open]{padding-bottom:1rem}
 </section>
 
 
-<section class="slide light" data-t="Strategic framing">
-  <div class="inner">
-    <div class="label">Context</div>
-    <h2 class="display big">Comparing a strategic framing of Create with observable channel activity.</h2>
-    <p class="sub tight">The themes below come from a strategy presentation on Create that we reviewed. Its slides and figures are not reproduced here.</p>
-    <div class="frs"><div class="fr"><div class="fr-t">Network reach expressed as combined channel subscribers</div><div class="pill mixed">Mixed evidence</div><div class="fr-o"><b>Observed</b> The grouped channels’ public subscriber counts add up to about 55M (Nations), 9.7M (electronic labels), 2.3M (culture) and 2.1M (scene labels)</div><div class="fr-l"><b>Limits</b> Subscribers overlap across channels and aren’t unique people; per-upload views vary widely; some grouped channels are inactive or state no link</div></div><div class="fr"><div class="fr-t">Annual network views</div><div class="pill na">Not assessable from public data</div><div class="fr-o"><b>Observed</b> Nine Nations channels with a dated starting total gained 1.15B views between Feb 2025 and 14 Oct 2026; uploads published in that period hold about a quarter of it today</div><div class="fr-l"><b>Limits</b> A calendar-year figure can’t be isolated from the public snapshots, so annual totals can’t be checked either way</div></div><div class="fr"><div class="fr-t">High-volume, repeatable visualizer publishing</div><div class="pill vis">Visible in our sample</div><div class="fr-o"><b>Observed</b> One visual template; Trap 2.2 and Chill 3.0 uploads a week</div><div class="fr-l"><b>Limits</b> Cost and return are not visible</div></div><div class="fr"><div class="fr-t">Context-led discovery via listening-occasion playlists</div><div class="pill vis">Visible in our sample</div><div class="fr-o"><b>Observed</b> House Nation “Car Music” (175 videos), “Summer House” (253)</div><div class="fr-l"><b>Limits</b> Whether playlists route listeners needs traffic-source data</div></div><div class="fr"><div class="fr-t">Each channel gives a release a new route, enhanced by remixed versions</div><div class="pill mixed">Mixed evidence</div><div class="fr-o"><b>Observed</b> Repeat treatments happen: Artemas got 5 Create assets in 15 weeks</div><div class="fr-l"><b>Limits</b> On the cited bbno$ uploads, network copies show limited visible views next to the artist’s own</div></div><div class="fr"><div class="fr-t">Spot momentum early, sign quickly, seed owned channels</div><div class="pill na">Not assessable from public data</div><div class="fr-o"><b>Observed</b> Chill Nation teased Artemas pre-release and posted it a day after</div><div class="fr-l"><b>Limits</b> Nations copies of recent broke. releases came 4–5 weeks after the label’s; signing speed isn’t visible</div></div><div class="fr"><div class="fr-t">Audiences built to match core repertoire</div><div class="pill na">Not assessable from public data</div><div class="fr-o"><b>Observed</b> No public demographic data</div><div class="fr-l"><b>Limits</b> —</div></div></div>
-  </div>
-</section>
+
 
 <section class="slide" data-t="What this helps us understand">
   <div class="inner">
@@ -854,26 +847,9 @@ details.more[open]{padding-bottom:1rem}
   </div>
 </section>
 
-<section class="slide light" data-t="Questions">
-  <div class="inner">
-    <div class="label">Questions for further discussion</div>
-    <h2 class="display big">Questions these findings raise.</h2>
-    <ol class="qs">
-      <li><b>What would returning-viewer or traffic-source data clarify?</b><span>Whether a consistent view distribution reflects returning viewers, subscriber feeds or recommendation.</span></li>
-      <li><b>Would the listening / culture distinction matter when defining a channel’s purpose?</b><span>The two formats show very different per-upload results, sometimes on the same channel.</span></li>
-      <li><b>Could different treatments be assessed separately?</b><span>Originals, remixes, slowed edits, translations and lyric videos behave differently in our small samples.</span></li>
-      <li><b>How do label and network channels share a release?</b><span>Monstercat and broke. show different patterns of where a release draws its visible views.</span></li>
-    </ol>
-    <h3 class="mini">Areas that may warrant further exploration</h3>
-    <p class="sub">Repeated snapshots over several weeks · authorised analytics from a partner channel · release case studies chosen in advance · measures of value beyond visible views (playlists, Content ID, DSP follow-through).</p>
-  </div>
-</section>
 
-<section class="slide close" data-t="Close">
-  <div class="inner"><div class="label">VMG UK · 14 October 2026</div>
-  <h2 class="display big">Research to inform discussion.</h2>
-  <p class="lede">Method, coverage, definitions and sources are in the Analysis appendix (button at top right).</p></div>
-</section>
+
+
 </main>
 
 <button class="an-btn" id="an-open">Analysis</button>
@@ -972,7 +948,7 @@ details.more[open]{padding-bottom:1rem}
 <script>
 (function(){
   var s=[].slice.call(document.querySelectorAll('.slide')),toc=document.getElementById('toc'),pb=document.getElementById('pbar');
-  var CH={'Cover':'Overview','Findings in brief':'Findings','How to read the numbers':'Measures','Who controls what':'The network','Subscribers and views':'Recent results','Where lifetime views sit':'Lifetime views','Older uploads still earn':'Views gained','Trap Nation':'Channel examples','How a song moves':'Repertoire','Features':'Features','Featured artists':'Featured artists','Strategic framing':'Context','What this helps us understand':'Discussion'},cur=null,map=[];
+  var CH={'Cover':'Overview','Findings in brief':'Findings','How to read the numbers':'Measures','Who controls what':'The network','Subscribers and views':'Recent results','Where lifetime views sit':'Lifetime views','Older uploads still earn':'Views gained','Trap Nation':'Channel examples','How a song moves':'Repertoire','Features':'Features','Featured artists':'Featured artists','What this helps us understand':'Discussion'},cur=null,map=[];
   s.forEach(function(x,i){x.id='s'+i;if(CH[x.dataset.t]){var a=document.createElement('a');a.href='#s'+i;a.textContent=CH[x.dataset.t];toc.appendChild(a);cur=a;}map.push(cur);});
   var io=new IntersectionObserver(function(es){es.forEach(function(en){if(en.isIntersecting){en.target.classList.add('in');}})},{threshold:0,rootMargin:'0px 0px -20% 0px'});
   s.forEach(function(x){io.observe(x)});
