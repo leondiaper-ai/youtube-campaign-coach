@@ -1080,21 +1080,12 @@ export default function ChannelHealthBoard({
                     <span className="text-[9px] text-ink/25 shrink-0">{isExpanded ? '▲' : '▼'}</span>
                   </div>
                   <div className="text-[11px] text-ink/40 mt-0.5 leading-snug truncate">{r.reason}</div>
-                  {pinnedChannelIds && r.channelId && (
-                    <button
-                      onClick={(e) => { e.stopPropagation(); handlePin(r.channelId!, pinnedSet.has(r.channelId!)); }}
-                      disabled={pinningId === r.channelId}
-                      className={`absolute ${removable ? '-right-7' : '-right-1'} top-0 w-5 h-5 flex items-center justify-center rounded-full text-[11px] transition-all ${
-                        pinnedSet.has(r.channelId) ? '' : 'opacity-0 group-hover/row:opacity-100 hover:!opacity-100 focus:!opacity-100'
-                      }`}
-                      style={{ background: 'transparent' }}
-                      title={pinnedSet.has(r.channelId)
-                        ? `Unpin ${r.name} from Active Campaigns`
-                        : `Pin ${r.name} to Active Campaigns`}
-                    >
-                      {pinningId === r.channelId ? '…' : pinnedSet.has(r.channelId) ? '📌' : '📍'}
-                    </button>
-                  )}
+                  {/* The pin used to live here as a hover-only 📍 on the row.
+                      Two problems: it was invisible until hover, so nobody
+                      found it, and it sat a few pixels from the ✕ that removes
+                      the channel entirely — a miss on one is a destructive
+                      click on the other. Tracking is now a labelled action
+                      inside the expanded row, next to the other actions. */}
                   {removable && r.channelId && (
                     <button
                       onClick={(e) => { e.stopPropagation(); handleRemove(r.channelId!, r.name); }}
@@ -1160,8 +1151,22 @@ export default function ChannelHealthBoard({
                         Behaviour
                       </Link>
                     )}
-                    <QuickCopyButton row={r} type="slack" />
-                    <QuickCopyButton row={r} type="email" />
+                    <QuickCopyButton row={r} />
+                    {pinnedChannelIds && r.channelId && (
+                      <button
+                        onClick={(e) => { e.stopPropagation(); handlePin(r.channelId!, pinnedSet.has(r.channelId!)); }}
+                        disabled={pinningId === r.channelId}
+                        className="px-3 py-1.5 rounded text-[10px] font-bold uppercase tracking-[0.08em] transition-colors cursor-pointer"
+                        style={pinnedSet.has(r.channelId)
+                          ? { background: '#E8F8F0', color: '#0A7A45', border: 'none' }
+                          : { background: '#F6F1E7', color: 'rgba(14,14,14,0.55)', border: 'none' }}
+                        title={pinnedSet.has(r.channelId)
+                          ? `Stop tracking ${r.name} as a priority campaign`
+                          : `Track ${r.name} as a priority campaign`}
+                      >
+                        {pinningId === r.channelId ? '…' : pinnedSet.has(r.channelId) ? 'Tracked' : 'Track channel'}
+                      </button>
+                    )}
                   </div>
 
                   <div className="flex flex-wrap items-center gap-4">
@@ -2025,13 +2030,13 @@ function buildBenchmarkRead(bench: MarketBenchmarks, rows: RowData[]): Benchmark
 
 // ─── Quick Copy Buttons (Slack/Email from RowData) ──────────────────────────
 
-function buildQuickUpdate(r: RowData, type: 'slack' | 'email'): string {
+/* ONE report, not a Slack one and an email one.
+   The two differed by a two-word greeting and nothing else, so the choice
+   asked the reader to pick a destination before they had seen the content —
+   and whichever they picked, they pasted the same text. */
+function buildQuickUpdate(r: RowData): string {
   const lines: string[] = [];
-  if (type === 'email') {
-    lines.push('Hi all,');
-    lines.push('');
-  }
-  lines.push(`Quick ${r.name} YouTube update:`);
+  lines.push(`${r.name} — YouTube channel report`);
   lines.push('');
 
   // Gather insights — prioritised
@@ -2101,18 +2106,16 @@ function buildQuickUpdate(r: RowData, type: 'slack' | 'email'): string {
   return lines.join('\n');
 }
 
-function QuickCopyButton({ row, type }: { row: RowData; type: 'slack' | 'email' }) {
+function QuickCopyButton({ row }: { row: RowData }) {
   const [copied, setCopied] = useState(false);
 
   const handleCopy = useCallback(() => {
-    const text = buildQuickUpdate(row, type);
+    const text = buildQuickUpdate(row);
     navigator.clipboard.writeText(text).then(() => {
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     });
-  }, [row, type]);
-
-  const label = type === 'slack' ? 'Slack' : 'Email';
+  }, [row]);
 
   return (
     <button
@@ -2124,7 +2127,7 @@ function QuickCopyButton({ row, type }: { row: RowData; type: 'slack' | 'email' 
         border: 'none',
       }}
     >
-      {copied ? 'Copied' : `${label} Update`}
+      {copied ? 'Copied' : 'Channel report'}
     </button>
   );
 }
