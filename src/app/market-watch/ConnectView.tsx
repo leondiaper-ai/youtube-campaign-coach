@@ -43,6 +43,25 @@ const VERDICTS = [
   ['unsupported', 'Unsupported', 'Evidence does not justify it'],
 ] as const;
 
+
+const A_CLS: Record<string,string> = {
+  strong:'bg-emerald-600', moderate:'bg-amber-500', weak:'bg-orange-400', none:'bg-ink/25',
+};
+/* Four bars, never one score. The brief's point: a catalogue track with real
+   editorial fit and no campaign should not look like a track with no fit. */
+const Axes = ({ c }: any) => (
+  <div className="flex gap-2 flex-wrap mt-2">
+    {[['Editorial fit', c.editorialFit], ['Performance support', c.performanceSupport],
+      ['Timing', c.timing], ['Execution', c.execution]].map(([l, v]: any) => (
+      <div key={l} className="flex items-center gap-1.5">
+        <span className={`w-2 h-2 rounded-full ${A_CLS[v] ?? A_CLS.none}`} />
+        <span className="text-[10px] uppercase tracking-wider text-ink/50">{l}</span>
+        <span className="text-[10px] font-bold text-ink/75">{v}</span>
+      </div>
+    ))}
+  </div>
+);
+
 const Section = ({ title, children }: any) => (
   <div className="mt-3">
     <div className="text-[10px] uppercase tracking-[0.12em] font-bold text-ink/45 mb-1">{title}</div>
@@ -84,6 +103,7 @@ function CandidateCard({ c, verdict, onVerdict }: any) {
             <span className="text-[11px] font-semibold text-ink/70">Treatment: {c.suggestedTreatment}</span>
           )}
         </div>
+        <Axes c={c} />
         <div className="text-[11px] text-ink/55 mt-1.5 leading-snug">{c.readinessReason}</div>
       </div>
 

@@ -61,6 +61,11 @@ export function songName(title: string): string {
   const split = splitCredit(title);
   let core = split ? split.songPart : title;
   core = core.replace(/\s*[\[(][^\])]*[\])]\s*/g, ' ');
+  /* Feature credits belong to the record, not to the song's identity. Live
+     data had jigitz carrying both "50 ballerinas" and "50 ballerinas ft.
+     okgiorgio, Tabi" as separate songs — one record split in two, which
+     then splits its Shorts and its evidence in two as well. */
+  core = core.replace(/\s+(ft\.?|feat\.?|featuring|with)\s+.*$/i, ' ');
   return core.replace(/\s+/g, ' ').trim();
 }
 

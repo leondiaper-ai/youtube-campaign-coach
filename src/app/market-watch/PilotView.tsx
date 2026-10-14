@@ -11,6 +11,25 @@ import { fmtNum } from '@/lib/artists';
 
 const dt = (iso: string) => new Date(iso).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: '2-digit' });
 
+
+const A_CLS: Record<string,string> = {
+  strong:'bg-emerald-600', moderate:'bg-amber-500', weak:'bg-orange-400', none:'bg-ink/25',
+};
+/* Four bars, never one score. The brief's point: a catalogue track with real
+   editorial fit and no campaign should not look like a track with no fit. */
+const Axes = ({ c }: any) => (
+  <div className="flex gap-2 flex-wrap mt-2">
+    {[['Editorial fit', c.editorialFit], ['Performance support', c.performanceSupport],
+      ['Timing', c.timing], ['Execution', c.execution]].map(([l, v]: any) => (
+      <div key={l} className="flex items-center gap-1.5">
+        <span className={`w-2 h-2 rounded-full ${A_CLS[v] ?? A_CLS.none}`} />
+        <span className="text-[10px] uppercase tracking-wider text-ink/50">{l}</span>
+        <span className="text-[10px] font-bold text-ink/75">{v}</span>
+      </div>
+    ))}
+  </div>
+);
+
 const VERDICTS = [['useful', 'Useful'], ['obvious', 'Obvious'], ['unsuitable', 'Unsuitable'], ['unsupported', 'Unsupported']] as const;
 
 export default function PilotView() {
@@ -144,6 +163,7 @@ export default function PilotView() {
                         {c.performance.n} comparable upload(s) · median {c.performance.median != null ? fmtNum(c.performance.median) : '—'}
                         {c.performance.lowerQuartile != null ? ` · lower quartile ${fmtNum(c.performance.lowerQuartile)}` : ''}
                       </div>
+                      <Axes c={c} />
                       <div className="text-[11px] text-ink/50 mt-1 leading-snug">{c.readinessReason}</div>
                       {c.supporting.slice(0, 2).map((v: any) => (
                         <a key={v.id} href={v.url} target="_blank" rel="noreferrer" className="block text-[11px] text-ink/60 hover:underline mt-0.5">

@@ -46,6 +46,9 @@ import {
   type Description, type DestinationProfile, type DestExample, type Overlap,
 } from './descriptors';
 
+/** Reported per axis. Never summed — a total would hide which axis is weak. */
+export type Assessment = 'strong' | 'moderate' | 'weak' | 'none';
+
 export type Route = 'same_artist' | 'comparable_track' | 'treatment_pattern';
 export const ROUTE_LABEL: Record<Route, string> = {
   same_artist: 'Same artist already published here',
@@ -156,6 +159,13 @@ export interface Candidate {
   permission: 'unknown';
   ownership: string;
 
+  /* Four separate axes. Only editorialFit can veto — see the note where
+     these are computed. */
+  editorialFit: Assessment;
+  performanceSupport: Assessment;
+  timing: Assessment;
+  execution: Assessment;
+
   readiness: 'investigate' | 'propose';
   readinessReason: string;
   nextAction: string;
@@ -224,26 +234,53 @@ function build(
   if (prof.windowDays < 180)
     counter.push(`Only ${prof.windowDays} days of this destination's uploads are collected, so its pattern may not be representative.`);
 
-  /* READY TO PROPOSE vs WORTH INVESTIGATING.
-     Proposing means asking someone to spend money, so it needs: hard
-     (not inferred) editorial evidence, a usable distribution rather than
-     anecdotes, and a timing reason from real Watcher activity. */
+  /* ── FOUR AXES, NOT ONE GATE ──────────────────────────────────────────
+     The previous version ANDed editorial fit, performance evidence and
+     campaign timing into a single "ready to propose" flag. That was wrong
+     in a way that mattered: a catalogue track with excellent editorial fit
+     failed on timing and came back looking identical to a track with no
+     editorial case at all. Five comparable uploads and a live campaign are
+     useful signals, not requirements.
+
+     So the four are reported separately, and only EDITORIAL FIT can veto.
+     A strong fit with thin performance data and no campaign is a real
+     opportunity that needs a cheap test; a weak fit with perfect timing is
+     not an opportunity at all. */
   const hasHard = ROUTE_KIND[route] === 'exact' || sims.anyHardEvidence;
-  const hasDist = perf.n >= 5;
-  const hasTiming = wn.strength === 'supported';
-  let readiness: Candidate['readiness'] = 'investigate';
-  let readinessReason: string;
-  if (hasHard && hasDist && hasTiming && !prof.suspect) {
-    readiness = 'propose';
-    readinessReason = 'Editorial evidence is observed rather than inferred, there are enough uploads for a distribution, and Watcher shows live campaign activity to time it against.';
-  } else {
-    const why: string[] = [];
-    if (!hasHard) why.push('editorial evidence is inferred rather than observed');
-    if (!hasDist) why.push(`only ${perf.n} comparable upload(s) with view counts`);
-    if (!hasTiming) why.push(`timing case is ${wn.strength}`);
-    if (prof.suspect) why.push('destination channel identity unverified');
-    readinessReason = `Worth investigating, not ready to propose: ${why.join('; ')}.`;
-  }
+  const statedAxes = sims.shared.filter(s => s.from === 'stated').length;
+
+  const editorialFit: Assessment =
+    ROUTE_KIND[route] === 'exact' ? 'strong'
+    : statedAxes >= 2 ? 'strong'
+    : statedAxes === 1 ? 'moderate'
+    : sims.shared.length ? 'weak'
+    : 'none';
+
+  const performanceSupport: Assessment =
+    perf.n >= 8 ? 'strong' : perf.n >= 5 ? 'moderate' : perf.n >= 2 ? 'weak' : 'none';
+
+  const timing: Assessment =
+    wn.strength === 'supported' ? 'strong' : wn.strength === 'weak' ? 'moderate' : 'none';
+
+  /* Execution readiness is about whether the thing could actually be done,
+     and it is the axis nobody can improve by collecting more data. */
+  const execution: Assessment = prof.suspect ? 'none'
+    : ch.relationship === 'network_member' ? 'moderate' : 'weak';
+
+  /* Editorial fit alone decides whether this is worth putting in front of
+     anyone. "Weak" fit backed only by a parsed treatment is the generic-tag
+     match the brief warns against, so it does not reach propose however
+     good the other three look. */
+  const readiness: Candidate['readiness'] =
+    (editorialFit === 'strong' || editorialFit === 'moderate') && !prof.suspect ? 'propose' : 'investigate';
+
+  const readinessReason = readiness === 'propose'
+    ? `Editorial fit is ${editorialFit}${ROUTE_KIND[route] === 'exact' ? ' (observed — this destination has published this artist)' : ` (${statedAxes} researched attribute(s) agree)`}. Performance support ${performanceSupport}, timing ${timing} — neither blocks a test, they size it.`
+    : editorialFit === 'none'
+      ? 'No editorial case at all. The pairing exists only because the destination uses a treatment this song lacks, which says nothing about whether the song belongs there.'
+      : prof.suspect
+        ? 'Destination identity is unverified — the handle resolved to something implausible. Nothing else matters until that is settled.'
+        : `Editorial fit is weak: the only agreement is on ${sims.shared.map(s => s.axis).join(', ')}, ${sims.shared.every(s => s.from === 'parsed' || s.from === 'inferred') ? 'parsed from titles rather than researched' : 'thin'}. A treatment or language match is not musical fit.`;
 
   return {
     id: `${a.slug}::${song.key}::${prof.key}::${route}`,
@@ -262,6 +299,7 @@ function build(
     performance: perf, whyNow: wn,
     uncertainty, counterEvidence: counter,
     permission: 'unknown', ownership: a.ownership ?? 'observed',
+    editorialFit, performanceSupport, timing, execution,
     readiness, readinessReason,
     nextAction: readiness === 'propose'
       ? `Confirm who controls the recording of "${song.name}" and whether a ${treatment?.name ?? 'placement'} may be created and licensed. If yes, approach ${prof.name} with the ${perf.n} comparable uploads above as the basis, and agree in advance what result would count as nothing happening.`
@@ -276,7 +314,7 @@ function build(
                 : destOnly.length
                   ? `tag ${destOnly.join(', ')} on ${prof.name}; this song already has those recorded`
                   : `review the matched axes — they are parsed from titles rather than stated, so confirm or correct them`
-            : !hasDist ? `collect more of ${prof.name}'s uploads so the performance context is a distribution rather than anecdotes`
+            : performanceSupport === 'none' ? `collect more of ${prof.name}'s uploads — there is no performance context at all yet`
             : prof.suspect ? `verify ${prof.name}'s real channel — the handle resolved to something implausible`
             : `establish a timing reason from campaign activity; the editorial case already stands`}.`,
   };
