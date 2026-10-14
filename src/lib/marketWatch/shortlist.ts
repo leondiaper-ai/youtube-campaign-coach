@@ -192,23 +192,45 @@ export async function buildShortlistCandidates(
     .sort((x, y) => (y.gain!.gain) - (x.gain!.gain))
     .slice(0, perLens);
 
-  /* Worth extending needs a NAMED signal, not a leftover bucket.
+  /* ── WORTH EXTENDING ─────────────────────────────────────────────────
+     The first version asked whether the song's best Short beat the record.
+     That is structurally broken: for anything with a real catalogue the
+     record is in the millions, so the test can only ever fire on songs with
+     a few hundred views — and those are exactly the ones a floor then has to
+     throw out. The lens came back empty, which looked like honesty and was
+     actually a bad question.
 
-     And a floor. Without one the lens filled with songs whose record has
-     323 views and whose Short has 900: the ratio is real and the finding is
-     worthless, because nothing at that scale is evidence a follow-up would
-     land. The floor is on the SIGNAL asset, not the song, so a modest
-     record with a genuinely working Short still qualifies. */
+     The right frame is ARTIST-RELATIVE, the same reasoning videoSnapshots
+     uses for pace: is short-form working harder for THIS song than it
+     normally does for this artist? That holds at 500 views and at 500
+     million, and it is the thing that would justify making more.
+
+     Still floored in absolute terms, because a 2x lift on 300 views is a
+     ratio, not an opportunity. */
   const EXTEND_FLOOR = 25_000;
+  const LIFT = 2;
   type Ext = typeof withMeasure[number] & { signal: string };
   const extending: Ext[] = [];
+
+  /* Median Short per artist, from every Short on the channel. */
+  const artistShortMedian = new Map<string, number>();
+  for (const e of withMeasure) {
+    if (artistShortMedian.has(e.a.slug)) continue;
+    const all = withMeasure.filter(x => x.a.slug === e.a.slug)
+      .flatMap(x => x.song.shorts.map(sh => sh.views).filter((v): v is number => v != null && v > 0))
+      .sort((x, y) => x - y);
+    if (all.length >= 3) artistShortMedian.set(e.a.slug, all[Math.floor(all.length / 2)]);
+  }
+
   for (const e of withMeasure) {
     const shorts = e.song.shorts.filter(s => (s.views ?? 0) > 0);
-    const bestShort = shorts.sort((a, b) => (b.views ?? 0) - (a.views ?? 0))[0];
+    const bestShort = [...shorts].sort((a, b) => (b.views ?? 0) - (a.views ?? 0))[0];
+    const med = artistShortMedian.get(e.a.slug);
     const fv = e.featured.views ?? 0;
-    if (bestShort && (bestShort.views ?? 0) >= EXTEND_FLOOR && (bestShort.views ?? 0) > fv && fv > 0) {
+
+    if (bestShort && med && (bestShort.views ?? 0) >= EXTEND_FLOOR && (bestShort.views ?? 0) >= med * LIFT) {
       extending.push({ ...e, signal:
-        `A Short for this song has ${fmt(bestShort.views!)} views against ${fmt(fv)} on the record itself — short-form is doing more work than the full track.` });
+        `A Short for this song has ${fmt(bestShort.views!)} views — ${((bestShort.views!) / med).toFixed(1)}x this artist's median Short of ${fmt(med)}. Short-form is landing harder here than it usually does for them.` });
       continue;
     }
     const tc = topCommentsFor(e.raw, e.featured.id);
@@ -255,7 +277,7 @@ export async function buildShortlistCandidates(
     }
 
     cards.push({
-      key: id, slug: e.a.slug, artist: e.a.name, song: e.song.name, lens,
+      key: id, slug: e.a.slug, artist: e.a.name.trim(), song: e.song.name, lens,
       featured: toRef(e.featured),
       scope: { headline: 'featured video', set: 'song assets' },
       measured: e.gain ? {
