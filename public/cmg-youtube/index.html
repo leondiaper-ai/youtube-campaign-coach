@@ -416,6 +416,27 @@ details.more .periods{margin-top:.4rem}
  .tbl td.ch .av{display:none}
  .tbl::after{content:'Scroll sideways for more columns →';display:block;font-size:.7rem;color:var(--smoke);padding:.5rem .8rem}
 }
+@media(max-width:600px){
+ .cb{grid-template-columns:1fr;gap:.3rem}.cb-l span{font-size:.74rem}.cb-n{grid-column:1}
+ .cb-l{font-size:.86rem}
+ .big{font-size:clamp(1.65rem,7.4vw,2.2rem)}
+ .slide{padding:5.2rem 0 3.2rem;min-height:auto}
+ .inner{padding:0 1.1rem}
+ .sb-l{font-size:.82rem}
+ .huge{font-size:3rem}
+ .calc{padding:1.1rem}
+ .calc-r{font-size:.86rem}.calc-r b{font-size:1.5rem}
+ .periods{grid-template-columns:1fr}
+ .case{padding:1.1rem !important}
+ .label{font-size:.6rem;line-height:1.5}
+}
+@media(max-width:600px){
+ .hb{grid-template-columns:1fr;gap:.3rem}
+ .hb div{flex-wrap:nowrap;white-space:nowrap}
+ .stats5 b{font-size:1.8rem}
+ .two-nums b{font-size:1.9rem}
+}
+.hb div i{flex:0 0 auto}
 </style>
 <link rel="stylesheet" href="/shared/analysis-sheet.css">
 <style>:root{--an-accent:#FF4A1C}</style>
@@ -622,10 +643,10 @@ details.more .periods{margin-top:.4rem}
     <div class="split2 wide">
       <div class="hbars">
         <h3 class="mini">Typical upload views by treatment (number of uploads in brackets)</h3>
-        <div class="hb"><span>Original <em>(73)</em></span><div><i style="width:12.3%"></i><b>34K</b></div></div>
-        <div class="hb"><span>Remix or edit <em>(70)</em></span><div><i style="width:11.6%"></i><b>32K</b></div></div>
-        <div class="hb"><span>Remix of an established song <em>(36)</em></span><div><i style="width:14.7%"></i><b>41K</b></div></div>
-        <div class="hb"><span>Slowed or sped-up edit <em>(11)</em></span><div><i style="width:100%"></i><b>276K</b></div></div>
+        <div class="hb"><span>Original <em>(73)</em></span><div><i style="width:calc(12.3% * .62)"></i><b>34K</b></div></div>
+        <div class="hb"><span>Remix or edit <em>(70)</em></span><div><i style="width:calc(11.6% * .62)"></i><b>32K</b></div></div>
+        <div class="hb"><span>Remix of an established song <em>(36)</em></span><div><i style="width:calc(14.7% * .62)"></i><b>41K</b></div></div>
+        <div class="hb"><span>Slowed or sped-up edit <em>(11)</em></span><div><i style="width:calc(100% * .62)"></i><b>276K</b></div></div>
         <p class="sub">Medians of lifetime views. The slowed/sped group is 11 uploads, so this is an association in a small sample, not evidence that the treatment causes the result.</p>
       </div>
       <div class="row2">
@@ -806,10 +827,10 @@ details.more .periods{margin-top:.4rem}
     <div class="split2 wide">
       <div class="hbars">
         <h3 class="mini">Share of each artist’s network lifetime views held by early uploads</h3>
-        <div class="hb"><span>Marshmello <em>58 placements · 753M</em></span><div><i style="width:91%;background:#FF4A1C"></i><b>91%</b> on 2016 uploads</div></div>
-        <div class="hb"><span>deadmau5 <em>127 · 94M, mostly mau5trap</em></span><div><i style="width:72%;background:#FF4A1C"></i><b>72%</b> on 2014–17 uploads</div></div>
-        <div class="hb"><span>Audien <em>52 · 1.5M, mostly Enhanced</em></span><div><i style="width:59%;background:#FF4A1C"></i><b>59%</b> on 2010–12 uploads</div></div>
-        <div class="hb"><span>bbno$ <em>40 · 6.9M</em></span><div><i style="width:47%;background:#FF4A1C"></i><b>47%</b> on one 2019 feature</div></div>
+        <div class="hb"><span>Marshmello <em>58 placements · 753M</em></span><div><i style="width:calc(91% * .62);background:#FF4A1C"></i><b>91%</b> on 2016 uploads</div></div>
+        <div class="hb"><span>deadmau5 <em>127 · 94M, mostly mau5trap</em></span><div><i style="width:calc(72% * .62);background:#FF4A1C"></i><b>72%</b> on 2014–17 uploads</div></div>
+        <div class="hb"><span>Audien <em>52 · 1.5M, mostly Enhanced</em></span><div><i style="width:calc(59% * .62);background:#FF4A1C"></i><b>59%</b> on 2010–12 uploads</div></div>
+        <div class="hb"><span>bbno$ <em>40 · 6.9M</em></span><div><i style="width:calc(47% * .62);background:#FF4A1C"></i><b>47%</b> on one 2019 feature</div></div>
       </div>
       <div>
         <div class="box"><b>A large lifetime total is not the same as continued growth.</b> Older placements show much larger totals than recent ones (Marshmello: median 940K for placements over five years old, about 50K for those under two), but they have had years longer to gather views, so the two can’t be compared directly.</div>
