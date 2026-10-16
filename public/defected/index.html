@@ -427,7 +427,8 @@ h3.display{font-size:clamp(1.2rem,2.2vw,1.9rem);font-variation-settings:'wdth' 7
 .tl::before{content:'';position:absolute;left:0;right:0;bottom:0;height:1px;background:rgba(13,10,11,.3)}
 .ep{grid-row:1;align-self:end;position:relative}
 .ep .thumb{border-radius:2px;border:2px solid var(--ink)}
-.ep i{position:absolute;left:0;bottom:-1.3rem;font-style:normal;font-family:'DM Mono',monospace;font-size:.56rem;letter-spacing:.06em;color:rgba(13,10,11,.7);white-space:nowrap}
+.ep i{position:absolute;left:0;top:calc(100% + .35rem);font-style:normal;font-family:'DM Mono',monospace;font-size:.56rem;line-height:1.35;letter-spacing:.06em;color:rgba(13,10,11,.7);white-space:nowrap}
+.ep i b{display:block;font-weight:500;color:var(--ink)}
 .gap{grid-row:1;align-self:end;height:1.4rem;display:flex;align-items:center;justify-content:center;font-family:'DM Mono',monospace;font-size:.56rem;letter-spacing:.1em;color:rgba(13,10,11,.55);border-bottom:2px dashed rgba(13,10,11,.35);margin-bottom:.4rem}
 
 @media(max-width:860px){
@@ -989,7 +990,7 @@ body.sheet-open .chrome,body.sheet-open #pbar{display:none}
     <h2 class="display tight reveal" style="margin-top:.7rem;max-width:18ch">Give each podcast episode more moments to reach fans.</h2>
     <div class="reveal" style="margin-top:clamp(1.4rem,3vw,2.4rem)">
       <div class="tl" id="tl"></div>
-      <div style="display:flex;justify-content:space-between;margin-top:1.9rem"><span class="label">Jan 2024</span><span class="label">Moments in Music, season one · nine episodes in 25 months</span><span class="label">Feb 2026</span></div>
+      <div style="display:flex;justify-content:space-between;margin-top:2.6rem"><span class="label">Jan 2024</span><span class="label">Moments in Music, season one · nine episodes in 25 months</span><span class="label">Feb 2026</span></div>
     </div>
     <div class="grid2" style="margin-top:clamp(1.4rem,3vw,2.2rem);grid-template-columns:1fr 1fr;align-items:start">
       <div class="reveal">
@@ -1364,14 +1365,16 @@ function months(){
 }
 
 /* Slide 13: nine episodes on a 26-month grid (Jan 2024 = column 1). */
-var EPS = [['4ZmX-P8ZcJw',1,'E1 · Jan 24'],['h8D3PkHfKN0',2,'E2'],['cklwzzHn5yk',2,'E3'],['zSS4XjIgNcM',3,'E4'],['_5bL_Smn9e0',6,'E5 · Jun'],['iXpPztRQN8s',7,'E6 · Jul'],['B4fNB2a1jeA',14,'E7 · Feb 25'],['EIzL3Rvsug0',21,'E8 · Sep 25'],['uqpmjd5Iip0',26,'E9 · Feb 26']];
+/* [id, grid column, label, month]. Jan–Mar 2024 had four episodes in three
+   months, so E2–E4 take one column each from 2 to 4; every label is two
+   short lines so no label is wider than its column. */
+var EPS = [['4ZmX-P8ZcJw',1,'E1','Jan 24'],['h8D3PkHfKN0',2,'E2','Feb'],['cklwzzHn5yk',3,'E3','Feb'],['zSS4XjIgNcM',4,'E4','Mar'],['_5bL_Smn9e0',6,'E5','Jun'],['iXpPztRQN8s',7,'E6','Jul'],['B4fNB2a1jeA',14,'E7','Feb 25'],['EIzL3Rvsug0',21,'E8','Sep 25'],['uqpmjd5Iip0',26,'E9','Feb 26']];
 function timeline(){
   var el = document.getElementById('tl'); if(!el) return;
   var h = '';
   EPS.forEach(function(e, i){
-    /* E2 and E3 share February 2024; let the second sit one column right. */
-    var col = e[1] + (i === 2 ? 1 : 0);
-    h += '<div class="ep" style="grid-column:' + col + '"><a class="thumb" href="https://www.youtube.com/watch?v=' + e[0] + '" target="_blank" rel="noopener"><img data-vid="' + e[0] + '" alt=""></a><i>' + e[2] + '</i></div>';
+    var col = e[1];
+    h += '<div class="ep" style="grid-column:' + col + '"><a class="thumb" href="https://www.youtube.com/watch?v=' + e[0] + '" target="_blank" rel="noopener"><img data-vid="' + e[0] + '" alt=""></a><i><b>' + e[2] + '</b>' + e[3] + '</i></div>';
   });
   h += '<div class="gap" style="grid-column:8/14">7 months</div><div class="gap" style="grid-column:15/21">7 months</div><div class="gap" style="grid-column:22/26">5 months</div>';
   el.innerHTML = h;
