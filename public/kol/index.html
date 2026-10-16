@@ -587,12 +587,6 @@ const ARTIST = {
     channelId:'UCfJein8E4rcYZSUCc8UqyMA',
     apiBase:'https://youtube-campaign-coach.vercel.app/api/artist-live',
     capturedAt:'24 Aug 2026',
-    /* Machine-comparable form of capturedAt. The catalogue analysis in this
-       deck is pinned to that retrieval so every derived percentage stays
-       internally consistent — see the DATA LAYER note above. Anything the
-       channel has published since is shown separately on the "Since this deck
-       was written" slide rather than folded into the frozen figures. */
-    capturedISO:'2026-08-24',
   },
 
   /* Hero imagery — swappable. Any public YouTube video ID from the catalogue.
@@ -1065,22 +1059,6 @@ function slides(){ return [
   </div>
 </section>`,
 
-/* 01b ── SINCE THIS DECK WAS WRITTEN ──────────────────────────────
-   Rendered empty and hidden. refreshLive() fills it from the live API and
-   reveals it ONLY if the channel has published since capturedISO. A deck that
-   has been overtaken should say so rather than quietly present stale figures
-   as current — and the analysis behind it stays frozen either way.          */
-`<section class="slide coal" data-t="Since this deck was written" id="sinceSlide" style="display:none">
-  <div class="inner">
-    <div class="label reveal" style="color:var(--signal)" id="sinceLabel">Live from the channel</div>
-    <h2 class="display reveal" id="sinceHead"
-        style="font-size:clamp(2rem,5.5vw,3.8rem);line-height:.95">New since 24 Aug</h2>
-    <p class="sub reveal" id="sinceSub" style="margin-top:1rem;max-width:56ch"></p>
-    <div class="thumb-grid g4 stagger" id="sinceGrid" style="margin-top:2rem"></div>
-    <div class="src reveal" id="sinceSrc" style="margin-top:1.6rem"></div>
-  </div>
-</section>`,
-
 /* 02 ── STAKES ───────────────────────────────────────────────────
    Was two slides — the lifetime total, then where the viewing sits — which
    said "big audience, mostly old" twice with no escalation between them. One
@@ -1457,86 +1435,13 @@ async function refreshLive(){
     A.liveData = {
       subscriberCount: d.state?.subscriberCount ?? null,
       viewCount:       d.state?.viewCount ?? null,
-      /* Uploads are NOT merged into the catalogue analysis — they drive the
-         "since this deck was written" slide only. */
-      latestVideos:    d.state?.latestVideos ?? [],
-      lastUploadDate:  d.state?.lastUploadDate ?? null,
     };
   }catch(e){
     console.warn('[KoL deck] live refresh unavailable —', e.message, '· keeping captured data');
     A.liveData = null;
   }
   renderStats();
-  renderSince();
   btn.classList.remove('spinning'); btn.disabled = false;
-}
-
-/* ═══════════════════════════════════════════════════════════════════
-   SINCE THIS DECK WAS WRITTEN
-
-   The catalogue analysis is pinned to the retrieval date so the percentages
-   stay internally consistent. That is correct, and it means the deck goes out
-   of date silently — a new single can land and every slide still reads as
-   though it is the current picture.
-
-   This reads the live upload list, keeps only what was published after the
-   capture, and shows it as its own thing. It never recomputes a frozen
-   figure. If nothing has landed the slide stays hidden and the deck is
-   exactly as it was.
-   ═══════════════════════════════════════════════════════════════════ */
-function renderSince(){
-  const slide = document.getElementById('sinceSlide');
-  if(!slide) return;
-  const vids = (A.liveData?.latestVideos) || [];
-  const cut  = Date.parse(A.meta.capturedISO + 'T00:00:00Z');
-  if(!vids.length || !Number.isFinite(cut)){ slide.style.display='none'; return; }
-
-  const fresh = vids
-    .filter(v => Date.parse(v.publishedAt) > cut)
-    .sort((a,b) => b.publishedAt.localeCompare(a.publishedAt));
-  if(!fresh.length){ slide.style.display='none'; return; }
-
-  /* Long-form and Shorts are counted separately — a release week is mostly
-     Shorts, and merging them would overstate how many videos landed. */
-  const longform = fresh.filter(v => v.kind !== 'short');
-  const shorts   = fresh.filter(v => v.kind === 'short');
-  /* Name the most recent VIDEO, not the most recent upload. The newest item
-     is usually a social Short — "KOYSAR is out everywhere now 🍒" — and
-     leading on that caption reads as though it were the release. */
-  const newest   = longform[0] || fresh[0];
-  const days     = Math.max(0, Math.round((Date.now() - Date.parse(newest.publishedAt)) / 864e5));
-
-  document.getElementById('sinceHead').innerHTML = longform.length
-    ? `${longform.length} new video${longform.length>1?'s':''}<br>since ${A.meta.capturedAt}.`
-    : `${shorts.length} new Short${shorts.length>1?'s':''}<br>since ${A.meta.capturedAt}.`;
-
-  const parts = [];
-  if(longform.length) parts.push(`<b style="color:var(--cream)">${longform.length} long-form</b>`);
-  if(shorts.length)   parts.push(`<b style="color:var(--cream)">${shorts.length} Short${shorts.length>1?'s':''}</b>`);
-  document.getElementById('sinceSub').innerHTML =
-    `${parts.join(' and ')} published since this analysis was retrieved. The most recent is ` +
-    `<b style="color:var(--cream)">${esc(newest.title)}</b>, ${days===0?'today':days===1?'yesterday':days+' days ago'}. ` +
-    `The slides that follow are unchanged — they describe the catalogue as it stood on ${A.meta.capturedAt}.`;
-
-  /* Long-form first, then Shorts, capped at eight tiles. */
-  const show = [...longform, ...shorts].slice(0, 8);
-  document.getElementById('sinceGrid').innerHTML = show.map(v => `
-    <a class="tcard" href="https://www.youtube.com/watch?v=${v.videoId}" target="_blank" rel="noopener">
-      <img src="${thumb(v.videoId)}" alt="" loading="lazy">
-      <div class="tmeta">
-        <div class="ttitle">${esc(v.title)}</div>
-        <div class="tviews">${fmt(v.views)}</div>
-        <div class="tsub">${v.publishedAt.slice(0,10)} · ${v.kind === 'short' ? 'Short' : 'Long-form'}</div>
-      </div>
-    </a>`).join('');
-
-  document.getElementById('sinceSrc').textContent =
-    'Live read from the public YouTube API. View counts on very recent uploads are still moving.';
-
-  slide.style.display = '';
-  slide.querySelectorAll('.reveal').forEach(e=>e.classList.add('visible'));
-  [...document.getElementById('sinceGrid').children]
-    .forEach((c,i)=>setTimeout(()=>c.classList.add('visible'), i*70));
 }
 
 /* ── Reveal observers ──────────────────────────────────────────── */
