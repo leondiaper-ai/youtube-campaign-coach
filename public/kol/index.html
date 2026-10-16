@@ -1500,7 +1500,10 @@ function renderSince(){
      Shorts, and merging them would overstate how many videos landed. */
   const longform = fresh.filter(v => v.kind !== 'short');
   const shorts   = fresh.filter(v => v.kind === 'short');
-  const newest   = fresh[0];
+  /* Name the most recent VIDEO, not the most recent upload. The newest item
+     is usually a social Short — "KOYSAR is out everywhere now 🍒" — and
+     leading on that caption reads as though it were the release. */
+  const newest   = longform[0] || fresh[0];
   const days     = Math.max(0, Math.round((Date.now() - Date.parse(newest.publishedAt)) / 864e5));
 
   document.getElementById('sinceHead').innerHTML = longform.length
