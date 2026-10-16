@@ -324,7 +324,7 @@ measure when 2025 has fewer, more selective uploads?
 **4.6 Slide 7 — the four strengths.** Each number appears on an earlier slide: 52 a year
 (4.2); three million-view records (4.5); 59 sets, nine over 100K (4.3); four in ten (4.4).
 
-**4.7 Slide 8 — "None of the 71 public playlists holds them, and the podcast tile that carries the show's name is a tracklist of other channels' uploads."**
+**4.7 Slide 8 — "What it doesn't have yet is an up-to-date playlist that brings the weekly episodes together: the only public playlist containing any is the 631-video Broadcasting House archive, with two episodes from 2022–23, and the podcast tile that carries the show's name is a list of tracks played on the show, hosted on other channels."**
 §3.8. The 631-item playlist has now been read in full: 2 radio episodes among 622, both
 from 2022–23. The weekly episodes are not collected in any public playlist. **Challenge:**
 a private or unlisted playlist is invisible to the API and to a signed-out visitor; the
