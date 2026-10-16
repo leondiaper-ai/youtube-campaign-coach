@@ -9,16 +9,16 @@
 
 <!--
   UNDERSCORES × YOUTUBE — channel development presentation
-  Virgin Music Group UK
-  16 October 2026
+  Virgin Music Group UK · 16 October 2026
 
   ─────────────────────────────────────────────────────────────────────
   WHERE THE NUMBERS COME FROM
   Public YouTube Data API v3 (all 102 public uploads, read 16 Oct 2026,
   via /api/full-catalogue), public playlists and channel sections
   (/api/channel-shelf), VMG weekly channel snapshots (/api/weekly-snapshots),
-  public comments (/api/comment-scan), and the logged-out channel page
-  inspected 16 Oct 2026. There are no YouTube Studio metrics in this deck.
+  public comments (/api/comment-scan), the logged-out channel page and the
+  official tour page (underscores.plus), all inspected 16 Oct 2026.
+  There are no YouTube Studio metrics in this deck.
 
   ─────────────────────────────────────────────────────────────────────
   RULES THIS FILE OBEYS
@@ -40,324 +40,312 @@
    9. Confidential BBC voting, jury outreach and budgets stay out.
 
   ─────────────────────────────────────────────────────────────────────
-  IDENTITY — taken from the U era's own materials, not a house style
-  Four cues, used selectively. Data slides stay plain.
-   1. THE CATALOGUE INDEX. underscores.plus is an index: Optima, small
-      black type on white, gold (#FDC100) section heads, releases coded
-      YYMMDD (U = 260320). Headlines and labels are set in Optima (native
-      on Apple devices; Belleza is the web fallback), labels are gold, and
-      the intro and November slides are laid out as index rows.
-   2. THE GALLERIA. U's world is a mall atrium: Ochiai Shohei's fine-line
-      album artwork, the album film shot in a real atrium, "live from
-      GALLERIA CHICAGO", and the tour itself, GALLERIA. Light slides use
-      the artwork's cream paper and pale sky-blue line colour.
-   3. THE U MARK. The site's emblem is a pair of headphones drawn as a U,
-      echoing the smiling U on the screen in the album art. It appears
-      once, faintly, behind the closing slide.
-   4. THE SPLIT FRAME. Her Shorts crop a sharp vertical panel out of a
-      blurred, darkened frame. The cover uses the same construction.
-  Earlier builds used a red-orange/cyan system sampled from thumbnails and
-  an underscore cursor after headlines; both are retired.
+  CONSTRUCTION — Ezra's approach, underscores' material
+   · Bold, tight display type for findings; very large figures; small mono
+     labels; one statement line where a slide needs a conclusion.
+   · Content fills a 1400px canvas. Image-led slides run full-bleed behind
+     separate scrims so the image keeps its own contrast.
+   · THE U-ERA STRIP is the recurring motif: one tick per week from Music
+     (27 Jun 2025) to 16 Oct 2026, lit where an upload landed — gold for a
+     single's release week, cream for album week. Real data, like Ezra's
+     day-ticks. It appears on the cover and on the growth slide, where the
+     dark last seven weeks sit against +3.37M views.
+   · VERTICAL PANELS (singles) echo how her Shorts cut a tall panel out of a
+     frame. THE SKYLINE draws the Do It campaign with bars made of its own
+     frames, height = lifetime views. THE STREAM RAIL draws the production
+     stream's own chapter marks at their real positions.
+   · The U album artwork (Ochiai Shohei) leads the creative-world slide;
+     the GALLERIA tour is a rail over the Galleria Chicago live frame.
+   · Colour: underscores.plus gold (#FDC100) and the U artwork's line blue.
+     Optima has one limited role: YYMMDD release codes, the way
+     underscores.plus catalogues her releases.
+   · No lazy-loaded images: hidden slides in Present mode never trigger a
+     lazy load, which left thumbnails blank.
 -->
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Belleza&family=Inter+Tight:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Belleza&family=Inter+Tight:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 
 <style>
 :root{
-  --ink:#0C0D10;
-  --ink-2:#15171C;
-  --paper:#FBF8EE;      /* the album artwork's paper */
-  --sky:#DCEAF4;        /* the artwork's sky, as a ground */
-  --sky-dp:#9DC3E2;
-  --signal:#FDC100;     /* underscores.plus section gold */
-  --signal-dp:#8A6500;  /* the same gold, darkened for text on light */
-  --cyan:#8FC3E6;       /* the artwork's line blue */
-  --cyan-dp:#2F6E98;    /* line blue on light */
-  --disp:Optima,'Optima Nova','Belleza',Candara,'Segoe UI',sans-serif;
-  --mute:#A7ABB3;       /* body copy on dark, 8.4:1 on ink */
-  --dim:#7C818B;        /* labels only */
-  --mute-l:#4A4E57;     /* body copy on light */
-  --line:rgba(255,255,255,.13);
-  --line-l:rgba(12,13,16,.12);
-  --pad:clamp(1.5rem,5vw,5rem);
+  --ink:#0B0C0F; --ink-2:#13151A; --ink-3:#1D2027;
+  --cream:#F7F3E9;
+  --paper:#F7F3E9;
+  --gold:#FDC100;            /* underscores.plus */
+  --gold-dp:#7A5900;         /* gold for text on cream */
+  --blue:#8FC3E6;            /* the U artwork's line blue */
+  --blue-dp:#2F6E98;
+  --warm:#B9BCC4;            /* body on dark, 9:1 */
+  --dim:#80858F;             /* labels only */
+  --mute-l:#4A4E57;          /* body on cream */
+  --line:rgba(247,243,233,.14);
+  --line-l:rgba(11,12,15,.14);
+  --code:Optima,'Optima Nova','Belleza',sans-serif;
+  --mono:'JetBrains Mono',ui-monospace,monospace;
+  --pad:clamp(1.6rem,5vw,5.5rem);
 }
-*{margin:0;padding:0;box-sizing:border-box}
+*{box-sizing:border-box;margin:0;padding:0}
 html{scroll-behavior:smooth}
-body{background:var(--ink);color:var(--paper);font-family:'Inter Tight',system-ui,sans-serif;
+body{background:var(--ink);color:var(--cream);font-family:'Inter Tight',system-ui,sans-serif;
   font-size:clamp(15px,1.05vw,18px);line-height:1.5;-webkit-font-smoothing:antialiased}
-a{color:inherit}
-img{display:block;max-width:100%}
+a{color:inherit;text-decoration:none}
+img{display:block}
 b{font-weight:700}
 
 /* ── Type ───────────────────────────────────────────────────────── */
-.display{font-family:var(--disp);font-weight:400;letter-spacing:-.012em;line-height:1.04}
-h1.display{font-size:clamp(3.4rem,11vw,9.2rem);font-weight:700;letter-spacing:-.03em;line-height:.95}
-h2.display{font-size:clamp(2rem,4.4vw,3.7rem);max-width:27ch}
-.label{font-family:var(--disp);font-size:.84rem;font-weight:400;letter-spacing:.01em;color:var(--dim)}
-.label.sig{color:var(--signal)}
-.light .label,.sky .label{color:var(--mute-l)}
-.light .label.sig,.sky .label.sig{color:var(--signal-dp)}
-.light .q .th,.light .p .n{color:var(--signal-dp)}
-.lede{font-size:clamp(1.05rem,1.55vw,1.32rem);line-height:1.45;color:var(--paper);max-width:52ch;margin-top:1.2rem}
-.light .lede,.sky .lede{color:var(--ink)}
-.body{color:var(--mute);max-width:60ch}
-.light .body,.sky .body{color:var(--mute-l)}
-.body b,.lede b{color:var(--paper)}
-.light .body b,.sky .body b,.light .lede b,.sky .lede b{color:var(--ink)}
-.num{font-weight:800;letter-spacing:-.04em;line-height:.9;font-variant-numeric:tabular-nums}
-.src{font-size:.66rem;letter-spacing:.01em;color:var(--dim);
-  margin-top:1.6rem;opacity:.95}
-.light .src,.sky .src{color:var(--mute-l)}
-.note{font-size:.7rem;color:var(--dim);margin-top:.35rem;line-height:1.45}
-.light .note,.sky .note{color:var(--mute-l)}
+.display{font-weight:800;letter-spacing:-.04em;line-height:.93}
+h1.display{font-size:clamp(4rem,15vw,12.5rem);font-weight:900;letter-spacing:-.06em;line-height:.82}
+h2.display{font-size:clamp(2.1rem,4.7vw,4.2rem);max-width:24ch}
+.big-num{font-weight:800;letter-spacing:-.045em;line-height:.86;font-variant-numeric:tabular-nums}
+.label{font-family:var(--mono);font-size:.68rem;letter-spacing:.14em;text-transform:uppercase;color:var(--dim)}
+.label.g{color:var(--gold)}
+.label.b{color:var(--blue)}
+.statement{font-size:clamp(1.12rem,1.9vw,1.6rem);line-height:1.3;font-weight:600;letter-spacing:-.015em;max-width:40ch}
+.statement .g{color:var(--gold)}
+.body{color:var(--warm);max-width:58ch}
+.body b{color:var(--cream)}
+.src{font-family:var(--mono);font-size:.62rem;line-height:1.45;color:var(--dim);
+  border-left:2px solid var(--line);padding-left:.7rem;max-width:84ch;margin-top:1.2rem}
+.code{font-family:var(--code);letter-spacing:.02em}
+.cream-s{background:var(--cream);color:var(--ink)}
+.cream-s .label{color:var(--mute-l)}
+.cream-s .label.g{color:var(--gold-dp)}
+.cream-s .body{color:var(--mute-l)} .cream-s .body b{color:var(--ink)}
+.cream-s .src{color:var(--mute-l);border-color:var(--line-l)}
 
 /* ── Slides ─────────────────────────────────────────────────────── */
-.deck{padding-top:50px}
+.deck{padding-top:48px}
 .slide{position:relative;min-height:100vh;display:flex;flex-direction:column;justify-content:center;
-  padding:4.5rem var(--pad) 3.5rem;overflow:hidden;border-bottom:1px solid var(--line)}
-.slide.light{background:var(--paper);color:var(--ink);border-color:var(--line-l)}
-.slide.sky{background:var(--sky);color:var(--ink);border-color:var(--line-l)}
-.inner{position:relative;z-index:3;width:100%;max-width:1220px;margin:0 auto}
-.grid2{display:grid;gap:clamp(1.5rem,4vw,3.5rem);align-items:center}
-@media(min-width:900px){.grid2{grid-template-columns:1fr 1fr}.grid2.wide-l{grid-template-columns:1.15fr .85fr}.grid2.wide-r{grid-template-columns:.85fr 1.15fr}}
-
-/* ── Imagery ────────────────────────────────────────────────────── */
+  padding:5rem var(--pad) 3.4rem;overflow:hidden;border-bottom:1px solid var(--line)}
+.slide.flush{padding:0;justify-content:stretch}
+.inner{position:relative;z-index:3;width:100%;max-width:1400px;margin:0 auto}
 .bleed{position:absolute;inset:0;z-index:0}
 .bleed img{width:100%;height:100%;object-fit:cover}
-.bleed::after{content:'';position:absolute;inset:0;
-  background:linear-gradient(180deg,rgba(12,13,16,.15) 0%,rgba(12,13,16,.55) 55%,rgba(12,13,16,.95) 100%)}
-.bleed.left::after{background:linear-gradient(90deg,rgba(12,13,16,.96) 0%,rgba(12,13,16,.86) 45%,rgba(12,13,16,.25) 100%)}
-.frame{position:relative;border-radius:14px;overflow:hidden;display:block;text-decoration:none;color:inherit}
-.frame img{width:100%;aspect-ratio:16/9;object-fit:cover}
-.frame .cap{position:absolute;left:0;right:0;bottom:0;padding:1.6rem 1rem .8rem;
-  background:linear-gradient(0deg,rgba(0,0,0,.82),transparent);color:#fff}
-.frame .cap .t{font-weight:700;font-size:.92rem}
-.frame .cap .m{font-size:.72rem;opacity:.85;margin-top:.15rem}
-.play{position:absolute;top:.7rem;right:.7rem;width:2rem;height:2rem;border-radius:50%;
-  background:rgba(255,255,255,.92);display:grid;place-items:center}
-.play::after{content:'';border-left:.62rem solid var(--ink);border-top:.38rem solid transparent;border-bottom:.38rem solid transparent;margin-left:.15rem}
+.scrim-b::after{content:'';position:absolute;inset:0;
+  background:linear-gradient(to top,rgba(11,12,15,.97) 6%,rgba(11,12,15,.7) 40%,rgba(11,12,15,.12) 78%)}
+.scrim-l::after{content:'';position:absolute;inset:0;
+  background:linear-gradient(to right,rgba(11,12,15,.96) 28%,rgba(11,12,15,.72) 58%,rgba(11,12,15,.25) 100%)}
+.play{position:absolute;top:.9rem;right:.9rem;z-index:2;width:2.3rem;height:2.3rem;border-radius:50%;
+  background:rgba(247,243,233,.92);display:grid;place-items:center}
+.play::after{content:'';border-left:.68rem solid var(--ink);border-top:.42rem solid transparent;border-bottom:.42rem solid transparent;margin-left:.18rem}
+.row{display:flex;gap:clamp(1.4rem,3.6vw,3.4rem);flex-wrap:wrap;align-items:flex-end}
+.between{display:flex;justify-content:space-between;align-items:flex-end;gap:2rem;flex-wrap:wrap}
 
-/* ── Thumbnail cards ────────────────────────────────────────────── */
-.thumbs{display:grid;gap:1rem;margin-top:2rem}
-.thumbs.four{grid-template-columns:repeat(4,1fr)}
-.thumbs.three{grid-template-columns:repeat(3,1fr)}
-@media(max-width:900px){.thumbs.four,.thumbs.three{grid-template-columns:repeat(2,1fr)}}
-@media(max-width:520px){.thumbs.four,.thumbs.three{grid-template-columns:1fr}}
-.tc{display:block;text-decoration:none;color:inherit;transition:transform .25s ease}
-.tc:hover{transform:translateY(-4px)}
-.tc .im{position:relative;border-radius:10px;overflow:hidden;background:#1b1d22}
-.tc .im img{width:100%;aspect-ratio:16/9;object-fit:cover}
-.tc .t{font-weight:700;font-size:.86rem;margin-top:.6rem;line-height:1.3}
-.tc .v{font-weight:800;font-size:clamp(1.5rem,2.4vw,2.1rem);letter-spacing:-.04em;margin-top:.25rem;line-height:1}
-.tc .m{font-size:.7rem;color:var(--dim);margin-top:.35rem}
-.light .tc .m,.sky .tc .m{color:var(--mute-l)}
-.tc .ch{font-family:var(--disp);font-size:.8rem;color:var(--cyan);margin-top:.5rem}
-.light .tc .ch{color:var(--cyan-dp)}
-
-/* ── Stats ──────────────────────────────────────────────────────── */
-.stats{display:flex;flex-wrap:wrap;gap:clamp(1.4rem,4vw,3.2rem);margin-top:2rem}
-.stat .num{font-size:clamp(2.6rem,5.6vw,4.6rem)}
-.stat .label{margin-top:.55rem}
+/* ── THE U-ERA STRIP ────────────────────────────────────────────── */
+.rhythm{display:flex;gap:3px;align-items:flex-end;height:var(--rh,30px)}
+.tick{flex:1 1 0;border-radius:1px;background:rgba(247,243,233,.12);height:24%}
+.tick.o{height:62%;background:rgba(247,243,233,.55)}
+.tick.a{height:100%;background:var(--cream)}
+.tick.s{height:100%;background:var(--gold)}
+.rkey{display:flex;gap:1.3rem;flex-wrap:wrap;margin-top:.6rem}
+.rkey span{font-family:var(--mono);font-size:.6rem;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);display:flex;align-items:center;gap:.4rem}
+.rkey i{display:inline-block;width:8px;height:8px;border-radius:1px}
+.rwrap{position:relative}
+.quiet{position:absolute;right:0;top:-1.5rem;width:calc(7 / 69 * 100%);border-bottom:2px solid var(--blue);
+  font-family:var(--mono);font-size:.58rem;letter-spacing:.08em;text-transform:uppercase;color:var(--blue);
+  text-align:right;padding-bottom:.25rem;white-space:nowrap}
 
 /* ── Growth bars ────────────────────────────────────────────────── */
-.bars{margin-top:1rem;display:flex;flex-direction:column;gap:.55rem}
-.bar{display:grid;grid-template-columns:7.2rem 1fr 4.6rem;gap:.8rem;align-items:center}
-.bar .k{font-size:.74rem;color:var(--mute)}
-.bar .tr{height:.9rem;border-radius:3px;background:rgba(255,255,255,.06);overflow:hidden}
-.bar .fi{height:100%;background:var(--cyan);border-radius:3px}
-.bar.part .fi{background:repeating-linear-gradient(90deg,var(--cyan) 0 6px,transparent 6px 9px)}
-.bar .val{font-weight:700;font-size:.9rem;text-align:right;font-variant-numeric:tabular-nums}
+.bars{display:flex;flex-direction:column;gap:.75rem;margin-top:.9rem}
+.bar{display:grid;grid-template-columns:7.4rem 1fr 5.4rem;gap:.9rem;align-items:center}
+.bar .k{font-family:var(--mono);font-size:.7rem;color:var(--warm)}
+.bar .tr{height:1.5rem;border-radius:2px;background:rgba(247,243,233,.06);overflow:hidden}
+.bar .fi{height:100%;background:var(--blue);border-radius:2px}
+.bar.part .fi{background:repeating-linear-gradient(90deg,var(--blue) 0 7px,transparent 7px 10px)}
+.bar .val{font-weight:800;font-size:1.35rem;letter-spacing:-.03em;text-align:right;font-variant-numeric:tabular-nums}
 
-/* ── Credits ────────────────────────────────────────────────────── */
-.creds{margin-top:1.6rem;display:flex;flex-direction:column;gap:.9rem}
-.cred{display:grid;grid-template-columns:9.5rem 1fr;gap:1rem;align-items:baseline;
-  border-top:1px solid var(--line);padding-top:.8rem}
-.cred .role{font-family:'JetBrains Mono',monospace;font-size:.72rem;color:var(--signal)}
-.cred .what{font-size:.95rem}
-.cred .what span{color:var(--mute);font-size:.85rem}
+/* ── Split slide (artwork + type) ───────────────────────────────── */
+.split2{display:grid;grid-template-columns:1fr 1fr;min-height:100vh;width:100%}
+.split2 .art{position:relative;overflow:hidden;background:#EDE7D6}
+.split2 .art img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.split2 .art .cap{position:absolute;left:1rem;bottom:1rem;z-index:2;font-family:var(--mono);font-size:.62rem;letter-spacing:.08em;
+  text-transform:uppercase;background:rgba(11,12,15,.82);color:var(--cream);padding:.4rem .6rem;border-radius:2px}
+.split2 .txt{display:flex;flex-direction:column;justify-content:center;padding:4.6rem var(--pad) 3rem clamp(1.6rem,4vw,3.6rem)}
+@media(max-width:860px){.split2{grid-template-columns:1fr}.split2 .art{min-height:52vh}}
+.creds{margin-top:1.5rem;display:flex;flex-direction:column}
+.cred{display:grid;grid-template-columns:1fr auto;gap:.2rem 1rem;padding:.75rem 0;border-top:1px solid var(--line)}
+.cred .role{font-family:var(--mono);font-size:.64rem;letter-spacing:.12em;text-transform:uppercase;color:var(--gold);grid-column:1}
+.cred .code{grid-column:2;grid-row:1 / span 2;align-self:center;color:var(--dim);font-size:1.05rem}
+.cred .w{font-weight:700;font-size:clamp(1rem,1.5vw,1.25rem);line-height:1.2}
+.cred .w span{font-weight:400;color:var(--warm);font-size:.85em}
 
-/* ── Timeline ───────────────────────────────────────────────────── */
-.tl{margin-top:2rem;display:grid;grid-template-columns:repeat(9,1fr);gap:.45rem;align-items:end}
-@media(max-width:900px){.tl{grid-template-columns:repeat(3,1fr)}}
-.st{border-radius:8px;padding:.6rem .55rem;background:#fff;border:1px solid var(--line-l);min-height:5.2rem;
-  display:flex;flex-direction:column;justify-content:flex-end}
-.st .d{font-size:.64rem;color:var(--mute-l)}
-.st .w{font-weight:700;font-size:.74rem;margin-top:.2rem;line-height:1.2}
-.st .n{font-weight:800;font-size:1.05rem;letter-spacing:-.03em;margin-top:.25rem}
-.st.hero{background:var(--ink);color:var(--paper);border-color:var(--ink);min-height:6.6rem}
-.st.hero .d{color:var(--mute)}
-.st.hero .n{font-size:1.5rem;color:var(--signal)}
-.st.rmx{background:var(--signal);color:var(--ink);border-color:var(--signal);min-height:6.2rem}
-.st.rmx .d{color:rgba(12,13,16,.7)}
-.st.rmx .n{font-size:1.35rem}
-.phase{display:grid;grid-template-columns:6fr 3fr;gap:.45rem;margin-top:.55rem}
-@media(max-width:900px){.phase{display:none}}
-.phase div{font-family:var(--disp);font-size:.78rem;
-  border-top:2px solid var(--ink);padding-top:.4rem;color:var(--mute-l)}
-.phase div:last-child{border-color:var(--signal);color:var(--signal-dp)}
+/* ── VERTICAL PANELS (singles) ──────────────────────────────────── */
+.showcase .head{position:relative;z-index:3;padding:4.4rem var(--pad) 1.2rem}
+.panels{flex:1;display:grid;grid-template-columns:repeat(4,1fr);gap:3px;padding:0 3px 3px;min-height:0}
+.pan{position:relative;overflow:hidden;background:var(--ink-3);display:block;min-height:300px}
+.pan img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transition:transform .6s ease}
+.pan:hover img{transform:scale(1.04)}
+.pan::after{content:'';position:absolute;inset:0;
+  background:linear-gradient(to top,rgba(11,12,15,.96) 0%,rgba(11,12,15,.6) 34%,rgba(11,12,15,0) 62%)}
+.pan .meta{position:absolute;left:0;right:0;bottom:0;z-index:2;padding:1.1rem 1.1rem 1.2rem}
+.pan .code{color:var(--gold);font-size:.95rem}
+.pan .t{font-weight:700;font-size:clamp(1rem,1.5vw,1.3rem);margin-top:.2rem;line-height:1.15}
+.pan .big-num{font-size:clamp(2.6rem,5vw,4.4rem);margin-top:.5rem}
+.pan .c{font-family:var(--mono);font-size:.66rem;letter-spacing:.06em;color:var(--warm);margin-top:.5rem}
+.pan.peace .big-num{color:var(--gold)}
+@media(max-width:820px){.panels{grid-template-columns:1fr 1fr;grid-auto-rows:60vh}}
 
-/* ── Chapters ───────────────────────────────────────────────────── */
-.chaps{font-family:'JetBrains Mono',monospace;font-size:.7rem;line-height:1.85;color:var(--mute)}
-.chaps b{color:var(--cyan);font-weight:500;margin-right:.7rem}
-.light .chaps{color:var(--mute-l)}
-.light .chaps b{color:var(--cyan-dp)}
-.light .frame{border:1px solid var(--line-l)}
+/* ── THE SKYLINE (Do It) ────────────────────────────────────────── */
+.sky{display:flex;align-items:flex-end;gap:10px;height:clamp(200px,40vh,320px);margin-top:1.2rem;
+  border-bottom:2px solid var(--line);position:relative}
+.col{position:relative;display:flex;flex-direction:column;justify-content:flex-end;height:100%}
+.col .v{font-weight:800;font-size:1.05rem;letter-spacing:-.03em;margin-bottom:.4rem;white-space:nowrap}
+.col .b{position:relative;overflow:hidden;border-radius:3px 3px 0 0;background:rgba(247,243,233,.18);min-height:6px}
+.col .b img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.col.s{flex:1 1 0;min-width:0}
+.col.l{flex:3.2 1 0;min-width:0}
+.col.l .v{font-size:clamp(1.4rem,2.4vw,2.1rem)}
+.col.hero .v,.col.rmx .v{color:var(--gold)}
+.brk{flex:1.6 1 0;height:100%;position:relative;display:flex;align-items:flex-end;justify-content:center}
+.brk::before{content:'';position:absolute;left:50%;top:18%;bottom:0;border-left:2px dashed var(--line)}
+.brk span{position:relative;background:var(--ink);font-family:var(--mono);font-size:.78rem;letter-spacing:.12em;
+  text-transform:uppercase;color:var(--warm);padding:.3rem .2rem;margin-bottom:38%;text-align:center;line-height:1.4}
+.axis{display:flex;gap:10px;margin-top:.55rem}
+.axis div{font-family:var(--mono);font-size:.6rem;letter-spacing:.04em;color:var(--dim);line-height:1.35}
+.axis div b{display:block;color:var(--cream);font-weight:500}
+.axis .s{flex:1 1 0;min-width:0} .axis .l{flex:3.2 1 0;min-width:0} .axis .brk{height:auto}
+
+/* ── Process ────────────────────────────────────────────────────── */
+.frame{position:relative;display:block;border-radius:4px;overflow:hidden;background:var(--ink-3)}
+.frame img{width:100%;aspect-ratio:16/9;object-fit:cover}
+.mini{display:grid;grid-template-columns:6.2rem 1fr;gap:.9rem;align-items:center;padding:.7rem 0;border-top:1px solid var(--line)}
+.mini img{width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:2px}
+.mini .big-num{font-size:clamp(1.6rem,2.6vw,2.2rem)}
+.mini .m{font-size:.8rem;color:var(--warm);margin-top:.25rem}
+.srail{position:relative;margin-top:2.2rem;height:12px;border-radius:6px;background:rgba(143,195,230,.16)}
+.srail .mk{position:absolute;top:-6px;width:3px;height:24px;background:var(--blue);border-radius:2px}
+.srail .mk span{position:absolute;left:0;top:-1.85rem;white-space:nowrap;font-weight:700;font-size:.86rem}
+.srail .mk i{position:absolute;left:0;top:1.9rem;white-space:nowrap;font-style:normal;font-family:var(--mono);font-size:.6rem;color:var(--dim)}
+.srail .end{position:absolute;right:0;top:1.9rem;font-family:var(--mono);font-size:.6rem;color:var(--dim)}
+
+/* ── Contact sheet (ecosystem) ──────────────────────────────────── */
+.sheet-grid{position:absolute;inset:0;z-index:0;display:grid;grid-template-columns:repeat(3,1fr);grid-auto-rows:1fr;gap:3px;padding:3px}
+.sheet-grid a{position:relative;overflow:hidden;display:block;background:var(--ink-3)}
+.sheet-grid img{width:100%;height:100%;object-fit:cover}
+.sheet-grid .tc{position:absolute;left:.6rem;top:.55rem;z-index:2;font-family:var(--mono);font-size:.6rem;letter-spacing:.08em;
+  text-transform:uppercase;background:rgba(11,12,15,.78);padding:.25rem .45rem;border-radius:2px}
+.sheet-wash{position:absolute;inset:0;z-index:1;pointer-events:none;
+  background:linear-gradient(to top,rgba(11,12,15,.985) 36%,rgba(11,12,15,.9) 52%,rgba(11,12,15,.45) 76%,rgba(11,12,15,.2) 100%)}
+.sheet-type{position:relative;z-index:3;margin-top:auto;padding:0 var(--pad) clamp(1.8rem,4vw,3rem)}
+.eco .big-num{font-size:clamp(2.2rem,4.2vw,3.6rem)}
+.eco .label{margin-top:.4rem}
 
 /* ── Quotes ─────────────────────────────────────────────────────── */
-.quotes{display:grid;gap:1.4rem;margin-top:2rem}
-@media(min-width:900px){.quotes{grid-template-columns:repeat(3,1fr)}}
-.q{border-top:2px solid var(--signal);padding-top:1rem}
-.q:nth-child(2){border-color:var(--cyan)}
-.q .th{font-family:var(--disp);font-size:.9rem;color:var(--signal)}
-.q .n{font-weight:800;font-size:2.2rem;letter-spacing:-.04em;line-height:1;margin-top:.4rem}
-.q .n span{font-size:.8rem;font-weight:500;letter-spacing:0;color:var(--mute);margin-left:.4rem}
-.q blockquote{font-family:var(--disp);font-size:1.22rem;line-height:1.35;margin-top:.9rem}
-.q cite{display:block;font-style:normal;font-size:.7rem;color:var(--dim);margin-top:.5rem}
+.quotes{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(1.2rem,3vw,2.6rem);margin-top:2rem}
+@media(max-width:860px){.quotes{grid-template-columns:1fr}}
+.q{border-top:3px solid var(--gold);padding-top:1.1rem}
+.q:nth-child(2){border-color:var(--blue)} .q:nth-child(3){border-color:var(--cream)}
+.q .big-num{font-size:clamp(3.4rem,7vw,5.8rem)}
+.q:nth-child(1) .big-num{color:var(--gold)} .q:nth-child(2) .big-num{color:var(--blue)}
+.q blockquote{font-size:clamp(1.05rem,1.6vw,1.35rem);line-height:1.32;font-weight:600;letter-spacing:-.01em;margin-top:1rem}
+.q cite{display:block;font-style:normal;font-family:var(--mono);font-size:.62rem;color:var(--dim);margin-top:.6rem;letter-spacing:.04em}
 
-/* ── Trailer compare ────────────────────────────────────────────── */
-.vs{display:grid;gap:1.4rem;margin-top:1.6rem;grid-template-columns:minmax(0,340px) auto minmax(0,340px);align-items:center}
+/* ── Trailer (cream) ────────────────────────────────────────────── */
+.vs{display:grid;grid-template-columns:1fr auto 1fr;gap:1.6rem;align-items:center;margin-top:1.6rem}
 @media(max-width:760px){.vs{grid-template-columns:1fr}.vs .arrow{display:none}}
-.vs .arrow{font-size:1.6rem;color:var(--mute-l)}
-.tag{display:inline-block;font-family:var(--disp);font-size:.78rem;padding:.25rem .5rem;border-radius:4px;margin-bottom:.55rem;background:var(--line-l)}
-.tag.sig{background:var(--signal);color:var(--ink)}
-.guide{margin-top:1.6rem;display:grid;gap:1rem}
-@media(min-width:900px){.guide{grid-template-columns:1fr 1fr}}
-.guide div{border-left:2px solid var(--ink);padding-left:.85rem;font-size:.9rem;color:var(--mute-l)}
+.vs .arrow{font-size:2rem;font-weight:800;color:var(--mute-l)}
+.vs .t{font-weight:800;font-size:clamp(1rem,1.6vw,1.35rem);margin-top:.7rem;letter-spacing:-.02em}
+.vs .m{font-family:var(--mono);font-size:.64rem;color:var(--mute-l);margin-top:.25rem}
+.tag{display:inline-block;font-family:var(--mono);font-size:.62rem;letter-spacing:.12em;text-transform:uppercase;
+  padding:.3rem .55rem;border-radius:2px;margin-bottom:.6rem;background:rgba(11,12,15,.1)}
+.tag.g{background:var(--gold);color:var(--ink)}
+.guide{display:grid;grid-template-columns:1fr 1fr;gap:1.6rem;margin-top:1.6rem}
+@media(max-width:760px){.guide{grid-template-columns:1fr}}
+.guide div{border-top:2px solid var(--ink);padding-top:.7rem;font-size:.95rem;color:var(--mute-l)}
 .guide div b{color:var(--ink)}
 
-/* ── Tour ───────────────────────────────────────────────────────── */
-.tour{display:grid;grid-template-columns:repeat(5,1fr);gap:.55rem;margin-top:1.8rem}
-@media(max-width:760px){.tour{grid-template-columns:repeat(2,1fr)}}
-.td{border:1px solid var(--line);border-radius:10px;padding:.9rem .8rem;background:rgba(12,13,16,.55);backdrop-filter:blur(4px)}
-.td.out{border-color:rgba(34,201,224,.6)}
-.td .d{font-weight:800;font-size:2rem;letter-spacing:-.04em;line-height:1}
-.td .mo{font-family:'JetBrains Mono',monospace;font-size:.56rem;color:var(--dim);letter-spacing:.08em}
-.td .c{font-weight:700;font-size:.9rem;margin-top:.5rem}
-.td .v{font-size:.72rem;color:var(--mute)}
-.td .s{font-family:'JetBrains Mono',monospace;font-size:.56rem;letter-spacing:.08em;text-transform:uppercase;margin-top:.55rem;color:var(--cyan)}
-.td:not(.out) .s{color:var(--dim)}
-.td.pop{border-style:dashed;border-color:rgba(255,255,255,.3)}
+/* ── Tour rail ──────────────────────────────────────────────────── */
+.rail{display:grid;grid-template-columns:repeat(6,1fr);gap:clamp(.6rem,1.6vw,1.4rem);position:relative;margin-top:2rem}
+.rail::before{content:'';position:absolute;left:0;right:0;top:calc(1.05rem + 6px);height:2px;background:var(--line)}
+.stop .d{font-family:var(--mono);font-size:.68rem;letter-spacing:.14em;text-transform:uppercase;color:var(--warm)}
+.node{width:14px;height:14px;border-radius:50%;background:var(--ink);border:2px solid var(--gold);margin:.35rem 0 0;position:relative}
+.stop.out .node{background:var(--gold)}
+.stop.open .node{border-color:var(--blue);background:var(--blue)}
+.stop.pop .node{border:2px dashed var(--cream);background:transparent}
+.stop .c{font-weight:800;font-size:clamp(1.15rem,2vw,1.7rem);letter-spacing:-.03em;margin-top:.9rem;line-height:1.05}
+.stop .v{font-size:.82rem;color:var(--warm);margin-top:.25rem}
+.stop .s{font-family:var(--mono);font-size:.62rem;letter-spacing:.12em;text-transform:uppercase;margin-top:.6rem;color:var(--gold)}
+.stop.open .s{color:var(--blue)} .stop.pop .s{color:var(--warm)}
+@media(max-width:860px){.rail{grid-template-columns:1fr 1fr;row-gap:1.4rem}.rail::before{display:none}}
 
 /* ── Priorities ─────────────────────────────────────────────────── */
-.pri{display:grid;gap:1rem;margin-top:1.8rem}
-@media(min-width:900px){.pri{grid-template-columns:repeat(3,1fr)}}
-.p{border-top:3px solid var(--signal);padding-top:1rem}
-.p:nth-child(2){border-color:var(--cyan)}
-.p:nth-child(3){border-color:var(--paper)}
-.p:nth-child(2) .n{color:var(--cyan)}
-.p:nth-child(3) .n{color:var(--paper)}
-.p .n{font-family:var(--disp);font-size:.86rem;color:var(--signal)}
-.p h3{font-family:var(--disp);font-size:1.28rem;font-weight:400;margin-top:.3rem;line-height:1.2}
-.p .row{margin-top:.55rem;font-size:.86rem;color:#C9CCD2;line-height:1.42}
-.p .row b{display:block;font-family:var(--disp);font-size:.78rem;color:var(--paper);font-weight:400;margin-bottom:.1rem;opacity:.75}
-.p .own{margin-top:.8rem;font-size:.74rem;color:var(--cyan)}
-.after{display:grid;gap:1rem;margin-top:1.6rem;padding-top:1.1rem;border-top:1px solid var(--line)}
-@media(min-width:900px){.after{grid-template-columns:1fr 1fr}}
-.after .label{margin-bottom:.35rem}
-.after p{font-size:.9rem;color:#C9CCD2}
-.after p b{color:var(--paper)}
-
-/* ── Split frame (cover) — the construction of her Shorts: a sharp
-   vertical panel cut from the same frame, blurred and darkened behind ── */
-.split{position:absolute;inset:0;z-index:0;overflow:hidden;background:#000}
-.split .bg{position:absolute;inset:-40px;width:calc(100% + 80px);height:calc(100% + 80px);object-fit:cover;
-  filter:blur(22px) brightness(.42) saturate(.9)}
-.split .panel{position:absolute;top:0;bottom:0;right:9%;width:min(34%,440px);overflow:hidden;
-  box-shadow:0 0 80px rgba(0,0,0,.5)}
-.split .panel img{width:100%;height:100%;object-fit:cover}
-@media(max-width:760px){.split .panel{right:0;width:58%;opacity:.7}}
-
-/* ── The U mark — the headphones-as-U emblem from underscores.plus ── */
-.umark{position:absolute;z-index:1;pointer-events:none;color:var(--paper);opacity:.07}
-
-/* ── Index rows — the underscores.plus catalogue layout ──────────── */
-.index{margin-top:1.5rem;display:grid;grid-template-columns:4.6rem 1fr;column-gap:1.1rem;row-gap:.55rem;
-  font-family:var(--disp);font-size:1rem;line-height:1.3}
-.index .h{grid-column:1 / -1;color:var(--signal-dp);margin-top:.75rem;font-size:.9rem}
-.index .h:first-child{margin-top:0}
-.index .c{color:var(--mute-l);font-variant-numeric:tabular-nums}
-.index .w span{color:var(--mute-l)}
-.art{position:relative;margin:0}
-.art img{width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:4px;border:1px solid var(--line-l)}
-.art figcaption{font-family:var(--disp);font-size:.8rem;color:var(--mute-l);margin-top:.6rem}
-
-/* ── Tour index — dates set the way the official tour page sets them ── */
-.tix{margin-top:1.6rem;display:grid;grid-template-columns:repeat(5,1fr);gap:0;border-top:1px solid var(--line)}
-@media(max-width:760px){.tix{grid-template-columns:1fr 1fr}}
-.tx{padding:.9rem .9rem 1rem 0;border-right:1px solid var(--line);font-family:var(--disp)}
-.tx + .tx{padding-left:.9rem}
-.tx:last-child{border-right:none}
-.tx .mo{font-size:.8rem;color:var(--mute)}
-.tx .d{font-size:2.6rem;line-height:1;margin-top:.1rem}
-.tx .cc{font-size:.72rem;color:var(--mute);letter-spacing:.06em}
-.tx .c{font-size:1.05rem;margin-top:.6rem}
-.tx .v{font-size:.82rem;color:var(--mute)}
-.tx .s{font-size:.84rem;margin-top:.55rem;color:var(--signal)}
-.tx .s.open{color:var(--cyan)}
+.pri{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(1rem,2.6vw,2.4rem);margin-top:1.6rem}
+@media(max-width:900px){.pri{grid-template-columns:1fr}}
+.p{border-top:3px solid var(--gold);padding-top:.9rem}
+.p:nth-child(2){border-color:var(--blue)} .p:nth-child(3){border-color:var(--cream)}
+.p .n{font-weight:800;font-size:2.4rem;letter-spacing:-.04em;line-height:1;color:var(--gold)}
+.p:nth-child(2) .n{color:var(--blue)} .p:nth-child(3) .n{color:var(--cream)}
+.p h3{font-weight:800;font-size:clamp(1.15rem,1.8vw,1.5rem);letter-spacing:-.025em;line-height:1.12;margin-top:.45rem}
+.p .r{margin-top:.6rem;font-size:.88rem;color:var(--warm);line-height:1.42}
+.p .r b{display:block;font-family:var(--mono);font-size:.58rem;letter-spacing:.12em;text-transform:uppercase;color:var(--dim);font-weight:500;margin-bottom:.1rem}
+.p .own{margin-top:.75rem;font-family:var(--mono);font-size:.62rem;letter-spacing:.06em;color:var(--blue)}
+.after{display:grid;grid-template-columns:1fr 1fr;gap:1.6rem;margin-top:1.4rem;padding-top:1rem;border-top:1px solid var(--line)}
+@media(max-width:900px){.after{grid-template-columns:1fr}}
+.after p{font-size:.92rem;color:var(--warm);margin-top:.35rem}
+.after p b{color:var(--cream)}
 
 /* ── Reveal ─────────────────────────────────────────────────────── */
-.reveal{opacity:0;transform:translateY(22px);transition:opacity .7s ease,transform .7s ease}
+.reveal{opacity:0;transform:translateY(18px);transition:opacity .6s ease,transform .6s ease}
 .reveal.visible{opacity:1;transform:none}
-.stagger>*{opacity:0;transform:translateY(16px);transition:opacity .55s ease,transform .55s ease}
+.stagger>*{opacity:0;transform:translateY(14px);transition:opacity .5s ease,transform .5s ease}
 .stagger>*.visible{opacity:1;transform:none}
+@media(prefers-reduced-motion:reduce){.reveal,.stagger>*{opacity:1!important;transform:none!important;transition:none!important}}
 
 /* ── Chrome ─────────────────────────────────────────────────────── */
 .chrome{position:fixed;top:0;left:0;right:0;z-index:900;display:flex;justify-content:space-between;align-items:center;
-  padding:.7rem 1.25rem;background:rgba(12,13,16,.9);backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
-.chrome-l{font-family:var(--disp);font-size:.8rem;color:var(--dim)}
-.chrome-l b{color:var(--paper);font-weight:700}
+  padding:.7rem var(--pad);background:rgba(11,12,15,.9);backdrop-filter:blur(14px);border-bottom:1px solid var(--line);
+  font-family:var(--mono);font-size:.66rem;letter-spacing:.13em;text-transform:uppercase;color:var(--dim)}
+.chrome-l b{color:var(--gold);font-weight:500}
 .chrome-r{display:flex;gap:.5rem}
-.btn{font-family:'JetBrains Mono',monospace;font-size:.6rem;font-weight:500;letter-spacing:.1em;text-transform:uppercase;
-  padding:.5rem .85rem;border-radius:6px;border:1px solid var(--line);background:transparent;color:var(--paper);cursor:pointer}
-.btn:hover{background:rgba(255,255,255,.1)}
-.btn.primary{background:var(--signal);border-color:var(--signal);color:var(--ink)}
+.btn{font-family:var(--mono);font-size:.62rem;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;
+  background:transparent;color:var(--warm);border:1px solid var(--line);padding:.45rem .8rem;border-radius:2px}
+.btn:hover{border-color:var(--gold);color:var(--gold)}
+.btn.primary{background:var(--gold);border-color:var(--gold);color:var(--ink);font-weight:700}
 
-/* ── Presentation mode ──────────────────────────────────────────── */
+/* ── Present ────────────────────────────────────────────────────── */
 body.present{overflow:hidden}
 body.present .chrome{display:none}
 body.present .deck{padding-top:0}
-body.present .slide{display:none;height:100vh;min-height:100vh;border:none;
-  padding:clamp(1.4rem,4.5vh,3.2rem) clamp(2rem,5vw,5rem);overflow-y:auto;justify-content:safe center}
+body.present .slide{display:none;height:100vh;min-height:100vh;border:0;padding-top:3.4rem;padding-bottom:2.4rem;overflow-y:auto}
+body.present .slide.flush{padding:0}
+body.present .slide{padding-top:2.9rem}
+body.present .split2 .txt{padding-top:2.6rem;padding-bottom:2rem}
+body.present .vs{margin-top:1.2rem}
+body.present .guide{margin-top:1.2rem}
 body.present .slide.current{display:flex}
 body.present .reveal,body.present .stagger>*{opacity:1;transform:none;transition:none}
-body.present .inner{max-width:min(1220px,calc((100vh - 5rem) * 16 / 9))}
-body.present h2.display{font-size:clamp(1.8rem,3.5vw,3.05rem)}
-body.present .lede{margin-top:.9rem;font-size:clamp(1rem,1.4vw,1.2rem)}
-body.present .thumbs{margin-top:1.4rem}
-body.present .src{margin-top:1.1rem}
-.pbar{display:none;position:fixed;bottom:0;left:0;height:3px;background:var(--signal);z-index:1000;transition:width .3s ease}
-.pcount{display:none;position:fixed;bottom:.9rem;right:1.2rem;z-index:1000;font-family:'JetBrains Mono',monospace;font-size:.6rem;
-  letter-spacing:.1em;color:var(--dim);background:rgba(12,13,16,.75);padding:.3rem .65rem;border-radius:5px}
-.phint{display:none;position:fixed;bottom:.9rem;left:1.2rem;z-index:1000;font-family:'JetBrains Mono',monospace;font-size:.56rem;
-  letter-spacing:.08em;text-transform:uppercase;color:var(--dim);opacity:.6}
-body.present .pbar,body.present .pcount,body.present .phint{display:block}
+.pbar{display:none;position:fixed;bottom:0;left:0;height:3px;background:var(--gold);z-index:1000;transition:width .3s ease}
+.pcount{display:none;position:fixed;bottom:.9rem;right:1.2rem;z-index:1000;font-family:var(--mono);font-size:.6rem;
+  letter-spacing:.1em;color:var(--dim);background:rgba(11,12,15,.75);padding:.3rem .65rem;border-radius:3px}
+body.present .pbar,body.present .pcount{display:block}
 
 /* ── Analysis ───────────────────────────────────────────────────── */
-.sheet{display:none;background:var(--paper);color:var(--ink)}
+.sheet{display:none;background:var(--cream);color:var(--ink)}
 .sheet.open{display:block;position:fixed;inset:0;z-index:950;overflow-y:auto;padding:4.2rem clamp(1rem,5vw,4rem) 4rem}
 body.sheet-open{overflow:hidden}
-.sheet .close{position:fixed;top:1rem;right:1.25rem;z-index:960;background:var(--ink)}
+.sheet .close{position:fixed;top:1rem;right:1.25rem;z-index:960;background:var(--ink);color:var(--cream)}
 .sheet-in{max-width:1120px;margin:0 auto}
-.sheet h2{font-family:var(--disp);font-size:clamp(1.9rem,4vw,3rem);font-weight:400;line-height:1.05}
+.sheet .label.sig{color:var(--gold-dp)}
+.sheet h2{font-weight:800;font-size:clamp(2rem,4vw,3.2rem);letter-spacing:-.04em;line-height:.95}
 .sheet h3{font-size:1rem;font-weight:800;margin:2.1rem 0 .6rem;padding-bottom:.4rem;border-bottom:1px solid var(--line-l)}
 .sheet p,.sheet li{font-size:.86rem;color:var(--mute-l);line-height:1.6;max-width:78ch}
 .sheet p b,.sheet li b,.sheet td b{color:var(--ink)}
 .sheet ul{list-style:none;margin-top:.4rem}
 .sheet li{padding-left:1.1rem;position:relative;margin-bottom:.4rem}
-.sheet li::before{content:'–';position:absolute;left:0;top:-.15em;color:var(--signal-dp);font-weight:800}
+.sheet li::before{content:'';position:absolute;left:0;top:.62em;width:6px;height:6px;border-radius:1px;background:var(--gold)}
 .sheet table{width:100%;border-collapse:collapse;font-size:.8rem;margin-top:.6rem}
-.sheet th{text-align:left;font-family:var(--disp);font-size:.76rem;
+.sheet th{text-align:left;font-family:var(--mono);font-size:.58rem;letter-spacing:.08em;text-transform:uppercase;
   color:var(--mute-l);font-weight:500;padding:.45rem .5rem;border-bottom:1px solid var(--line-l)}
-.sheet td{padding:.48rem .5rem;border-bottom:1px solid rgba(12,13,16,.07);color:var(--mute-l);vertical-align:top}
+.sheet td{padding:.48rem .5rem;border-bottom:1px solid rgba(11,12,15,.07);color:var(--mute-l);vertical-align:top}
 .sheet td.r,.sheet th.r{text-align:right;font-variant-numeric:tabular-nums}
 .sheet .cols{display:grid;gap:2.4rem}
 @media(min-width:960px){.sheet .cols{grid-template-columns:1fr 1fr}}
-.sheet a{color:var(--signal-dp)}
+.sheet a{color:var(--blue-dp)}
 .sheet .small{font-size:.76rem}
 
-@media print{.chrome,.pbar,.pcount,.phint{display:none}.slide{min-height:0;page-break-inside:avoid}}
+@media(max-width:860px){.split2 .txt{padding:2.4rem var(--pad)}}
+@media print{.chrome,.pbar,.pcount{display:none}.slide{min-height:0;page-break-inside:avoid}}
 </style>
 </head>
 <body>
@@ -365,54 +353,58 @@ body.sheet-open{overflow:hidden}
 <div class="chrome">
   <div class="chrome-l"><b>underscores × YouTube</b> · VMG UK · 16 Oct 2026</div>
   <div class="chrome-r">
-    <button class="btn primary" onclick="startPresent()">Present</button>
     <button class="btn" onclick="openSheet()">Analysis</button>
+    <button class="btn primary" onclick="startPresent()">Present</button>
   </div>
 </div>
 <div class="pbar" id="pbar"></div>
 <div class="pcount" id="pcount"></div>
-<div class="phint">← → to move · Esc to exit</div>
 
 <div class="deck">
 
 <!-- ══ 1 · COVER ═══════════════════════════════════════════════════ -->
-<section class="slide" data-t="Cover" style="justify-content:flex-end;padding-bottom:4rem">
-  <div class="split">
-    <img class="bg" src="https://i.ytimg.com/vi/Gf-fCJ6TkRU/maxresdefault.jpg" alt=""
+<section class="slide" data-t="Cover" style="justify-content:flex-end;padding-bottom:3rem">
+  <div class="bleed scrim-b">
+    <img src="https://i.ytimg.com/vi/Gf-fCJ6TkRU/maxresdefault.jpg" alt="underscores in the video for The Peace"
+      style="object-position:50% 22%"
       onerror="this.onerror=null;this.src='https://i.ytimg.com/vi/Gf-fCJ6TkRU/hqdefault.jpg'">
-    <div class="panel"><img src="https://i.ytimg.com/vi/Gf-fCJ6TkRU/maxresdefault.jpg" alt="underscores in the video for The Peace"
-      style="object-position:46% 30%"
-      onerror="this.onerror=null;this.src='https://i.ytimg.com/vi/Gf-fCJ6TkRU/hqdefault.jpg'"></div>
   </div>
   <div class="inner">
-    <div class="label sig reveal">Virgin Music Group UK</div>
-    <h1 class="display reveal" style="margin-top:.9rem">underscores</h1>
-    <p class="lede reveal" style="max-width:40ch">
-      The channel, what already works, and where we can build — towards November in the UK and the
-      next album in 2027.
-    </p>
-    <div class="label reveal" style="margin-top:1.4rem;color:var(--mute)">2026 YouTube Music Foundry artist · 16 October 2026</div>
+    <div class="label g reveal">Virgin Music Group UK · 2026 YouTube Music Foundry artist · 16 October 2026</div>
+    <h1 class="display reveal" style="margin-top:1rem">underscores</h1>
+    <p class="statement reveal" style="margin-top:1.4rem">The channel is already working.<br><span class="g">Where do we build next?</span></p>
+    <div class="reveal" style="margin-top:2.2rem;max-width:880px">
+      <div class="rhythm" style="--rh:30px"></div>
+      <div class="rkey">
+        <span><i style="background:var(--gold)"></i>Single</span>
+        <span><i style="background:var(--cream)"></i>Album</span>
+        <span><i style="background:rgba(247,243,233,.55)"></i>Other uploads</span>
+        <span>Every week of the U era · 27 Jun 2025 → 16 Oct 2026</span>
+      </div>
+    </div>
   </div>
 </section>
 
 <!-- ══ 2 · SCALE AND MOMENTUM ══════════════════════════════════════
-     Audience first. Verified 27-day interval from the weekly snapshot
-     series. The first reading (19 Sep) to the second (21 Sep) is a 2-day
-     gap, so the bars start at 21 Sep and the 19→21 step is in Analysis. -->
+     One hero figure, the real weekly readings, and the U-era strip with
+     its dark last seven weeks: the catalogue growing with nothing new
+     published. Channel-level only. -->
 <section class="slide" data-t="The channel">
   <div class="inner">
-    <div class="label sig reveal">The channel today</div>
-    <h2 class="display reveal" style="margin-top:.7rem">An Official Artist Channel that keeps growing between releases</h2>
+    <div class="label g reveal">The channel today · Official Artist Channel</div>
+    <h2 class="display reveal" style="margin-top:.6rem">It keeps growing between releases.</h2>
 
-    <div class="grid2 wide-r" style="margin-top:2rem;align-items:end">
-      <div class="stats stagger" style="margin-top:0;display:grid;grid-template-columns:1fr 1fr;gap:1.6rem 2rem">
-        <div class="stat"><div class="num">145K</div><div class="label">Subscribers</div><div class="note">Public count, rounded</div></div>
-        <div class="stat"><div class="num">36.8M</div><div class="label">Channel views</div><div class="note">Lifetime</div></div>
-        <div class="stat"><div class="num" style="color:var(--cyan)">+3.37M</div><div class="label">Views in 27 days</div><div class="note">19 Sep → 16 Oct 2026</div></div>
-        <div class="stat"><div class="num">102</div><div class="label">Public uploads</div><div class="note">Latest 28 Aug 2026</div></div>
+    <div class="reveal" style="display:grid;grid-template-columns:1.05fr .95fr;gap:clamp(1.6rem,4vw,4rem);margin-top:1.8rem;align-items:end">
+      <div>
+        <div class="big-num" style="font-size:clamp(4.2rem,10.5vw,8.8rem);color:var(--gold)">+3.37M</div>
+        <div class="label" style="margin-top:.7rem;color:var(--warm)">Channel views in 27 days · 19 Sep → 16 Oct 2026</div>
+        <div class="rwrap" style="margin-top:2.4rem">
+          <div class="quiet">No uploads since 28 Aug</div>
+          <div class="rhythm" style="--rh:26px"></div>
+          <div class="rkey"><span>Uploads per week, U era</span></div>
+        </div>
       </div>
-
-      <div class="reveal">
+      <div>
         <div class="label">Channel views added, between readings</div>
         <div class="bars">
           <div class="bar"><div class="k">21 → 28 Sep</div><div class="tr"><div class="fi" style="width:72%"></div></div><div class="val">+742K</div></div>
@@ -420,179 +412,187 @@ body.sheet-open{overflow:hidden}
           <div class="bar"><div class="k">5 → 12 Oct</div><div class="tr"><div class="fi" style="width:84%"></div></div><div class="val">+860K</div></div>
           <div class="bar part"><div class="k">12 → 16 Oct</div><div class="tr"><div class="fi" style="width:36%"></div></div><div class="val">+371K</div></div>
         </div>
-        <div class="note" style="margin-top:.6rem">Last bar is four days. Public subscriber count 136K → 145K over the same period.</div>
-        <p class="body" style="margin-top:1.2rem;font-size:.95rem">
-          With nothing new published since 28 August, the catalogue is still adding <b>between 0.7M and 1M
-          views a week</b>. Eleven playlists and era shelves on the Home tab already give visitors
-          somewhere to go.
-        </p>
+        <div class="label" style="margin-top:.6rem;letter-spacing:.06em">Last bar is four days</div>
       </div>
     </div>
-    <div class="src reveal">Source: VMG weekly channel snapshots, 19 Sep – 12 Oct · YouTube Data API, 16 Oct 2026 · Official Artist Channel badge on the channel page. Channel-level; not attributed to any video.</div>
+
+    <div class="row reveal" style="margin-top:2.2rem;padding-top:1.1rem;border-top:1px solid var(--line)">
+      <div><div class="big-num" style="font-size:clamp(2rem,3.6vw,3rem)">145K</div><div class="label" style="margin-top:.35rem">Subscribers · 136K on 19 Sep</div></div>
+      <div><div class="big-num" style="font-size:clamp(2rem,3.6vw,3rem)">36.8M</div><div class="label" style="margin-top:.35rem">Lifetime views</div></div>
+      <div><div class="big-num" style="font-size:clamp(2rem,3.6vw,3rem)">102</div><div class="label" style="margin-top:.35rem">Public uploads</div></div>
+      <div><div class="big-num" style="font-size:clamp(2rem,3.6vw,3rem)">11</div><div class="label" style="margin-top:.35rem">Playlists · era shelves on Home</div></div>
+    </div>
+    <div class="src reveal">Source: VMG weekly channel snapshots, 19 Sep – 12 Oct · YouTube Data API, 16 Oct 2026. Subscriber counts are public and rounded. Channel-level; not attributed to any video.</div>
   </div>
 </section>
 
 <!-- ══ 3 · THE CREATIVE WORLD ══════════════════════════════════════
-     Consolidates the old authorship, title-grammar and process slides.
-     Credits quoted as credited; nothing extended to "she makes everything".
-     Laid out as an underscores.plus index: YYMMDD code, then the work.
-     The image is the U album artwork itself (Ochiai Shohei), as it
-     appears on her own channel's album uploads. -->
-<section class="slide light" data-t="Creative world">
-  <div class="inner">
-    <div class="grid2 wide-r" style="align-items:center">
-      <div>
-        <div class="label sig reveal">Who she is</div>
-        <h2 class="display reveal" style="margin-top:.6rem">A producer who builds a world around every record</h2>
-        <p class="lede reveal" style="font-size:clamp(1rem,1.4vw,1.18rem)">
-          April Harper Grey writes and produces as underscores. YouTube's Foundry announcement singles out
-          her conceptual songwriting and world-building visuals. <i>U</i>'s world is a galleria — and the
-          credits show how closely she is involved.
-        </p>
-        <div class="index stagger">
-          <div class="h">Credited to underscores</div>
-          <div class="c">260812</div><div class="w">Creative director · The Peace <span>— dir. Ayodeji, prod. bigkid</span></div>
-          <div class="c">260828</div><div class="w">Artwork · Unlimited Love <span>and The Peace (Frost Children Remix)</span></div>
-          <div class="c">210202</div><div class="w">Director / editor · Second hand embarrassment</div>
-          <div class="h">Each era, its own titles</div>
-          <div class="c">230503</div><div class="w"><span>underscores</span> 'Cops and robbers' Official Video</div>
-          <div class="c">260812</div><div class="w"><span>underscores</span> — The Peace</div>
-        </div>
+     The U album artwork leads: half the canvas, full height. Credits are
+     quoted as credited; nothing extended to "she makes everything". -->
+<section class="slide flush" data-t="Creative world">
+  <div class="split2">
+    <a class="art reveal" href="https://www.youtube.com/watch?v=PLJCcZPWiV8" target="_blank" rel="noopener">
+      <img src="https://i.ytimg.com/vi/PLJCcZPWiV8/maxresdefault.jpg" alt="U album artwork: a fine-line drawing of a shopping-mall atrium with a smiling U on a screen"
+        style="object-position:50% 50%"
+        onerror="this.onerror=null;this.src='https://i.ytimg.com/vi/PLJCcZPWiV8/hqdefault.jpg'">
+      <div class="cap">U · album artwork by Ochiai Shohei</div>
+    </a>
+    <div class="txt">
+      <div class="label g reveal">Who she is</div>
+      <h2 class="display reveal" style="margin-top:.6rem;font-size:clamp(2rem,3.7vw,3.3rem)">A producer who builds a world around every record.</h2>
+      <p class="body reveal" style="margin-top:1rem;font-size:1.02rem">
+        April Harper Grey writes and produces as underscores. YouTube's Foundry announcement singles out
+        her conceptual songwriting and <b>world-building visuals</b>. For <i>U</i>, that world is a galleria.
+      </p>
+      <div class="creds stagger">
+        <div class="cred"><div class="role">Creative director</div><div class="code">260812</div><div class="w">The Peace <span>— dir. Ayodeji · prod. bigkid</span></div></div>
+        <div class="cred"><div class="role">Director / editor</div><div class="code">210202</div><div class="w">Second hand embarrassment</div></div>
+        <div class="cred"><div class="role">Artwork</div><div class="code">260828</div><div class="w">Unlimited Love <span>· The Peace (Frost Children Remix)</span></div></div>
+        <div class="cred"><div class="role">Every era, its own titles</div><div class="code">230503 → 260812</div><div class="w"><span>'Cops and robbers' Official Video →</span> underscores — The Peace</div></div>
       </div>
-      <figure class="art reveal">
-        <a href="https://www.youtube.com/watch?v=PLJCcZPWiV8" target="_blank" rel="noopener">
-          <img src="https://i.ytimg.com/vi/PLJCcZPWiV8/maxresdefault.jpg" alt="U album artwork: a fine-line drawing of a shopping-mall atrium"
-            onerror="this.onerror=null;this.src='https://i.ytimg.com/vi/PLJCcZPWiV8/hqdefault.jpg'"></a>
-        <figcaption>U · 260320 · album artwork by Ochiai Shohei</figcaption>
-      </figure>
+      <div class="src reveal">Source: public video descriptions and titles, 16 Oct 2026 · YouTube Official Blog, 16 Sep 2026 · YYMMDD codes as underscores.plus uses them.</div>
     </div>
-    <div class="src reveal">Source: public video descriptions and titles, 16 Oct 2026 · YouTube Official Blog, 16 Sep 2026 · release codes as used on underscores.plus (YYMMDD).</div>
   </div>
 </section>
 
-<!-- ══ 4 · FOUR SINGLES ════════════════════════════════════════════
-     The four actual singles. No remix here. -->
-<section class="slide" data-t="Four singles">
-  <div class="inner">
-    <div class="label sig reveal">The <i>U</i> era · album released 20 March 2026</div>
-    <h2 class="display reveal" style="margin-top:.7rem">Four singles, four strong videos</h2>
-    <p class="lede reveal">Every single from the album has passed <b>740,000 views</b>. The newest, The Peace,
-      has drawn the most comments of the four in under ten weeks.</p>
-
-    <div class="thumbs four stagger">
-      <a class="tc" href="https://www.youtube.com/watch?v=UNYqwpx7Cys" target="_blank" rel="noopener">
-        <div class="im"><img src="https://i.ytimg.com/vi/UNYqwpx7Cys/hqdefault.jpg" alt="" loading="lazy"><div class="play"></div></div>
-        <div class="t">Music</div><div class="v">1.87M</div><div class="m">27 Jun 2025 · 2,122 comments</div></a>
-      <a class="tc" href="https://www.youtube.com/watch?v=Zd0j0xnhWFw" target="_blank" rel="noopener">
-        <div class="im"><img src="https://i.ytimg.com/vi/Zd0j0xnhWFw/hqdefault.jpg" alt="" loading="lazy"><div class="play"></div></div>
-        <div class="t">Do It</div><div class="v">1.48M</div><div class="m">4 Nov 2025 · 1,998 comments</div></a>
-      <a class="tc" href="https://www.youtube.com/watch?v=i_gkcxgNCM8" target="_blank" rel="noopener">
-        <div class="im"><img src="https://i.ytimg.com/vi/i_gkcxgNCM8/hqdefault.jpg" alt="" loading="lazy"><div class="play"></div></div>
-        <div class="t">Tell Me (U Want It)</div><div class="v">744K</div><div class="m">25 Feb 2026 · 1,199 comments</div></a>
-      <a class="tc" href="https://www.youtube.com/watch?v=Gf-fCJ6TkRU" target="_blank" rel="noopener">
-        <div class="im"><img src="https://i.ytimg.com/vi/Gf-fCJ6TkRU/hqdefault.jpg" alt="" loading="lazy"><div class="play"></div></div>
-        <div class="t">The Peace</div><div class="v" style="color:var(--signal)">1.37M</div><div class="m">12 Aug 2026 · 3,089 comments</div></a>
+<!-- ══ 4 · FOUR SINGLES — a video showcase ════════════════════════
+     Four tall panels cut from the four videos. The remix is not here. -->
+<section class="slide flush showcase" data-t="Four singles">
+  <div class="head between">
+    <div>
+      <div class="label g reveal">The U era · album released 20 March 2026</div>
+      <h2 class="display reveal" style="margin-top:.6rem;max-width:none">Every single passed 740K.</h2>
     </div>
-    <div class="src reveal">Source: YouTube Data API, 16 Oct 2026 · lifetime views. The videos are different ages, so these are not a pace comparison.</div>
+    <div class="reveal" style="max-width:40ch;padding-bottom:.25rem">
+      <p class="body" style="font-size:1rem"><b>The Peace</b>, the newest, has the most comments of the four — 3,089 in nine weeks.</p>
+      <div class="label" style="margin-top:.5rem;letter-spacing:.06em">Lifetime views · different ages, not a pace comparison</div>
+    </div>
+  </div>
+  <div class="panels stagger">
+    <a class="pan" href="https://www.youtube.com/watch?v=UNYqwpx7Cys" target="_blank" rel="noopener">
+      <img src="https://i.ytimg.com/vi/UNYqwpx7Cys/maxresdefault.jpg" alt="Music" style="object-position:56% 40%"
+        onerror="this.onerror=null;this.src='https://i.ytimg.com/vi/UNYqwpx7Cys/hqdefault.jpg'"><div class="play"></div>
+      <div class="meta"><div class="code">250627</div><div class="t">Music</div><div class="big-num">1.87M</div><div class="c">2,122 comments</div></div></a>
+    <a class="pan" href="https://www.youtube.com/watch?v=Zd0j0xnhWFw" target="_blank" rel="noopener">
+      <img src="https://i.ytimg.com/vi/Zd0j0xnhWFw/maxresdefault.jpg" alt="Do It" style="object-position:47% 40%"
+        onerror="this.onerror=null;this.src='https://i.ytimg.com/vi/Zd0j0xnhWFw/hqdefault.jpg'"><div class="play"></div>
+      <div class="meta"><div class="code">251104</div><div class="t">Do It</div><div class="big-num">1.48M</div><div class="c">1,998 comments</div></div></a>
+    <a class="pan" href="https://www.youtube.com/watch?v=i_gkcxgNCM8" target="_blank" rel="noopener">
+      <img src="https://i.ytimg.com/vi/i_gkcxgNCM8/maxresdefault.jpg" alt="Tell Me (U Want It)" style="object-position:52% 30%"
+        onerror="this.onerror=null;this.src='https://i.ytimg.com/vi/i_gkcxgNCM8/hqdefault.jpg'"><div class="play"></div>
+      <div class="meta"><div class="code">260225</div><div class="t">Tell Me (U Want It)</div><div class="big-num">744K</div><div class="c">1,199 comments</div></div></a>
+    <a class="pan peace" href="https://www.youtube.com/watch?v=Gf-fCJ6TkRU" target="_blank" rel="noopener">
+      <img src="https://i.ytimg.com/vi/Gf-fCJ6TkRU/maxresdefault.jpg" alt="The Peace" style="object-position:42% 30%"
+        onerror="this.onerror=null;this.src='https://i.ytimg.com/vi/Gf-fCJ6TkRU/hqdefault.jpg'"><div class="play"></div>
+      <div class="meta"><div class="code">260812</div><div class="t">The Peace</div><div class="big-num">1.37M</div><div class="c">3,089 comments</div></div></a>
   </div>
 </section>
 
-<!-- ══ 5 · DO IT, RELEASED AS A CAMPAIGN ═══════════════════════════
-     Rollout and remix together, as one example. Nine assets: six in the
-     release window (15 Oct – 9 Nov 2025), three in the January wave. -->
-<section class="slide light" data-t="Do It campaign">
+<!-- ══ 5 · DO IT — the campaign as a sequence ═════════════════════
+     Nine assets: six in the release window (15 Oct – 9 Nov 2025), three
+     in the January wave. Bar height = lifetime views. -->
+<section class="slide" data-t="Do It campaign">
   <div class="inner">
-    <div class="label sig reveal">What the team already does well</div>
-    <h2 class="display reveal" style="margin-top:.7rem">Do It was released as a campaign, then given a second moment</h2>
-    <p class="lede reveal">Six uploads in the release window — Shorts, the video and a choreography version.
-      Ten weeks later, two Shorts and the <b>Yves remix</b> gave the song a new moment, with
-      collaborator Yves bringing her own audience.</p>
+    <div class="label g reveal">What the team already does well</div>
+    <h2 class="display reveal" style="margin-top:.6rem;max-width:none">Do It was released as a campaign.</h2>
 
-    <div class="tl stagger">
-      <div class="st"><div class="d">15 Oct</div><div class="w">Short</div><div class="n">159K</div></div>
-      <div class="st"><div class="d">26 Oct</div><div class="w">Short</div><div class="n">449K</div></div>
-      <div class="st"><div class="d">31 Oct</div><div class="w">Short</div><div class="n">112K</div></div>
-      <div class="st hero"><div class="d">4 Nov</div><div class="w">Official video</div><div class="n">1.48M</div></div>
-      <div class="st"><div class="d">6 Nov</div><div class="w">Short</div><div class="n">236K</div></div>
-      <div class="st"><div class="d">9 Nov</div><div class="w">Choreo version</div><div class="n">415K</div></div>
-      <div class="st"><div class="d">17 Jan</div><div class="w">Short</div><div class="n">50K</div></div>
-      <div class="st"><div class="d">21 Jan</div><div class="w">Short</div><div class="n">55K</div></div>
-      <a class="st rmx" href="https://www.youtube.com/watch?v=kvhVECfGsw8" target="_blank" rel="noopener" style="text-decoration:none"><div class="d">23 Jan ↗</div><div class="w">Yves remix</div><div class="n">727K</div></a>
+    <div class="sky stagger">
+      <a class="col s" href="https://www.youtube.com/shorts/cQ99ZWxvrbw" target="_blank" rel="noopener"><div class="v">159K</div><div class="b" style="height:10.8%"><img src="https://i.ytimg.com/vi/cQ99ZWxvrbw/hqdefault.jpg" alt=""></div></a>
+      <a class="col s" href="https://www.youtube.com/shorts/bkEoBmpQtCg" target="_blank" rel="noopener"><div class="v">449K</div><div class="b" style="height:30.3%"><img src="https://i.ytimg.com/vi/bkEoBmpQtCg/hqdefault.jpg" alt=""></div></a>
+      <a class="col s" href="https://www.youtube.com/shorts/BHXIFSKgP_w" target="_blank" rel="noopener"><div class="v">112K</div><div class="b" style="height:7.6%"><img src="https://i.ytimg.com/vi/BHXIFSKgP_w/hqdefault.jpg" alt=""></div></a>
+      <a class="col l hero" href="https://www.youtube.com/watch?v=Zd0j0xnhWFw" target="_blank" rel="noopener"><div class="v">1.48M</div><div class="b" style="height:100%"><img src="https://i.ytimg.com/vi/Zd0j0xnhWFw/maxresdefault.jpg" alt="Do It official video" style="object-position:47% 50%"></div></a>
+      <a class="col s" href="https://www.youtube.com/shorts/Opaj6Zcm3bQ" target="_blank" rel="noopener"><div class="v">236K</div><div class="b" style="height:16%"><img src="https://i.ytimg.com/vi/Opaj6Zcm3bQ/hqdefault.jpg" alt=""></div></a>
+      <a class="col l" href="https://www.youtube.com/watch?v=j-lxGi4pOj8" target="_blank" rel="noopener"><div class="v">415K</div><div class="b" style="height:28.1%"><img src="https://i.ytimg.com/vi/j-lxGi4pOj8/maxresdefault.jpg" alt="Do It choreo version" style="object-position:38% 50%"></div></a>
+      <div class="brk"><span>ten<br>weeks</span></div>
+      <a class="col s" href="https://www.youtube.com/shorts/nQwqQ5yE7D0" target="_blank" rel="noopener"><div class="v">50K</div><div class="b" style="height:3.4%"><img src="https://i.ytimg.com/vi/nQwqQ5yE7D0/hqdefault.jpg" alt=""></div></a>
+      <a class="col s" href="https://www.youtube.com/shorts/L9kOH6yZOx0" target="_blank" rel="noopener"><div class="v">55K</div><div class="b" style="height:3.7%"><img src="https://i.ytimg.com/vi/L9kOH6yZOx0/hqdefault.jpg" alt=""></div></a>
+      <a class="col l rmx" href="https://www.youtube.com/watch?v=kvhVECfGsw8" target="_blank" rel="noopener"><div class="v">727K</div><div class="b" style="height:49.2%"><img src="https://i.ytimg.com/vi/kvhVECfGsw8/maxresdefault.jpg" alt="Do It Yves remix" style="object-position:35% 40%"></div></a>
     </div>
-    <div class="phase"><div>Release window · 6 uploads in under four weeks</div><div>Follow-up · 3 uploads</div></div>
+    <div class="axis reveal">
+      <div class="s"><b>15 Oct</b>Short</div><div class="s"><b>26 Oct</b>Short</div><div class="s"><b>31 Oct</b>Short</div>
+      <div class="l"><b style="color:var(--gold)">4 Nov</b>Official video</div><div class="s"><b>6 Nov</b>Short</div>
+      <div class="l"><b>9 Nov</b>Choreo version</div><div class="brk"></div>
+      <div class="s"><b>17 Jan</b>Short</div><div class="s"><b>21 Jan</b>Short</div><div class="l"><b style="color:var(--gold)">23 Jan</b>Yves remix</div>
+    </div>
 
-    <p class="body reveal" style="margin-top:1.4rem;font-size:.95rem">
-      The remix drew <b>1,783 comments</b> as well as its views. It shows a single can carry on well
-      after release; the public data cannot show whether it sent viewers back to the original.
-    </p>
-    <div class="src reveal">Source: YouTube Data API, 16 Oct 2026 · publication order and lifetime views, 2025–26. A sequence, not a measured funnel.</div>
+    <div class="between reveal" style="margin-top:1.5rem">
+      <p class="statement">Six uploads in under four weeks — then a second moment, led by the Yves remix, <span class="g">ten weeks after release.</span></p>
+      <div class="row">
+        <div><div class="big-num" style="font-size:clamp(2.4rem,4.4vw,3.6rem)">9</div><div class="label" style="margin-top:.35rem">uploads in all</div></div>
+        <div><div class="big-num" style="font-size:clamp(2.4rem,4.4vw,3.6rem);color:var(--gold)">1,783</div><div class="label" style="margin-top:.35rem">comments on the remix</div></div>
+      </div>
+    </div>
+    <div class="src reveal">Bar height = lifetime views, YouTube Data API, 16 Oct 2026 · 2025–26, in publication order. A sequence, not a measured funnel: public data can't show whether the remix sent viewers back to the original.</div>
   </div>
 </section>
 
-<!-- ══ 6 · PROCESS AND PERFORMANCE ═════════════════════════════════ -->
-<section class="slide light" data-t="Process and performance">
+<!-- ══ 6 · PROCESS AND PERFORMANCE ═════════════════════════════════
+     The stream made tangible: its own chapter marks drawn at their real
+     positions across 3h 22m. -->
+<section class="slide" data-t="Process and performance">
   <div class="inner">
-    <div class="label sig reveal">Beyond the singles</div>
-    <h2 class="display reveal" style="margin-top:.7rem">Process and performance already find an audience</h2>
+    <div class="label g reveal">Beyond the singles</div>
+    <h2 class="display reveal" style="margin-top:.6rem;max-width:none">Process and performance find an audience.</h2>
 
-    <div class="grid2" style="margin-top:1.6rem;align-items:center">
-      <a class="frame reveal" href="https://www.youtube.com/watch?v=6OmpI6wJVNc" target="_blank" rel="noopener">
+    <div class="reveal" style="display:grid;grid-template-columns:1.08fr .92fr;gap:clamp(1.4rem,3.4vw,3rem);margin-top:1.5rem;align-items:center">
+      <a class="frame" href="https://www.youtube.com/watch?v=6OmpI6wJVNc" target="_blank" rel="noopener">
         <img src="https://i.ytimg.com/vi/6OmpI6wJVNc/maxresdefault.jpg" alt="U–A(side) production stream"
-          onerror="this.onerror=null;this.src='https://i.ytimg.com/vi/6OmpI6wJVNc/hqdefault.jpg'">
-        <div class="play"></div>
-        <div class="cap" style="background:linear-gradient(0deg,rgba(0,0,0,.85),rgba(0,0,0,0))"><div class="t">U–A(side) / production stream</div><div class="m">3h 22m · April 2026 · chaptered by song</div></div>
+          onerror="this.onerror=null;this.src='https://i.ytimg.com/vi/6OmpI6wJVNc/hqdefault.jpg'"><div class="play"></div>
       </a>
-      <div class="reveal">
-        <div class="num" style="font-size:clamp(2.8rem,5.4vw,4.4rem);color:var(--cyan-dp)">137K</div>
-        <div class="label" style="margin-top:.5rem">views on a three-hour production stream</div>
-        <div class="note">Views show demand for the upload — not unique viewers or how long people watched.</div>
-        <div class="chaps" style="margin-top:1.1rem">
-          <b>00:04:42</b>Innuendo (I Get U)<br>
-          <b>00:44:51</b>Lovefield<br>
-          <b>01:20:51</b>Do It<br>
-          <b>02:06:49</b>Bodyfeeling<br>
-          <b>02:41:10</b>Wish U Well
+      <div>
+        <div class="big-num" style="font-size:clamp(3.4rem,7.4vw,6.2rem);color:var(--blue)">137K</div>
+        <div class="label" style="margin-top:.55rem;color:var(--warm)">views · U–A(side) / production stream · 3h 22m</div>
+        <div class="label" style="margin-top:.3rem;letter-spacing:.05em;text-transform:none">Demand for the upload — not unique viewers or watch time</div>
+        <div style="margin-top:1.1rem">
+          <a class="mini" href="https://www.youtube.com/watch?v=yzwzkhNQcsM" target="_blank" rel="noopener"><img src="https://i.ytimg.com/vi/yzwzkhNQcsM/hqdefault.jpg" alt=""><div><div class="big-num">236K</div><div class="m">U — the album film · 34 min</div></div></a>
+          <a class="mini" href="https://www.youtube.com/watch?v=X0Ejds9uRco" target="_blank" rel="noopener"><img src="https://i.ytimg.com/vi/X0Ejds9uRco/hqdefault.jpg" alt=""><div><div class="big-num">107K</div><div class="m">Unlimited Love 《live from Galleria Chicago》</div></div></a>
+          <a class="mini" href="https://www.youtube.com/watch?v=WgQlyYji81Y" target="_blank" rel="noopener"><img src="https://i.ytimg.com/vi/WgQlyYji81Y/hqdefault.jpg" alt=""><div><div class="big-num">68K</div><div class="m">U–B(side) / production stream · 3h 27m</div></div></a>
         </div>
       </div>
     </div>
 
-    <div class="thumbs three stagger" style="margin-top:1.4rem">
-      <a class="tc" href="https://www.youtube.com/watch?v=yzwzkhNQcsM" target="_blank" rel="noopener">
-        <div class="t">U (album film)</div><div class="v">236K</div><div class="m">34 min · Mar 2026</div></a>
-      <a class="tc" href="https://www.youtube.com/watch?v=X0Ejds9uRco" target="_blank" rel="noopener">
-        <div class="t">Unlimited Love 《live from Galleria Chicago》</div><div class="v">107K</div><div class="m">4m 39s · Aug 2026</div></a>
-      <a class="tc" href="https://www.youtube.com/watch?v=WgQlyYji81Y" target="_blank" rel="noopener">
-        <div class="t">U–B(side) / production stream</div><div class="v">68K</div><div class="m">3h 27m · Apr 2026</div></a>
+    <div class="reveal" style="margin-top:1.3rem">
+      <div class="label b">The A-side stream, chaptered by song across 3h 22m</div>
+      <div class="srail">
+        <div class="mk" style="left:2.3%"><span>Innuendo (I Get U)</span><i>0:04:42</i></div>
+        <div class="mk" style="left:22.2%"><span>Lovefield</span><i>0:44:51</i></div>
+        <div class="mk" style="left:40%"><span>Do It</span><i>1:20:51</i></div>
+        <div class="mk" style="left:62.8%"><span>Bodyfeeling</span><i>2:06:49</i></div>
+        <div class="mk" style="left:79.8%"><span>Wish U Well</span><i>2:41:10</i></div>
+        <div class="end">3:22:02</div>
+      </div>
     </div>
-    <div class="src reveal">Source: YouTube Data API, 16 Oct 2026 · durations and lifetime views. Chapters from the stream description.</div>
+    <div class="src reveal" style="margin-top:2.1rem">Source: YouTube Data API, 16 Oct 2026 · durations and lifetime views · chapters from the stream description.</div>
   </div>
 </section>
 
-<!-- ══ 7 · ECOSYSTEM ═══════════════════════════════════════════════
+<!-- ══ 7 · ECOSYSTEM — contact sheet of partner uploads ════════════
      Third-party uploads only. Never added to channel totals. Views as
      displayed by YouTube on 16 Oct 2026. -->
-<section class="slide" data-t="Beyond the channel">
-  <div class="inner">
-    <div class="label sig reveal">Beyond her channel</div>
-    <h2 class="display reveal" style="margin-top:.7rem">DJ sets and interviews travel widely on other channels</h2>
-    <p class="lede reveal">On partners' channels, her DJ sets and long-form interviews find audiences of their own.</p>
-
-    <div class="thumbs three stagger">
-      <a class="tc" href="https://www.youtube.com/watch?v=h8LZ3wAW7fQ" target="_blank" rel="noopener">
-        <div class="im"><img src="https://i.ytimg.com/vi/h8LZ3wAW7fQ/hqdefault.jpg" alt="" loading="lazy"><div class="play"></div></div>
-        <div class="ch">Elevator Music · DJ set</div><div class="v">459K</div><div class="m">59 min · Aug 2026</div></a>
-      <a class="tc" href="https://www.youtube.com/watch?v=BT5Pms2MdoM" target="_blank" rel="noopener">
-        <div class="im"><img src="https://i.ytimg.com/vi/BT5Pms2MdoM/hqdefault.jpg" alt="" loading="lazy"><div class="play"></div></div>
-        <div class="ch">goyo club · DJ mix</div><div class="v">309K</div><div class="m">67 min · Apr 2026</div></a>
-      <a class="tc" href="https://www.youtube.com/watch?v=aPZT0v6pBbk" target="_blank" rel="noopener">
-        <div class="im"><img src="https://i.ytimg.com/vi/aPZT0v6pBbk/hqdefault.jpg" alt="" loading="lazy"><div class="play"></div></div>
-        <div class="ch">Lyrical Lemonade · interview</div><div class="v">143K</div><div class="m">59 min · Building the World of U</div></a>
+<section class="slide flush" data-t="Beyond the channel">
+  <div class="sheet-grid">
+    <a href="https://www.youtube.com/watch?v=h8LZ3wAW7fQ" target="_blank" rel="noopener"><img src="https://i.ytimg.com/vi/h8LZ3wAW7fQ/hqdefault.jpg" alt=""><span class="tc">Elevator Music · DJ set</span></a>
+    <a href="https://www.youtube.com/watch?v=BT5Pms2MdoM" target="_blank" rel="noopener"><img src="https://i.ytimg.com/vi/BT5Pms2MdoM/hqdefault.jpg" alt=""><span class="tc">goyo club · DJ mix</span></a>
+    <a href="https://www.youtube.com/watch?v=aPZT0v6pBbk" target="_blank" rel="noopener"><img src="https://i.ytimg.com/vi/aPZT0v6pBbk/hqdefault.jpg" alt=""><span class="tc">Lyrical Lemonade · interview</span></a>
+    <a href="https://www.youtube.com/watch?v=wIc4JoclLaA" target="_blank" rel="noopener"><img src="https://i.ytimg.com/vi/wIc4JoclLaA/hqdefault.jpg" alt=""><span class="tc">Our Generation Music</span></a>
+    <a href="https://www.youtube.com/watch?v=M9USse7OT64" target="_blank" rel="noopener"><img src="https://i.ytimg.com/vi/M9USse7OT64/hqdefault.jpg" alt=""><span class="tc">Pitchfork</span></a>
+    <a href="https://www.youtube.com/watch?v=jh7huX-EykA" target="_blank" rel="noopener"><img src="https://i.ytimg.com/vi/jh7huX-EykA/hqdefault.jpg" alt=""><span class="tc">fantano</span></a>
+    <a href="https://www.youtube.com/watch?v=1Tt3QvIpqYw" target="_blank" rel="noopener"><img src="https://i.ytimg.com/vi/1Tt3QvIpqYw/hqdefault.jpg" alt=""><span class="tc">The Lot Radio</span></a>
+    <a href="https://www.youtube.com/watch?v=zZ3XM0YUJSU" target="_blank" rel="noopener"><img src="https://i.ytimg.com/vi/zZ3XM0YUJSU/hqdefault.jpg" alt=""><span class="tc">The FADER</span></a>
+    <a href="https://www.youtube.com/watch?v=SbZT-fi9bZ0" target="_blank" rel="noopener"><img src="https://i.ytimg.com/vi/SbZT-fi9bZ0/hqdefault.jpg" alt=""><span class="tc">Elevator Pitch</span></a>
+  </div>
+  <div class="sheet-wash"></div>
+  <div class="inner sheet-type">
+    <div class="label g reveal">Beyond her channel</div>
+    <h2 class="display reveal" style="margin-top:.6rem;max-width:22ch">DJ sets and interviews travel widely on other channels.</h2>
+    <div class="row eco stagger" style="margin-top:1.5rem">
+      <div><div class="big-num" style="color:var(--gold)">459K</div><div class="label">Elevator Music · DJ set</div></div>
+      <div><div class="big-num">309K</div><div class="label">goyo club · DJ mix</div></div>
+      <div><div class="big-num">230K</div><div class="label">Our Generation Music</div></div>
+      <div><div class="big-num">201K</div><div class="label">Pitchfork</div></div>
+      <div><div class="big-num">143K</div><div class="label">Lyrical Lemonade</div></div>
     </div>
-    <p class="body reveal" style="margin-top:1.1rem;font-size:.92rem">
-      Also Our Generation Music (230K), Pitchfork (201K), fantano (165K) and The Lot Radio (120K).
-      None of these are counted in her channel's figures.
-    </p>
-    <div class="src reveal">Source: YouTube search and channel pages, 16 Oct 2026 · views as displayed. Full list in Analysis.</div>
+    <div class="src reveal">Source: YouTube search and channel pages, 16 Oct 2026 · views as displayed · partner channels, not counted in her channel's figures. Full list in Analysis.</div>
   </div>
 </section>
 
@@ -600,135 +600,124 @@ body.sheet-open{overflow:hidden}
      Proportional: comments illustrate, they do not explain performance. -->
 <section class="slide" data-t="What fans notice">
   <div class="inner">
-    <div class="label sig reveal">In the comments</div>
-    <h2 class="display reveal" style="margin-top:.7rem">Fans talk about the era, the visuals and the sound</h2>
-    <p class="lede reveal">In a sample of 160 of the most prominent comments across the four singles, the album
-      and era came up most, then the videos, then production.</p>
+    <div class="label g reveal">In the comments</div>
+    <h2 class="display reveal" style="margin-top:.6rem">Fans talk about the era, the visuals and the sound.</h2>
 
     <div class="quotes stagger">
       <div class="q">
-        <div class="th">Album and era</div><div class="n">25<span>mentions</span></div>
+        <div class="big-num">25</div><div class="label" style="margin-top:.5rem">mentions · album and era</div>
         <blockquote>“After an extended hiatus, underscores STUNS by making the Third Song Ever.”</blockquote>
         <cite>6,102 likes · Tell Me (U Want It) · a running joke across the singles</cite>
       </div>
       <div class="q">
-        <div class="th">Videos and visuals</div><div class="n">21<span>mentions</span></div>
+        <div class="big-num">21</div><div class="label" style="margin-top:.5rem">mentions · videos and visuals</div>
         <blockquote>“she was the creative director on this?? the storytelling goes crazy”</blockquote>
         <cite>56 likes · The Peace</cite>
       </div>
       <div class="q">
-        <div class="th">Production and sound</div><div class="n">9<span>mentions</span></div>
+        <div class="big-num">9</div><div class="label" style="margin-top:.5rem">mentions · production and sound</div>
         <blockquote>“drumless production going crazy”</blockquote>
         <cite>2,858 likes · The Peace</cite>
       </div>
     </div>
-    <p class="body reveal" style="margin-top:1.6rem;font-size:.92rem">
-      A small, popularity-weighted sample: it shows what some fans pick out, not what drives viewing.
-    </p>
+    <p class="body reveal" style="margin-top:1.8rem;font-size:.98rem">From 160 of the most prominent comments across the four singles — a popularity-weighted sample. <b>It shows what some fans pick out, not what drives viewing.</b></p>
     <div class="src reveal">Source: public comments, relevance-ordered, 40 per single · themes coded by reading · method in Analysis.</div>
   </div>
 </section>
 
 <!-- ══ 9 · TRAILER TEST ════════════════════════════════════════════
      Proportionate: an optimisation test, not the headline opportunity. -->
-<section class="slide sky" data-t="A quick test">
+<section class="slide cream-s" data-t="A quick test">
   <div class="inner">
-    <div class="label sig reveal">One quick optimisation</div>
-    <h2 class="display reveal" style="margin-top:.7rem">New visitors meet an audio track first</h2>
-    <p class="lede reveal">The Home tab is well organised. The one thing worth testing is the trailer slot,
-      which currently plays an audio upload over still artwork.</p>
+    <div class="label g reveal">One quick optimisation</div>
+    <h2 class="display reveal" style="margin-top:.6rem">New visitors meet an audio track first.</h2>
 
     <div class="vs stagger">
-      <a class="tc" href="https://www.youtube.com/watch?v=VOXkhL00a6Y" target="_blank" rel="noopener">
+      <a href="https://www.youtube.com/watch?v=VOXkhL00a6Y" target="_blank" rel="noopener">
         <span class="tag">Trailer now</span>
-        <div class="im"><img src="https://i.ytimg.com/vi/VOXkhL00a6Y/hqdefault.jpg" alt="" loading="lazy"><div class="play"></div></div>
-        <div class="t">Unlimited Love (♫) · audio</div><div class="m">254K views · Aug 2026</div></a>
+        <div class="frame"><img src="https://i.ytimg.com/vi/VOXkhL00a6Y/maxresdefault.jpg" alt="Unlimited Love audio upload artwork"
+          onerror="this.onerror=null;this.src='https://i.ytimg.com/vi/VOXkhL00a6Y/hqdefault.jpg'"><div class="play"></div></div>
+        <div class="t">Unlimited Love (♫) — audio over still artwork</div><div class="m">254K views · Aug 2026</div></a>
       <div class="arrow">→</div>
-      <a class="tc" href="https://www.youtube.com/watch?v=Gf-fCJ6TkRU" target="_blank" rel="noopener">
-        <span class="tag sig">Candidate to test</span>
-        <div class="im"><img src="https://i.ytimg.com/vi/Gf-fCJ6TkRU/hqdefault.jpg" alt="" loading="lazy"><div class="play"></div></div>
-        <div class="t">The Peace · music video</div><div class="m">Shows her world in under three minutes</div></a>
+      <a href="https://www.youtube.com/watch?v=Gf-fCJ6TkRU" target="_blank" rel="noopener">
+        <span class="tag g">Candidate to test</span>
+        <div class="frame"><img src="https://i.ytimg.com/vi/Gf-fCJ6TkRU/maxresdefault.jpg" alt="The Peace music video"
+          onerror="this.onerror=null;this.src='https://i.ytimg.com/vi/Gf-fCJ6TkRU/hqdefault.jpg'"><div class="play"></div></div>
+        <div class="t">The Peace — her world in under three minutes</div><div class="m">Music video · creative director: underscores</div></a>
     </div>
 
     <div class="guide reveal">
-      <div><b>YouTube's guidance:</b> the trailer is shown to people who aren't subscribed; a separate
-        featured video can be set for returning subscribers.</div>
-      <div><b>Our proposal:</b> test a video introduction for new visitors, and check the returning-subscriber
-        slot in Studio. Read the result as directional — other activity moves the channel too.</div>
+      <div><b>YouTube's guidance:</b> the trailer is shown to people who aren't subscribed; a separate featured video can be set for returning subscribers.</div>
+      <div><b>Our proposal:</b> test a video introduction and check the returning-subscriber slot in Studio. Read the result as directional — other activity moves the channel too.</div>
     </div>
     <div class="src reveal">Source: channel Home tab viewed signed-out, 16 Oct 2026 · YouTube Help, "Customize your channel layout".</div>
   </div>
 </section>
 
-<!-- ══ 10 · NOVEMBER AND 2027 ══════════════════════════════════════
-     Tour name, venues and ticket status are public on the official tour
-     page (underscores.plus/galleria-european-chapter, read 16 Oct 2026)
-     and match internal reporting of 14 Oct. Dates are set in that page's
-     own month / day / country stack. -->
+<!-- ══ 10 · NOVEMBER — the GALLERIA rail ═══════════════════════════
+     Tour name, venues and status are public on underscores.plus
+     (galleria-european-chapter, read 16 Oct 2026) and match internal
+     reporting of 14 Oct. The pop-up is proposed, so it is drawn dashed. -->
 <section class="slide" data-t="November">
-  <div class="bleed left">
+  <div class="bleed scrim-l">
     <img src="https://i.ytimg.com/vi/X0Ejds9uRco/maxresdefault.jpg" alt="Unlimited Love live from Galleria Chicago"
-      style="object-position:62% 50%"
+      style="object-position:70% 50%"
       onerror="this.onerror=null;this.src='https://i.ytimg.com/vi/X0Ejds9uRco/hqdefault.jpg'">
   </div>
   <div class="inner">
-    <div class="label sig reveal">GALLERIA · European Chapter · with special guests umru</div>
-    <h2 class="display reveal" style="margin-top:.7rem">Four of five UK shows are sold out</h2>
+    <div class="label g reveal">GALLERIA · European Chapter · with special guests umru</div>
+    <h2 class="display reveal" style="margin-top:.6rem;max-width:18ch">Four of five UK shows are sold out.</h2>
 
-    <div class="tix stagger">
-      <div class="tx"><div class="mo">nov</div><div class="d">10</div><div class="cc">GB</div><div class="c">Glasgow</div><div class="v">SWG3</div><div class="s">sold out</div></div>
-      <div class="tx"><div class="mo">nov</div><div class="d">12</div><div class="cc">GB</div><div class="c">London</div><div class="v">Electric Brixton</div><div class="s">sold out</div></div>
-      <div class="tx"><div class="mo">nov</div><div class="d">14</div><div class="cc">GB</div><div class="c">Manchester</div><div class="v">Aviva Studios</div><div class="s">sold out</div></div>
-      <div class="tx"><div class="mo">nov</div><div class="d">15</div><div class="cc">GB</div><div class="c">Bristol</div><div class="v">The Prospect Building</div><div class="s open">tickets on sale</div></div>
-      <div class="tx"><div class="mo">nov</div><div class="d">16</div><div class="cc">GB</div><div class="c">London</div><div class="v">Electric Brixton</div><div class="s">sold out</div></div>
+    <div class="rail stagger">
+      <div class="stop out"><div class="d">10 Nov</div><div class="node"></div><div class="c">Glasgow</div><div class="v">SWG3</div><div class="s">Sold out</div></div>
+      <div class="stop out"><div class="d">12 Nov</div><div class="node"></div><div class="c">London</div><div class="v">Electric Brixton</div><div class="s">Sold out</div></div>
+      <div class="stop pop"><div class="d">13 Nov</div><div class="node"></div><div class="c">London</div><div class="v">Fan pop-up</div><div class="s">Proposed</div></div>
+      <div class="stop out"><div class="d">14 Nov</div><div class="node"></div><div class="c">Manchester</div><div class="v">Aviva Studios</div><div class="s">Sold out</div></div>
+      <div class="stop open"><div class="d">15 Nov</div><div class="node"></div><div class="c">Bristol</div><div class="v">The Prospect Building</div><div class="s">On sale</div></div>
+      <div class="stop out"><div class="d">16 Nov</div><div class="node"></div><div class="c">London</div><div class="v">Electric Brixton</div><div class="s">Sold out</div></div>
     </div>
 
-    <p class="lede reveal" style="max-width:56ch">
-      A London fan pop-up has been proposed for 13 November. This is the right moment to film: a UK live
-      piece, short-form from the week, and material that can serve as a <b>follow-up moment</b> for a
-      current single — and as groundwork for the 2027 album.
-    </p>
+    <p class="statement reveal" style="margin-top:2.2rem;max-width:44ch">The moment to film: a UK live piece, short-form from the week, and material for a current single's <span class="g">follow-up moment</span> — groundwork for the 2027 album.</p>
     <div class="src reveal">Source: underscores.plus tour page and internal VMG reporting, 14–16 Oct 2026. Pop-up, tour marketing and 2027 album timing are all to be confirmed.</div>
   </div>
 </section>
 
 <!-- ══ 11 · PRIORITIES ═════════════════════════════════════════════ -->
 <section class="slide" data-t="Priorities" style="background:var(--ink-2)">
-  <svg class="umark" style="width:min(30vw,380px);right:3%;bottom:4%;opacity:.05" viewBox="0 0 200 200" aria-hidden="true"><path d="M44 78 V112 A56 56 0 0 0 156 112 V78" fill="none" stroke="currentColor" stroke-width="20" stroke-linecap="round"/><rect x="20" y="30" width="44" height="66" rx="20" transform="rotate(-14 42 63)" fill="currentColor"/><rect x="136" y="30" width="44" height="66" rx="20" transform="rotate(14 158 63)" fill="currentColor"/></svg>
   <div class="inner">
-    <div class="label sig reveal">What we propose</div>
-    <h2 class="display reveal" style="margin-top:.7rem">Three priorities</h2>
+    <div class="label g reveal">What we propose</div>
+    <h2 class="display reveal" style="margin-top:.6rem">Three priorities.</h2>
 
     <div class="pri stagger">
       <div class="p">
-        <div class="n">01 · November</div>
+        <div class="n">01</div>
         <h3>Capture the UK shows for YouTube</h3>
-        <div class="row"><b>What</b>Agree a short capture plan: one live performance piece, Shorts from the shows and pop-up, and footage held for later use.</div>
-        <div class="row"><b>Why</b>Four sold-out rooms, and live already works on the channel — Galleria Chicago, 107K.</div>
-        <div class="row"><b>Measure</b>Views, average view duration and UK share of views in Studio.</div>
+        <div class="r"><b>What</b>A short capture plan: one live performance piece, Shorts from the shows and pop-up, footage held for later.</div>
+        <div class="r"><b>Why</b>Four sold-out rooms, and live already works on the channel — Galleria Chicago, 107K.</div>
+        <div class="r"><b>Measure</b>Views, average view duration and UK share of views in Studio.</div>
         <div class="own">Management and VMG UK · before 10 Nov</div>
       </div>
       <div class="p">
-        <div class="n">02 · Release follow-through</div>
+        <div class="n">02</div>
         <h3>Plan a second moment for priority singles</h3>
-        <div class="row"><b>What</b>For each priority single, choose a follow-up that suits the song and the material — a remix, live or alternate version, or a choreo cut.</div>
-        <div class="row"><b>Why</b>Do It's January wave, led by the Yves remix (727K), kept the song active ten weeks on.</div>
-        <div class="row"><b>Measure</b>The follow-up's own performance, and in Studio the original's views and traffic sources either side of it.</div>
+        <div class="r"><b>What</b>A follow-up chosen for the song and material — a remix, live or alternate version, or a choreo cut.</div>
+        <div class="r"><b>Why</b>Do It's January wave, led by the Yves remix (727K), kept the song active ten weeks on.</div>
+        <div class="r"><b>Measure</b>The follow-up's own performance, and the original's views and traffic sources either side of it.</div>
         <div class="own">Management and label · from the next single</div>
       </div>
       <div class="p">
-        <div class="n">03 · Creative process</div>
+        <div class="n">03</div>
         <h3>Test a shorter process format</h3>
-        <div class="row"><b>What</b>Test standalone edits drawn from sessions and streams — around 5–15 minutes as a starting point — alongside the long streams.</div>
-        <div class="row"><b>Why</b>The A-side stream drew 137K over three hours. The best length is not yet known.</div>
-        <div class="row"><b>Measure</b>Average view duration and percentage viewed, compared across lengths.</div>
+        <div class="r"><b>What</b>Standalone edits from sessions and streams — around 5–15 minutes as a starting point — alongside the long streams.</div>
+        <div class="r"><b>Why</b>The A-side stream drew 137K over three hours. The best length is not yet known.</div>
+        <div class="r"><b>Measure</b>Average view duration and percentage viewed, compared across lengths.</div>
         <div class="own">Management and label · ahead of 2027 sessions</div>
       </div>
     </div>
 
     <div class="after reveal">
-      <div><div class="label">Quick win · team</div><p><b>Test a video trailer</b> for new visitors and review the returning-subscriber featured slot.</p></div>
-      <div><div class="label" style="color:var(--cyan)">To discuss with YouTube UK</div><p>Foundry support around the November shows, a read of UK audience and traffic sources, and the launch features available for the 2027 album.</p></div>
+      <div><div class="label g">Quick win · team</div><p><b>Test a video trailer</b> for new visitors and review the returning-subscriber featured slot.</p></div>
+      <div><div class="label b">To discuss with YouTube UK</div><p>Foundry support around the November shows, a read of UK audience and traffic sources, and the launch features available for the 2027 album.</p></div>
     </div>
     <div class="src reveal">Studio metrics available to the channel owner; which can be isolated per test to be confirmed before targets are set. Detail in Analysis.</div>
   </div>
@@ -918,67 +907,66 @@ body.sheet-open{overflow:hidden}
 </div>
 
 <script>
+/* ── U-era strip: one tick per week, 27 Jun 2025 → 16 Oct 2026 (69 weeks).
+   s = a single's release week, a = album week, o = other uploads, . = none.
+   Built from publication dates of all public uploads, 16 Oct 2026. */
+var WEEKS = "so.............o.oso.........oo...s...a....o..............s..o.......";
+document.querySelectorAll('.rhythm').forEach(function(el){
+  el.innerHTML = WEEKS.split('').map(function(k){ return '<div class="tick'+(k==='.'?'':' '+k)+'"></div>'; }).join('');
+});
+
 /* ── Reveal on scroll ───────────────────────────────────────────── */
-const io = new IntersectionObserver(es=>{
-  es.forEach(e=>{
+var io = new IntersectionObserver(function(es){
+  es.forEach(function(e){
     if(!e.isIntersecting) return;
     e.target.classList.add('visible');
     if(e.target.classList.contains('stagger'))
-      [...e.target.children].forEach((c,i)=>setTimeout(()=>c.classList.add('visible'), i*70));
+      [].slice.call(e.target.children).forEach(function(c,i){ setTimeout(function(){ c.classList.add('visible'); }, i*70); });
     io.unobserve(e.target);
   });
 },{threshold:.12});
-document.querySelectorAll('.reveal,.stagger').forEach(el=>io.observe(el));
+document.querySelectorAll('.reveal,.stagger').forEach(function(el){ io.observe(el); });
 
 /* ── Presentation mode ──────────────────────────────────────────── */
-let cur = 0;
-const slides = () => [...document.querySelectorAll('.slide')];
+var cur = 0;
+function slides(){ return [].slice.call(document.querySelectorAll('.slide')); }
 function startPresent(){
   closeSheet();
   document.body.classList.add('present');
   showSlide(0);
-  const el = document.documentElement;
-  if(el.requestFullscreen) el.requestFullscreen().catch(()=>{});
+  var el = document.documentElement;
+  if(el.requestFullscreen) el.requestFullscreen().catch(function(){});
 }
 function exitPresent(){
   document.body.classList.remove('present');
-  slides().forEach(s=>s.classList.remove('current'));
-  if(document.fullscreenElement && document.exitFullscreen) document.exitFullscreen().catch(()=>{});
-  slides()[cur]?.scrollIntoView({block:'start'});
+  slides().forEach(function(s){ s.classList.remove('current'); });
+  if(document.fullscreenElement && document.exitFullscreen) document.exitFullscreen().catch(function(){});
+  var s = slides()[cur]; if(s) s.scrollIntoView({block:'start'});
 }
 function showSlide(i){
-  const s = slides();
+  var s = slides();
   cur = Math.max(0, Math.min(i, s.length-1));
-  s.forEach((el,n)=>el.classList.toggle('current', n===cur));
+  s.forEach(function(el,n){ el.classList.toggle('current', n===cur); });
   s[cur].scrollTop = 0;
-  s[cur].querySelectorAll('.reveal,.stagger>*').forEach(e=>e.classList.add('visible'));
+  s[cur].querySelectorAll('.reveal,.stagger>*').forEach(function(e){ e.classList.add('visible'); });
   document.getElementById('pbar').style.width = ((cur+1)/s.length*100)+'%';
   document.getElementById('pcount').textContent = (cur+1)+' / '+s.length;
 }
-document.addEventListener('keydown', e=>{
-  if(!document.body.classList.contains('present')){
-    if(e.key==='Escape') closeSheet();
-    return;
-  }
-  if(e.key==='ArrowRight'||e.key===' '||e.key==='PageDown'){e.preventDefault();showSlide(cur+1);}
-  else if(e.key==='ArrowLeft'||e.key==='PageUp'){e.preventDefault();showSlide(cur-1);}
-  else if(e.key==='Escape'){exitPresent();}
-  else if(e.key==='Home'){showSlide(0);}
-  else if(e.key==='End'){showSlide(slides().length-1);}
+document.addEventListener('keydown', function(e){
+  if(!document.body.classList.contains('present')){ if(e.key==='Escape') closeSheet(); return; }
+  if(e.key==='ArrowRight'||e.key===' '||e.key==='PageDown'){ e.preventDefault(); showSlide(cur+1); }
+  else if(e.key==='ArrowLeft'||e.key==='PageUp'){ e.preventDefault(); showSlide(cur-1); }
+  else if(e.key==='Escape'){ exitPresent(); }
+  else if(e.key==='Home'){ showSlide(0); }
+  else if(e.key==='End'){ showSlide(slides().length-1); }
 });
-document.addEventListener('fullscreenchange', ()=>{
+document.addEventListener('fullscreenchange', function(){
   if(!document.fullscreenElement && document.body.classList.contains('present')) exitPresent();
 });
 
 /* ── Analysis sheet ─────────────────────────────────────────────── */
-function openSheet(){
-  document.getElementById('sheet').classList.add('open');
-  document.body.classList.add('sheet-open');
-}
-function closeSheet(){
-  document.getElementById('sheet').classList.remove('open');
-  document.body.classList.remove('sheet-open');
-}
+function openSheet(){ document.getElementById('sheet').classList.add('open'); document.body.classList.add('sheet-open'); }
+function closeSheet(){ var s=document.getElementById('sheet'); if(s) s.classList.remove('open'); document.body.classList.remove('sheet-open'); }
 </script>
 </body>
 </html>
