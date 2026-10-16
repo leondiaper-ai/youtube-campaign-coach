@@ -42,10 +42,11 @@
       measure attached.
    7. Caveats that change how a figure reads sit on the slide, in one
       line. Everything else lives in the Analysis sheet.
-   8. A fan upload's views are evidence to investigate, never proof of
-      demand. Each lyric-video case was opened and checked (lyric-led,
-      which version, whether an official one exists anywhere) before
-      it went on a slide, and the slide says what was found.
+   8. Views on a lyric upload hosted by another channel are evidence to
+      investigate, never proof of demand, and nothing is assumed about
+      that channel's ownership or relationship with Defected. Each case
+      was opened and checked (lyric-led, which version, whether an
+      official one exists) before it went on a slide.
    9. Tool conditions (Premiere trailer, Live Redirect) are stated
       separately and marked as Studio checks; anniversaries are dated
       from the original Defected release, not the YouTube upload.
@@ -312,6 +313,8 @@ h3.display{font-size:clamp(1.2rem,2.2vw,1.9rem);font-variation-settings:'wdth' 7
 .steps li{counter-increment:s;position:relative;padding-left:1.7rem;font-size:.8rem;line-height:1.38;color:rgba(13,10,11,.85)}
 .steps li::before{content:'0' counter(s);position:absolute;left:0;top:.1rem;font-family:'DM Mono',monospace;font-size:.62rem;letter-spacing:.1em;color:var(--red)}
 .steps li b{font-weight:600;color:var(--ink)}
+.steps.dark li{color:var(--warm);font-size:.92rem}
+.steps.dark li b{color:var(--cream)}
 .steps.row{display:grid;grid-template-columns:repeat(3,1fr);gap:1.2rem;margin-top:1.1rem;padding-top:.9rem;border-top:1px solid rgba(13,10,11,.2)}
 @media(max-width:860px){.steps.row{grid-template-columns:1fr}}
 
@@ -345,7 +348,7 @@ h3.display{font-size:clamp(1.2rem,2.2vw,1.9rem);font-variation-settings:'wdth' 7
 .facts div .big-num{font-size:clamp(1.4rem,2.4vw,2.1rem)}
 .facts div .label{margin-top:.3rem}
 
-/* ── Slide 10 · lyric videos: three cases, each a fan upload beside its status ─*/
+/* ── Slide 10 · lyric videos: three cases, each an upload on another channel beside its status ─*/
 .cases{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(.8rem,1.6vw,1.6rem)}
 @media(max-width:860px){.cases{grid-template-columns:1fr}}
 .case{border-top:2px solid var(--line);padding-top:.7rem;min-width:0}
@@ -353,7 +356,7 @@ h3.display{font-size:clamp(1.2rem,2.2vw,1.9rem);font-variation-settings:'wdth' 7
 @media(max-width:860px){.case .thumb{max-width:60%}}
 .case h3{font-size:clamp(1rem,1.5vw,1.3rem)}
 .case .stat{display:grid;grid-template-columns:auto 1fr;gap:.25rem .6rem;margin-top:.5rem;font-size:.76rem;line-height:1.4;color:var(--warm)}
-.case .stat span:first-child{font-family:'DM Mono',monospace;font-size:.58rem;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);padding-top:.2rem}
+.case .stat span:nth-child(odd){font-family:'DM Mono',monospace;font-size:.58rem;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);padding-top:.2rem}
 .case .stat b{color:var(--cream);font-weight:600}
 .case .stat .no{color:var(--red);font-weight:600}
 .case .stat .yes{color:var(--cyan);font-weight:600}
@@ -370,6 +373,8 @@ h3.display{font-size:clamp(1.2rem,2.2vw,1.9rem);font-variation-settings:'wdth' 7
 .pt .y b{color:var(--red);font-weight:500}
 .line20.fmt .pt .y{white-space:normal;line-height:1.35}
 .line20.fmt .pt .y i{display:block;font-style:normal;color:var(--dim)}
+.field .line20.fmt .pt .y{color:rgba(13,10,11,.7)}
+.field .line20.fmt .pt .y i{color:rgba(13,10,11,.6)}
 .pt .thumb .cap{padding:.35rem .4rem .35rem;font-size:.54rem;background:linear-gradient(to top,rgba(13,10,11,.97) 30%,rgba(13,10,11,.45))}
 .pt .thumb .cap b{font-size:.68rem}
 
@@ -759,30 +764,30 @@ body.sheet-open .chrome,body.sheet-open #pbar{display:none}
   </div>
 </section>
 
-<!-- ═══ 8 · THE WEEKLY SHOW, EASIER TO FIND ═════════════════════════
-     The radio playlist and the Home page, merged after review. Panel
-     one is the Podcasts tab as it stood on 16 Oct; panel two is the fix
-     built from the show's own sleeve; panel three is Home, shelf by
-     shelf, with the additions drawn in red. One slide, one ask. -->
+<!-- ═══ 8 · THE RADIO SHOW ══════════════════════════════════════════
+     One point, one visual, three actions. The current podcast tile as
+     it stood on 16 Oct beside the proposed episode collection drawn
+     from the show's own sleeve. Shelf order, title formats and counts
+     are in the Analysis sheet. -->
 <section class="slide field lime" data-t="The radio show">
   <div class="inner">
-    <div class="grid2" style="align-items:end;grid-template-columns:1fr 1fr">
+    <div class="grid2" style="align-items:end;grid-template-columns:1.1fr 1fr">
       <div>
         <div class="label reveal">Worth trying · 1</div>
-        <h2 class="display tight reveal" style="margin-top:.7rem;max-width:18ch">Make the weekly radio show easier to find.</h2>
+        <h2 class="display tight reveal" style="margin-top:.7rem;max-width:16ch">Bring the weekly radio episodes together.</h2>
       </div>
-      <p class="body reveal" style="font-size:.95rem;max-width:52ch">The show has a consistent weekly schedule and recognisable artwork. What it doesn't have yet is one up-to-date place to find the episodes: <b>no public playlist collects them (the Broadcasting House archive holds two from 2022–23), the podcast tile carrying the show's name is a list of tracks hosted on other channels, and Home — which already features the album, releases, the latest sets, the podcast and live sessions — has no shelf for the radio show.</b></p>
+      <p class="body reveal" style="font-size:1rem;max-width:46ch">The show already has a consistent schedule and recognisable artwork. An up-to-date episode playlist could make it easier to find and follow.</p>
     </div>
-    <div class="panels three" style="margin-top:clamp(1.1rem,2.4vw,1.8rem)">
-      <div class="panel reveal">
-        <div class="label">The Podcasts tab, 16 October</div>
-        <div class="shot" style="box-shadow:0 14px 36px rgba(0,0,0,.25)"><img src="/defected/img/podcasts-tab.jpg" alt="Defected's Podcasts tab: a podcast called Defected Radio with 45 episodes and a release sleeve as its cover, beside Moments in Music"></div>
-        <div class="callout"><b>“Defected Radio · 45 episodes.”</b> Opened, it's Prunk – Topic, 8bit Records, TMPLE … — tracks from the show, on other channels. Useful as a tracklist; it isn't the show.</div>
+    <div class="grid2" style="margin-top:clamp(1.2rem,2.6vw,2rem);grid-template-columns:1fr 1fr;align-items:start">
+      <div class="reveal">
+        <div class="label">The podcast tile today</div>
+        <div class="shot crop" style="margin-top:.5rem;height:clamp(200px,34vh,300px);box-shadow:0 14px 36px rgba(0,0,0,.25)"><img src="/defected/img/podcasts-tab.jpg" style="object-position:0 72%" alt="Defected's Podcasts tab: a podcast called Defected Radio with 45 episodes and a release sleeve as its cover, beside Moments in Music"></div>
+        <div class="callout"><b>“Defected Radio · 45 episodes”</b> is a list of tracks from the show, hosted on other channels — useful, but it isn't the episodes.</div>
       </div>
-      <div class="panel reveal">
-        <div class="label">What it could look like, with the show's own artwork</div>
-        <div class="fixtile">
-          <div class="art"><img data-vid="lRa2uJsP2YM" alt="Defected Radio Show sleeve"><span>Podcast · 250 episodes</span></div>
+      <div class="reveal">
+        <div class="label">The proposed episode collection</div>
+        <div class="fixtile" style="margin-top:.5rem">
+          <div class="art"><img data-vid="lRa2uJsP2YM" alt="Defected Radio Show sleeve"><span>Podcast · every episode</span></div>
           <div class="bd"><b>Defected Radio Show — every episode</b><i>New every Friday · Sam Divine, Monki, Rimarkable</i></div>
         </div>
         <div class="miniShelf">
@@ -791,160 +796,128 @@ body.sheet-open .chrome,body.sheet-open #pbar{display:none}
           <a class="thumb" href="https://www.youtube.com/watch?v=lRa2uJsP2YM" target="_blank" rel="noopener"><img data-vid="lRa2uJsP2YM" alt=""></a>
           <a class="thumb" href="https://www.youtube.com/watch?v=cfzMTKNxW5g" target="_blank" rel="noopener"><img data-vid="cfzMTKNxW5g" alt=""></a>
         </div>
-        <div class="shot crop" style="margin-top:.8rem;height:clamp(90px,13vh,120px);box-shadow:0 14px 36px rgba(0,0,0,.25)"><img src="/defected/img/videos-grid-a.jpg" alt="The Videos grid: DFTD sleeves, a yellow radio episode, a Malta set and release artwork side by side" style="object-position:0 30%"></div>
-        <div class="label" style="margin-top:.4rem">The grid already tells a release, a radio episode and a set apart. One title format for the HQ sets — <b style="color:var(--ink)">DJ | style of mix | Live from Defected HQ</b> — would do the same for the series.</div>
-      </div>
-      <div class="panel reveal">
-        <div class="label">Home shelves on 16 October, top to bottom · suggested changes</div>
-        <div class="rail9">
-          <div class="shelf"><span class="i">01</span><span class="t">Featured video <i>David Rodigan · House of Roots</i></span><span class="k">keep</span></div>
-          <div class="shelf add"><span class="i">+</span><span class="t">Defected Radio Show — every episode <i>newest Friday first</i></span><span class="k">add</span></div>
-          <div class="shelf"><span class="i">02</span><span class="t">Oden &amp; Fatzo — Somehow It Flies <i>album of the week</i></span><span class="k">keep</span></div>
-          <div class="shelf"><span class="i">03</span><span class="t">Defected Releases</span><span class="k">keep</span></div>
-          <div class="shelf move"><span class="i">04</span><span class="t">“Defected Broadcasting House” <i>holds this season's sets</i></span><span class="k">rename: Live from Defected</span></div>
-          <div class="shelf add"><span class="i">+</span><span class="t">Defected Croatia · Defected Malta <i>playlists already exist</i></span><span class="k">add</span></div>
-          <div class="shelf"><span class="i">05–07</span><span class="t">Moments in Music · Live Sessions · Edge Of Desire</span><span class="k">keep</span></div>
-          <div class="shelf"><span class="i">08</span><span class="t">Playlist Mixes <i>the catalogue mixes</i></span><span class="k">rename: Defected Mixes</span></div>
-          <div class="shelf add"><span class="i">+</span><span class="t">Shorts</span><span class="k">add</span></div>
-          <div class="shelf move"><span class="i">09</span><span class="t">Defected 2026: The Playlist <i>includes other channels' videos</i></span><span class="k">move lower</span></div>
-          <div class="shelf"><span class="i">10</span><span class="t">Defected XXV · Official Music Videos</span><span class="k">keep</span></div>
-        </div>
-        <div class="qual" style="border-color:var(--ink);margin-top:.7rem">How we'd know it helped: playlist views, and episode views arriving from the playlist, in Studio over the 28 days before and after; Home-tab impressions and clicks by shelf. A day's work, no new production.</div>
+        <ol class="steps" style="margin-top:1.1rem">
+          <li><b>Collect the full episodes</b> in one public playlist, set as a podcast.</li>
+          <li><b>Use the radio show's artwork</b> as its cover, so it reads as the show.</li>
+          <li><b>Feature the playlist on Home.</b></li>
+        </ol>
       </div>
     </div>
-    <ol class="steps row reveal">
-      <li><b>Create</b> a “Defected Radio Show — every episode” playlist, past episodes added, set as a podcast, with the show's artwork as its cover, and link it in every episode description.</li>
-      <li><b>Keep</b> the current tracklist — renamed “Defected Radio — tracks from the show” — so it no longer appears as the podcast.</li>
-      <li><b>Add</b> the shelves above, rename the sets shelf for what it holds, and settle one title format for the HQ sets.</li>
-    </ol>
-    <div class="src">Checked 16 Oct 2026: 71 public playlists, 11 Home shelves. The 631-video “Defected Broadcasting House” playlist was read in full: of its 622 available videos, 357 are Broadcasting House shows, 198 DJ sets, 20 mixes and 2 radio episodes (March 2022 and February 2023).</div>
+    <div class="src">Checked 16 Oct 2026: no public playlist collects the weekly episodes; the Broadcasting House archive holds two from 2022–23. Shelf order, title formats and the counts are under Analysis.</div>
   </div>
 </section>
 
-<!-- ═══ 9 · PREMIERES AS OCCASIONS ══════════════════════════════════
-     Leads with the strength (189 Premieres, used on the right formats),
-     shows a real Premiere page, then the four tools YouTube's own Help
-     pages describe — each with its own condition, stated separately. -->
+<!-- ═══ 9 · PREMIERES ═══════════════════════════════════════════════
+     The strength first, one flagship example, three possibilities.
+     Eligibility conditions, the per-format counts and the chapters
+     check are in the Analysis sheet. -->
 <section class="slide" data-t="Premieres">
   <div class="inner">
     <div class="grid2" style="align-items:end;grid-template-columns:1.1fr 1fr">
       <div>
         <div class="label reveal">Worth trying · 2</div>
-        <h2 class="display tight reveal" style="margin-top:.7rem;max-width:22ch">A few flagship Premieres could become bigger shared moments.</h2>
+        <h2 class="display tight reveal" style="margin-top:.7rem;max-width:18ch">Build a bigger moment around selected Premieres.</h2>
       </div>
-      <p class="body reveal" style="font-size:.95rem;max-width:52ch">Defected already premieres the right things — every podcast episode, every music video, most event sets — and announces them with Shorts. What it rarely does is treat one as an occasion. <b>The candidates are the ones that already draw the biggest Premiere audiences:</b> the next Malta or Pacha flagship set, the next music video of Hold Me's scale (221K, premiered 22 Feb 2025), or a catalogue piece with the artists present (slide 11).</p>
+      <p class="body reveal" style="font-size:1rem;max-width:48ch">Defected already uses Premieres extensively. For a few standout releases, extra promotion and artist participation could give fans more reason to join together.</p>
     </div>
-    <div class="prem" style="margin-top:clamp(1.1rem,2.4vw,1.8rem)">
+    <div class="prem" style="margin-top:clamp(1.2rem,2.6vw,2rem);grid-template-columns:1fr 1fr">
       <div class="reveal">
+        <div class="label" style="margin-bottom:.5rem">A flagship example</div>
         <div class="premPage">
-          <a class="thumb" href="https://www.youtube.com/watch?v=hlbMcaCYq-Q" target="_blank" rel="noopener"><img data-vid="hlbMcaCYq-Q" data-big="1" alt=""><span class="cap"><b>Green Velvet · Live from the Ditch, Defected Malta</b>Premiered 13 Feb 2025, 19:00 · 550K · the channel's biggest set since 2024</span></a>
-          <div class="bar"><span><b>Premiere page</b> · reminders · live chat · chat replay</span><span><span class="pill on">no trailer visible</span> <span class="pill">no tracklist or chapters</span></span></div>
-        </div>
-        <div class="facts" style="margin-top:.9rem;gap:1.2rem">
-          <div><div class="big-num" style="color:var(--lime)">189</div><div class="label">Premieres all-time<br>65 in 2024 · 21 in 2025 · 12 in 2026</div></div>
-          <div><div class="big-num" style="color:var(--cream)">9 / 9</div><div class="label">podcast episodes premiered,<br>chat replay on</div></div>
-          <div><div class="big-num" style="color:var(--cream)">59 / 122</div><div class="label">DJ sets since 2024 — event sets<br>almost always, HQ sets about half</div></div>
+          <a class="thumb" href="https://www.youtube.com/watch?v=hlbMcaCYq-Q" target="_blank" rel="noopener"><img data-vid="hlbMcaCYq-Q" data-big="1" alt=""><span class="cap"><b>Green Velvet · Live from the Ditch, Defected Malta</b>Premiered 13 Feb 2025 at 19:00 · chat replay available · 550K views to date</span></a>
+          <div class="bar"><span><b>189 Premieres</b> on the channel · every podcast episode and music video, most event sets</span></div>
         </div>
       </div>
       <div class="reveal">
-        <div class="label" style="margin-bottom:.6rem">What YouTube's own tools allow · each condition checked separately in Studio</div>
-        <div class="tools">
-          <div class="tool t1"><b>Trailer on the Premiere page</b><p>15 seconds to 3 minutes, playing on the watch page in the days before — cut from the set itself. <i>Needs over 1,000 subscribers and no active strikes; a restriction on the channel isn't visible publicly, so confirm in Studio.</i></p></div>
-          <div class="tool t2"><b>Live Redirect from a pre-show</b><p>A short live stream — the DJ or host before the set — that sends viewers into the Premiere as it starts; YouTube's own release-day guidance for artists. <i>Its own condition: over 1,000 subscribers, no live-streaming restriction; check separately from the trailer.</i></p></div>
-          <div class="tool t3"><b>Host in the chat</b><p>The DJ or artist in the Premiere chat for the hour, with reminders pushed by the announcement Short. The one thing nobody else can supply. <i>Visible afterwards in the chat replay.</i></p></div>
-          <div class="tool t4"><b>Tracklist and chapters</b><p>Five of the six flagship event-set Premieres we checked carry neither; the David Morales HQ mix has eight chapters, so the practice exists. A practical addition for selected sets. <i>Premium Afterparty — a members-only live stream with the artist — isn't self-serve: a question to put to YouTube about a specific moment.</i></p></div>
-        </div>
-        <div class="qual">One way to pace it: one or two Premieres a quarter run this way, the rest as now. How we'd know: reminders set, concurrent viewers and chat messages in Studio, against the channel's usual set Premieres.</div>
+        <div class="label" style="margin-bottom:.6rem">Three possibilities</div>
+        <ol class="steps dark" style="margin-top:0;gap:.7rem">
+          <li><b>A short trailer before launch</b> on the Premiere page.</li>
+          <li><b>The artist or DJ joining chat</b> for the Premiere hour.</li>
+          <li><b>A short live introduction, where practical,</b> leading into the Premiere.</li>
+        </ol>
+        <div class="qual">Tracklists and chapters are a small addition for selected sets. Eligibility for trailers and live redirects, and what was visible on past Premieres, are under Analysis; what the team already does around a Premiere isn't fully visible publicly.</div>
       </div>
     </div>
-    <div class="src reveal">Public YouTube data · Premiere pages, chat replays and descriptions read 16 Oct 2026 (Green Velvet, Sam Divine Pacha, Oden &amp; Fatzo Pacha, Dennis Ferrer Croatia, Eats Everything Malta, David Morales HQ) · tool conditions from YouTube Help and YouTube for Artists, read the same day · trailers, reminder counts and chat volume are not visible publicly.</div>
+    <div class="src reveal">Public YouTube data · Premiere pages and chat replays read 16 Oct 2026 · feature conditions from YouTube Help, read the same day.</div>
   </div>
 </section>
 
 <!-- ═══ 10 · LYRIC VIDEOS ═══════════════════════════════════════════
-     Three records, each a fan lyric upload beside its verified status.
-     The fan uploads are evidence to look into, not proof of demand;
-     the slide says what was checked and recommends one test. -->
+     Three examples, four labels each: track, hosting channel, views,
+     whether an official lyric video exists. Verification detail is in
+     the Analysis sheet. -->
 <section class="slide" data-t="Lyric videos" style="background:var(--ink-2)">
   <div class="inner">
     <div class="grid2" style="align-items:end;grid-template-columns:1.1fr 1fr">
       <div>
         <div class="label reveal">Worth trying · 3</div>
-        <h2 class="display tight reveal" style="margin-top:.7rem;max-width:20ch">Explore official lyric videos for selected key records.</h2>
+        <h2 class="display tight reveal" style="margin-top:.7rem;max-width:18ch">Give key catalogue another way to be discovered.</h2>
       </div>
-      <p class="body reveal" style="font-size:.95rem;max-width:50ch">For three vocal records, fans have made lyric videos that found a large audience. <b>That's a signal worth investigating, not proof of unmet demand</b> — so each was checked: is the upload really lyric-led, which version does it use, and does an official lyric video already exist on the label's, the artist's or a partner's channel?</p>
+      <p class="body reveal" style="font-size:1rem;max-width:48ch">Lyric uploads of Defected records have attracted substantial viewing on other music channels. Selected official lyric videos could offer another way into the music within Defected's channel network.</p>
     </div>
     <div class="cases stagger" style="margin-top:clamp(1.2rem,2.6vw,2rem)">
       <div class="case first">
-        <a class="thumb" href="https://www.youtube.com/watch?v=RpmFVcMggZE" target="_blank" rel="noopener"><img data-vid="RpmFVcMggZE" alt=""><span class="cap"><b>Cola · fan lyric video</b>Groove Bassment · 2017 · 6.1M</span></a>
-        <h3 class="display">CamelPhat &amp; Elderbrook — Cola</h3>
+        <a class="thumb" href="https://www.youtube.com/watch?v=RpmFVcMggZE" target="_blank" rel="noopener"><img data-vid="RpmFVcMggZE" alt=""></a>
+        <h3 class="display">Cola</h3>
         <div class="stat">
-          <span>Lyric-led</span><span><b>Yes</b> — full lyrics on screen, over the original single (3:43).</span>
-          <span>Official</span><span><span class="no">None found</span> on Defected, CamelPhat or Elderbrook's channels. Defected holds the audio (174M) and the official video (36.7M).</span>
-          <span>Read</span><span>The only one of the three with no official lyric video anywhere.</span>
+          <span>Hosted by</span><span>Groove Bassment</span>
+          <span>Views</span><span><b>6.1M</b> · uploaded 2017</span>
+          <span>Official</span><span><span class="no">None found</span> on Defected, CamelPhat or Elderbrook's channels.</span>
         </div>
       </div>
       <div class="case">
-        <a class="thumb" href="https://www.youtube.com/watch?v=-OWvghF_rpA" target="_blank" rel="noopener"><img data-vid="-OWvghF_rpA" alt=""><span class="cap"><b>Pump It Up · fan lyric video</b>Sunrise Sounds · Apr 2025 · 7.1M</span></a>
-        <h3 class="display">Endor — Pump It Up</h3>
+        <a class="thumb" href="https://www.youtube.com/watch?v=-OWvghF_rpA" target="_blank" rel="noopener"><img data-vid="-OWvghF_rpA" alt=""></a>
+        <h3 class="display">Pump It Up</h3>
         <div class="stat">
-          <span>Lyric-led</span><span><b>Yes</b> — the radio edit (2:30), sleeve shown, lyrics throughout.</span>
-          <span>Official</span><span><span class="yes">Exists</span> — on Armada Music TV (Mar 2020, 90K), not on Defected. The record's later run came with <i>The Substance</i>.</span>
-          <span>Read</span><span>The official version exists but has had little reach; a Defected-hosted one would be a second official upload.</span>
+          <span>Hosted by</span><span>Sunrise Sounds</span>
+          <span>Views</span><span><b>7.1M</b> · uploaded Apr 2025</span>
+          <span>Official</span><span><span class="yes">Exists</span> — Armada Music TV, 2020.</span>
         </div>
       </div>
       <div class="case">
-        <a class="thumb" href="https://www.youtube.com/watch?v=b5yMWNPU_y4" target="_blank" rel="noopener"><img data-vid="b5yMWNPU_y4" alt=""><span class="cap"><b>Edge Of Desire · fan lyric video</b>7clouds Afro House · 2025 · 1.7M</span></a>
-        <h3 class="display">Jonas Blue &amp; Malive — Edge Of Desire</h3>
+        <a class="thumb" href="https://www.youtube.com/watch?v=b5yMWNPU_y4" target="_blank" rel="noopener"><img data-vid="b5yMWNPU_y4" alt=""></a>
+        <h3 class="display">Edge Of Desire</h3>
         <div class="stat">
-          <span>Lyric-led</span><span><b>Yes</b> — the radio edit (2:15).</span>
-          <span>Official</span><span><span class="yes">Exists</span> — on Jonas Blue's channel (Nov 2025, 116K), where the record's audio also lives (9.6M against Defected's 1.27M).</span>
-          <span>Read</span><span>Already covered by the artist. Nothing for Defected to add here.</span>
+          <span>Hosted by</span><span>7clouds Afro House</span>
+          <span>Views</span><span><b>1.7M</b> · uploaded 2025</span>
+          <span>Official</span><span><span class="yes">Exists</span> — Jonas Blue's channel, 2025.</span>
         </div>
       </div>
     </div>
     <div class="grid2 reveal" style="margin-top:1.3rem;grid-template-columns:1.1fr 1fr;align-items:start">
-      <p class="body" style="font-size:.92rem">Recommendation: <b>test one first</b>, chosen on rights to the vocal, the artists' wishes, production effort and what current listening data says about the record. On the evidence, Cola is the one with a clear gap; whether it goes first is the label's and the artists' call. <b>Where it's hosted is a discussion with the artist and the label</b> — the artist channel is often the bigger home for a vocal record — and raw channel totals alone shouldn't decide it.</p>
-      <div class="qual">How we'd know: views at 30 and 90 days, where the upload's viewers come from (search, suggested, the fan version's audience) in Studio, and whether the official version surfaces for the record's “lyrics” searches. Nine records were checked for all their supporting versions; the full table is under Analysis.</div>
+      <p class="statement" style="font-size:clamp(1rem,1.4vw,1.25rem);max-width:40ch">Cola could be one to explore, subject to existing partnerships and artist plans.</p>
+      <div class="qual">Pump It Up and Edge Of Desire already have official versions elsewhere; this isn't a suggestion to duplicate them. The opportunity is another discovery format, connected to related Defected content through playlists, descriptions and end screens where appropriate — with no assumption that viewers elsewhere would transfer or that results would repeat.</div>
     </div>
-    <div class="src reveal">Public YouTube data · lyric-video status checked 16 Oct 2026 on @DefectedMusic, @camelphat_music, @elderbrook-music, @endormusicuk, Jonas Blue's channel and Armada Music TV · fan uploads opened and watched to confirm they are lyric-led and which version they use.</div>
+    <div class="src reveal">Lifetime views and hosting channels as shown on YouTube, 16 Oct 2026 · each upload opened to confirm it is a lyric video · the channels searched for official versions are listed under Analysis.</div>
   </div>
 </section>
 
-<!-- ═══ 11 · THE ANNIVERSARY ════════════════════════════════════════
-     One record, twenty years, eight things that already exist on the
-     channel laid along a line. The suggestion is to gather them. -->
-<section class="slide field cyan" data-t="An anniversary">
+<!-- ═══ 11 · CATALOGUE MILESTONES ═══════════════════════════════════
+     A discussion opportunity, not a plan. One clearly labelled example
+     with four verified assets. Release sources are in the Analysis
+     sheet, with the Defected release distinguished from any earlier
+     release. -->
+<section class="slide field cyan" data-t="Catalogue milestones">
   <div class="inner">
     <div class="grid2" style="align-items:end;grid-template-columns:1.15fr 1fr">
       <div>
-        <div class="label reveal">Worth trying · 4</div>
-        <h2 class="display tight reveal" style="margin-top:.7rem;max-width:20ch">The Cure &amp; The Cause turns twenty this year. The pieces already exist.</h2>
+        <div class="label reveal">Worth discussing · 4</div>
+        <h2 class="display tight reveal" style="margin-top:.7rem;max-width:24ch">Could catalogue milestones bring existing content together?</h2>
       </div>
-      <p class="body reveal" style="font-size:.95rem;max-width:50ch">Fish Go Deep &amp; Tracey K's record was released on Defected in 2006 — the Dennis Ferrer remix single that August. In 2026 the channel has added a Shy FX remix, David Rodigan playing it at Croatia and a <i>Do You Remember House?</i> episode, on top of the 2024 Idris Elba remix and a live session. <b>Nothing on the channel yet brings these together as an anniversary.</b> Gathering them is a day's work with material that exists.</p>
+      <p class="body reveal" style="font-size:1rem;max-width:46ch">Remixes, performances and stories already give key records several lives on the channel. A milestone could be an opportunity to connect them.</p>
     </div>
-    <div class="line20 stagger">
-      <div class="pt"><div class="y"><b>2006</b> · remix single</div><a class="thumb" href="https://www.youtube.com/watch?v=ikJCO_FrQQ8" target="_blank" rel="noopener"><img data-vid="ikJCO_FrQQ8" alt=""><span class="cap"><b>26M</b>Dennis Ferrer Remix</span></a></div>
-      <div class="pt"><div class="y"><b>2006</b> · original</div><a class="thumb" href="https://www.youtube.com/watch?v=-LQlVFTaLcs" target="_blank" rel="noopener"><img data-vid="-LQlVFTaLcs" alt=""><span class="cap"><b>59K</b>Original Mix</span></a></div>
-      <div class="pt"><div class="y"><b>2008</b> · video</div><a class="thumb" href="https://www.youtube.com/watch?v=JbM0DtQZ9AY" target="_blank" rel="noopener"><img data-vid="JbM0DtQZ9AY" alt=""><span class="cap"><b>1.6M</b>Official video</span></a></div>
-      <div class="pt"><div class="y"><b>2024</b> · remix</div><a class="thumb" href="https://www.youtube.com/watch?v=llyBrtHVqgc" target="_blank" rel="noopener"><img data-vid="llyBrtHVqgc" alt=""><span class="cap"><b>77K</b>Idris Elba Remix</span></a></div>
-      <div class="pt"><div class="y"><b>2024</b> · live</div><a class="thumb" href="https://www.youtube.com/watch?v=FWtOmRLIjss" target="_blank" rel="noopener"><img data-vid="FWtOmRLIjss" alt=""><span class="cap"><b>8K</b>Zoe Kypri, live session</span></a></div>
-      <div class="pt"><div class="y"><b>Apr 2026</b> · story</div><a class="thumb" href="https://www.youtube.com/shorts/10F6v5TSQF4" target="_blank" rel="noopener"><img data-vid="10F6v5TSQF4" alt=""><span class="cap"><b>13K</b>Do You Remember House? Ep.1</span></a></div>
-      <div class="pt"><div class="y"><b>Sep 2026</b> · remix</div><a class="thumb" href="https://www.youtube.com/watch?v=DKf6g9OjDwI" target="_blank" rel="noopener"><img data-vid="DKf6g9OjDwI" alt=""><span class="cap"><b>16K</b>Shy FX remix</span></a></div>
-      <div class="pt"><div class="y"><b>Sep 2026</b> · moment</div><a class="thumb" href="https://www.youtube.com/watch?v=IWlcdPprdzg" target="_blank" rel="noopener"><img data-vid="IWlcdPprdzg" alt=""><span class="cap"><b>6.7K</b>Rodigan plays it at Croatia</span></a></div>
+    <div class="label reveal" style="margin-top:clamp(1.2rem,2.6vw,2rem)">An example to discuss · The Cure &amp; The Cause — 20 years since its Defected release (2006)</div>
+    <div class="line20 fmt stagger" style="margin-top:1.2rem;grid-template-columns:repeat(4,1fr);gap:.8rem">
+      <div class="pt"><div class="y"><b>2006</b><i>Dennis Ferrer Remix</i></div><a class="thumb" href="https://www.youtube.com/watch?v=ikJCO_FrQQ8" target="_blank" rel="noopener"><img data-vid="ikJCO_FrQQ8" alt=""><span class="cap"><b>26M</b>Fish Go Deep &amp; Tracey K</span></a></div>
+      <div class="pt"><div class="y"><b>2024</b><i>Idris Elba Remix</i></div><a class="thumb" href="https://www.youtube.com/watch?v=llyBrtHVqgc" target="_blank" rel="noopener"><img data-vid="llyBrtHVqgc" alt=""><span class="cap"><b>77K</b>Defected</span></a></div>
+      <div class="pt"><div class="y"><b>Apr 2026</b><i>Story · Short</i></div><a class="thumb" href="https://www.youtube.com/shorts/10F6v5TSQF4" target="_blank" rel="noopener"><img data-vid="10F6v5TSQF4" alt=""><span class="cap"><b>13K</b>Do You Remember House? Ep.1</span></a></div>
+      <div class="pt"><div class="y"><b>Sep 2026</b><i>Shy FX remix</i></div><a class="thumb" href="https://www.youtube.com/watch?v=DKf6g9OjDwI" target="_blank" rel="noopener"><img data-vid="DKf6g9OjDwI" alt=""><span class="cap"><b>16K</b>Defected</span></a></div>
     </div>
-    <div class="grid2" style="margin-top:clamp(1.2rem,2.6vw,2rem);grid-template-columns:1.15fr 1fr;align-items:start">
-      <ol class="steps reveal" style="margin-top:0">
-        <li><b>A “The Cure &amp; The Cause — 20 years” playlist</b> of every version, featured on Home for the rest of the year and linked from each upload's description.</li>
-        <li><b>One story-led piece</b> — Tracey K, Fish Go Deep or Dennis Ferrer on the record — premiered with the artists in the chat if they'll join, and co-published with them.</li>
-        <li><b>The existing heritage clips connected</b>: the <i>Do You Remember House?</i> episode and the Rodigan moment pointing at the playlist and the Shy FX remix.</li>
-      </ol>
-      <div class="reveal">
-        <p class="body" style="font-size:.92rem"><b>Next on the calendar: Cola turns ten in June 2027.</b> The ARTBAT remix, four 2017 remixes, the Elderbrook chilled mix and the official video are all on the channel, and it's the lyric-video candidate from the previous slide. Worth planning now — the exact date to confirm against the label's own release records (public sources give 17 June 2017).</p>
-        <div class="qual" style="border-color:var(--ink)">How we'd know: playlist views and views arriving from it on the older uploads, in Studio; the story piece against the typical Moments in Music episode (17K). Freak Like Me's tenth and Groovejet's twenty-fifth already had their moments; no further occasion is claimed for them.</div>
-      </div>
+    <div class="grid2 reveal" style="margin-top:clamp(1.2rem,2.6vw,2rem);grid-template-columns:1.15fr 1fr;align-items:start">
+      <p class="statement" style="font-size:clamp(1rem,1.4vw,1.25rem);max-width:44ch">Explore a collection bringing the existing versions, performances and stories together — if useful alongside the label's current plans.</p>
+      <div class="qual" style="border-color:var(--ink)">The 2026 remix and story content may already be part of a deliberate campaign; the question is what's planned, not what's missing. Release sources, and which other records have milestones near, are under Analysis.</div>
     </div>
-    <div class="src">Release dates checked against the original Defected releases (DFTD129 / DFTD145, 2006), not the YouTube upload dates · channel assets and views read 16 Oct 2026.</div>
+    <div class="src">The Defected release is dated from the label's 2006 catalogue entries (DFTD129 / DFTD145), not from the YouTube upload dates · channel assets and views read 16 Oct 2026.</div>
   </div>
 </section>
 
@@ -1057,12 +1030,11 @@ body.sheet-open .chrome,body.sheet-open #pbar{display:none}
       <div class="prio">
         <div class="d">02 · Across the quarter · owned material</div>
         <div class="head"><a class="thumb" href="https://www.youtube.com/watch?v=ikJCO_FrQQ8" target="_blank" rel="noopener"><img data-vid="ikJCO_FrQQ8" alt=""></a><h3 class="display">Make more of the music the label already owns</h3></div>
-        <p>The Cure &amp; The Cause at twenty gathered into one playlist and one story piece; one flagship Premiere run as an occasion; one lyric video explored.<br><b>How we'd know:</b> playlist views; reminders, concurrent viewers and chat in Studio against the usual Premieres; the lyric video's views and sources at 30 days.</p>
+        <p>One selected Premiere with a bigger moment around it; a lyric video explored for Cola, subject to partnerships and artist plans; a catalogue-milestone collection discussed alongside the label's current plans.<br><b>How we'd know:</b> reminders, concurrent viewers and chat in Studio against the usual Premieres; a lyric video's views and sources at 30 days; collection playlist views.</p>
         <ul>
-          <li>Trailer and Live Redirect eligibility confirmed separately in Studio before the Premiere.</li>
+          <li>Trailer and live-redirect eligibility confirmed separately in Studio before the Premiere.</li>
           <li>Tracklist and chapters on the selected sets.</li>
           <li>Catalogue mixes on a calendar — four a year, one title format.</li>
-          <li>Cola's tenth, June 2027, planned now; the exact date confirmed.</li>
         </ul>
         <span class="tag">Uses existing music</span>
       </div>
@@ -1211,6 +1183,10 @@ body.sheet-open .chrome,body.sheet-open #pbar{display:none}
       <tr><td>“Defected Broadcasting House” playlist, read in full</td><td>622 of 631 videos available: 357 Broadcasting House shows · 198 DJ sets · 20 mixes · 45 other · 2 radio episodes (a 2022 Sydney special and 3 Feb 2023). The weekly episodes are not collected anywhere public</td></tr>
       <tr><td>Home shelves</td><td>11: featured video, album, releases, “Broadcasting House” (holding current sets), podcast, live sessions, Edge Of Desire, Playlist Mixes, Defected 2026 playlist (third-party uploads), XXV, official videos. No radio, Shorts, Croatia or Malta shelf</td></tr>
       <tr><td>Public playlists</td><td>71, including Defected Croatia (87), Defected Malta (57), Defected Releases (1,008), Defected Classics (144), Glitterbox (98)</td></tr>
+      <tr><td>Home shelf suggestions (moved off the slide)</td><td>Add a “Defected Radio Show — every episode” shelf under the featured video · rename the “Defected Broadcasting House” shelf for what it now holds (this season's sets) · add Croatia and Malta shelves (playlists exist) · add a Shorts shelf · rename “Playlist Mixes” to “Defected Mixes” · move “Defected 2026: The Playlist” (third-party uploads) lower. A test, measured by Home-tab impressions and clicks by shelf in Studio</td></tr>
+      <tr><td>HQ set titles</td><td>Led with the style in 2024 (“Afro House Music DJ Mix | Caiiro”) and with the DJ in 2026 (“Leyo | Jackin House Mix”); one format — DJ | style of mix | Live from Defected HQ — would make the series read as one series</td></tr>
+      <tr><td>Keeping the tracklist</td><td>The current “Defected Radio” podcast is useful as a tracklist; renaming it “Defected Radio — tracks from the show” keeps it without it standing in for the episodes. A link to the episode playlist in every episode description</td></tr>
+      <tr><td>How we'd know</td><td>Playlist views, and episode views arriving from the playlist, in Studio over the 28 days before and after; the show appearing as a podcast in YouTube Music</td></tr>
     </table>
     <div class="an-note"><b>Claim boundary.</b> The public API exposes playlists and home sections; it does not expose end screens, cards, Community posts or the channel trailer's performance. A playlist that is not public is invisible here, which is not the same as not existing. Shelf order and naming effects are tested in Studio's Home-tab impressions, not assumed.</div>
 
@@ -1229,38 +1205,38 @@ body.sheet-open .chrome,body.sheet-open #pbar{display:none}
       <tr><td>Co-published videos on Home</td><td class="n">18</td><td>Oden &amp; Fatzo, Jonas Blue, Malive, Purple Disco Machine, Denis Sulta, Astels, Moby “and 3 more”, Chinois Ibiza</td></tr>
     </table>
     <p>Tool conditions are from YouTube Help and YouTube for Artists, read 16 Oct 2026, and are stated separately because they are separate checks: a Premiere trailer (15 s–3 min on the watch page) needs over 1,000 subscribers and no active strikes; Live Redirect (a live stream into a Premiere, or a Premiere into another Premiere or another channel's stream with permission) needs over 1,000 subscribers and no live-streaming restriction; Collaborations allow up to 10 channels, recommend the video to every collaborator's audience and leave revenue with the posting channel; Premium Afterparty is a Premium-members-only live stream hosted with YouTube and has no self-serve route. The channel's subscriber count clears both thresholds; strikes and restrictions are not visible publicly.</p>
-    <div class="an-note"><b>Claim boundary.</b> Whether a trailer was set, how many reminders were taken, concurrent viewers and chat volume are not public. The deck says the channel “rarely treats a Premiere as an occasion” on what is visible: no trailer on the pages opened, no tracklist, and announcement Shorts as the only visible promotion. The quarterly cadence is offered as one option, not a target.</div>
+    <div class="an-note"><b>Claim boundary.</b> Whether a trailer ran before a Premiere, how many reminders were taken, concurrent viewers and chat volume are not public; a trailer is not shown after the Premiere ends, so its absence now says nothing about whether one was used. The slide therefore describes what the channel visibly does (premieres the right formats, announces with Shorts, leaves chat replay on) and offers three possibilities without claiming any is missing. Lifetime views on a premiered video are not a Premiere audience. How we'd know: reminders set, concurrent viewers and chat messages in Studio for a Premiere run this way, against the channel's usual set Premieres.</div>
 
     <h3>Slide 10 · lyric videos, and the supporting versions of nine records</h3>
     <table>
-      <tr><th>Record</th><th>Fan lyric upload</th><th>Lyric-led? Version?</th><th>Official lyric video</th></tr>
-      <tr class="lead"><td>CamelPhat &amp; Elderbrook – Cola (Defected, Jun 2017)</td><td>Groove Bassment, RpmFVcMggZE, 2017, 6.1M</td><td>Yes; original single, 3:43</td><td class="miss">None found on @DefectedMusic, @camelphat_music or @elderbrook-music (channel searches and video lists, 16 Oct). A 315K “Official Lyric Video” by WOW TV is a fan channel</td></tr>
+      <tr><th>Record</th><th>Lyric upload on another channel</th><th>Lyric-led? Version?</th><th>Official lyric video</th></tr>
+      <tr class="lead"><td>CamelPhat &amp; Elderbrook – Cola (Defected, Jun 2017)</td><td>Groove Bassment, RpmFVcMggZE, 2017, 6.1M</td><td>Yes; original single, 3:43</td><td class="miss">None found on @DefectedMusic, @camelphat_music or @elderbrook-music (channel searches and video lists, 16 Oct). A 315K “Official Lyric Video” by WOW TV is a third-party channel whose relationship with the label is not known from public data</td></tr>
       <tr><td>Endor – Pump It Up (Defected, 2019)</td><td>Sunrise Sounds, -OWvghF_rpA, 13 Apr 2025, 7.1M</td><td>Yes; radio edit, 2:30, DFTD sleeve shown</td><td>Exists: Armada Music TV, wRkax1FYiBI, 31 Mar 2020, 89.6K, titled “Official Lyric Video [From The Substance movie]”. Not on Defected; Endor's own channel (@endormusicuk) has no lyric video</td></tr>
       <tr><td>Jonas Blue &amp; Malive – Edge Of Desire (2025)</td><td>7clouds Afro House, b5yMWNPU_y4, 2025, 1.7M</td><td>Yes; radio edit, 2:15</td><td>Exists: Jonas Blue's channel, eNEnxdqyQEw, 13 Nov 2025, 116K</td></tr>
     </table>
     <table>
       <tr><th>Record</th><th>Official audio</th><th>Music video</th><th>Lyric video</th><th>Alt / remix</th><th>Live / set</th><th>Shorts</th><th>Story</th><th>Playlist</th></tr>
-      <tr><td>Cola (2017)</td><td>Defected 174.3M; CamelPhat OAC 4.4M</td><td>Defected 36.7M</td><td class="miss">none official; fan 6.1M</td><td>Mousse T. Glitterbox 994K, Franky Rizardo 803K, ARTBAT 2025 259K</td><td>4Music live 44K</td><td>“Cola vs Nanana” 163K</td><td class="miss">none</td><td>Defected Classics</td></tr>
+      <tr><td>Cola (2017)</td><td>Defected 174.3M; CamelPhat OAC 4.4M</td><td>Defected 36.7M</td><td class="miss">none official; Groove Bassment upload 6.1M</td><td>Mousse T. Glitterbox 994K, Franky Rizardo 803K, ARTBAT 2025 259K</td><td>4Music live 44K</td><td>“Cola vs Nanana” 163K</td><td class="miss">none</td><td>Defected Classics</td></tr>
       <tr><td>The Cure &amp; The Cause (2006)</td><td>Dennis Ferrer Remix 26.5M; Topic 2.4M</td><td>2008 official video 1.6M</td><td class="miss">none</td><td>Idris Elba Remix 2024 77K; Shy FX remix Sep 2026 16.7K</td><td>Zoe Kypri live 8K; Rodigan at Croatia 6.7K</td><td>DYRH Ep.1 13K; Idris Elba at WHP 11K</td><td class="miss">none</td><td>Defected Classics</td></tr>
-      <tr><td>Pump It Up (2019)</td><td>Extended 1.5M</td><td>27.5M; Selected. upload 136M</td><td>Armada Music TV 90K; fan 7.1M</td><td>Jax Jones, Low Steppa remixes</td><td>—</td><td>police-officer clip 6.6M (repost)</td><td class="miss">none</td><td>—</td></tr>
+      <tr><td>Pump It Up (2019)</td><td>Extended 1.5M</td><td>27.5M; Selected. upload 136M</td><td>Armada Music TV 90K; Sunrise Sounds upload 7.1M</td><td>Jax Jones, Low Steppa remixes</td><td>—</td><td>police-officer clip 6.6M (repost)</td><td class="miss">none</td><td>—</td></tr>
       <tr><td>Freak Like Me (2016)</td><td>7.7M; Katy B &amp; MNEK 3.8M</td><td>—</td><td class="miss">none</td><td>Ben Kim Remix 2025 347K</td><td>Pacha crowd Short 50K</td><td>DYRH Ep.5 14.5K</td><td class="miss">none</td><td>—</td></tr>
-      <tr><td>Just Stay The Night (2025)</td><td>1.37M</td><td class="miss">none</td><td>none official; fan 26K / 4K</td><td>Acoustic 8.8K</td><td>Basement Short 2.5K</td><td>Raphaella acoustic 1.6K</td><td class="miss">none</td><td>XXV</td></tr>
-      <tr><td>Deep Inside (2025)</td><td>Defected 1.36M; Ferreck Dawn's channel 1.9M</td><td class="miss">none</td><td>none official; fan 1.8K</td><td>—</td><td>—</td><td>Story of the Sample 39K; Barbara Tucker 13K</td><td>the two Shorts</td><td>—</td></tr>
-      <tr><td>Edge Of Desire (2025)</td><td>Defected 1.27M (co-published); Jonas Blue's channel 9.6M</td><td>Brazilian Summer 120K; Malive Tour 23K</td><td>Jonas Blue's channel 116K; fan 1.7M</td><td>Franky Rizardo Remix 542K</td><td>In The House on Jonas Blue's channel 2.3M; radio takeover</td><td>6 incl. DYRH Ep.2</td><td>In Conversation</td><td>own Home shelf</td></tr>
+      <tr><td>Just Stay The Night (2025)</td><td>1.37M</td><td class="miss">none</td><td>none official; other-channel uploads 26K / 4K</td><td>Acoustic 8.8K</td><td>Basement Short 2.5K</td><td>Raphaella acoustic 1.6K</td><td class="miss">none</td><td>XXV</td></tr>
+      <tr><td>Deep Inside (2025)</td><td>Defected 1.36M; Ferreck Dawn's channel 1.9M</td><td class="miss">none</td><td>none official; other-channel upload 1.8K</td><td>—</td><td>—</td><td>Story of the Sample 39K; Barbara Tucker 13K</td><td>the two Shorts</td><td>—</td></tr>
+      <tr><td>Edge Of Desire (2025)</td><td>Defected 1.27M (co-published); Jonas Blue's channel 9.6M</td><td>Brazilian Summer 120K; Malive Tour 23K</td><td>Jonas Blue's channel 116K; 7clouds upload 1.7M</td><td>Franky Rizardo Remix 542K</td><td>In The House on Jonas Blue's channel 2.3M; radio takeover</td><td>6 incl. DYRH Ep.2</td><td>In Conversation</td><td>own Home shelf</td></tr>
       <tr><td>Natural Blues (2025)</td><td>Defected 152K; Moby's channel 1.0M</td><td>Moby's channel 935K</td><td class="miss">none</td><td>Official Visualiser 12K</td><td>Way Out West 243K (co-published); Coachella on Moby's channel 573K</td><td>3</td><td>Moby &amp; Jacob Lusk story 11K</td><td>—</td></tr>
       <tr><td>Lady Love (2023)</td><td>185K</td><td>927K</td><td class="miss">none</td><td>—</td><td>Camden Cox live Short 2K</td><td>pre-order / out-now</td><td class="miss">none</td><td>Oden &amp; Fatzo playlist</td></tr>
     </table>
-    <div class="an-note"><b>Claim boundary.</b> A fan upload's views show that an audience watched a lyric video for the record; they do not show that an official one would reach the same audience, or that the viewers were looking for the lyrics rather than the record. The slide recommends investigating and testing one, and leaves hosting as a decision for the artist and the label. Not an opportunity: a visualiser for any of these, or a video for Just Stay The Night (fan demand modest). No resurgence is claimed for any record — there is no historical series.</div>
+    <div class="an-note"><b>Claim boundary.</b> Views on a lyric upload hosted by another channel show that an audience watched a lyric video for the record; they do not show that an official one would reach the same audience, that viewers would transfer, or that a new upload would repeat the result. The hosting channels are named as they appear on YouTube; nothing is assumed about who owns them or their relationship with Defected. Pump It Up and Edge Of Desire already have official lyric videos elsewhere, so the slide does not suggest duplicating them; Cola is offered as one to explore, subject to partnerships and artist plans. Hosting any new upload is a decision for the artist and the label. Not an opportunity: a visualiser for any of these, or a video for Just Stay The Night (other-channel lyric uploads 26K and 4K). No resurgence is claimed for any record — there is no historical series.</div>
 
     <h3>Slide 11 · anniversaries</h3>
     <table>
       <tr><th>Record</th><th>Original release</th><th>Source checked</th><th>Occasion</th></tr>
-      <tr class="lead"><td>Fish Go Deep &amp; Tracey K – The Cure &amp; The Cause</td><td>Defected, 2006: 12″ DFTD129 and the Dennis Ferrer remix single DFTD145 (28 Aug 2006); 2024 reissue with the Idris Elba remix</td><td>AllMusic release listing; the channel's own 2006-dated uploads (ikJCO_FrQQ8, -LQlVFTaLcs)</td><td>20 years in 2026 — the current year. Not read from the YouTube upload dates (2008–13)</td></tr>
+      <tr class="lead"><td>Fish Go Deep &amp; Tracey K – The Cure &amp; The Cause</td><td><b>Original release:</b> on Fish Go Deep's own Go Deep imprint, from their debut album, c. 2005 (Traxsource artist biography: “a single off their debut album … was licensed by UK house giant, Defected”). <b>Defected release:</b> 2006 — 12″ DFTD129 and the Dennis Ferrer remix single DFTD145 (28 Aug 2006, AllMusic); 2024 reissue with the Idris Elba remix</td><td>Traxsource artist page; AllMusic release listing; the channel's own 2006-dated uploads (ikJCO_FrQQ8, -LQlVFTaLcs)</td><td>The slide says “20 years since its Defected release (2006)”, not since first release. Not read from the YouTube upload dates (2008–13)</td></tr>
       <tr><td>CamelPhat &amp; Elderbrook – Cola</td><td>Defected, June 2017 (Wikipedia: 17 June 2017; Traxsource confirms 2017 only)</td><td>Wikipedia, Traxsource; the channel's June 2017 upload</td><td>10 years in June 2027; exact day to confirm against the label's release records before fixing a date</td></tr>
       <tr><td>Lee Walker vs DJ Deeon – Freak Like Me</td><td>2016</td><td>—</td><td>10 in 2026; already marked by the Ben Kim remix and Pacha footage. No further occasion claimed</td></tr>
       <tr><td>Kings of Tomorrow – Finally · Spiller – Groovejet</td><td>2000</td><td>—</td><td>25 in 2025–26; Groovejet got a 2026 version, Finally the 2024 Mochakk remix. No new material surfaced</td></tr>
     </table>
-    <p>Assets on the channel for The Cure &amp; The Cause, read 16 Oct 2026: Dennis Ferrer Remix 26M (ikJCO_FrQQ8), Original Mix 59K (-LQlVFTaLcs), official video 1.6M (JbM0DtQZ9AY), Acoustic 63K (diiWzCXoMac), Charles Webster, Full Intention, Balearic Soul and Atmos Blaq remixes (37K, 10K, 10K, 21K), Idris Elba Remix 77K (llyBrtHVqgc), Zoe Kypri live 8K (FWtOmRLIjss), Do You Remember House? Ep.1 13K (10F6v5TSQF4), Shy FX remix 16K (DKf6g9OjDwI), Rodigan at Croatia 6.7K (IWlcdPprdzg) and two announcement Shorts. No playlist or Home shelf gathers them.</p>
+    <p>The slide shows four of these assets as an example to discuss; the 2026 remix and story content may be part of a campaign the label already has under way, which public data cannot show. Assets on the channel for The Cure &amp; The Cause, read 16 Oct 2026: Dennis Ferrer Remix 26M (ikJCO_FrQQ8), Original Mix 59K (-LQlVFTaLcs), official video 1.6M (JbM0DtQZ9AY), Acoustic 63K (diiWzCXoMac), Charles Webster, Full Intention, Balearic Soul and Atmos Blaq remixes (37K, 10K, 10K, 21K), Idris Elba Remix 77K (llyBrtHVqgc), Zoe Kypri live 8K (FWtOmRLIjss), Do You Remember House? Ep.1 13K (10F6v5TSQF4), Shy FX remix 16K (DKf6g9OjDwI), Rodigan at Croatia 6.7K (IWlcdPprdzg) and two announcement Shorts. No playlist or Home shelf gathers them.</p>
 
     <h3>Slide 12 · Shorts</h3>
     <table>

@@ -372,55 +372,48 @@ is the gathering of formats, slide 7 the credit that recommends to both audience
 52 a year (4.2); three million-view records (4.5); 59 sets, nine over 100K (4.3); 16 of 30
 (4.4); 189 Premieres (§3.9); 18 co-published videos on Home (§3.9).
 
-**4.7 Slide 8 — "no public playlist collects them (the Broadcasting House archive holds two from 2022–23), the podcast tile carrying the show's name is a list of tracks hosted on other channels, and Home … has no shelf for the radio show."**
+**4.7 Slide 8 — "Bring the weekly radio episodes together": no public playlist collects the episodes; the podcast tile is a tracklist hosted on other channels.**
 §3.8. The 631-item playlist has been read in full: 2 radio episodes among 622, both from
-2022–23. Home's 11 shelves were read the same day; none is the radio show. The slide now
-also carries the Home shelf audit and the HQ title-order note (§3.3), merged from the
-former slide 9. **Challenge:** a private or unlisted playlist is invisible to the API and
-to a signed-out visitor; the slide says "public", and the fix is the same either way.
-The proposed shelf order is explicitly a test; the measure named is Studio's Home-tab
-impressions by shelf.
+2022–23. The slide now carries one point, the podcast tile beside the proposed collection,
+and three actions; the Home-shelf suggestions, the HQ title-format note, the counts and
+the measurement plan are in the deck's Analysis sheet under slide 8. **Challenge:** a
+private or unlisted playlist is invisible to the API and to a signed-out visitor; the
+slide says "public", and the action is the same either way.
 
-**4.8 Slide 9 — "189 Premieres"; "9 / 9 podcast episodes premiered"; "59 / 122 DJ sets since 2024"; "five of the six flagship event-set Premieres we checked carry neither" a tracklist nor chapters; the four tool conditions.**
-§3.9. Premieres are uploads with a scheduled start in the API's live-streaming details:
-189 of 195 "was live" uploads; the other six were live streams. 9/9, 59/122 and the
-per-format counts are from the same flag crossed with the §2 classification. Chapters
-were checked by opening six watch pages on 16 Oct and reading the description for
-timestamps: Green Velvet (hlbMcaCYq-Q), Sam Divine at Pacha (wW4vI546r-s), Oden & Fatzo
-at Pacha (dO1TSqF2mF8), Dennis Ferrer at Croatia (AEMfEGGsE8I), Eats Everything at Malta
-(1AhqoSVFoc0) — none; David Morales at HQ (6o9S_-DGV4Q) — eight chapters. Tool conditions
-are quoted from YouTube Help (Premieres; Live Redirect; Collaborations; Premium
-Afterparty) and YouTube for Artists' release-day guidance, read 16 Oct, and the slide
-states the trailer and Live Redirect conditions separately with "confirm in Studio".
-**Challenge:** "rarely treats a Premiere as an occasion" rests on what is visible — no
-trailer on the pages opened, no tracklist, announcement Shorts as the only visible
-promotion. Trailers may have run and expired; reminders and chat volume are not public.
-The quarterly cadence is one option, not a target.
+**4.8 Slide 9 — "Build a bigger moment around selected Premieres": 189 Premieres; one flagship example (Green Velvet at Malta, premiered 13 Feb 2025, chat replay available, 550K views to date); three possibilities.**
+§3.9. Premieres are uploads with a scheduled start in the API's live-streaming details
+(189 of 195 "was live" uploads). The slide does not say the channel "rarely" treats a
+Premiere as an occasion, does not call lifetime views a Premiere audience, and does not
+treat the absence of a trailer on the page today as evidence about launch: trailers are
+not shown after a Premiere ends, and reminders, concurrent viewers and chat volume are
+Studio-only. The three possibilities are offered without claiming any is missing. Trailer
+and live-redirect conditions (quoted from YouTube Help) and the chapters check (5 of 6
+flagship set pages without timestamps; the Morales HQ mix with eight chapters) are in the
+Analysis sheet. **Challenge:** is "a flagship example" read as "this one lacked
+something"? The caption states only what is visible.
 
-**4.8a Slide 10 — the three lyric-video cases.**
-§3.10. Each fan upload was opened and watched (Chrome, 16 Oct) to confirm it is lyric-led
-and which version it uses; the artist, label and partner channels were searched for an
-official lyric video. Cola: Groove Bassment RpmFVcMggZE (2017, 6.1M, original single
-3:43) — none found on @DefectedMusic, @camelphat_music or @elderbrook-music. Pump It Up:
-Sunrise Sounds -OWvghF_rpA (13 Apr 2025, 7.1M, radio edit 2:30) — an official lyric
-video exists on Armada Music TV, wRkax1FYiBI (31 Mar 2020, 89.6K). Edge Of Desire: 7clouds
-b5yMWNPU_y4 (2025, 1.7M, radio edit 2:15) — an official lyric video exists on Jonas Blue's
-channel, eNEnxdqyQEw (13 Nov 2025, 116K). The slide therefore recommends testing one, names
-Cola as the one with a clear gap, and leaves hosting to the artist and label.
-**Challenge:** a fan upload's views show an audience watched a lyric video; they do not
-show that an official one would reach it, nor that viewers wanted the lyrics rather than
-the record. A 315K "Official Lyric Video" for Cola by WOW TV is a fan channel; if the
-label knows it to be licensed, the Cola row changes.
+**4.8a Slide 10 — "Give key catalogue another way to be discovered": three lyric uploads on other channels, each with track, hosting channel, views, and whether an official lyric video exists.**
+§3.10. Each upload was opened to confirm it is a lyric video; the hosting channels are
+named as they appear on YouTube (Groove Bassment, Sunrise Sounds, 7clouds Afro House) and
+nothing is assumed about their ownership or relationship with Defected. Pump It Up has an
+official lyric video on Armada Music TV (2020) and Edge Of Desire on Jonas Blue's channel
+(2025); the slide says so and does not suggest duplicating them. Cola has none found on
+Defected, CamelPhat or Elderbrook's channels; the slide closes with "Cola could be one to
+explore, subject to existing partnerships and artist plans." No transfer of viewers or
+repeat of results is promised. **Challenge:** a 315K "Official Lyric Video" for Cola by
+WOW TV is a third-party channel whose relationship with the label is not known from
+public data; if the label knows it to be licensed, the Cola row changes.
 
-**4.8b Slide 11 — "The Cure & The Cause turns twenty this year"; "Cola turns ten in June 2027".**
-§3.11. The Cure & The Cause: Defected 2006 (12" DFTD129; the Dennis Ferrer remix single
-DFTD145 dated 28 Aug 2006 on AllMusic's release listing), so 2026 is its twentieth year;
-the channel's own uploads carry "2006" in their titles. Not read from upload dates
-(2008–13). Cola: Wikipedia gives 17 June 2017, Traxsource "P&C 2017"; the channel's audio
-upload is June 2017. The slide says "June 2027" and asks for the exact day to be confirmed
-against the label's records. The eight assets on the slide are listed in §3.11 with ids
-and lifetime views. **Challenge:** the anniversary has ten weeks of 2026 left; the slide's
-ask is a playlist, one story piece and links, which is sized for that.
+**4.8b Slide 11 — "Could catalogue milestones bring existing content together?": The Cure & The Cause, "20 years since its Defected release (2006)", four assets.**
+§3.11. Original release: on Fish Go Deep's own Go Deep imprint, c. 2005, from their debut
+album (Traxsource artist biography: "a single off their debut album … was licensed by UK
+house giant, Defected"). Defected release: 2006, 12" DFTD129 and the Dennis Ferrer remix
+single DFTD145 (28 Aug 2006, AllMusic). The slide says "since its Defected release", not
+since first release, and is framed as an example to discuss; it does not say anything is
+missing, does not propose an interview or artist participation, and does not carry a Cola
+plan. **Challenge:** the 2026 Shy FX remix, the Rodigan moment and the Do You Remember
+House? episode may already be a deliberate campaign; public data cannot show that, so the
+slide asks what is planned.
 
 **4.9 Slide 12 — "heritage 13.1K median (n=22) vs promotional 6.3K (n=42) vs everything else 7.0K (n=134); 4, 4 and 8 over 20K"; monthly strip.**
 §3.6. Framed as "promising enough to test properly, not proven." **Challenge:** the
@@ -437,9 +430,10 @@ titled as a quote would be missed. Only the Skream clip was found.
 
 **4.11 Slide 14 — the three priorities and the Studio checks.** No new figures. Each
 measure named is either public (playlist views, 28-day views) or Studio (impressions,
-related-link clicks, reminders, concurrent viewers). **Challenge:** priority 2 bundles
-four things (anniversary, a Premiere occasion, a lyric video, mixes on a calendar); check
-that "three priorities" is honest about the amount of work beneath it.
+related-link clicks, reminders, concurrent viewers). Priority 2 now reads "explore" and
+"discuss" for the lyric video and the milestone collection, matching slides 10 and 11.
+**Challenge:** priority 2 still bundles several things; check that "three priorities" is
+honest about the amount of work beneath it.
 
 ---
 
@@ -458,12 +452,15 @@ that "three priorities" is honest about the amount of work beneath it.
    corrected slide still shows setting medians, which a room may read as a ranking.
 5. **No snapshots.** Nothing about momentum, first-week shape or catalogue growth can be
    said. The deck says so three times; the risk is a listener inferring it anyway.
-6. **The lyric-video evidence is fan views.** Three cases were checked by hand and two of
-   the three turned out to have an official lyric video already (Armada; Jonas Blue). The
-   slide says so and recommends one test; the risk is the room hearing "7.1M" as demand.
-7. **Premiere promotion is partly invisible.** Trailers expire with the Premiere; reminder
-   counts and chat volume are Studio-only. "Rarely treated as an occasion" is a reading of
-   what remains visible.
+6. **The lyric-video evidence is views on other channels' uploads.** Three cases were
+   checked by hand and two of the three turned out to have an official lyric video already
+   (Armada Music TV; Jonas Blue). The slide says so and goes no further than "one to
+   explore"; the risk is the room hearing "7.1M" as demand.
+7. **Premiere promotion is partly invisible.** Trailers are not shown after the Premiere;
+   reminder counts and chat volume are Studio-only. The slide offers possibilities rather
+   than naming gaps, for that reason.
+8. **The milestone may already be a campaign.** The 2026 remix and story content around
+   The Cure & The Cause could be deliberate; the slide asks rather than asserts.
 
 ## 6. Things deliberately not claimed
 
@@ -494,7 +491,7 @@ that "three priorities" is honest about the amount of work beneath it.
    criticism of the current team?
 6. Are there recommendations the evidence supports that the deck leaves out — and are any
    of the three priorities on slide 14 ones the evidence does not support?
-7. Trace 4.8a. Is a Defected-hosted lyric video for Cola the right first test, given the
-   artists' own channels, or should the slide stop at "explore"?
+7. Trace 4.8a. The slide now stops at "Cola could be one to explore". Is that the right
+   level, given the artists' own channels and existing partnerships?
 8. Trace 4.8. Are the trailer and Live Redirect conditions quoted correctly, and is it
    right to present the quarterly cadence as an option rather than a target?
