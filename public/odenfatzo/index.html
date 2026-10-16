@@ -146,8 +146,6 @@ h2.display{font-size:clamp(1.8rem,3.9vw,3.3rem);max-width:24ch}
 .grid2{display:grid;grid-template-columns:1fr 1fr;gap:clamp(1.4rem,3.6vw,3.4rem)}
 @media(max-width:880px){.grid2{grid-template-columns:1fr}}
 .grid2>*{min-width:0}
-@media(max-width:560px){.asset{grid-template-columns:84px minmax(0,1fr) auto;gap:.6rem}.asset .big-num{font-size:1.2rem}.asset .t{font-size:.86rem}
-  .moments{grid-template-columns:1fr}.chips span{font-size:.6rem}}
 .row{display:flex;gap:clamp(1.2rem,3.4vw,3rem);flex-wrap:wrap;align-items:flex-end}
 .play{position:absolute;top:.6rem;right:.6rem;z-index:2;width:1.9rem;height:1.9rem;border-radius:50%;
   background:rgba(244,242,236,.92);display:grid;place-items:center}
@@ -331,6 +329,9 @@ body.sheet-open{overflow:hidden}
 .sheet .small{font-size:.76rem}
 .sheet .label{color:var(--mute-l)}
 
+/* Phone width: keep thumbnails, numbers and host badges inside the column. */
+@media(max-width:560px){.asset{grid-template-columns:84px minmax(0,1fr) auto;gap:.6rem}.asset .big-num{font-size:1.2rem}.asset .t{font-size:.86rem}
+  .moments{grid-template-columns:1fr}.chips span{font-size:.6rem}.host{white-space:normal}}
 @media print{.chrome,.pbar,.pcount{display:none}.slide{min-height:0;page-break-inside:avoid}}
 </style>
 </head>
