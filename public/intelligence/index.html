@@ -161,6 +161,7 @@ section{padding-block:clamp(2.6rem,5vw,5rem)}
   padding:.32rem .68rem;border:1px solid currentColor;border-radius:100px;white-space:nowrap}
 .tag.live{color:var(--c-live)}
 .tag.deep{color:var(--c-deep)}
+.tag.review{color:var(--c-deep)}  /* CHANNEL REVIEW — a label channel, not an artist campaign */
 .tag.case{color:var(--c-case)}
 @media(max-width:940px){
   .arow{grid-template-columns:minmax(0,1fr) auto;row-gap:.6rem}
@@ -457,7 +458,7 @@ const ARTISTS = [
   /* The first label deep dive on this list. Defected is a channel, not a
      campaign, so it is 'deep' and the note names the routing finding that
      the whole deck turns on, not the billion. */
-  { name:'Defected Records',      href:'/defected',       work:['deep'],
+  { name:'Defected Records',      href:'/defected',       work:['review'],
     note:'250 Friday radio episodes with no playlist of their own; three catalogue moments worth gathering' },
   /* Tagged 'deep', not 'live': the album campaign is running, but the
      tag is only applied from the API's CAMPAIGN_LIVE state. The note
@@ -472,7 +473,7 @@ const ARTISTS = [
    these are written after a campaign has finished and the outcome is
    measurable. "Live campaign" means running right now — it is only ever
    applied from the API's CAMPAIGN_LIVE state, never typed by hand. */
-const TAG = { live:'Live campaign', deep:'Deep dive', case:'Post campaign case study' };
+const TAG = { live:'Live campaign', deep:'Deep dive', review:'Channel review', case:'Post campaign case study' };
 
 const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c =>
   ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
