@@ -531,7 +531,7 @@ body.sheet-open .chrome,body.sheet-open #pbar{display:none}
   </div>
   <div style="display:flex;gap:.5rem">
     <button class="an-btn" id="an-open">Analysis</button>
-    <button class="btn primary" onclick="startPresent()">Present</button>
+    <button class="btn primary" id="present-btn" onclick="startPresent()">Present</button>
   </div>
 </div>
 
@@ -1430,8 +1430,27 @@ function observeAll(){
 
 /* ── Present mode ────────────────────────────────────────────────────── */
 var cur = 0;
-function startPresent(){ document.body.classList.add('present'); showSlide(0); }
-function exitPresent(){ document.body.classList.remove('present'); document.getElementById('pbar').style.width = '0'; }
+/* Present takes the browser full screen (the click is the user gesture the
+   Fullscreen API needs). Leaving full screen by any route — Esc, the
+   browser's own control, the Exit button — leaves present mode too. If the
+   browser refuses full screen, slides still present inside the window. */
+function fsEl(){ return document.fullscreenElement || document.webkitFullscreenElement; }
+function startPresent(){
+  if(document.body.classList.contains('present')){ exitPresent(); return; }
+  document.body.classList.add('present'); showSlide(0); presentBtn('Exit');
+  var d = document.documentElement, req = d.requestFullscreen || d.webkitRequestFullscreen;
+  if(req && !fsEl()){ try { var r = req.call(d); if(r && r.catch) r.catch(function(){}); } catch(e){} }
+}
+function exitPresent(){
+  document.body.classList.remove('present'); document.getElementById('pbar').style.width = '0'; presentBtn('Present');
+  var ex = document.exitFullscreen || document.webkitExitFullscreen;
+  if(fsEl() && ex){ try { var r = ex.call(document); if(r && r.catch) r.catch(function(){}); } catch(e){} }
+  var s = document.querySelectorAll('.deck .slide')[cur]; if(s) s.scrollIntoView();
+}
+function presentBtn(t){ var b = document.getElementById('present-btn'); if(b) b.textContent = t; }
+['fullscreenchange','webkitfullscreenchange'].forEach(function(ev){
+  document.addEventListener(ev, function(){ if(!fsEl() && document.body.classList.contains('present')) exitPresent(); });
+});
 function showSlide(i){
   var s = document.querySelectorAll('.deck .slide');
   if(i < 0) i = 0; if(i > s.length - 1) i = s.length - 1;
