@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>underscores × YouTube — direction test</title>
+<!--
+  DIRECTION TEST — three slides rebuilt on Ezra's construction:
+  bold display + big numbers, content that fills the canvas, full-bleed
+  imagery behind real scrims, a recurring motif drawn from real publishing
+  data, and compositions shaped around each finding.
+
+  underscores-specific:
+   · THE U-ERA STRIP (motif). One tick per week from Music (27 Jun 2025)
+     to 16 Oct 2026, lit where an upload landed. Gold = a single's release
+     week, cream = album week. It is real data, the way Ezra's day-ticks are.
+   · VERTICAL PANELS. Her Shorts crop a tall panel out of a frame; the
+     singles showcase is four tall panels cut from the four videos.
+   · THE SKYLINE. The Do It campaign drawn as bars made of its own frames,
+     height = lifetime views, in publication order, with the ten-week gap
+     left visible.
+   · Optima appears in one limited role: release codes (YYMMDD), the way
+     underscores.plus catalogues her releases.
+-->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Belleza&family=Inter+Tight:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#0B0C0F; --ink-2:#14161B; --ink-3:#1D2027;
+  --cream:#F7F3E9;
+  --gold:#FDC100;            /* underscores.plus */
+  --gold-dp:#8A6500;
+  --blue:#8FC3E6;            /* the U artwork's line blue */
+  --warm:#B9BCC4;            /* body on dark */
+  --dim:#80858F;             /* labels only */
+  --line:rgba(247,243,233,.14);
+  --code:Optima,'Optima Nova','Belleza',sans-serif;
+  --mono:'JetBrains Mono',ui-monospace,monospace;
+  --pad:clamp(1.6rem,5vw,5.5rem);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--ink);color:var(--cream);font-family:'Inter Tight',system-ui,sans-serif;
+  font-size:clamp(15px,1.05vw,18px);line-height:1.5;-webkit-font-smoothing:antialiased}
+a{color:inherit;text-decoration:none}
+img{display:block}
+
+/* ── Type: bold, tight, big ─────────────────────────────────────── */
+.display{font-weight:800;letter-spacing:-.04em;line-height:.92}
+h1.display{font-size:clamp(4rem,15vw,12.5rem);font-weight:900;letter-spacing:-.06em;line-height:.82}
+h2.display{font-size:clamp(2.2rem,5vw,4.4rem)}
+.big-num{font-weight:800;letter-spacing:-.045em;line-height:.86;font-variant-numeric:tabular-nums}
+.label{font-family:var(--mono);font-size:.68rem;letter-spacing:.14em;text-transform:uppercase;color:var(--dim)}
+.label.g{color:var(--gold)}
+.statement{font-size:clamp(1.15rem,2vw,1.7rem);line-height:1.3;font-weight:600;letter-spacing:-.015em;max-width:34ch}
+.body{color:var(--warm);max-width:58ch}
+.src{font-family:var(--mono);font-size:.62rem;line-height:1.45;color:var(--dim);
+  border-left:2px solid var(--line);padding-left:.7rem;max-width:80ch;margin-top:1.2rem}
+.code{font-family:var(--code);font-size:1rem;letter-spacing:.02em}
+
+/* ── Slides ─────────────────────────────────────────────────────── */
+.slide{position:relative;min-height:100vh;display:flex;flex-direction:column;justify-content:center;
+  padding:5.5rem var(--pad) 3.6rem;overflow:hidden;border-bottom:1px solid var(--line)}
+.inner{position:relative;z-index:3;width:100%;max-width:1400px;margin:0 auto}
+.bleed{position:absolute;inset:0;z-index:0}
+.bleed img{width:100%;height:100%;object-fit:cover}
+.scrim-b::after{content:'';position:absolute;inset:0;
+  background:linear-gradient(to top,rgba(11,12,15,.97) 6%,rgba(11,12,15,.7) 40%,rgba(11,12,15,.12) 78%)}
+
+/* ── THE U-ERA STRIP ────────────────────────────────────────────── */
+.rhythm{display:flex;gap:3px;align-items:flex-end;height:var(--rh,34px)}
+.tick{flex:1 1 0;border-radius:1px;background:rgba(247,243,233,.12);height:24%}
+.tick.o{height:62%;background:rgba(247,243,233,.55)}
+.tick.a{height:100%;background:var(--cream)}
+.tick.s{height:100%;background:var(--gold)}
+.rkey{display:flex;gap:1.4rem;flex-wrap:wrap;margin-top:.6rem}
+.rkey span{font-family:var(--mono);font-size:.62rem;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);display:flex;align-items:center;gap:.4rem}
+.rkey i{display:inline-block;width:8px;height:8px;border-radius:1px}
+
+/* ── VERTICAL PANELS (singles) ──────────────────────────────────── */
+.showcase{padding:0;justify-content:stretch}
+.showcase .head{position:relative;z-index:3;padding:4.6rem var(--pad) 1.4rem;
+  display:flex;justify-content:space-between;align-items:flex-end;gap:2rem;flex-wrap:wrap}
+.panels{flex:1;display:grid;grid-template-columns:repeat(4,1fr);gap:3px;padding:0 3px 3px;min-height:0}
+.pan{position:relative;overflow:hidden;background:var(--ink-3);display:block}
+.pan img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transition:transform .6s ease}
+.pan:hover img{transform:scale(1.04)}
+.pan::after{content:'';position:absolute;inset:0;
+  background:linear-gradient(to top,rgba(11,12,15,.96) 0%,rgba(11,12,15,.6) 34%,rgba(11,12,15,0) 62%)}
+.pan .meta{position:absolute;left:0;right:0;bottom:0;z-index:2;padding:1.1rem 1.1rem 1.2rem}
+.pan .code{color:var(--gold);font-size:.95rem}
+.pan .t{font-weight:700;font-size:clamp(1rem,1.5vw,1.3rem);margin-top:.2rem;line-height:1.15}
+.pan .big-num{font-size:clamp(2.6rem,5vw,4.4rem);margin-top:.5rem}
+.pan .c{font-family:var(--mono);font-size:.66rem;letter-spacing:.06em;color:var(--warm);margin-top:.5rem}
+.pan.peace .big-num{color:var(--gold)}
+.play{position:absolute;top:1rem;right:1rem;z-index:2;width:2.3rem;height:2.3rem;border-radius:50%;
+  background:rgba(247,243,233,.92);display:grid;place-items:center}
+.play::after{content:'';border-left:.68rem solid var(--ink);border-top:.42rem solid transparent;border-bottom:.42rem solid transparent;margin-left:.18rem}
+@media(max-width:820px){.panels{grid-template-columns:1fr 1fr;grid-auto-rows:60vh}}
+
+/* ── THE SKYLINE (Do It) ────────────────────────────────────────── */
+.sky{display:flex;align-items:flex-end;gap:10px;height:clamp(220px,42vh,330px);margin-top:1.4rem;
+  border-bottom:2px solid var(--line);position:relative}
+.col{position:relative;display:flex;flex-direction:column;justify-content:flex-end;height:100%}
+.col .v{font-weight:800;font-size:1.05rem;letter-spacing:-.03em;margin-bottom:.4rem;white-space:nowrap}
+.col .b{position:relative;overflow:hidden;border-radius:3px 3px 0 0;background:rgba(247,243,233,.18);min-height:6px}
+.col .b img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.col.s{width:clamp(44px,4.6vw,64px)}
+.col.l{width:clamp(120px,13vw,190px)}
+.col.l .v{font-size:clamp(1.4rem,2.4vw,2.1rem)}
+.col.hero .v{color:var(--gold)}
+.col.hero .b{outline:2px solid var(--gold);outline-offset:-2px}
+.col.rmx .v{color:var(--gold)}
+.brk{width:clamp(70px,9vw,130px);height:100%;position:relative;display:flex;align-items:flex-end;justify-content:center}
+.brk::before{content:'';position:absolute;left:50%;top:18%;bottom:0;border-left:2px dashed var(--line)}
+.brk span{position:relative;background:var(--ink);font-family:var(--mono);font-size:.62rem;letter-spacing:.12em;
+  text-transform:uppercase;color:var(--warm);padding:.3rem .2rem;margin-bottom:38%;text-align:center;line-height:1.4}
+.axis{display:flex;gap:10px;margin-top:.55rem}
+.axis div{font-family:var(--mono);font-size:.6rem;letter-spacing:.04em;color:var(--dim);line-height:1.35}
+.axis div b{display:block;color:var(--cream);font-weight:500}
+.axis .s{width:clamp(44px,4.6vw,64px)} .axis .l{width:clamp(120px,13vw,190px)} .axis .brk{height:auto}
+.waves{display:flex;gap:10px;margin-top:.9rem}
+.wave{border-top:2px solid var(--cream);padding-top:.5rem}
+.wave.two{border-color:var(--gold)}
+.facts{display:flex;gap:clamp(1.6rem,4vw,3.6rem);flex-wrap:wrap;align-items:flex-end;margin-top:1.6rem}
+
+/* ── Present ────────────────────────────────────────────────────── */
+.chrome{position:fixed;top:0;left:0;right:0;z-index:60;display:flex;justify-content:space-between;align-items:center;
+  padding:.7rem var(--pad);background:rgba(11,12,15,.9);backdrop-filter:blur(14px);border-bottom:1px solid var(--line);
+  font-family:var(--mono);font-size:.66rem;letter-spacing:.13em;text-transform:uppercase;color:var(--dim)}
+.btn{font:inherit;cursor:pointer;background:var(--gold);color:var(--ink);border:1px solid var(--gold);padding:.45rem .8rem;border-radius:2px}
+body.present{overflow:hidden}
+body.present .chrome{display:none}
+body.present .slide{display:none;height:100vh;min-height:100vh;border:0;padding-top:4.4rem;padding-bottom:2.4rem;overflow-y:auto}
+body.present .slide.showcase{padding:0}
+body.present .slide.active{display:flex}
+</style>
+</head>
+<body>
+<div class="chrome"><span style="color:var(--gold)">underscores × YouTube</span><span>Direction test · 3 slides</span><button class="btn" onclick="startPresent()">Present</button></div>
+<div class="deck">
+
+<!-- ══ 1 · COVER ═══════════════════════════════════════════════════ -->
+<section class="slide" data-t="Cover" style="justify-content:flex-end;padding-bottom:3rem">
+  <div class="bleed scrim-b">
+    <img src="https://i.ytimg.com/vi/Gf-fCJ6TkRU/maxresdefault.jpg" alt="underscores in the video for The Peace"
+      style="object-position:50% 22%"
+      onerror="this.onerror=null;this.src='https://i.ytimg.com/vi/Gf-fCJ6TkRU/hqdefault.jpg'">
+  </div>
+  <div class="inner">
+    <div class="label g">underscores × YouTube · Virgin Music Group UK · 16 October 2026</div>
+    <h1 class="display" style="margin-top:1rem">underscores</h1>
+    <p class="statement" style="margin-top:1.4rem">The channel is already working.<br><span style="color:var(--gold)">Where do we build next?</span></p>
+    <div style="margin-top:2.2rem;max-width:860px">
+      <div class="rhythm" id="cover-rhythm" style="--rh:30px"></div>
+      <div class="rkey">
+        <span><i style="background:var(--gold)"></i>Single</span>
+        <span><i style="background:var(--cream)"></i>Album</span>
+        <span><i style="background:rgba(247,243,233,.55)"></i>Other uploads</span>
+        <span>Every week of the U era · 27 Jun 2025 → 16 Oct 2026</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ 4 · FOUR SINGLES — a video showcase ════════════════════════ -->
+<section class="slide showcase" data-t="Four singles">
+  <div class="head">
+    <div>
+      <div class="label g">The U era · four singles</div>
+      <h2 class="display" style="margin-top:.6rem">Every single passed 740K.</h2>
+    </div>
+    <p class="body" style="max-width:40ch;font-size:1rem;padding-bottom:.3rem">
+      <b style="color:var(--cream)">The Peace</b>, the newest, has the most comments of the four — 3,089 in nine weeks.
+    </p>
+  </div>
+  <div class="panels">
+    <a class="pan" href="https://www.youtube.com/watch?v=UNYqwpx7Cys" target="_blank" rel="noopener">
+      <img src="https://i.ytimg.com/vi/UNYqwpx7Cys/maxresdefault.jpg" alt="Music" style="object-position:40% 40%"><div class="play"></div>
+      <div class="meta"><div class="code">250627</div><div class="t">Music</div><div class="big-num">1.87M</div><div class="c">2,122 comments</div></div></a>
+    <a class="pan" href="https://www.youtube.com/watch?v=Zd0j0xnhWFw" target="_blank" rel="noopener">
+      <img src="https://i.ytimg.com/vi/Zd0j0xnhWFw/maxresdefault.jpg" alt="Do It" style="object-position:47% 40%"><div class="play"></div>
+      <div class="meta"><div class="code">251104</div><div class="t">Do It</div><div class="big-num">1.48M</div><div class="c">1,998 comments</div></div></a>
+    <a class="pan" href="https://www.youtube.com/watch?v=i_gkcxgNCM8" target="_blank" rel="noopener">
+      <img src="https://i.ytimg.com/vi/i_gkcxgNCM8/maxresdefault.jpg" alt="Tell Me (U Want It)" style="object-position:52% 30%"><div class="play"></div>
+      <div class="meta"><div class="code">260225</div><div class="t">Tell Me (U Want It)</div><div class="big-num">744K</div><div class="c">1,199 comments</div></div></a>
+    <a class="pan peace" href="https://www.youtube.com/watch?v=Gf-fCJ6TkRU" target="_blank" rel="noopener">
+      <img src="https://i.ytimg.com/vi/Gf-fCJ6TkRU/maxresdefault.jpg" alt="The Peace" style="object-position:42% 30%"><div class="play"></div>
+      <div class="meta"><div class="code">260812</div><div class="t">The Peace</div><div class="big-num">1.37M</div><div class="c">3,089 comments</div></div></a>
+  </div>
+  <div class="src" style="position:absolute;right:var(--pad);top:4.7rem;z-index:3;border:0;text-align:right;max-width:34ch;display:none"></div>
+</section>
+
+<!-- ══ 5 · DO IT — the campaign as a sequence ═════════════════════ -->
+<section class="slide" data-t="Do It campaign">
+  <div class="inner">
+    <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:2rem;flex-wrap:wrap">
+      <div>
+        <div class="label g">What the team already does well</div>
+        <h2 class="display" style="margin-top:.6rem;max-width:20ch">Do It was released as a campaign.</h2>
+      </div>
+      <div class="facts" style="margin-top:0">
+        <div><div class="big-num" style="font-size:clamp(2.4rem,4.4vw,3.6rem)">9</div><div class="label" style="margin-top:.35rem">uploads</div></div>
+        <div><div class="big-num" style="font-size:clamp(2.4rem,4.4vw,3.6rem)">10<span style="font-size:.45em;color:var(--dim)"> wks</span></div><div class="label" style="margin-top:.35rem">to the second moment</div></div>
+      </div>
+    </div>
+
+    <div class="sky">
+      <a class="col s" href="https://www.youtube.com/shorts/cQ99ZWxvrbw" target="_blank" rel="noopener"><div class="v">159K</div><div class="b" style="height:10.8%"><img src="https://i.ytimg.com/vi/cQ99ZWxvrbw/hqdefault.jpg" alt=""></div></a>
+      <a class="col s" href="https://www.youtube.com/shorts/bkEoBmpQtCg" target="_blank" rel="noopener"><div class="v">449K</div><div class="b" style="height:30.3%"><img src="https://i.ytimg.com/vi/bkEoBmpQtCg/hqdefault.jpg" alt=""></div></a>
+      <a class="col s" href="https://www.youtube.com/shorts/BHXIFSKgP_w" target="_blank" rel="noopener"><div class="v">112K</div><div class="b" style="height:7.6%"><img src="https://i.ytimg.com/vi/BHXIFSKgP_w/hqdefault.jpg" alt=""></div></a>
+      <a class="col l hero" href="https://www.youtube.com/watch?v=Zd0j0xnhWFw" target="_blank" rel="noopener"><div class="v">1.48M</div><div class="b" style="height:100%"><img src="https://i.ytimg.com/vi/Zd0j0xnhWFw/maxresdefault.jpg" alt="Do It official video" style="object-position:47% 50%"></div></a>
+      <a class="col s" href="https://www.youtube.com/shorts/Opaj6Zcm3bQ" target="_blank" rel="noopener"><div class="v">236K</div><div class="b" style="height:16%"><img src="https://i.ytimg.com/vi/Opaj6Zcm3bQ/hqdefault.jpg" alt=""></div></a>
+      <a class="col l" href="https://www.youtube.com/watch?v=j-lxGi4pOj8" target="_blank" rel="noopener"><div class="v">415K</div><div class="b" style="height:28.1%"><img src="https://i.ytimg.com/vi/j-lxGi4pOj8/maxresdefault.jpg" alt="Do It choreo version" style="object-position:38% 50%"></div></a>
+      <div class="brk"><span>ten<br>weeks</span></div>
+      <a class="col s" href="https://www.youtube.com/shorts/nQwqQ5yE7D0" target="_blank" rel="noopener"><div class="v">50K</div><div class="b" style="height:3.4%"><img src="https://i.ytimg.com/vi/nQwqQ5yE7D0/hqdefault.jpg" alt=""></div></a>
+      <a class="col s" href="https://www.youtube.com/shorts/L9kOH6yZOx0" target="_blank" rel="noopener"><div class="v">55K</div><div class="b" style="height:3.7%"><img src="https://i.ytimg.com/vi/L9kOH6yZOx0/hqdefault.jpg" alt=""></div></a>
+      <a class="col l rmx" href="https://www.youtube.com/watch?v=kvhVECfGsw8" target="_blank" rel="noopener"><div class="v">727K</div><div class="b" style="height:49.2%"><img src="https://i.ytimg.com/vi/kvhVECfGsw8/maxresdefault.jpg" alt="Do It Yves remix" style="object-position:35% 40%"></div></a>
+    </div>
+    <div class="axis">
+      <div class="s"><b>15 Oct</b>Short</div><div class="s"><b>26 Oct</b>Short</div><div class="s"><b>31 Oct</b>Short</div>
+      <div class="l"><b style="color:var(--gold)">4 Nov</b>Official video</div><div class="s"><b>6 Nov</b>Short</div>
+      <div class="l"><b>9 Nov</b>Choreo version</div><div class="brk"></div>
+      <div class="s"><b>17 Jan</b>Short</div><div class="s"><b>21 Jan</b>Short</div><div class="l"><b style="color:var(--gold)">23 Jan</b>Yves remix</div>
+    </div>
+
+    <p class="statement" style="margin-top:1.6rem;max-width:46ch">Six uploads in under four weeks — then a second moment, led by the Yves remix, <span style="color:var(--gold)">ten weeks after release.</span></p>
+    <div class="src">Bar height = lifetime views, YouTube Data API, 16 Oct 2026 · 2025–26, in publication order. A sequence, not a measured funnel: public data can't show whether the remix sent viewers back to the original.</div>
+  </div>
+</section>
+
+</div>
+<script>
+/* U-era strip: one tick per week, 27 Jun 2025 → 16 Oct 2026 (69 weeks).
+   s = a single's release week, a = album week, o = other uploads. */
+var WEEKS = "so.............o.oso.........oo...s...a....o..............s..o.......";
+function rhythm(el){ el.innerHTML = WEEKS.split('').map(function(k){ return '<div class="tick'+(k==='.'?'':' '+k)+'"></div>'; }).join(''); }
+document.querySelectorAll('.rhythm').forEach(rhythm);
+var cur=0; function S(){return [].slice.call(document.querySelectorAll('.slide'));}
+function showSlide(i){var s=S();cur=Math.max(0,Math.min(i,s.length-1));s.forEach(function(e,n){e.classList.toggle('active',n===cur)});}
+function startPresent(){document.body.classList.add('present');showSlide(0);}
+document.addEventListener('keydown',function(e){if(!document.body.classList.contains('present'))return;
+  if(e.key==='ArrowRight'||e.key===' ')showSlide(cur+1); else if(e.key==='ArrowLeft')showSlide(cur-1); else if(e.key==='Escape')document.body.classList.remove('present');});
+</script>
+</body>
+</html>
