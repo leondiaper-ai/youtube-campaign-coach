@@ -295,7 +295,7 @@ h2.display{font-size:clamp(1.8rem,3.9vw,3.3rem);max-width:24ch}
 
 
 /* Outernet + documentary slides */
-.pictag{position:absolute;right:clamp(1rem,3vw,2.5rem);bottom:clamp(1rem,3vh,2rem);z-index:2;font-family:'DM Mono',monospace;font-size:.72rem;letter-spacing:.12em;text-transform:uppercase;color:var(--suit);background:rgba(7,8,13,.82);border:1px solid var(--sunset);padding:.45rem .7rem;border-radius:2px}
+.pictag{position:absolute;right:clamp(1rem,3vw,2.5rem);top:clamp(1.2rem,4vh,2.6rem);z-index:2;font-family:'DM Mono',monospace;font-size:.72rem;letter-spacing:.12em;text-transform:uppercase;color:var(--suit);background:rgba(7,8,13,.82);border:1px solid var(--sunset);padding:.45rem .7rem;border-radius:2px}
 .ways{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(.8rem,2vw,1.8rem);margin-top:.6rem;max-width:1000px}
 .ways>div{border-top:3px solid var(--sky);padding-top:.6rem}
 .ways h4{font-family:'Archivo',sans-serif;font-variation-settings:'wdth' 110,'wght' 760;text-transform:uppercase;font-size:clamp(1.05rem,1.6vw,1.35rem)}
@@ -317,7 +317,7 @@ h2.display{font-size:clamp(1.8rem,3.9vw,3.3rem);max-width:24ch}
 .story .could{font-size:.9rem;line-height:1.45;margin-top:.6rem;color:var(--suit);opacity:.82;border-left:3px solid var(--sky);padding-left:.7rem;max-width:46ch}
 .story .could b{display:block;font-family:'DM Mono',monospace;font-weight:400;font-size:.6rem;letter-spacing:.12em;text-transform:uppercase;color:var(--sky);opacity:1}
 .dates{margin-top:1.2rem;font-family:'DM Mono',monospace;font-size:.74rem;letter-spacing:.1em;text-transform:uppercase;color:var(--suit);border:1px solid var(--line);display:inline-block;padding:.45rem .7rem}
-@media(max-width:880px){.ways{grid-template-columns:1fr}.pictag{font-size:.6rem;bottom:auto;top:4.2rem}}
+@media(max-width:880px){.ways{grid-template-columns:1fr}.pictag{font-size:.6rem;top:4.2rem}}
 
 /* ── Present ────────────────────────────────────────────────────── */
 body.present{overflow:hidden}
@@ -346,6 +346,10 @@ body.present .slide[data-t="The album story"] h2.display,body.present .slide[dat
 body.present .slide[data-t="The album story"] .body{font-size:.95rem!important}
 body.present .plan + .nextstep + .src{margin-top:.7rem}
 body.present .nextstep p{font-size:clamp(1.05rem,1.6vw,1.4rem)}
+body.present .story .pic img{aspect-ratio:16/5.2}
+body.present .story .kicker{margin-top:.7rem}
+body.present .dates{margin-top:.9rem}
+body.present .evidence{margin-top:1.2rem}
 body.present .slide.current{display:flex}
 body.present .reveal,body.present .stagger>*{opacity:1;transform:none;transition:none}
 .pbar{display:none;position:fixed;bottom:0;left:0;height:3px;background:var(--sky);z-index:1000;transition:width .3s ease}
@@ -682,7 +686,8 @@ body.sheet-open{overflow:hidden}
         <div><b>70K</b><span>Wembley NYE set</span><i class="host both">Defected · co-credited</i></div>
       </div>
     </div>
-    <div class="src reveal">Show date and broadcast format to confirm. · Lifetime public views as displayed, 16 Oct 2026; views are not watch time · production, rights and claims notes in Analysis.</div>
+    <div class="dates reveal" style="margin-top:1rem">Show date and broadcast format to confirm.</div>
+    <div class="src reveal">Lifetime public views as displayed, 16 Oct 2026; views are not watch time · production, rights and claims notes in Analysis.</div>
   </div>
 </section>
 
