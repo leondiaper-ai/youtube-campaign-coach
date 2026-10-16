@@ -247,10 +247,14 @@ most upfront house music…". Opened, its rows are tracks on other channels: Pru
 visualiser), simo not simon – Topic, Joseph Capriati (Control). "Moments in Music" — 9
 episodes, branded cover.
 
-**"Defected Broadcasting House" playlist** (631 items, 114,056 views): the newest 100
-entries, matched by video id against the inventory — 82 DJ sets, 7 Broadcasting House
-shows, 7 studio mixes, 1 release, 1 Short, 1 unmatched, **0 radio episodes**; oldest of
-the 100 published 2 March 2024. About 135 radio episodes were published in that period.
+**"Defected Broadcasting House" playlist** (631 items, 114,056 views), read in full on
+16 October 2026 (14:45 UK, signed-in Chrome, scrolled to the end): 622 videos available
+(the rest private or removed). By title: 357 Broadcasting House shows, 198 DJ sets, 20
+mixes, 45 other, **2 radio episodes** — "Sam Divine – Defected Radio Show on Defected
+Broadcasting House (Live from Sydney) (04.03.22)" and "Defected Radio Show Hosted by
+Monki – 03.02.23". An earlier id-level check of the newest 100 (added since March 2024)
+found 82 DJ sets, 7 Broadcasting House shows, 7 mixes, 1 release, 1 Short and 0 radio
+episodes.
 
 **All 71 public playlists** (none titled for the radio show episodes): Oden & Fatzo –
 Somehow It Flies (ALBUM) 17 · Melé – Alive On Arrival 15 · House of Roots 4 · Dames
@@ -321,11 +325,10 @@ measure when 2025 has fewer, more selective uploads?
 (4.2); three million-view records (4.5); 59 sets, nine over 100K (4.3); four in ten (4.4).
 
 **4.7 Slide 8 — "None of the 71 public playlists holds them, and the podcast tile that carries the show's name is a tracklist of other channels' uploads."**
-§3.8. The 631-item playlist was checked for its newest 100 only. **Challenge:** could the
-radio episodes be in the *older* 531? If they were, the newest 100 (added since March
-2024) would still contain the ~135 episodes published since then, unless episodes stopped
-being added in early 2024 — which would be its own finding. Also: a private playlist is
-invisible to the API; the slide says "public".
+§3.8. The 631-item playlist has now been read in full: 2 radio episodes among 622, both
+from 2022–23. The weekly episodes are not collected in any public playlist. **Challenge:**
+a private or unlisted playlist is invisible to the API and to a signed-out visitor; the
+slide says "public", and the fix is the same either way.
 
 **4.8 Slide 9 — the Home shelf audit and the title-order note.** §3.8 for the shelves;
 §3.3 for the titles. The proposed order is explicitly a test; the measure named is
@@ -383,8 +386,9 @@ five are housekeeping; test that reading.
 
 ## 7. Questions for the reviewer, in priority order
 
-1. Trace 4.7. Is "no playlist holds the episodes" proven by the newest-100 check, or does
-   it need the full 631?
+1. Trace 4.7. The full-playlist read found 2 radio episodes in 622. Is there any other
+   public surface (a Live tab playlist, a Community post series) that would count as
+   "a place that holds the episodes"?
 2. Trace 4.3. Does the slide headline still imply a venue effect the table does not show?
 3. Trace 4.4. Should "In The House" and Flavour Trip be in the compilation bucket? Rerun
    the per-year rates without them and say whether the recommendation survives.
