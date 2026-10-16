@@ -187,7 +187,7 @@ Hit-rate comparison used on the slide ("roughly one in five sets, one in twenty 
 episodes"): sets 2022–25 over 100K / n = 31/206 = 15%; radio 2022–25 = 10/206 = 4.9%.
 Compilations 2022–25 = 16/30 = 53%.
 
-### 3.5 Releases (release audio + lyric + official video)
+### 3.5 Releases (release audio + lyric + official video) — now Analysis-only on the deck
 
 | Year | n | Median | Over 100K | Over 1M |
 |---|---|---|---|---|
@@ -353,10 +353,20 @@ Flavour Trip collaboration (2.76M). Without Flavour Trip and PDM, 2024 is 3/8. D
 whether the strand belongs in the same bucket as the seasonal "Defected Summer Mix"
 compilations — the deck argues it is the same product with the artist first.
 
-**4.5 Slide 6 — "Releases carried 2025": median 43K (n=68) vs 18K (n=115) in 2024; three over 1M.**
-§3.5. The slide's caveat: 2024 is a year older, which makes 2025's lead conservative;
-2026 too young. **Challenge:** 2025's n is smaller (68 vs 115). Is the median the right
-measure when 2025 has fewer, more selective uploads?
+**4.5 Slide 6 — "One record, several ways for fans to discover it": Edge Of Desire's twelve-video Home shelf; eight formats with their hosting channels; "one of three 2025 releases past a million views (the Extended Mix, 1.27M)".**
+§3.5 for the million-view milestone (the three over 1M in 2025). The shelf and its
+playlist (PLoRGBexfBL8c7zDulW2j4G_2JlMOhnqjC, 12 videos, 102,794 playlist views) were read
+on 16 Oct; each tile on the slide carries the upload's hosting channel because two of the
+formats — the live performance (Y1HUL-TALoE, 2.3M) and the lyric video (eNEnxdqyQEw,
+116K) — are on Jonas Blue's channel and are pulled into Defected's shelf, and three of the
+Defected uploads carry YouTube's co-publisher credit. Asset ids and views are listed in the
+deck's Analysis sheet under slide 6. The 43K-vs-18K year comparison that used to be on the
+slide is now only in the Analysis sheet, with its method and the 68-vs-115 sample caveat.
+**Challenge:** the slide celebrates the approach without attributing the views to it, and
+says so; check the shelf screenshot was not taken in a signed-in state that personalises
+the row (it was captured from the channel page with the sidebar cropped out). Also check
+that slide 7's "co-publishing" lane and this slide do not read as the same point: slide 6
+is the gathering of formats, slide 7 the credit that recommends to both audiences.
 
 **4.6 Slide 7 — the six strengths.** Each number appears on an earlier slide or in §3.9:
 52 a year (4.2); three million-view records (4.5); 59 sets, nine over 100K (4.3); 16 of 30
