@@ -222,6 +222,11 @@ body.present h2.big{font-size:clamp(1.8rem,4vw,3.1rem)}
 body.present .op p{font-size:.76rem}
 body.present .op h4{margin:.4rem 0 .45rem}
 body.present .fstep{padding:.65rem .7rem}
+/* The formats slide gained the stream chapter list, which pushed it 40px past
+   a 738px slide. These two tighten only in present mode. */
+body.present .chaps{line-height:1.65;font-size:.7rem;margin-top:.8rem}
+body.present .creds{line-height:1.6;font-size:.72rem;margin-top:1.1rem}
+body.present .era .ex{line-height:1.6;font-size:.68rem;margin-top:.6rem}
 .pbar{display:none;position:fixed;bottom:0;left:0;height:3px;background:var(--signal);z-index:1000;transition:width .3s ease}
 body.present .pbar{display:block}
 .pcount{display:none;position:fixed;bottom:1rem;right:1.25rem;z-index:1000;font-size:.6rem;font-weight:700;
