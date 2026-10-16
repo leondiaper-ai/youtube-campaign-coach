@@ -100,7 +100,7 @@ h2.display{font-size:clamp(2.2rem,5vw,4.4rem)}
 @media(max-width:820px){.panels{grid-template-columns:1fr 1fr;grid-auto-rows:60vh}}
 
 /* ── THE SKYLINE (Do It) ────────────────────────────────────────── */
-.sky{display:flex;align-items:flex-end;gap:10px;height:clamp(220px,42vh,330px);margin-top:1.4rem;
+.sky{display:flex;align-items:flex-end;gap:10px;height:clamp(200px,40vh,320px);margin-top:1.2rem;
   border-bottom:2px solid var(--line);position:relative}
 .col{position:relative;display:flex;flex-direction:column;justify-content:flex-end;height:100%}
 .col .v{font-weight:800;font-size:1.05rem;letter-spacing:-.03em;margin-bottom:.4rem;white-space:nowrap}
@@ -114,7 +114,7 @@ h2.display{font-size:clamp(2.2rem,5vw,4.4rem)}
 .col.rmx .v{color:var(--gold)}
 .brk{width:clamp(70px,9vw,130px);height:100%;position:relative;display:flex;align-items:flex-end;justify-content:center}
 .brk::before{content:'';position:absolute;left:50%;top:18%;bottom:0;border-left:2px dashed var(--line)}
-.brk span{position:relative;background:var(--ink);font-family:var(--mono);font-size:.62rem;letter-spacing:.12em;
+.brk span{position:relative;background:var(--ink);font-family:var(--mono);font-size:.78rem;letter-spacing:.12em;
   text-transform:uppercase;color:var(--warm);padding:.3rem .2rem;margin-bottom:38%;text-align:center;line-height:1.4}
 .axis{display:flex;gap:10px;margin-top:.55rem}
 .axis div{font-family:var(--mono);font-size:.6rem;letter-spacing:.04em;color:var(--dim);line-height:1.35}
@@ -177,7 +177,7 @@ body.present .slide.active{display:flex}
   </div>
   <div class="panels">
     <a class="pan" href="https://www.youtube.com/watch?v=UNYqwpx7Cys" target="_blank" rel="noopener">
-      <img src="https://i.ytimg.com/vi/UNYqwpx7Cys/maxresdefault.jpg" alt="Music" style="object-position:40% 40%"><div class="play"></div>
+      <img src="https://i.ytimg.com/vi/UNYqwpx7Cys/maxresdefault.jpg" alt="Music" style="object-position:56% 40%"><div class="play"></div>
       <div class="meta"><div class="code">250627</div><div class="t">Music</div><div class="big-num">1.87M</div><div class="c">2,122 comments</div></div></a>
     <a class="pan" href="https://www.youtube.com/watch?v=Zd0j0xnhWFw" target="_blank" rel="noopener">
       <img src="https://i.ytimg.com/vi/Zd0j0xnhWFw/maxresdefault.jpg" alt="Do It" style="object-position:47% 40%"><div class="play"></div>
@@ -195,16 +195,8 @@ body.present .slide.active{display:flex}
 <!-- ══ 5 · DO IT — the campaign as a sequence ═════════════════════ -->
 <section class="slide" data-t="Do It campaign">
   <div class="inner">
-    <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:2rem;flex-wrap:wrap">
-      <div>
-        <div class="label g">What the team already does well</div>
-        <h2 class="display" style="margin-top:.6rem;max-width:20ch">Do It was released as a campaign.</h2>
-      </div>
-      <div class="facts" style="margin-top:0">
-        <div><div class="big-num" style="font-size:clamp(2.4rem,4.4vw,3.6rem)">9</div><div class="label" style="margin-top:.35rem">uploads</div></div>
-        <div><div class="big-num" style="font-size:clamp(2.4rem,4.4vw,3.6rem)">10<span style="font-size:.45em;color:var(--dim)"> wks</span></div><div class="label" style="margin-top:.35rem">to the second moment</div></div>
-      </div>
-    </div>
+    <div class="label g">What the team already does well</div>
+    <h2 class="display" style="margin-top:.6rem;max-width:none">Do It was released as a campaign.</h2>
 
     <div class="sky">
       <a class="col s" href="https://www.youtube.com/shorts/cQ99ZWxvrbw" target="_blank" rel="noopener"><div class="v">159K</div><div class="b" style="height:10.8%"><img src="https://i.ytimg.com/vi/cQ99ZWxvrbw/hqdefault.jpg" alt=""></div></a>
@@ -225,7 +217,13 @@ body.present .slide.active{display:flex}
       <div class="s"><b>17 Jan</b>Short</div><div class="s"><b>21 Jan</b>Short</div><div class="l"><b style="color:var(--gold)">23 Jan</b>Yves remix</div>
     </div>
 
-    <p class="statement" style="margin-top:1.6rem;max-width:46ch">Six uploads in under four weeks — then a second moment, led by the Yves remix, <span style="color:var(--gold)">ten weeks after release.</span></p>
+    <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:2rem;margin-top:1.5rem;flex-wrap:wrap">
+      <p class="statement" style="max-width:40ch">Six uploads in under four weeks — then a second moment, led by the Yves remix, <span style="color:var(--gold)">ten weeks after release.</span></p>
+      <div class="facts" style="margin-top:0">
+        <div><div class="big-num" style="font-size:clamp(2.4rem,4.4vw,3.6rem)">9</div><div class="label" style="margin-top:.35rem">uploads in all</div></div>
+        <div><div class="big-num" style="font-size:clamp(2.4rem,4.4vw,3.6rem);color:var(--gold)">1,783</div><div class="label" style="margin-top:.35rem">comments on the remix</div></div>
+      </div>
+    </div>
     <div class="src">Bar height = lifetime views, YouTube Data API, 16 Oct 2026 · 2025–26, in publication order. A sequence, not a measured funnel: public data can't show whether the remix sent viewers back to the original.</div>
   </div>
 </section>
