@@ -26,6 +26,8 @@ const nextConfig = {
       { source: '/cmg-youtube', destination: '/cmg-youtube/index.html' },
       // Defected Records × YouTube: label channel review, October 2026.
       { source: '/defected', destination: '/defected/index.html' },
+      // Oden & Fatzo × YouTube: the Somehow It Flies album campaign deep dive.
+      { source: '/odenfatzo', destination: '/odenfatzo/index.html' },
     ];
   },
 };
