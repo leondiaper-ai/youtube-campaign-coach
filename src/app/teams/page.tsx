@@ -47,12 +47,22 @@ export default async function TeamsPage() {
       const team = TEAMS[slug];
       const market = Object.values(MARKETS).find((m) => m.teamSlug === slug) ?? null;
       const entries = await listEntries(slug);
-      const pinned = market ? await listPinned(market.id) : [];
+      /* ── COUNT THE SAME PINS THE BOARD COUNTS ────────────────────────
+         This read listPinned(market.id), which is the market-level pinned
+         CAMPAIGN list in campaignStore — a different store from the one the
+         team board uses. The board's Priority tab counts team entries
+         carrying a pinnedAt, and the Track channel button writes there, so
+         the two numbers drifted apart: Australia showed 1 here and
+         Priority (5) on its own board.
+
+         `entries` is already loaded a line above, so counting from it is
+         both correct and one KV read cheaper. */
+      const pinnedCount = entries.filter((e) => e.pinnedAt != null).length;
       const lastTouched = entries.reduce<string | null>(
         (latest, e) => (!latest || e.updatedAt > latest ? e.updatedAt : latest),
         null,
       );
-      return { team, market, count: entries.length, pinned: pinned.length, lastTouched };
+      return { team, market, count: entries.length, pinned: pinnedCount, lastTouched };
     }),
   );
 
@@ -102,7 +112,7 @@ export default async function TeamsPage() {
                 <div>
                   <div className="text-kpi font-black tabular-nums">{ukPinned.length}</div>
                   <div className="text-[11px] font-bold uppercase tracking-label text-secondary mt-1.5">
-                    Pinned
+                    Priority
                   </div>
                 </div>
               </div>
@@ -156,7 +166,7 @@ export default async function TeamsPage() {
                       {pinned || <span className="text-faint">0</span>}
                     </div>
                     <div className="text-[11px] font-bold uppercase tracking-label text-secondary mt-1.5">
-                      Pinned
+                      Priority
                     </div>
                   </div>
                 </div>
