@@ -1,864 +1,765 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>underscores × YouTube — the shape of a release</title>
-<meta name="description" content="underscores YouTube strategy review · U era, November UK tour, towards 2027 · read 16 October 2026">
 <meta name="robots" content="noindex,nofollow">
+<title>underscores × YouTube — channel opportunity</title>
+<meta name="description" content="underscores channel development and the 2027 campaign · VMG UK · 16 October 2026">
 
-<!-- ═══════════════════════════════════════════════════════════════════
-     underscores × YOUTUBE — ARTIST STRATEGY REVIEW · 16 October 2026
-     Virgin Music Group UK · for management and YouTube UK
-
-     SCOPE. All 102 videos currently public on @underscores, read from the
-     YouTube Data API v3 on 16 October 2026 — channels endpoint, uploads
-     playlist paged to exhaustion (uncapped), videos.list for per-video
-     statistics, commentThreads for a 160-comment sample. No YouTube Studio
-     metrics anywhere: no impressions, no click-through, no retention, no
-     traffic sources, no unique viewers, no territory split. Every one of
-     those is an analytics request on slide 11 rather than an estimate.
-
-     WHAT THIS DECK WILL NOT DO
-      1. Lifetime views divided by days live is never called momentum.
-         Where two releases are compared the age gap is printed; where they
-         are not age-matched the comparison is called a floor.
-      2. The channel reports 36,814,369 lifetime views. The 102 public
-         uploads sum to 23,330,281 — a 36.6% gap of deleted, private or
-         unlisted material. Nothing here is a share of lifetime.
-      3. Topic-channel views are never added to artist-channel views.
-      4. A Short preceding a video that performed is a SEQUENCE. We hold no
-         traffic-source data and never say the Short sent anyone.
-      5. The comment sample is relevance-ordered, which is not random. Said
-         on the slide, not in a footnote. No sentiment score is computed.
-      6. Four sold-out UK shows prove live demand, not YouTube audience.
-      7. No invented targets. The two reference numbers on the actions
-         slide are labelled planning assumptions.
-
-     INTERNAL CONTEXT. Tour dates, the proposed pop-up and the Spotify
-     figures come from a VMG email thread of 5-15 October 2026 and are
-     labelled as dated internal inputs wherever they appear. Unapproved
-     budget figures are deliberately absent — they are cross-platform and
-     uncleared, and this document is shareable.
-
-     VERIFIED BEFORE USE. underscores is April Harper Grey, solo, she/her
-     (Wikipedia). Foundry Class of 2026 confirmed against YouTube's own
-     announcement of 16 September 2026, with the programme's benefits
-     quoted rather than characterised. The BBC pundits page referenced in
-     the internal thread was inaccessible, so no individual is named and no
-     endorsement is implied.
-
-     DESIGN. House deep-dive structure: full-bleed photographic slides,
-     mono labels, one sampled accent family. The palette was sampled
-     programmatically from five real thumbnails via canvas getImageData —
-     greys and near-blacks filtered, remainder binned by hue: red-orange
-     46.8%, cyan 34.8%, magenta 11.4%, amber 5.1%. The photography is the
-     channel's own maxres frames with hqdefault fallbacks. The repeating
-     rule is an underscore, because the artist's name is a typographic mark
-     and it can do the structural work.
-     ═══════════════════════════════════════════════════════════════════ -->
+<!-- underscores × YouTube — artist channel opportunity presentation.
+     VMG UK, for management and YouTube UK. 16 October 2026.
+     Built on the series framework (chrome bar, presentation mode, Analysis
+     sheet). Accent sampled from the channel's own thumbnails: red-orange
+     dominates at 46.8% of saturated pixels, cyan second at 34.8%.
+     Display face is set lower-case for this artist, whose name is styled
+     that way; the rest of the hierarchy matches the series.
+     Figures: YouTube Data API v3 read 16 Oct 2026, all 102 public uploads.
+     Growth: 28 days of channel snapshots. Full detail in Analysis. -->
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
 <style>
 :root{
-  --night:#08080C; --ink:#111118; --coal:#17171F;
-  --bone:#F2F0EB; --smoke:#A6A29C; --faint:#6B6760;
-  --rule:rgba(242,240,235,.13);
-
-  /* Sampled from the channel's own thumbnails — see the note above. */
-  --red:#FF3B1F;   /* 46.8% of saturated pixels */
-  --cyan:#22C9E0;  /* 34.8% */
-  --mag:#FF4FA3;   /* 11.4% */
-  --amber:#FFB224; /* 5.1% */
-
-  --disp:'Syne',sans-serif;
-  --body:'Inter',system-ui,sans-serif;
-  --mono:'JetBrains Mono',monospace;
-  --pad:clamp(22px,5vw,78px);
+  --ink:#0B0B0D;
+  --paper:#F4F1EA;
+  --cream:#EAE5DA;
+  --signal:#FF3B1F;      /* sampled — 46.8% of saturated thumbnail pixels */
+  --cyan:#22C9E0;        /* sampled — 34.8% */
+  --sun:#FFB224;
+  --smoke:#8A847A;
+  --bone:#E2DCD1;
+  --warm:#4A4640;
+  --hair:rgba(255,255,255,.12);
 }
 *{margin:0;padding:0;box-sizing:border-box}
 html{scroll-behavior:smooth}
-body{background:var(--night);color:var(--bone);font-family:var(--body);
+body{background:var(--ink);color:var(--paper);font-family:'Inter',system-ui,sans-serif;
   line-height:1.5;-webkit-font-smoothing:antialiased}
 a{color:inherit}
 img{display:block;max-width:100%}
 
-/* ── NAV ──────────────────────────────────────────────────────────── */
-.nav{position:fixed;top:0;left:0;right:0;z-index:50;display:flex;align-items:center;
-  justify-content:space-between;padding:14px var(--pad);
-  background:linear-gradient(180deg,rgba(8,8,12,.96),rgba(8,8,12,0));
-  font-family:var(--mono);font-size:.62rem;letter-spacing:.18em;text-transform:uppercase}
-.nav .who{color:var(--faint)}
-.nav a.analysis{text-decoration:none;color:var(--faint);border:1px solid var(--rule);
-  padding:7px 13px;border-radius:2px;transition:.2s}
-.nav a.analysis:hover{color:var(--bone);border-color:var(--red)}
+/* Anton, but not forced uppercase — the artist styles her name lower-case. */
+.display{font-family:'Anton',Impact,sans-serif;font-weight:400;letter-spacing:.005em;line-height:.94}
 
-/* ── SLIDE ────────────────────────────────────────────────────────── */
-.slide{position:relative;min-height:100vh;display:flex;align-items:center;
-  border-bottom:1px solid var(--rule);overflow:hidden}
-.inner{position:relative;z-index:3;width:100%;max-width:1180px;margin:0 auto;
-  padding:clamp(76px,11vh,130px) var(--pad) clamp(52px,8vh,96px)}
-.bleed{position:absolute;inset:0;z-index:1}
-.bleed img{width:100%;height:100%;object-fit:cover;display:block}
-.bleed::after{content:'';position:absolute;inset:0}
-.scrim-l::after{background:linear-gradient(90deg,rgba(8,8,12,.97) 0%,rgba(8,8,12,.9) 44%,rgba(8,8,12,.4) 100%)}
-.scrim-b::after{background:linear-gradient(180deg,rgba(8,8,12,.45) 0%,rgba(8,8,12,.93) 60%,var(--night) 100%)}
-.scrim-f::after{background:rgba(8,8,12,.82)}
+/* ── Slides ─────────────────────────────────────────────────────── */
+.slide{position:relative;min-height:100vh;display:flex;flex-direction:column;
+  justify-content:center;padding:clamp(2rem,6vw,5rem);
+  border-bottom:1px solid rgba(255,255,255,.07);overflow:hidden}
+.slide.light{background:var(--paper);color:var(--ink)}
+.slide.cream{background:var(--cream);color:var(--ink)}
+.inner{position:relative;z-index:3;width:100%;max-width:1240px;margin:0 auto}
 
-/* ── TYPE ─────────────────────────────────────────────────────────── */
-.label{font-family:var(--mono);font-size:.62rem;letter-spacing:.2em;
-  text-transform:uppercase;color:var(--faint)}
-.label.hot{color:var(--red)}
-.label.cold{color:var(--cyan)}
-.label.pink{color:var(--mag)}
-.label.amb{color:var(--amber)}
-h1.display,h2.display{font-family:var(--disp);font-weight:800;letter-spacing:-.03em;
-  line-height:1.0;margin:0}
-h1.display{font-size:clamp(2.4rem,6vw,5.2rem)}
-h2.display{font-size:clamp(1.85rem,4.1vw,3.2rem)}
-h3{font-family:var(--disp);font-weight:700;font-size:1.02rem;letter-spacing:-.01em;color:var(--bone)}
-.big-p{font-size:clamp(1rem,1.8vw,1.3rem);line-height:1.52;color:var(--smoke);
-  max-width:40em;margin-top:1.3rem}
-.big-p b{color:var(--bone);font-weight:600}
-p{color:var(--smoke);max-width:62em}
-.fine{font-family:var(--mono);font-size:.68rem;line-height:1.9;color:var(--faint);
-  letter-spacing:.04em}
-.rule{height:2px;width:clamp(44px,6vw,78px);background:var(--red);margin:1.5rem 0 1.1rem}
+.label{font-size:.68rem;font-weight:700;letter-spacing:.18em;text-transform:uppercase;
+  color:var(--signal);margin-bottom:1.25rem}
+.kicker{font-size:.68rem;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--smoke)}
+h1.hero{font-size:clamp(2.6rem,8vw,6.4rem)}
+h2.big{font-size:clamp(2rem,5.4vw,4.2rem)}
+h3.mid{font-size:clamp(1.5rem,3.2vw,2.5rem)}
+.sub{font-size:clamp(1rem,1.5vw,1.22rem);color:var(--smoke);max-width:720px;margin-top:1.4rem;line-height:1.55}
+.slide.light .sub,.slide.cream .sub{color:var(--warm)}
+.slide.light .kicker,.slide.cream .kicker,.slide.light .tsub,.slide.cream .tsub,
+.slide.light .stat .cap,.slide.cream .stat .cap,
+.slide.light .stat .sub2,.slide.cream .stat .sub2{color:var(--warm)}
+.sub b,.sub strong{color:var(--paper);font-weight:600}
+.slide.light .sub b,.slide.cream .sub b{color:var(--ink)}
 
-/* ── HERO NUMBERS ─────────────────────────────────────────────────── */
-.hero2{display:grid;gap:1px;background:var(--rule);border:1px solid var(--rule);margin-top:2rem}
-@media(min-width:720px){.hero2.four{grid-template-columns:repeat(4,1fr)}
-  .hero2.three{grid-template-columns:repeat(3,1fr)}
-  .hero2.two{grid-template-columns:repeat(2,1fr)}}
-.h2c{background:var(--night);padding:1.35rem 1.2rem}
-.h2n{font-family:var(--disp);font-weight:800;font-size:clamp(1.9rem,4.6vw,3rem);
-  line-height:.92;letter-spacing:-.035em;font-variant-numeric:tabular-nums}
-.h2n.r{color:var(--red)} .h2n.c{color:var(--cyan)} .h2n.m{color:var(--mag)} .h2n.a{color:var(--amber)}
-.h2l{font-family:var(--mono);font-size:.6rem;letter-spacing:.14em;text-transform:uppercase;
-  color:var(--faint);margin-top:.7rem;line-height:1.6}
+.srcline{font-size:.6rem;letter-spacing:.1em;text-transform:uppercase;color:var(--smoke);
+  margin-top:2rem;opacity:.8}
 
-/* ── PANELS ───────────────────────────────────────────────────────── */
-.cols{display:grid;gap:1.1rem;margin-top:1.8rem}
-@media(min-width:800px){.cols.two{grid-template-columns:repeat(2,1fr)}
-  .cols.three{grid-template-columns:repeat(3,1fr)}}
-.panel{background:var(--ink);border:1px solid var(--rule);padding:1.25rem 1.3rem}
-.panel.r{border-left:2px solid var(--red)}
-.panel.c{border-left:2px solid var(--cyan)}
-.panel.m{border-left:2px solid var(--mag)}
-.panel.a{border-left:2px solid var(--amber)}
-.panel p{font-size:.88rem;margin-top:.6rem;color:var(--smoke)}
+/* ── Reveal ─────────────────────────────────────────────────────── */
+.reveal{opacity:0;transform:translateY(26px);transition:opacity .8s ease,transform .8s ease}
+.reveal.visible{opacity:1;transform:none}
+.stagger>*{opacity:0;transform:translateY(18px);transition:opacity .6s ease,transform .6s ease}
+.stagger>*.visible{opacity:1;transform:none}
 
-ul.ticks{list-style:none;margin-top:.8rem}
-ul.ticks li{font-size:.88rem;color:var(--smoke);line-height:1.6;padding-left:1.15rem;
-  position:relative;margin-bottom:.5rem}
-ul.ticks li::before{content:'_';position:absolute;left:0;top:-.2em;color:var(--red);
-  font-family:var(--mono)}
-ul.ticks li b{color:var(--bone);font-weight:600}
+/* ── Hero image ─────────────────────────────────────────────────── */
+.bleed{position:absolute;inset:0;z-index:0}
+.bleed img{width:100%;height:100%;object-fit:cover}
+.bleed::after{content:'';position:absolute;inset:0;
+  background:linear-gradient(180deg,rgba(11,11,13,.5) 0%,rgba(11,11,13,.78) 55%,rgba(11,11,13,.96) 100%)}
+.bleed.side::after{background:linear-gradient(90deg,rgba(11,11,13,.96) 0%,rgba(11,11,13,.86) 48%,rgba(11,11,13,.5) 100%)}
 
-/* ── TABLE ────────────────────────────────────────────────────────── */
-.tw{overflow-x:auto;margin-top:1.6rem}
-table{width:100%;border-collapse:collapse;font-size:.86rem;min-width:540px}
-th{font-family:var(--mono);font-size:.58rem;letter-spacing:.14em;text-transform:uppercase;
-  color:var(--faint);text-align:left;padding:.6rem .55rem;border-bottom:1px solid var(--rule);
-  font-weight:400}
-td{padding:.65rem .55rem;border-bottom:1px solid rgba(242,240,235,.06);color:var(--smoke);
-  vertical-align:top}
-td b{color:var(--bone)}
-.num{text-align:right;font-variant-numeric:tabular-nums;font-family:var(--mono)}
-tr.key{background:rgba(255,59,31,.07)}
-tr.keyc{background:rgba(34,201,224,.07)}
+/* ── Stats ──────────────────────────────────────────────────────── */
+.stat-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));
+  gap:clamp(1rem,3vw,2.6rem);margin-top:2.4rem}
+.stat .num{font-family:'Anton',sans-serif;font-size:clamp(2.4rem,5.4vw,4.4rem);line-height:.9}
+.stat .num.sig{color:var(--signal)} .stat .num.cy{color:var(--cyan)}
+.stat .cap{font-size:.62rem;font-weight:700;letter-spacing:.16em;text-transform:uppercase;
+  color:var(--smoke);margin-top:.7rem}
+.stat .sub2{font-size:.7rem;color:var(--smoke);margin-top:.35rem;opacity:.8}
 
-/* ── VIDEO GRID ───────────────────────────────────────────────────── */
-.vgrid{display:grid;gap:.9rem;margin-top:1.6rem}
-@media(min-width:620px){.vgrid{grid-template-columns:repeat(2,1fr)}}
-@media(min-width:960px){.vgrid.four{grid-template-columns:repeat(4,1fr)}
-  .vgrid.three{grid-template-columns:repeat(3,1fr)}}
-.thumb{display:block;text-decoration:none;border:1px solid var(--rule);background:var(--ink);
-  transition:border-color .2s}
-.thumb:hover{border-color:var(--red)}
-.thumb img{width:100%;aspect-ratio:16/9;object-fit:cover;background:var(--coal)}
-.thumb .tb{padding:.7rem .8rem}
-.thumb .tt{font-size:.8rem;font-weight:600;color:var(--bone);line-height:1.3}
-.thumb .tm{font-family:var(--mono);font-size:.64rem;color:var(--faint);margin-top:.4rem;
-  font-variant-numeric:tabular-nums}
-.thumb .tm b{color:var(--cyan);font-weight:500}
+/* ── Thumbnails ─────────────────────────────────────────────────── */
+.thumb-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1rem;margin-top:2.2rem}
+.thumb-grid.four{grid-template-columns:repeat(4,1fr)}
+.thumb-grid.three{grid-template-columns:repeat(3,1fr)}
+@media(max-width:900px){.thumb-grid.four{grid-template-columns:repeat(2,1fr)}
+  .thumb-grid.three{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:560px){.thumb-grid.four,.thumb-grid.three{grid-template-columns:1fr}}
+.tcard{display:block;text-decoration:none;color:inherit;border-radius:10px;overflow:hidden;
+  background:rgba(255,255,255,.04);border:1px solid var(--hair);transition:transform .3s ease}
+.slide.light .tcard,.slide.cream .tcard{background:#fff;border-color:var(--bone)}
+.tcard:hover{transform:translateY(-4px)}
+.tcard img{width:100%;aspect-ratio:16/9;object-fit:cover;display:block;background:#1a1a1f}
+.tmeta{padding:.75rem .85rem}
+.ttitle{font-size:.76rem;font-weight:600;line-height:1.35;display:-webkit-box;-webkit-line-clamp:2;
+  -webkit-box-orient:vertical;overflow:hidden}
+.tviews{font-family:'Anton',sans-serif;font-size:1.2rem;margin-top:.4rem;color:var(--signal)}
+.tsub{font-size:.58rem;letter-spacing:.1em;text-transform:uppercase;color:var(--smoke);margin-top:.2rem}
 
-/* ── BARS ─────────────────────────────────────────────────────────── */
-.bar{height:6px;background:rgba(242,240,235,.08);overflow:hidden}
-.bar i{display:block;height:100%}
+/* ── Release timeline ───────────────────────────────────────────── */
+.flow{display:grid;gap:.6rem;margin-top:2.2rem}
+@media(min-width:860px){.flow{grid-template-columns:repeat(6,1fr)}}
+.fstep{background:rgba(255,255,255,.05);border:1px solid var(--hair);border-radius:9px;
+  padding:.85rem .8rem;position:relative}
+.slide.light .fstep,.slide.cream .fstep{background:#fff;border-color:var(--bone)}
+.fstep.hero{background:rgba(255,59,31,.14);border-color:rgba(255,59,31,.5)}
+.slide.light .fstep.hero{background:rgba(255,59,31,.1)}
+.fwhen{font-size:.58rem;letter-spacing:.1em;text-transform:uppercase;color:var(--smoke)}
+.fwhat{font-size:.78rem;font-weight:700;margin-top:.3rem;line-height:1.25}
+.fnum{font-family:'Anton',sans-serif;font-size:1.05rem;margin-top:.35rem}
+.fstep.hero .fnum{color:var(--signal)}
 
-/* ── QUOTES ───────────────────────────────────────────────────────── */
-.q{border-left:2px solid var(--cyan);padding:.1rem 0 .1rem .95rem;margin:.85rem 0;
-  font-size:.92rem;color:var(--bone);line-height:1.5}
-.q span{display:block;font-family:var(--mono);font-size:.6rem;color:var(--faint);
-  margin-top:.4rem;letter-spacing:.08em}
-.q.amb{border-left-color:var(--amber)}
-.q.pnk{border-left-color:var(--mag)}
+/* ── Opportunity cards ──────────────────────────────────────────── */
+.ops{display:grid;gap:1rem;margin-top:2.2rem}
+@media(min-width:860px){.ops{grid-template-columns:repeat(3,1fr)}}
+.op{border:1px solid var(--hair);border-radius:10px;padding:1.2rem 1.25rem;
+  background:rgba(255,255,255,.04)}
+.slide.light .op,.slide.cream .op{background:#fff;border-color:var(--bone)}
+.op .n{font-family:'Anton',sans-serif;font-size:1.6rem;color:var(--signal);line-height:1}
+.op h4{font-size:.95rem;font-weight:700;margin:.5rem 0 .55rem;line-height:1.3}
+.op p{font-size:.8rem;color:var(--smoke);line-height:1.55}
+.slide.light .op p,.slide.cream .op p{color:var(--warm)}
+.op .step{font-size:.76rem;font-weight:600;margin-top:.7rem;padding-top:.7rem;
+  border-top:1px solid var(--hair);color:var(--paper)}
+.slide.light .op .step,.slide.cream .op .step{border-color:var(--bone);color:var(--ink)}
 
-/* ── CAVEAT ───────────────────────────────────────────────────────── */
-.caveat{border:1px solid rgba(255,59,31,.3);background:rgba(255,59,31,.05);
-  padding:1rem 1.15rem;margin-top:1.4rem}
-.caveat .ch{font-family:var(--mono);font-size:.58rem;letter-spacing:.16em;
-  text-transform:uppercase;color:var(--red);margin-bottom:.5rem}
-.caveat p{font-size:.85rem;color:var(--smoke);max-width:none}
-.caveat p b{color:var(--bone)}
+/* ── Quotes ─────────────────────────────────────────────────────── */
+.qs{display:grid;gap:1rem;margin-top:2rem}
+@media(min-width:860px){.qs{grid-template-columns:repeat(3,1fr)}}
+.qt{border-left:2px solid var(--cyan);padding:.1rem 0 .1rem .9rem}
+.qt .h{font-size:.85rem;font-weight:700;margin-bottom:.5rem}
+.qt p{font-size:.82rem;color:var(--smoke);line-height:1.5;font-style:italic}
+.slide.light .qt p,.slide.cream .qt p{color:var(--warm)}
+.qt .src{font-size:.56rem;letter-spacing:.1em;text-transform:uppercase;color:var(--smoke);margin-top:.45rem}
 
-/* ── SOURCE CHIPS ─────────────────────────────────────────────────── */
-.chips{display:flex;gap:.4rem;flex-wrap:wrap;margin-top:1.6rem}
-.chip{font-family:var(--mono);font-size:.56rem;letter-spacing:.13em;text-transform:uppercase;
-  padding:.25rem .55rem;border:1px solid var(--rule);color:var(--faint)}
-.chip.ch{border-color:rgba(34,201,224,.4);color:var(--cyan)}
-.chip.pb{border-color:rgba(255,178,36,.4);color:var(--amber)}
-.chip.it{border-color:rgba(255,79,163,.4);color:var(--mag)}
-.chip.us{border-color:rgba(255,59,31,.45);color:var(--red)}
+/* ── Tour ───────────────────────────────────────────────────────── */
+.tour{display:grid;gap:.5rem;margin-top:2rem}
+@media(min-width:760px){.tour{grid-template-columns:repeat(5,1fr)}}
+.td{border:1px solid var(--hair);border-radius:8px;padding:.8rem .75rem;text-align:center}
+.td.out{border-color:rgba(34,201,224,.5);background:rgba(34,201,224,.08)}
+.td .d{font-family:'Anton',sans-serif;font-size:1.35rem}
+.td .c{font-size:.72rem;font-weight:600;margin-top:.25rem}
+.td .s{font-size:.56rem;letter-spacing:.1em;text-transform:uppercase;margin-top:.4rem;color:var(--cyan)}
+.td:not(.out) .s{color:var(--smoke)}
 
-@media print{.nav{display:none}.slide{min-height:0;page-break-inside:avoid}}
+/* ── Chrome ─────────────────────────────────────────────────────── */
+.chrome{position:fixed;top:0;left:0;right:0;z-index:900;display:flex;justify-content:space-between;
+  align-items:center;padding:.75rem 1.25rem;background:rgba(11,11,13,.92);backdrop-filter:blur(12px);
+  border-bottom:1px solid var(--hair)}
+.chrome-l{font-size:.6rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--smoke)}
+.chrome-r{display:flex;gap:.5rem}
+.btn{font-family:inherit;font-size:.58rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;
+  padding:.5rem .85rem;border-radius:6px;border:1px solid var(--hair);background:transparent;
+  color:var(--paper);cursor:pointer;transition:all .2s}
+.btn:hover{background:rgba(255,255,255,.1)}
+.btn.primary{background:var(--signal);border-color:var(--signal);color:#fff}
+body.present .chrome{display:none}
+body.present{overflow:hidden}
+.deck{padding-top:52px}
+
+/* ── Presentation mode ──────────────────────────────────────────── */
+body.present .slide{display:none;min-height:100vh;height:100vh;border:none;
+  padding:clamp(1.5rem,4vh,3.5rem) clamp(2rem,5vw,5rem);overflow-y:auto;justify-content:safe center}
+body.present .slide.current{display:flex}
+body.present .reveal,body.present .stagger>*{opacity:1;transform:none;transition:none}
+body.present .deck{padding-top:0}
+body.present .inner{max-width:min(1240px,calc((100vh - 6rem) * 16 / 9))}
+body.present .stat-row,body.present .thumb-grid,body.present .flow,
+body.present .ops,body.present .qs,body.present .tour{margin-top:1.5rem}
+body.present .sub{margin-top:1rem}
+body.present .ttitle{-webkit-line-clamp:1;font-size:.7rem}
+body.present .srcline{margin-top:1.2rem}
+.pbar{display:none;position:fixed;bottom:0;left:0;height:3px;background:var(--signal);z-index:1000;transition:width .3s ease}
+body.present .pbar{display:block}
+.pcount{display:none;position:fixed;bottom:1rem;right:1.25rem;z-index:1000;font-size:.6rem;font-weight:700;
+  letter-spacing:.14em;color:var(--smoke);background:rgba(11,11,13,.75);padding:.35rem .7rem;border-radius:5px}
+body.present .pcount{display:block}
+.phint{display:none;position:fixed;bottom:1rem;left:1.25rem;z-index:1000;font-size:.58rem;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--smoke);opacity:.5}
+body.present .phint{display:block}
+
+/* ── Analysis sheet ─────────────────────────────────────────────── */
+.sheet{display:none;padding:4.5rem clamp(1rem,5vw,4rem);background:var(--paper);color:var(--ink);min-height:100vh}
+.sheet.open{display:block;position:fixed;inset:0;z-index:950;overflow-y:auto}
+body.sheet-open{overflow:hidden}
+.sheet h2{font-family:'Anton',sans-serif;font-size:clamp(1.8rem,4vw,3rem);line-height:.95;margin-bottom:.4rem}
+.sheet h3{font-size:.95rem;font-weight:700;margin:2rem 0 .6rem;padding-bottom:.4rem;
+  border-bottom:1px solid var(--bone)}
+.sheet p,.sheet li{font-size:.84rem;color:var(--warm);line-height:1.6;max-width:78ch}
+.sheet ul{list-style:none;margin-top:.5rem}
+.sheet li{padding-left:1.1rem;position:relative;margin-bottom:.45rem}
+.sheet li::before{content:'_';position:absolute;left:0;top:-.15em;color:var(--signal);font-weight:700}
+.sheet li b,.sheet p b{color:var(--ink)}
+.sheet table{width:100%;border-collapse:collapse;font-size:.78rem;margin-top:.7rem}
+.sheet th{text-align:left;font-size:.58rem;letter-spacing:.12em;text-transform:uppercase;color:var(--warm);
+  padding:.45rem .5rem;border-bottom:1px solid var(--bone);font-weight:700}
+.sheet td{padding:.5rem;border-bottom:1px solid rgba(0,0,0,.07);color:var(--warm);vertical-align:top}
+.sheet td b{color:var(--ink)}
+.sheet .num{text-align:right;font-variant-numeric:tabular-nums}
+.sheet .close{position:fixed;top:1rem;right:1.25rem;z-index:960}
+.sheet .cols{display:grid;gap:2rem}
+@media(min-width:900px){.sheet .cols{grid-template-columns:repeat(2,1fr)}}
+.sheet a{color:#B5280F}
+
+@media print{.chrome,.pbar,.pcount,.phint{display:none}.slide{min-height:0;page-break-inside:avoid}}
 </style>
 </head>
 <body>
 
-<nav class="nav">
-  <span class="who">underscores · @underscores</span>
-  <a class="analysis" href="#method">Method &amp; sources ↓</a>
-</nav>
+<div class="chrome">
+  <div class="chrome-l"><span style="color:var(--signal)">underscores × YouTube</span></div>
+  <div class="chrome-r">
+    <button class="btn primary" onclick="startPresent()">Present</button>
+    <button class="btn" onclick="openSheet('analysis')">Analysis</button>
+  </div>
+</div>
 
-<!-- ══ 01 · COVER ═══════════════════════════════════════════════════ -->
-<section class="slide">
-  <div class="bleed scrim-l">
+<div class="pbar" id="pbar"></div>
+<div class="pcount" id="pcount"></div>
+<div class="phint">← → to move · Esc to exit</div>
+
+<div class="deck">
+
+<!-- ══ 1 · COVER ════════════════════════════════════════════════════ -->
+<section class="slide" data-t="Cover">
+  <div class="bleed">
     <img src="https://i.ytimg.com/vi/Gf-fCJ6TkRU/maxresdefault.jpg"
-         onerror="this.src='https://i.ytimg.com/vi/Gf-fCJ6TkRU/hqdefault.jpg'" alt=""
-         style="filter:saturate(1.1)">
+         onerror="this.src='https://i.ytimg.com/vi/Gf-fCJ6TkRU/hqdefault.jpg'" alt="">
   </div>
   <div class="inner">
-    <div class="label hot">U era · YouTube strategy review · 16 October 2026</div>
-    <h1 class="display" style="margin-top:1.1rem">She already knows<br>how to build a release.</h1>
-    <p class="big-p">
-      Three Shorts, a video, a version, a remix — <b>six assets from one song</b>. The creative
-      is not the question going into 2027. The question is whether the surfaces around it are
-      built to catch what it makes.
+    <div class="label reveal">Virgin Music Group UK · 16 October 2026</div>
+    <h1 class="hero display reveal">underscores</h1>
+    <p class="sub reveal" style="max-width:640px;font-size:clamp(1.05rem,1.7vw,1.4rem)">
+      Channel development and the 2027 album campaign.<br>
+      A presentation for management and YouTube UK.
     </p>
-    <div class="rule"></div>
-    <div class="fine">
-      All 102 videos currently public on the channel · 145K subscribers<br>
-      160 comments sampled across four singles · YouTube Data API v3, read 16 October 2026<br>
-      No YouTube Studio metrics — every analytics question is listed, not estimated
-    </div>
   </div>
 </section>
 
-<!-- ══ 02 · THE ARTIST ══════════════════════════════════════════════ -->
-<section class="slide">
+<!-- ══ 2 · THE CHANNEL TODAY ════════════════════════════════════════ -->
+<section class="slide" data-t="The channel today">
   <div class="inner">
-    <div class="label">Who this is, verified</div>
-    <h2 class="display" style="margin-top:.9rem">A producer whose audience<br>argues about production.</h2>
-
-    <div class="cols two">
-      <div>
-        <p style="font-size:.95rem"><b style="color:var(--bone)">underscores</b> is April Harper Grey —
-        American singer, songwriter and producer, working solo. She uses
-        <b style="color:var(--bone)">she/her</b>. The styling is lower-case and she is not a band.</p>
-        <p style="font-size:.95rem;margin-top:.8rem">Three albums: <i>Fishmonger</i> (2021),
-        <i>Wallsocket</i> (2023) — a concept record about small-town America promoted with an
-        <b style="color:var(--bone)">alternate-reality game</b> — and <b style="color:var(--bone)">U</b>,
-        released 20 March 2026 on Mom + Pop. Pitchfork Best New Music, five stars in NME. She opened
-        for Charli XCX in autumn 2026.</p>
-        <p style="font-size:.95rem;margin-top:.8rem">That history matters for one reason: the
-        world-building is <b style="color:var(--bone)">already how she works</b>. Nothing in this deck
-        asks her to become a different kind of artist.</p>
-      </div>
-
-      <div class="panel c">
-        <div class="label cold">Verified · 16 September 2026</div>
-        <h3 style="margin-top:.7rem">YouTube Music Foundry, Class of 2026</h3>
-        <p>Announced in the autumn cohort — 16 artists, eight countries. YouTube's own words:
-        <i>"a genre-bending innovator fusing hyperpop with sharp, cinematic conceptual songwriting
-        and world-building visuals."</i></p>
-        <p style="margin-top:.7rem">Foundry artists receive, per YouTube:
-        <b style="color:var(--bone)">a grant, dedicated partner support, access to products, and
-        bespoke on- and off-platform opportunities</b>. We quote the programme rather than
-        characterise it.</p>
-        <p class="fine" style="margin-top:.9rem"><a href="https://blog.youtube/creator-and-artist-stories/new-artists-youtube-music-foundry-class-2026/" target="_blank" rel="noopener" style="color:var(--cyan)">blog.youtube — Foundry Class of 2026 ↗</a></p>
-      </div>
+    <div class="label reveal">The channel today</div>
+    <h2 class="big display reveal" style="max-width:17ch">Growing without publishing</h2>
+    <div class="stat-row stagger">
+      <div class="stat"><div class="num">145K</div><div class="cap">Subscribers</div>
+        <div class="sub2">Public display, rounded</div></div>
+      <div class="stat"><div class="num">36.8M</div><div class="cap">Channel views</div>
+        <div class="sub2">Lifetime, artist channel</div></div>
+      <div class="stat"><div class="num">102</div><div class="cap">Public uploads</div>
+        <div class="sub2">84 long-form · 18 Shorts</div></div>
+      <div class="stat"><div class="num sig">+798K</div><div class="cap">Views, last 7 days</div>
+        <div class="sub2">Measured · no uploads in 30 days</div></div>
     </div>
-
-    <div class="hero2 four">
-      <div class="h2c"><div class="h2n r">145K</div><div class="h2l">Subscribers<br>Public rounded display</div></div>
-      <div class="h2c"><div class="h2n c">36.8M</div><div class="h2l">Lifetime views<br>Artist channel only</div></div>
-      <div class="h2c"><div class="h2n m">13.8M</div><div class="h2l">Topic channel views<br>Separate surface · 549 subs</div></div>
-      <div class="h2c"><div class="h2n a">102</div><div class="h2l">Public videos<br>84 long-form · 18 Shorts</div></div>
+    <p class="sub reveal">
+      April Harper Grey records as <b>underscores</b> — a solo producer and songwriter, and a
+      <b>2026 YouTube Music Foundry artist</b>. The channel added <b>798,252 views in the last
+      week with nothing new published</b>. The catalogue is doing the work; the opportunity is
+      giving it something to hand people on to.
+    </p>
+    <div class="thumb-grid four stagger">
+      <a class="tcard" href="https://www.youtube.com/watch?v=Gf-fCJ6TkRU" target="_blank" rel="noopener">
+        <img src="https://i.ytimg.com/vi/Gf-fCJ6TkRU/hqdefault.jpg" alt="" loading="lazy">
+        <div class="tmeta"><div class="ttitle">The Peace</div><div class="tviews">1.37M</div>
+        <div class="tsub">Aug 2026</div></div></a>
+      <a class="tcard" href="https://www.youtube.com/watch?v=Zd0j0xnhWFw" target="_blank" rel="noopener">
+        <img src="https://i.ytimg.com/vi/Zd0j0xnhWFw/hqdefault.jpg" alt="" loading="lazy">
+        <div class="tmeta"><div class="ttitle">Do It</div><div class="tviews">1.48M</div>
+        <div class="tsub">Nov 2025</div></div></a>
+      <a class="tcard" href="https://www.youtube.com/watch?v=UNYqwpx7Cys" target="_blank" rel="noopener">
+        <img src="https://i.ytimg.com/vi/UNYqwpx7Cys/hqdefault.jpg" alt="" loading="lazy">
+        <div class="tmeta"><div class="ttitle">Music</div><div class="tviews">1.87M</div>
+        <div class="tsub">Jun 2025</div></div></a>
+      <a class="tcard" href="https://www.youtube.com/watch?v=i_gkcxgNCM8" target="_blank" rel="noopener">
+        <img src="https://i.ytimg.com/vi/i_gkcxgNCM8/hqdefault.jpg" alt="" loading="lazy">
+        <div class="tmeta"><div class="ttitle">Tell Me (U Want It)</div><div class="tviews">744K</div>
+        <div class="tsub">Feb 2026</div></div></a>
     </div>
-    <div class="chips">
-      <span class="chip ch">Channel data</span><span class="chip pb">Public research</span>
-      <span class="chip us">Our reading</span>
-    </div>
+    <div class="srcline reveal">YouTube Data API, 16 Oct 2026 · growth from 28 days of channel snapshots</div>
   </div>
 </section>
 
-<!-- ══ 03 · THE UK MOMENT ═══════════════════════════════════════════ -->
-<section class="slide">
-  <div class="bleed scrim-b">
+<!-- ══ 3 · THE VIDEOS CONNECT ═══════════════════════════════════════ -->
+<section class="slide light" data-t="The videos connect">
+  <div class="inner">
+    <div class="label reveal">Current era · album <i>U</i>, March 2026</div>
+    <h2 class="big display reveal" style="max-width:19ch">Four singles, four strong results</h2>
+    <p class="sub reveal">
+      Every single from this album cycle has cleared <b>700,000 views</b>, and the newest is the
+      most engaged: <b>The Peace</b> has drawn <b>3,089 comments in 65 days</b> — more than any
+      other single in the era. The visual identity is consistent and recognisably hers.
+    </p>
+    <div class="thumb-grid four stagger">
+      <a class="tcard" href="https://www.youtube.com/watch?v=Gf-fCJ6TkRU" target="_blank" rel="noopener">
+        <img src="https://i.ytimg.com/vi/Gf-fCJ6TkRU/hqdefault.jpg" alt="" loading="lazy">
+        <div class="tmeta"><div class="ttitle">underscores — The Peace</div><div class="tviews">1.37M</div>
+        <div class="tsub">12 Aug 2026 · 3,089 comments</div></div></a>
+      <a class="tcard" href="https://www.youtube.com/watch?v=Zd0j0xnhWFw" target="_blank" rel="noopener">
+        <img src="https://i.ytimg.com/vi/Zd0j0xnhWFw/hqdefault.jpg" alt="" loading="lazy">
+        <div class="tmeta"><div class="ttitle">underscores — Do It</div><div class="tviews">1.48M</div>
+        <div class="tsub">4 Nov 2025</div></div></a>
+      <a class="tcard" href="https://www.youtube.com/watch?v=UNYqwpx7Cys" target="_blank" rel="noopener">
+        <img src="https://i.ytimg.com/vi/UNYqwpx7Cys/hqdefault.jpg" alt="" loading="lazy">
+        <div class="tmeta"><div class="ttitle">underscores — Music</div><div class="tviews">1.87M</div>
+        <div class="tsub">27 Jun 2025</div></div></a>
+      <a class="tcard" href="https://www.youtube.com/watch?v=kvhVECfGsw8" target="_blank" rel="noopener">
+        <img src="https://i.ytimg.com/vi/kvhVECfGsw8/hqdefault.jpg" alt="" loading="lazy">
+        <div class="tmeta"><div class="ttitle">Do It (Yves Remix)</div><div class="tviews">727K</div>
+        <div class="tsub">23 Jan 2026 · collaboration</div></div></a>
+    </div>
+    <p class="sub reveal" style="font-size:.9rem;margin-top:1.4rem">
+      Earlier catalogue still earns — <i>Locals (Girls like us)</i> and <i>Spoiled little brat</i>
+      sit between 600K and 790K from 2021–23. Those are lifetime totals across very different
+      ages, so they show durability rather than current pace.
+    </p>
+    <div class="srcline reveal" style="color:var(--warm)">Lifetime view counts, YouTube Data API, 16 Oct 2026</div>
+  </div>
+</section>
+
+<!-- ══ 4 · WHAT THE TEAM DOES WELL ══════════════════════════════════ -->
+<section class="slide" data-t="Release craft">
+  <div class="inner">
+    <div class="label reveal">What the team already does well</div>
+    <h2 class="big display reveal" style="max-width:20ch">A release is built, not dropped</h2>
+    <p class="sub reveal">
+      <b>Do It</b> is the clearest example. Six assets in 25 days — three Shorts, the video, another
+      Short, then a choreography version. A remix wave followed ten weeks later. This is deliberate
+      release craft and it is already house practice.
+    </p>
+    <div class="flow stagger">
+      <div class="fstep"><div class="fwhen">15 Oct</div><div class="fwhat">Short</div><div class="fnum">159K</div></div>
+      <div class="fstep"><div class="fwhen">26 Oct</div><div class="fwhat">Short</div><div class="fnum">448K</div></div>
+      <div class="fstep"><div class="fwhen">31 Oct</div><div class="fwhat">Short</div><div class="fnum">112K</div></div>
+      <div class="fstep hero"><div class="fwhen">4 Nov</div><div class="fwhat">Official video</div><div class="fnum">1.48M</div></div>
+      <div class="fstep"><div class="fwhen">6 Nov</div><div class="fwhat">Short</div><div class="fnum">236K</div></div>
+      <div class="fstep"><div class="fwhen">9 Nov</div><div class="fwhat">Choreo version</div><div class="fnum">415K</div></div>
+    </div>
+    <p class="sub reveal" style="font-size:.92rem">
+      Ten weeks on, two Shorts and the <b>Yves remix</b> reopened the song — the remix alone drew
+      <b>727,000 views</b>. Nine assets in total across the campaign.
+    </p>
+    <div class="srcline reveal">Publication order and lifetime views. Movement between assets is not
+      measurable without channel analytics — see Analysis.</div>
+  </div>
+</section>
+
+<!-- ══ 5 · MORE TO WATCH ════════════════════════════════════════════ -->
+<section class="slide cream" data-t="Range of formats">
+  <div class="inner">
+    <div class="label reveal">Beyond the single</div>
+    <h2 class="big display reveal" style="max-width:20ch">An unusual range already exists</h2>
+    <p class="sub reveal">
+      Two multi-hour production streams, a four-part video series, a full album video and a live
+      performance. <b>The A-side production stream drew 136,839 views</b> — a strong result for
+      unedited process footage, and a format very few artists at this scale attempt.
+    </p>
+    <div class="thumb-grid four stagger">
+      <a class="tcard" href="https://www.youtube.com/watch?v=6OmpI6wJVNc" target="_blank" rel="noopener">
+        <img src="https://i.ytimg.com/vi/6OmpI6wJVNc/hqdefault.jpg" alt="" loading="lazy">
+        <div class="tmeta"><div class="ttitle">U–A(side) / production stream</div><div class="tviews">137K</div>
+        <div class="tsub">3h 22m · Apr 2026</div></div></a>
+      <a class="tcard" href="https://www.youtube.com/watch?v=yzwzkhNQcsM" target="_blank" rel="noopener">
+        <img src="https://i.ytimg.com/vi/yzwzkhNQcsM/hqdefault.jpg" alt="" loading="lazy">
+        <div class="tmeta"><div class="ttitle">U (album video)</div><div class="tviews">236K</div>
+        <div class="tsub">34m · Mar 2026</div></div></a>
+      <a class="tcard" href="https://www.youtube.com/watch?v=X0Ejds9uRco" target="_blank" rel="noopener">
+        <img src="https://i.ytimg.com/vi/X0Ejds9uRco/hqdefault.jpg" alt="" loading="lazy">
+        <div class="tmeta"><div class="ttitle">Unlimited Love 《live from Galleria Chicago》</div><div class="tviews">107K</div>
+        <div class="tsub">4m 39s · Aug 2026</div></div></a>
+      <a class="tcard" href="https://www.youtube.com/watch?v=Vxm4KaIzeqY" target="_blank" rel="noopener">
+        <img src="https://i.ytimg.com/vi/Vxm4KaIzeqY/hqdefault.jpg" alt="" loading="lazy">
+        <div class="tmeta"><div class="ttitle">Wsk Life 1 — four-part series</div><div class="tviews">36K</div>
+        <div class="tsub">21m · Feb 2024</div></div></a>
+    </div>
+    <p class="sub reveal" style="font-size:.9rem;margin-top:1.3rem">
+      Process and performance are the two foundations worth developing. How long people actually
+      stay with a three-hour video is a question for channel analytics, not something view counts
+      can answer.
+    </p>
+    <div class="srcline reveal" style="color:var(--warm)">Durations and lifetime views, YouTube Data API, 16 Oct 2026</div>
+  </div>
+</section>
+
+<!-- ══ 6 · WHAT FANS RESPOND TO ═════════════════════════════════════ -->
+<section class="slide" data-t="Audience response">
+  <div class="inner">
+    <div class="label reveal">What fans respond to</div>
+    <h2 class="big display reveal" style="max-width:20ch">They talk about how it was made</h2>
+    <p class="sub reveal">
+      Across 160 comments read on four singles, three themes recur: <b>production craft</b>,
+      <b>visual authorship</b>, and <b>a shared in-joke that carries between releases</b>.
+      This is an audience engaged with her as a maker, not only with the songs.
+    </p>
+    <div class="qs stagger">
+      <div class="qt"><div class="h">Production craft</div>
+        <p>"drumless production going crazy"</p>
+        <div class="src">2,858 likes · The Peace</div></div>
+      <div class="qt"><div class="h">Visual authorship</div>
+        <p>"she was the creative director on this?? the storytelling goes crazy"</p>
+        <div class="src">on Do It</div></div>
+      <div class="qt"><div class="h">A joke that travels</div>
+        <p>"After inventing Music, underscores is now going on to Do it, making the Second Song Ever."</p>
+        <div class="src">9,489 likes · repeated across three singles</div></div>
+    </div>
+    <p class="sub reveal" style="font-size:.9rem">
+      Worth preserving: the process access and the creative-direction credit. Worth exploring:
+      more of the making, since that is what the audience reaches for unprompted.
+    </p>
+    <div class="srcline reveal">Public comments, relevance-ordered sample · method in Analysis</div>
+  </div>
+</section>
+
+<!-- ══ 7 · WHERE WE CAN BUILD ═══════════════════════════════════════ -->
+<section class="slide light" data-t="Where we can build">
+  <div class="inner">
+    <div class="label reveal">Where we can build</div>
+    <h2 class="big display reveal" style="max-width:20ch">Three opportunities from what already works</h2>
+    <div class="ops stagger">
+      <div class="op">
+        <div class="n">01</div>
+        <h4>Extend the process strand</h4>
+        <p><b>Strength:</b> the A-side stream drew 137K and production is the most-discussed topic
+        in the comments. <b>Opportunity:</b> process currently appears about twice a year, around
+        an album.</p>
+        <div class="step">Next step — plan capture during the 2027 sessions so the material exists
+        before it is needed.</div>
+      </div>
+      <div class="op">
+        <div class="n">02</div>
+        <h4>Give the catalogue a front door</h4>
+        <p><b>Strength:</b> 798K views in a week with nothing new published, and a separate Topic
+        surface carrying 13.8M lifetime views. <b>Opportunity:</b> arrivals have no obvious next
+        step into the era.</p>
+        <div class="step">Next step — review playlists and channel sections so a first-time viewer
+        lands somewhere deliberate.</div>
+      </div>
+      <div class="op">
+        <div class="n">03</div>
+        <h4>Keep releases open longer</h4>
+        <p><b>Strength:</b> the Yves remix reopened Do It ten weeks after release and drew 727K.
+        <b>Opportunity:</b> that second wave happened once.</p>
+        <div class="step">Next step — build one planned follow-up moment into each 2027 single
+        from the outset.</div>
+      </div>
+    </div>
+    <div class="srcline reveal" style="color:var(--warm)">Each opportunity traces to a figure in Analysis</div>
+  </div>
+</section>
+
+<!-- ══ 8 · UK MOMENT ════════════════════════════════════════════════ -->
+<section class="slide" data-t="A UK moment">
+  <div class="bleed side">
     <img src="https://i.ytimg.com/vi/X0Ejds9uRco/maxresdefault.jpg"
          onerror="this.src='https://i.ytimg.com/vi/X0Ejds9uRco/hqdefault.jpg'" alt="">
   </div>
   <div class="inner">
-    <div class="label pink">Internal campaign input · reported 14 October 2026</div>
-    <h2 class="display" style="margin-top:.9rem">Four of five sold out.<br>Nothing on the channel about it.</h2>
+    <div class="label reveal">November 2026</div>
+    <h2 class="big display reveal" style="max-width:18ch">Strong UK demand, three weeks out</h2>
+    <div class="tour stagger">
+      <div class="td out"><div class="d">10</div><div class="c">Glasgow<br>SWG3</div><div class="s">Sold out</div></div>
+      <div class="td out"><div class="d">12</div><div class="c">London<br>Brixton</div><div class="s">Sold out</div></div>
+      <div class="td out"><div class="d">14</div><div class="c">Manchester<br>Aviva</div><div class="s">Sold out</div></div>
+      <div class="td"><div class="d">15</div><div class="c">Bristol<br>Prospect</div><div class="s">On sale</div></div>
+      <div class="td out"><div class="d">16</div><div class="c">London<br>Brixton</div><div class="s">Sold out</div></div>
+    </div>
+    <p class="sub reveal">
+      Four of five sold out as reported on 14 October, including both London dates, with a fan
+      pop-up proposed for the 13th. Three ways to bring it onto YouTube: <b>a live performance
+      piece</b>, <b>short-form from the pop-up</b>, and <b>a tour-wide film</b> for December.
+      Foundry membership gives us a natural basis for discussing support with YouTube UK.
+    </p>
+    <div class="srcline reveal">Tour status from internal campaign reporting, 14 Oct 2026 · subject to confirmation</div>
+  </div>
+</section>
 
-    <div class="cols two">
-      <div class="tw" style="margin-top:0">
+<!-- ══ 9 · TOWARDS THE NEXT ALBUM ═══════════════════════════════════ -->
+<section class="slide cream" data-t="2027 campaign shape">
+  <div class="inner">
+    <div class="label reveal">Building towards the next album</div>
+    <h2 class="big display reveal" style="max-width:20ch">A repeatable shape per single</h2>
+    <p class="sub reveal">
+      Do It already proved the pattern. Applied deliberately to each 2027 single, it gives every
+      release a second and third moment rather than a single peak.
+    </p>
+    <div class="flow stagger" style="grid-template-columns:repeat(4,1fr)">
+      <div class="fstep hero"><div class="fwhen">Stage 1</div><div class="fwhat">Hero release</div>
+        <div class="fnum" style="font-size:.76rem;font-family:'Inter';font-weight:600;color:var(--warm)">Video, with short-form around it</div></div>
+      <div class="fstep"><div class="fwhen">Stage 2</div><div class="fwhat">Follow-up music moment</div>
+        <div class="fnum" style="font-size:.76rem;font-family:'Inter';font-weight:600;color:var(--warm)">Remix, alternate or live version</div></div>
+      <div class="fstep"><div class="fwhen">Stage 3</div><div class="fwhat">Artist world</div>
+        <div class="fnum" style="font-size:.76rem;font-family:'Inter';font-weight:600;color:var(--warm)">Process or performance film</div></div>
+      <div class="fstep"><div class="fwhen">Stage 4</div><div class="fwhat">Next release</div>
+        <div class="fnum" style="font-size:.76rem;font-family:'Inter';font-weight:600;color:var(--warm)">Catalogue stays open behind it</div></div>
+    </div>
+    <p class="sub reveal" style="font-size:.9rem">
+      <b>November is separate.</b> It is an opportunity to capture material and test the live
+      format while the shows are happening. Album timing, budget and rollout remain to be
+      confirmed, so this is a shape rather than a schedule.
+    </p>
+    <div class="srcline reveal" style="color:var(--warm)">Formats selected from this channel's own evidence</div>
+  </div>
+</section>
+
+<!-- ══ 10 · NEXT STEP ═══════════════════════════════════════════════ -->
+<section class="slide" data-t="The next step">
+  <div class="inner">
+    <div class="label reveal">The next step</div>
+    <h2 class="big display reveal" style="max-width:16ch">Three priorities</h2>
+    <div class="ops stagger">
+      <div class="op">
+        <div class="n">01</div>
+        <h4>Capture November</h4>
+        <p>Five UK shows and a proposed pop-up. Agree what gets filmed and who covers it, so the
+        material exists whether or not it is used immediately.</p>
+        <div class="step">Management · before 10 November</div>
+      </div>
+      <div class="op">
+        <div class="n">02</div>
+        <h4>Open the channel analytics conversation</h4>
+        <p>Where viewers come from, how long they stay with the long-form, and how much of the
+        audience is UK. These answers shape the 2027 plan.</p>
+        <div class="step">VMG UK with YouTube UK · before November</div>
+      </div>
+      <div class="op">
+        <div class="n">03</div>
+        <h4>Plan the process film early</h4>
+        <p>The strongest distinctive format on the channel, and the one the audience asks about.
+        It has to be filmed while the record is being made.</p>
+        <div class="step">Management and label · 2027 sessions</div>
+      </div>
+    </div>
+    <p class="sub reveal">
+      underscores is a 2026 Foundry artist with a growing channel, a distinctive catalogue and an
+      audience that engages with her craft. <b>The foundations are already here.</b>
+    </p>
+    <div class="srcline reveal">Detailed owners, measurement and analytics requests in Analysis</div>
+  </div>
+</section>
+
+</div><!-- /deck -->
+
+<!-- ══ ANALYSIS SHEET ═══════════════════════════════════════════════ -->
+<div class="sheet" id="sheet-analysis">
+  <button class="btn close" onclick="closeSheets()">Close ✕</button>
+  <div style="max-width:1100px;margin:0 auto">
+    <h2>Analysis</h2>
+    <p style="font-size:.9rem">Evidence, method and limitations behind the presentation.
+    All channel figures read from the public YouTube Data API v3 on <b>16 October 2026</b>.</p>
+
+    <div class="cols">
+      <div>
+        <h3>Inventory and scope</h3>
+        <p>All <b>102 videos currently public</b> on
+        <a href="https://www.youtube.com/@underscores" target="_blank" rel="noopener">@underscores</a>,
+        retrieved by paging the uploads playlist to exhaustion — not a capped sample.
+        <b>84 long-form, 18 Shorts.</b> Channel opened July 2013; oldest public upload Dec 2014.</p>
         <table>
-          <tr><th>Date</th><th>City · venue</th><th class="num">Status</th></tr>
-          <tr><td><b>10 Nov</b></td><td>Glasgow, SWG3</td><td class="num" style="color:var(--cyan)">Sold out</td></tr>
-          <tr><td><b>12 Nov</b></td><td>London, Electric Brixton</td><td class="num" style="color:var(--cyan)">Sold out</td></tr>
-          <tr><td><b>14 Nov</b></td><td>Manchester, Aviva Studios</td><td class="num" style="color:var(--cyan)">Sold out</td></tr>
-          <tr><td><b>15 Nov</b></td><td>Bristol, The Prospect Building</td><td class="num" style="color:var(--amber)">Available</td></tr>
-          <tr><td><b>16 Nov</b></td><td>London, Electric Brixton</td><td class="num" style="color:var(--cyan)">Sold out</td></tr>
-          <tr><td><b>13 Nov</b></td><td>London fan pop-up · proposed</td><td class="num" style="color:var(--faint)">TBC</td></tr>
+          <tr><th>Year</th><th class="num">Uploads</th><th class="num">Shorts</th><th class="num">Lifetime views</th></tr>
+          <tr><td>2021</td><td class="num">27</td><td class="num">0</td><td class="num">4,106,760</td></tr>
+          <tr><td>2023</td><td class="num">22</td><td class="num">3</td><td class="num">4,036,165</td></tr>
+          <tr><td>2024</td><td class="num">10</td><td class="num">0</td><td class="num">1,372,371</td></tr>
+          <tr><td><b>2025</b></td><td class="num">15</td><td class="num">11</td><td class="num">5,342,803</td></tr>
+          <tr><td><b>2026</b> to 28 Aug</td><td class="num">22</td><td class="num">4</td><td class="num">5,868,552</td></tr>
         </table>
-      </div>
-      <div>
-        <p style="font-size:.95rem">The newest upload on the channel is
-        <b style="color:var(--bone)">28 August 2026</b>. That is a seven-week silence running straight
-        into five UK shows, and there is <b style="color:var(--bone)">no UK content on the channel at
-        all</b> — the one live upload in this era was filmed in Chicago.</p>
-        <div class="caveat">
-          <div class="ch">What this does not prove</div>
-          <p>Sold-out rooms establish <b>live demand</b>. They do not establish that those ticket
-          buyers watch the channel. That overlap is a Studio question — a UK viewing split — and we
-          do not have one. If the overlap is small, that is an
-          <b>acquisition opportunity, not a failure</b>.</p>
-        </div>
-      </div>
-    </div>
-    <div class="chips"><span class="chip it">Internal · tour dates</span><span class="chip ch">Channel data</span></div>
-  </div>
-</section>
+        <p style="margin-top:.6rem;font-size:.78rem">View totals are lifetime and favour older
+        uploads. They indicate activity, not comparative performance.</p>
 
-<!-- ══ 04 · THE ECOSYSTEM ═══════════════════════════════════════════ -->
-<section class="slide">
-  <div class="inner">
-    <div class="label">Four surfaces, four jobs</div>
-    <h2 class="display" style="margin-top:.9rem">13.8 million views sit on a channel<br>with 549 subscribers.</h2>
-    <p class="big-p">Counted separately throughout. Topic views are never added to channel views, and
-    a track living on both is <b>one recording on two surfaces</b>, not two performances.</p>
+        <h3>Growth readings</h3>
+        <p>From <b>28 days of channel snapshots</b> held by VMG, not from the public API alone:</p>
+        <ul>
+          <li><b>+798,252 channel views</b> over 7 days (+2.2%). The lifetime view counter is exact,
+            so this delta is reliable.</li>
+          <li><b>Subscriber display moved from ~135K to 145K</b> over 30 days. Public subscriber
+            counts are <b>rounded</b>, so this is coarse — treat as direction, not precision.</li>
+          <li><b>Zero uploads in the 30-day window.</b> Newest upload 28 August 2026.</li>
+        </ul>
 
-    <div class="cols two">
-      <div class="panel r">
-        <div class="label hot">01 · Owned</div>
-        <h3 style="margin-top:.6rem"><a href="https://www.youtube.com/@underscores" target="_blank" rel="noopener" style="text-decoration:none">youtube.com/@underscores ↗</a></h3>
-        <p><b style="color:var(--bone)">Job: everything.</b> Discovery, deep viewing, community and
-        catalogue all run through one surface. Opened July 2013 — older than the project, which is why
-        its biggest single upload is still a
-        <a href="https://www.youtube.com/watch?v=lA_qxkrpM0M" target="_blank" rel="noopener" style="color:var(--cyan)">2014 dubstep production tutorial ↗</a>
-        at 2,143,040 views.</p>
-      </div>
-      <div class="panel m">
-        <div class="label pink">02 · Auto-generated</div>
-        <h3 style="margin-top:.6rem">underscores — Topic</h3>
-        <p><b style="color:var(--bone)">Job: repeat listening.</b> 13,797,333 lifetime views against
-        <b style="color:var(--bone)">549 subscribers</b> — the signature of a passive surface. No visual
-        identity, no community, no route back to the artist channel.
-        <b style="color:var(--bone)">The largest single finding on this slide.</b></p>
-      </div>
-      <div class="panel c">
-        <div class="label cold">03 · Collaborative</div>
-        <h3 style="margin-top:.6rem">Features and remixes</h3>
-        <p><b style="color:var(--bone)">Job: lateral discovery.</b> Seven collaborators across the
-        catalogue — Jane Remover, gabby start, henhouse!, 8485, Knapsack, and in this era
-        <b style="color:var(--bone)">Yves</b> and <b style="color:var(--bone)">Frost Children</b>. The Yves
-        remix drew <b style="color:var(--bone)">726,794</b>, comparable to a lead single. Remix as
-        discovery is demonstrated here, not theoretical.</p>
-      </div>
-      <div class="panel a">
-        <div class="label amb">04 · Third-party</div>
-        <h3 style="margin-top:.6rem">Fan and community uploads</h3>
-        <p><b style="color:var(--bone)">Job: cultural reach.</b> Visible in the comments we sampled — a
-        running joke travels between videos, so people are moving across the catalogue.</p>
-        <p style="color:var(--faint);font-size:.82rem;margin-top:.6rem"><b>Not quantified.</b> No
-        systematic search was run. No third-party view is owned, controlled or monetised by the artist,
-        and none is counted anywhere in this deck.</p>
-      </div>
-    </div>
-
-    <div class="caveat">
-      <div class="ch">Avoiding double-counting</div>
-      <p>On <b>20 March 2026</b> ten uploads landed in one day: nine track-level
-      <span style="font-family:var(--mono)">(♫)</span> audio uploads plus a 34-minute album video.
-      Those nine are the same recordings Topic also carries. A listener who plays <i>Lovefield</i> on
-      Topic and watches the <span style="font-family:var(--mono)">(♫)</span> upload is
-      <b>one person consuming one song on two surfaces</b>. They stay in separate columns throughout.</p>
-    </div>
-    <div class="chips"><span class="chip ch">Channel data · 16 Oct 2026</span><span class="chip us">Our reading</span></div>
-  </div>
-</section>
-
-<!-- ══ 05 · THE LADDER ══════════════════════════════════════════════ -->
-<section class="slide">
-  <div class="bleed scrim-l">
-    <img src="https://i.ytimg.com/vi/Zd0j0xnhWFw/maxresdefault.jpg"
-         onerror="this.src='https://i.ytimg.com/vi/Zd0j0xnhWFw/hqdefault.jpg'" alt="">
-  </div>
-  <div class="inner">
-    <div class="label hot">Do It · October–November 2025</div>
-    <h2 class="display" style="margin-top:.9rem">Six assets. One song.<br>The template already exists.</h2>
-    <p class="big-p">The clearest worked example on the channel of a release built as a
-    <b>sequence rather than a drop</b> — and the audience was warmest <b>after</b> the video, not before.</p>
-
-    <div class="tw">
-      <table>
-        <tr><th>Date</th><th>Asset</th><th>Format</th><th class="num">Views</th><th class="num">Like rate</th></tr>
-        <tr><td class="num">15 Oct</td><td><a href="https://www.youtube.com/shorts/cQ99ZWxvrbw" target="_blank" rel="noopener">Do It ↗</a></td><td>Short</td><td class="num">159,109</td><td class="num">6.06%</td></tr>
-        <tr><td class="num">26 Oct</td><td><a href="https://www.youtube.com/shorts/bkEoBmpQtCg" target="_blank" rel="noopener">Do It ↗</a></td><td>Short</td><td class="num" style="color:var(--cyan)"><b>448,503</b></td><td class="num">5.84%</td></tr>
-        <tr><td class="num">31 Oct</td><td><a href="https://www.youtube.com/shorts/BHXIFSKgP_w" target="_blank" rel="noopener">Do It ↗</a></td><td>Short</td><td class="num">111,681</td><td class="num">5.61%</td></tr>
-        <tr class="key"><td class="num"><b>4 Nov</b></td><td><a href="https://www.youtube.com/watch?v=Zd0j0xnhWFw" target="_blank" rel="noopener"><b>underscores — Do It ↗</b></a></td><td><b>Official video</b></td><td class="num"><b>1,477,883</b></td><td class="num">4.04%</td></tr>
-        <tr class="keyc"><td class="num">6 Nov</td><td><a href="https://www.youtube.com/shorts/Opaj6Zcm3bQ" target="_blank" rel="noopener">Do It ↗</a></td><td>Short</td><td class="num">236,083</td><td class="num" style="color:var(--cyan)"><b>7.43%</b></td></tr>
-        <tr><td class="num">9 Nov</td><td><a href="https://www.youtube.com/watch?v=j-lxGi4pOj8" target="_blank" rel="noopener">Do It (Choreo Ver.) ↗</a></td><td>Alt version</td><td class="num">415,363</td><td class="num">4.98%</td></tr>
-        <tr><td class="num">23 Jan</td><td><a href="https://www.youtube.com/watch?v=kvhVECfGsw8" target="_blank" rel="noopener">Do It (Yves Remix) ↗</a></td><td>Remix</td><td class="num">726,794</td><td class="num">5.66%</td></tr>
-      </table>
-    </div>
-
-    <div class="cols three">
-      <div class="panel c"><h3>Observe</h3>
-        <p>Three Shorts over 20 days, the video, a Short <i>after</i> it, a choreography version,
-        then a remix 11 weeks later. <b style="color:var(--bone)">2.9M views across the six.</b></p></div>
-      <div class="panel"><h3>Why it matters</h3>
-        <p>The post-video Short carries the <b style="color:var(--bone)">highest like rate of the whole
-        sequence at 7.43%</b> — an argument for publishing <i>into</i> a release rather than stopping
-        at it.</p></div>
-      <div class="panel r"><h3>So what</h3>
-        <p>Make this the default shape for 2027. It is cheap, repeatable, and already hers.</p></div>
-    </div>
-
-    <div class="caveat">
-      <div class="ch">The honest limit on this slide</div>
-      <p>This is a <b>sequence, not a funnel</b>. We know the Shorts preceded the video and the video
-      performed. We do <b>not</b> know that anyone crossed from one to the other — that needs
-      traffic-source data, which is the first analytics ask on slide 11.</p>
-    </div>
-    <div class="chips"><span class="chip ch">Channel data</span><span class="chip us">Our reading</span></div>
-  </div>
-</section>
-
-<!-- ══ 06 · THE SURPRISE FORMAT ═════════════════════════════════════ -->
-<section class="slide">
-  <div class="bleed scrim-f">
-    <img src="https://i.ytimg.com/vi/6OmpI6wJVNc/maxresdefault.jpg"
-         onerror="this.src='https://i.ytimg.com/vi/6OmpI6wJVNc/hqdefault.jpg'" alt="">
-  </div>
-  <div class="inner">
-    <div class="label amb">The format nobody expected to work</div>
-    <h2 class="display" style="margin-top:.9rem">Three hours and twenty-four minutes<br>of her working. 136,839 views.</h2>
-    <p class="big-p">A 5.97% like rate — <b>higher than every official video on the channel</b>.
-    This is the most under-exploited thing underscores makes.</p>
-
-    <div class="hero2 three">
-      <div class="h2c"><div class="h2n a">5.97%</div><div class="h2l">Like rate, A-side stream<br>Channel's best, any format</div></div>
-      <div class="h2c"><div class="h2n">4.04%</div><div class="h2l">Like rate, Do It<br>The biggest official video</div></div>
-      <div class="h2c"><div class="h2n">2.56%</div><div class="h2l">Median, all long-form<br>Across the catalogue</div></div>
-    </div>
-
-    <div class="cols two">
-      <div class="tw" style="margin-top:0">
+        <h3>Current-era singles</h3>
         <table>
-          <tr><th>Asset</th><th class="num">Length</th><th class="num">Views</th><th class="num">Likes</th></tr>
-          <tr class="key"><td><a href="https://www.youtube.com/watch?v=6OmpI6wJVNc" target="_blank" rel="noopener"><b>U–A(side) / production stream ↗</b></a><br><span class="fine">25 Apr 2026</span></td><td class="num">3.4h</td><td class="num" style="color:var(--amber)"><b>136,839</b></td><td class="num">8,174</td></tr>
-          <tr><td><a href="https://www.youtube.com/watch?v=WgQlyYji81Y" target="_blank" rel="noopener">U–B(side) / production stream ↗</a><br><span class="fine">26 Apr 2026</span></td><td class="num">3.4h</td><td class="num">68,102</td><td class="num">3,891</td></tr>
+          <tr><th>Single</th><th class="num">Views</th><th class="num">Age</th><th class="num">Comments</th></tr>
+          <tr><td>Music</td><td class="num">1,871,328</td><td class="num">476d</td><td class="num">2,122</td></tr>
+          <tr><td>Do It</td><td class="num">1,477,883</td><td class="num">346d</td><td class="num">1,998</td></tr>
+          <tr><td>Tell Me (U Want It)</td><td class="num">743,549</td><td class="num">233d</td><td class="num">1,199</td></tr>
+          <tr><td><b>The Peace</b></td><td class="num"><b>1,373,924</b></td><td class="num"><b>65d</b></td><td class="num"><b>3,089</b></td></tr>
         </table>
+        <p style="margin-top:.6rem;font-size:.78rem"><b>Not age-matched.</b> The Peace has had 65
+        days against Music's 476. No per-video daily history exists far enough back to compare them
+        at equal age, so no pace claim is made in the presentation.</p>
+
+        <h3>Do It — full asset list</h3>
+        <table>
+          <tr><th>Date</th><th>Asset</th><th class="num">Views</th></tr>
+          <tr><td>15 Oct 25</td><td>Short</td><td class="num">159,109</td></tr>
+          <tr><td>26 Oct 25</td><td>Short</td><td class="num">448,503</td></tr>
+          <tr><td>31 Oct 25</td><td>Short</td><td class="num">111,681</td></tr>
+          <tr><td><b>4 Nov 25</b></td><td><b>Official video</b></td><td class="num"><b>1,477,883</b></td></tr>
+          <tr><td>6 Nov 25</td><td>Short</td><td class="num">236,083</td></tr>
+          <tr><td>9 Nov 25</td><td>Choreo Ver.</td><td class="num">415,363</td></tr>
+          <tr><td>17 Jan 26</td><td>Short</td><td class="num">50,293</td></tr>
+          <tr><td>21 Jan 26</td><td>Short</td><td class="num">55,173</td></tr>
+          <tr><td>23 Jan 26</td><td>Yves Remix</td><td class="num">726,794</td></tr>
+        </table>
+        <p style="margin-top:.6rem;font-size:.78rem"><b>Six assets in the 25-day release window;
+        nine across the full campaign</b> including the January remix wave. The presentation shows
+        the six-asset window and notes the later three.</p>
       </div>
+
       <div>
-        <p style="font-size:.95rem">The comment sample explains why it worked.
-        <b style="color:var(--bone)">"drumless production going crazy"</b> is the second most-liked
-        comment we collected, at 2,858 likes. This audience does not only react to songs — it reads
-        them as <b style="color:var(--bone)">work by a specific person with a specific method</b>.</p>
-        <p style="font-size:.95rem;margin-top:.8rem">Which means the appetite for process content here
-        is <b style="color:var(--bone)">evidenced, not assumed</b> — and it currently happens roughly
-        twice a year, around an album.</p>
-      </div>
-    </div>
-    <div class="chips"><span class="chip ch">Channel data</span><span class="chip us">Our reading</span></div>
-  </div>
-</section>
-
-<!-- ══ 07 · PERFORMANCE ═════════════════════════════════════════════ -->
-<section class="slide">
-  <div class="inner">
-    <div class="label">Publishing, by year</div>
-    <h2 class="display" style="margin-top:.9rem">The channel woke up in 2025<br>and has not gone back to sleep.</h2>
-    <p class="big-p">Counts are exact. View totals are <b>lifetime</b> and therefore favour older
-    years — shown for the shape of activity, not to rank the years against each other.</p>
-
-    <div class="tw">
-      <table>
-        <tr><th>Year</th><th class="num">Uploads</th><th class="num">Shorts</th><th>Shorts share of that year</th><th class="num">Lifetime views</th></tr>
-        <tr><td>2014</td><td class="num">1</td><td class="num">0</td><td><div class="bar"><i style="width:0"></i></div></td><td class="num">2,143,040</td></tr>
-        <tr><td>2018–20</td><td class="num">3</td><td class="num">0</td><td><div class="bar"><i style="width:0"></i></div></td><td class="num">118,942</td></tr>
-        <tr><td>2021</td><td class="num">27</td><td class="num">0</td><td><div class="bar"><i style="width:0"></i></div></td><td class="num">4,106,760</td></tr>
-        <tr><td>2022</td><td class="num">2</td><td class="num">0</td><td><div class="bar"><i style="width:0"></i></div></td><td class="num">341,648</td></tr>
-        <tr><td>2023</td><td class="num">22</td><td class="num">3</td><td><div class="bar"><i style="width:14%;background:var(--cyan)"></i></div></td><td class="num">4,036,165</td></tr>
-        <tr><td>2024</td><td class="num">10</td><td class="num">0</td><td><div class="bar"><i style="width:0"></i></div></td><td class="num">1,372,371</td></tr>
-        <tr class="key"><td><b>2025</b></td><td class="num"><b>15</b></td><td class="num"><b>11</b></td><td><div class="bar"><i style="width:73%;background:var(--red)"></i></div></td><td class="num">5,342,803</td></tr>
-        <tr class="key"><td><b>2026</b> <span class="fine">to 28 Aug</span></td><td class="num"><b>22</b></td><td class="num"><b>4</b></td><td><div class="bar"><i style="width:18%;background:var(--red)"></i></div></td><td class="num">5,868,552</td></tr>
-      </table>
-    </div>
-
-    <div class="cols three">
-      <div class="panel c"><h3>Observe</h3>
-        <p>Shorts arrived properly in <b style="color:var(--bone)">2025 — 11 of 15 uploads</b>. In 2026 the
-        ratio inverts, because the album drop put ten long-form uploads on one day.</p></div>
-      <div class="panel"><h3>Why it matters</h3>
-        <p>The two years with the most <b style="color:var(--bone)">lifetime</b> views are the two most
-        recent, despite having had the least time to accumulate them. Whatever changed is still working.</p></div>
-      <div class="panel r"><h3>So what</h3>
-        <p><b style="color:var(--bone)">Four Shorts in eight months</b> from a channel that proved in 2025
-        it can make them work. The cheapest available lever before 2027.</p></div>
-    </div>
-    <div class="chips"><span class="chip ch">Channel data</span><span class="chip us">Our reading</span></div>
-  </div>
-</section>
-
-<!-- ══ 08 · WHICH SONG LEADS ════════════════════════════════════════ -->
-<section class="slide">
-  <div class="inner">
-    <div class="label cold">Tested, not inherited</div>
-    <h2 class="display" style="margin-top:.9rem">The Peace is the right door —<br>on YouTube's own evidence.</h2>
-    <p class="big-p">The marketing plan leads on The Peace for streaming reasons. We were asked to
-    test that against YouTube evidence rather than carry it over. <b>It agrees, on different grounds.</b></p>
-
-    <div class="tw">
-      <table>
-        <tr><th>Single</th><th class="num">Views</th><th class="num">Age</th><th class="num">Like rate</th><th class="num">Comments</th></tr>
-        <tr><td><b>Music</b></td><td class="num">1,871,328</td><td class="num">476d</td><td class="num">3.83%</td><td class="num">2,122</td></tr>
-        <tr><td><b>Do It</b></td><td class="num">1,477,883</td><td class="num">346d</td><td class="num">4.04%</td><td class="num">1,998</td></tr>
-        <tr><td><b>Tell Me (U Want It)</b></td><td class="num">743,549</td><td class="num">233d</td><td class="num">4.35%</td><td class="num">1,199</td></tr>
-        <tr class="keyc"><td><b>The Peace</b></td><td class="num"><b>1,373,924</b></td><td class="num"><b>65d</b></td><td class="num" style="color:var(--cyan)"><b>5.25%</b></td><td class="num" style="color:var(--cyan)"><b>3,089</b></td></tr>
-      </table>
-    </div>
-
-    <div class="vgrid four">
-      <a class="thumb" href="https://www.youtube.com/watch?v=Gf-fCJ6TkRU" target="_blank" rel="noopener">
-        <img src="https://i.ytimg.com/vi/Gf-fCJ6TkRU/hqdefault.jpg" alt="" loading="lazy">
-        <div class="tb"><div class="tt">The Peace</div><div class="tm"><b>1,373,924</b> · 65d</div></div></a>
-      <a class="thumb" href="https://www.youtube.com/watch?v=Zd0j0xnhWFw" target="_blank" rel="noopener">
-        <img src="https://i.ytimg.com/vi/Zd0j0xnhWFw/hqdefault.jpg" alt="" loading="lazy">
-        <div class="tb"><div class="tt">Do It</div><div class="tm"><b>1,477,883</b> · 346d</div></div></a>
-      <a class="thumb" href="https://www.youtube.com/watch?v=UNYqwpx7Cys" target="_blank" rel="noopener">
-        <img src="https://i.ytimg.com/vi/UNYqwpx7Cys/hqdefault.jpg" alt="" loading="lazy">
-        <div class="tb"><div class="tt">Music</div><div class="tm"><b>1,871,328</b> · 476d</div></div></a>
-      <a class="thumb" href="https://www.youtube.com/watch?v=i_gkcxgNCM8" target="_blank" rel="noopener">
-        <img src="https://i.ytimg.com/vi/i_gkcxgNCM8/hqdefault.jpg" alt="" loading="lazy">
-        <div class="tb"><div class="tt">Tell Me (U Want It)</div><div class="tm"><b>743,549</b> · 233d</div></div></a>
-    </div>
-
-    <div class="cols two">
-      <div class="caveat" style="margin-top:0">
-        <div class="ch">These are not age-matched</div>
-        <p>The Peace has had 65 days; Music has had 476. No per-video daily history exists that far
-        back, so we cannot say what Music had at day 65. The comparison is a <b>floor</b>: The Peace has
-        reached 73% of Music's lifetime total in 14% of the time, and the true pace gap is
-        <b>wider than that, not narrower</b>.</p>
-      </div>
-      <div class="panel a" style="margin-top:0">
-        <h3>The counter-case, stated</h3>
-        <p>Music and Do It carry larger lifetime totals. If the goal were maximum catalogue reach
-        rather than current-moment momentum, <b style="color:var(--bone)">Music is the bigger door</b>.
-        For a November activation tied to a live run, The Peace is the correct lead.</p>
-      </div>
-    </div>
-    <div class="chips"><span class="chip ch">Channel data</span><span class="chip it">Internal · streaming priority</span><span class="chip us">Our reading</span></div>
-  </div>
-</section>
-
-<!-- ══ 09 · AUDIENCE ════════════════════════════════════════════════ -->
-<section class="slide">
-  <div class="bleed scrim-b">
-    <img src="https://i.ytimg.com/vi/UNYqwpx7Cys/maxresdefault.jpg"
-         onerror="this.src='https://i.ytimg.com/vi/UNYqwpx7Cys/hqdefault.jpg'" alt="">
-  </div>
-  <div class="inner">
-    <div class="label">160 comments, four singles</div>
-    <h2 class="display" style="margin-top:.9rem">They are not listening.<br>They are paying attention.</h2>
-
-    <div class="caveat" style="margin-top:1.4rem">
-      <div class="ch">The sample, described in full</div>
-      <p>160 comments read 16 October 2026 via the public commentThreads endpoint — 40 each from The
-      Peace, Do It, Music and Tell Me (U Want It), ordered by YouTube's <b>relevance</b> ranking.
-      Relevance favours comments with likes and replies, so <b>this is not a random sample</b> and it
-      over-represents popular opinion. No sentiment score has been computed. Qualitative signals only.</p>
-    </div>
-
-    <div class="hero2 four">
-      <div class="h2c"><div class="h2n c">25</div><div class="h2l">mention the album<br>or a specific era</div></div>
-      <div class="h2c"><div class="h2n c">21</div><div class="h2l">mention the video,<br>visuals or art direction</div></div>
-      <div class="h2c"><div class="h2n c">9</div><div class="h2l">mention production,<br>mixing or sound design</div></div>
-      <div class="h2c"><div class="h2n c">6</div><div class="h2l">mention live,<br>touring or tickets</div></div>
-    </div>
-
-    <div class="cols two">
-      <div>
-        <h3>A joke that only works if you've seen the last one</h3>
-        <div class="q">After inventing Music, underscores is now going on to Do it, making the Second Song Ever.
-          <span>9,489 likes · on Do It</span></div>
-        <div class="q">After an extended hiatus, underscores STUNS by making the Third Song Ever.
-          <span>6,102 likes · on The Peace</span></div>
-        <p style="font-size:.9rem;margin-top:.9rem">The same format of joke recurs across three singles,
-        heavily upvoted each time. People arrive at a new release <b style="color:var(--bone)">already
-        carrying context from the last one</b> — the behaviour a catalogue strategy is supposed to
-        produce, visible without any analytics.</p>
-        <p style="font-size:.82rem;color:var(--faint);margin-top:.6rem">It is not proof of returning
-        viewers. That is a Studio metric. It is consistent with them.</p>
-      </div>
-      <div>
-        <h3>What they actually argue about</h3>
-        <div class="q amb">drumless production going crazy<span>2,858 likes · production</span></div>
-        <div class="q amb">everyone praises underscores as a producer (as they should!) but her writing is just so great<span>2,561 likes · craft</span></div>
-        <div class="q pnk">she was the creative director on this?? the storytelling goes crazy<span>56 likes · visual authorship</span></div>
-        <div class="q">SOPHIE smiling down from heaven<span>7,231 likes · lineage</span></div>
-        <p style="font-size:.9rem;margin-top:.9rem">The pattern is <b style="color:var(--bone)">authorship</b> —
-        production decisions, writing, creative direction, lineage. That is the audience for a process
-        film, and it is why the 3.4-hour stream performed.</p>
-      </div>
-    </div>
-    <div class="chips"><span class="chip ch">commentThreads · 16 Oct 2026</span><span class="chip us">Our reading</span></div>
-  </div>
-</section>
-
-<!-- ══ 10 · NOVEMBER ════════════════════════════════════════════════ -->
-<section class="slide">
-  <div class="inner">
-    <div class="label hot">Three weeks out</div>
-    <h2 class="display" style="margin-top:.9rem">Four assets.<br>Nothing that needs a new idea.</h2>
-    <p class="big-p">Every item uses a format this channel has already run successfully. The tour
-    supplies the footage; this is about <b>sequencing what gets captured anyway</b>.</p>
-
-    <div class="tw">
-      <table>
-        <tr><th>When</th><th>Asset</th><th>Why this, for this artist</th><th>Intended journey</th></tr>
-        <tr><td class="num"><b>Late Oct</b></td><td><b>2–3 Shorts</b><br><span class="fine">The Peace</span></td>
-          <td>Breaks the seven-week silence. Exactly the Do It pattern — three Shorts over 20 days ahead
-            of the main asset.</td>
-          <td>Short → channel → The Peace. <span style="color:var(--faint)">Sequence only; the hop is
-            unmeasurable without traffic sources.</span></td></tr>
-        <tr class="keyc"><td class="num"><b>10–16 Nov</b></td><td><b>Live capture, one show</b><br><span class="fine">《live from LONDON》</span></td>
-          <td>One live upload exists and it did 107,285. The title grammar for live already exists.
-            Brixton sold out twice.</td>
-          <td>Standalone destination — and the only UK-specific asset on the channel.</td></tr>
-        <tr><td class="num"><b>13 Nov</b></td><td><b>Pop-up documentation</b><br><span class="fine">Short-form</span></td>
-          <td>The comment culture is participatory. The pop-up is the one moment the community is
-            physically in a room.</td>
-          <td>Short → community replies. Lowest cost item here.</td></tr>
-        <tr><td class="num"><b>Dec</b></td><td><b>Tour or process film</b><br><span class="fine">Long-form</span></td>
-          <td>The production stream earned 5.97%. This audience watches long when the subject is how
-            the work is made.</td>
-          <td>Carries the gap between the tour and the 2027 campaign.</td></tr>
-      </table>
-    </div>
-
-    <div class="cols two">
-      <div class="caveat" style="margin-top:0">
-        <div class="ch">Honest about the weakest link</div>
-        <p>The Shorts→video journey is the part we <b>cannot evidence</b>. Treat the Shorts as worth doing
-        because they are cheap and the format engages — 5.84% median like rate against 2.56% long-form —
-        <b>not because a conversion rate has been demonstrated</b>.</p>
-      </div>
-      <div class="panel" style="margin-top:0">
-        <h3>Deliberately not recommended</h3>
-        <ul class="ticks">
-          <li><b>New lyric videos.</b> 18 exist, median 111,637, and the (♫) uploads cover this record.
-            No distinct audience need.</li>
-          <li><b>A visualiser for The Peace.</b> It has a video, a remix and an audio upload. A fourth
-            surface for one song splits attention.</li>
-          <li><b>Changing the title grammar.</b> It is legible and era-specific. Standardising would
-            cost more than it returns.</li>
+        <h3>Comment research — method</h3>
+        <p><b>160 comments</b> retrieved 16 October 2026 via the public commentThreads endpoint —
+        40 each from The Peace, Do It, Music and Tell Me (U Want It), ordered by YouTube's
+        <b>relevance</b> ranking.</p>
+        <ul>
+          <li><b>Relevance ordering is not a random sample.</b> It favours comments with likes and
+            replies, so it over-represents popular opinion.</li>
+          <li>No sentiment score was computed. Themes were coded by reading.</li>
+          <li>Coding counts: album or era <b>25</b>, video or visuals <b>21</b>, production or
+            sound design <b>9</b>, live or touring <b>6</b>.</li>
+          <li>The low live count is not evidence of weak tour interest — the UK shows had not
+            happened and relevance ordering buries recent comments.</li>
         </ul>
-      </div>
-    </div>
-    <div class="chips"><span class="chip ch">Channel data</span><span class="chip it">Internal · tour, pop-up</span><span class="chip us">Recommendation</span></div>
-  </div>
-</section>
 
-<!-- ══ 11 · YOUTUBE UK ══════════════════════════════════════════════ -->
-<section class="slide">
-  <div class="inner">
-    <div class="label cold">For the conversation</div>
-    <h2 class="display" style="margin-top:.9rem">What we can do ourselves,<br>and what we'd need help with.</h2>
+        <h3>Other surfaces</h3>
+        <p>An auto-generated <b>underscores — Topic</b> channel carries <b>13,797,333 lifetime
+        views</b> on 549 subscribers. Topic channels are generated from distributed audio and
+        behave differently from an artist channel; the subscriber count is not a meaningful signal
+        and <b>no configuration fault is implied</b>. These views are counted separately and never
+        added to the 36.8M artist-channel figure.</p>
+        <p style="margin-top:.6rem">Collaborators appearing in the catalogue: Jane Remover, gabby
+        start, henhouse!, 8485, Knapsack, Yves, Frost Children. Uploads on collaborators' own
+        channels are a separate surface, not counted here.</p>
+        <p style="margin-top:.6rem">Third-party and fan uploads were <b>not systematically
+        mapped</b>. No third-party view is owned, controlled or monetised by the artist.</p>
 
-    <div class="cols two">
-      <div class="panel c">
-        <h3>Management can action directly</h3>
-        <ul class="ticks">
-          <li><b>Restart publishing before 10 November.</b> No permission required, no new shoot.</li>
-          <li><b>Capture one UK show and the pop-up.</b> Crew already present.</li>
-          <li><b>Commission vertical at every future shoot</b> as standard.</li>
-          <li><b>Confirm Official Artist Channel configuration</b> with the distributor, so Topic
-            consumption consolidates correctly.</li>
+        <h3>Reporting limitations</h3>
+        <ul>
+          <li><b>No YouTube Studio metrics.</b> No impressions, click-through, retention, average
+            view duration, traffic sources, unique viewers, returning viewers, territory split or
+            subscriber gain by video. Every such question is listed as a request, not estimated.</li>
+          <li><b>Publication order is not a funnel.</b> Where Shorts preceded a video, that is a
+            sequence. Movement between assets cannot be measured without traffic-source data.</li>
+          <li><b>Length and like rate do not indicate retention.</b> The production stream's view
+            count shows it attracted an audience, not how long that audience stayed.</li>
+          <li><b>Shorts and long-form view counts are not directly comparable.</b> YouTube changed
+            Shorts view counting in March 2025, and the formats are surfaced differently.</li>
+          <li><b>Channel lifetime total exceeds the sum of public uploads</b> — 36,814,369 against
+            23,330,281. The difference is <b>not explained by public data</b> and is not attributed
+            to any specific cause here. No figure in the presentation is expressed as a share of
+            lifetime views.</li>
+          <li><b>Production, rights and budget are not assumed.</b> Any filming recommendation is
+            subject to crew, cost, clearance and artist agreement.</li>
+          <li><b>Snapshot.</b> Figures move. Newest upload at time of reading: 28 August 2026.</li>
         </ul>
-      </div>
-      <div class="panel r">
-        <h3>Requires YouTube involvement</h3>
-        <ul class="ticks">
-          <li><b>Analytics access.</b> UK viewing share, traffic sources, returning viewers, retention
-            on the long-form streams, subscriber gain by video — everything this deck had to leave open.</li>
-          <li><b>Is a UK Foundry moment possible around the November run?</b> YouTube's own 2026 Foundry
-            activity included a UK release party with Natanya; that is the precedent we point at, not
-            an expectation.</li>
-          <li><b>Editorial consideration</b> for a London live asset, if one is captured.</li>
-          <li><b>A view on process-led long-form.</b> Our data says it over-performs here; YouTube can
-            say whether that holds across comparable artists.</li>
+
+        <h3>Analytics requests for YouTube UK</h3>
+        <ul>
+          <li>UK share of channel viewing, and whether it moves around the November shows.</li>
+          <li>Traffic sources into the current-era videos, including whether Shorts contribute.</li>
+          <li>Average view duration and retention on the long-form streams and album video.</li>
+          <li>Returning-viewer rate across the <i>U</i> era.</li>
+          <li>Subscriber gain attributed by video.</li>
+        </ul>
+
+        <h3>Sources</h3>
+        <ul>
+          <li><b>Channel data</b> — YouTube Data API v3, read 16 Oct 2026.</li>
+          <li><b>Growth</b> — VMG channel snapshot series, 28 days.</li>
+          <li><b>Biography and discography</b> —
+            <a href="https://en.wikipedia.org/wiki/Underscores_(musician)" target="_blank" rel="noopener">Wikipedia</a>.
+            April Harper Grey, solo artist, she/her. <i>U</i> released 20 March 2026 on Mom + Pop.</li>
+          <li><b>Foundry</b> —
+            <a href="https://blog.youtube/creator-and-artist-stories/new-artists-youtube-music-foundry-class-2026/" target="_blank" rel="noopener">YouTube Official Blog, 16 Sep 2026</a>.
+            Foundry artists receive a grant, dedicated partner support, product access and bespoke
+            opportunities, per YouTube.</li>
+          <li><b>Tour status and campaign context</b> — internal VMG reporting, 5–15 Oct 2026.
+            Dated internal input, subject to confirmation.</li>
         </ul>
       </div>
     </div>
 
-    <div class="panel" style="margin-top:1.1rem">
-      <h3>The three questions worth asking in the room</h3>
-      <ul class="ticks" style="margin-top:.9rem">
-        <li><b>Does the Short→video journey exist here at all?</b> We have run the sequence twice and
-          cannot see whether it works. One traffic-source read settles how the 2027 campaign is built.</li>
-        <li><b>Do the UK ticket buyers watch the channel?</b> Four sold-out shows, no UK viewing data.</li>
-        <li><b>Is 3.4 hours of production footage an anomaly or a format?</b> It out-performed every
-          official video on like rate. YouTube sees comparable artists; we see one channel.</li>
-      </ul>
-    </div>
-
-    <div class="caveat">
-      <div class="ch">One note on BBC Sound of 2027</div>
-      <p>Internal campaign context references a Sound of 2027 ambition and links a BBC pundits page.
-      <b>We could not access that page to verify the year, the names or the roles</b>, so no individual is
-      described here as a judge and no endorsement is implied. There is no public nomination. It is
-      background to the UK push, not evidence.</p>
-    </div>
-    <div class="chips"><span class="chip us">Recommendation</span><span class="chip it">Internal context</span><span class="chip pb">YouTube blog</span></div>
+    <p style="margin-top:2.5rem;font-size:.75rem;color:var(--warm)">
+      Virgin Music Group UK · YouTube strategy · 16 October 2026.
+      Contains dated internal campaign inputs — confirm currency before external circulation.</p>
   </div>
-</section>
+</div>
 
-<!-- ══ 12 · ACTIONS ═════════════════════════════════════════════════ -->
-<section class="slide">
-  <div class="inner">
-    <div class="label hot">Ranked by impact × feasibility</div>
-    <h2 class="display" style="margin-top:.9rem">Five actions.<br>Three of them this month.</h2>
+<script>
+/* ── Reveal on scroll ───────────────────────────────────────────── */
+const io = new IntersectionObserver(es=>{
+  es.forEach(e=>{
+    if(!e.isIntersecting) return;
+    e.target.classList.add('visible');
+    if(e.target.classList.contains('stagger'))
+      [...e.target.children].forEach((c,i)=>setTimeout(()=>c.classList.add('visible'), i*80));
+    io.unobserve(e.target);
+  });
+},{threshold:.15});
+document.querySelectorAll('.reveal,.stagger').forEach(el=>io.observe(el));
 
-    <div class="tw">
-      <table style="min-width:760px">
-        <tr><th></th><th>Action</th><th>Evidence behind it</th><th>Owner · timing</th><th>Effort</th><th>Measure</th></tr>
-        <tr class="key"><td class="num" style="color:var(--red)"><b>1</b></td>
-          <td><b>2–3 Shorts on The Peace before 10 Nov</b></td>
-          <td>Seven-week gap into a sold-out tour. Shorts median 5.84% vs 2.56% long-form. Four Shorts
-            in 2026 against 11 in 2025.</td>
-          <td>Management<br><span class="fine">by 7 Nov</span></td>
-          <td>Low<br><span class="fine">existing footage</span></td>
-          <td>Views and like rate vs the Shorts median. <b>Studio:</b> traffic sources.</td></tr>
-        <tr class="key"><td class="num" style="color:var(--red)"><b>2</b></td>
-          <td><b>Capture one London show and the pop-up</b></td>
-          <td>One live upload this era (107,285) and no UK content at all. Both Brixton dates sold out.</td>
-          <td>Management + crew<br><span class="fine">12–16 Nov</span></td>
-          <td>Low–med<br><span class="fine">crew on site</span></td>
-          <td>Against the Chicago benchmark. <b>Studio:</b> UK share.</td></tr>
-        <tr><td class="num" style="color:var(--cyan)"><b>3</b></td>
-          <td><b>Request the analytics on slide 11</b></td>
-          <td>Every open question in this deck is a Studio metric.</td>
-          <td>VMG UK → YouTube UK<br><span class="fine">before November</span></td>
-          <td>Low<br><span class="fine">a conversation</span></td>
-          <td>A pre-tour baseline, so November reads against something.</td></tr>
-        <tr><td class="num" style="color:var(--cyan)"><b>4</b></td>
-          <td><b>Confirm Official Artist Channel configuration</b></td>
-          <td>13,797,333 Topic views on 549 subscribers. Public data cannot show whether consolidation
-            is correct.</td>
-          <td>Management + distributor<br><span class="fine">Nov–Dec</span></td>
-          <td>Low<br><span class="fine">admin</span></td>
-          <td>Binary — does Topic surface under the artist identity.</td></tr>
-        <tr><td class="num" style="color:var(--amber)"><b>5</b></td>
-          <td><b>Commission a process film for the 2027 record</b></td>
-          <td>3.4-hour stream: 136,839 views, <b>5.97% — above every official video</b>. Production is the
-            most-discussed topic in the comment sample.</td>
-          <td>Management + label<br><span class="fine">during album making</span></td>
-          <td>Medium<br><span class="fine">capture in sessions</span></td>
-          <td>Like rate vs 5.97%. <b>Studio:</b> average view duration.</td></tr>
-      </table>
-    </div>
+/* ── Presentation mode ──────────────────────────────────────────── */
+let cur = 0;
+const allSlides = () => [...document.querySelectorAll('.slide')];
 
-    <div class="cols two">
-      <div class="panel c" style="margin-top:0"><h3>Immediate — November</h3>
-        <p>Actions <b style="color:var(--bone)">1, 2 and 3</b>. All low effort, all using resources already
-        committed, all reversible if album timing moves.</p></div>
-      <div class="panel a" style="margin-top:0"><h3>Preparation — 2027</h3>
-        <p>Actions <b style="color:var(--bone)">4 and 5</b>, plus the measurement baseline. These determine
-        what the next campaign can be built on.</p></div>
-    </div>
+function startPresent(){
+  closeSheets();
+  document.body.classList.add('present');
+  cur = 0; showSlide(0);
+  const el = document.documentElement;
+  if(el.requestFullscreen) el.requestFullscreen().catch(()=>{});
+}
+function exitPresent(){
+  document.body.classList.remove('present');
+  allSlides().forEach(s=>s.classList.remove('current'));
+  if(document.fullscreenElement && document.exitFullscreen) document.exitFullscreen().catch(()=>{});
+  allSlides()[cur]?.scrollIntoView({block:'start'});
+}
+function showSlide(i){
+  const s = allSlides();
+  cur = Math.max(0, Math.min(i, s.length-1));
+  s.forEach((el,n)=>el.classList.toggle('current', n===cur));
+  s[cur].querySelectorAll('.reveal,.stagger>*').forEach(e=>e.classList.add('visible'));
+  document.getElementById('pbar').style.width = ((cur+1)/s.length*100)+'%';
+  document.getElementById('pcount').textContent = (cur+1)+' / '+s.length;
+}
+document.addEventListener('keydown', e=>{
+  if(!document.body.classList.contains('present')){
+    if(e.key==='Escape') closeSheets();
+    return;
+  }
+  if(e.key==='ArrowRight'||e.key===' '||e.key==='PageDown'){e.preventDefault();showSlide(cur+1);}
+  else if(e.key==='ArrowLeft'||e.key==='PageUp'){e.preventDefault();showSlide(cur-1);}
+  else if(e.key==='Escape'){exitPresent();}
+  else if(e.key==='Home'){showSlide(0);}
+  else if(e.key==='End'){showSlide(allSlides().length-1);}
+});
+document.addEventListener('fullscreenchange', ()=>{
+  if(!document.fullscreenElement && document.body.classList.contains('present')) exitPresent();
+});
 
-    <div class="caveat">
-      <div class="ch">Two planning assumptions, labelled as such</div>
-      <p>If a November Shorts run happens, a reasonable <b>planning assumption</b> is that it performs near
-      the channel's existing Shorts median of <b>64,947 views</b>. If a London live asset is captured, the
-      comparable is the Chicago upload at <b>107,285</b>. Neither is a target, a forecast or a commitment —
-      they are the only honest reference points the public data provides, offered so November can be
-      judged against something rather than nothing.</p>
-    </div>
-  </div>
-</section>
-
-<!-- ══ 13 · METHOD ══════════════════════════════════════════════════ -->
-<section class="slide" id="method" style="background:var(--ink)">
-  <div class="inner">
-    <div class="label">Method, sources and limitations</div>
-    <h2 class="display" style="margin-top:.9rem">Where every number came from.</h2>
-
-    <div class="cols two">
-      <div>
-        <h3>Channel data</h3>
-        <p style="font-size:.88rem;margin-top:.5rem">Public <b style="color:var(--bone)">YouTube Data API v3</b>,
-        read <b style="color:var(--bone)">16 October 2026</b>. Channels endpoint for totals; uploads playlist
-        paged to exhaustion (102 videos, uncapped); videos.list for per-video statistics; commentThreads
-        for the comment sample. Channel:
-        <a href="https://www.youtube.com/@underscores" target="_blank" rel="noopener" style="color:var(--cyan)">youtube.com/@underscores ↗</a></p>
-
-        <h3 style="margin-top:1.3rem">Public research</h3>
-        <ul class="ticks">
-          <li><a href="https://en.wikipedia.org/wiki/Underscores_(musician)" target="_blank" rel="noopener" style="color:var(--cyan)">Wikipedia — underscores (musician) ↗</a><br>
-            biography, pronouns, discography, Mom + Pop, the ARG, Charli XCX support</li>
-          <li><a href="https://blog.youtube/creator-and-artist-stories/new-artists-youtube-music-foundry-class-2026/" target="_blank" rel="noopener" style="color:var(--cyan)">YouTube Official Blog, 16 Sep 2026 ↗</a><br>
-            Foundry confirmation, programme description, UK and global precedents</li>
-        </ul>
-
-        <h3 style="margin-top:1.3rem">Internal campaign context</h3>
-        <p style="font-size:.88rem;margin-top:.5rem">VMG email thread, <b style="color:var(--bone)">5–15 October
-        2026</b>: tour dates and sold-out status (reported 14 Oct), proposed pop-up, Spotify figures for
-        "U" over a 28-day window, proposed cross-platform marketing.
-        <b style="color:var(--bone)">Dated internal inputs, not independently verified.</b> Budget figures
-        are deliberately excluded — unapproved, cross-platform, and this document is shareable.</p>
-      </div>
-
-      <div>
-        <h3 style="color:var(--red)">Material limitations</h3>
-        <ul class="ticks">
-          <li><b>36.6% view gap.</b> Channel reports 36,814,369 lifetime; the 102 public uploads sum to
-            23,330,281. The 13,484,088 difference is deleted, private or unlisted.
-            <b>No figure here is a share of lifetime.</b></li>
-          <li><b>No Studio metrics.</b> No impressions, CTR, retention, traffic sources, unique viewers,
-            territory splits or subscriber-gain-by-video.</li>
-          <li><b>No age-matched comparison.</b> No per-video daily history exists for the older singles,
-            so pace comparisons are floors.</li>
-          <li><b>Comment sample is relevance-ordered</b>, n=160 across four videos. Not random.</li>
-          <li><b>Third-party uploads unmapped.</b> No systematic search was run.</li>
-          <li><b>BBC pundits page inaccessible.</b> Year, names and roles unverified; no individual named.</li>
-          <li><b>Snapshot.</b> Newest upload 28 Aug 2026. Figures move.</li>
-        </ul>
-
-        <h3 style="margin-top:1.3rem">Design note</h3>
-        <p style="font-size:.88rem;margin-top:.5rem">Palette sampled programmatically from five real
-        thumbnails via canvas <span style="font-family:var(--mono)">getImageData</span>, greys and
-        near-blacks filtered, remainder binned by hue: red-orange 46.8%, cyan 34.8%, magenta 11.4%,
-        amber 5.1%. The repeating rule is an underscore — the artist's own mark doing the structural work.</p>
-      </div>
-    </div>
-
-    <div class="rule" style="margin-top:2rem"></div>
-    <p class="fine">Virgin Music Group UK · YouTube strategy · 16 October 2026<br>
-    For discussion with management and YouTube UK. Contains dated internal campaign inputs —
-    confirm currency before external circulation.</p>
-  </div>
-</section>
-
+/* ── Analysis sheet ─────────────────────────────────────────────── */
+function openSheet(which){
+  closeSheets();
+  document.getElementById('sheet-'+which).classList.add('open');
+  document.body.classList.add('sheet-open');
+  window.scrollTo(0,0);
+}
+function closeSheets(){
+  document.querySelectorAll('.sheet').forEach(s=>s.classList.remove('open'));
+  document.body.classList.remove('sheet-open');
+}
+</script>
 </body>
 </html>
