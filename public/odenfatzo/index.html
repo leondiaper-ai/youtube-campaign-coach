@@ -293,6 +293,32 @@ h2.display{font-size:clamp(1.8rem,3.9vw,3.3rem);max-width:24ch}
 .btn:hover{border-color:var(--sky);color:var(--sky)}
 .btn.primary{background:var(--suit);border-color:var(--suit);color:var(--ink);font-weight:500}
 
+
+/* Outernet + documentary slides */
+.pictag{position:absolute;right:clamp(1rem,3vw,2.5rem);bottom:clamp(1rem,3vh,2rem);z-index:2;font-family:'DM Mono',monospace;font-size:.72rem;letter-spacing:.12em;text-transform:uppercase;color:var(--suit);background:rgba(7,8,13,.82);border:1px solid var(--sunset);padding:.45rem .7rem;border-radius:2px}
+.ways{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(.8rem,2vw,1.8rem);margin-top:.6rem;max-width:1000px}
+.ways>div{border-top:3px solid var(--sky);padding-top:.6rem}
+.ways h4{font-family:'Archivo',sans-serif;font-variation-settings:'wdth' 110,'wght' 760;text-transform:uppercase;font-size:clamp(1.05rem,1.6vw,1.35rem)}
+.ways p{font-size:.95rem;line-height:1.4;margin-top:.3rem;color:var(--suit);opacity:.86;max-width:30ch}
+.evidence{margin-top:1.6rem;max-width:1000px;border-top:1px solid var(--line);padding-top:.7rem}
+.evidence .label{color:var(--dim)}
+.ev{display:flex;gap:clamp(1.2rem,3vw,2.6rem);flex-wrap:wrap;margin-top:.5rem}
+.ev>div{display:flex;flex-direction:column;gap:.2rem}
+.ev b{font-family:'Archivo',sans-serif;font-variation-settings:'wdth' 112,'wght' 820;font-size:clamp(1.4rem,2.4vw,2rem);line-height:1;color:var(--sunset)}
+.ev>div+div b{color:var(--suit)}
+.ev span{font-size:.8rem;color:var(--dim)}
+.ev i{font-style:normal}
+.story .pic{position:relative;border-radius:3px;overflow:hidden}
+.story .pic img{width:100%;aspect-ratio:16/6.4;object-fit:cover;display:block}
+.story .pic span{position:absolute;left:.5rem;bottom:.5rem;font-family:'DM Mono',monospace;font-size:.58rem;letter-spacing:.1em;text-transform:uppercase;background:rgba(7,8,13,.8);color:var(--suit);padding:.25rem .45rem}
+.story .kicker{font-family:'Archivo',sans-serif;font-variation-settings:'wdth' 110,'wght' 780;text-transform:uppercase;font-size:clamp(1.2rem,1.9vw,1.6rem);margin-top:.9rem}
+.story .kicker em{display:block;font-style:normal;font-family:'DM Mono',monospace;font-variation-settings:normal;font-weight:400;font-size:.66rem;letter-spacing:.12em;color:var(--sky);margin-top:.3rem}
+.story .what{font-size:1.02rem;line-height:1.4;font-weight:600;margin-top:.5rem;max-width:40ch}
+.story .could{font-size:.9rem;line-height:1.45;margin-top:.6rem;color:var(--suit);opacity:.82;border-left:3px solid var(--sky);padding-left:.7rem;max-width:46ch}
+.story .could b{display:block;font-family:'DM Mono',monospace;font-weight:400;font-size:.6rem;letter-spacing:.12em;text-transform:uppercase;color:var(--sky);opacity:1}
+.dates{margin-top:1.2rem;font-family:'DM Mono',monospace;font-size:.74rem;letter-spacing:.1em;text-transform:uppercase;color:var(--suit);border:1px solid var(--line);display:inline-block;padding:.45rem .7rem}
+@media(max-width:880px){.ways{grid-template-columns:1fr}.pictag{font-size:.6rem;bottom:auto;top:4.2rem}}
+
 /* ── Present ────────────────────────────────────────────────────── */
 body.present{overflow:hidden}
 body.present .chrome{display:none}
@@ -633,51 +659,55 @@ body.sheet-open{overflow:hidden}
 <!-- ══ 10 · OUTERNET ═══════════════════════════════════════════════ -->
 <section class="slide" data-t="Outernet">
   <div class="bleed scrim-l">
-    <img src="https://i.ytimg.com/vi/Bxx4cdL8Z5g/maxresdefault.jpg" alt="Oden & Fatzo live at Tour Royale, Toulon"
+    <img src="https://i.ytimg.com/vi/Bxx4cdL8Z5g/maxresdefault.jpg" alt="Oden & Fatzo performing at Tour Royale, Toulon — a previous show, not Outernet"
       style="object-position:60% 50%"
       onerror="this.onerror=null;this.src='https://i.ytimg.com/vi/Bxx4cdL8Z5g/hqdefault.jpg'">
+    <div class="pictag">Previous performance · Tour Royale</div>
   </div>
   <div class="inner">
-    <span class="card reveal">Mid-November · London</span> <span class="host" style="margin-left:.6rem">Pictured: Tour Royale · Recording</span>
-    <h2 class="display reveal" style="margin-top:.8rem;max-width:20ch">Outernet: the live show, then the replay.</h2>
-    <div class="row stagger" style="margin-top:1.5rem">
-      <div><div class="big-num" style="font-size:clamp(2.4rem,5vw,4.2rem);color:var(--sunset)">824K</div><div class="label" style="margin-top:.4rem">Boiler Room set · 57 min</div><div class="host both" style="margin-top:.35rem">Boiler Room · co-credited</div></div>
-      <div><div class="big-num" style="font-size:clamp(2.4rem,5vw,4.2rem)">228K</div><div class="label" style="margin-top:.4rem">Pacha set · 87 min · Premiere</div><div class="host both" style="margin-top:.35rem">Defected · co-credited</div></div>
-      <div><div class="big-num" style="font-size:clamp(2.4rem,5vw,4.2rem)">70K</div><div class="label" style="margin-top:.4rem">Wembley NYE set · Premiere</div><div class="host both" style="margin-top:.35rem">Defected · co-credited</div></div>
+    <span class="card reveal">Planned · mid-November · Outernet, London</span>
+    <h2 class="display reveal" style="margin-top:.8rem;max-width:20ch">The Outernet show can live on beyond the night.</h2>
+    <p class="body reveal lead" style="margin-top:.8rem;font-size:1.02rem;max-width:58ch">The planned full-show film gives fans a chance to experience the performance — and return to it after the event.</p>
+    <div class="label reveal" style="margin-top:1.5rem;color:var(--sky)">Ways to build on the planned production</div>
+    <div class="ways stagger">
+      <div><h4>Full show</h4><p>Keep the recording available after its first showing.</p></div>
+      <div><h4>Standout moments</h4><p>Share selected performances and Shorts.</p></div>
+      <div><h4>Easy to explore</h4><p>Add a tracklist, chapters and a playlist of live performances.</p></div>
     </div>
-    <p class="statement reveal" style="margin-top:1.6rem;max-width:46ch">Fans already sit with their full sets. <span class="s">A headline show can keep working long after the night.</span></p>
-    <div class="grid2 reveal" style="margin-top:1.3rem;max-width:980px;gap:1.6rem">
-      <div><div class="label" style="color:var(--sky)">Ways to extend it</div>
-        <p class="body" style="font-size:.9rem;margin-top:.35rem">Chapters by track and captions on the full stream · Shorts cut from the show, linked to it on the same channel · the replay kept with the campaign's other live videos.</p></div>
-      <div><div class="label" style="color:var(--sunset)">To agree with production and rights</div>
-        <p class="body" style="font-size:.9rem;margin-top:.35rem">Real-time stream or Premiere of the recording · clearances for guests and samples in the set · a playback and claims check before going public.</p></div>
+    <div class="evidence reveal">
+      <div class="label">Existing full-set videos have attracted substantial viewing.</div>
+      <div class="ev">
+        <div><b>824K</b><span>Boiler Room set</span><i class="host both">Boiler Room · co-credited</i></div>
+        <div><b>228K</b><span>Defected Pacha set</span><i class="host both">Defected · co-credited</i></div>
+        <div><b>70K</b><span>Wembley NYE set</span><i class="host both">Defected · co-credited</i></div>
+      </div>
     </div>
-    <div class="src reveal">Lifetime views as displayed, 16 Oct 2026 · show date and format to confirm.</div>
+    <div class="src reveal">Show date and broadcast format to confirm. · Lifetime public views as displayed, 16 Oct 2026; views are not watch time · production, rights and claims notes in Analysis.</div>
   </div>
 </section>
 
 <!-- ══ 11 · DOCUMENTARY AND PODCAST ════════════════════════════════ -->
 <section class="slide" data-t="Documentary and podcast">
   <div class="inner">
-    <span class="card reveal">December · and from 20 October</span>
-    <h2 class="display reveal" style="margin-top:.8rem">The documentary and podcast tell the story behind the music.</h2>
-    <div class="grid2" style="margin-top:1.5rem;align-items:start">
+    <span class="card reveal">Planned · December · and from 20 October</span>
+    <h2 class="display reveal" style="margin-top:.8rem">More chances to get to know Oden &amp; Fatzo.</h2>
+    <p class="body reveal lead" style="margin-top:.8rem;font-size:1.02rem;max-width:62ch">The documentary and podcast appearance extend the album campaign beyond the music and live performances.</p>
+    <div class="grid2 story" style="margin-top:1.4rem;align-items:start">
       <div class="reveal">
-        <a class="th" href="https://www.youtube.com/shorts/VBF4ETnvVHk" target="_blank" rel="noopener" style="display:block;position:relative;border-radius:3px;overflow:hidden"><img src="https://i.ytimg.com/vi/VBF4ETnvVHk/hqdefault.jpg" alt="Oden & Fatzo live at La Gaîté Lyrique, Paris" class="doc-img" style="width:100%;aspect-ratio:16/8;object-fit:cover"></a>
-        <div class="host a" style="margin-top:.45rem">Live cut · La Gaîté Lyrique, Paris · artist channel · 2022</div>
-        <h3 style="font-family:'Archivo',sans-serif;font-variation-settings:'wdth' 110,'wght' 760;text-transform:uppercase;font-size:1.3rem;margin-top:1rem">The mini-documentary</h3>
-        <p class="body" style="font-size:.95rem;margin-top:.4rem">From their Paris beginnings to the Outernet launch show. It answers what the suits and the space world only hint at: <b>who these two are</b>.</p>
-        <p class="body" style="font-size:.88rem;margin-top:.6rem"><b>Could add:</b> a Premiere with the duo in chat · chapters by place · short extracts from the Paris locations.</p>
+        <div class="pic"><img src="https://i.ytimg.com/vi/eSiGXb_MIBE/hqdefault.jpg" alt="Oden &amp; Fatzo in their flight suits in a desert jeep"><span>Pictured: Carpooling video · Defected · 2024</span></div>
+        <div class="kicker">Their story <em>Documentary · planned for December</em></div>
+        <p class="what">From their beginnings in Paris to the Outernet album launch show.</p>
+        <p class="could"><b>Possible addition</b> Short extracts could introduce a place, memory or turning point before leading into the full film.</p>
       </div>
       <div class="reveal">
-        <a class="th" href="https://www.youtube.com/watch?v=4ZmX-P8ZcJw" target="_blank" rel="noopener" style="display:block;position:relative;border-radius:3px;overflow:hidden"><img src="https://i.ytimg.com/vi/4ZmX-P8ZcJw/hqdefault.jpg" alt="Moments In Music season 1, with Sam Divine" class="doc-img" style="width:100%;aspect-ratio:16/8;object-fit:cover"></a>
-        <div class="host d" style="margin-top:.45rem">Moments In Music S1 · Defected</div>
-        <h3 style="font-family:'Archivo',sans-serif;font-variation-settings:'wdth' 110,'wght' 760;text-transform:uppercase;font-size:1.3rem;margin-top:1rem">Moments In Music, season 2</h3>
-        <p class="body" style="font-size:.95rem;margin-top:.4rem">Eight weekly episodes from 20 October, hosted by Monki, with <b>Oden &amp; Fatzo among the guests</b>. Season 1's nine episodes run 40–67 minutes and have 2.4K–30.9K views.</p>
-        <p class="body" style="font-size:.88rem;margin-top:.6rem"><b>Could add:</b> credit Oden &amp; Fatzo on their episode, as on Defected's music videos · a Short cut from the conversation, like Skream's (14K).</p>
+        <div class="pic"><img src="https://i.ytimg.com/vi/A4kRWVnRP1M/hqdefault.jpg" alt="Oden &amp; Fatzo in their flight suits, Lady Love artwork" style="object-position:50% 60%"><span>Pictured: Lady Love video · Defected</span></div>
+        <div class="kicker">Their influences <em>Moments In Music · Defected</em></div>
+        <p class="what">A conversation with Monki about the music and moments that shaped them.</p>
+        <p class="could"><b>Possible addition</b> A standout story or quote could become a clip, with a collaborator credit helping connect the episode to their channel.</p>
       </div>
     </div>
-    <div class="src reveal">Source: Defected's plan and public uploads, 16 Oct 2026 · the duo's episode date TBC.</div>
+    <div class="dates reveal">Series starts 20 October · Oden &amp; Fatzo episode date TBC.</div>
+    <div class="src reveal">Source: Defected's plan, 16 Oct 2026 · images are existing campaign visuals, not footage from the documentary or the episode · season-one figures in Analysis.</div>
   </div>
 </section>
 
@@ -805,6 +835,24 @@ body.sheet-open{overflow:hidden}
           <li><b>Live Redirect</b> — routes: live stream → Premiere; live stream → another channel's live stream; Premiere → another Premiere; Premiere → another channel's live stream. Sender: 1,000+ subscribers, no strikes. Receiver allows redirects in Studio (Settings › Community: subscribed channels by default, all channels, or up to 100 named). Set up in Studio › Content › Live › Edit › Customization › Redirect; fires when the source ends. Same-channel Premiere → live isn't listed; YouTube suggests a pinned chat message. <a href="https://support.google.com/youtube/answer/10359590" target="_blank" rel="noopener">Help</a></li>
           <li><b>Premium afterparties</b> — live streams with artists, hosted video and chat, for YouTube Premium and Music Premium members; archives may stay available to members. The page doesn't describe how artists are selected. <a href="https://support.google.com/youtube/answer/10184580" target="_blank" rel="noopener">Help</a></li>
           <li>Premieres are already used on Defected for Lady Love, Fly Away, Only You (Live Session), Pacha and Wembley. Chapters were not found on the long sets checked; captions not checked.</li>
+        </ul>
+
+        <h3>Outernet — production, rights and claims</h3>
+        <ul>
+          <li><b>Format</b>: whether "livestream" means a real-time stream or a Premiere of the recording; which channel hosts it.</li>
+          <li><b>Rights</b>: clearances for guests and samples in the set.</li>
+          <li><b>Claims</b>: a playback and claims check before the recording goes public.</li>
+          <li><b>Exploring the replay</b>: chapters by track and captions on the full show; Shorts cut from the show can link to it only if both are on the same channel.</li>
+          <li><b>Set views</b> (lifetime, as displayed 16 Oct 2026): Boiler Room × FLY Open Air 824K (57 min, Boiler Room, co-credited); Live from Defected Pacha 228K (87 min, Premiere, Defected, co-credited); OVO Wembley NYE 70K (Premiere, Defected, co-credited). Public views do not show watch time.</li>
+          <li>The slide's background is Tour Royale, Toulon — a previous performance, not Outernet.</li>
+        </ul>
+
+        <h3>Documentary and podcast — supporting detail</h3>
+        <ul>
+          <li><b>Moments In Music season 1</b> (Defected): nine episodes, 40–67 minutes each, 2.4K–30.9K views as displayed.</li>
+          <li><b>Clips from episodes</b>: Defected has cut Shorts from season-one conversations — Skream's drew 14K views.</li>
+          <li><b>Season 2</b>: eight weekly episodes from 20 October, hosted by Monki; Oden &amp; Fatzo among the guests, episode date TBC.</li>
+          <li><b>Documentary</b>: planned for December, from their Paris beginnings to the Outernet launch show; hosting channel to confirm. Possible additions: a Premiere with the duo in chat; chapters by place.</li>
         </ul>
 
         <h3>Dates and details to confirm</h3>
