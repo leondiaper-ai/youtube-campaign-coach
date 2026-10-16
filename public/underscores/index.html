@@ -177,11 +177,23 @@ body.present .slide.current{display:flex}
 body.present .reveal,body.present .stagger>*{opacity:1;transform:none;transition:none}
 body.present .deck{padding-top:0}
 body.present .inner{max-width:min(1240px,calc((100vh - 6rem) * 16 / 9))}
+/* Presenting on a 16:9 display leaves far less vertical room than a scrolling
+   page. Three slides overflowed at 682px of slide height, so the dense
+   elements step down here rather than on the page. */
 body.present .stat-row,body.present .thumb-grid,body.present .flow,
-body.present .ops,body.present .qs,body.present .tour{margin-top:1.5rem}
-body.present .sub{margin-top:1rem}
-body.present .ttitle{-webkit-line-clamp:1;font-size:.7rem}
-body.present .srcline{margin-top:1.2rem}
+body.present .ops,body.present .qs,body.present .tour{margin-top:1.2rem}
+body.present .sub{margin-top:.85rem;font-size:clamp(.88rem,1.25vw,1.05rem)}
+body.present .ttitle{-webkit-line-clamp:1;font-size:.68rem}
+body.present .tviews{font-size:1rem;margin-top:.25rem}
+body.present .tmeta{padding:.5rem .6rem}
+body.present .tsub{font-size:.54rem}
+body.present .srcline{margin-top:.9rem}
+body.present .stat .num{font-size:clamp(2rem,4vw,3.2rem)}
+body.present .stat .cap{margin-top:.5rem}
+body.present h2.big{font-size:clamp(1.8rem,4vw,3.1rem)}
+body.present .op p{font-size:.76rem}
+body.present .op h4{margin:.4rem 0 .45rem}
+body.present .fstep{padding:.65rem .7rem}
 .pbar{display:none;position:fixed;bottom:0;left:0;height:3px;background:var(--signal);z-index:1000;transition:width .3s ease}
 body.present .pbar{display:block}
 .pcount{display:none;position:fixed;bottom:1rem;right:1.25rem;z-index:1000;font-size:.6rem;font-weight:700;
@@ -265,10 +277,10 @@ body.sheet-open{overflow:hidden}
         <div class="sub2">Measured · no uploads in 30 days</div></div>
     </div>
     <p class="sub reveal">
-      April Harper Grey records as <b>underscores</b> — a solo producer and songwriter, and a
-      <b>2026 YouTube Music Foundry artist</b>. The channel added <b>798,252 views in the last
-      week with nothing new published</b>. The catalogue is doing the work; the opportunity is
-      giving it something to hand people on to.
+      April Harper Grey records as <b>underscores</b> — solo producer and songwriter, and a
+      <b>2026 YouTube Music Foundry artist</b>. The channel added <b>798,252 views last week with
+      nothing new published</b>. The catalogue is working; the opportunity is giving arrivals
+      somewhere to go next.
     </p>
     <div class="thumb-grid four stagger">
       <a class="tcard" href="https://www.youtube.com/watch?v=Gf-fCJ6TkRU" target="_blank" rel="noopener">
@@ -320,10 +332,9 @@ body.sheet-open{overflow:hidden}
         <div class="tmeta"><div class="ttitle">Do It (Yves Remix)</div><div class="tviews">727K</div>
         <div class="tsub">23 Jan 2026 · collaboration</div></div></a>
     </div>
-    <p class="sub reveal" style="font-size:.9rem;margin-top:1.4rem">
-      Earlier catalogue still earns — <i>Locals (Girls like us)</i> and <i>Spoiled little brat</i>
-      sit between 600K and 790K from 2021–23. Those are lifetime totals across very different
-      ages, so they show durability rather than current pace.
+    <p class="sub reveal" style="font-size:.88rem;margin-top:1.2rem">
+      Earlier catalogue still earns: <i>Locals (Girls like us)</i> and <i>Spoiled little brat</i>
+      sit between 600K and 790K. Lifetime totals, so they show durability rather than current pace.
     </p>
     <div class="srcline reveal" style="color:var(--warm)">Lifetime view counts, YouTube Data API, 16 Oct 2026</div>
   </div>
@@ -362,9 +373,9 @@ body.sheet-open{overflow:hidden}
     <div class="label reveal">Beyond the single</div>
     <h2 class="big display reveal" style="max-width:20ch">An unusual range already exists</h2>
     <p class="sub reveal">
-      Two multi-hour production streams, a four-part video series, a full album video and a live
-      performance. <b>The A-side production stream drew 136,839 views</b> — a strong result for
-      unedited process footage, and a format very few artists at this scale attempt.
+      Two multi-hour production streams, a four-part series, a full album video and a live
+      performance. <b>The A-side stream drew 136,839 views</b> — a strong result for unedited
+      process footage, and a format few artists at this scale attempt.
     </p>
     <div class="thumb-grid four stagger">
       <a class="tcard" href="https://www.youtube.com/watch?v=6OmpI6wJVNc" target="_blank" rel="noopener">
@@ -384,10 +395,9 @@ body.sheet-open{overflow:hidden}
         <div class="tmeta"><div class="ttitle">Wsk Life 1 — four-part series</div><div class="tviews">36K</div>
         <div class="tsub">21m · Feb 2024</div></div></a>
     </div>
-    <p class="sub reveal" style="font-size:.9rem;margin-top:1.3rem">
-      Process and performance are the two foundations worth developing. How long people actually
-      stay with a three-hour video is a question for channel analytics, not something view counts
-      can answer.
+    <p class="sub reveal" style="font-size:.88rem;margin-top:1.1rem">
+      Process and performance are the two foundations worth developing. How long people stay with
+      a three-hour video is a question for channel analytics, not view counts.
     </p>
     <div class="srcline reveal" style="color:var(--warm)">Durations and lifetime views, YouTube Data API, 16 Oct 2026</div>
   </div>
