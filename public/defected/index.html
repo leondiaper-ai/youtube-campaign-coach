@@ -1,0 +1,1469 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Defected Records × YouTube — House Music, All Life Long</title>
+
+<!--
+  DEFECTED RECORDS × YOUTUBE — channel review · v1 · 16 October 2026
+  Virgin Music Group · UK YouTube
+
+  ─────────────────────────────────────────────────────────────────────
+  WHERE THE NUMBERS COME FROM
+  One pull of the public YouTube Data API v3 against @DefectedMusic on
+  16 October 2026 (11:11–11:21 UTC): the 5,000 most recent of 5,243
+  public uploads (14 Jun 2011 → 16 Oct 2026), the channel's 71 public
+  playlists and homepage sections, plus a manual walk of Home, Videos,
+  Shorts, Podcasts and Playlists in a browser the same day. Every figure
+  on these slides is a LIFETIME TOTAL as at that date. There is no
+  YouTube Studio data anywhere in this deck: no impressions, CTR,
+  retention, watch time, traffic sources or returning viewers. The
+  channel entered our daily snapshots on 16 October, so there is no
+  velocity or momentum series yet either.
+
+  ─────────────────────────────────────────────────────────────────────
+  RULES THIS FILE OBEYS
+   1. No lifetime-view ranking across upload ages. Series are compared
+      within the same window, or by structural measures (cadence,
+      consistency, format mix, share of attention).
+   2. "85% of observed upload views sit on pre-2022 uploads" is a
+      statement about where ACCUMULATED views sit. It is never presented
+      as the archive's share of current consumption, nor as evidence
+      that recent output underperforms.
+   3. Setting, host and headliner effects are observed co-occurrence.
+      No slide says a setting or a title CAUSED a result.
+   4. Shorts-to-long-form conversion is a hypothesis to test, not a
+      behaviour we can see.
+   5. Podcast season two is "the label's planned season two". No public
+      source confirms a launch date, so none is stated.
+   6. Nothing promises a number. Every recommendation is a test with a
+      measure attached.
+   7. Caveats that change how a figure reads sit on the slide, in one
+      line. Everything else lives in the Analysis sheet.
+   8. Views on a lyric upload hosted by another channel are evidence to
+      investigate, never proof of demand, and nothing is assumed about
+      that channel's ownership or relationship with Defected. Each case
+      was opened and checked (lyric-led, which version, whether an
+      official one exists) before it went on a slide.
+   9. Tool conditions (Premiere trailer, Live Redirect) are stated
+      separately and marked as Studio checks; anniversaries are dated
+      from the original Defected release, not the YouTube upload.
+
+  ─────────────────────────────────────────────────────────────────────
+  THE DESIGN SYSTEM CAME OUT OF THE CHANNEL
+  Sixteen real thumbnails from the series discussed here (Malta, Pacha,
+  Croatia, Chinois, HQ, the radio show, three DFTD sleeves, the 2026
+  summer mix, the podcast, album-day uploads) were sampled pixel by
+  pixel, greys and crushed blacks removed, hues binned: red 0–30° 48%
+  and magenta-red 330° 17% (the roundel, stage light, the DFTD panel);
+  cyan-teal 180–210° 16% and acid green 150° 9% (the radio sleeves,
+  Chinois' sea); yellow 60° 4% (the Sam Divine radio sleeve). So: one
+  red, a near-black ground with a red cast, and the radio show's flat
+  broadcast colours as section accents. Daylight only on the
+  compilations slide, because those sleeves are the only daylight on
+  the channel.
+
+  Display type is Archivo at the NARROW end of its width axis
+  (wdth 75 / wght 800), echoing the condensed DFTD catalogue-number
+  lettering and the event wordmarks. Ezra uses the same family at the
+  wide end: the two decks share a chassis, not a look.
+
+  THE MOTIF is a 52-week strip — one cell per week of the last year,
+  tall when a lot landed, with the Friday radio episode marked in that
+  week's sleeve colour. The finding is consistency and routing, so the
+  repeating mark is the calendar itself.
+
+  IMAGERY is loaded by video id from i.ytimg.com at render time, so
+  every frame is a real Defected upload. Channel-surface screenshots
+  were taken on 16 October 2026 and live in /defected/img so the deck
+  never depends on YouTube's layout staying the same. Shorts use the
+  vertical oardefault thumbnail with a landscape fallback.
+-->
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,100..900&family=Instrument+Sans:wght@400..700&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+
+<style>
+:root{
+  /* Sampled from the channel's own frames — see the note above. */
+  --red:#E2231A;        /* the roundel, the DFTD panel, the Pacha cherries */
+  --red-dp:#8F1710;
+  --yellow:#F2D53C;     /* Defected Radio · Sam Divine */
+  --lime:#B9F24C;       /* Defected Radio · Rimarkable / 25.09.26 */
+  --cyan:#39D0E6;       /* Defected Radio · Monki */
+  --blue:#2E63E8;       /* Defected Radio · the blue week; Chinois' sea */
+  --pod:#2FBF5F;        /* Moments in Music cover green */
+
+  --ink:#0D0A0B;        /* near-black with a red cast; the rooms are lit red */
+  --ink-2:#15100F;
+  --ink-3:#1E1716;
+  --cream:#F3EDE4;
+  --warm:#BDB3AE;       /* body copy on dark */
+  --dim:#7C726E;        /* labels only, never body text */
+  --line:rgba(243,237,228,.13);
+
+  --pad:clamp(1.6rem,5vw,5.5rem);
+  --an-accent:var(--red);
+}
+
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{
+  background:var(--ink);color:var(--cream);
+  font-family:'Instrument Sans',system-ui,sans-serif;
+  font-size:clamp(15px,1.05vw,18px);line-height:1.55;
+  -webkit-font-smoothing:antialiased;overflow-x:hidden;
+}
+/* A fine grain over everything, 2%: the difference between a web page
+   and a printed thing. */
+body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:55;opacity:.02;
+  background:repeating-linear-gradient(0deg,#fff 0 1px,transparent 1px 3px),
+             repeating-linear-gradient(90deg,#fff 0 1px,transparent 1px 3px)}
+a{color:inherit}
+img{display:block}
+
+/* ── Type ───────────────────────────────────────────────────────────*/
+.display{
+  font-family:'Archivo',sans-serif;
+  font-variation-settings:'wdth' 75,'wght' 800;
+  text-transform:uppercase;line-height:.9;letter-spacing:.005em;
+}
+h1.display{font-size:clamp(3rem,8.8vw,8rem)}
+h2.display{font-size:clamp(2.1rem,5.6vw,4.9rem)}
+h2.display.tight{font-size:clamp(1.8rem,4.2vw,3.6rem)}
+h3.display{font-size:clamp(1.2rem,2.2vw,1.9rem);font-variation-settings:'wdth' 78,'wght' 780}
+.label{
+  font-family:'DM Mono',monospace;font-size:.68rem;font-weight:400;
+  letter-spacing:.16em;text-transform:uppercase;color:var(--dim);
+}
+.statement{font-size:clamp(1.05rem,1.7vw,1.5rem);line-height:1.38;color:var(--cream);max-width:36ch}
+.body{color:var(--warm);max-width:60ch}
+.body b{color:var(--cream);font-weight:600}
+.big-num{
+  font-family:'Archivo',sans-serif;font-variation-settings:'wdth' 78,'wght' 800;
+  line-height:.86;letter-spacing:-.01em;font-variant-numeric:tabular-nums;
+}
+.stamp{font-family:'DM Mono',monospace;font-size:.72rem;letter-spacing:.14em;text-transform:uppercase}
+.qual{
+  font-family:'DM Mono',monospace;font-size:.66rem;line-height:1.5;letter-spacing:.04em;
+  color:var(--warm);border-left:2px solid var(--red);padding-left:.7rem;max-width:70ch;margin-top:1.1rem;
+}
+.src{
+  font-family:'DM Mono',monospace;font-size:.64rem;line-height:1.45;
+  color:var(--dim);border-left:2px solid var(--line);padding-left:.7rem;
+  max-width:80ch;margin-top:1.4rem;
+}
+
+/* ── Slides ─────────────────────────────────────────────────────────*/
+.deck{width:100%}
+.slide{
+  position:relative;min-height:100vh;width:100%;
+  display:flex;flex-direction:column;justify-content:flex-start;
+  padding:5.5rem var(--pad) 4rem;overflow:hidden;
+  border-bottom:1px solid var(--line);
+}
+.inner{position:relative;z-index:3;width:100%;max-width:1400px;margin:auto}
+.bleed{position:absolute;inset:0;z-index:0}
+.bleed img{width:100%;height:100%;object-fit:cover;display:block}
+.scrim-b::after{content:'';position:absolute;inset:0;
+  background:linear-gradient(to top,rgba(13,10,11,.97) 6%,rgba(13,10,11,.74) 40%,rgba(13,10,11,.16) 80%)}
+.scrim-l::after{content:'';position:absolute;inset:0;
+  background:linear-gradient(to right,rgba(13,10,11,.96) 32%,rgba(13,10,11,.66) 58%,rgba(13,10,11,.14) 100%)}
+.scrim-f::after{content:'';position:absolute;inset:0;background:rgba(13,10,11,.8)}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:clamp(1.5rem,4vw,4.5rem)}
+@media(max-width:860px){.grid2{grid-template-columns:1fr}}
+
+/* Flat "broadcast" fields: the radio sleeves' own treatment, black type on colour. */
+.field{color:var(--ink)}
+.field .label,.field .src,.field .qual{color:rgba(13,10,11,.62);border-color:rgba(13,10,11,.25)}
+.field .body{color:rgba(13,10,11,.78)}
+.field .body b,.field .statement{color:var(--ink)}
+.field.lime{background:var(--lime)}
+.field.cyan{background:var(--cyan)}
+.field.pod{background:var(--pod)}
+
+/* ── THE MOTIF: the 52-week strip ───────────────────────────────────
+   One cell per week, height by upload count, the Friday radio episode
+   as a coloured cap in that week's sleeve colour. */
+.weeks{display:flex;gap:3px;align-items:flex-end;width:100%;height:var(--wh,64px)}
+.wk{flex:1 1 0;min-width:1px;position:relative;background:rgba(243,237,228,.12);border-radius:1px;height:12%}
+.wk.on{background:var(--warm)}
+.wk.on::after{content:'';position:absolute;left:0;right:0;top:0;height:4px;border-radius:1px;background:var(--cap,transparent)}
+.wk.radio::after{background:var(--cap)}
+.wk.off{background:rgba(226,35,26,.35)}
+.weeks.mini{--wh:22px;gap:2px}
+.weeks.mini .wk.on::after{height:3px}
+
+/* ── Thumbs ─────────────────────────────────────────────────────────*/
+.thumb{position:relative;display:block;border-radius:3px;overflow:hidden;background:var(--ink-3);aspect-ratio:16/9;text-decoration:none}
+.thumb img{width:100%;height:100%;object-fit:cover;display:block;filter:saturate(1.1) contrast(1.04)}
+.thumb .cap{
+  position:absolute;left:0;right:0;bottom:0;padding:.5rem .55rem .45rem;
+  background:linear-gradient(to top,rgba(13,10,11,.94),rgba(13,10,11,0));
+  font-family:'DM Mono',monospace;font-size:.6rem;line-height:1.35;color:var(--cream);letter-spacing:.04em;
+}
+.thumb .cap b{display:block;font-family:'Archivo',sans-serif;font-variation-settings:'wdth' 78,'wght' 780;font-size:.82rem;text-transform:uppercase;letter-spacing:0;line-height:1.05;margin-bottom:.15rem}
+.thumb.v{aspect-ratio:9/16}
+.shot{border-radius:4px;overflow:hidden;border:1px solid var(--line);background:var(--ink-3);box-shadow:0 20px 50px rgba(0,0,0,.45)}
+.shot img{width:100%;height:auto;display:block}
+.shot.crop{height:clamp(150px,22vh,210px)}
+.shot.crop img{height:100%;object-fit:cover;object-position:0 18%}
+
+/* ── Slide 2 · the year strip ────────────────────────────────────────
+   Width to scale by observed views per upload year. The pre-2022
+   blocks are red, 2022–26 cream, so the split reads before the number. */
+.years{display:flex;gap:2px;width:100%;height:clamp(90px,14vh,150px);align-items:stretch}
+.yr{position:relative;min-width:2px;background:var(--red-dp);border-radius:1px}
+.yr.now{background:var(--cream)}
+.yr.cola{background:var(--red)}
+.yr i{position:absolute;left:0;bottom:-1.35rem;font-style:normal;font-family:'DM Mono',monospace;font-size:.6rem;letter-spacing:.08em;color:var(--dim);white-space:nowrap}
+.yr.now i{color:var(--warm)}
+
+/* ── Slide 3 · radio sleeve band ─────────────────────────────────────*/
+.band{display:grid;grid-template-columns:repeat(8,1fr);gap:4px}
+@media(max-width:860px){.band{grid-template-columns:repeat(4,1fr)}}
+
+/* ── Slide 4 · the set wall + ladder ────────────────────────────────
+   Tiles carry data-s (their setting). Hovering or focusing a ladder row
+   lights that setting and dims the rest: the picture and the point are
+   the same object (D-Block's mechanic). */
+.wall{display:grid;grid-template-columns:repeat(4,1fr);gap:4px}
+@media(max-width:560px){.wall{grid-template-columns:repeat(3,1fr)}}
+.wall .thumb img{transition:filter .4s ease,opacity .4s ease}
+.wall.focus .thumb img{filter:saturate(.6) brightness(.32)}
+.wall.focus .thumb.lit img{filter:saturate(1.15) brightness(1) contrast(1.05)}
+.ladder{display:flex;flex-direction:column;gap:.15rem}
+.rung{display:grid;grid-template-columns:8.4rem 1fr auto;gap:.8rem;align-items:center;padding:.3rem .5rem;border-radius:3px;cursor:default;transition:background .2s ease}
+.rung:hover,.rung.on{background:rgba(243,237,228,.06)}
+.rung .nm{font-family:'DM Mono',monospace;font-size:.66rem;letter-spacing:.12em;text-transform:uppercase;color:var(--warm)}
+.rung .nm i{display:block;font-style:normal;color:var(--dim);letter-spacing:.06em;font-size:.6rem;margin-top:.15rem}
+.rung .bar{height:12px;background:rgba(243,237,228,.08);border-radius:2px;overflow:hidden}
+.rung .bar i{display:block;height:100%;width:var(--w);background:var(--red);border-radius:2px}
+.rung .v{font-family:'Archivo',sans-serif;font-variation-settings:'wdth' 80,'wght' 780;font-size:1.1rem;color:var(--cream);font-variant-numeric:tabular-nums;white-space:nowrap}
+.rung .v i{font-style:normal;font-family:'DM Mono',monospace;font-size:.6rem;color:var(--dim);margin-left:.35rem;letter-spacing:.06em}
+
+/* ── Slide 5 · compilations, the daylight section ──────────────────*/
+.slide.day{background:#F4EBDD;color:#1A1210}
+.slide.day .label{color:#8A6E55}
+.slide.day .body{color:#5B4A40}
+.slide.day .body b,.slide.day .statement{color:#1A1210}
+.slide.day .src,.slide.day .qual{color:#8A6E55;border-color:rgba(26,18,16,.2)}
+.slide.day .qual{border-color:var(--red)}
+.slide.day .big-num{color:var(--red)}
+.slide.day .thumb{background:#DDD2C3}
+.seasons{display:grid;grid-template-columns:repeat(6,1fr);gap:.6rem;margin-top:1.4rem}
+@media(max-width:860px){.seasons{grid-template-columns:repeat(3,1fr)}}
+.season{border-top:2px solid rgba(26,18,16,.15);padding-top:.6rem}
+.season.hi{border-top-color:var(--red)}
+.season .y{font-family:'DM Mono',monospace;font-size:.66rem;letter-spacing:.14em;color:#8A6E55}
+.season .n{font-family:'Archivo',sans-serif;font-variation-settings:'wdth' 78,'wght' 800;font-size:clamp(1.5rem,2.6vw,2.2rem);line-height:.9;margin:.35rem 0 .2rem;color:#1A1210}
+.season .n span{font-size:.5em;color:#8A6E55}
+.season p{font-size:.74rem;line-height:1.35;color:#5B4A40}
+.dots{display:flex;gap:3px;margin:.4rem 0 .35rem;flex-wrap:wrap}
+.dots i{width:9px;height:9px;border-radius:50%;background:rgba(26,18,16,.18)}
+.dots i.k{background:var(--red)}
+.mixes{display:grid;grid-template-columns:repeat(3,1fr);gap:.6rem}
+@media(max-width:860px){.mixes{grid-template-columns:repeat(3,1fr)}}
+
+/* ── Slide 6 · releases ─────────────────────────────────────────────*/
+.sleeves{display:grid;grid-template-columns:repeat(3,1fr);gap:.6rem}
+@media(max-width:560px){.sleeves{grid-template-columns:1fr}}
+.rel{display:flex;gap:1.4rem;flex-wrap:wrap;align-items:flex-end}
+
+/* ── Slide 7 · what to protect: six lanes, each headed by the real asset ─*/
+.lanes{display:grid;grid-template-columns:repeat(6,1fr);gap:clamp(.7rem,1.3vw,1.3rem)}
+@media(max-width:1100px){.lanes{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:760px){.lanes{grid-template-columns:1fr 1fr}}
+@media(max-width:480px){.lanes{grid-template-columns:1fr}}
+.lane{border-top:2px solid var(--line);padding-top:.8rem;min-width:0}
+.lane .thumb{margin-bottom:.7rem}
+.lane .n{font-family:'DM Mono',monospace;font-size:.68rem;letter-spacing:.18em}
+.lane h3{margin:.35rem 0 .45rem;font-size:clamp(1.05rem,1.55vw,1.4rem)}
+.lane p{font-size:.8rem;color:var(--warm);line-height:1.42}
+.lane p b{color:var(--cream);font-weight:600}
+.lane.c1{border-top-color:var(--yellow)}.lane.c1 .n{color:var(--yellow)}
+.lane.c2{border-top-color:var(--red)}.lane.c2 .n{color:var(--red)}
+.lane.c3{border-top-color:var(--cyan)}.lane.c3 .n{color:var(--cyan)}
+.lane.c4{border-top-color:var(--cream)}.lane.c4 .n{color:var(--cream)}
+.lane.c5{border-top-color:var(--lime)}.lane.c5 .n{color:var(--lime)}
+.lane.c6{border-top-color:var(--blue)}.lane.c6 .n{color:#7FA0F5}
+
+/* ── Slide 8 · the radio destination: three surfaces ────────────────*/
+.panels{display:grid;grid-template-columns:1fr 1fr 1.1fr;gap:clamp(.8rem,1.6vw,1.6rem);align-items:start}
+.panels.three{grid-template-columns:1fr 1fr 1.25fr}
+@media(max-width:980px){.panels,.panels.three{grid-template-columns:1fr}}
+.panel .label{margin-bottom:.5rem}
+.callout{
+  font-family:'DM Mono',monospace;font-size:.66rem;line-height:1.45;letter-spacing:.04em;
+  color:var(--ink);background:var(--cream);border-radius:2px;padding:.5rem .65rem;margin-top:.6rem;max-width:40ch;
+}
+.callout b{color:var(--red);font-weight:500}
+.fixtile{display:grid;grid-template-columns:7.5rem 1fr;background:var(--ink);color:var(--cream);border-radius:4px;overflow:hidden;border:1px solid rgba(13,10,11,.3)}
+.fixtile .art{position:relative;aspect-ratio:1;overflow:hidden}
+.fixtile .art img{width:100%;height:100%;object-fit:cover}
+.fixtile .art span{position:absolute;left:.6rem;bottom:.6rem;font-family:'DM Mono',monospace;font-size:.58rem;letter-spacing:.12em;text-transform:uppercase;background:rgba(13,10,11,.85);padding:.25rem .45rem;border-radius:2px}
+.fixtile .bd{padding:.7rem .8rem .8rem;align-self:center}
+.fixtile .bd b{display:block;font-family:'Archivo',sans-serif;font-variation-settings:'wdth' 78,'wght' 780;text-transform:uppercase;font-size:1rem;line-height:1.02}
+.fixtile .bd i{display:block;font-style:normal;font-family:'DM Mono',monospace;font-size:.6rem;letter-spacing:.1em;text-transform:uppercase;color:var(--warm);margin-top:.35rem}
+.miniShelf{display:grid;grid-template-columns:repeat(4,1fr);gap:3px;margin-top:.5rem}
+.steps{list-style:none;counter-reset:s;display:flex;flex-direction:column;gap:.45rem;margin-top:.9rem}
+.steps li{counter-increment:s;position:relative;padding-left:1.7rem;font-size:.8rem;line-height:1.38;color:rgba(13,10,11,.85)}
+.steps li::before{content:'0' counter(s);position:absolute;left:0;top:.1rem;font-family:'DM Mono',monospace;font-size:.62rem;letter-spacing:.1em;color:var(--red)}
+.steps li b{font-weight:600;color:var(--ink)}
+.steps.dark li{color:var(--warm);font-size:.92rem}
+.steps.dark li b{color:var(--cream)}
+.steps.row{display:grid;grid-template-columns:repeat(3,1fr);gap:1.2rem;margin-top:1.1rem;padding-top:.9rem;border-top:1px solid rgba(13,10,11,.2)}
+@media(max-width:860px){.steps.row{grid-template-columns:1fr}}
+
+/* ── Slide 8 · the Home rail (inside the radio slide) ───────────────*/
+.rail9{display:flex;flex-direction:column;gap:2px}
+.field .shelf{background:rgba(13,10,11,.07);color:var(--ink)}
+.field .shelf .t{color:var(--ink)}
+.field .shelf .t i,.field .shelf .i,.field .shelf .k{color:rgba(13,10,11,.6)}
+.field .shelf.add{background:rgba(226,35,26,.12);border:1px dashed rgba(226,35,26,.7)}
+.field .shelf.add .i,.field .shelf.add .k{color:var(--red)}
+.field .shelf.move{background:rgba(13,10,11,.14)}
+.field .shelf.move .k{color:var(--ink)}
+
+/* ── Slide 9 · Premieres: the strength, then the tools ──────────────*/
+.prem{display:grid;grid-template-columns:.95fr 1.25fr;gap:clamp(1.2rem,2.6vw,2.4rem);align-items:start}
+@media(max-width:900px){.prem{grid-template-columns:1fr}}
+.premPage{position:relative;border-radius:4px;overflow:hidden;background:var(--ink-3);border:1px solid var(--line)}
+.premPage .thumb{border-radius:0}
+.premPage .bar{display:flex;justify-content:space-between;gap:1rem;align-items:center;padding:.6rem .8rem;background:var(--ink-2);font-family:'DM Mono',monospace;font-size:.6rem;letter-spacing:.1em;text-transform:uppercase;color:var(--warm);flex-wrap:wrap}
+.premPage .bar b{color:var(--cream);font-weight:500}
+.premPage .pill{display:inline-block;border:1px solid var(--line);border-radius:2px;padding:.2rem .45rem;color:var(--cream)}
+.premPage .pill.on{border-color:var(--red);color:var(--red)}
+.tools{display:grid;grid-template-columns:1fr 1fr;gap:.6rem}
+@media(max-width:560px){.tools{grid-template-columns:1fr}}
+.tool{border-top:2px solid var(--line);padding-top:.55rem}
+.tool b{display:block;font-family:'Archivo',sans-serif;font-variation-settings:'wdth' 78,'wght' 780;text-transform:uppercase;font-size:.95rem;line-height:1.05;color:var(--cream)}
+.tool p{font-size:.76rem;line-height:1.4;color:var(--warm);margin-top:.3rem}
+.tool p i{font-style:normal;color:var(--dim);font-family:'DM Mono',monospace;font-size:.6rem;letter-spacing:.06em}
+.tool.t1{border-top-color:var(--red)}.tool.t2{border-top-color:var(--cyan)}.tool.t3{border-top-color:var(--yellow)}.tool.t4{border-top-color:var(--lime)}
+.facts{display:flex;gap:1.6rem;flex-wrap:wrap;margin-top:1rem}
+.facts div .big-num{font-size:clamp(1.4rem,2.4vw,2.1rem)}
+.facts div .label{margin-top:.3rem}
+
+/* ── Slide 10 · lyric videos: three cases, each an upload on another channel beside its status ─*/
+.cases{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(.8rem,1.6vw,1.6rem)}
+@media(max-width:860px){.cases{grid-template-columns:1fr}}
+.case{border-top:2px solid var(--line);padding-top:.7rem;min-width:0}
+.case .thumb{margin-bottom:.6rem;max-width:68%}
+@media(max-width:860px){.case .thumb{max-width:60%}}
+.case h3{font-size:clamp(1rem,1.5vw,1.3rem)}
+.case .stat{display:grid;grid-template-columns:auto 1fr;gap:.25rem .6rem;margin-top:.5rem;font-size:.76rem;line-height:1.4;color:var(--warm)}
+.case .stat span:nth-child(odd){font-family:'DM Mono',monospace;font-size:.58rem;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);padding-top:.2rem}
+.case .stat b{color:var(--cream);font-weight:600}
+.case .stat .no{color:var(--red);font-weight:600}
+.case .stat .yes{color:var(--cyan);font-weight:600}
+.case.first{border-top-color:var(--red)}
+.case.first h3{color:var(--cream)}
+
+/* ── Slide 11 · the anniversary: a line of what already exists ──────*/
+.line20{display:grid;grid-template-columns:repeat(8,1fr);gap:.45rem;position:relative;margin-top:1.4rem}
+@media(max-width:980px){.line20{grid-template-columns:repeat(4,1fr)}}
+@media(max-width:560px){.line20{grid-template-columns:repeat(2,1fr)}}
+.line20::before{content:'';position:absolute;left:0;right:0;top:-.7rem;height:1px;background:var(--line)}
+.pt{min-width:0}
+.pt .y{font-family:'DM Mono',monospace;font-size:.6rem;letter-spacing:.12em;color:var(--dim);margin-bottom:.35rem;white-space:nowrap}
+.pt .y b{color:var(--red);font-weight:500}
+.line20.fmt .pt .y{white-space:normal;line-height:1.35}
+.line20.fmt .pt .y i{display:block;font-style:normal;color:var(--dim)}
+.field .line20.fmt .pt .y{color:rgba(13,10,11,.7)}
+.field .line20.fmt .pt .y i{color:rgba(13,10,11,.6)}
+.pt .thumb .cap{padding:.35rem .4rem .35rem;font-size:.54rem;background:linear-gradient(to top,rgba(13,10,11,.97) 30%,rgba(13,10,11,.45))}
+.pt .thumb .cap b{font-size:.68rem}
+
+/* ── Slide 14 · three priorities, supporting actions beneath ────────*/
+.prios{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(1rem,2.2vw,2.2rem)}
+@media(max-width:860px){.prios{grid-template-columns:1fr}}
+.prio{border-top:2px solid var(--red);padding-top:.8rem;min-width:0}
+.prio:nth-child(2){border-top-color:var(--yellow)}
+.prio:nth-child(3){border-top-color:var(--cyan)}
+.prio .d{font-family:'DM Mono',monospace;font-size:.62rem;letter-spacing:.14em;text-transform:uppercase;color:var(--dim)}
+.prio .head{display:grid;grid-template-columns:6.4rem 1fr;gap:.8rem;align-items:center;margin-top:.6rem}
+.prio .thumb{margin:0}
+.prio h3{font-size:clamp(1.05rem,1.6vw,1.35rem);line-height:1.05}
+.prio>p{font-size:.8rem;color:var(--warm);line-height:1.4;margin-top:.45rem}
+.prio>p b{color:var(--cream);font-weight:600}
+.prio ul{list-style:none;margin-top:.7rem;border-top:1px solid var(--line)}
+.prio li{font-size:.72rem;color:var(--warm);line-height:1.38;padding:.3rem 0 .3rem .9rem;position:relative;border-bottom:1px solid var(--line)}
+.prio li::before{content:'';position:absolute;left:0;top:.8rem;width:4px;height:4px;border-radius:50%;background:var(--dim)}
+.prio li b{color:var(--cream);font-weight:600}
+.prio .tag{display:inline-block;margin-top:.55rem;font-family:'DM Mono',monospace;font-size:.56rem;letter-spacing:.12em;text-transform:uppercase;padding:.2rem .45rem;border:1px solid var(--line);border-radius:2px;color:var(--warm)}
+.prio .tag.x{border-color:var(--cyan);color:var(--cyan)}
+.shelf{display:grid;grid-template-columns:2rem 1fr auto;gap:.8rem;align-items:center;padding:.28rem .6rem;border-radius:2px;background:rgba(243,237,228,.045);font-size:.78rem}
+.shelf .i{font-family:'DM Mono',monospace;font-size:.6rem;letter-spacing:.1em;color:var(--dim)}
+.shelf .t{color:var(--cream)}
+.shelf .t i{font-style:normal;color:var(--dim);font-size:.74rem;margin-left:.4rem}
+.shelf .k{font-family:'DM Mono',monospace;font-size:.58rem;letter-spacing:.12em;text-transform:uppercase;color:var(--dim)}
+.shelf.add{background:rgba(226,35,26,.14);border:1px dashed rgba(226,35,26,.6)}
+.shelf.add .i,.shelf.add .k{color:var(--red)}
+.shelf.move{background:rgba(57,208,230,.1)}
+.shelf.move .k{color:var(--cyan)}
+@media(max-width:560px){.shelf{grid-template-columns:2rem 1fr;gap:.2rem .6rem}.shelf .k{grid-column:2;white-space:normal}}
+
+/* ── Slide 12 · Shorts ──────────────────────────────────────────────*/
+.months{display:flex;gap:3px;align-items:flex-end;height:70px;width:100%}
+.mo{flex:1 1 0;background:rgba(243,237,228,.22);border-radius:1px;position:relative}
+.mo.y26{background:var(--warm)}
+.mo.zero{background:var(--red);height:3px!important}
+.mo i{position:absolute;left:50%;transform:translateX(-50%);bottom:-1.25rem;font-style:normal;font-family:'DM Mono',monospace;font-size:.56rem;color:var(--dim);letter-spacing:.06em}
+.shorts{display:grid;grid-template-columns:repeat(6,1fr);gap:.5rem}
+@media(max-width:860px){.shorts{grid-template-columns:repeat(3,1fr)}}
+.cmp{display:grid;grid-template-columns:1fr 1fr 1fr;gap:1rem;margin-top:1.2rem}
+@media(max-width:560px){.cmp{grid-template-columns:1fr}}
+.cmp div{border-top:2px solid var(--line);padding-top:.6rem}
+.cmp div.h{border-top-color:var(--yellow)}
+.cmp .big-num{font-size:clamp(1.5rem,2.6vw,2.2rem)}
+.cmp p{font-size:.78rem;color:var(--warm);line-height:1.4;margin-top:.3rem}
+
+/* ── Slide 13 · the podcast timeline ────────────────────────────────*/
+.tl{position:relative;display:grid;grid-template-columns:repeat(26,1fr);gap:2px;align-items:end;height:clamp(120px,18vh,180px)}
+.tl::before{content:'';position:absolute;left:0;right:0;bottom:0;height:1px;background:rgba(13,10,11,.3)}
+.ep{grid-row:1;align-self:end;position:relative}
+.ep .thumb{border-radius:2px;border:2px solid var(--ink)}
+.ep i{position:absolute;left:0;bottom:-1.3rem;font-style:normal;font-family:'DM Mono',monospace;font-size:.56rem;letter-spacing:.06em;color:rgba(13,10,11,.7);white-space:nowrap}
+.gap{grid-row:1;align-self:end;height:1.4rem;display:flex;align-items:center;justify-content:center;font-family:'DM Mono',monospace;font-size:.56rem;letter-spacing:.1em;color:rgba(13,10,11,.55);border-bottom:2px dashed rgba(13,10,11,.35);margin-bottom:.4rem}
+
+@media(max-width:860px){
+  .tl{display:flex;flex-wrap:wrap;gap:.6rem 2%;height:auto}
+  .tl::before{display:none}
+  .ep{width:32%}
+  .ep i{position:static;display:block;margin-top:.25rem}
+  .gap{display:none}
+  .podgrid{grid-template-columns:1fr!important}
+}
+
+/* ── (retired) the 90-day rail ─────────────────────────────────────*/
+.rail{display:grid;grid-template-columns:repeat(5,1fr);gap:clamp(.8rem,1.8vw,1.6rem);position:relative}
+@media(max-width:980px){.rail{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:560px){.rail{grid-template-columns:1fr}}
+.stop{border-top:2px solid var(--red);padding-top:.8rem}
+.stop:nth-child(2){border-top-color:var(--yellow)}
+.stop:nth-child(3){border-top-color:var(--cyan)}
+.stop:nth-child(4){border-top-color:var(--lime)}
+.stop:nth-child(5){border-top-color:var(--pod)}
+.stop .d{font-family:'DM Mono',monospace;font-size:.62rem;letter-spacing:.14em;text-transform:uppercase;color:var(--dim)}
+.stop .thumb{margin:.6rem 0 .7rem}
+.stop h3{font-size:clamp(1rem,1.5vw,1.25rem);line-height:1.05}
+.stop p{font-size:.75rem;color:var(--warm);line-height:1.38;margin-top:.4rem}
+.stop p b{color:var(--cream);font-weight:600}
+.stop .tag{display:inline-block;margin-top:.5rem;font-family:'DM Mono',monospace;font-size:.56rem;letter-spacing:.12em;text-transform:uppercase;padding:.2rem .45rem;border:1px solid var(--line);border-radius:2px;color:var(--warm)}
+.stop .tag.x{border-color:var(--cyan);color:var(--cyan)}
+
+/* Closing summary */
+.prios.close{gap:clamp(1.4rem,3vw,3rem)}
+.prios.close .prio{padding-top:1rem}
+.prios.close .thumb{aspect-ratio:16/8}
+.prios.close .d{margin-top:.9rem;font-size:.7rem;color:var(--cream)}
+.prios.close h3{font-size:clamp(1.25rem,2.1vw,1.8rem);line-height:1.04;margin-top:.35rem}
+.prios.close .prio>p{font-size:clamp(.95rem,1.25vw,1.1rem);line-height:1.45;color:var(--cream);opacity:.88;margin-top:.6rem;max-width:32ch}
+@media(max-width:880px){.prios.close{grid-template-columns:1fr}}
+.checks{display:grid;grid-template-columns:1fr 1fr;gap:1rem 2rem;margin-top:1.1rem}
+@media(max-width:760px){.checks{grid-template-columns:1fr}}
+.checks ul{list-style:none}
+.checks li{font-size:.78rem;color:var(--warm);padding:.28rem 0 .28rem 1rem;position:relative;border-bottom:1px solid var(--line);line-height:1.4}
+.checks li::before{content:'';position:absolute;left:0;top:.95rem;width:5px;height:5px;border-radius:50%;background:var(--red)}
+.checks li:last-child{border-bottom:0}
+
+/* ── Chrome ─────────────────────────────────────────────────────────*/
+.chrome{
+  position:fixed;top:0;left:0;right:0;z-index:60;
+  display:flex;justify-content:space-between;align-items:center;gap:1rem;
+  padding:.7rem var(--pad);background:rgba(13,10,11,.9);
+  backdrop-filter:blur(14px);border-bottom:1px solid var(--line);
+  font-family:'DM Mono',monospace;font-size:.66rem;letter-spacing:.13em;text-transform:uppercase;
+}
+.chrome-l{display:flex;gap:1.1rem;align-items:center;color:var(--dim);min-width:0}
+.chrome-l .mark{width:18px;height:18px;border-radius:50%;background:var(--red);flex:none}
+.chrome-l span:first-of-type{white-space:nowrap;color:var(--cream)}
+@media(max-width:760px){.chrome-l span:nth-of-type(2){display:none}}
+.btn{
+  font:inherit;text-transform:uppercase;letter-spacing:.13em;cursor:pointer;
+  background:transparent;color:var(--warm);border:1px solid var(--line);
+  padding:.45rem .8rem;border-radius:2px;white-space:nowrap;
+}
+.btn:hover{border-color:var(--red);color:var(--cream)}
+.btn.primary{border-color:var(--red);color:var(--cream);background:var(--red);font-weight:500}
+.btn.primary:hover{background:#F0352C;border-color:#F0352C}
+#pbar{position:fixed;top:0;left:0;height:2px;background:var(--red);width:0;z-index:70;transition:width .3s ease}
+
+/* ── Present mode ───────────────────────────────────────────────────*/
+body.present .deck .slide{display:none;height:100vh;min-height:100vh;border-bottom:0;padding-top:4.4rem;padding-bottom:2.2rem;overflow-y:auto}
+body.present .deck .slide.active{display:flex}
+body.present{overflow:hidden}
+
+/* ── Motion ─────────────────────────────────────────────────────────*/
+.reveal{opacity:0;transform:translateY(16px);transition:opacity .6s ease,transform .6s ease}
+.reveal.visible{opacity:1;transform:none}
+.stagger>*{opacity:0;transform:translateY(14px);transition:opacity .5s ease,transform .5s ease}
+.stagger.visible>*{opacity:1;transform:none}
+.wk,.mo,.yr,.rung .bar i{transition:height .6s cubic-bezier(.2,.7,.3,1),width .6s cubic-bezier(.2,.7,.3,1)}
+@media(prefers-reduced-motion:reduce){
+  .reveal,.stagger>*{opacity:1!important;transform:none!important;transition:none!important}
+  .wk,.mo,.yr,.rung .bar i{transition:none!important}
+  html{scroll-behavior:auto}
+}
+</style>
+<link rel="stylesheet" href="/shared/analysis-sheet.css">
+<style>
+/* The shared Analysis control sits in the chrome bar here, not floating.
+   Loaded after the shared sheet so these win. */
+.chrome .an-btn{position:static;top:auto;right:auto;background:transparent;border:1px solid var(--line);color:var(--warm);padding:.45rem .8rem;font-size:.66rem;letter-spacing:.13em;-webkit-backdrop-filter:none;backdrop-filter:none;border-radius:2px}
+.chrome .an-btn:hover{border-color:var(--red);color:var(--cream)}
+body.sheet-open .chrome,body.sheet-open #pbar{display:none}
+</style>
+</head>
+<body>
+<div id="pbar"></div>
+
+<div class="chrome">
+  <div class="chrome-l">
+    <span class="mark" aria-hidden="true"></span>
+    <span>Defected Records × YouTube</span>
+    <span>Channel review · October 2026</span>
+  </div>
+  <div style="display:flex;gap:.5rem">
+    <button class="an-btn" id="an-open">Analysis</button>
+    <button class="btn primary" onclick="startPresent()">Present</button>
+  </div>
+</div>
+
+<div class="deck" id="deck">
+
+<!-- ═══ 1 · COVER ═══════════════════════════════════════════════════
+     The channel's own banner, uncropped: YouTube shows a 6:1 strip of it
+     on the channel page, but the source behind it is the full 2560×1440
+     frame — Es Vedrà at dusk, the DEFECTED FOREVER neon on the sand. It
+     is the one piece of the label's identity that is theirs rather than
+     an event's, which is why it opens a review of the whole channel. The
+     neon sits upper-right of the headline; the scrim darkens the sand so
+     the type sits on it, and leaves the sky and the sign alone.
+     The only figures on the cover are the two the label quoted, verified
+     and dated. -->
+<section class="slide" data-t="Cover" style="padding-bottom:3.2rem">
+  <div class="bleed scrim-b"><img src="https://yt3.googleusercontent.com/TVxdULrepOnF5f0B9Ch3GO_fw9p0vmePGzJTXnmjBRGaXtkSCGj964fRgWPPctyt3d7gm9W_Kg=s0" alt="Defected's channel banner: a DEFECTED FOREVER neon sign on a beach at dusk, Es Vedrà behind" style="object-position:62% 50%"></div>
+  <div class="inner" style="margin-bottom:0">
+    <div class="label reveal" style="color:var(--cream)">Defected Records × YouTube · channel review · October 2026</div>
+    <h1 class="display reveal" style="margin-top:1rem;max-width:12ch">House music,<br>all life long.</h1>
+    <p class="statement reveal" style="margin-top:1.4rem;font-size:clamp(1.15rem,2vw,1.75rem);max-width:34ch">
+      One billion views in. <span style="color:var(--red)">What's working, and what's worth trying next.</span>
+    </p>
+    <div class="reveal" style="margin-top:2.2rem;max-width:820px">
+      <div class="weeks mini" id="cover-weeks"></div>
+      <div class="label" style="margin-top:.55rem;color:var(--warm)">Every week of the last year. The coloured cap is Friday's Defected Radio Show, in that week's artwork colour.</div>
+    </div>
+    <div class="stamp reveal" style="margin-top:1.6rem;color:var(--dim)">1,011,854,634 views · 1.52M subscribers · 5,243 public videos · read 16 Oct 2026</div>
+  </div>
+</section>
+
+<!-- ═══ 2 · THE ARCHIVE AND THE WEEK ════════════════════════════════
+     The one structural fact that frames everything else. Stated as a
+     share of OBSERVED upload views, with the denominator on the slide,
+     and with the one caveat that changes how it reads. -->
+<section class="slide" data-t="The archive">
+  <div class="inner">
+    <div class="label reveal">For context</div>
+    <h2 class="display tight reveal" style="margin-top:.7rem;max-width:18ch">Most of the billion views belong to the back catalogue.</h2>
+
+    <div class="reveal" style="margin-top:clamp(1.6rem,3.4vw,2.6rem)">
+      <div class="years" id="years"></div>
+      <div style="display:flex;justify-content:space-between;margin-top:1.7rem;flex-wrap:wrap;gap:.6rem">
+        <span class="label"><span style="display:inline-block;width:9px;height:9px;background:var(--red-dp);border-radius:1px;margin-right:.4rem;vertical-align:middle"></span>Uploads 2011–2021</span>
+        <span class="label"><span style="display:inline-block;width:9px;height:9px;background:var(--red);border-radius:1px;margin-right:.4rem;vertical-align:middle"></span>2017 · Camelphat &amp; Elderbrook ‘Cola’ alone, 174.3M</span>
+        <span class="label"><span style="display:inline-block;width:9px;height:9px;background:var(--cream);border-radius:1px;margin-right:.4rem;vertical-align:middle"></span>Uploads 2022–2026</span>
+      </div>
+    </div>
+
+    <div class="grid2 stagger" style="margin-top:clamp(1.4rem,3vw,2.2rem);align-items:start">
+      <div style="display:flex;gap:2.2rem;flex-wrap:wrap;align-items:flex-end">
+        <div><div class="big-num" style="font-size:clamp(3rem,7vw,5.6rem);color:var(--red)">85<span style="font-size:.45em">%</span></div><div class="label" style="margin-top:.4rem;max-width:22ch">of all views on the channel's current videos belong to the 3,001 uploaded before 2022</div></div>
+        <div><div class="big-num" style="font-size:clamp(1.8rem,3.4vw,2.8rem);color:var(--cream)">137M</div><div class="label" style="margin-top:.4rem;max-width:22ch">views on the 1,999 videos uploaded since January 2022</div></div>
+      </div>
+      <div style="display:flex;gap:1rem;align-items:flex-start">
+        <a class="thumb" href="https://www.youtube.com/watch?v=qke-jOUqSXU" target="_blank" rel="noopener" style="width:min(46%,220px);flex:none"><img data-vid="qke-jOUqSXU" alt="Camelphat & Elderbrook — Cola"><span class="cap"><b>‘Cola’ · 2017</b>174.3M · 17% of all channel views</span></a>
+        <p class="body" style="font-size:.95rem">
+          That is what a 27-year catalogue looks like on YouTube, and it is a strength. It also means this review is about <b>what the channel publishes now</b> — the radio show, DJ sets, releases, Shorts and the podcast — and how the catalogue is surfaced alongside it.
+        </p>
+      </div>
+    </div>
+
+    <div class="qual reveal">These are lifetime totals: older videos have had up to fifteen years to collect views. The figure shows where views have built up over time, not what people are watching today, and says nothing about how recent uploads are doing.</div>
+    <div class="src reveal">Public YouTube data · 5,000 of 5,243 public videos, 14 Jun 2011 → 16 Oct 2026, 910.7M views counted against the channel's 1,011.9M total. Measured against that total, the pre-2022 share is 76.5%.</div>
+  </div>
+</section>
+
+<!-- ═══ 3 · IT NEVER GOES QUIET ═════════════════════════════════════
+     The first strength. The sleeve band shows the thing being praised —
+     the weekly show's own rotating colours — and the 52-week strip
+     underneath is the motif at full size. -->
+<section class="slide" data-t="Cadence">
+  <div class="inner">
+    <div class="label reveal">Already working · 1</div>
+    <h2 class="display tight reveal" style="margin-top:.7rem;max-width:20ch">Something new every week, and the radio show every Friday.</h2>
+
+    <div class="band reveal" id="band" style="margin-top:clamp(1.2rem,2.6vw,2rem)"></div>
+    <div class="label reveal" style="margin-top:.55rem">The last eight Fridays of Defected Radio Show. The artwork colour rotates, the host and date change, the format stays the same.</div>
+
+    <div class="reveal" style="margin-top:clamp(1.4rem,3vw,2.2rem)">
+      <div class="weeks" id="weeks" style="--wh:84px"></div>
+      <div style="display:flex;justify-content:space-between;margin-top:.5rem"><span class="label">Oct 2025</span><span class="label">The two tall weeks are album weeks: Melé on 25 September, Oden &amp; Fatzo this week</span><span class="label">Oct 2026</span></div>
+    </div>
+
+    <div class="stagger" style="margin-top:clamp(1.4rem,3vw,2.2rem);display:flex;gap:clamp(1.4rem,3.6vw,3.2rem);flex-wrap:wrap;align-items:flex-end">
+      <div><div class="big-num" style="font-size:clamp(2.2rem,4.4vw,3.6rem);color:var(--yellow)">50<span style="color:var(--dim)">/52</span></div><div class="label" style="margin-top:.35rem">weeks with a new upload<br>(the two quiet weeks are Christmas)</div></div>
+      <div><div class="big-num" style="font-size:clamp(2.2rem,4.4vw,3.6rem);color:var(--lime)">238<span style="color:var(--dim)">/250</span></div><div class="label" style="margin-top:.35rem">radio episodes since 2022<br>went out on a Friday</div></div>
+      <div><div class="big-num" style="font-size:clamp(2.2rem,4.4vw,3.6rem);color:var(--cyan)">52</div><div class="label" style="margin-top:.35rem">episodes a year,<br>every year since 2019</div></div>
+      <div><div class="big-num" style="font-size:clamp(2.2rem,4.4vw,3.6rem);color:var(--cream)">85</div><div class="label" style="margin-top:.35rem">uploads in the last<br>90 days</div></div>
+      <p class="statement" style="max-width:30ch;margin-bottom:.2rem;color:var(--cream)">Weekly episodes, seven years running. YouTube rewards exactly this kind of consistency.</p>
+    </div>
+
+    <div class="src reveal">Public YouTube data · 490 radio episodes all-time, 248 since 1 Jan 2022 · weeks counted Friday to Thursday, 17 Oct 2025 → 16 Oct 2026.</div>
+  </div>
+</section>
+
+<!-- ═══ 4 · THE SETS ════════════════════════════════════════════════
+     The wall is the 100K+ sets of the last three seasons, one tile per
+     setting the channel records in. Hover a rung and only that setting
+     stays lit. The point the wall makes before the numbers do: the big
+     sets come from every room, and the HQ studio made more of them than
+     any venue. -->
+<section class="slide" data-t="The sets">
+  <div class="inner">
+    <div class="label reveal">Already working · 2</div>
+    <h2 class="display tight reveal" style="margin-top:.7rem;max-width:18ch">Standout DJ sets come from both HQ and the events.</h2>
+    <div class="grid2" style="margin-top:clamp(1.2rem,2.6vw,2rem);grid-template-columns:1.15fr 1fr;align-items:start">
+      <div class="wall reveal" id="wall"></div>
+      <div class="reveal">
+        <div class="label" style="margin-bottom:.6rem">DJ sets published since January 2024 · typical (median) views per set, and how many passed 100K</div>
+        <div class="ladder" id="ladder"></div>
+        <p class="statement" style="margin-top:.9rem;font-size:clamp(.95rem,1.35vw,1.15rem);max-width:40ch">25 sets have passed 100K since January 2024; nine were recorded at Defected HQ, more than at any single event. What they share is <b style="color:var(--red)">a well-known name on the bill</b> — Carl Cox, Armand Van Helden, Green Velvet, David Morales, Mike Dunn, Sam Divine — and six are South African or Afro house sets.</p>
+        <div class="qual">Lifetime views on videos of different ages, and the event samples are small: Pacha is three sets, Malta ten (59K typical without Green Velvet). Nothing here shows a venue makes a set bigger — distinctive settings are worth trying, not a rule.</div>
+      </div>
+    </div>
+    <div class="src reveal">Public YouTube data · 122 “Live from …” sets, 1 Jan 2024 → 16 Oct 2026. HQ = Defected HQ / The Basement studio sets. NYE = Defected Worldwide NYE 23/24, all published Jan–Mar 2024.</div>
+  </div>
+</section>
+
+<!-- ═══ 5 · THE COMPILATIONS ════════════════════════════════════════
+     The only daylight section, because the summer-mix sleeves are the
+     only daylight on the channel. Year by year, with dots for the
+     uploads and red dots for the ones that passed 100K: the ratio is the
+     argument, and 2026 is marked incomplete. -->
+<section class="slide day" data-t="The compilations">
+  <div class="inner">
+    <div class="label reveal">Already working · 3</div>
+    <h2 class="display tight reveal" style="margin-top:.7rem;max-width:18ch">Selected catalogue mixes have attracted strong viewing.</h2>
+    <div class="grid2" style="margin-top:clamp(1.2rem,2.6vw,2rem);grid-template-columns:1.1fr 1fr;align-items:start">
+      <div class="mixes reveal">
+        <a class="thumb" href="https://www.youtube.com/watch?v=Byb0DLtNN_0" target="_blank" rel="noopener"><img data-vid="Byb0DLtNN_0" alt=""><span class="cap"><b>Disco House · Defected × Glitterbox · 2022</b>2.72M</span></a>
+        <a class="thumb" href="https://www.youtube.com/watch?v=kvAd8bnrpgc" target="_blank" rel="noopener"><img data-vid="kvAd8bnrpgc" alt=""><span class="cap"><b>Latin House · Summer House Mix · 2024</b>383K</span></a>
+        <a class="thumb" href="https://www.youtube.com/watch?v=qXoTwOZO84w" target="_blank" rel="noopener"><img data-vid="qXoTwOZO84w" alt=""><span class="cap"><b>Defected Ibiza · Summer Mix 2026</b>246K at six months</span></a>
+        <a class="thumb" href="https://www.youtube.com/watch?v=vRvr2nQ3-RI" target="_blank" rel="noopener"><img data-vid="vRvr2nQ3-RI" alt=""><span class="cap"><b>Purple Disco Machine · In The House · 2024</b>1.90M</span></a>
+        <a class="thumb" href="https://www.youtube.com/watch?v=FlwsC4VmncA" target="_blank" rel="noopener"><img data-vid="FlwsC4VmncA" alt=""><span class="cap"><b>Ibiza Sunset House Mix · 2025</b>138K</span></a>
+        <a class="thumb" href="https://www.youtube.com/watch?v=O1mxdjYAapk" target="_blank" rel="noopener"><img data-vid="O1mxdjYAapk" alt=""><span class="cap"><b>Jonas Blue · In The House · 2025</b>138K</span></a>
+      </div>
+      <div class="reveal">
+        <p class="body" style="font-size:.98rem">Studio mixes of 40 minutes or more include the seasonal compilations (“House Music 2024 – Defected Summer Mix”) and the artist-mixed In The House series. <b>Between 2022 and 2025, 16 of the 30 published passed 100K views.</b> There have been fewer lately: ten in 2024, three in 2025 and three so far in 2026, where the year isn't finished and the uploads are still young.</p>
+        <div class="seasons stagger">
+          <div class="season"><div class="y">2021</div><div class="n">13</div><div class="dots" data-n="13" data-k="10"></div><p>10 over 100K · typical 612K · lockdown year</p></div>
+          <div class="season"><div class="y">2022</div><div class="n">8</div><div class="dots" data-n="8" data-k="4"></div><p>4 over 100K · typical 148K</p></div>
+          <div class="season"><div class="y">2023</div><div class="n">9</div><div class="dots" data-n="9" data-k="4"></div><p>4 over 100K · typical 49K</p></div>
+          <div class="season hi"><div class="y">2024</div><div class="n">10</div><div class="dots" data-n="10" data-k="5"></div><p>5 over 100K · typical 130K</p></div>
+          <div class="season hi"><div class="y">2025</div><div class="n">3</div><div class="dots" data-n="3" data-k="3"></div><p>3 over 100K · typical 138K</p></div>
+          <div class="season hi"><div class="y">2026 <span style="font-size:.9em">· to 16 Oct</span></div><div class="n">3</div><div class="dots" data-n="3" data-k="1"></div><p>1 over 100K so far · year not finished</p></div>
+        </div>
+        <p class="statement" style="margin-top:1.2rem;font-size:clamp(1rem,1.5vw,1.3rem)">Of the channel's formats, this is the one that has most often passed 100K, and the one that costs least to make. Worth putting back on a regular calendar.</p>
+      </div>
+    </div>
+    <div class="src reveal">Public YouTube data · 69 such mixes all-time, 46 since 2021 · the artist-mixed In The House series (since 2024) is counted in; event and Basement recordings and the radio show are not.</div>
+  </div>
+</section>
+
+<!-- ═══ 6 · ONE RECORD, SEVERAL WAYS IN ═════════════════════════════
+     Edge Of Desire as the worked example of something the channel
+     already does well: one record, its formats gathered on one Home
+     shelf. The shelf is shown as it stood on 16 Oct; the eight tiles
+     beneath are the formats, each with its hosting channel, because two
+     of them live on Jonas Blue's channel and are pulled into the shelf.
+     The million-view milestone is a small supporting line; the 43K/18K
+     year comparison and its method moved to the Analysis sheet. Nothing
+     here says the formats caused the views. -->
+<section class="slide" data-t="One record" style="background:var(--ink-2)">
+  <div class="inner">
+    <div class="grid2" style="align-items:end;grid-template-columns:1.1fr 1fr">
+      <div>
+        <div class="label reveal">Already working · 4</div>
+        <h2 class="display tight reveal" style="margin-top:.7rem;max-width:18ch">One record, several ways for fans to discover it.</h2>
+      </div>
+      <div class="reveal">
+        <p class="body" style="font-size:.98rem;max-width:50ch">Edge Of Desire shows how Defected builds a campaign around a record, with different formats brought together on one Home shelf: <b>the release audio, a lyric video, a live performance, an interview, a radio takeover, Shorts and the remixes</b> — twelve videos in one playlist, each pointing at the others.</p>
+        <div class="label" style="margin-top:.7rem">One of three 2025 releases past a million views on the channel (the Extended Mix, 1.27M) · the Home shelf sits seventh on the page</div>
+      </div>
+    </div>
+    <div class="reveal" style="margin-top:clamp(1.1rem,2.4vw,1.8rem)">
+      <div class="shot" style="max-width:1120px"><img src="/defected/img/home-edge-of-desire.jpg" alt="The Jonas Blue & Malive — Edge Of Desire shelf on Defected's Home page: the live performance on Jonas Blue's channel, the Extended Mix, the In The House set, the Malive tour video, the radio takeover and the interview"></div>
+      <div class="label" style="margin-top:.5rem">The shelf on Home, 16 October · a playlist of twelve videos · “Defected Records and 2 more”, “and Jonas Blue”, “and Malive” are YouTube's co-publisher credits</div>
+    </div>
+    <div class="line20 fmt stagger" style="margin-top:1.5rem">
+      <div class="pt"><div class="y"><b>Release audio</b><i>Defected</i></div><a class="thumb" href="https://www.youtube.com/watch?v=lACS1E3HQGM" target="_blank" rel="noopener"><img data-vid="lACS1E3HQGM" alt=""><span class="cap"><b>1.27M</b>Extended Mix · co-published</span></a></div>
+      <div class="pt"><div class="y"><b>Live</b><i>Jonas Blue's channel</i></div><a class="thumb" href="https://www.youtube.com/watch?v=Y1HUL-TALoE" target="_blank" rel="noopener"><img data-vid="Y1HUL-TALoE" alt=""><span class="cap"><b>2.3M</b>From Defected In The House</span></a></div>
+      <div class="pt"><div class="y"><b>Lyric video</b><i>Jonas Blue's channel</i></div><a class="thumb" href="https://www.youtube.com/watch?v=eNEnxdqyQEw" target="_blank" rel="noopener"><img data-vid="eNEnxdqyQEw" alt=""><span class="cap"><b>116K</b>Official lyric video</span></a></div>
+      <div class="pt"><div class="y"><b>Video</b><i>Defected</i></div><a class="thumb" href="https://www.youtube.com/watch?v=m8zJoCJ-WoI" target="_blank" rel="noopener"><img data-vid="m8zJoCJ-WoI" alt=""><span class="cap"><b>119K</b>Brazilian Summer Video · tour video 22K</span></a></div>
+      <div class="pt"><div class="y"><b>Radio takeover</b><i>Defected</i></div><a class="thumb" href="https://www.youtube.com/watch?v=ZJn8c3LeynE" target="_blank" rel="noopener"><img data-vid="ZJn8c3LeynE" alt=""><span class="cap"><b>33K</b>Defected Radio Show, 25.07.25</span></a></div>
+      <div class="pt"><div class="y"><b>Interview</b><i>Defected</i></div><a class="thumb" href="https://www.youtube.com/watch?v=g3X7yszvbCE" target="_blank" rel="noopener"><img data-vid="g3X7yszvbCE" alt=""><span class="cap"><b>4.9K</b>In Conversation · In The House set 138K</span></a></div>
+      <div class="pt"><div class="y"><b>Remixes</b><i>Defected</i></div><a class="thumb" href="https://www.youtube.com/watch?v=xswW9v_kqBA" target="_blank" rel="noopener"><img data-vid="xswW9v_kqBA" alt=""><span class="cap"><b>542K</b>Franky Rizardo · three more remixes</span></a></div>
+      <div class="pt"><div class="y"><b>Shorts</b><i>Defected</i></div><a class="thumb" href="https://www.youtube.com/shorts/KL6p-79O-VI" target="_blank" rel="noopener"><img data-vid="KL6p-79O-VI" alt=""><span class="cap"><b>39K</b>ANOTR drops it · six Shorts in all</span></a></div>
+    </div>
+    <div class="grid2 reveal" style="margin-top:1.3rem;grid-template-columns:1.1fr 1fr;align-items:start">
+      <p class="body" style="font-size:.92rem">The approach is repeatable because none of it is unusual on its own: the release, a set, a conversation, an hour of radio, a few clips. What makes it work is that <b>they are made for the same record and collected in one place</b>, with the artists' own uploads credited and pulled in rather than duplicated.</p>
+      <div class="qual">A shelf gathers the formats; it doesn't tell us which of them brought the views, and this slide doesn't claim that. The year-on-year release comparison that used to sit here is in the Analysis sheet.</div>
+    </div>
+    <div class="src reveal">Public YouTube data · the shelf, its playlist and each upload's hosting channel read 16 Oct 2026 · lifetime views as shown on the channel that day.</div>
+  </div>
+</section>
+
+<!-- ═══ 7 · WHAT TO PROTECT ═════════════════════════════════════════
+     The hinge. Six strengths, each headed by the real asset it refers
+     to, each with its number from an earlier slide or the Analysis
+     sheet. Premieres and co-publishing were added after the second
+     research pass: both are things the channel already does well. -->
+<section class="slide" data-t="What to protect">
+  <div class="inner">
+    <div class="label reveal">Worth protecting</div>
+    <h2 class="display reveal" style="margin-top:.7rem">Six things already working.</h2>
+    <div class="lanes stagger" style="margin-top:clamp(1.4rem,3vw,2.2rem)">
+      <div class="lane c1">
+        <a class="thumb" href="https://www.youtube.com/watch?v=hHVUrJld5zo" target="_blank" rel="noopener"><img data-vid="hHVUrJld5zo" alt=""></a>
+        <div class="n">01</div><h3 class="display">The Friday show</h3>
+        <p><b>52 episodes a year since 2019.</b> The weekly appointment, with artwork that reads at a glance. Keep the slot and the colours; bring the episodes together (next).</p>
+      </div>
+      <div class="lane c2">
+        <a class="thumb" href="https://www.youtube.com/watch?v=8QiN1PiXDpU" target="_blank" rel="noopener"><img data-vid="8QiN1PiXDpU" alt=""></a>
+        <div class="n">02</div><h3 class="display">The DFTD artwork</h3>
+        <p><b>Three million-view records in 2025.</b> Artwork that says “Defected release” before the title is read. Worth using on every release upload.</p>
+      </div>
+      <div class="lane c3">
+        <a class="thumb" href="https://www.youtube.com/watch?v=6o9S_-DGV4Q" target="_blank" rel="noopener"><img data-vid="6o9S_-DGV4Q" alt=""></a>
+        <div class="n">03</div><h3 class="display">The HQ sets</h3>
+        <p><b>59 sets, nine over 100K.</b> The studio series keeps the sets coming between seasons and has produced more big ones than any event. Keep it going.</p>
+      </div>
+      <div class="lane c4">
+        <a class="thumb" href="https://www.youtube.com/watch?v=vRvr2nQ3-RI" target="_blank" rel="noopener"><img data-vid="vRvr2nQ3-RI" alt=""></a>
+        <div class="n">04</div><h3 class="display">The catalogue mixes</h3>
+        <p><b>16 of 30 passed 100K in 2022–25.</b> The cheapest large audience the channel has. Worth a regular calendar.</p>
+      </div>
+      <div class="lane c5">
+        <a class="thumb" href="https://www.youtube.com/watch?v=hlbMcaCYq-Q" target="_blank" rel="noopener"><img data-vid="hlbMcaCYq-Q" alt=""></a>
+        <div class="n">05</div><h3 class="display">The Premieres</h3>
+        <p><b>189 Premieres, used for the right things:</b> every podcast episode, every music video, most event sets, with chat replay left on. The audio uploads and the radio show, rightly, aren't premiered.</p>
+      </div>
+      <div class="lane c6">
+        <a class="thumb" href="https://www.youtube.com/watch?v=O1mxdjYAapk" target="_blank" rel="noopener"><img data-vid="O1mxdjYAapk" alt=""></a>
+        <div class="n">06</div><h3 class="display">The co-publishing</h3>
+        <p><b>18 videos on Home carry a co-publisher</b> — artists, and the venue Chinois Ibiza — so YouTube recommends each to both audiences. A habit worth keeping and extending to catalogue pieces with the original artists.</p>
+      </div>
+    </div>
+    <p class="statement reveal" style="margin-top:1.8rem;color:var(--red);max-width:46ch">The suggestions that follow don't ask for a new content line. They're about making what already exists easier to find, and giving a few of the label's own records and moments more room.</p>
+  </div>
+</section>
+
+<!-- ═══ 8 · THE RADIO SHOW ══════════════════════════════════════════
+     One point, one visual, three actions. The current podcast tile as
+     it stood on 16 Oct beside the proposed episode collection drawn
+     from the show's own sleeve. Shelf order, title formats and counts
+     are in the Analysis sheet. -->
+<section class="slide field lime" data-t="The radio show">
+  <div class="inner">
+    <div class="grid2" style="align-items:end;grid-template-columns:1.1fr 1fr">
+      <div>
+        <div class="label reveal">Worth trying · 1</div>
+        <h2 class="display tight reveal" style="margin-top:.7rem;max-width:16ch">Bring the weekly radio episodes together.</h2>
+      </div>
+      <p class="body reveal" style="font-size:1rem;max-width:46ch">The show already has a consistent schedule and recognisable artwork. An up-to-date episode playlist could make it easier to find and follow.</p>
+    </div>
+    <div class="grid2" style="margin-top:clamp(1.2rem,2.6vw,2rem);grid-template-columns:1fr 1fr;align-items:start">
+      <div class="reveal">
+        <div class="label">The podcast tile today</div>
+        <div class="shot crop" style="margin-top:.5rem;height:clamp(200px,34vh,300px);box-shadow:0 14px 36px rgba(0,0,0,.25)"><img src="/defected/img/podcasts-tab.jpg" style="object-position:0 72%" alt="Defected's Podcasts tab: a podcast called Defected Radio with 45 episodes and a release sleeve as its cover, beside Moments in Music"></div>
+        <div class="callout"><b>“Defected Radio · 45 episodes”</b> is a list of tracks from the show, hosted on other channels — useful, but it isn't the episodes.</div>
+      </div>
+      <div class="reveal">
+        <div class="label">The proposed episode collection</div>
+        <div class="fixtile" style="margin-top:.5rem">
+          <div class="art"><img data-vid="lRa2uJsP2YM" alt="Defected Radio Show sleeve"><span>Podcast · every episode</span></div>
+          <div class="bd"><b>Defected Radio Show — every episode</b><i>New every Friday · Sam Divine, Monki, Rimarkable</i></div>
+        </div>
+        <div class="miniShelf">
+          <a class="thumb" href="https://www.youtube.com/watch?v=hHVUrJld5zo" target="_blank" rel="noopener"><img data-vid="hHVUrJld5zo" alt=""></a>
+          <a class="thumb" href="https://www.youtube.com/watch?v=5Ofy1QJRTGs" target="_blank" rel="noopener"><img data-vid="5Ofy1QJRTGs" alt=""></a>
+          <a class="thumb" href="https://www.youtube.com/watch?v=lRa2uJsP2YM" target="_blank" rel="noopener"><img data-vid="lRa2uJsP2YM" alt=""></a>
+          <a class="thumb" href="https://www.youtube.com/watch?v=cfzMTKNxW5g" target="_blank" rel="noopener"><img data-vid="cfzMTKNxW5g" alt=""></a>
+        </div>
+        <ol class="steps" style="margin-top:1.1rem">
+          <li><b>Collect the full episodes</b> in one public playlist, set as a podcast.</li>
+          <li><b>Use the radio show's artwork</b> as its cover, so it reads as the show.</li>
+          <li><b>Feature the playlist on Home.</b></li>
+        </ol>
+      </div>
+    </div>
+    <div class="src">Checked 16 Oct 2026: no public playlist collects the weekly episodes; the Broadcasting House archive holds two from 2022–23. Shelf order, title formats and the counts are under Analysis.</div>
+  </div>
+</section>
+
+<!-- ═══ 9 · PREMIERES ═══════════════════════════════════════════════
+     The strength first, one flagship example, three possibilities.
+     Eligibility conditions, the per-format counts and the chapters
+     check are in the Analysis sheet. -->
+<section class="slide" data-t="Premieres">
+  <div class="inner">
+    <div class="grid2" style="align-items:end;grid-template-columns:1.1fr 1fr">
+      <div>
+        <div class="label reveal">Worth trying · 2</div>
+        <h2 class="display tight reveal" style="margin-top:.7rem;max-width:18ch">Build a bigger moment around selected Premieres.</h2>
+      </div>
+      <p class="body reveal" style="font-size:1rem;max-width:48ch">Defected already uses Premieres extensively. For a few standout releases, extra promotion and artist participation could give fans more reason to join together.</p>
+    </div>
+    <div class="prem" style="margin-top:clamp(1.2rem,2.6vw,2rem);grid-template-columns:1fr 1fr">
+      <div class="reveal">
+        <div class="label" style="margin-bottom:.5rem">A flagship example</div>
+        <div class="premPage">
+          <a class="thumb" href="https://www.youtube.com/watch?v=hlbMcaCYq-Q" target="_blank" rel="noopener"><img data-vid="hlbMcaCYq-Q" data-big="1" alt=""><span class="cap"><b>Green Velvet · Live from the Ditch, Defected Malta</b>Premiered 13 Feb 2025 at 19:00 · chat replay available · 550K views to date</span></a>
+          <div class="bar"><span><b>189 Premieres</b> on the channel · every podcast episode and music video, most event sets</span></div>
+        </div>
+      </div>
+      <div class="reveal">
+        <div class="label" style="margin-bottom:.6rem">Three possibilities</div>
+        <ol class="steps dark" style="margin-top:0;gap:.7rem">
+          <li><b>A short trailer before launch</b> on the Premiere page.</li>
+          <li><b>The artist or DJ joining chat</b> for the Premiere hour.</li>
+          <li><b>A short live introduction, where practical,</b> leading into the Premiere.</li>
+        </ol>
+        <div class="qual">Tracklists and chapters are a small addition for selected sets. Eligibility for trailers and live redirects, and what was visible on past Premieres, are under Analysis; what the team already does around a Premiere isn't fully visible publicly.</div>
+      </div>
+    </div>
+    <div class="src reveal">Public YouTube data · Premiere pages and chat replays read 16 Oct 2026 · feature conditions from YouTube Help, read the same day.</div>
+  </div>
+</section>
+
+<!-- ═══ 10 · LYRIC VIDEOS ═══════════════════════════════════════════
+     Three examples, four labels each: track, hosting channel, views,
+     whether an official lyric video exists. Verification detail is in
+     the Analysis sheet. -->
+<section class="slide" data-t="Lyric videos" style="background:var(--ink-2)">
+  <div class="inner">
+    <div class="grid2" style="align-items:end;grid-template-columns:1.1fr 1fr">
+      <div>
+        <div class="label reveal">Worth trying · 3</div>
+        <h2 class="display tight reveal" style="margin-top:.7rem;max-width:18ch">Give key catalogue another way to be discovered.</h2>
+      </div>
+      <p class="body reveal" style="font-size:1rem;max-width:48ch">Lyric uploads of Defected records have attracted substantial viewing on other music channels. Selected official lyric videos could offer another way into the music within Defected's channel network.</p>
+    </div>
+    <div class="cases stagger" style="margin-top:clamp(1.2rem,2.6vw,2rem)">
+      <div class="case first">
+        <a class="thumb" href="https://www.youtube.com/watch?v=RpmFVcMggZE" target="_blank" rel="noopener"><img data-vid="RpmFVcMggZE" alt=""></a>
+        <h3 class="display">Cola</h3>
+        <div class="stat">
+          <span>Hosted by</span><span>Groove Bassment</span>
+          <span>Views</span><span><b>6.1M</b> · uploaded 2017</span>
+          <span>Official</span><span><span class="no">None found</span> on Defected, CamelPhat or Elderbrook's channels.</span>
+        </div>
+      </div>
+      <div class="case">
+        <a class="thumb" href="https://www.youtube.com/watch?v=-OWvghF_rpA" target="_blank" rel="noopener"><img data-vid="-OWvghF_rpA" alt=""></a>
+        <h3 class="display">Pump It Up</h3>
+        <div class="stat">
+          <span>Hosted by</span><span>Sunrise Sounds</span>
+          <span>Views</span><span><b>7.1M</b> · uploaded Apr 2025</span>
+          <span>Official</span><span><span class="yes">Exists</span> — Armada Music TV, 2020.</span>
+        </div>
+      </div>
+      <div class="case">
+        <a class="thumb" href="https://www.youtube.com/watch?v=b5yMWNPU_y4" target="_blank" rel="noopener"><img data-vid="b5yMWNPU_y4" alt=""></a>
+        <h3 class="display">Edge Of Desire</h3>
+        <div class="stat">
+          <span>Hosted by</span><span>7clouds Afro House</span>
+          <span>Views</span><span><b>1.7M</b> · uploaded 2025</span>
+          <span>Official</span><span><span class="yes">Exists</span> — Jonas Blue's channel, 2025.</span>
+        </div>
+      </div>
+    </div>
+    <div class="grid2 reveal" style="margin-top:1.3rem;grid-template-columns:1.1fr 1fr;align-items:start">
+      <p class="statement" style="font-size:clamp(1rem,1.4vw,1.25rem);max-width:40ch">Cola could be one to explore, subject to existing partnerships and artist plans.</p>
+      <div class="qual">Pump It Up and Edge Of Desire already have official versions elsewhere; this isn't a suggestion to duplicate them. The opportunity is another discovery format, connected to related Defected content through playlists, descriptions and end screens where appropriate — with no assumption that viewers elsewhere would transfer or that results would repeat.</div>
+    </div>
+    <div class="src reveal">Lifetime views and hosting channels as shown on YouTube, 16 Oct 2026 · each upload opened to confirm it is a lyric video · the channels searched for official versions are listed under Analysis.</div>
+  </div>
+</section>
+
+<!-- ═══ 11 · CATALOGUE MILESTONES ═══════════════════════════════════
+     A discussion opportunity, not a plan. One clearly labelled example
+     with four verified assets. Release sources are in the Analysis
+     sheet, with the Defected release distinguished from any earlier
+     release. -->
+<section class="slide field cyan" data-t="Catalogue milestones">
+  <div class="inner">
+    <div class="grid2" style="align-items:end;grid-template-columns:1.15fr 1fr">
+      <div>
+        <div class="label reveal">Worth discussing · 4</div>
+        <h2 class="display tight reveal" style="margin-top:.7rem;max-width:24ch">Could catalogue milestones bring existing content together?</h2>
+      </div>
+      <p class="body reveal" style="font-size:1rem;max-width:46ch">Remixes, performances and stories already give key records several lives on the channel. A milestone could be an opportunity to connect them.</p>
+    </div>
+    <div class="label reveal" style="margin-top:clamp(1.2rem,2.6vw,2rem)">An example to discuss · The Cure &amp; The Cause — 20 years since its Defected release (2006)</div>
+    <div class="line20 fmt stagger" style="margin-top:1.2rem;grid-template-columns:repeat(4,1fr);gap:.8rem">
+      <div class="pt"><div class="y"><b>2006</b><i>Dennis Ferrer Remix</i></div><a class="thumb" href="https://www.youtube.com/watch?v=ikJCO_FrQQ8" target="_blank" rel="noopener"><img data-vid="ikJCO_FrQQ8" alt=""><span class="cap"><b>26M</b>Fish Go Deep &amp; Tracey K</span></a></div>
+      <div class="pt"><div class="y"><b>2024</b><i>Idris Elba Remix</i></div><a class="thumb" href="https://www.youtube.com/watch?v=llyBrtHVqgc" target="_blank" rel="noopener"><img data-vid="llyBrtHVqgc" alt=""><span class="cap"><b>77K</b>Defected</span></a></div>
+      <div class="pt"><div class="y"><b>Apr 2026</b><i>Story · Short</i></div><a class="thumb" href="https://www.youtube.com/shorts/10F6v5TSQF4" target="_blank" rel="noopener"><img data-vid="10F6v5TSQF4" alt=""><span class="cap"><b>13K</b>Do You Remember House? Ep.1</span></a></div>
+      <div class="pt"><div class="y"><b>Sep 2026</b><i>Shy FX remix</i></div><a class="thumb" href="https://www.youtube.com/watch?v=DKf6g9OjDwI" target="_blank" rel="noopener"><img data-vid="DKf6g9OjDwI" alt=""><span class="cap"><b>16K</b>Defected</span></a></div>
+    </div>
+    <div class="grid2 reveal" style="margin-top:clamp(1.2rem,2.6vw,2rem);grid-template-columns:1.15fr 1fr;align-items:start">
+      <p class="statement" style="font-size:clamp(1rem,1.4vw,1.25rem);max-width:44ch">Explore a collection bringing the existing versions, performances and stories together — if useful alongside the label's current plans.</p>
+      <div class="qual" style="border-color:var(--ink)">The 2026 remix and story content may already be part of a deliberate campaign; the question is what's planned, not what's missing. Release sources, and which other records have milestones near, are under Analysis.</div>
+    </div>
+    <div class="src">The Defected release is dated from the label's 2006 catalogue entries (DFTD129 / DFTD145), not from the YouTube upload dates · channel assets and views read 16 Oct 2026.</div>
+  </div>
+</section>
+
+<!-- ═══ 12 · SHORTS ═════════════════════════════════════════════════
+     The month strip shows the slowdown; the vertical frames show the
+     two kinds of Short side by side; the comparison carries its sample
+     sizes so the "promising test" framing is visible on the slide. -->
+<section class="slide" data-t="Shorts" style="background:var(--ink-2)">
+  <div class="inner">
+    <div class="grid2" style="align-items:end;grid-template-columns:1.25fr 1fr">
+      <div>
+        <div class="label reveal">Worth trying · 5</div>
+        <h2 class="display tight reveal" style="margin-top:.7rem;max-width:20ch">Try more Shorts built around the stories behind the music.</h2>
+      </div>
+      <div class="reveal" style="padding-bottom:.2rem">
+        <div class="months" id="months"></div>
+        <div style="display:flex;justify-content:space-between;margin-top:1.5rem;gap:.6rem;flex-wrap:wrap"><span class="label">Shorts per month · Jan 2025 →</span><span class="label">Jun–Oct 2026: 1 · 3 · 0 · 5 · 6</span></div>
+      </div>
+    </div>
+    <div class="grid2" style="margin-top:clamp(1.4rem,3vw,2.2rem);grid-template-columns:1.25fr 1fr;align-items:start">
+      <div class="reveal">
+        <div class="shorts">
+          <a class="thumb v" href="https://www.youtube.com/shorts/udw-U-01BUI" target="_blank" rel="noopener"><img data-short="udw-U-01BUI" alt=""><span class="cap"><b>54K</b>A house classic for your Monday · Aly-Us · Mar 2025</span></a>
+          <a class="thumb v" href="https://www.youtube.com/shorts/Bmv5Xq9Db1E" target="_blank" rel="noopener"><img data-short="Bmv5Xq9Db1E" alt=""><span class="cap"><b>39K</b>Story of the Sample · Hardrive · Mar 2025</span></a>
+          <a class="thumb v" href="https://www.youtube.com/shorts/U4ZVZHKHPNk" target="_blank" rel="noopener"><img data-short="U4ZVZHKHPNk" alt=""><span class="cap"><b>29K</b>What is House Music? · Frankie Knuckles · Jan 2025</span></a>
+          <a class="thumb v" href="https://www.youtube.com/shorts/10F6v5TSQF4" target="_blank" rel="noopener"><img data-short="10F6v5TSQF4" alt=""><span class="cap"><b>13K</b>Do You Remember House? Ep.1 · Apr 2026</span></a>
+          <a class="thumb v" href="https://www.youtube.com/shorts/w64Wf3NOIh8" target="_blank" rel="noopener" style="outline:2px solid var(--line);outline-offset:-2px"><img data-short="w64Wf3NOIh8" alt=""><span class="cap"><b>45K</b>Croatia tickets · announcement · Nov 2025</span></a>
+          <a class="thumb v" href="https://www.youtube.com/shorts/6D8Ey-eYj28" target="_blank" rel="noopener" style="outline:2px solid var(--line);outline-offset:-2px"><img data-short="6D8Ey-eYj28" alt=""><span class="cap"><b>40K</b>Malta tickets · announcement · Aug 2025</span></a>
+        </div>
+        <div class="label" style="margin-top:.5rem">Left four: Shorts about classic records and the stories behind them. Right two: the strongest announcement Shorts of the same period.</div>
+      </div>
+      <div class="reveal">
+        <div class="cmp">
+          <div class="h"><div class="label" style="color:var(--yellow)">Classic records &amp; stories</div><div class="big-num" style="color:var(--yellow)">13.1K</div><p>typical views · 22 Shorts · 4 over 20K</p></div>
+          <div><div class="label">Announcements</div><div class="big-num" style="color:var(--warm)">6.3K</div><p>typical views · 42 Shorts · 4 over 20K</p></div>
+          <div><div class="label">Everything else</div><div class="big-num" style="color:var(--warm)">7.0K</div><p>typical views · 134 Shorts · 8 over 20K</p></div>
+        </div>
+        <p class="body" style="margin-top:1.1rem;font-size:.95rem">Defected has plenty of music knowledge and stories to draw on, and the Shorts that use it — a classic record, the story of a sample, <i>Do You Remember House?</i> — have typically reached about twice the audience of announcement Shorts. <b>That's 22 clips, so it's a promising sign rather than a rule.</b> Worth a small run alongside the existing promotional clips: one slot a week (the “house classic for your Monday” slot already exists), eight to twelve weeks, five kinds of clip from material the label already has:</p>
+        <ul style="list-style:none;margin-top:.7rem;font-size:.84rem;color:var(--warm);line-height:1.5">
+          <li style="padding:.3rem 0;border-bottom:1px solid var(--line)"><b style="color:var(--cream)">Do You Remember House?</b> · one record, one memory → links to the record</li>
+          <li style="padding:.3rem 0;border-bottom:1px solid var(--line)"><b style="color:var(--cream)">Story of the Sample</b> · 30 seconds of music history → links to the original</li>
+          <li style="padding:.3rem 0;border-bottom:1px solid var(--line)"><b style="color:var(--cream)">The moment</b> · a crowd reaction from a Malta or Pacha set → links to the full set</li>
+          <li style="padding:.3rem 0;border-bottom:1px solid var(--line)"><b style="color:var(--cream)">The story</b> · a 40-second podcast moment → links to the episode</li>
+          <li style="padding:.3rem 0"><b style="color:var(--cream)">This Friday</b> · the week's pick from the show → links to the radio episode</li>
+        </ul>
+        <div class="qual">Each Short can carry YouTube's related-video link to the full set, episode or record (set in Studio; worth checking the option is available on the channel). Whether Shorts viewers go on to watch the longer video is the thing to find out, not something to assume.</div>
+      </div>
+    </div>
+    <div class="src reveal">Public YouTube data · 198 Shorts, 1 Jan 2025 → 16 Oct 2026, grouped by title · the channel's four biggest Shorts ever (14.4M, 6.6M, 3.3M, 1.5M, 2022–23) are reposted crowd and dance clips and sit outside all three groups.</div>
+  </div>
+</section>
+
+<!-- ═══ 13 · THE PODCAST ════════════════════════════════════════════
+     On the podcast's own green. Nine season-one tiles on a 26-month
+     line with the gaps drawn, and the one story clip that beat every
+     announcement as the template for the planned season two. -->
+<section class="slide field pod" data-t="The podcast">
+  <div class="inner">
+    <div class="label reveal">Worth trying · 6</div>
+    <h2 class="display tight reveal" style="margin-top:.7rem;max-width:18ch">Give each podcast episode more moments to reach fans.</h2>
+    <div class="reveal" style="margin-top:clamp(1.4rem,3vw,2.4rem)">
+      <div class="tl" id="tl"></div>
+      <div style="display:flex;justify-content:space-between;margin-top:1.9rem"><span class="label">Jan 2024</span><span class="label">Moments in Music, season one · nine episodes in 25 months</span><span class="label">Feb 2026</span></div>
+    </div>
+    <div class="grid2" style="margin-top:clamp(1.4rem,3vw,2.2rem);grid-template-columns:1fr 1fr;align-items:start">
+      <div class="reveal">
+        <p class="body" style="font-size:.98rem">Season one already has the things that matter: a branded cover, its own playlist, a Home shelf, and guests with stories to tell. <b>Each episode was announced with a Short, but only one clip from inside a conversation was published</b> — Skream on the track that started it all — and it reached more viewers (14.3K) than any announcement. Nine episodes over 25 months, with gaps of up to seven months; views 2.4K–31K, typically 17K.</p>
+        <div class="qual" style="border-color:var(--ink)">The label's planned season two isn't announced publicly yet, so no date is given here. These suggestions are about how episodes are cut and released, whenever that is.</div>
+      </div>
+      <div class="reveal">
+        <div class="podgrid" style="display:grid;grid-template-columns:auto 1fr;gap:1rem;align-items:start">
+          <a class="thumb v" href="https://www.youtube.com/shorts/dc1auJdrj7E" target="_blank" rel="noopener" style="width:120px"><img data-short="dc1auJdrj7E" alt=""><span class="cap"><b>14.3K</b>Skream · the track that started it all</span></a>
+          <ol class="steps" style="margin-top:0">
+            <li><b>Give each episode a small set of standalone clips</b>, each built around one strong story or quote and linked to the episode. The Skream clip is the model; the announcement becomes one of four, not the only one.</li>
+            <li><b>A regular slot</b> for the season, released as a run, with the playlist and the Podcasts tab updated on day one.</li>
+            <li><b>Episode artwork with the guest's face and one line</b> — the Sam Divine episode already does this — and chapters in every description.</li>
+            <li><b>Link the guest's music both ways.</b> The episode points to the guest's Defected releases or set, and those point back to the episode.</li>
+          </ol>
+        </div>
+        <div class="qual" style="border-color:var(--ink)">How we'd know: episode views at 28 days against the season-one typical (17K); clip views against the announcements (about 4K); related-link clicks in Studio.</div>
+      </div>
+    </div>
+    <div class="src">Public YouTube data · S1E01 22 Jan 2024 → S1E09 18 Feb 2026 · Apple Podcasts and Spotify list the same nine episodes as at 16 Oct 2026.</div>
+  </div>
+</section>
+
+<!-- ═══ 14 · THREE PRIORITIES, NINETY DAYS ══════════════════════════
+     Three priorities, each headed by the asset it concerns, with the
+     smaller supporting actions beneath so the plan stays three things
+     rather than a task list. The Studio checks and the follow-up
+     measurement plan sit beneath, because a public-data review has to
+     say what would resolve its own uncertainties. -->
+<section class="slide" data-t="Summary">
+  <div class="bleed scrim-f"><img data-vid="wW4vI546r-s" data-frame="2" alt="Defected at Pacha Ibiza, during Sam Divine's opening-party set"></div>
+  <div class="inner">
+    <div class="label reveal">In summary</div>
+    <h2 class="display tight reveal" style="margin-top:.7rem;max-width:22ch">Three opportunities to build on a strong channel.</h2>
+    <div class="prios close stagger" style="margin-top:clamp(1.4rem,3vw,2.4rem)">
+      <div class="prio">
+        <a class="thumb" href="https://www.youtube.com/@DefectedMusic/podcasts" target="_blank" rel="noopener"><img data-vid="lRa2uJsP2YM" alt="A Defected Radio episode"></a>
+        <div class="d">01</div>
+        <h3 class="display">Bring the radio episodes together</h3>
+        <p>An up-to-date playlist, recognisable artwork and a clear place on Home.</p>
+      </div>
+      <div class="prio">
+        <a class="thumb" href="https://www.youtube.com/watch?v=ikJCO_FrQQ8" target="_blank" rel="noopener"><img data-vid="ikJCO_FrQQ8" alt="A Defected Premiere"></a>
+        <div class="d">02</div>
+        <h3 class="display">Build selected music moments</h3>
+        <p>Give a flagship Premiere extra support, or explore a catalogue idea alongside existing plans.</p>
+      </div>
+      <div class="prio">
+        <a class="thumb" href="https://www.youtube.com/shorts/udw-U-01BUI" target="_blank" rel="noopener"><img data-vid="udw-U-01BUI" alt="A Defected Short"></a>
+        <div class="d">03</div>
+        <h3 class="display">Share more of the stories</h3>
+        <p>Test clips from artist conversations, podcast episodes and the history behind key records.</p>
+      </div>
+    </div>
+    <p class="statement reveal" style="margin-top:clamp(1.6rem,3.4vw,2.6rem);color:var(--cream);max-width:44ch">Defected already does a great deal well. These are a few practical ideas to explore together.</p>
+    <div class="src reveal">Defected Records × YouTube · Virgin Music Group · public YouTube data read 16 October 2026 · supporting detail, Studio questions and future measurement are under Analysis.</div>
+  </div>
+</section>
+
+</div><!-- /deck -->
+
+<!-- ═══ ANALYSIS ════════════════════════════════════════════════════
+     The house pattern: every asserted figure as a row with n, the claim
+     boundary in words, the first objection raised by us. -->
+<div class="an-panel" id="an-panel" role="dialog" aria-modal="true" aria-label="Analysis appendix">
+  <div class="an-in">
+    <button class="an-back">← Back to the review</button>
+    <h2>Analysis appendix</h2>
+    <div class="an-sub">Public YouTube Data API v3 · @DefectedMusic · one pull, 16 October 2026, 11:11–11:21 UTC · no YouTube Studio data</div>
+
+    <h3>What was read</h3>
+    <table>
+      <tr><th>Item</th><th>Value</th><th>Note</th></tr>
+      <tr class="lead"><td>Lifetime channel views</td><td class="n">1,011,854,634</td><td>YouTube's counter, read 11:11 UTC</td></tr>
+      <tr><td>Subscribers</td><td class="n">1,520,000</td><td>Rounded public count; no multiple or growth figure is put on it</td></tr>
+      <tr><td>Public videos</td><td class="n">5,243</td><td>Inventory holds the 5,000 most recent, 14 Jun 2011 → 16 Oct 2026</td></tr>
+      <tr><td>Observed views in inventory</td><td class="n">910,708,685</td><td>90.0% of the lifetime counter; the rest is the 243 oldest uploads plus deleted or private videos</td></tr>
+      <tr><td>Uploads since 1 Jan 2022</td><td class="n">1,999</td><td>136,955,316 views; the window used for all format and series reads</td></tr>
+      <tr><td>Uploads in last 90 days</td><td class="n">85</td><td>41 releases, 12 radio, 11 Shorts, 8 sets, 13 other</td></tr>
+      <tr><td>Premieres</td><td class="n">189</td><td>Of 195 “was live” uploads in the inventory, 189 carry a scheduled start and are Premieres (133 of them since 2022); the other six were live streams</td></tr>
+    </table>
+    <p>Formats were classified by title and duration (radio show, DJ set recorded live, studio compilation, release audio, lyric/official video, Short via the API flag, podcast, live session, interview/feature) and checked by sampling. About fifteen uploads since 2022 fall outside every rule; totals carry n so the margin is visible.</p>
+
+    <h3>Slide 2 · the archive</h3>
+    <table>
+      <tr><th>Measure</th><th>Value</th><th>Note</th></tr>
+      <tr class="lead"><td>Pre-2022 share of observed upload views</td><td class="n">85.0%</td><td>773,753,369 on 3,001 uploads, of 910.7M observed</td></tr>
+      <tr><td>Pre-2022 share of the lifetime counter</td><td class="n">76.5%</td><td>Same numerator against 1,011.9M</td></tr>
+      <tr><td>‘Cola’ (qke-jOUqSXU, Jun 2017)</td><td class="n">174,267,044</td><td>17.2% of the counter; the official video (LcNXG-6SqWA) adds 36.7M</td></tr>
+      <tr><td>Top 10 uploads</td><td class="n">33.8%</td><td>of the counter; top 100 = 68%</td></tr>
+    </table>
+    <div class="an-note"><b>The objection to raise first.</b> Lifetime totals favour old uploads by construction. This slide therefore makes no claim about current consumption or about recent output; it locates accumulated views so the review can focus on the live operation. Catalogue growth will be readable only once the daily snapshots that began on 16 October have history.</div>
+
+    <h3>Slide 3 · cadence</h3>
+    <table>
+      <tr><th>Measure</th><th>Value</th><th>Note</th></tr>
+      <tr><td>Radio episodes, all-time / since 2022</td><td class="n">490 / 248</td><td>Title match “Defected Radio”</td></tr>
+      <tr class="lead"><td>Episodes published on a Friday, 2022–26</td><td class="n">238 / 250</td><td>UTC publish day; 2 Sunday, 3 Monday, 1 Tuesday, 6 Saturday</td></tr>
+      <tr><td>Episodes per year</td><td class="n">52 · 51 · 51 · 52 · 42</td><td>2022 → 2026 to date (2019: 52, 2020: 53, 2021: 55)</td></tr>
+      <tr><td>Weeks with an upload, last 52</td><td class="n">50</td><td>Friday–Thursday weeks to 16 Oct 2026; the two dark weeks are 26 Dec–8 Jan</td></tr>
+      <tr><td>Weeks with a radio episode, last 52</td><td class="n">47</td><td>Holiday and takeover weeks account for the five</td></tr>
+      <tr><td>Radio median by host, episodes since 2024</td><td class="n">47K · 31K · 23K</td><td>Sam Divine n=57 · Monki n=29 · Rimarkable n=32</td></tr>
+      <tr><td>Radio median by upload year</td><td class="n">67K · 60K · 44K · 34K · 26K</td><td>2022 → 2026; older episodes have had longer to accumulate</td></tr>
+    </table>
+    <div class="an-note"><b>The host and year differences are not read as decline or as a verdict on any host.</b> Episode age, guest line-ups and takeover weeks all confound them, and the radio show's traffic sources are a Studio question. They are listed because a reviewer would ask.</div>
+
+    <h3>Slide 4 · DJ sets</h3>
+    <table>
+      <tr><th>Setting</th><th>n</th><th>Median</th><th>Over 100K</th><th>Largest</th></tr>
+      <tr><td>Defected HQ / The Basement</td><td class="n">59</td><td class="n">27K</td><td class="n">9</td><td>David Morales 206K</td></tr>
+      <tr><td>Worldwide NYE 23/24</td><td class="n">12</td><td class="n">37K</td><td class="n">4</td><td>Armand Van Helden, Wembley 1.05M · Carl Cox, Sydney 1.00M</td></tr>
+      <tr><td>Croatia</td><td class="n">18</td><td class="n">37K</td><td class="n">3</td><td>Da Capo 183K</td></tr>
+      <tr><td>Malta (The Ditch, Café del Mar, Uno)</td><td class="n">10</td><td class="n">79K</td><td class="n">3</td><td>Green Velvet 550K; median 59K without it</td></tr>
+      <tr><td>Pacha Ibiza</td><td class="n">3</td><td class="n">228K</td><td class="n">2</td><td>Sam Divine 328K</td></tr>
+      <tr><td>Ushuaïa and other venues</td><td class="n">15</td><td class="n">32K</td><td class="n">4</td><td>Groove Armada 341K</td></tr>
+      <tr><td>Chinois Ibiza 2026</td><td class="n">5</td><td class="n">26K</td><td class="n">0</td><td>Eliza Rose 30K; all five weeks old</td></tr>
+      <tr class="lead"><td>All sets, Jan 2024 → Oct 2026</td><td class="n">122</td><td class="n">33K</td><td class="n">25</td><td>—</td></tr>
+      <tr><td>Afro / South African house strand</td><td class="n">21</td><td class="n">37K</td><td class="n">6</td><td>Vinny Da Vinci 242K; the other 101 sets have a median of 33K</td></tr>
+      <tr><td>HQ sets 2024 vs 2025–26</td><td class="n">45 / 14</td><td class="n">22K / 42K</td><td class="n">7 / 2</td><td>Younger uploads with the higher median; not read as a trend</td></tr>
+    </table>
+    <p>The deck's earlier working draft read this as “setting beats studio”. The table does not support that: the studio series produced more 100K sets than any venue, and the venue samples are small and uneven in age. What recurs among the 25 is a recognised headliner, and in six cases an Afro or South African house selection.</p>
+
+    <h3>Slide 5 · compilations</h3>
+    <table>
+      <tr><th>Upload year</th><th>n</th><th>Median</th><th>Over 100K</th><th>Note</th></tr>
+      <tr><td>2021</td><td class="n">13</td><td class="n">612K</td><td class="n">10</td><td>Lockdown-era peak</td></tr>
+      <tr><td>2022</td><td class="n">8</td><td class="n">148K</td><td class="n">4</td><td>Includes Disco House × Glitterbox 2.72M</td></tr>
+      <tr><td>2023</td><td class="n">9</td><td class="n">49K</td><td class="n">4</td><td></td></tr>
+      <tr class="lead"><td>2024</td><td class="n">10</td><td class="n">130K</td><td class="n">5</td><td>Includes Flavour Trip 2.76M and Purple Disco Machine In The House 1.90M</td></tr>
+      <tr><td>2025</td><td class="n">3</td><td class="n">138K</td><td class="n">3</td><td>Ibiza Sunset, Jonas Blue In The House, Carl Craig In The House</td></tr>
+      <tr><td>2026 to 16 Oct</td><td class="n">3</td><td class="n">17K</td><td class="n">1</td><td>Defected Ibiza Summer Mix 2026 246K; year incomplete and uploads young</td></tr>
+    </table>
+    <p>Definition: 40 minutes or more, titled as a mix, not recorded live at an event or in the Basement, not the radio show. The “In The House” artist-mixed strand (2024 on) is included because it is the same product with the artist's name first; the format has partly moved into that name rather than stopped. Rate comparison: in 2022–25 the live sets passed 100K roughly one time in five and the radio episodes roughly one in twenty.</p>
+
+    <h3>Slide 6 · one record, and the releases by year</h3>
+    <table>
+      <tr><th>Edge Of Desire asset</th><th>Host</th><th>Views</th><th>Note</th></tr>
+      <tr class="lead"><td>Extended Mix (release audio)</td><td>Defected “and 2 more”</td><td class="n">1.27M</td><td>lACS1E3HQGM · the million-view milestone; co-published with Jonas Blue and Malive</td></tr>
+      <tr><td>From Defected In The House (live performance)</td><td>Jonas Blue's channel</td><td class="n">2.3M</td><td>Y1HUL-TALoE · in the Defected shelf and playlist</td></tr>
+      <tr><td>Official lyric video</td><td>Jonas Blue's channel</td><td class="n">116K</td><td>eNEnxdqyQEw · 13 Nov 2025</td></tr>
+      <tr><td>Brazilian Summer Video · Malive Tour Video</td><td>Defected · Defected and Malive</td><td class="n">119K · 22K</td><td>m8zJoCJ-WoI · w4RLll9s2_g</td></tr>
+      <tr><td>Defected Radio Show: Jonas Blue Takeover 25.07.25</td><td>Defected</td><td class="n">33K</td><td>ZJn8c3LeynE</td></tr>
+      <tr><td>In Conversation with Jonas Blue · Jonas Blue In The House (set)</td><td>Defected · Defected and Jonas Blue</td><td class="n">4.9K · 138K</td><td>g3X7yszvbCE · O1mxdjYAapk</td></tr>
+      <tr><td>Remixes: Franky Rizardo · Jazz-N-Groove · Grigoré &amp; Serve Cold · Sunrise Mix</td><td>Defected</td><td class="n">542K · 49K · 26K · 12K</td><td>xswW9v_kqBA · lBKpNtT-2DE · 7nbfZCi45Jk · FeDT0n0IpF8</td></tr>
+      <tr><td>Shorts (6)</td><td>Defected</td><td class="n">39K · 22K · 6.9K · 6.5K · 5.9K · 5.7K</td><td>ANOTR drop KL6p-79O-VI · squad do-LSv2g9k0 · Rizardo in Peru McQkhL3T-RY · DYRH Ep.2 TKA7QgoJZ08 · Sonny Fodera at Mambo Q9IS1lZedlY · Carlita &amp; DJ Tennis mT69dwKqzag</td></tr>
+      <tr><td>Home shelf “Jonas Blue &amp; Malive – Edge Of Desire”</td><td>Defected</td><td class="n">12 videos</td><td>Playlist PLoRGBexfBL8c7zDulW2j4G_2JlMOhnqjC, 102,794 playlist views; seventh shelf on Home on 16 Oct. The last two items are Jonas Blue's 2026 single “Girl”</td></tr>
+    </table>
+    <p>Views are as shown on the channel on 16 Oct 2026 (the Extended Mix is 1.27M in the API pull and shows as “1.2M” on the page). Jonas Blue's own channel also hosts the record's radio edit (9.6M), which is not in the shelf. The slide makes no claim that the additional formats produced the views.</p>
+    <table>
+      <tr><th>Upload year</th><th>n</th><th>Median</th><th>Over 100K</th><th>Over 1M</th></tr>
+      <tr><td>2024</td><td class="n">115</td><td class="n">18K</td><td class="n">15</td><td class="n">0</td></tr>
+      <tr class="lead"><td>2025</td><td class="n">68</td><td class="n">43K</td><td class="n">22</td><td class="n">3</td></tr>
+      <tr><td>2026 to 16 Oct</td><td class="n">100</td><td class="n">9K</td><td class="n">6</td><td class="n">0</td></tr>
+    </table>
+    <p>Release audio, lyric videos and official videos, by upload year. The three over 1M in 2025: Just Stay The Night (8QiN1PiXDpU, 1.37M), Deep Inside (voQQVBtF72Q, 1.36M), Edge Of Desire (lACS1E3HQGM, 1.27M). 2024's uploads are a year older than 2025's, which makes 2025's lead conservative; 2026's are too young to read, and 19 of them were published on the morning of the pull. This comparison used to sit on the slide; it is kept here because a reviewer would ask, and left off the slide because a smaller, more selective 2025 (68 against 115) makes the medians an uneven pair.</p>
+
+    <h3>Slide 8 · channel organisation</h3>
+    <table>
+      <tr><th>Surface</th><th>Observed 16 Oct 2026</th></tr>
+      <tr><td>Podcasts tab</td><td>Two podcasts: “Defected Radio” (45 items, release sleeve as cover, updated 25 Sep 2026) and “Moments in Music” (9 episodes, branded cover)</td></tr>
+      <tr class="lead"><td>“Defected Radio” podcast contents</td><td>Tracks hosted on other channels (Prunk – Topic, 8bit Records, TMPLE, TruThoughtsJukeBox, PapaRecordsTv, Hot Since 82 …), i.e. a tracklist; owned by Defected Records</td></tr>
+      <tr><td>Playlists collecting the weekly episodes</td><td class="miss">—</td></tr>
+      <tr><td>“Defected Broadcasting House” playlist, read in full</td><td>622 of 631 videos available: 357 Broadcasting House shows · 198 DJ sets · 20 mixes · 45 other · 2 radio episodes (a 2022 Sydney special and 3 Feb 2023). The weekly episodes are not collected anywhere public</td></tr>
+      <tr><td>Home shelves</td><td>11: featured video, album, releases, “Broadcasting House” (holding current sets), podcast, live sessions, Edge Of Desire, Playlist Mixes, Defected 2026 playlist (third-party uploads), XXV, official videos. No radio, Shorts, Croatia or Malta shelf</td></tr>
+      <tr><td>Public playlists</td><td>71, including Defected Croatia (87), Defected Malta (57), Defected Releases (1,008), Defected Classics (144), Glitterbox (98)</td></tr>
+      <tr><td>Home shelf suggestions (moved off the slide)</td><td>Add a “Defected Radio Show — every episode” shelf under the featured video · rename the “Defected Broadcasting House” shelf for what it now holds (this season's sets) · add Croatia and Malta shelves (playlists exist) · add a Shorts shelf · rename “Playlist Mixes” to “Defected Mixes” · move “Defected 2026: The Playlist” (third-party uploads) lower. A test, measured by Home-tab impressions and clicks by shelf in Studio</td></tr>
+      <tr><td>HQ set titles</td><td>Led with the style in 2024 (“Afro House Music DJ Mix | Caiiro”) and with the DJ in 2026 (“Leyo | Jackin House Mix”); one format — DJ | style of mix | Live from Defected HQ — would make the series read as one series</td></tr>
+      <tr><td>Keeping the tracklist</td><td>The current “Defected Radio” podcast is useful as a tracklist; renaming it “Defected Radio — tracks from the show” keeps it without it standing in for the episodes. A link to the episode playlist in every episode description</td></tr>
+      <tr><td>How we'd know</td><td>Playlist views, and episode views arriving from the playlist, in Studio over the 28 days before and after; the show appearing as a podcast in YouTube Music</td></tr>
+    </table>
+    <div class="an-note"><b>Claim boundary.</b> The public API exposes playlists and home sections; it does not expose end screens, cards, Community posts or the channel trailer's performance. A playlist that is not public is invisible here, which is not the same as not existing. Shelf order and naming effects are tested in Studio's Home-tab impressions, not assumed.</div>
+
+
+    <h3>Slide 9 · Premieres</h3>
+    <table>
+      <tr><th>Format, uploads since Jan 2024</th><th>Premiered</th><th>Note</th></tr>
+      <tr><td>Moments in Music podcast</td><td class="n">9 of 9</td><td>Scheduled 16:00–18:00 UK on weekdays; chat replay available; the Josh Baker episode has 22 chapters</td></tr>
+      <tr><td>Official music videos</td><td class="n">3 of 3</td><td>Hannah Wants ft. ARA – Hold Me (WLa8AoK9Sz0) premiered 22 Feb 2025, 221K, chat replay available</td></tr>
+      <tr><td>Live Sessions</td><td class="n">8 of 10</td><td></td></tr>
+      <tr class="lead"><td>DJ sets (“Live from …”)</td><td class="n">59 of 122</td><td>Event sets almost always (Green Velvet 13 Feb 2025 19:00; Oden &amp; Fatzo at Pacha; every Malta set); HQ sets about half</td></tr>
+      <tr><td>Studio mixes / In The House</td><td class="n">8 of 17</td><td></td></tr>
+      <tr><td>Release audio · radio show · Shorts</td><td class="n">3 of 274 · 1 of 145 · 1 of 303</td><td>Not premiered, correctly; Shorts cannot be</td></tr>
+      <tr><td>Premieres all-time</td><td class="n">189</td><td>65 in 2024, 21 in 2025, 12 to 16 Oct 2026. Only six uploads in the inventory were real live broadcasts, all 2020–21</td></tr>
+      <tr><td>Tracklist or chapters on flagship set Premieres</td><td class="n">0 of 5</td><td>Checked 16 Oct: Green Velvet (hlbMcaCYq-Q), Sam Divine Pacha (wW4vI546r-s), Oden &amp; Fatzo Pacha (dO1TSqF2mF8), Dennis Ferrer Croatia (AEMfEGGsE8I), Eats Everything Malta (1AhqoSVFoc0): no timestamps in any description. David Morales at HQ (6o9S_-DGV4Q, Dec 2024, not a Premiere) has eight chapters</td></tr>
+      <tr><td>Co-published videos on Home</td><td class="n">18</td><td>Oden &amp; Fatzo, Jonas Blue, Malive, Purple Disco Machine, Denis Sulta, Astels, Moby “and 3 more”, Chinois Ibiza</td></tr>
+    </table>
+    <p>Tool conditions are from YouTube Help and YouTube for Artists, read 16 Oct 2026, and are stated separately because they are separate checks: a Premiere trailer (15 s–3 min on the watch page) needs over 1,000 subscribers and no active strikes; Live Redirect (a live stream into a Premiere, or a Premiere into another Premiere or another channel's stream with permission) needs over 1,000 subscribers and no live-streaming restriction; Collaborations allow up to 10 channels, recommend the video to every collaborator's audience and leave revenue with the posting channel; Premium Afterparty is a Premium-members-only live stream hosted with YouTube and has no self-serve route. The channel's subscriber count clears both thresholds; strikes and restrictions are not visible publicly.</p>
+    <div class="an-note"><b>Claim boundary.</b> Whether a trailer ran before a Premiere, how many reminders were taken, concurrent viewers and chat volume are not public; a trailer is not shown after the Premiere ends, so its absence now says nothing about whether one was used. The slide therefore describes what the channel visibly does (premieres the right formats, announces with Shorts, leaves chat replay on) and offers three possibilities without claiming any is missing. Lifetime views on a premiered video are not a Premiere audience. How we'd know: reminders set, concurrent viewers and chat messages in Studio for a Premiere run this way, against the channel's usual set Premieres.</div>
+
+    <h3>Slide 10 · lyric videos, and the supporting versions of nine records</h3>
+    <table>
+      <tr><th>Record</th><th>Lyric upload on another channel</th><th>Lyric-led? Version?</th><th>Official lyric video</th></tr>
+      <tr class="lead"><td>CamelPhat &amp; Elderbrook – Cola (Defected, Jun 2017)</td><td>Groove Bassment, RpmFVcMggZE, 2017, 6.1M</td><td>Yes; original single, 3:43</td><td class="miss">None found on @DefectedMusic, @camelphat_music or @elderbrook-music (channel searches and video lists, 16 Oct). A 315K “Official Lyric Video” by WOW TV is a third-party channel whose relationship with the label is not known from public data</td></tr>
+      <tr><td>Endor – Pump It Up (Defected, 2019)</td><td>Sunrise Sounds, -OWvghF_rpA, 13 Apr 2025, 7.1M</td><td>Yes; radio edit, 2:30, DFTD sleeve shown</td><td>Exists: Armada Music TV, wRkax1FYiBI, 31 Mar 2020, 89.6K, titled “Official Lyric Video [From The Substance movie]”. Not on Defected; Endor's own channel (@endormusicuk) has no lyric video</td></tr>
+      <tr><td>Jonas Blue &amp; Malive – Edge Of Desire (2025)</td><td>7clouds Afro House, b5yMWNPU_y4, 2025, 1.7M</td><td>Yes; radio edit, 2:15</td><td>Exists: Jonas Blue's channel, eNEnxdqyQEw, 13 Nov 2025, 116K</td></tr>
+    </table>
+    <table>
+      <tr><th>Record</th><th>Official audio</th><th>Music video</th><th>Lyric video</th><th>Alt / remix</th><th>Live / set</th><th>Shorts</th><th>Story</th><th>Playlist</th></tr>
+      <tr><td>Cola (2017)</td><td>Defected 174.3M; CamelPhat OAC 4.4M</td><td>Defected 36.7M</td><td class="miss">none official; Groove Bassment upload 6.1M</td><td>Mousse T. Glitterbox 994K, Franky Rizardo 803K, ARTBAT 2025 259K</td><td>4Music live 44K</td><td>“Cola vs Nanana” 163K</td><td class="miss">none</td><td>Defected Classics</td></tr>
+      <tr><td>The Cure &amp; The Cause (2006)</td><td>Dennis Ferrer Remix 26.5M; Topic 2.4M</td><td>2008 official video 1.6M</td><td class="miss">none</td><td>Idris Elba Remix 2024 77K; Shy FX remix Sep 2026 16.7K</td><td>Zoe Kypri live 8K; Rodigan at Croatia 6.7K</td><td>DYRH Ep.1 13K; Idris Elba at WHP 11K</td><td class="miss">none</td><td>Defected Classics</td></tr>
+      <tr><td>Pump It Up (2019)</td><td>Extended 1.5M</td><td>27.5M; Selected. upload 136M</td><td>Armada Music TV 90K; Sunrise Sounds upload 7.1M</td><td>Jax Jones, Low Steppa remixes</td><td>—</td><td>police-officer clip 6.6M (repost)</td><td class="miss">none</td><td>—</td></tr>
+      <tr><td>Freak Like Me (2016)</td><td>7.7M; Katy B &amp; MNEK 3.8M</td><td>—</td><td class="miss">none</td><td>Ben Kim Remix 2025 347K</td><td>Pacha crowd Short 50K</td><td>DYRH Ep.5 14.5K</td><td class="miss">none</td><td>—</td></tr>
+      <tr><td>Just Stay The Night (2025)</td><td>1.37M</td><td class="miss">none</td><td>none official; other-channel uploads 26K / 4K</td><td>Acoustic 8.8K</td><td>Basement Short 2.5K</td><td>Raphaella acoustic 1.6K</td><td class="miss">none</td><td>XXV</td></tr>
+      <tr><td>Deep Inside (2025)</td><td>Defected 1.36M; Ferreck Dawn's channel 1.9M</td><td class="miss">none</td><td>none official; other-channel upload 1.8K</td><td>—</td><td>—</td><td>Story of the Sample 39K; Barbara Tucker 13K</td><td>the two Shorts</td><td>—</td></tr>
+      <tr><td>Edge Of Desire (2025)</td><td>Defected 1.27M (co-published); Jonas Blue's channel 9.6M</td><td>Brazilian Summer 120K; Malive Tour 23K</td><td>Jonas Blue's channel 116K; 7clouds upload 1.7M</td><td>Franky Rizardo Remix 542K</td><td>In The House on Jonas Blue's channel 2.3M; radio takeover</td><td>6 incl. DYRH Ep.2</td><td>In Conversation</td><td>own Home shelf</td></tr>
+      <tr><td>Natural Blues (2025)</td><td>Defected 152K; Moby's channel 1.0M</td><td>Moby's channel 935K</td><td class="miss">none</td><td>Official Visualiser 12K</td><td>Way Out West 243K (co-published); Coachella on Moby's channel 573K</td><td>3</td><td>Moby &amp; Jacob Lusk story 11K</td><td>—</td></tr>
+      <tr><td>Lady Love (2023)</td><td>185K</td><td>927K</td><td class="miss">none</td><td>—</td><td>Camden Cox live Short 2K</td><td>pre-order / out-now</td><td class="miss">none</td><td>Oden &amp; Fatzo playlist</td></tr>
+    </table>
+    <div class="an-note"><b>Claim boundary.</b> Views on a lyric upload hosted by another channel show that an audience watched a lyric video for the record; they do not show that an official one would reach the same audience, that viewers would transfer, or that a new upload would repeat the result. The hosting channels are named as they appear on YouTube; nothing is assumed about who owns them or their relationship with Defected. Pump It Up and Edge Of Desire already have official lyric videos elsewhere, so the slide does not suggest duplicating them; Cola is offered as one to explore, subject to partnerships and artist plans. Hosting any new upload is a decision for the artist and the label. Not an opportunity: a visualiser for any of these, or a video for Just Stay The Night (other-channel lyric uploads 26K and 4K). No resurgence is claimed for any record — there is no historical series.</div>
+
+    <h3>Slide 11 · anniversaries</h3>
+    <table>
+      <tr><th>Record</th><th>Original release</th><th>Source checked</th><th>Occasion</th></tr>
+      <tr class="lead"><td>Fish Go Deep &amp; Tracey K – The Cure &amp; The Cause</td><td><b>Original release:</b> on Fish Go Deep's own Go Deep imprint, from their debut album, c. 2005 (Traxsource artist biography: “a single off their debut album … was licensed by UK house giant, Defected”). <b>Defected release:</b> 2006 — 12″ DFTD129 and the Dennis Ferrer remix single DFTD145 (28 Aug 2006, AllMusic); 2024 reissue with the Idris Elba remix</td><td>Traxsource artist page; AllMusic release listing; the channel's own 2006-dated uploads (ikJCO_FrQQ8, -LQlVFTaLcs)</td><td>The slide says “20 years since its Defected release (2006)”, not since first release. Not read from the YouTube upload dates (2008–13)</td></tr>
+      <tr><td>CamelPhat &amp; Elderbrook – Cola</td><td>Defected, June 2017 (Wikipedia: 17 June 2017; Traxsource confirms 2017 only)</td><td>Wikipedia, Traxsource; the channel's June 2017 upload</td><td>10 years in June 2027; exact day to confirm against the label's release records before fixing a date</td></tr>
+      <tr><td>Lee Walker vs DJ Deeon – Freak Like Me</td><td>2016</td><td>—</td><td>10 in 2026; already marked by the Ben Kim remix and Pacha footage. No further occasion claimed</td></tr>
+      <tr><td>Kings of Tomorrow – Finally · Spiller – Groovejet</td><td>2000</td><td>—</td><td>25 in 2025–26; Groovejet got a 2026 version, Finally the 2024 Mochakk remix. No new material surfaced</td></tr>
+    </table>
+    <p>The slide shows four of these assets as an example to discuss; the 2026 remix and story content may be part of a campaign the label already has under way, which public data cannot show. Assets on the channel for The Cure &amp; The Cause, read 16 Oct 2026: Dennis Ferrer Remix 26M (ikJCO_FrQQ8), Original Mix 59K (-LQlVFTaLcs), official video 1.6M (JbM0DtQZ9AY), Acoustic 63K (diiWzCXoMac), Charles Webster, Full Intention, Balearic Soul and Atmos Blaq remixes (37K, 10K, 10K, 21K), Idris Elba Remix 77K (llyBrtHVqgc), Zoe Kypri live 8K (FWtOmRLIjss), Do You Remember House? Ep.1 13K (10F6v5TSQF4), Shy FX remix 16K (DKf6g9OjDwI), Rodigan at Croatia 6.7K (IWlcdPprdzg) and two announcement Shorts. No playlist or Home shelf gathers them.</p>
+
+    <h3>Slide 12 · Shorts</h3>
+    <table>
+      <tr><th>Group, Shorts since 1 Jan 2025</th><th>n</th><th>Median</th><th>Over 20K</th><th>Largest</th></tr>
+      <tr class="lead"><td>Heritage / catalogue</td><td class="n">22</td><td class="n">13.1K</td><td class="n">4</td><td>Aly-Us ‘Follow Me’ 54K (10 Mar 2025)</td></tr>
+      <tr><td>Promotional (out now, watch now, tickets, shop)</td><td class="n">42</td><td class="n">6.3K</td><td class="n">4</td><td>Croatia tickets 45K (20 Nov 2025)</td></tr>
+      <tr><td>Everything else (moments, drops, merch)</td><td class="n">134</td><td class="n">7.0K</td><td class="n">8</td><td>Pacha crowd, Freak Like Me 50K (12 Aug 2025)</td></tr>
+      <tr><td>Shorts per month, 2025</td><td class="n" colspan="4">10 · 22 · 13 · 17 · 13 · 10 · 11 · 10 · 21 · 5 · 11 · 4</td></tr>
+      <tr><td>Shorts per month, 2026 to 16 Oct</td><td class="n" colspan="4">4 · 7 · 3 · 12 · 10 · 1 · 3 · 0 · 5 · 6</td></tr>
+    </table>
+    <p>Groups are assigned from titles. A sample of 22 with a two-to-one median and equal counts of 20K+ hits supports a structured test, not a conclusion. The channel's four biggest Shorts (14.4M, 6.6M, 3.3M, 1.5M; Nov 2022–Aug 2023) are reposted crowd and dance clips credited to other accounts and are excluded from all three groups. The related-video link on Shorts was introduced by YouTube in September 2023; whether it is still offered to the channel is confirmed in Studio.</p>
+
+    <h3>Slide 13 · Moments in Music</h3>
+    <table>
+      <tr><th>Episode</th><th>Published</th><th>Views</th></tr>
+      <tr><td>S1E01 Sam Divine</td><td>21 Jan 2024</td><td class="n">30,891</td></tr>
+      <tr><td>S1E02 Skream</td><td>4 Feb 2024</td><td class="n">21,827</td></tr>
+      <tr><td>S1E03 Roger Sanchez</td><td>18 Feb 2024</td><td class="n">8,635</td></tr>
+      <tr><td>S1E04 Joseph Capriati</td><td>3 Mar 2024</td><td class="n">15,944</td></tr>
+      <tr><td>S1E05 Rudimental</td><td>19 Jun 2024</td><td class="n">2,407</td></tr>
+      <tr><td>S1E06 MK</td><td>24 Jul 2024</td><td class="n">17,171</td></tr>
+      <tr><td>S1E07 Carl Craig</td><td>26 Feb 2025</td><td class="n">15,632</td></tr>
+      <tr><td>S1E08 Josh Baker</td><td>16 Sep 2025</td><td class="n">27,032</td></tr>
+      <tr><td>S1E09 Purple Disco Machine</td><td>18 Feb 2026</td><td class="n">18,415</td></tr>
+    </table>
+    <p>Announcement Shorts for the series (n=17) have a median of about 4K; the one excerpt cut from a conversation (Skream, dc1auJdrj7E) has 14.3K. Apple Podcasts and Spotify list the same nine episodes and no season-two trailer as at 16 October 2026; the label's planned season two is referred to without a date.</p>
+
+    <h3>Slide 14 · the summary, supporting detail</h3>
+    <p>The closing slide keeps three headline opportunities. The working behind each, as developed earlier in the review, is kept here.</p>
+    <dl>
+      <dt>01 · Bring the radio episodes together</dt><dd>A playlist of every episode, set as a podcast, with the show's artwork and a shelf on Home. Supporting steps: the tracklist kept, renamed, with a link to the playlist in every episode description; the sets shelf renamed for what it holds, with Croatia, Malta and Shorts shelves added; one title format for the HQ sets. How we'd know: playlist views, and episode views arriving from it, after 28 days; Home-tab impressions and clicks by shelf.</dd>
+      <dt>02 · Build selected music moments</dt><dd>One selected Premiere with a bigger moment around it; a lyric video explored for Cola, subject to partnerships and artist plans; a catalogue-milestone collection discussed alongside the label's current plans. Supporting steps: trailer and live-redirect eligibility confirmed separately in Studio before the Premiere; tracklist and chapters on the selected sets; catalogue mixes on a calendar with one title format. How we'd know: reminders, concurrent viewers and chat in Studio against the usual Premieres; a lyric video's views and sources at 30 days; collection playlist views.</dd>
+      <dt>03 · Share more of the stories</dt><dd>Story-led Shorts tested over a set period; a few clips from inside each podcast episode when season two comes. Supporting steps: each clip linked to the full set, episode or record; podcast artwork led by the guest, with the guest's music linked both ways; the announcement becomes one clip among several, not the only one. How we'd know: typical views and related-link clicks by kind of clip; episode views at 28 days against 17K; clip views against the 4K the announcements reached.</dd>
+    </dl>
+    <p style="margin-top:1rem"><b>Questions only YouTube Studio can answer</b></p>
+    <ul>
+      <li>Traffic sources for the radio show: search, browse, external, playlist.</li>
+      <li>Reminders set, concurrent viewers and chat volume on past Premieres; whether trailers were used.</li>
+      <li>Impressions and click-through for HQ sets against event sets, over the same period.</li>
+      <li>Search terms bringing people to the catalogue uploads; traffic from Shorts audio.</li>
+      <li>Related-link clicks on the few Shorts that already carry one.</li>
+    </ul>
+    <p style="margin-top:1rem"><b>What we'll be able to say later</b></p>
+    <ul>
+      <li>We started recording the channel's public figures daily on 16 October 2026. From mid-November we can show how each new upload performs in its first week; from mid-January, quarter against quarter.</li>
+      <li>Then: radio episode views at 7 and 28 days by host; Shorts by kind of clip at 7 days; the anniversary playlist and any lyric video at 30 and 90 days, against the figures in this deck.</li>
+      <li>Whether the back catalogue is still growing, and where, can only be read from that record — nothing in this deck claims it.</li>
+    </ul>
+
+    <h3>Method</h3>
+    <dl>
+      <dt>Sources</dt><dd>Public YouTube Data API v3 through the project's own routes (uploads, playlists, channel sections); the live channel in a browser on 16 October 2026; Apple Podcasts and Spotify for the podcast listing. No YouTube Studio data of any kind.</dd>
+      <dt>Comparison rule</dt><dd>No lifetime-view ranking across upload ages. Series are compared within the same window or by structural measures: cadence, consistency, format mix, share passing a threshold. Where a comparison cannot be made fairly the figures are stated with their limits.</dd>
+      <dt>Attribution</dt><dd>Public data shows co-occurrence. No result is attributed to a setting, a title, a thumbnail or a host. Shorts-to-long-form conversion is a hypothesis for the test on slide 12.</dd>
+      <dt>Snapshots</dt><dd>The channel entered daily public snapshots on 16 October 2026. Until there is history, nothing here describes momentum, release-week shape or catalogue growth. The follow-up plan is under Slide 14 above.</dd>
+      <dt>Not retrieved</dt><dd>The 243 oldest uploads (2009 to mid-2011); the Live and Posts tabs; end screens, cards and Community posts, which the public API does not expose.</dd>
+    </dl>
+    <button class="an-back">← Back to the review</button>
+  </div>
+</div>
+
+<script>
+/* ── Data, from the 16 Oct 2026 pull ──────────────────────────────────
+   Weeks run Friday→Thursday, oldest first (17 Oct 2025 → 16 Oct 2026):
+   [uploads, radio episodes]. */
+var WEEKS = [[1,1],[2,1],[5,1],[7,1],[5,1],[6,1],[5,1],[2,1],[0,0],[2,2],[0,0],[3,2],[4,1],[18,1],[4,1],[5,1],[8,1],[4,1],[4,1],[4,1],[3,0],[3,2],[5,1],[9,1],[11,2],[6,1],[3,1],[8,1],[11,1],[4,1],[2,0],[5,2],[3,1],[2,1],[5,1],[3,1],[4,1],[5,1],[7,1],[3,1],[2,1],[3,1],[4,1],[2,1],[3,1],[6,1],[5,1],[6,1],[22,1],[4,1],[6,1],[19,0]];
+var CAPS = ['var(--yellow)','var(--lime)','var(--cyan)','var(--blue)'];
+function weeks(el, max){
+  if(!el) return;
+  var top = max || 22;
+  el.innerHTML = WEEKS.map(function(w, i){
+    var h = w[0] ? Math.max(14, Math.round(w[0] / top * 100)) : 10;
+    var cls = 'wk' + (w[0] ? ' on' : ' off') + (w[1] ? ' radio' : '');
+    return '<div class="' + cls + '" style="height:' + h + '%;--cap:' + CAPS[i % 4] + '" title="' + w[0] + ' uploads' + (w[1] ? ', radio' : '') + '"></div>';
+  }).join('');
+}
+
+/* Observed views by upload year, from the inventory. */
+var YEARS = [[2011,5902073],[2012,24490200],[2013,102097202],[2014,38338186],[2015,18460888],[2016,53931901],[2017,241897086],[2018,79962550],[2019,78556892],[2020,84601533],[2021,45514858],[2022,59464165],[2023,31642380],[2024,22901847],[2025,17399090],[2026,5547834]];
+var COLA = 174267044;
+function years(){
+  var el = document.getElementById('years'); if(!el) return;
+  var tot = YEARS.reduce(function(s, y){ return s + y[1]; }, 0);
+  el.innerHTML = YEARS.map(function(y){
+    var w = y[1] / tot * 100;
+    if (y[0] === 2017){
+      var c = COLA / tot * 100;
+      return '<div class="yr cola" style="width:' + c + '%" title="2017 · Cola 174.3M"><i>2017</i></div>' +
+             '<div class="yr" style="width:' + (w - c) + '%" title="2017 · other uploads"></div>';
+    }
+    var lab = (y[0] === 2011 || y[0] === 2013 || y[0] === 2020 || y[0] === 2022 || y[0] === 2026) ? '<i>' + y[0] + '</i>' : '';
+    return '<div class="yr' + (y[0] >= 2022 ? ' now' : '') + '" style="width:' + w + '%" title="' + y[0] + '">' + lab + '</div>';
+  }).join('');
+}
+
+/* The last eight Fridays, newest first. */
+var RADIO = [['hHVUrJld5zo','Sam Divine','09.10.26'],['5Ofy1QJRTGs','Monki','02.10.26'],['lRa2uJsP2YM','Sam Divine','25.09.26'],['cfzMTKNxW5g','Rimarkable','18.09.26'],['OfyXcVDQ4dc','Sam Divine','11.09.26'],['CP4XK2mNhpg','Monki','04.09.26'],['6Sxr_dzQYSg','Sam Divine','28.08.26'],['vMJqUlalBBk','Rimarkable','21.08.26']];
+function band(){
+  var el = document.getElementById('band'); if(!el) return;
+  el.innerHTML = RADIO.map(function(r){
+    return '<a class="thumb" href="https://www.youtube.com/watch?v=' + r[0] + '" target="_blank" rel="noopener"><img data-vid="' + r[0] + '" alt=""><span class="cap">' + r[1] + ' · ' + r[2] + '</span></a>';
+  }).join('');
+}
+
+/* Slide 4: the 100K+ sets of 2024–26, one or more per setting. */
+var SETS = [
+  ['h00SedgmiAk','nye','Armand Van Helden · Wembley','1.05M'],['66Fn24EuiX0','nye','Carl Cox · Sydney','1.00M'],
+  ['hlbMcaCYq-Q','malta','Green Velvet · The Ditch','550K'],['O9przWlVAR0','malta','Ferrer b2b Honeyluv · The Ditch','106K'],
+  ['wW4vI546r-s','pacha','Sam Divine · Pacha','328K'],['dO1TSqF2mF8','pacha','Oden & Fatzo · Pacha','228K'],
+  ['6o9S_-DGV4Q','hq','David Morales · HQ','206K'],['BIOjxxlYE5g','hq','Sun El-Musician · HQ','172K'],['I0NLHgtxfcE','hq','Maz · HQ','135K'],
+  ['69-GjJf3nqg','croatia','Da Capo · Croatia','183K'],['AEMfEGGsE8I','croatia','Dennis Ferrer · Croatia','112K'],
+  ['KA9McrkYiIU','other','Groove Armada · Ushuaïa','341K']
+];
+var LADDER = [['pacha','Pacha Ibiza','3 sets · 2025',228],['malta','Malta',"10 sets · '24–'26",79],['nye','Worldwide NYE','12 sets · Jan–Mar 2024',37],['croatia','Croatia','18 sets',37],['other','Ushuaïa & others','15 sets',32],['hq','Defected HQ studio','59 sets · 9 over 100K',27]];
+function wall(){
+  var w = document.getElementById('wall'), l = document.getElementById('ladder'); if(!w || !l) return;
+  w.innerHTML = SETS.map(function(s){
+    return '<a class="thumb" data-s="' + s[1] + '" href="https://www.youtube.com/watch?v=' + s[0] + '" target="_blank" rel="noopener"><img data-vid="' + s[0] + '" alt=""><span class="cap"><b>' + s[3] + '</b>' + s[2] + '</span></a>';
+  }).join('');
+  l.innerHTML = LADDER.map(function(r){
+    return '<div class="rung" data-s="' + r[0] + '" tabindex="0"><div class="nm">' + r[1] + '<i>' + r[2] + '</i></div><div class="bar"><i style="--w:' + (r[3] / 228 * 100) + '%"></i></div><div class="v">' + r[3] + 'K<i>typical</i></div></div>';
+  }).join('');
+  function light(s){
+    w.classList.toggle('focus', !!s);
+    w.querySelectorAll('.thumb').forEach(function(t){ t.classList.toggle('lit', t.getAttribute('data-s') === s); });
+    l.querySelectorAll('.rung').forEach(function(r){ r.classList.toggle('on', r.getAttribute('data-s') === s); });
+  }
+  l.querySelectorAll('.rung').forEach(function(r){
+    r.addEventListener('mouseenter', function(){ light(r.getAttribute('data-s')); });
+    r.addEventListener('focus', function(){ light(r.getAttribute('data-s')); });
+    r.addEventListener('mouseleave', function(){ light(null); });
+    r.addEventListener('blur', function(){ light(null); });
+  });
+}
+
+/* Slide 5: dots per year, red for the ones over 100K. */
+function dots(){
+  document.querySelectorAll('.dots').forEach(function(d){
+    var n = +d.getAttribute('data-n'), k = +d.getAttribute('data-k'), h = '';
+    for (var i = 0; i < n; i++) h += '<i class="' + (i < k ? 'k' : '') + '"></i>';
+    d.innerHTML = h;
+  });
+}
+
+/* Slide 12: Shorts per month, Jan 2025 → Oct 2026. */
+var MONTHS = [10,22,13,17,13,10,11,10,21,5,11,4, 4,7,3,12,10,1,3,0,5,6];
+function months(){
+  var el = document.getElementById('months'); if(!el) return;
+  el.innerHTML = MONTHS.map(function(n, i){
+    var lab = (i === 0) ? '<i>Jan 25</i>' : (i === 12) ? '<i>Jan 26</i>' : (i === 21) ? '<i>Oct 26</i>' : '';
+    return '<div class="mo' + (i >= 12 ? ' y26' : '') + (n === 0 ? ' zero' : '') + '" style="height:' + Math.max(4, n / 22 * 100) + '%" title="' + n + '">' + lab + '</div>';
+  }).join('');
+}
+
+/* Slide 13: nine episodes on a 26-month grid (Jan 2024 = column 1). */
+var EPS = [['4ZmX-P8ZcJw',1,'E1 · Jan 24'],['h8D3PkHfKN0',2,'E2'],['cklwzzHn5yk',2,'E3'],['zSS4XjIgNcM',3,'E4'],['_5bL_Smn9e0',6,'E5 · Jun'],['iXpPztRQN8s',7,'E6 · Jul'],['B4fNB2a1jeA',14,'E7 · Feb 25'],['EIzL3Rvsug0',21,'E8 · Sep 25'],['uqpmjd5Iip0',26,'E9 · Feb 26']];
+function timeline(){
+  var el = document.getElementById('tl'); if(!el) return;
+  var h = '';
+  EPS.forEach(function(e, i){
+    /* E2 and E3 share February 2024; let the second sit one column right. */
+    var col = e[1] + (i === 2 ? 1 : 0);
+    h += '<div class="ep" style="grid-column:' + col + '"><a class="thumb" href="https://www.youtube.com/watch?v=' + e[0] + '" target="_blank" rel="noopener"><img data-vid="' + e[0] + '" alt=""></a><i>' + e[2] + '</i></div>';
+  });
+  h += '<div class="gap" style="grid-column:8/14">7 months</div><div class="gap" style="grid-column:15/21">7 months</div><div class="gap" style="grid-column:22/26">5 months</div>';
+  el.innerHTML = h;
+}
+
+/* ── Thumbnails by video id ────────────────────────────────────────────
+   YouTube does not 404 a missing maxresdefault; it serves a grey 120×90
+   placeholder with HTTP 200. So we check the decoded width and drop to
+   hqdefault. Shorts use the vertical oardefault frame first. data-frame
+   asks for one of YouTube's auto-captured video frames (maxres1/2/3)
+   instead of the uploaded thumbnail — used for the two full-bleed heroes,
+   because every event thumbnail carries a wordmark. */
+function loadThumbs(root){
+  (root || document).querySelectorAll('img[data-vid]:not([src]),img[data-short]:not([src])').forEach(function(img){
+    var id = img.getAttribute('data-vid') || img.getAttribute('data-short');
+    var isShort = img.hasAttribute('data-short');
+    var big = img.getAttribute('data-big') === '1';
+    var frame = img.getAttribute('data-frame');
+    var chain = frame ? ['maxres' + frame, 'sd' + frame, 'hq' + frame, 'maxresdefault', 'hqdefault']
+              : isShort ? ['oardefault','hqdefault','mqdefault']
+              : (big ? ['maxresdefault','sddefault','hqdefault'] : ['hqdefault','mqdefault']);
+    var i = 0;
+    function next(){
+      if (i >= chain.length) return;
+      img.src = 'https://i.ytimg.com/vi/' + id + '/' + chain[i++] + '.jpg';
+    }
+    img.loading = 'lazy';
+    img.onerror = next;
+    img.onload = function(){ if (this.naturalWidth <= 120 && i < chain.length) next(); };
+    next();
+  });
+}
+
+/* ── Reveal on scroll ────────────────────────────────────────────────── */
+var io = null;
+function observeAll(){
+  if(!('IntersectionObserver' in window)){
+    document.querySelectorAll('.reveal,.stagger').forEach(function(e){ e.classList.add('visible'); });
+    return;
+  }
+  io = new IntersectionObserver(function(entries){
+    entries.forEach(function(en){
+      if(!en.isIntersecting) return;
+      en.target.classList.add('visible');
+      if(en.target.classList.contains('stagger')){
+        for(var i = 0; i < en.target.children.length; i++) en.target.children[i].style.transitionDelay = (i * 45) + 'ms';
+      }
+      io.unobserve(en.target);
+    });
+  }, { threshold: .14, rootMargin: '0px 0px -8% 0px' });
+  document.querySelectorAll('.reveal,.stagger').forEach(function(e){ io.observe(e); });
+}
+
+/* ── Present mode ────────────────────────────────────────────────────── */
+var cur = 0;
+function startPresent(){ document.body.classList.add('present'); showSlide(0); }
+function exitPresent(){ document.body.classList.remove('present'); document.getElementById('pbar').style.width = '0'; }
+function showSlide(i){
+  var s = document.querySelectorAll('.deck .slide');
+  if(i < 0) i = 0; if(i > s.length - 1) i = s.length - 1;
+  cur = i;
+  s.forEach(function(el, n){ el.classList.toggle('active', n === i); });
+  s[i].querySelectorAll('.reveal,.stagger').forEach(function(el){
+    el.classList.add('visible');
+    if(el.classList.contains('stagger')) for(var k = 0; k < el.children.length; k++){ el.children[k].style.opacity = 1; el.children[k].style.transform = 'none'; }
+  });
+  document.getElementById('pbar').style.width = ((i + 1) / s.length * 100) + '%';
+}
+document.addEventListener('keydown', function(e){
+  if(e.key === 'Escape'){ if(document.body.classList.contains('present')) exitPresent(); return; }
+  if(!document.body.classList.contains('present')) return;
+  if(e.key === 'ArrowRight' || e.key === ' '){ e.preventDefault(); showSlide(cur + 1); }
+  if(e.key === 'ArrowLeft'){ e.preventDefault(); showSlide(cur - 1); }
+});
+/* Scroll progress when not presenting. */
+window.addEventListener('scroll', function(){
+  if(document.body.classList.contains('present')) return;
+  var h = document.documentElement;
+  var p = h.scrollTop / (h.scrollHeight - h.clientHeight);
+  document.getElementById('pbar').style.width = (p * 100) + '%';
+}, { passive: true });
+
+document.addEventListener('DOMContentLoaded', function(){
+  weeks(document.getElementById('cover-weeks'));
+  weeks(document.getElementById('weeks'));
+  years(); band(); wall(); dots(); months(); timeline();
+  loadThumbs();
+  observeAll();
+  document.querySelectorAll('.deck .slide')[0].querySelectorAll('.reveal').forEach(function(el){ el.classList.add('visible'); });
+});
+</script>
+<script src="/shared/analysis-sheet.js"></script>
+
+</body>
+</html>
