@@ -438,11 +438,14 @@ body.sheet-open .chrome,body.sheet-open #pbar{display:none}
 
 <!-- ═══ 1 · COVER ═══════════════════════════════════════════════════
      The room is put inside Defected's own setting before any number
-     lands. Green Velvet at The Ditch, Malta — the biggest set of 2025,
-     and the wordmark is in the frame itself. The only figures on the
-     cover are the two the label quoted, verified and dated. -->
+     lands: The Ditch at Defected Malta, from Nic Fanciulli's set. This
+     is a frame from the video (YouTube's auto-captured maxres1), not the
+     thumbnail, because every event thumbnail carries the event wordmark
+     and the cover should carry the deck's own headline only. The only
+     figures on the cover are the two the label quoted, verified and
+     dated. -->
 <section class="slide" data-t="Cover" style="padding-bottom:3.2rem">
-  <div class="bleed scrim-b"><img data-vid="hlbMcaCYq-Q" data-big="1" alt="Green Velvet, live from The Ditch at Defected Malta" style="object-position:50% 32%"></div>
+  <div class="bleed scrim-b"><img data-vid="k4ReV-qmX1A" data-frame="1" alt="The crowd at The Ditch, Defected Malta, during Nic Fanciulli's set" style="object-position:50% 40%"></div>
   <div class="inner" style="margin-bottom:0">
     <div class="label reveal" style="color:var(--cream)">Defected Records × YouTube · channel review · October 2026</div>
     <h1 class="display reveal" style="margin-top:1rem;max-width:12ch">House music,<br>all life long.</h1>
@@ -824,7 +827,7 @@ body.sheet-open .chrome,body.sheet-open #pbar{display:none}
      the follow-up measurement plan sit beneath, because a public-data
      review has to say what would resolve its own uncertainties. -->
 <section class="slide" data-t="Ninety days">
-  <div class="bleed scrim-f"><img data-vid="wW4vI546r-s" data-big="1" alt="Sam Divine, live from Defected at Pacha Ibiza"></div>
+  <div class="bleed scrim-f"><img data-vid="wW4vI546r-s" data-frame="2" alt="Defected at Pacha Ibiza, during Sam Divine's opening-party set"></div>
   <div class="inner">
     <div class="label reveal">Priorities</div>
     <h2 class="display reveal" style="margin-top:.7rem">Five things, ninety days.</h2>
@@ -1136,13 +1139,19 @@ function timeline(){
 /* ── Thumbnails by video id ────────────────────────────────────────────
    YouTube does not 404 a missing maxresdefault; it serves a grey 120×90
    placeholder with HTTP 200. So we check the decoded width and drop to
-   hqdefault. Shorts use the vertical oardefault frame first. */
+   hqdefault. Shorts use the vertical oardefault frame first. data-frame
+   asks for one of YouTube's auto-captured video frames (maxres1/2/3)
+   instead of the uploaded thumbnail — used for the two full-bleed heroes,
+   because every event thumbnail carries a wordmark. */
 function loadThumbs(root){
   (root || document).querySelectorAll('img[data-vid]:not([src]),img[data-short]:not([src])').forEach(function(img){
     var id = img.getAttribute('data-vid') || img.getAttribute('data-short');
     var isShort = img.hasAttribute('data-short');
     var big = img.getAttribute('data-big') === '1';
-    var chain = isShort ? ['oardefault','hqdefault','mqdefault'] : (big ? ['maxresdefault','sddefault','hqdefault'] : ['hqdefault','mqdefault']);
+    var frame = img.getAttribute('data-frame');
+    var chain = frame ? ['maxres' + frame, 'sd' + frame, 'hq' + frame, 'maxresdefault', 'hqdefault']
+              : isShort ? ['oardefault','hqdefault','mqdefault']
+              : (big ? ['maxresdefault','sddefault','hqdefault'] : ['hqdefault','mqdefault']);
     var i = 0;
     function next(){
       if (i >= chain.length) return;
