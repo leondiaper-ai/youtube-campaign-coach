@@ -106,20 +106,20 @@ h2.display{font-size:clamp(2.2rem,5vw,4.4rem)}
 .col .v{font-weight:800;font-size:1.05rem;letter-spacing:-.03em;margin-bottom:.4rem;white-space:nowrap}
 .col .b{position:relative;overflow:hidden;border-radius:3px 3px 0 0;background:rgba(247,243,233,.18);min-height:6px}
 .col .b img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
-.col.s{width:clamp(44px,4.6vw,64px)}
-.col.l{width:clamp(120px,13vw,190px)}
+.col.s{flex:1 1 0;min-width:0}
+.col.l{flex:3.2 1 0;min-width:0}
 .col.l .v{font-size:clamp(1.4rem,2.4vw,2.1rem)}
 .col.hero .v{color:var(--gold)}
 .col.hero .b{outline:2px solid var(--gold);outline-offset:-2px}
 .col.rmx .v{color:var(--gold)}
-.brk{width:clamp(70px,9vw,130px);height:100%;position:relative;display:flex;align-items:flex-end;justify-content:center}
+.brk{flex:1.6 1 0;height:100%;position:relative;display:flex;align-items:flex-end;justify-content:center}
 .brk::before{content:'';position:absolute;left:50%;top:18%;bottom:0;border-left:2px dashed var(--line)}
 .brk span{position:relative;background:var(--ink);font-family:var(--mono);font-size:.78rem;letter-spacing:.12em;
   text-transform:uppercase;color:var(--warm);padding:.3rem .2rem;margin-bottom:38%;text-align:center;line-height:1.4}
 .axis{display:flex;gap:10px;margin-top:.55rem}
 .axis div{font-family:var(--mono);font-size:.6rem;letter-spacing:.04em;color:var(--dim);line-height:1.35}
 .axis div b{display:block;color:var(--cream);font-weight:500}
-.axis .s{width:clamp(44px,4.6vw,64px)} .axis .l{width:clamp(120px,13vw,190px)} .axis .brk{height:auto}
+.axis .s{flex:1 1 0;min-width:0} .axis .l{flex:3.2 1 0;min-width:0} .axis .brk{height:auto}
 .waves{display:flex;gap:10px;margin-top:.9rem}
 .wave{border-top:2px solid var(--cream);padding-top:.5rem}
 .wave.two{border-color:var(--gold)}
