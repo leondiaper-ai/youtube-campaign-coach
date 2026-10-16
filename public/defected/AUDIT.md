@@ -9,6 +9,9 @@ end, but the most useful thing you can do is take a claim from §4, trace it to 
 §3, and tell me where the claim outruns the evidence. The deck is a constructive review of
 an established, well-run channel. If a finding reads as a manufactured problem, say so.
 
+
+> **Update, 16 Oct 2026 (evening):** at the label's request the small print (caveat lines and source lines) was removed from every slide. The same caveats and sources remain in the deck's Analysis sheet and in this file; where §4 says a caveat is "on the slide", read "in the Analysis sheet".
+
 ---
 
 ## 1. Provenance
