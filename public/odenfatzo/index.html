@@ -1,0 +1,832 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Oden & Fatzo × YouTube — Somehow It Flies</title>
+<meta name="description" content="Oden & Fatzo × YouTube · the Somehow It Flies album campaign · Virgin Music Group UK · 16 October 2026">
+
+<!--
+  ODEN & FATZO × YOUTUBE — album campaign deep dive · v1 · 16 October 2026
+  Virgin Music Group UK · for Defected Records and YouTube UK
+
+  ──────────────────────────────────────────────────────────────────
+  THE ONE SENTENCE
+  Defected has already built a substantial YouTube campaign around
+  Oden & Fatzo. Their live performances, distinctive visual identity and
+  planned films give fans several ways to discover the project. A few
+  connections between those assets could help the campaign work together.
+
+  ──────────────────────────────────────────────────────────────────
+  WHERE THE NUMBERS COME FROM
+  · @OdenFatzo (UCHTGQSVEIvSRmq_NFqnUrHw): all 46 public uploads, playlists
+    and sections, YouTube Data API v3 via /api/full-catalogue and
+    /api/channel-shelf, 16 Oct 2026 13:49 UTC.
+  · @DefectedMusic: the 5,000 newest of 5,244 public uploads, 16 Oct 2026
+    13:51 UTC, filtered to titles/descriptions naming Oden & Fatzo (84).
+  · Collaborator credits read from each watch page, 16 Oct 2026.
+  · Channel Home surfaces viewed signed-out, 16 Oct 2026; screenshots in
+    /odenfatzo/img so the deck never depends on YouTube's layout.
+  · Third-party uploads (Boiler Room, Ministry of Sound, Marvellous,
+    Recording) as displayed by YouTube, 16 Oct 2026.
+  · Campaign plan: Defected's email to YouTube (Sarah), 16 Oct 2026; the
+    album press release; the "Someone Like You" treatment (Cofeel).
+  There is no YouTube Studio data here: no impressions, CTR, retention,
+  watch time, traffic sources or audience overlap.
+
+  ──────────────────────────────────────────────────────────────────
+  RULES THIS FILE OBEYS
+   1. Every example names its hosting channel. Artist-channel, Defected
+      and third-party figures are never added together.
+   2. Lifetime views across different ages are shown as examples, never
+      ranked into a claim about what works best.
+   3. Publication order is a sequence, not a funnel.
+   4. Label plans are labelled as plans; dates and hosting channels are
+      provisional where the label has not confirmed them.
+   5. The treatment is proposed creative, not a finished video. The
+      ending is not shown. Its French TV reference is context only.
+   6. YouTube features are described from YouTube's own help pages. No
+      partner feature or promotion is promised.
+   7. The artist channel's lifetime counter (14.2M) is not used: public
+      uploads total about 25K and public data does not explain the gap.
+
+  ──────────────────────────────────────────────────────────────────
+  CONSTRUCTION — the Ezra chassis, Oden & Fatzo's material
+   · Wide, bold display type (Archivo wdth 125) — the lettering of flight
+     suits and mission patches, since the white suits are their stage
+     identity (Lady Love, Boiler Room, Wembley).
+   · Labels set white-on-black in boxes: the single artwork's and the
+     treatment's own title-card device.
+   · Colour from the material: deep-space ink (the channel banner), suit
+     white, the sky of the 'Someone Like You' artwork, and the suits'
+     blue-white-red stripe used once as a rule.
+   · Host badges: Defected red for Defected-hosted, sky blue for the
+     artist channel, grey for other channels.
+   · The motif is a faint flight path of the campaign's moments — filled
+     when published, outlined when planned. It carries no dates on the
+     cover, so it does not read as an agreed release sequence.
+-->
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,100..900&family=Instrument+Sans:wght@400..700&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+
+<style>
+:root{
+  --ink:#07080D;        /* deep space — the channel banner */
+  --ink-2:#0E1018;
+  --ink-3:#181B26;
+  --suit:#F4F2EC;       /* the flight suits */
+  --sky:#8FBDE6;        /* the sky over the 'Someone Like You' field */
+  --sky-dp:#2E6AA8;
+  --stripe-b:#2B4FC4;   /* suit stripe */
+  --stripe-r:#E0393E;   /* suit stripe */
+  --def:#E2231A;        /* Defected */
+  --sunset:#F2A15C;     /* the treatment's sky */
+  --warm:#B8BCC8;       /* body on dark, 9:1 */
+  --dim:#7D8291;        /* labels only */
+  --mute-l:#4B4F5A;
+  --line:rgba(244,242,236,.14);
+  --line-l:rgba(7,8,13,.14);
+  --pad:clamp(1.6rem,5vw,5.5rem);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--ink);color:var(--suit);font-family:'Instrument Sans',system-ui,sans-serif;
+  font-size:clamp(15px,1.05vw,18px);line-height:1.55;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+a{color:inherit;text-decoration:none}
+img{display:block}
+b{font-weight:600}
+
+/* ── Type ───────────────────────────────────────────────────────── */
+.display{font-family:'Archivo',sans-serif;font-variation-settings:'wdth' 125,'wght' 820;
+  text-transform:uppercase;line-height:.94;letter-spacing:-.01em}
+h1.display{font-size:clamp(2.8rem,8vw,7rem)}
+h2.display{font-size:clamp(1.8rem,3.9vw,3.3rem);max-width:24ch}
+.big-num{font-family:'Archivo',sans-serif;font-variation-settings:'wdth' 112,'wght' 820;line-height:.88;
+  letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.label{font-family:'DM Mono',monospace;font-size:.68rem;letter-spacing:.14em;text-transform:uppercase;color:var(--dim)}
+.card{display:inline-block;background:var(--suit);color:var(--ink);font-family:'DM Mono',monospace;font-size:.68rem;
+  letter-spacing:.14em;text-transform:uppercase;padding:.32rem .6rem;font-weight:500}
+.card.dark{background:#000;color:#fff}
+.statement{font-size:clamp(1.1rem,1.8vw,1.55rem);line-height:1.32;font-weight:600;max-width:42ch}
+.statement .s{color:var(--sky)}
+.body{color:var(--warm);max-width:60ch}
+.body b{color:var(--suit)}
+.src{font-family:'DM Mono',monospace;font-size:.62rem;line-height:1.5;color:var(--dim);
+  border-left:2px solid var(--line);padding-left:.7rem;max-width:88ch;margin-top:1.2rem}
+.stripe{height:4px;width:72px;background:linear-gradient(90deg,var(--stripe-b) 0 33%,var(--suit) 33% 66%,var(--stripe-r) 66%)}
+
+/* ── Host badges — every example names where it lives ───────────── */
+.host{display:inline-flex;align-items:center;gap:.35rem;font-family:'DM Mono',monospace;font-size:.6rem;letter-spacing:.08em;
+  text-transform:uppercase;color:var(--warm);white-space:nowrap}
+.host::before{content:'';width:7px;height:7px;border-radius:50%;background:var(--dim)}
+.host.d::before{background:var(--def)}
+.host.a::before{background:var(--sky)}
+.host.both::before{background:linear-gradient(90deg,var(--def) 50%,var(--sky) 50%)}
+
+/* ── Slides ─────────────────────────────────────────────────────── */
+.deck{padding-top:48px}
+.slide{position:relative;min-height:100vh;display:flex;flex-direction:column;justify-content:center;
+  padding:5rem var(--pad) 3.4rem;overflow:hidden;border-bottom:1px solid var(--line)}
+.slide.flush{padding:0;justify-content:stretch}
+.slide.light{background:var(--suit);color:var(--ink)}
+.slide.light .body{color:var(--mute-l)} .slide.light .body b{color:var(--ink)}
+.slide.light .label{color:var(--mute-l)}
+.slide.light .src{color:var(--mute-l);border-color:var(--line-l)}
+.slide.light .host{color:var(--mute-l)}
+.inner{position:relative;z-index:3;width:100%;max-width:1400px;margin:0 auto}
+.bleed{position:absolute;inset:0;z-index:0}
+.bleed img{width:100%;height:100%;object-fit:cover}
+.scrim-b::after{content:'';position:absolute;inset:0;
+  background:linear-gradient(to top,rgba(7,8,13,.97) 8%,rgba(7,8,13,.72) 42%,rgba(7,8,13,.15) 80%)}
+.scrim-l::after{content:'';position:absolute;inset:0;
+  background:linear-gradient(to right,rgba(7,8,13,.96) 30%,rgba(7,8,13,.72) 58%,rgba(7,8,13,.22) 100%)}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:clamp(1.4rem,3.6vw,3.4rem)}
+@media(max-width:880px){.grid2{grid-template-columns:1fr}}
+.row{display:flex;gap:clamp(1.2rem,3.4vw,3rem);flex-wrap:wrap;align-items:flex-end}
+.play{position:absolute;top:.6rem;right:.6rem;z-index:2;width:1.9rem;height:1.9rem;border-radius:50%;
+  background:rgba(244,242,236,.92);display:grid;place-items:center}
+.play::after{content:'';border-left:.56rem solid var(--ink);border-top:.35rem solid transparent;border-bottom:.35rem solid transparent;margin-left:.15rem}
+
+/* ── Flight path motif ──────────────────────────────────────────── */
+.path{display:flex;align-items:center;gap:0;position:relative;height:16px}
+.path::before{content:'';position:absolute;left:0;right:0;top:50%;border-top:1px dashed rgba(244,242,236,.28)}
+.path i{position:relative;z-index:1;flex:1;display:flex;justify-content:center}
+.path i::after{content:'';width:10px;height:10px;border-radius:50%;border:1.5px solid rgba(244,242,236,.6);background:var(--ink)}
+.path i.on::after{background:var(--suit);border-color:var(--suit)}
+
+/* ── Contact sheet (identity) ───────────────────────────────────── */
+.sheet-grid{position:absolute;inset:0;z-index:0;display:grid;grid-template-columns:repeat(3,1fr);grid-auto-rows:1fr;gap:3px;padding:3px}
+.sheet-grid a{position:relative;overflow:hidden;display:block;background:var(--ink-3)}
+.sheet-grid img{width:100%;height:100%;object-fit:cover}
+.sheet-grid .tc{position:absolute;left:.6rem;top:.55rem;z-index:2;background:rgba(7,8,13,.82);padding:.28rem .5rem}
+.sheet-wash{position:absolute;inset:0;z-index:1;pointer-events:none;
+  background:linear-gradient(to top,rgba(7,8,13,.985) 34%,rgba(7,8,13,.88) 50%,rgba(7,8,13,.4) 74%,rgba(7,8,13,.12) 100%)}
+.sheet-type{position:relative;z-index:3;margin-top:auto;padding:0 var(--pad) clamp(1.8rem,4vw,3rem)}
+.chips{display:flex;gap:.5rem;flex-wrap:wrap;margin-top:1rem}
+.chips span{font-family:'DM Mono',monospace;font-size:.66rem;letter-spacing:.08em;text-transform:uppercase;
+  border:1px solid var(--line);padding:.35rem .6rem;color:var(--suit)}
+
+/* ── Asset lists (videos / sets) ────────────────────────────────── */
+.col h3{font-family:'DM Mono',monospace;font-weight:500;font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--sky);border-top:3px solid var(--sky);padding-top:.7rem;margin-bottom:.4rem}
+.col.sets h3{color:var(--sunset);border-color:var(--sunset)}
+.asset{display:grid;grid-template-columns:clamp(110px,11vw,170px) 1fr auto;gap:1rem;align-items:center;padding:.6rem 0;border-bottom:1px solid var(--line)}
+.asset .th{position:relative;overflow:hidden;border-radius:2px;background:var(--ink-3)}
+.asset .th img{width:100%;aspect-ratio:16/9;object-fit:cover}
+.asset .t{font-weight:600;font-size:.95rem;line-height:1.25}
+.asset .m{margin-top:.3rem;display:flex;gap:.8rem;flex-wrap:wrap;align-items:center}
+.asset .m .len{font-family:'DM Mono',monospace;font-size:.6rem;color:var(--dim)}
+.asset .big-num{font-size:clamp(1.5rem,2.6vw,2.2rem);text-align:right}
+
+/* ── Screenshots ────────────────────────────────────────────────── */
+.shot{border-radius:4px;overflow:hidden;box-shadow:0 18px 40px rgba(0,0,0,.4);background:#fff}
+.shot img{width:100%;height:auto}
+.note{margin-top:.55rem;font-size:.85rem;color:var(--warm)}
+.note b{color:var(--suit)}
+.connect{border:1px dashed rgba(143,189,230,.6);padding:1rem 1.1rem;margin-top:1.2rem}
+.connect .label{color:var(--sky)}
+.connect p{margin-top:.45rem;font-size:.92rem;color:var(--warm)}
+.connect p b{color:var(--suit)}
+
+/* ── Rail (Ezra's .rail, built around the finding) ──────────────── */
+.rail{display:grid;gap:clamp(.7rem,1.8vw,1.6rem);position:relative;margin-top:1.8rem}
+.rail::before{content:'';position:absolute;left:0;right:0;top:calc(1.05rem + 6px);height:2px;background:var(--line)}
+.stop .d{font-family:'DM Mono',monospace;font-size:.66rem;letter-spacing:.12em;text-transform:uppercase;color:var(--warm);white-space:nowrap}
+.node{width:13px;height:13px;border-radius:50%;background:var(--ink);border:2px solid var(--suit);margin:.35rem 0 0;position:relative}
+.stop.on .node{background:var(--suit)}
+.stop.hero .node{background:var(--sky);border-color:var(--sky);box-shadow:0 0 0 4px rgba(143,189,230,.2)}
+.stop .th{position:relative;margin-top:.8rem;border-radius:2px;overflow:hidden;background:var(--ink-3)}
+.stop .th img{width:100%;aspect-ratio:16/9;object-fit:cover}
+.stop .th.v img{aspect-ratio:9/12}
+.stop h4{font-family:'Archivo',sans-serif;font-variation-settings:'wdth' 110,'wght' 760;text-transform:uppercase;
+  font-size:clamp(.92rem,1.35vw,1.15rem);line-height:1.1;margin-top:.7rem}
+.stop.hero h4{color:var(--sky)}
+.stop .big-num{font-size:clamp(1.3rem,2.2vw,1.9rem);margin-top:.35rem}
+.stop.hero .big-num{color:var(--sky)}
+.stop p{font-size:.84rem;color:var(--warm);line-height:1.4;margin-top:.35rem}
+.stop .host{margin-top:.45rem}
+@media(max-width:880px){.rail{grid-template-columns:1fr 1fr!important;row-gap:1.4rem}.rail::before{display:none}}
+
+/* ── Campaign timeline ──────────────────────────────────────────── */
+.plan .stop.planned .node{border-style:dashed;background:transparent}
+.plan .stop .role{font-family:'DM Mono',monospace;font-size:.62rem;letter-spacing:.06em;color:var(--sky);margin-top:.45rem;text-transform:uppercase}
+.plan .stop .st{font-family:'DM Mono',monospace;font-size:.58rem;letter-spacing:.1em;text-transform:uppercase;margin-top:.5rem;color:var(--dim)}
+.plan .stop.on .st{color:var(--suit)}
+
+/* ── Treatment ──────────────────────────────────────────────────── */
+.treat{position:relative}
+.treat img{width:100%;aspect-ratio:5/4;object-fit:cover;border-radius:3px}
+.treat .card{position:absolute;left:.8rem;top:.8rem}
+.moments{display:grid;grid-template-columns:1fr 1fr;gap:.6rem;margin-top:.8rem}
+.moments div{border-top:2px solid var(--sky);padding-top:.5rem;font-size:.9rem;font-weight:600;line-height:1.3}
+.moments.film div{border-color:var(--sunset)}
+.moments div span{display:block;font-weight:400;font-size:.8rem;color:var(--warm);margin-top:.15rem}
+
+/* ── Afterparty ─────────────────────────────────────────────────── */
+.ask{border-left:4px solid var(--sky);padding:.2rem 0 .2rem 1rem;margin-top:1.2rem}
+.ask p{font-size:1.05rem;font-weight:600;line-height:1.35}
+.ask .label{color:var(--sky)}
+.shape{display:grid;grid-template-columns:repeat(4,1fr);gap:3px;margin-top:1.4rem}
+@media(max-width:880px){.shape{grid-template-columns:1fr 1fr}}
+.shape div{background:var(--ink-3);padding:1rem .95rem}
+.shape .n{font-family:'DM Mono',monospace;font-size:.62rem;color:var(--dim);letter-spacing:.12em}
+.shape h4{font-family:'Archivo',sans-serif;font-variation-settings:'wdth' 110,'wght' 760;text-transform:uppercase;font-size:clamp(.95rem,1.4vw,1.15rem);line-height:1.1;margin-top:.45rem}
+.shape p{font-size:.84rem;color:var(--warm);margin-top:.45rem;line-height:1.4}
+.shape .tag{display:inline-block;margin-top:.6rem;font-family:'DM Mono',monospace;font-size:.58rem;letter-spacing:.08em;text-transform:uppercase;
+  padding:.22rem .45rem;border:1px solid var(--line);color:var(--warm)}
+.shape .tag.live{border-color:var(--sunset);color:var(--sunset)}
+.routes{display:grid;grid-template-columns:1fr 1fr;gap:1.4rem;margin-top:1.3rem}
+@media(max-width:880px){.routes{grid-template-columns:1fr}}
+.route{border-top:3px solid var(--sky);padding-top:.7rem}
+.route.alt{border-color:var(--line)}
+.route h4{font-weight:700;font-size:1.05rem}
+.route p{font-size:.88rem;color:var(--warm);margin-top:.3rem;line-height:1.45}
+.redirect{margin-top:1.2rem;padding:.8rem 1rem;background:rgba(143,189,230,.08);border:1px solid rgba(143,189,230,.25);font-size:.86rem;color:var(--warm)}
+.redirect b{color:var(--suit)}
+
+/* ── Priorities ─────────────────────────────────────────────────── */
+.pri{display:grid;grid-template-columns:repeat(4,1fr);gap:clamp(1rem,2.2vw,2rem);margin-top:1.6rem}
+@media(max-width:980px){.pri{grid-template-columns:1fr 1fr}}
+@media(max-width:560px){.pri{grid-template-columns:1fr}}
+.p{border-top:3px solid var(--sky);padding-top:.8rem}
+.p:nth-child(2){border-color:var(--suit)} .p:nth-child(3){border-color:var(--sunset)} .p:nth-child(4){border-color:var(--stripe-r)}
+.p .n{font-family:'Archivo',sans-serif;font-variation-settings:'wdth' 112,'wght' 820;font-size:2rem;line-height:1}
+.p h3{font-family:'Archivo',sans-serif;font-variation-settings:'wdth' 108,'wght' 760;text-transform:uppercase;font-size:clamp(1rem,1.5vw,1.25rem);line-height:1.12;margin-top:.5rem}
+.p p{font-size:.88rem;color:var(--warm);margin-top:.55rem;line-height:1.45}
+.p .who{margin-top:.7rem;font-family:'DM Mono',monospace;font-size:.6rem;letter-spacing:.06em;color:var(--sky)}
+.after{display:grid;grid-template-columns:1fr 1fr;gap:1.6rem;margin-top:1.4rem;padding-top:1rem;border-top:1px solid var(--line)}
+@media(max-width:880px){.after{grid-template-columns:1fr}}
+.after p{font-size:.92rem;color:var(--warm);margin-top:.35rem}
+.after p b{color:var(--suit)}
+
+/* ── Reveal ─────────────────────────────────────────────────────── */
+.reveal{opacity:0;transform:translateY(16px);transition:opacity .6s ease,transform .6s ease}
+.reveal.visible{opacity:1;transform:none}
+.stagger>*{opacity:0;transform:translateY(14px);transition:opacity .5s ease,transform .5s ease}
+.stagger>*.visible{opacity:1;transform:none}
+@media(prefers-reduced-motion:reduce){.reveal,.stagger>*{opacity:1!important;transform:none!important;transition:none!important}}
+
+/* ── Chrome ─────────────────────────────────────────────────────── */
+.chrome{position:fixed;top:0;left:0;right:0;z-index:900;display:flex;justify-content:space-between;align-items:center;gap:1rem;
+  padding:.7rem var(--pad);background:rgba(7,8,13,.9);backdrop-filter:blur(14px);border-bottom:1px solid var(--line);
+  font-family:'DM Mono',monospace;font-size:.66rem;letter-spacing:.13em;text-transform:uppercase;color:var(--dim)}
+.chrome-l b{color:var(--suit);font-weight:500}
+@media(max-width:760px){.chrome-l span{display:none}}
+.chrome-r{display:flex;gap:.5rem}
+.btn{font:inherit;cursor:pointer;background:transparent;color:var(--warm);border:1px solid var(--line);padding:.45rem .8rem;border-radius:2px;white-space:nowrap}
+.btn:hover{border-color:var(--sky);color:var(--sky)}
+.btn.primary{background:var(--suit);border-color:var(--suit);color:var(--ink);font-weight:500}
+
+/* ── Present ────────────────────────────────────────────────────── */
+body.present{overflow:hidden}
+body.present .chrome{display:none}
+body.present .deck{padding-top:0}
+body.present .slide{display:none;height:100vh;min-height:100vh;border:0;padding-top:2.8rem;padding-bottom:2.2rem;overflow-y:auto}
+body.present .slide.flush{padding:0}
+body.present .slide.current{display:flex}
+body.present .reveal,body.present .stagger>*{opacity:1;transform:none;transition:none}
+.pbar{display:none;position:fixed;bottom:0;left:0;height:3px;background:var(--sky);z-index:1000;transition:width .3s ease}
+.pcount{display:none;position:fixed;bottom:.9rem;right:1.2rem;z-index:1000;font-family:'DM Mono',monospace;font-size:.6rem;
+  letter-spacing:.1em;color:var(--dim);background:rgba(7,8,13,.75);padding:.3rem .65rem;border-radius:3px}
+body.present .pbar,body.present .pcount{display:block}
+
+/* ── Analysis ───────────────────────────────────────────────────── */
+.sheet{display:none;background:var(--suit);color:var(--ink)}
+.sheet.open{display:block;position:fixed;inset:0;z-index:950;overflow-y:auto;padding:4.2rem clamp(1rem,5vw,4rem) 4rem}
+body.sheet-open{overflow:hidden}
+.sheet .close{position:fixed;top:1rem;right:1.25rem;z-index:960;background:var(--ink);color:var(--suit)}
+.sheet-in{max-width:1120px;margin:0 auto}
+.sheet h2{font-family:'Archivo',sans-serif;font-variation-settings:'wdth' 125,'wght' 820;text-transform:uppercase;font-size:clamp(1.8rem,3.6vw,2.8rem);line-height:.95}
+.sheet h3{font-size:1rem;font-weight:700;margin:2.1rem 0 .6rem;padding-bottom:.4rem;border-bottom:1px solid var(--line-l)}
+.sheet p,.sheet li{font-size:.86rem;color:var(--mute-l);line-height:1.6;max-width:80ch}
+.sheet p b,.sheet li b,.sheet td b{color:var(--ink)}
+.sheet ul{list-style:none;margin-top:.4rem}
+.sheet li{padding-left:1.1rem;position:relative;margin-bottom:.4rem}
+.sheet li::before{content:'';position:absolute;left:0;top:.62em;width:6px;height:6px;border-radius:50%;background:var(--sky-dp)}
+.sheet table{width:100%;border-collapse:collapse;font-size:.8rem;margin-top:.6rem}
+.sheet th{text-align:left;font-family:'DM Mono',monospace;font-size:.58rem;letter-spacing:.08em;text-transform:uppercase;
+  color:var(--mute-l);font-weight:500;padding:.45rem .5rem;border-bottom:1px solid var(--line-l)}
+.sheet td{padding:.45rem .5rem;border-bottom:1px solid rgba(7,8,13,.07);color:var(--mute-l);vertical-align:top}
+.sheet td.r,.sheet th.r{text-align:right;font-variant-numeric:tabular-nums}
+.sheet .cols{display:grid;gap:2.4rem}
+@media(min-width:960px){.sheet .cols{grid-template-columns:1fr 1fr}}
+.sheet a{color:var(--sky-dp)}
+.sheet .small{font-size:.76rem}
+.sheet .label{color:var(--mute-l)}
+
+@media print{.chrome,.pbar,.pcount{display:none}.slide{min-height:0;page-break-inside:avoid}}
+</style>
+</head>
+<body>
+
+<div class="chrome">
+  <div class="chrome-l"><b>Oden &amp; Fatzo × YouTube</b> <span>· Somehow It Flies · Defected · VMG UK · 16 Oct 2026</span></div>
+  <div class="chrome-r">
+    <button class="btn" onclick="openSheet()">Analysis</button>
+    <button class="btn primary" onclick="startPresent()">Present</button>
+  </div>
+</div>
+<div class="pbar" id="pbar"></div>
+<div class="pcount" id="pcount"></div>
+
+<div class="deck">
+
+<!-- ══ 1 · COVER ═══════════════════════════════════════════════════
+     A released frame, not the treatment: the suits at Boiler Room. -->
+<section class="slide" data-t="Cover" style="justify-content:flex-end;padding-bottom:3rem">
+  <div class="bleed scrim-b">
+    <img src="https://i.ytimg.com/vi/E-rSgNpqPew/maxresdefault.jpg" alt="Oden & Fatzo in their white flight suits, Boiler Room x FLY Open Air"
+      style="object-position:50% 30%"
+      onerror="this.onerror=null;this.src='https://i.ytimg.com/vi/E-rSgNpqPew/hqdefault.jpg'">
+  </div>
+  <div class="inner">
+    <span class="card reveal">Oden &amp; Fatzo × YouTube · Defected Records · Virgin Music Group UK</span>
+    <h1 class="display reveal" style="margin-top:1.1rem">Somehow<br>it flies.</h1>
+    <p class="statement reveal" style="margin-top:1.3rem">The debut album is out today. Defected has built a strong YouTube campaign around it — <span class="s">here's what's working, and how the pieces could connect.</span></p>
+    <div class="reveal" style="margin-top:2rem;max-width:520px">
+      <div class="path"><i class="on"></i><i class="on"></i><i></i><i></i><i></i><i></i><i></i></div>
+      <div class="label" style="margin-top:.5rem">The campaign's films · published and planned</div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ 2 · IDENTITY — contact sheet of real frames ═════════════════ -->
+<section class="slide flush" data-t="Identity">
+  <div class="sheet-grid">
+    <a href="https://www.youtube.com/watch?v=A4kRWVnRP1M" target="_blank" rel="noopener"><img src="https://i.ytimg.com/vi/A4kRWVnRP1M/hqdefault.jpg" alt="Lady Love official video"><span class="tc host both">Lady Love · Defected</span></a>
+    <a href="https://www.youtube.com/watch?v=E-rSgNpqPew" target="_blank" rel="noopener"><img src="https://i.ytimg.com/vi/E-rSgNpqPew/hqdefault.jpg" alt="Boiler Room x FLY Open Air"><span class="tc host">Boiler Room</span></a>
+    <a href="https://www.youtube.com/watch?v=a1O7kCT51M0" target="_blank" rel="noopener"><img src="https://i.ytimg.com/vi/a1O7kCT51M0/hqdefault.jpg" alt="Someone Like You single artwork"><span class="tc host d">Someone Like You · Defected</span></a>
+    <a href="https://www.youtube.com/watch?v=gEpIUA1vbi4" target="_blank" rel="noopener"><img src="https://i.ytimg.com/vi/gEpIUA1vbi4/hqdefault.jpg" alt="Live from OVO Wembley Arena"><span class="tc host both">Wembley NYE · Defected</span></a>
+    <a href="https://www.youtube.com/watch?v=iCTOcfnAnLk" target="_blank" rel="noopener"><img src="https://i.ytimg.com/vi/iCTOcfnAnLk/hqdefault.jpg" alt="Oden & Fatzo in Orbit tour diary"><span class="tc host a">In Orbit · artist channel</span></a>
+    <a href="https://www.youtube.com/watch?v=cwhXtqOWgco" target="_blank" rel="noopener"><img src="https://i.ytimg.com/vi/cwhXtqOWgco/hqdefault.jpg" alt="Take Our Time lyric video"><span class="tc host a">Take Our Time · artist channel</span></a>
+    <a href="https://www.youtube.com/watch?v=phWoaDd2iGo" target="_blank" rel="noopener"><img src="https://i.ytimg.com/vi/phWoaDd2iGo/hqdefault.jpg" alt="Fly Away official video"><span class="tc host both">Fly Away · Defected</span></a>
+    <a href="https://www.youtube.com/watch?v=dO1TSqF2mF8" target="_blank" rel="noopener"><img src="https://i.ytimg.com/vi/dO1TSqF2mF8/hqdefault.jpg" alt="Live from Defected Pacha"><span class="tc host both">Pacha · Defected</span></a>
+    <a href="https://www.youtube.com/watch?v=eSiGXb_MIBE" target="_blank" rel="noopener"><img src="https://i.ytimg.com/vi/eSiGXb_MIBE/hqdefault.jpg" alt="Carpooling with Oden & Fatzo"><span class="tc host both">Carpooling · Defected</span></a>
+  </div>
+  <div class="sheet-wash"></div>
+  <div class="inner sheet-type">
+    <div class="stripe reveal"></div>
+    <h2 class="display reveal" style="margin-top:.9rem;max-width:22ch">A recognisable identity, from artwork to live performance.</h2>
+    <p class="body reveal" style="margin-top:.9rem;font-size:1.02rem;max-width:66ch">
+      The Parisian duo wear their <b>white flight suits</b> on stage and on screen — Lady Love, Boiler Room, Wembley — and space runs through
+      their titles. The press release ties the album's name to the same <b>playful, space-themed</b> world.
+    </p>
+    <div class="chips stagger">
+      <span>Spaceship For Sale</span><span>Opération Laïka</span><span>Observatory EP</span><span>In Orbit — tour diaries</span><span>Somehow It Flies</span>
+    </div>
+    <div class="src reveal">Source: public YouTube uploads and Releases tab, 16 Oct 2026 · album press release. Tags name each video's hosting channel.</div>
+  </div>
+</section>
+
+<!-- ══ 3 · VIDEOS AND SETS ═════════════════════════════════════════
+     Lauren leads, because it is the biggest example. Hosts named,
+     never summed; lifetime totals of different ages. -->
+<section class="slide" data-t="Two ways in">
+  <div class="inner">
+    <span class="card reveal">What already reaches fans</span>
+    <h2 class="display reveal" style="margin-top:.8rem;max-width:26ch">Music videos and full live sets give fans different ways into the duo.</h2>
+    <div class="grid2 stagger" style="margin-top:1.6rem">
+      <div class="col">
+        <h3>Music videos</h3>
+        <a class="asset" href="https://www.youtube.com/watch?v=kYmg2dqhxY0" target="_blank" rel="noopener"><div class="th"><img src="https://i.ytimg.com/vi/kYmg2dqhxY0/hqdefault.jpg" alt=""></div><div><div class="t">Lauren (Official Visualiser)</div><div class="m"><span class="host both">Ministry of Sound · co-credited</span></div></div><div class="big-num">8.78M</div></a>
+        <a class="asset" href="https://www.youtube.com/watch?v=nfUGzWanCCU" target="_blank" rel="noopener"><div class="th"><img src="https://i.ytimg.com/vi/nfUGzWanCCU/hqdefault.jpg" alt=""></div><div><div class="t">Lauren (Official Video)</div><div class="m"><span class="host">Marvellous</span></div></div><div class="big-num">1.29M</div></a>
+        <a class="asset" href="https://www.youtube.com/watch?v=A4kRWVnRP1M" target="_blank" rel="noopener"><div class="th"><img src="https://i.ytimg.com/vi/A4kRWVnRP1M/hqdefault.jpg" alt=""></div><div><div class="t">Lady Love ft. Camden Cox (Official Video)</div><div class="m"><span class="host both">Defected · co-credited</span><span class="len">Premiere</span></div></div><div class="big-num">927K</div></a>
+        <a class="asset" href="https://www.youtube.com/watch?v=lWnkY6Io-p0" target="_blank" rel="noopener"><div class="th"><img src="https://i.ytimg.com/vi/lWnkY6Io-p0/hqdefault.jpg" alt=""></div><div><div class="t">My Temptations (Lyric Video)</div><div class="m"><span class="host both">Defected · co-credited</span></div></div><div class="big-num">313K</div></a>
+      </div>
+      <div class="col sets">
+        <h3>Full live sets</h3>
+        <a class="asset" href="https://www.youtube.com/watch?v=E-rSgNpqPew" target="_blank" rel="noopener"><div class="th"><img src="https://i.ytimg.com/vi/E-rSgNpqPew/hqdefault.jpg" alt=""></div><div><div class="t">Boiler Room x FLY Open Air 2022</div><div class="m"><span class="host both">Boiler Room · co-credited</span><span class="len">57 min</span></div></div><div class="big-num">824K</div></a>
+        <a class="asset" href="https://www.youtube.com/watch?v=Bxx4cdL8Z5g" target="_blank" rel="noopener"><div class="th"><img src="https://i.ytimg.com/vi/Bxx4cdL8Z5g/hqdefault.jpg" alt=""></div><div><div class="t">Live at Tour Royale, Toulon</div><div class="m"><span class="host">Recording</span><span class="len">68 min</span></div></div><div class="big-num">264K</div></a>
+        <a class="asset" href="https://www.youtube.com/watch?v=dO1TSqF2mF8" target="_blank" rel="noopener"><div class="th"><img src="https://i.ytimg.com/vi/dO1TSqF2mF8/hqdefault.jpg" alt=""></div><div><div class="t">Live from Defected Pacha + special guests</div><div class="m"><span class="host both">Defected · co-credited</span><span class="len">87 min · Premiere</span></div></div><div class="big-num">228K</div></a>
+        <a class="asset" href="https://www.youtube.com/watch?v=gEpIUA1vbi4" target="_blank" rel="noopener"><div class="th"><img src="https://i.ytimg.com/vi/gEpIUA1vbi4/hqdefault.jpg" alt=""></div><div><div class="t">Live from OVO Wembley Arena, NYE 23/24</div><div class="m"><span class="host both">Defected · co-credited</span><span class="len">59 min · Premiere</span></div></div><div class="big-num">70K</div></a>
+      </div>
+    </div>
+    <div class="src reveal">Lifetime views as displayed, 16 Oct 2026 · different ages, so examples rather than a ranking · each sits on its own channel and the figures are never added together.</div>
+  </div>
+</section>
+
+<!-- ══ 4 · WORKING TOGETHER ════════════════════════════════════════
+     Lead with the strength: collaborator credits. The missing credit is
+     a connection to complete, subject to the label's intended credits. -->
+<section class="slide" data-t="Working together">
+  <div class="inner">
+    <span class="card reveal">Artist channel × Defected</span>
+    <h2 class="display reveal" style="margin-top:.8rem">Defected and the artist channel already work together.</h2>
+    <div class="grid2" style="margin-top:1.5rem;align-items:start">
+      <div class="reveal">
+        <div class="shot"><img src="/odenfatzo/img/home-top.jpg" alt="The Oden & Fatzo channel Home tab: Official Artist Channel badge, album pre-order banner, Music videos shelf"></div>
+        <p class="note"><b>An Official Artist Channel</b> whose banner and description already point to the album pre-order. Music videos and Releases shelves gather the catalogue automatically.</p>
+      </div>
+      <div class="reveal">
+        <div class="shot"><img src="/odenfatzo/img/collabs-shelf.jpg" alt="The Collaborations shelf on the Oden & Fatzo channel, showing Defected uploads credited to both channels"></div>
+        <p class="note"><b>Defected's videos carry both names.</b> Lady Love, the Pacha and Wembley sets, the My Temptations lyric video and the latest live sessions are co-credited — so they appear in a Collaborations shelf on the artist's Home.</p>
+        <div class="connect">
+          <div class="label">A connection to complete</div>
+          <p>The <b>Take Our Time live session</b> (2 Oct) credits Defected and Astels. If Oden &amp; Fatzo are meant to be credited too, adding them would place it alongside the others. YouTube's help describes inviting collaborators at upload — worth checking in Studio whether it can be added now.</p>
+        </div>
+      </div>
+    </div>
+    <div class="src reveal">Source: @OdenFatzo Home viewed signed-out and collaborator credits read from each watch page, 16 Oct 2026 · audio uploads and Shorts on Defected are single-credited, as usual.</div>
+  </div>
+</section>
+
+<!-- ══ 5 · MY TEMPTATIONS — one example, as a rail ═════════════════ -->
+<section class="slide" data-t="My Temptations">
+  <div class="inner">
+    <span class="card reveal">One single, start to finish</span>
+    <h2 class="display reveal" style="margin-top:.8rem">My Temptations shows how the formats can work together.</h2>
+    <div class="rail stagger" style="grid-template-columns:repeat(5,1fr)">
+      <div class="stop on"><div class="d">27 Jan</div><div class="node"></div>
+        <a class="th" href="https://www.youtube.com/shorts/T8tXH5ZFnKQ" target="_blank" rel="noopener"><img src="https://i.ytimg.com/vi/T8tXH5ZFnKQ/hqdefault.jpg" alt=""></a>
+        <h4>The tease</h4><div class="big-num">13.7K</div><p>A Short from the booth: "Who wants this brand new track?"</p><div class="host d">Defected · Short</div></div>
+      <div class="stop on"><div class="d">26 Mar – 9 Apr</div><div class="node"></div>
+        <a class="th" href="https://www.youtube.com/shorts/ORKQuuJz-Pw" target="_blank" rel="noopener"><img src="https://i.ytimg.com/vi/ORKQuuJz-Pw/hqdefault.jpg" alt=""></a>
+        <h4>The countdown</h4><div class="big-num">5.7K</div><p>A release-date Short on Defected, and a run of the duo's own Shorts: "After nearly 4 years of waiting…"</p><div class="host both">Both channels · Shorts</div></div>
+      <div class="stop on"><div class="d">2 Apr</div><div class="node"></div>
+        <a class="th" href="https://www.youtube.com/shorts/G6sqrA_udhA" target="_blank" rel="noopener"><img src="https://i.ytimg.com/vi/G6sqrA_udhA/hqdefault.jpg" alt=""></a>
+        <h4>The crowd</h4><div class="big-num">3.4K</div><p>Dropping the track at Defected Croatia — the song in a room.</p><div class="host d">Defected · Short</div></div>
+      <div class="stop hero"><div class="d">3 Apr</div><div class="node"></div>
+        <a class="th" href="https://www.youtube.com/watch?v=lWnkY6Io-p0" target="_blank" rel="noopener"><img src="https://i.ytimg.com/vi/lWnkY6Io-p0/hqdefault.jpg" alt=""><div class="play"></div></a>
+        <h4>The lyric video</h4><div class="big-num">313K</div><p>With an edit the day before. The video most fans have watched.</p><div class="host both">Defected · co-credited</div></div>
+      <div class="stop on"><div class="d">21 May</div><div class="node"></div>
+        <a class="th" href="https://www.youtube.com/watch?v=zfZzGKXgt-U" target="_blank" rel="noopener"><img src="https://i.ytimg.com/vi/zfZzGKXgt-U/hqdefault.jpg" alt=""><div class="play"></div></a>
+        <h4>The live version</h4><div class="big-num">7.9K</div><p>Live from Defected Malta, seven weeks after release.</p><div class="host both">Defected · co-credited</div></div>
+    </div>
+    <p class="statement reveal" style="margin-top:1.6rem">A tease, a lyric video, a crowd moment and a live version — <span class="s">each gives fans a different reason to watch.</span></p>
+    <div class="src reveal">Lifetime views, YouTube Data API, 16 Oct 2026 · a sequence, not a measured funnel · the duo's own countdown Shorts drew 42–1,448 views each.</div>
+  </div>
+</section>
+
+<!-- ══ 6 · MEETING THE DUO ═════════════════════════════════════════ -->
+<section class="slide" data-t="Meet the duo">
+  <div class="inner">
+    <span class="card reveal">Personality on screen</span>
+    <h2 class="display reveal" style="margin-top:.8rem">The album campaign gives fans more chances to meet the duo.</h2>
+    <div class="grid2" style="margin-top:1.5rem;align-items:start">
+      <div class="stagger">
+        <div class="label" style="margin-bottom:.4rem">Already on YouTube</div>
+        <a class="asset" href="https://www.youtube.com/watch?v=eSiGXb_MIBE" target="_blank" rel="noopener"><div class="th"><img src="https://i.ytimg.com/vi/eSiGXb_MIBE/hqdefault.jpg" alt=""></div><div><div class="t">Carpooling with Oden &amp; Fatzo &amp; Poppy Baskcomb</div><div class="m"><span class="host both">Defected · co-credited</span><span class="len">2024</span></div></div><div class="big-num">3.6K</div></a>
+        <a class="asset" href="https://www.youtube.com/watch?v=iCTOcfnAnLk" target="_blank" rel="noopener"><div class="th"><img src="https://i.ytimg.com/vi/iCTOcfnAnLk/hqdefault.jpg" alt=""></div><div><div class="t">In Orbit 001 — on tour in Barcelona, Mallorca, Newcastle…</div><div class="m"><span class="host a">Artist channel</span><span class="len">Jun 2026 · 002 in Sep</span></div></div><div class="big-num">441</div></a>
+        <a class="asset" href="https://www.youtube.com/shorts/Hpxm7LDtMHk" target="_blank" rel="noopener"><div class="th"><img src="https://i.ytimg.com/vi/Hpxm7LDtMHk/hqdefault.jpg" alt=""></div><div><div class="t">Live jamming in Ibiza with m.O.N.R.O.E. and Matluck</div><div class="m"><span class="host d">Defected · Short</span><span class="len">2025</span></div></div><div class="big-num">7.0K</div></a>
+        <a class="asset" href="https://www.youtube.com/shorts/gaKXziQhnns" target="_blank" rel="noopener"><div class="th"><img src="https://i.ytimg.com/vi/gaKXziQhnns/hqdefault.jpg" alt=""></div><div><div class="t">Selfish Desires [Live cut — La Gaîté Lyrique]</div><div class="m"><span class="host a">Artist channel · Short</span><span class="len">2022</span></div></div><div class="big-num">2.7K</div></a>
+      </div>
+      <div class="reveal">
+        <div class="label" style="margin-bottom:.4rem">Coming in the album campaign</div>
+        <div style="display:flex;flex-direction:column;gap:.9rem;margin-top:.6rem">
+          <div style="border-top:2px solid var(--sky);padding-top:.6rem"><div style="font-weight:700;font-size:1.05rem">Interviews and album track-by-track</div><p class="body" style="font-size:.88rem;margin-top:.2rem">Material the label already has — the duo explaining the record in their own words.</p></div>
+          <div style="border-top:2px solid var(--sky);padding-top:.6rem"><div style="font-weight:700;font-size:1.05rem">Moments In Music, season 2</div><p class="body" style="font-size:.88rem;margin-top:.2rem">Defected's video podcast, hosted by Monki, with Oden &amp; Fatzo among eight guests.</p></div>
+          <div style="border-top:2px solid var(--sky);padding-top:.6rem"><div style="font-weight:700;font-size:1.05rem">The mini-documentary</div><p class="body" style="font-size:.88rem;margin-top:.2rem">Their origin story through Paris, ending at the Outernet album launch show.</p></div>
+        </div>
+        <p class="statement" style="margin-top:1.4rem;font-size:clamp(1.05rem,1.6vw,1.35rem)">Small, characterful moments already exist. <span class="s">The campaign adds longer ones.</span></p>
+      </div>
+    </div>
+    <div class="src reveal">Lifetime views, 16 Oct 2026 · hosts as tagged · campaign items from Defected's plan, 16 Oct 2026.</div>
+  </div>
+</section>
+
+<!-- ══ 7 · THE ALBUM STORY — campaign timeline ═════════════════════
+     Published moments filled; planned outlined. Dates provisional. -->
+<section class="slide" data-t="The album story">
+  <div class="inner">
+    <span class="card reveal">Defected's plan · October to December</span>
+    <h2 class="display reveal" style="margin-top:.8rem">The album story continues through December.</h2>
+    <div class="rail plan stagger" style="grid-template-columns:repeat(7,1fr)">
+      <div class="stop on"><div class="d">2 Oct</div><div class="node"></div>
+        <a class="th" href="https://www.youtube.com/watch?v=dEmulBeAfB0" target="_blank" rel="noopener"><img src="https://i.ytimg.com/vi/dEmulBeAfB0/hqdefault.jpg" alt=""><div class="play"></div></a>
+        <h4>Take Our Time</h4><div class="role">Shows the performance</div><p>Live session with Astels · 13.4K</p><div class="host d">Defected</div><div class="st">Published</div></div>
+      <div class="stop on"><div class="d">16 Oct</div><div class="node"></div>
+        <a class="th" href="https://www.youtube.com/watch?v=a1O7kCT51M0" target="_blank" rel="noopener"><img src="https://i.ytimg.com/vi/a1O7kCT51M0/hqdefault.jpg" alt=""></a>
+        <h4>Somehow It Flies</h4><div class="role">The record</div><p>All 19 tracks uploaded today</p><div class="host d">Defected</div><div class="st">Published</div></div>
+      <div class="stop planned"><div class="d">20 Oct*</div><div class="node"></div>
+        <h4>Someone Like You</h4><div class="role">Introduces the song</div><p>Lyric video</p><div class="host">Host TBC</div><div class="st">Planned</div></div>
+      <div class="stop planned"><div class="d">From 20 Oct</div><div class="node"></div>
+        <h4>Moments In Music</h4><div class="role">Meet the artists</div><p>Season 2 · 8 weekly episodes · their date TBC</p><div class="host d">Defected</div><div class="st">Planned</div></div>
+      <div class="stop planned hero"><div class="d">Early Nov</div><div class="node"></div>
+        <h4>Someone Like You</h4><div class="role">A distinctive creative world</div><p>Official video + afterparty</p><div class="host">Host TBC</div><div class="st">Planned</div></div>
+      <div class="stop planned"><div class="d">Mid Nov</div><div class="node"></div>
+        <h4>Outernet</h4><div class="role">Captures the live show</div><p>Full-length multicam stream</p><div class="host">Host TBC</div><div class="st">Planned</div></div>
+      <div class="stop planned"><div class="d">December</div><div class="node"></div>
+        <h4>The documentary</h4><div class="role">Tells the origin story</div><p>Paris to the Outernet</p><div class="host">Host TBC</div><div class="st">Planned</div></div>
+    </div>
+    <p class="statement reveal" style="margin-top:1.6rem">Each film offers a different way into the album — <span class="s">fans can start anywhere.</span></p>
+    <div class="src reveal">Source: Defected's plan, 16 Oct 2026, and the public channel · *the plan says Saturday 20 October; 20 October 2026 is a Tuesday — date to confirm · hosting channels provisional until confirmed.</div>
+  </div>
+</section>
+
+<!-- ══ 8 · SOMEONE LIKE YOU — the treatment ════════════════════════
+     Proposed creative. The ending is not described. -->
+<section class="slide" data-t="Someone Like You">
+  <div class="inner">
+    <div class="grid2" style="align-items:center">
+      <div class="treat reveal">
+        <img src="/odenfatzo/img/treatment-cover.jpg" alt="From the 'Someone Like You' treatment: the duo in flight suits at a table under a sunset sky">
+        <span class="card dark">Treatment · proposed</span>
+      </div>
+      <div>
+        <span class="card reveal">'Someone Like You' · early November</span>
+        <h2 class="display reveal" style="margin-top:.8rem;font-size:clamp(1.7rem,3.3vw,2.8rem)">A rocket, a village and two dreamers in flight suits.</h2>
+        <p class="body reveal" style="margin-top:.9rem">
+          An offbeat mockumentary in the style of a cult French TV documentary. The duo play two neighbours who
+          <b>sell leeks, wear cosmonaut suits as house clothes</b> and build a rocket from salvage — their space world, told as a story.
+        </p>
+        <div class="label reveal" style="margin-top:1.1rem;color:var(--sky)">Moments that could stand alone — from the finished video, if they make the edit</div>
+        <div class="moments stagger">
+          <div>Paying for a rocket book in leeks<span>A character beat that needs no explanation</span></div>
+          <div>Flight suits as pyjamas<span>The identity, played straight</span></div>
+          <div>The meteorite jar<span>A small, funny detail</span></div>
+          <div>The rocket, piece by piece<span>The build, without the ending</span></div>
+        </div>
+        <div class="label reveal" style="margin-top:1rem;color:var(--sunset)">Would need filming during the shoot</div>
+        <div class="moments film stagger">
+          <div>Building the props<span>Practical effects, behind the scenes</span></div>
+          <div>The duo on the idea<span>How the video links to their world</span></div>
+        </div>
+        <div class="src reveal">Source: Cofeel treatment for Defected · proposed creative, not a finished video · the ending is kept for the Premiere.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ 9 · PREMIERE AND AFTERPARTY ═════════════════════════════════
+     The label's request first. Live Redirect from YouTube's own help:
+     live → Premiere; live → another channel's live; Premiere → another
+     Premiere; Premiere → another channel's live stream. No handoff is
+     promised until hosting channels are confirmed. -->
+<section class="slide" data-t="Premiere and afterparty">
+  <div class="inner">
+    <span class="card reveal">'Someone Like You' · official video</span>
+    <h2 class="display reveal" style="margin-top:.8rem;max-width:28ch">'Someone Like You': a Premiere with more to explore afterwards.</h2>
+    <div class="ask reveal">
+      <div class="label">Defected's request</div>
+      <p>A YouTube afterparty for the video Premiere, using interview and track-by-track material the label already has.</p>
+    </div>
+    <div class="shape stagger">
+      <div><div class="n">01</div><h4>Welcome</h4><p>The duo say hello and set up the video.</p><span class="tag">Prerecorded or live</span></div>
+      <div><div class="n">02</div><h4>The story behind it</h4><p>The song, the rocket and the mockumentary, from the interview material.</p><span class="tag">Existing material</span></div>
+      <div><div class="n">03</div><h4>The album</h4><p>Selected track-by-track segments with their commentary.</p><span class="tag">Existing material</span></div>
+      <div><div class="n">04</div><h4>Fan questions</h4><p>Only if the artists can join live.</p><span class="tag live">Needs the artists live</span></div>
+    </div>
+    <div class="routes stagger">
+      <div class="route"><h4>1 · YouTube Premium Afterparty</h4><p>Explore with Ashraf first. A live stream with the artists for YouTube Premium and Music Premium members; access and setup sit with YouTube.</p></div>
+      <div class="route alt"><h4>2 · A public companion</h4><p>An alternative if useful: a scheduled public stream or a short companion video built from the same material.</p></div>
+    </div>
+    <div class="redirect reveal"><b>Live Redirect, per YouTube's help:</b> a Premiere can hand viewers to another Premiere or to <b>another channel's</b> live stream (that channel must allow it); a live stream can hand them to a Premiere. The sending channel needs 1,000+ subscribers. Same-channel Premiere-to-live isn't listed — a pinned chat message does that job. <b>Hosting and setup to confirm before planning a handoff.</b></div>
+    <div class="src reveal">Artist participation, duration and language are options to confirm, not commitments · YouTube Help: Premium afterparties; Live Redirect, read 16 Oct 2026.</div>
+  </div>
+</section>
+
+<!-- ══ 10 · OUTERNET ═══════════════════════════════════════════════ -->
+<section class="slide" data-t="Outernet">
+  <div class="bleed scrim-l">
+    <img src="https://i.ytimg.com/vi/dO1TSqF2mF8/maxresdefault.jpg" alt="Live from Defected Pacha"
+      style="object-position:65% 50%"
+      onerror="this.onerror=null;this.src='https://i.ytimg.com/vi/dO1TSqF2mF8/hqdefault.jpg'">
+  </div>
+  <div class="inner">
+    <span class="card reveal">Mid-November · London</span>
+    <h2 class="display reveal" style="margin-top:.8rem;max-width:20ch">Outernet: the live show, then the replay.</h2>
+    <div class="row stagger" style="margin-top:1.5rem">
+      <div><div class="big-num" style="font-size:clamp(2.4rem,5vw,4.2rem);color:var(--sunset)">824K</div><div class="label" style="margin-top:.4rem">Boiler Room set · 57 min</div><div class="host both" style="margin-top:.35rem">Boiler Room · co-credited</div></div>
+      <div><div class="big-num" style="font-size:clamp(2.4rem,5vw,4.2rem)">228K</div><div class="label" style="margin-top:.4rem">Pacha set · 87 min · Premiere</div><div class="host both" style="margin-top:.35rem">Defected · co-credited</div></div>
+      <div><div class="big-num" style="font-size:clamp(2.4rem,5vw,4.2rem)">70K</div><div class="label" style="margin-top:.4rem">Wembley NYE set · Premiere</div><div class="host both" style="margin-top:.35rem">Defected · co-credited</div></div>
+    </div>
+    <p class="statement reveal" style="margin-top:1.6rem;max-width:46ch">Fans already sit with their full sets. <span class="s">A headline show can keep working long after the night.</span></p>
+    <div class="grid2 reveal" style="margin-top:1.3rem;max-width:980px;gap:1.6rem">
+      <div><div class="label" style="color:var(--sky)">Ways to extend it</div>
+        <p class="body" style="font-size:.9rem;margin-top:.35rem">Chapters by track and captions on the full stream · Shorts cut from the show, linked to it on the same channel · the replay kept with the campaign's other live videos.</p></div>
+      <div><div class="label" style="color:var(--sunset)">To agree with production and rights</div>
+        <p class="body" style="font-size:.9rem;margin-top:.35rem">Real-time stream or Premiere of the recording · clearances for guests and samples in the set · a playback and claims check before going public.</p></div>
+    </div>
+    <div class="src reveal">Lifetime views as displayed, 16 Oct 2026 · show date and format to confirm.</div>
+  </div>
+</section>
+
+<!-- ══ 11 · DOCUMENTARY AND PODCAST ════════════════════════════════ -->
+<section class="slide" data-t="Documentary and podcast">
+  <div class="inner">
+    <span class="card reveal">December · and from 20 October</span>
+    <h2 class="display reveal" style="margin-top:.8rem">The documentary and podcast tell the story behind the music.</h2>
+    <div class="grid2" style="margin-top:1.5rem;align-items:start">
+      <div class="reveal">
+        <a class="th" href="https://www.youtube.com/watch?v=Bxx4cdL8Z5g" target="_blank" rel="noopener" style="display:block;position:relative;border-radius:3px;overflow:hidden"><img src="https://i.ytimg.com/vi/Bxx4cdL8Z5g/hqdefault.jpg" alt="Oden & Fatzo live at Tour Royale, Toulon" style="width:100%;aspect-ratio:16/8;object-fit:cover"></a>
+        <div class="host" style="margin-top:.45rem">Live at Tour Royale · Recording · 2020</div>
+        <h3 style="font-family:'Archivo',sans-serif;font-variation-settings:'wdth' 110,'wght' 760;text-transform:uppercase;font-size:1.3rem;margin-top:1rem">The mini-documentary</h3>
+        <p class="body" style="font-size:.95rem;margin-top:.4rem">From their Paris beginnings to the Outernet launch show. It answers what the suits and the space world only hint at: <b>who these two are</b>.</p>
+        <p class="body" style="font-size:.88rem;margin-top:.6rem"><b>Could add:</b> a Premiere with the duo in chat · chapters by place · short extracts from the Paris locations.</p>
+      </div>
+      <div class="reveal">
+        <a class="th" href="https://www.youtube.com/watch?v=4ZmX-P8ZcJw" target="_blank" rel="noopener" style="display:block;position:relative;border-radius:3px;overflow:hidden"><img src="https://i.ytimg.com/vi/4ZmX-P8ZcJw/hqdefault.jpg" alt="Moments In Music season 1, with Sam Divine" style="width:100%;aspect-ratio:16/8;object-fit:cover"></a>
+        <div class="host d" style="margin-top:.45rem">Moments In Music S1 · Defected</div>
+        <h3 style="font-family:'Archivo',sans-serif;font-variation-settings:'wdth' 110,'wght' 760;text-transform:uppercase;font-size:1.3rem;margin-top:1rem">Moments In Music, season 2</h3>
+        <p class="body" style="font-size:.95rem;margin-top:.4rem">Eight weekly episodes from 20 October, hosted by Monki, with <b>Oden &amp; Fatzo among the guests</b>. Season 1's nine episodes run 40–67 minutes and have 2.4K–30.9K views.</p>
+        <p class="body" style="font-size:.88rem;margin-top:.6rem"><b>Could add:</b> credit Oden &amp; Fatzo on their episode, as on Defected's music videos · a Short cut from the conversation, like Skream's (14K).</p>
+      </div>
+    </div>
+    <div class="src reveal">Source: Defected's plan and public uploads, 16 Oct 2026 · the duo's episode date TBC.</div>
+  </div>
+</section>
+
+<!-- ══ 12 · POSSIBILITIES ══════════════════════════════════════════ -->
+<section class="slide" data-t="Possibilities" style="background:var(--ink-2)">
+  <div class="inner">
+    <span class="card reveal">To explore together</span>
+    <h2 class="display reveal" style="margin-top:.8rem">A few connections between strong pieces.</h2>
+    <div class="pri stagger">
+      <div class="p"><div class="n">01</div><h3>Complete the credits</h3>
+        <p>Credit Oden &amp; Fatzo on the Take Our Time live session and the coming films and episode — where that matches the label's intended credits.</p><div class="who">Defected · Studio check</div></div>
+      <div class="p"><div class="n">02</div><h3>An album playlist</h3>
+        <p>One "Somehow It Flies" playlist on the artist channel gathering the campaign's videos from both channels, shown on Home if it adds to the existing shelves.</p><div class="who">Artist team / Defected</div></div>
+      <div class="p"><div class="n">03</div><h3>Character Shorts</h3>
+        <p>Short moments from the finished 'Someone Like You' video, posted on the channel that hosts it and linked to the full video. Keep the ending for the Premiere.</p><div class="who">Defected · after the edit</div></div>
+      <div class="p"><div class="n">04</div><h3>The afterparty</h3>
+        <p>Premium Afterparty with Ashraf first; a public companion as an alternative. Confirm hosting before any redirect.</p><div class="who">Defected × YouTube UK</div></div>
+    </div>
+    <div class="after reveal">
+      <div><div class="label">Optional</div><p>A <b>channel trailer</b> for first-time visitors — the official video once it's out, or the Take Our Time live session — if the team wants a welcome on the artist channel.</p></div>
+      <div><div class="label" style="color:var(--sky)">To discuss with YouTube UK</div><p>Premium Afterparty access for the Premiere · support around the Outernet broadcast · the Moments In Music series.</p></div>
+    </div>
+    <p class="statement reveal" style="margin-top:1.4rem">A good campaign is already in motion. <span class="s">These are small links between strong pieces.</span></p>
+  </div>
+</section>
+
+</div><!-- /deck -->
+
+<!-- ══ ANALYSIS ════════════════════════════════════════════════════ -->
+<div class="sheet" id="sheet">
+  <button class="btn close" onclick="closeSheet()">Close ✕</button>
+  <div class="sheet-in">
+    <div class="label">Analysis</div>
+    <h2 style="margin-top:.5rem">How this was put together</h2>
+    <p style="margin-top:.8rem">Public data and Defected's own campaign materials only. No YouTube Studio data: nothing here describes
+    impressions, click-through, retention, watch time, traffic sources or audience overlap, and nothing infers current momentum
+    from lifetime views.</p>
+    <p id="defLink" hidden style="margin-top:.5rem">Related: <a href="/defected">Defected Records × YouTube — channel review</a>.</p>
+
+    <div class="cols">
+      <div>
+        <h3>Coverage and dates</h3>
+        <table>
+          <tr><th>Source</th><th>Coverage</th><th>Read</th></tr>
+          <tr><td><b>@OdenFatzo</b></td><td>All 46 public uploads; 5 playlists; Home sections</td><td>16 Oct 2026, 13:49 UTC</td></tr>
+          <tr><td><b>@DefectedMusic</b></td><td>5,000 newest of 5,244 public uploads; 84 name Oden &amp; Fatzo (13 are radio shows with them in the tracklist)</td><td>16 Oct 2026, 13:51 UTC</td></tr>
+          <tr><td><b>Collaborator credits</b></td><td>Read from 13 watch pages</td><td>16 Oct 2026</td></tr>
+          <tr><td><b>Other channels</b></td><td>Search results and watch pages; views as displayed</td><td>16 Oct 2026</td></tr>
+          <tr><td><b>Plan</b></td><td>Defected email to YouTube; press release; Cofeel treatment</td><td>Received 16 Oct 2026</td></tr>
+        </table>
+
+        <h3>Hosting map</h3>
+        <ul>
+          <li><b>Artist channel</b> — <a href="https://www.youtube.com/@OdenFatzo" target="_blank" rel="noopener">@OdenFatzo</a>, Official Artist Channel (badge on the header). 8.57K subscribers; 46 public uploads: 3 long-form (Take Our Time lyric video, In Orbit 001 and 002) and 43 Shorts. Home: Music videos, Releases, Videos, Shorts, Collaborations. No channel trailer.</li>
+          <li><b>Defected</b> — hosts the campaign: official and lyric videos, live sessions, DJ sets, album tracks (19 uploaded 16 Oct), Shorts. Playlists "Oden &amp; Fatzo – Somehow It Flies (ALBUM)" and "Oden &amp; Fatzo | Defected"; the album is the second shelf on Defected's Home.</li>
+          <li><b>Topic / Releases</b> — distributor-delivered audio (for example the Lauren art track) appears in the artist channel's Releases and Music videos shelves.</li>
+          <li><b>Other channels</b> — Ministry of Sound (Lauren visualiser, co-credited), Marvellous (Lauren official video), Boiler Room (FLY Open Air 2022, co-credited), Recording (Tour Royale). Third-party: Men I Trust – Lauren (Oden &amp; Fatzo edit) on Novaj, 19.4M — not an official upload.</li>
+          <li>The artist channel's lifetime counter reads <b>14,205,609</b> while its 46 public uploads total about 25K. Public data does not explain the gap; the figure is not used.</li>
+        </ul>
+
+        <h3>Collaborator credits, as read</h3>
+        <table>
+          <tr><th>Upload</th><th>Credited channels</th></tr>
+          <tr><td>Lady Love (Official Video)</td><td>Defected + Oden &amp; Fatzo</td></tr>
+          <tr><td>Fly Away (Official Music Video)</td><td>Defected + Oden &amp; Fatzo</td></tr>
+          <tr><td>Live from OVO Wembley Arena</td><td>Defected + Oden &amp; Fatzo</td></tr>
+          <tr><td>Only You (Live Session)</td><td>Defected + Oden &amp; Fatzo</td></tr>
+          <tr><td>Live from Defected Pacha</td><td>Defected + Oden &amp; Fatzo</td></tr>
+          <tr><td>My Temptations (Lyric Video)</td><td>Defected + Oden &amp; Fatzo</td></tr>
+          <tr><td>You Don't Want To Think About It (Live Session)</td><td>Defected + Oden &amp; Fatzo + Noa Milee + Pastel</td></tr>
+          <tr><td><b>Take Our Time (Live Session)</b></td><td><b>Defected + Astels</b></td></tr>
+          <tr><td>Take Our Time (Extended Mix); album tracks; Defected Shorts</td><td>Defected only</td></tr>
+          <tr><td>Boiler Room set · Lauren visualiser</td><td>Boiler Room / Ministry of Sound + Oden &amp; Fatzo</td></tr>
+        </table>
+        <p class="small" style="margin-top:.5rem">YouTube's help describes inviting collaborators during upload; it does not say whether one can be added to a published video. Check in Studio.</p>
+
+        <h3>Selected uploads</h3>
+        <table>
+          <tr><th>Upload</th><th>Host</th><th>Published</th><th class="r">Views</th></tr>
+          <tr><td>Lady Love (Official Video)</td><td>Defected</td><td>24 Aug 2023</td><td class="r">926,789</td></tr>
+          <tr><td>Live from Defected Pacha</td><td>Defected</td><td>30 Sep 2025</td><td class="r">228,099</td></tr>
+          <tr><td>My Temptations (Lyric Video)</td><td>Defected</td><td>3 Apr 2026</td><td class="r">313,106</td></tr>
+          <tr><td>Tell Me What You Want (Extended Mix)</td><td>Defected</td><td>29 Jul 2024</td><td class="r">166,866</td></tr>
+          <tr><td>Tell Me What You Want (Live, NYE Wembley)</td><td>Defected</td><td>14 Jun 2024</td><td class="r">160,899</td></tr>
+          <tr><td>Fly Away (Official Music Video)</td><td>Defected</td><td>8 Dec 2023</td><td class="r">91,997</td></tr>
+          <tr><td>Live from OVO Wembley Arena</td><td>Defected</td><td>1 Feb 2024</td><td class="r">70,070</td></tr>
+          <tr><td>Only You (Live Session)</td><td>Defected</td><td>10 Apr 2025</td><td class="r">37,507</td></tr>
+          <tr><td>Take Our Time (Live Session)</td><td>Defected</td><td>2 Oct 2026</td><td class="r">13,362</td></tr>
+          <tr><td>Take Our Time (Lyric Video)</td><td>Artist</td><td>19 Sep 2026</td><td class="r">6,535</td></tr>
+          <tr><td>Carpooling with Oden &amp; Fatzo &amp; Poppy Baskcomb</td><td>Defected</td><td>10 Sep 2024</td><td class="r">3,569</td></tr>
+          <tr><td>In Orbit 001 · 002</td><td>Artist</td><td>2 Jun · 9 Sep 2026</td><td class="r">441 · 125</td></tr>
+        </table>
+        <p class="small" style="margin-top:.5rem">Lifetime totals at different ages: examples, not a ranking. Lauren visualiser 8,781,047 (Ministry of Sound); Lauren official video 1,286,782 (Marvellous); Boiler Room 823,620; Tour Royale 264,173 — as displayed.</p>
+      </div>
+
+      <div>
+        <h3>My Temptations, every asset</h3>
+        <table>
+          <tr><th>Date</th><th>Asset</th><th>Host</th><th class="r">Views</th></tr>
+          <tr><td>27 Jan 2026</td><td>Teaser Short</td><td>Defected</td><td class="r">13,730</td></tr>
+          <tr><td>26 Mar</td><td>Release-date Short</td><td>Defected</td><td class="r">5,711</td></tr>
+          <tr><td>30 Mar – 9 Apr</td><td>A run of countdown and release Shorts</td><td>Artist</td><td class="r">42–1,448 each</td></tr>
+          <tr><td>2 Apr</td><td>Edit</td><td>Defected</td><td class="r">5,937</td></tr>
+          <tr><td>2 Apr</td><td>Short from Defected Croatia</td><td>Defected</td><td class="r">3,429</td></tr>
+          <tr><td>3 Apr</td><td>Lyric video</td><td>Defected (co-credited)</td><td class="r">313,106</td></tr>
+          <tr><td>21 May</td><td>Live from Defected Malta</td><td>Defected (co-credited)</td><td class="r">7,955</td></tr>
+        </table>
+
+        <h3>Shorts — an observation, not a diagnosis</h3>
+        <p>The artist channel's 43 Shorts: the 2021–23 "Live cut" and "JAM" Shorts drew 599–2,671 views each; the September 2026 Shorts drew 15–83. Oden &amp; Fatzo Shorts on Defected drew roughly 1.6K–25K. Different channels, audiences and ages; public data can't say why. YouTube's help says a Short's related-video link can only point to a video on the same channel, so the artist channel's Shorts can't link to Defected-hosted videos.</p>
+
+        <h3>YouTube features referenced, as documented</h3>
+        <ul>
+          <li><b>Collaborations</b> — up to 10 creators per video; long-form, Shorts and archived streams; the posting channel keeps revenue. <a href="https://support.google.com/youtube/answer/16554898" target="_blank" rel="noopener">Help</a></li>
+          <li><b>Shorts related video</b> — "Select a Related Video from your channel"; needs advanced features. <a href="https://support.google.com/youtube/answer/14075157" target="_blank" rel="noopener">Help</a></li>
+          <li><b>Live Redirect</b> — routes: live stream → Premiere; live stream → another channel's live stream; Premiere → another Premiere; Premiere → another channel's live stream. Sender: 1,000+ subscribers, no strikes. Receiver allows redirects in Studio (Settings › Community: subscribed channels by default, all channels, or up to 100 named). Set up in Studio › Content › Live › Edit › Customization › Redirect; fires when the source ends. Same-channel Premiere → live isn't listed; YouTube suggests a pinned chat message. <a href="https://support.google.com/youtube/answer/10359590" target="_blank" rel="noopener">Help</a></li>
+          <li><b>Premium afterparties</b> — live streams with artists, hosted video and chat, for YouTube Premium and Music Premium members; archives may stay available to members. The page doesn't describe how artists are selected. <a href="https://support.google.com/youtube/answer/10184580" target="_blank" rel="noopener">Help</a></li>
+          <li>Premieres are already used on Defected for Lady Love, Fly Away, Only You (Live Session), Pacha and Wembley. Chapters were not found on the long sets checked; captions not checked.</li>
+        </ul>
+
+        <h3>Dates and details to confirm</h3>
+        <ul>
+          <li><b>20 October</b>: the plan says Saturday; 20 Oct 2026 is a Tuesday. Moments In Music season 2 also starts that day.</li>
+          <li><b>Take Our Time live session</b>: published Friday 2 Oct (the plan says Saturday 3 Oct).</li>
+          <li><b>Outernet</b>: show date not in the press release's live dates and not found publicly; whether "livestream" means real-time or a Premiere of the recording; whether the December documentary's launch show is the same show.</li>
+          <li><b>Hosting channels</b> for the lyric video, official video, Outernet stream and documentary.</li>
+          <li><b>The duo's podcast episode</b> date within the eight weeks.</li>
+          <li><b>Interview and track-by-track material</b>: format, length, language, captions.</li>
+          <li><b>Treatment</b>: it references a cult French TV documentary episode; tone and clearance are the label's call.</li>
+        </ul>
+
+        <h3>Sources</h3>
+        <ul>
+          <li><a href="https://docs.google.com/document/d/1QiZTjZErCnkCGqopGVN5F_AZQGKJJdqd5U9Unbl6ykM/edit" target="_blank" rel="noopener">Press release — Somehow It Flies</a> (live dates, tracklist, collaborators).</li>
+          <li>Defected email to YouTube UK, 16 Oct 2026 · "Someone Like You" treatment, Cofeel Production.</li>
+          <li>YouTube Data API v3 and public watch pages, 16 Oct 2026.</li>
+        </ul>
+      </div>
+    </div>
+
+    <p style="margin-top:2.6rem;font-size:.74rem">Virgin Music Group UK · 16 October 2026. Contains Defected's planned campaign details — confirm before wider circulation.</p>
+  </div>
+</div>
+
+<script>
+/* ── Reveal on scroll ───────────────────────────────────────────── */
+var io = new IntersectionObserver(function(es){
+  es.forEach(function(e){
+    if(!e.isIntersecting) return;
+    e.target.classList.add('visible');
+    if(e.target.classList.contains('stagger'))
+      [].slice.call(e.target.children).forEach(function(c,i){ setTimeout(function(){ c.classList.add('visible'); }, i*70); });
+    io.unobserve(e.target);
+  });
+},{threshold:.1});
+document.querySelectorAll('.reveal,.stagger').forEach(function(el){ io.observe(el); });
+
+/* ── Presentation mode ──────────────────────────────────────────── */
+var cur = 0;
+function slides(){ return [].slice.call(document.querySelectorAll('.slide')); }
+function startPresent(){
+  closeSheet();
+  document.body.classList.add('present');
+  showSlide(0);
+  var el = document.documentElement;
+  if(el.requestFullscreen) el.requestFullscreen().catch(function(){});
+}
+function exitPresent(){
+  document.body.classList.remove('present');
+  slides().forEach(function(s){ s.classList.remove('current'); });
+  if(document.fullscreenElement && document.exitFullscreen) document.exitFullscreen().catch(function(){});
+  var s = slides()[cur]; if(s) s.scrollIntoView({block:'start'});
+}
+function showSlide(i){
+  var s = slides();
+  cur = Math.max(0, Math.min(i, s.length-1));
+  s.forEach(function(el,n){ el.classList.toggle('current', n===cur); });
+  s[cur].scrollTop = 0;
+  s[cur].querySelectorAll('.reveal,.stagger,.stagger>*').forEach(function(e){ e.classList.add('visible'); });
+  document.getElementById('pbar').style.width = ((cur+1)/s.length*100)+'%';
+  document.getElementById('pcount').textContent = (cur+1)+' / '+s.length;
+}
+document.addEventListener('keydown', function(e){
+  if(!document.body.classList.contains('present')){ if(e.key==='Escape') closeSheet(); return; }
+  if(e.key==='ArrowRight'||e.key===' '||e.key==='PageDown'){ e.preventDefault(); showSlide(cur+1); }
+  else if(e.key==='ArrowLeft'||e.key==='PageUp'){ e.preventDefault(); showSlide(cur-1); }
+  else if(e.key==='Escape'){ exitPresent(); }
+  else if(e.key==='Home'){ showSlide(0); }
+  else if(e.key==='End'){ showSlide(slides().length-1); }
+});
+document.addEventListener('fullscreenchange', function(){
+  if(!document.fullscreenElement && document.body.classList.contains('present')) exitPresent();
+});
+
+/* ── Analysis sheet ─────────────────────────────────────────────── */
+function openSheet(){ document.getElementById('sheet').classList.add('open'); document.body.classList.add('sheet-open'); }
+function closeSheet(){ var s=document.getElementById('sheet'); if(s) s.classList.remove('open'); document.body.classList.remove('sheet-open'); }
+
+/* Link the Defected review only once that route exists on this
+   deployment, so this deck never depends on an unmerged branch. */
+fetch('/defected', {method:'HEAD'}).then(function(r){ if(r.ok) document.getElementById('defLink').hidden = false; }).catch(function(){});
+</script>
+</body>
+</html>
