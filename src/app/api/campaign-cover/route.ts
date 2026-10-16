@@ -218,7 +218,36 @@ function dateLabel(iso: string): string {
  */
 const PREMIERE_IS_A_PERFORMANCE_SEC = 600;
 
-function formatOf(v: any): { kind: string; label: string } {
+/* ── AN UNMARKED "ARTIST - SONG" UPLOAD IS STILL A MUSIC VIDEO ──────
+   Everything above this reads a format tag out of the title. That works
+   until an artist does not use one — and Kings of Leon do not. "Kings of
+   Leon - KOYSAR" went up on 16 October with no "(Official Video)", so it
+   fell through every check into `long`, which is not in RELEASE_KINDS, and
+   the page kept leading on the 8 October live video while the single it
+   was there to announce sat in the supporting strip. The Short captioned
+   "KOYSAR is out everywhere now" took the second hero, so the page showed
+   the trailer and hid the thing it was trailing — the same failure the
+   live-version fix above was written for, one artist later.
+
+   The rule: long-form, titled with the artist's own name then a dash, and
+   carrying none of the descriptors below. Requiring the artist name on the
+   lead side is what keeps "Happy Birthday USA! And thank you Manchester -
+   what a night!" out; the descriptor list is what keeps the behind-the-
+   songs, the album discussions and the (Audio) uploads out.
+
+   Checked against the full Kings of Leon catalogue: 56 matches, every one
+   a music video, with the sessions, discussions, unboxings and audio-only
+   uploads correctly excluded. Runs last, so an explicit format tag always
+   wins. */
+const NOT_MUSIC = /behind the (song|scenes)|\bbts\b|discussion|making of|unboxing|in the studio|interview|trailer|teaser|\bpart \d|\bepisode\b|documentary|announce|vinyl|album art|\bq&a\b|\(audio\)|sftc|city sessions|amazon music|tiny desk|vevo|reacts?\b/i;
+
+function looksLikeMusicRelease(title: string, artistName?: string | null): boolean {
+  if (!artistName) return false;
+  const lead = new RegExp('^\\s*' + artistName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\s*[-\u2013\u2014]\\s*', 'i');
+  return lead.test(title) && !NOT_MUSIC.test(title);
+}
+
+function formatOf(v: any, artistName?: string | null): { kind: string; label: string } {
   const dur = v.durationSec ?? 0;
   const title = String(v.title ?? '');
   const desc = String(v.description ?? '');
@@ -268,7 +297,10 @@ function formatOf(v: any): { kind: string; label: string } {
     return { kind: 'live', label: 'PREMIERE / LIVE' };
   }
 
-  if (dur > 62) return { kind: 'long', label: 'LONG FORM' };
+  if (dur > 62) {
+    if (looksLikeMusicRelease(title, artistName)) return { kind: 'music', label: 'VIDEO' };
+    return { kind: 'long', label: 'LONG FORM' };
+  }
   return { kind: 'unknown', label: 'UPLOAD' };
 }
 
@@ -279,7 +311,7 @@ function formatOf(v: any): { kind: string; label: string } {
  * distinction drives both which asset leads the page and what the read
  * says is out, so it lives here rather than being declared twice.
  */
-const RELEASE_KINDS = new Set(['omv', 'lyric', 'visualiser', 'live']);
+const RELEASE_KINDS = new Set(['omv', 'lyric', 'visualiser', 'live', 'music']);
 
 /**
  * How to name an asset that is the SECOND thing out for a song that is
@@ -291,6 +323,10 @@ const FOLLOWUP_PHRASE: Record<string, string> = {
   visualiser: 'Visualiser',
   lyric: 'Lyric video',
   omv: 'Official video',
+  /* An untagged "Artist - Song" upload. "Video" rather than "Official
+     video", because the artist did not call it one and we are inferring
+     the format from the naming pattern. */
+  music: 'Video',
 };
 
 /** What a release is called in a sentence, as opposed to on a label. */
@@ -299,6 +335,7 @@ const FORMAT_NOUN: Record<string, string> = {
   lyric: 'lyric video',
   visualiser: 'visualiser',
   live: 'live video',
+  music: 'video',
 };
 
 /** ['a','b','c'] -> "a, b and c". */
@@ -335,7 +372,10 @@ function listPhrase(items: string[]): string {
    upload is more likely to be the campaign's subject than a 30-second
    tease of it. */
 const FORMAT_WEIGHT: Record<string, number> = {
-  omv: 100, live: 80, lyric: 70, visualiser: 65, long: 50, trailer: 30, short: 20, unknown: 10,
+  /* `music` sits just under `omv`: it is the same thing, inferred from the
+     naming pattern rather than stated in the title, so an upload that calls
+     itself an official video still outranks it on a tie. */
+  omv: 100, music: 90, live: 80, lyric: 70, visualiser: 65, long: 50, trailer: 30, short: 20, unknown: 10,
 };
 
 function rankAssets(assets: CoverAsset[]): CoverAsset[] {
@@ -427,7 +467,7 @@ export async function GET(req: NextRequest) {
          asset, and excluding it by a strict `>` was half of the reason
          one surface counted 13 assets and this one counted 10. */
       if (!startAt || !Number.isFinite(at.getTime()) || at < startAt) continue;
-      const observed = formatOf(v);
+      const observed = formatOf(v, who.name);
       /* A person who knows what the asset is beats a duration check. The
          shape stays observed; only the name changes. */
       const human = overrideFor(v.id);
@@ -464,7 +504,7 @@ export async function GET(req: NextRequest) {
       for (const u of labelUploads) {
         /* Same id from both channels is one upload, not two. */
         if (known.has(u.id)) continue;
-        const observed = formatOf(u);
+        const observed = formatOf(u, who.name);
         const human = overrideFor(u.id);
         const f = human ? { kind: human.kind, label: human.label } : observed;
         postBaseline.push({
