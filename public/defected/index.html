@@ -455,6 +455,15 @@ h3.display{font-size:clamp(1.2rem,2.2vw,1.9rem);font-variation-settings:'wdth' 7
 .stop p b{color:var(--cream);font-weight:600}
 .stop .tag{display:inline-block;margin-top:.5rem;font-family:'DM Mono',monospace;font-size:.56rem;letter-spacing:.12em;text-transform:uppercase;padding:.2rem .45rem;border:1px solid var(--line);border-radius:2px;color:var(--warm)}
 .stop .tag.x{border-color:var(--cyan);color:var(--cyan)}
+
+/* Closing summary */
+.prios.close{gap:clamp(1.4rem,3vw,3rem)}
+.prios.close .prio{padding-top:1rem}
+.prios.close .thumb{aspect-ratio:16/8}
+.prios.close .d{margin-top:.9rem;font-size:.7rem;color:var(--cream)}
+.prios.close h3{font-size:clamp(1.25rem,2.1vw,1.8rem);line-height:1.04;margin-top:.35rem}
+.prios.close .prio>p{font-size:clamp(.95rem,1.25vw,1.1rem);line-height:1.45;color:var(--cream);opacity:.88;margin-top:.6rem;max-width:32ch}
+@media(max-width:880px){.prios.close{grid-template-columns:1fr}}
 .checks{display:grid;grid-template-columns:1fr 1fr;gap:1rem 2rem;margin-top:1.1rem}
 @media(max-width:760px){.checks{grid-template-columns:1fr}}
 .checks ul{list-style:none}
@@ -660,7 +669,7 @@ body.sheet-open .chrome,body.sheet-open #pbar{display:none}
         <a class="thumb" href="https://www.youtube.com/watch?v=O1mxdjYAapk" target="_blank" rel="noopener"><img data-vid="O1mxdjYAapk" alt=""><span class="cap"><b>Jonas Blue · In The House · 2025</b>138K</span></a>
       </div>
       <div class="reveal">
-        <p class="body" style="font-size:.98rem">Studio mixes of 40 minutes or more — the seasonal compilations (“House Music 2024 – Defected Summer Mix”) and the artist-mixed In The House series — are made from music the label already owns. <b>Between 2022 and 2025, 16 of the 30 published passed 100K views.</b> There have been fewer lately: ten in 2024, three in 2025 and three so far in 2026, where the year isn't finished and the uploads are still young.</p>
+        <p class="body" style="font-size:.98rem">Studio mixes of 40 minutes or more include the seasonal compilations (“House Music 2024 – Defected Summer Mix”) and the artist-mixed In The House series. <b>Between 2022 and 2025, 16 of the 30 published passed 100K views.</b> There have been fewer lately: ten in 2024, three in 2025 and three so far in 2026, where the year isn't finished and the uploads are still young.</p>
         <div class="seasons stagger">
           <div class="season"><div class="y">2021</div><div class="n">13</div><div class="dots" data-n="13" data-k="10"></div><p>10 over 100K · typical 612K · lockdown year</p></div>
           <div class="season"><div class="y">2022</div><div class="n">8</div><div class="dots" data-n="8" data-k="4"></div><p>4 over 100K · typical 148K</p></div>
@@ -1010,70 +1019,33 @@ body.sheet-open .chrome,body.sheet-open #pbar{display:none}
      rather than a task list. The Studio checks and the follow-up
      measurement plan sit beneath, because a public-data review has to
      say what would resolve its own uncertainties. -->
-<section class="slide" data-t="Ninety days">
+<section class="slide" data-t="Summary">
   <div class="bleed scrim-f"><img data-vid="wW4vI546r-s" data-frame="2" alt="Defected at Pacha Ibiza, during Sam Divine's opening-party set"></div>
   <div class="inner">
-    <div class="label reveal">Priorities</div>
-    <h2 class="display tight reveal" style="margin-top:.7rem;max-width:20ch">Three priorities for the next ninety days.</h2>
-    <div class="prios stagger" style="margin-top:clamp(1.2rem,2.6vw,2rem)">
+    <div class="label reveal">In summary</div>
+    <h2 class="display tight reveal" style="margin-top:.7rem;max-width:22ch">Three opportunities to build on a strong channel.</h2>
+    <div class="prios close stagger" style="margin-top:clamp(1.4rem,3vw,2.4rem)">
       <div class="prio">
-        <div class="d">01 · Weeks 1–2 · quick to do</div>
-        <div class="head"><a class="thumb" href="https://www.youtube.com/@DefectedMusic/podcasts" target="_blank" rel="noopener"><img data-vid="lRa2uJsP2YM" alt=""></a><h3 class="display">Make the weekly radio show easier to find</h3></div>
-        <p>A playlist of every episode, set as a podcast, with the show's artwork and a shelf on Home.<br><b>How we'd know:</b> playlist views, and episode views arriving from it, after 28 days; Home-tab impressions and clicks by shelf.</p>
-        <ul>
-          <li>The tracklist kept, renamed; a link to the playlist in every episode description.</li>
-          <li>The sets shelf renamed for what it holds; Croatia, Malta and Shorts shelves added.</li>
-          <li>One title format for the HQ sets.</li>
-        </ul>
-        <span class="tag">No new production</span>
+        <a class="thumb" href="https://www.youtube.com/@DefectedMusic/podcasts" target="_blank" rel="noopener"><img data-vid="lRa2uJsP2YM" alt="A Defected Radio episode"></a>
+        <div class="d">01</div>
+        <h3 class="display">Bring the radio episodes together</h3>
+        <p>An up-to-date playlist, recognisable artwork and a clear place on Home.</p>
       </div>
       <div class="prio">
-        <div class="d">02 · Across the quarter · owned material</div>
-        <div class="head"><a class="thumb" href="https://www.youtube.com/watch?v=ikJCO_FrQQ8" target="_blank" rel="noopener"><img data-vid="ikJCO_FrQQ8" alt=""></a><h3 class="display">Make more of the music the label already owns</h3></div>
-        <p>One selected Premiere with a bigger moment around it; a lyric video explored for Cola, subject to partnerships and artist plans; a catalogue-milestone collection discussed alongside the label's current plans.<br><b>How we'd know:</b> reminders, concurrent viewers and chat in Studio against the usual Premieres; a lyric video's views and sources at 30 days; collection playlist views.</p>
-        <ul>
-          <li>Trailer and live-redirect eligibility confirmed separately in Studio before the Premiere.</li>
-          <li>Tracklist and chapters on the selected sets.</li>
-          <li>Catalogue mixes on a calendar — four a year, one title format.</li>
-        </ul>
-        <span class="tag">Uses existing music</span>
+        <a class="thumb" href="https://www.youtube.com/watch?v=ikJCO_FrQQ8" target="_blank" rel="noopener"><img data-vid="ikJCO_FrQQ8" alt="A Defected Premiere"></a>
+        <div class="d">02</div>
+        <h3 class="display">Build selected music moments</h3>
+        <p>Give a flagship Premiere extra support, or explore a catalogue idea alongside existing plans.</p>
       </div>
       <div class="prio">
-        <div class="d">03 · Weeks 2–12 and with season two · a test</div>
-        <div class="head"><a class="thumb" href="https://www.youtube.com/shorts/udw-U-01BUI" target="_blank" rel="noopener"><img data-vid="udw-U-01BUI" alt=""></a><h3 class="display">Test story-led clips, for the catalogue and the podcast</h3></div>
-        <p>One story-led Short a week for eight to twelve weeks; a few clips from inside each podcast episode when season two comes.<br><b>How we'd know:</b> typical views and related-link clicks by kind of clip; episode views at 28 days against 17K; clip views against the 4K the announcements reached.</p>
-        <ul>
-          <li>Each clip linked to the full set, episode or record.</li>
-          <li>Podcast artwork led by the guest; the guest's music linked both ways.</li>
-          <li>The announcement becomes one clip of four, not the only one.</li>
-        </ul>
-        <span class="tag x">A test · needs Studio</span>
+        <a class="thumb" href="https://www.youtube.com/shorts/udw-U-01BUI" target="_blank" rel="noopener"><img data-vid="udw-U-01BUI" alt="A Defected Short"></a>
+        <div class="d">03</div>
+        <h3 class="display">Share more of the stories</h3>
+        <p>Test clips from artist conversations, podcast episodes and the history behind key records.</p>
       </div>
     </div>
-
-    <div class="checks reveal">
-      <div>
-        <div class="label" style="color:var(--red)">Questions only YouTube Studio can answer</div>
-        <ul style="margin-top:.5rem">
-          <li>Traffic sources for the radio show: search, browse, external, playlist.</li>
-          <li>Reminders set, concurrent viewers and chat volume on past Premieres; whether trailers were used.</li>
-          <li>Impressions and click-through for HQ sets against event sets, over the same period.</li>
-          <li>Search terms bringing people to the catalogue uploads; traffic from Shorts audio.</li>
-          <li>Related-link clicks on the few Shorts that already carry one.</li>
-        </ul>
-      </div>
-      <div>
-        <div class="label" style="color:var(--cyan)">What we'll be able to say later</div>
-        <ul style="margin-top:.5rem">
-          <li>We started recording the channel's public figures daily on 16 October 2026. From mid-November we can show how each new upload performs in its first week; from mid-January, quarter against quarter.</li>
-          <li>Then: radio episode views at 7 and 28 days by host; Shorts by kind of clip at 7 days; the anniversary playlist and any lyric video at 30 and 90 days, against the figures in this deck.</li>
-          <li>Whether the back catalogue is still growing, and where, can only be read from that record — nothing in this deck claims it.</li>
-        </ul>
-      </div>
-    </div>
-
-    <p class="statement reveal" style="margin-top:1.6rem;color:var(--cream);max-width:46ch">The channel is already in good shape. These three make it easier to find, give the label's own records more room, and test what the stories can do.</p>
-    <div class="src reveal">Defected Records × YouTube · Virgin Music Group · public YouTube data read 16 October 2026 · every figure above appears earlier in this deck; the working is under Analysis.</div>
+    <p class="statement reveal" style="margin-top:clamp(1.6rem,3.4vw,2.6rem);color:var(--cream);max-width:44ch">Defected already does a great deal well. These are a few practical ideas to explore together.</p>
+    <div class="src reveal">Defected Records × YouTube · Virgin Music Group · public YouTube data read 16 October 2026 · supporting detail, Studio questions and future measurement are under Analysis.</div>
   </div>
 </section>
 
@@ -1264,12 +1236,34 @@ body.sheet-open .chrome,body.sheet-open #pbar{display:none}
     </table>
     <p>Announcement Shorts for the series (n=17) have a median of about 4K; the one excerpt cut from a conversation (Skream, dc1auJdrj7E) has 14.3K. Apple Podcasts and Spotify list the same nine episodes and no season-two trailer as at 16 October 2026; the label's planned season two is referred to without a date.</p>
 
+    <h3>Slide 14 · the summary, supporting detail</h3>
+    <p>The closing slide keeps three headline opportunities. The working behind each, as developed earlier in the review, is kept here.</p>
+    <dl>
+      <dt>01 · Bring the radio episodes together</dt><dd>A playlist of every episode, set as a podcast, with the show's artwork and a shelf on Home. Supporting steps: the tracklist kept, renamed, with a link to the playlist in every episode description; the sets shelf renamed for what it holds, with Croatia, Malta and Shorts shelves added; one title format for the HQ sets. How we'd know: playlist views, and episode views arriving from it, after 28 days; Home-tab impressions and clicks by shelf.</dd>
+      <dt>02 · Build selected music moments</dt><dd>One selected Premiere with a bigger moment around it; a lyric video explored for Cola, subject to partnerships and artist plans; a catalogue-milestone collection discussed alongside the label's current plans. Supporting steps: trailer and live-redirect eligibility confirmed separately in Studio before the Premiere; tracklist and chapters on the selected sets; catalogue mixes on a calendar with one title format. How we'd know: reminders, concurrent viewers and chat in Studio against the usual Premieres; a lyric video's views and sources at 30 days; collection playlist views.</dd>
+      <dt>03 · Share more of the stories</dt><dd>Story-led Shorts tested over a set period; a few clips from inside each podcast episode when season two comes. Supporting steps: each clip linked to the full set, episode or record; podcast artwork led by the guest, with the guest's music linked both ways; the announcement becomes one clip among several, not the only one. How we'd know: typical views and related-link clicks by kind of clip; episode views at 28 days against 17K; clip views against the 4K the announcements reached.</dd>
+    </dl>
+    <p style="margin-top:1rem"><b>Questions only YouTube Studio can answer</b></p>
+    <ul>
+      <li>Traffic sources for the radio show: search, browse, external, playlist.</li>
+      <li>Reminders set, concurrent viewers and chat volume on past Premieres; whether trailers were used.</li>
+      <li>Impressions and click-through for HQ sets against event sets, over the same period.</li>
+      <li>Search terms bringing people to the catalogue uploads; traffic from Shorts audio.</li>
+      <li>Related-link clicks on the few Shorts that already carry one.</li>
+    </ul>
+    <p style="margin-top:1rem"><b>What we'll be able to say later</b></p>
+    <ul>
+      <li>We started recording the channel's public figures daily on 16 October 2026. From mid-November we can show how each new upload performs in its first week; from mid-January, quarter against quarter.</li>
+      <li>Then: radio episode views at 7 and 28 days by host; Shorts by kind of clip at 7 days; the anniversary playlist and any lyric video at 30 and 90 days, against the figures in this deck.</li>
+      <li>Whether the back catalogue is still growing, and where, can only be read from that record — nothing in this deck claims it.</li>
+    </ul>
+
     <h3>Method</h3>
     <dl>
       <dt>Sources</dt><dd>Public YouTube Data API v3 through the project's own routes (uploads, playlists, channel sections); the live channel in a browser on 16 October 2026; Apple Podcasts and Spotify for the podcast listing. No YouTube Studio data of any kind.</dd>
       <dt>Comparison rule</dt><dd>No lifetime-view ranking across upload ages. Series are compared within the same window or by structural measures: cadence, consistency, format mix, share passing a threshold. Where a comparison cannot be made fairly the figures are stated with their limits.</dd>
       <dt>Attribution</dt><dd>Public data shows co-occurrence. No result is attributed to a setting, a title, a thumbnail or a host. Shorts-to-long-form conversion is a hypothesis for the test on slide 12.</dd>
-      <dt>Snapshots</dt><dd>The channel entered daily public snapshots on 16 October 2026. Until there is history, nothing here describes momentum, release-week shape or catalogue growth. The follow-up plan is on slide 14.</dd>
+      <dt>Snapshots</dt><dd>The channel entered daily public snapshots on 16 October 2026. Until there is history, nothing here describes momentum, release-week shape or catalogue growth. The follow-up plan is under Slide 14 above.</dd>
       <dt>Not retrieved</dt><dd>The 243 oldest uploads (2009 to mid-2011); the Live and Posts tabs; end screens, cards and Community posts, which the public API does not expose.</dd>
     </dl>
     <button class="an-back">← Back to the review</button>
