@@ -96,7 +96,7 @@ export default function YouTubeTerritories({ slug }: { slug: string }) {
     };
   }, [slug]);
 
-  if (!data || !data.ok || data.countries.length === 0) return null;
+  if (!data || !data.ok || (data.countries.length === 0 && data.cities.length === 0)) return null;
 
   const scale = data.countries.slice(0, 8);
   const peak = scale[0]?.monthlyViews ?? 0;
@@ -142,6 +142,7 @@ export default function YouTubeTerritories({ slug }: { slug: string }) {
       </div>
 
       {/* ── SCALE MARKETS ───────────────────────────────────────── */}
+      {data.countries.length > 0 && (
       <div className="rounded-lg px-4 py-4" style={{ background: PAPER, border: `1px solid ${MUTED}` }}>
         <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1 mb-1">
           <div className="text-[10px] uppercase tracking-[0.14em] text-ink/40 font-bold">
@@ -199,6 +200,7 @@ export default function YouTubeTerritories({ slug }: { slug: string }) {
             ` ${data.estimatedCount} are marked ‘est’: modelled by Chartmetric rather than measured.`}
         </div>
       </div>
+      )}
 
       {/* ── MOMENTUM MARKETS ────────────────────────────────────── */}
       {risers.length > 0 && median != null && (
@@ -284,6 +286,7 @@ export default function YouTubeTerritories({ slug }: { slug: string }) {
                 </div>
                 <div className="text-[15px] font-black tabular-nums mt-0.5 text-ink/80">
                   {fmt(c.monthlyViews)}
+                  {c.isEstimate && <span className="text-[10px] font-normal text-ink/40"> est.</span>}
                 </div>
                 {c.marketLeader && (
                   <div
@@ -305,8 +308,9 @@ export default function YouTubeTerritories({ slug }: { slug: string }) {
           figures as the lifetime channel totals higher up. A caveat
           nobody can see is not a caveat. */}
       <div className="mt-3 pt-2 text-[10px] text-ink/45 leading-snug" style={{ borderTop: `1px solid ${MUTED}` }}>
-        Chartmetric YouTube&#8209;for&#8209;Artists, monthly video views by territory — a different
-        measurement from the lifetime channel totals above, not a different set of videos.
+        {data.countries.length === 0
+          ? 'Chartmetric monthly YouTube video views by city. Figures marked est. are modelled estimates; country totals and shares are unavailable.'
+          : 'Chartmetric YouTube-for-Artists, monthly video views by territory — a different measurement from the lifetime channel totals above, not a different set of videos.'}
       </div>
     </section>
   );

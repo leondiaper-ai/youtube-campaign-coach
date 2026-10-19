@@ -23,7 +23,7 @@ type Row = {
   monthlyViews: number; shareOfListed: number; isEstimate: boolean;
 };
 type Payload =
-  | { ok: true; reportingDate: string | null; countries: Row[]; estimatedCount: number }
+  | { ok: true; reportingDate: string | null; countries: Row[]; cities: Row[]; estimatedCount: number }
   | { ok: false; reason: string };
 
 const fmt = (n: number): string => {
@@ -60,6 +60,16 @@ export default function ArtistMarkets({ slug }: { slug: string }) {
 
   const top3 = t.countries.slice(0, 3);
   if (top3.length === 0) {
+    if (t.cities.length > 0) {
+      return (
+        <div>
+          <div className="text-[13px] text-ink/40">
+            Chartmetric provides city data for this artist; a country breakdown is unavailable.
+          </div>
+          <YouTubeTerritories slug={slug} />
+        </div>
+      );
+    }
     return <div className="text-[13px] text-ink/40">Chartmetric returned no markets for this artist.</div>;
   }
 
