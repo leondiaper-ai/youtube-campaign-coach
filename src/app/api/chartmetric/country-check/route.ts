@@ -26,6 +26,15 @@ export async function GET(req: NextRequest) {
   const slug = req.nextUrl.searchParams.get('artist') ?? '';
   const country = req.nextUrl.searchParams.get('country') ?? '';
   const id = Object.prototype.hasOwnProperty.call(ARTISTS, slug) ? ARTISTS[slug] : null;
+  if (id && req.nextUrl.searchParams.get('snapshot') === '2026-10-01') {
+    const result = await cmFetch<{ obj?: { insights?: { countries?: Record<string, unknown>[] } } }>(
+      `/api/artist/${id}/market-coverage-views/youtube?date=2026-10-01`,
+    );
+    if (!result.ok) return json({ ok: false, reason: result.reason, status: result.status });
+    return json({ ok: true, artistId: id, snapshot: '2026-10-01', countries: (result.data?.obj?.insights?.countries ?? []).map((r) => ({
+      name: r.name, code2: r.code2, value: r.value, timestp: r.timestp, isEstimate: r.is_estimate,
+    })) });
+  }
   if (!id || !['US', 'AU'].includes(country)) return json({ error: 'unsupported comparison' }, 400);
   const result = await cmFetch<{ obj?: Record<string, unknown> }>(
     `/api/artist/${id}/stat/youtube_artist?field=monthly_views&code2=${country}&latest=true`,
