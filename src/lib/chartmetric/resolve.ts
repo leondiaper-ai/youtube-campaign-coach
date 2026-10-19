@@ -47,6 +47,10 @@ const KEY = (channelId: string) => `cm:artist:${channelId}`;
    the territories call, so a mismatch is visible rather than silent.
    ═══════════════════════════════════════════════════════════════════ */
 const MANUAL_CM_ARTISTS: Record<string, { id: number; name: string }> = {
+  /* Rops1 (@rops1official). /get-ids returns no rows for this channel;
+     artist profile confirmed by the user at app.chartmetric.com/artist/1447650. */
+  UCn4aqvBeyXRM4gKgFELrTkw: { id: 1447650, name: 'Rops1' },
+
   /* TEN (@tenoffcl). /get-ids returns nothing for this channel; the
      profile is real and confirmed at app.chartmetric.com/artist/558680. */
   UC1a1QawKLefYNAjpT0ELNrQ: { id: 558680, name: 'TEN' },
