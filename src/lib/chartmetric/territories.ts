@@ -87,6 +87,7 @@
 
 import { cmFetch } from './client';
 import { resolveCmArtist, type CmArtistMapping } from './resolve';
+import { MARKETS } from '@/lib/territories/markets';
 
 export type TerritoryRow = {
   rank: number;
@@ -114,6 +115,11 @@ export type TerritoryRow = {
 
 export type Territories = {
   ok: true;
+  /** Allows old city-only cache entries to be retried after the date fallback fix. */
+  countryLookupVersion?: 2;
+  /** Present only for the explicit, bounded country-stat fallback. */
+  countryMarketsChecked?: number;
+  countryLookupComplete?: boolean;
   artist: { slug: string; name: string; channelId: string };
   chartmetric: { artistId: number; artistName: string | null };
   scope: 'chartmetric-youtube-monthly-views';
@@ -161,11 +167,85 @@ type RawRow = {
   trend?: RawTrendPoint[] | null;
 };
 type RawResponse = {
+  /** Internal provenance for country-stat fallback; not vendor fields. */
+  statsMarketsChecked?: number;
+  lookupComplete?: boolean;
   obj?: {
     insights?: { cities?: RawRow[] | null; countries?: RawRow[] | null } | null;
     artistTotalViews?: number | string | null;
   } | null;
 };
+
+const hasCountries = (response: RawResponse) =>
+  (response.obj?.insights?.countries ?? []).some((row) => (num(row.value) ?? 0) > 0);
+
+/** The latest coverage snapshot can contain cities but no countries even
+ * when country stats exist. Prefer yesterday's complete coverage; if that
+ * is also incomplete, use a reporting date obtained from a country stat.
+ * These are date-discovery calls only: every displayed country and city
+ * still comes from ONE market-coverage response, never sums of cities or
+ * a mixture of readings from different dates. The normal cache bounds cost.
+ */
+async function completeCountryCoverage(id: number, latest: RawResponse): Promise<RawResponse> {
+  if (hasCountries(latest)) return latest;
+  const today = new Date().toISOString().slice(0, 10);
+  const yesterday = new Date(Date.now() - 86_400_000).toISOString().slice(0, 10);
+  const tried = new Set([today]);
+  const dated = async (date: string): Promise<RawResponse | null> => {
+    if (tried.has(date)) return null;
+    tried.add(date);
+    const result = await cmFetch<RawResponse>(
+      `/api/artist/${id}/market-coverage-views/youtube?date=${date}`,
+    );
+    return result.ok && result.data && hasCountries(result.data) ? result.data : null;
+  };
+  const recent = await dated(yesterday);
+  if (recent) return recent;
+
+  // Two fixed discovery markets, not an unrestricted API proxy or world scan.
+  for (const code of ['US', 'AU']) {
+    const stat = await cmFetch<{ obj?: { monthly_views?: { timestp?: string | null }[] } }>(
+      `/api/artist/${id}/stat/youtube_artist?field=monthly_views&code2=${code}&latest=true`,
+    );
+    if (!stat.ok) continue;
+    const dates = (stat.data?.obj?.monthly_views ?? [])
+      .map((point) => point.timestp?.slice(0, 10) ?? '')
+      .filter((date) => /^\d{4}-\d{2}-\d{2}$/.test(date) && date < today)
+      .sort().reverse();
+    const date = dates[0];
+    if (!date) continue;
+    const snapshot = await dated(date);
+    if (snapshot) return snapshot;
+  }
+  // Some artists (Rops1) have country stats but no country coverage even
+  // on the reporting date. Check our configured markets, never infer a
+  // country total from city estimates. Coverage is labelled in the UI.
+  const readings: RawRow[] = [];
+  let complete = true;
+  for (const market of Object.values(MARKETS)) {
+    const stat = await cmFetch<{ obj?: { monthly_views?: {
+      value?: number | string | null; timestp?: string | null; is_estimate?: boolean;
+    }[] } }>(
+      `/api/artist/${id}/stat/youtube_artist?field=monthly_views&code2=${market.code}&latest=true`,
+    );
+    if (!stat.ok) { complete = false; continue; }
+    const point = [...(stat.data?.obj?.monthly_views ?? [])]
+      .filter((p) => p.timestp && num(p.value) != null)
+      .sort((a, b) => (b.timestp ?? '').localeCompare(a.timestp ?? ''))[0];
+    if (!point || (num(point.value) ?? 0) <= 0) continue;
+    readings.push({ name: market.name, code2: market.code, value: point.value,
+      timestp: point.timestp!.slice(0, 10), is_estimate: point.is_estimate });
+  }
+  if (!readings.length) return { ...latest, lookupComplete: complete };
+  // Keep countries comparable: do not combine latest readings from different days.
+  const dates = readings.map((r) => r.timestp!).sort();
+  const reporting = dates[dates.length - 1];
+  return {
+    statsMarketsChecked: Object.keys(MARKETS).length,
+    lookupComplete: complete,
+    obj: { insights: { countries: readings.filter((r) => r.timestp === reporting), cities: [] } },
+  };
+}
 
 /** Newest trend date anywhere in the payload — the real reading date. */
 function deriveReportingDate(rows: RawRow[]): string | null {
@@ -267,7 +347,8 @@ export async function fetchTerritories(
   );
   if (!res.ok) return { ok: false, reason: 'fetch-failed', detail: res.reason };
 
-  const insights = res.data?.obj?.insights;
+  const coverage = await completeCountryCoverage(mapping.cmArtistId, res.data ?? {});
+  const insights = coverage.obj?.insights;
   const rawCountries = insights?.countries ?? [];
   const rawCities = insights?.cities ?? [];
   if (rawCountries.length === 0 && rawCities.length === 0) {
@@ -303,6 +384,9 @@ export async function fetchTerritories(
 
   return {
     ok: true,
+    countryLookupVersion: 2,
+    countryMarketsChecked: coverage.statsMarketsChecked,
+    countryLookupComplete: coverage.lookupComplete ?? true,
     artist: { slug: artist.slug, name: artist.name, channelId },
     chartmetric: { artistId: mapping.cmArtistId, artistName: mapping.cmArtistName },
     scope: 'chartmetric-youtube-monthly-views',

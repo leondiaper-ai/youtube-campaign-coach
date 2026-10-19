@@ -64,6 +64,7 @@ type Payload =
       cities: Row[];
       listedTotal: number;
       estimatedCount: number;
+      countryMarketsChecked?: number;
     }
   | { ok: false; reason: string };
 
@@ -196,6 +197,7 @@ export default function YouTubeTerritories({ slug }: { slug: string }) {
         <div className="mt-3 text-[10px] text-ink/30 leading-snug">
           Share is of the {data.countries.length} territories Chartmetric returns for this artist —
           the only total the response supplies.
+          {data.countryMarketsChecked && ` Checked ${data.countryMarketsChecked} configured markets, not a worldwide ranking. Country-stat estimate flags are shown only where supplied.`}
           {data.estimatedCount > 0 &&
             ` ${data.estimatedCount} are marked ‘est’: modelled by Chartmetric rather than measured.`}
         </div>
@@ -308,7 +310,9 @@ export default function YouTubeTerritories({ slug }: { slug: string }) {
           figures as the lifetime channel totals higher up. A caveat
           nobody can see is not a caveat. */}
       <div className="mt-3 pt-2 text-[10px] text-ink/45 leading-snug" style={{ borderTop: `1px solid ${MUTED}` }}>
-        {data.countries.length === 0
+        {data.countryMarketsChecked
+          ? 'Chartmetric artist-level monthly YouTube views, including channel and featured videos. Country stats cover the checked markets; estimate status is not supplied for unmarked rows.'
+          : data.countries.length === 0
           ? 'Chartmetric monthly YouTube video views by city. Figures marked est. are modelled estimates; country totals and shares are unavailable.'
           : 'Chartmetric YouTube-for-Artists, monthly video views by territory — a different measurement from the lifetime channel totals above, not a different set of videos.'}
       </div>

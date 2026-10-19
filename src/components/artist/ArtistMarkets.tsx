@@ -23,7 +23,7 @@ type Row = {
   monthlyViews: number; shareOfListed: number; isEstimate: boolean;
 };
 type Payload =
-  | { ok: true; reportingDate: string | null; countries: Row[]; cities: Row[]; estimatedCount: number }
+  | { ok: true; reportingDate: string | null; countries: Row[]; cities: Row[]; estimatedCount: number; countryMarketsChecked?: number }
   | { ok: false; reason: string };
 
 const fmt = (n: number): string => {
@@ -123,6 +123,7 @@ export default function ArtistMarkets({ slug }: { slug: string }) {
             — on fresh data nothing prints. */}
         <span>
           Chartmetric monthly YouTube views by country.
+          {t.countryMarketsChecked && <> Across {t.countryMarketsChecked} checked markets; shares are of returned countries.</>}
           {readingAge != null && readingAge > 14 && (
             <> Last reported {t.reportingDate}, {readingAge} days ago.</>
           )}

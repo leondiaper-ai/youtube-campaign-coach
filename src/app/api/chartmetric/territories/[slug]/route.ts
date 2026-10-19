@@ -27,6 +27,7 @@ import { chartmetricConfigured } from '@/lib/chartmetric/auth';
 import { fetchTerritories, type TerritoriesResult } from '@/lib/chartmetric/territories';
 
 export const dynamic = 'force-dynamic';
+export const maxDuration = 60;
 
 const TTL_SECONDS = 12 * 60 * 60;
 
@@ -64,13 +65,19 @@ export async function GET(req: NextRequest, ctx: { params: Promise<{ slug: strin
 
   if (store) {
     const hit = (await store.get(key)) as TerritoriesResult | null;
-    if (hit) return NextResponse.json(hit, { status: 200 });
+    // Preserve valid country snapshots (including Ezra's existing view),
+    // but let pre-fix city-only snapshots try the dated country lookup once.
+    if (hit && (!hit.ok || hit.countries.length > 0 || hit.countryLookupVersion === 2)) {
+      return NextResponse.json(hit, { status: 200 });
+    }
   }
 
   const result = await fetchTerritories({ slug: artist.slug, name: artist.name }, channelId);
 
   // Only cache success. A transient failure should be retried, not pinned.
-  if (store && result.ok) await store.set(key, result, { ex: TTL_SECONDS });
+  if (store && result.ok && result.countryLookupComplete !== false) {
+    await store.set(key, result, { ex: TTL_SECONDS });
+  }
 
   return NextResponse.json(result, { status: 200 });
 }
