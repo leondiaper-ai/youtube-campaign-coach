@@ -1,11 +1,19 @@
 # Tom A. Smith × YouTube — audit pack
 
 **For independent review.** Read 20 October 2026. This is the raw material behind the deck
-at `/tomasmith`: 13 slides plus an appendix, for the UK commercial team and Fiction Records.
+at `/tomasmith`: **version 2**, 12 slides plus an appendix, for the UK commercial team and
+Fiction Records.
 
-The deck is a channel deep dive and album-preparation plan for a developing artist. Its main
-story: Tom has a distinctive visual identity, encouraging results around several songs, and
-promising performance-led Shorts. The plan builds on those strengths without overcommitting.
+The deck is a channel deep dive and album-preparation plan for a developing artist. Version 2
+is restructured on the Amyl deck (`/amyl`): direct headlines that carry the plan on their own,
+practical "what to do" language, and method and inventories moved to the appendix. The story:
+something distinctive already exists; the songs are still finding viewers; put the
+performance into the feed; give people somewhere to go next; start with existing footage;
+stay active without a second job; one idea from each peer; plan each single's follow-up; give
+the album a recognisable identity; who does what next.
+
+**New in v2: the key videos were watched** (sampled frames, sound not heard — §4.10). That
+corrected the Shorts classification: none of the 11 Shorts is a plain announcement card.
 
 You are being asked to **try to break this**, not to confirm it. Take a claim from §5, trace
 it to the rows in §4, and say where it outruns the evidence. Flag anything that reads as
@@ -43,6 +51,22 @@ generic advice, as overcommitting a small team, or as a judgement on the creativ
 - Add album-era world-building.
 - Replace Jamie Webster with Freak Slug.
 - Give each peer a distinct idea.
+
+**v2 instructions (applied):**
+- Simplify using the Amyl deck for structure, clarity and practical recommendations; keep
+  Tom's camcorder identity and evidence.
+- Watch the key Tom videos, Shorts and peer examples first; correct classifications;
+  separate observation from interpretation.
+- Performance can come from music videos as well as live footage.
+- Present clip → song video → playlist as the intended journey, not proven conversion.
+- Ask what files, sound and permissions exist before any new filming.
+- Priority tiers (First / Next / Optional) plus a light between-release example — not a quota.
+- Follow-up timeline; 7–14 days is a planning prompt, not a proven optimum, and not a
+  reason to manufacture a video.
+- Album identity: Tommy's Dance Place is a reference only; don't assume the album continues
+  it or needs a fictional world.
+- Close on actions and ownership (Tom/Fiction provide; VMG analyses, plans, packages).
+- Studio questions in one concise section.
 
 ## 2. Provenance
 
@@ -84,8 +108,10 @@ generic advice, as overcommitting a small team, or as a judgement on the creativ
 3. Comments are qualitative. Older listeners appear in them, but no audience-age claim is made.
 4. No footage, budget, date or artist availability is assumed.
 5. Peer examples illustrate single, achievable ideas. Their limits are stated.
-6. Formats are classified by title (I did not watch the videos). Shorts use the API's
-   `isShort` flag.
+6. Formats are classified from sampled frames as well as titles (§4.10). Shorts use the
+   API's `isShort` flag. Sound was not heard, so nothing is claimed about audio.
+7. Observation (what the frames and data show) is kept separate from interpretation (what we
+   think it suggests, to be tested).
 
 ## 4. The rows
 
@@ -127,24 +153,35 @@ Older examples in the appendix:
 
 ### 4.3 Every Short since December 2025 (n=11)
 
-| Short | ID | Views | Deck group |
+| Short | ID | Views | What we saw (frames) |
 |---|---|---:|---|
-| I see you smiling #livemusic | 0-Rnxi-s67w | 13,008 | performing (top three) |
-| I dont blame you for looking at me 🕺 | acFYP0MTvpA | 5,189 | performing (top three) |
-| I don't blame you for looking at me #musicvideo | Jrs-39ip02w | 3,058 | performing — a clip from the video (top three) |
-| Our summer headline shows in York and Tyldesley are on sale | 9RRL9smbWfE | 1,148 | announcement |
-| put on a record let me dance dance dance #live | bYbMwv9SkCE | 1,054 | performing |
-| Our Song | tXfg44fnca8 | 854 | performing? (content not checked) |
-| new ep out now ! | d6sI4BXTFoE | 722 | announcement |
-| Our Song Live in Birmingham | BLQAH7HGnE8 | 699 | performing |
-| out may 1st x | _au140gT9jo | 673 | announcement |
-| Full Video for Our Song is at 12pm Friday 26th | on9UEsJfZuA | 660 | announcement |
-| 'Our Song' full video out today 12pm | x56q2KigouA | 616 | announcement |
+| I see you smiling #livemusic | 0-Rnxi-s67w | 13,008 | Multi-angle live edit, white vest, yellow lyric captions |
+| I dont blame you for looking at me 🕺 | acFYP0MTvpA | 5,189 | Live, dancing, lyric caption |
+| I don't blame you for looking at me #musicvideo | Jrs-39ip02w | 3,058 | Vertical dance piece from the video world: cut-out Tom over changing graphics, pink lyric bubbles |
+| Our summer headline shows in York and Tyldesley are on sale | 9RRL9smbWfE | 1,148 | Live performance footage |
+| put on a record let me dance dance dance #live | bYbMwv9SkCE | 1,054 | POART dance-hall teaser, lyric text, "out May 1st" end card |
+| Our Song | tXfg44fnca8 | 854 | Live, polka shirt, no on-screen text |
+| new ep out now ! | d6sI4BXTFoE | 722 | POART dance-hall footage, dark |
+| Our Song Live in Birmingham | BLQAH7HGnE8 | 699 | Phone footage from the crowd, no on-screen text |
+| out may 1st x | _au140gT9jo | 673 | Dark dance-hall clip with text |
+| Full Video for Our Song is at 12pm Friday 26th | on9UEsJfZuA | 660 | Our Song record-shop video clip, yellow title card |
+| 'Our Song' full video out today 12pm | x56q2KigouA | 616 | Our Song record-shop video clip, yellow title card |
 
-**Slide 5 claim:** "His most-viewed Shorts all show him performing." The top three are all
-Tom on camera performing, and all five announcements are between 616 and 1,148. The slide
-also notes that not every performance Short travels (Our Song live in Birmingham: 699).
-Group medians: performing ≈ 2.1K (n=6); announcements 673 (n=5). Tiny samples.
+**Correction from v1.** v1 grouped five of these as "announcements" by title. The frames show
+all five contain performance or music-video footage. v1's "performing vs announcements"
+medians are withdrawn.
+
+**Slide 4 (v2).**
+- *Observation:* all 11 Shorts show Tom performing, live or from a music video. The three
+  that travelled (13K, 5.2K, 3.1K) are titled with a lyric and open on a close, bright
+  performance moment. Most others lead with a date, time or song title; several use darker
+  footage.
+- *Interpretation, presented as a test:* lead with the song, not the logistics. The next
+  4–6 Shorts: lyric in the title and on screen, performance from the first second, the song
+  video set as the related link.
+- *Confounds stated:* two of the top three are I Don't Blame You, so the song may matter as
+  much as the edit; 11 Shorts; one lyric-titled Short ("put on a record let me dance", 1,054)
+  didn't travel far either.
 
 ### 4.4 Last month (19 Sep → 20 Oct readings)
 
@@ -267,87 +304,117 @@ Appendix only:
 | Top Fans videos | Release Strategy: "only available to artists with a minimum number of top fans" | Appendix only |
 | Stations | No YouTube help page (invite-only test, per trade press) | Not recommended at this size |
 
-## 5. Every claim on the deck, slide by slide
+### 4.10 Frame review — how and what
 
-1. **Cover.** "Tommy's Dance Place is open." A look you can spot in a second, songs that are
-   connecting, live Shorts that move; "an achievable plan to build on them".
-2. **"A look and a sound you can spot in a second."** Sunderland, Fiction, dance-punk,
-   polka dots and braces, camcorder footage, Katie Anderson's visuals, Tommy's Dance Place.
-   *What it means:* the identity is there; put it in front of people more often.
-3. **"A real audience — and a pause since August."** 6,270 subscribers; 106 videos; 55 days
-   since the last upload; I Don't Blame You +4.2K last month at 13 months old. Weekly views
-   chart (§4.5). *What it means:* views have held at ~10K a week, so restart around the
-   deluxe EP and tour.
-4. **"Several songs are finding an audience."** Six thumbnails with lifetime views (§4.1).
-   *What it means:* keep pointing people to these songs; we'll check whether either of the
-   two biggest had paid support — "context, not a judgement on the work".
-5. **"His most-viewed Shorts all show him performing."** Top three against every
-   announcement Short (§4.3). *What it means:* make Shorts from performance, link each to its
-   song, and keep announcements for Community.
-6. **"Dancing, live shows and familiar echoes."** Four quotes (§4.6). The note says older
-   listeners feature, but the comments can't show audience age.
-7. **"A few fixes, done once."** Six fixes, each marked Checked or Studio check (§4.7).
-8. **"One idea to borrow from each."** Antony Szmierek (a running character), mary in the
-   junkyard (a live version), Freak Slug (a steady rhythm) (§4.8).
-9. **"Use what's filmed. Then capture one thing well."**
-   - Step 1, existing footage: the Isle of Wight full set, the Kooks support, SXSW (Waterloo
-     Records), Live at The Bunker. If usable, 2–3 Shorts.
-   - Step 2, choose ONE: a filmed tour show or a focused session, with what each gives, its
-     trade-off and what it needs.
-   - "Do one first. Film more only if there's budget and the response is clearly
-     encouraging."
-10. **"Give the album its own world, so fans know the era."** Four blocks:
-    - A look across everything (Tom's EP era).
-    - A trailer before the first single (Steven Wilson's, 73K).
-    - In-world posts (Tom's own Dance Place post).
-    - One place that holds the album: a playlist, plus optionally a full-album visualiser
-      (Freak Slug).
+**Method.** Long-form: four storyboard stills per video (`i.ytimg.com/vi/ID/hqdefault, hq1,
+hq2, hq3`). Shorts: the player's `<video>` sought to 5/20/35/50/70/90% and frames drawn to
+canvas. **Sound was not heard.**
 
-    The decision to make first: does the album continue Tommy's Dance Place or open a new
-    room?
-11. **"A flexible album rollout, built around release week."**
-    - 6 → 1 weeks before: the era set (look, trailer Short); lead single with a Premiere;
-      the playlist ready; optionally the live version.
-    - Release week: a focus-track video, 2–3 performance Shorts, a Community post;
-      optionally a full-album visualiser.
-    - Weeks 1–2 after: one follow-up within 7–14 days; comment replies.
-    - Weeks 3–6 after: the song fans respond to most gets one more piece; optionally a tour
-      film.
-12. **"Three questions worth answering first"** (Studio):
-    1. What support did the strongest videos have?
-    2. Do the live videos hold people?
-    3. Do Shorts lead to the songs?
+| Video | Observed |
+|---|---|
+| Put On A Record Tommy | Polka-dot shirt, Rowetta, dark dance hall with a disco ball (the Tommy's Dance Place set) |
+| I Don't Blame You | Tom performing to camera; ornate background, lying in grass, blue scenes |
+| Little Bits | Band studio performance |
+| Fashion | Tom against a sheet, outfit changes |
+| What | Black and white, sunglasses, mic |
+| SFX | Red shirt, mic, green title card |
+| Our Song | Record shop (Waterloo Records), yellow title |
+| Rockstar? | Blue background, braces, close singing |
+| Antony Szmierek · The Heron | A man with large wings in a period house |
+| mary in the junkyard · Crash Landing session / video | Studio, headphones, piano / aviator imagery |
+| Freak Slug · Wishing Bone / Serpent / Amulet visualiser | Home-video feel with friends / fire at dusk / captioned montage |
 
-    Each is shown with the data needed and the decision it informs.
-13. **Five next steps.** Now: fix the basics; find the footage; choose one capture. Album
-    preparation: share a Studio export and the paid-support answer; tell us the album window
-    and its world.
+*Interpretation:* nearly every official video is performance-led; Tom's "visualisers" are
+performance-to-camera pieces, not abstract visualisers.
+
+### 4.11 Possible footage sources (public uploads only)
+
+| Source | ID | Published | Views |
+|---|---|---|---:|
+| Tom A Smith Live at IOW 2026 — full set, 41 min (plus POART / IDBY clips; Sky IOW playlist) | 97kne_eYrHI | 25 Aug 2026 | 3,067 |
+| Live at Old Royal Naval College, supporting The Kooks | lTJAYivuM5Q | 7 Aug 2026 | 1,493 |
+| It's All Over — Live at Third Man Records London | s9JzNGt42w4 | 12 Dec 2025 | 1,232 |
+| Man Overboard — Live at The Bunker, Sunderland | LztmHJNku7I | 19 Dec 2024 | 993 |
+| "…THE MOVIE — Our First Full Tour" (2024 tour film) | Zxh_JPRhD10 | 16 Jun 2024 | 716 |
+| SXSW / Waterloo Records footage (used in the Our Song visualiser) | qqJcrdPFD2g | 26 Jun 2026 | — |
+
+Whether raw files, angles, usable sound or permission to re-cut exist is unknown. Slide 6
+asks four questions: what files; what sound; can we use it (ownership: broadcaster,
+festival, venue); which songs it covers.
+
+## 5. Every claim on the deck (v2), slide by slide
+
+1. **Cover — "Tommy's Dance Place is open."** Something distinctive is already here; put the
+   performance into the feed, give people somewhere to go next, build towards the album
+   without a second job.
+2. **"There's already something distinctive here."** Four points: a look (polka dots,
+   braces, camcorder texture, title cards, mostly Katie Anderson); performance at the centre
+   (§4.10); a world (Tommy's Dance Place, "everyone is invited"); fans talk about the dancing
+   and the shows (two quotes, §4.6). Six thumbnails.
+3. **"The songs are still finding viewers."** 6,270 subscribers; ~10K channel views a week
+   since June (§4.5); 55 days since the last upload; +15K last month across six uploads
+   (§4.4: 14,819). Six cards: lifetime views (labelled) plus last-month additions. Note: paid
+   support unknown, asked about before reading the two biggest.
+4. **"Put the performance into the feed."** §4.3 — observation / test, confounds stated.
+5. **"Give people somewhere to go next."** Clip → song video → playlist, each with the setup
+   step: Shorts related video (Set in Studio); end screen, pinned comment, description link
+   block (5 of 106 have a link — Checked), lyric captions; an official-videos playlist (none
+   of the six public playlists holds them — Checked). *"This is the route we're building, not
+   one we've shown people take. Studio would tell us whether they do."*
+6. **"Start with what already exists."** §4.11 and the four questions. "If the answers are
+   good, the next few Shorts and a live song video could come without a new shoot."
+7. **"Stay active without creating a second job."**
+   - **First** (artist time: little or none): the route; performance Shorts from existing
+     footage; live cut-downs from the IOW set; lyric captions; Community posts in Tom's voice.
+   - **Next** (only if footage runs short and feasible): one filmed tour show *or* one short
+     session.
+   - **Optional** (only when it adds something): personality pieces, BTS, extra sessions.
+   - A month between releases *could* look like: 2–4 performance Shorts; 1 song video (live
+     version or lyric video); a few Community posts; now and then something personal. "An
+     example to adapt, not a quota."
+8. **"Borrow one useful idea from each artist."** Antony Szmierek — a running motif (For Tom:
+   if the album has a strong image or phrase, let it recur). mary in the junkyard — a simple
+   live version (For Tom: one live version of the next single). Freak Slug — a steady rhythm
+   (For Tom: something to watch each month of the album era, often from existing footage).
+   §4.8.
+9. **"Plan the follow-up before the single goes live."** Before release (main asset, 2–3
+   clips, playlist, links) → Release (one focal point) → Following days (Shorts, comments,
+   Community) → Around 7–14 days (a worthwhile follow-up, *if there is one*) → Between
+   singles (performances, personality, catalogue) → Album week and after (focus tracks chosen
+   by response). The 7–14 days is labelled a planning prompt, not a proven best time.
+10. **"Give the album a recognisable identity."** Artwork, video treatment, thumbnails,
+    language, playlists. Tommy's Dance Place shown as a reference only. "It doesn't have to
+    continue Tommy's Dance Place or invent a fictional world — it just has to be
+    recognisable."
+11. **"Three questions Studio can answer."** Do Shorts lead to the songs? Do live videos hold
+    people? What drove the two biggest videos (traffic sources plus any paid support)?
+12. **"What we can help with next."** From Tom and Fiction: footage (files, sound,
+    permissions); Studio access or export, and paid-support context; the album window and
+    direction, and whether one capture is feasible. From VMG: set up the route; package
+    what exists (Shorts test, live cut-down); plan each single and read the response at 48
+    hours, 7 days and 28 days.
+
+Removed from v1 slides (now appendix or cut): the weekly chart, the fans quotes slide (two
+quotes folded into slide 2), the six-fix basics slide (folded into slide 5), the
+session-vs-show trade-off grid, the era slide's Steven Wilson trailer and Freak Slug album
+visualiser, and the dated album rollout grid.
 
 ## 6. Where I think it's weakest
 
-1. **Slide 5 rests on very few Shorts** (11 since Dec 2025). The "top three" framing is
-   accurate but thin. One of the three is a clip from the music video, not a live
-   performance. One Short ("Our Song", 854) was grouped without its content being checked.
-2. **Slide 4 may still read as a ranking.** Lifetime views across ages, with 141K and 89K
-   leading. Paid support is unknown either way.
-3. **"Views have held at ~10K a week" uses a stepping counter.** Single weeks swing from
-   2.8K to 19.1K. Averages over 7–12 weeks are steadier but approximate.
-4. **The weekly counter and the per-video sums disagree** (+39K against +20.7K over the
-   month). The deck uses the counter for the channel trend and per-video readings for
-   individual uploads.
-5. **The peer evidence is thin in places.** Antony's in-world Shorts are small; the slide
-   says so. Freak Slug is four times Tom's size. mary in the junkyard's session numbers sit
-   far below their videos.
-6. **The world-building slide uses a much larger label-mate** (Steven Wilson) for the
-   trailer example. Is that reasonable, or should a peer of Tom's size be found?
-7. **The footage inventory is unknown.** The deck lists public uploads as clues, not
-   confirmed raw material.
-8. **The basics are partly unverified:** captions, end screens, pinned comments, Shorts
-   links and the full channel description need Studio or a signed-in view.
-9. **The tour-show versus session trade-off is reasoned, not evidenced** — no channel data
-   compares them for Tom.
-10. **The "Familiar echoes" quote** is from an older listener, with age in the quote itself.
-    The slide notes the limit, but a reader may still generalise.
+1. **Slide 4's test rests on 11 Shorts**, with a song confound (two of three are I Don't
+   Blame You). The slide frames it as a test, but "lyric title + bright opening" is our
+   reading, not an established cause.
+2. **Frames were sampled and sound wasn't heard.** "Close, bright moment" is judged from six
+   frames; a different opening second is possible.
+3. **Slide 3's "+15K" sums six uploads chosen because they're the biggest movers**; the
+   channel counter shows ~39K for the same period (§4.4). The slide labels it as the six
+   shown.
+4. **The route on slide 5 is unproven.** Labelled as such; Studio would show it.
+5. **The footage inventory is unknown** — slide 6 lists public uploads only.
+6. **Peer evidence is thin in places** (Antony's Shorts small; Freak Slug four times Tom's
+   size; mary's sessions far below their videos).
+7. **The between-release month is an illustration**, not derived from Tom's data.
+8. **Basics are partly unverified** (captions, end screens, pinned comments, Shorts links).
 
 ## 7. Deliberately not claimed
 
@@ -361,17 +428,13 @@ Appendix only:
 
 ## 8. Questions for the reviewer, in priority order
 
-1. Does the main story (identity, songs connecting, performance Shorts) follow from §4,
-   or is any part stronger than the evidence?
-2. Is slide 5's Shorts claim defensible on 11 Shorts? Would you reword it?
-3. Does slide 4 or the appendix still imply anything about paid support, or rank formats
-   by lifetime views?
-4. Is the ONE-capture recommendation (slide 9) clear and proportionate? Is the trade-off
-   fair?
-5. Is the album rollout (slide 11) achievable for a small team without a date? Is anything
-   in "core" really optional?
-6. Are the three peer ideas the most useful ones available from the Watcher's list, and
-   are their limits stated honestly?
-7. Is the album-era slide grounded enough in Tom's own material, or does it lean on other
-   artists?
+1. Do the headlines alone tell the plan clearly? Is any one vague or generic?
+2. Is slide 4 defensible — is the observation / test split clean, and are the confounds
+   enough?
+3. Does slide 5 anywhere imply the route is proven?
+4. Are the First / Next / Optional tiers proportionate for a small team? Does the month
+   example read as a quota?
+5. Does slide 9 make 7–14 days sound like a rule?
+6. Does slide 10 assume anything about the album's concept?
+7. Is ownership on slide 12 clear and fair to the label?
 8. Tone: is anything patronising to the artist, or likely to land as criticism of the label?
