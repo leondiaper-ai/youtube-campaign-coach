@@ -111,8 +111,9 @@ On Chapel Slope (reading of 2 Oct = 8 views, pre-Premiere):
 d8 303,489 · d9 310,217 · d10 315,520 · d11 319,999 · d12 324,331 · d13 328,818 ·
 d14 333,000 · d15 337,340 · d16 341,239 · d17 344,501 · d18 347,771`
 
-Derived: last 7 days — session +21,418 (≈3,060/day); On Chapel Slope +23,440 (≈3,350/day).
-Session day 12→18 ≈7,955/day; On Chapel Slope day 12→18 ≈3,907/day. Likes/views 2.9% vs
+Derived: last 7 days (13→20 Oct readings) — session +21,418 (≈3,060/day; 684,806 → 706,224);
+On Chapel Slope +27,772 (≈3,970/day; 319,999 → 347,771). *Correction:* the first version of
+this pack and the deck gave OCS as +23,440, which was a six-day figure. Likes/views 2.9% vs
 2.8%. The session's daily gain rose on 3 Oct (+8,867 vs +5,821 the day before), the day
 after OCS's Premiere — noted, not interpreted. The reading time of day is not fixed.
 
@@ -238,43 +239,47 @@ Erase. Definitive Digital Edition (~6 months, 1.1K) · Royal Albert Hall announc
 
 ## 5. Every claim on the deck, slide by slide
 
+*Revised 20 Oct 2026 (editorial simplification at the team's request): one takeaway per
+slide, two or so examples, a "For the team" line; method and qualifications moved to the
+Analysis sheet. The format medians in §4 are no longer on the slides.*
+
 1. **Cover.** "Welcome to the village." Ticker restates the observance dates (11 Sep, 2 Oct,
-   RAH 28–29 Oct, 6 Nov). Image: On Chapel Slope thumbnail.
+   RAH 28–29 Oct, 6 Nov).
 2. **"Two singles in, seventeen days to the album."** Timeline of §4.1 plus RAH and release.
-3. **"Official videos lead. Performance and Steven's own voice reliably follow."** Five
-   panels: Harmony Codex official videos median 562K (§4.4); Future Bites Sessions median
-   191K, "none below 120K" (§4.3); RAH clips median 414K (§4.6); Shorts on his music median
-   29K, "almost three times" announcements 10K (§4.5); longer films 20–96K (§4.7).
-4. **"Both singles found their audience — and both are still being found."** Chart of §4.2;
-   512K vs 295K at day 7; 615K vs 348K at day 18; ≈3K a day each over the last week. Caveat
-   on slide: the session carried the album announcement and title track.
-5. **"Steven and the band, playing the music."** Session 706K "the campaign's most-viewed
-   upload"; Voyage 34 session 390K; Pariah RAH 1.44M; "the first Village Hall Session".
-6. **"When Steven explains the music, Shorts travel further."** §4.5 medians; later Shorts
-   322K and 213K "among the channel's most-viewed Shorts".
-7. **"Fans talk about the playing, the story — and Steven being open."** §4.10.
-8. **"The evidence is strongest for performance and for Steven's own voice."** Scorecard:
-   session (3/3), making the song (3/3, "above all in Shorts"), lyric/visualiser (2/3,
-   catalogue precedent), making the video (1/3, "keep it short").
-9. **Priority 1 — "More from the village hall."** If further sessions were recorded,
-   release one around the album and gather in a playlist; credit Randy McStine and Russell
-   Holzman via Collaborations; if RAH is filmed, a single song. "Confirm what was filmed."
-10. **Priority 2 — "Steven, explaining how the village was built."** One song/sound per
-    Short; cut from existing material if it exists; one longer track-by-track after release.
-11. **Priority 3 — "A visualiser that takes fans further into the village."** Built from
-    the parish world; fan-submitted photos *where permissions allow*; keep making-of light.
-12. **Bringing fans closer.** Afterparty after a release-week Premiere; Station of his own
-    catalogue; Top Fans message before 6 Nov; Community parish notices, questions answered
-    by Short replies, a poll. Status line on each.
-13. **Three next steps.** (01, assemble now) Shorts of Steven explaining the songs + a
-    Community question call; (02, assemble now with partner manager) release-week Top Fans
-    message → Premiere → Afterparty, if a 6 Nov Premiere is planned; ask about Station;
-    fill the Requiem playlist; (03, needs filming) the next Village Hall Session; confirm
-    RAH filming; visualiser needs design time.
+3. **"Three things fans already respond to."** (1) Official videos are a core part of the
+   channel — What Life Brings 822K, On Chapel Slope 348K. (2) Performances give fans another
+   way to enjoy the music — Village Hall Session 706K, Pariah (RAH) 1.4M. (3) Steven talking
+   about his music is a useful direction for Shorts — Records I've worked on 322K, Playing
+   bass on a new song 213K. *For the team:* the campaign already has an official video and a
+   performance; Steven explaining the music is the natural next layer. No ranking claimed.
+4. **"Both singles are still adding views."** Session 706K, +21K in the last week; On Chapel
+   Slope 348K, +28K in the last week (§4.2). The day-7 / day-18 comparison was removed.
+5. **"Fans love seeing the band play."** Village Hall Session 706K; Voyage 34 (Future Bites
+   Sessions) 390K. *For the team:* another session is the natural follow-up, if footage exists.
+6. **"Take fans inside the music."** Who played drums on 'What Life Brings'? (2024) 81K;
+   Three unusual instruments in my studio (2024) 115K; Playing bass on a new song (2025) 213K.
+7. **"What fans say they value."** Three quotes: the players (Russell Holzman), seeing how
+   it's made (Making of To The Bone), the village world (parish circular).
+8. **"Three ways to build on this."** Another performance; Steven explaining the songs;
+   supporting visual pieces (optional visualiser; story of the video if there's footage).
+   Scores removed.
+9–11. **Each idea answers:** What could we publish? Why does it fit Steven's channel? What
+   would we need? (9) a second Village Hall Session or one RAH song, if filmed and cleared;
+   credit the players as collaborators. (10) a short series of Steven explaining songs/sounds;
+   optional longer track-by-track; needs Steven's time or existing footage. (11) optional
+   visualiser/lyric video; a short making-of for On Chapel Slope if there's good footage or a
+   story — needs design time, B-roll, or Mike Bennion.
+12. **"Four ways to invite fans in."** One sentence each for Afterparty, Station, Top Fans,
+   Community; one shared note: Afterparty, Station and Top Fans depend on eligibility, confirm
+   with YouTube; Community available now.
+13. **"Three things to do before 6 November."** (1) Check what session, studio, interview and
+   BTS material exists, and whether RAH is filmed. (2) Choose one strong follow-up and invite
+   fan questions via a Community post. (3) Talk to YouTube about fan features; choose the best
+   fit for release week. Nothing is described as ready until the source material is confirmed.
 
 ## 6. The places I think this is weakest
 
-1. **Slide 4 is not a fair race.** The session was the album announcement, the title track
+1. **(Now removed from the slide.) The two singles were never a fair race.** The session was the album announcement, the title track
    and the first new music after a teaser campaign; On Chapel Slope was a second single.
    The slide says so, but a reader may still take "512K vs 295K" as a format verdict.
 2. **"Performance is the strongest thread" leans on one 2026 video.** Historically, sessions
