@@ -29,6 +29,7 @@ const nextConfig = {
       // Oden & Fatzo × YouTube: the Somehow It Flies album campaign deep dive.
       { source: '/odenfatzo', destination: '/odenfatzo/index.html' },
       { source: '/stevenwilson', destination: '/stevenwilson/index.html' },
+      { source: '/tomasmith', destination: '/tomasmith/index.html' },
     ];
   },
 };

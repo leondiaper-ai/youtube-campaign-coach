@@ -71,8 +71,9 @@ Because there is no album date, the plan uses a relative timeline around release
 - **Size:** 6,270 subscribers; 743,991 lifetime views; 106 public uploads since 2021. The
   channel appears to be an Official Artist Channel: it has a Releases tab, and art tracks
   appear in the Music videos shelf. Confirm in Studio.
-- **Channel views per week** (counter readings): about 12–14K a week in June–July 2026,
-  falling to about 7–8K a week from mid-September to October.
+- **Channel views per week** (counter readings): about 9.7K a week on average from 9 Jun
+  to 1 Sep, and about 10.5K from 1 Sep to 20 Oct. *Correction:* an earlier draft said
+  views fell to 7–8K a week; exact weekly windows show they held steady.
 - **Activity:** the last upload was 25 Aug (the full Isle of Wight set). There have been no
   uploads for 55 days, and the Watcher classifies the channel as COLD.
 - **The two big videos are still finding viewers** in the last 31 days:
