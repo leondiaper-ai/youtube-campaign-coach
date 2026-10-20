@@ -393,12 +393,15 @@ brief and deck.
     language, playlists. Tommy's Dance Place shown as a reference only. "It doesn't have to
     continue Tommy's Dance Place or invent a fictional world — it just has to be
     recognisable."
-11. **"Three questions Studio can answer."** Do Shorts lead to the songs? Do live videos hold
-    people? What drove the two biggest videos (traffic sources plus any paid support)?
+11. **"A fuller picture, with channel access."** "This review uses public YouTube data. If
+    you're happy to add me to YouTube Studio, I can look more closely at who's watching, how
+    they're finding Tom and which content is connecting." / "That would help us refine these
+    ideas and support the album campaign as it develops." A light offer, not a measurement
+    programme.
 12. **"What we can help with next."** From Tom and Fiction: the performances Tom rates;
-    Studio access or export, and paid-support context; the album window and direction. From VMG: set up the route; package
-    what exists (Shorts test, live cut-down); plan each single and read the response at 48
-    hours, 7 days and 28 days.
+    Studio access if they're happy to; the album window and direction. From VMG: set up the route; package
+    what exists (Shorts test, live cut-down); plan each single's follow-up, ready before
+    release day.
 
 Removed from v1 slides (now appendix or cut): the weekly chart, the fans quotes slide (two
 quotes folded into slide 2), the six-fix basics slide (folded into slide 5), the
