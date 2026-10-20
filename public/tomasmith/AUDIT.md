@@ -52,6 +52,11 @@ generic advice, as overcommitting a small team, or as a judgement on the creativ
 - Replace Jamie Webster with Freak Slug.
 - Give each peer a distinct idea.
 
+**v2.1 instruction (applied):** asset rights, ownership, permissions, raw-file availability
+and technical production checks are out of scope (handled separately by the team) and are
+removed from the whole deck, appendix included. Existing footage is presented as creative
+opportunity; repeated caveats trimmed.
+
 **v2 instructions (applied):**
 - Simplify using the Amyl deck for structure, clarity and practical recommendations; keep
   Tom's camcorder identity and evidence.
@@ -59,7 +64,7 @@ generic advice, as overcommitting a small team, or as a judgement on the creativ
   separate observation from interpretation.
 - Performance can come from music videos as well as live footage.
 - Present clip → song video → playlist as the intended journey, not proven conversion.
-- Ask what files, sound and permissions exist before any new filming.
+- Start from existing footage before any new filming (superseded in v2.1: presented as creative opportunity, no clearance questions).
 - Priority tiers (First / Next / Optional) plus a light between-release example — not a quota.
 - Follow-up timeline; 7–14 days is a planning prompt, not a proven optimum, and not a
   reason to manufacture a video.
@@ -338,9 +343,9 @@ performance-to-camera pieces, not abstract visualisers.
 | "…THE MOVIE — Our First Full Tour" (2024 tour film) | Zxh_JPRhD10 | 16 Jun 2024 | 716 |
 | SXSW / Waterloo Records footage (used in the Our Song visualiser) | qqJcrdPFD2g | 26 Jun 2026 | — |
 
-Whether raw files, angles, usable sound or permission to re-cut exist is unknown. Slide 6
-asks four questions: what files; what sound; can we use it (ownership: broadcaster,
-festival, venue); which songs it covers.
+Slide 6 presents these as creative opportunities. Asset rights, permissions, raw files and
+technical production checks are handled separately by the team and are out of scope for this
+brief and deck.
 
 ## 5. Every claim on the deck (v2), slide by slide
 
@@ -361,13 +366,15 @@ festival, venue); which songs it covers.
    block (5 of 106 have a link — Checked), lyric captions; an official-videos playlist (none
    of the six public playlists holds them — Checked). *"This is the route we're building, not
    one we've shown people take. Studio would tell us whether they do."*
-6. **"Start with what already exists."** §4.11 and the four questions. "If the answers are
-   good, the next few Shorts and a live song video could come without a new shoot."
+6. **"Start with what already exists."** §4.11, each with what it could become (IOW cut song
+   by song; Greenwich open-air clips; Waterloo Records tied to Our Song; Third Man and The
+   Bunker for between releases; the 2024 tour film as a look back). "The next few Shorts and
+   a live song video can come from what's already been filmed."
 7. **"Stay active without creating a second job."**
    - **First** (artist time: little or none): the route; performance Shorts from existing
      footage; live cut-downs from the IOW set; lyric captions; Community posts in Tom's voice.
-   - **Next** (only if footage runs short and feasible): one filmed tour show *or* one short
-     session.
+   - **Next** (around the tour, if it adds something new): one filmed tour show *or* one
+     short session.
    - **Optional** (only when it adds something): personality pieces, BTS, extra sessions.
    - A month between releases *could* look like: 2–4 performance Shorts; 1 song video (live
      version or lyric video); a few Community posts; now and then something personal. "An
@@ -388,9 +395,8 @@ festival, venue); which songs it covers.
     recognisable."
 11. **"Three questions Studio can answer."** Do Shorts lead to the songs? Do live videos hold
     people? What drove the two biggest videos (traffic sources plus any paid support)?
-12. **"What we can help with next."** From Tom and Fiction: footage (files, sound,
-    permissions); Studio access or export, and paid-support context; the album window and
-    direction, and whether one capture is feasible. From VMG: set up the route; package
+12. **"What we can help with next."** From Tom and Fiction: the performances Tom rates;
+    Studio access or export, and paid-support context; the album window and direction. From VMG: set up the route; package
     what exists (Shorts test, live cut-down); plan each single and read the response at 48
     hours, 7 days and 28 days.
 
@@ -410,7 +416,6 @@ visualiser, and the dated album rollout grid.
    channel counter shows ~39K for the same period (§4.4). The slide labels it as the six
    shown.
 4. **The route on slide 5 is unproven.** Labelled as such; Studio would show it.
-5. **The footage inventory is unknown** — slide 6 lists public uploads only.
 6. **Peer evidence is thin in places** (Antony's Shorts small; Freak Slug four times Tom's
    size; mary's sessions far below their videos).
 7. **The between-release month is an illustration**, not derived from Tom's data.
@@ -423,7 +428,6 @@ visualiser, and the dated album rollout grid.
 - Retention, traffic sources, returning viewers, subscribers per video, geography.
 - Audience age or territory size.
 - Any growth forecast or numeric target.
-- That a specific footage archive exists, or that any filming is budgeted.
 - That Afterparty, Top Fans or Stations are available to the channel.
 
 ## 8. Questions for the reviewer, in priority order
