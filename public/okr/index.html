@@ -127,6 +127,17 @@ h3.display{font-size:clamp(1.05rem,1.6vw,1.4rem);font-variation-settings:'wdth' 
 .uses li i{font-style:normal;font-family:'DM Mono',monospace;font-size:.66rem;color:var(--red-lt);flex:none;letter-spacing:.1em}
 .future{border-left:3px solid var(--red);padding:.15rem 0 .15rem 1rem;color:var(--cream);font-size:clamp(.95rem,1.2vw,1.1rem);line-height:1.45;max-width:46ch;margin-top:1.1rem}
 
+/* Starting point / today / potential. */
+.steps{display:grid;grid-template-columns:1fr 1.15fr 1fr;gap:clamp(.9rem,2vw,1.8rem);margin-top:clamp(.7rem,1.6vw,1.1rem)}
+.steps>div{border-top:2px solid var(--line);padding-top:.6rem}
+.steps>div.on{border-top-color:var(--red)}
+.steps .q{font-family:'DM Mono',monospace;font-size:.64rem;letter-spacing:.14em;text-transform:uppercase;color:var(--dim);margin-bottom:.4rem}
+.steps>div.on .q{color:var(--red-lt)}
+.steps p{color:var(--warm);font-size:clamp(.84rem,1.02vw,.93rem);line-height:1.45}
+.steps p b{color:var(--cream);font-weight:600}
+.steps .num{font-family:'Archivo',sans-serif;font-variation-settings:'wdth' 82,'wght' 800;font-size:1.9em;line-height:1;margin-right:.2rem;color:var(--cream)}
+@media(max-width:860px){.steps{grid-template-columns:1fr}}
+
 /* Links beside the examples. */
 .linkrow{display:flex;justify-content:space-between;align-items:baseline;gap:1rem;flex-wrap:wrap;margin-top:.55rem}
 .linkrow a{font-family:'DM Mono',monospace;font-size:.7rem;letter-spacing:.1em;text-transform:uppercase;color:var(--red-lt);text-decoration:none;border-bottom:1px solid currentColor;padding-bottom:.1rem}
@@ -290,19 +301,31 @@ body.present .hint{display:block}
   <div class="inner">
     <div class="label reveal">What exists today · YouTube dashboard (Watcher)</div>
     <h2 class="display reveal" style="margin-top:.5rem;max-width:36ch;font-size:clamp(1.5rem,3vw,2.7rem)">YouTube dashboard: a shared view of our channels</h2>
-    <p class="intro reveal" style="max-width:74ch;font-size:clamp(1rem,1.3vw,1.15rem)">I built this dashboard to bring key public YouTube channel information together across the roster. It is live and supports my work and colleagues in the UK, Nordics and Australia.</p>
+
+    <div class="steps stagger">
+      <div>
+        <div class="q">Starting point</div>
+        <p>No shared view of channel activity across the roster. The information existed &mdash; channel by channel, and in Studio for those with access &mdash; but not in one place.</p>
+      </div>
+      <div class="on">
+        <div class="q">Today</div>
+        <p><b class="num">250+</b> <b>channels monitored daily in one place.</b> Colleagues in Australia and the Nordics add artists to their own boards, extending that coverage. Boards also exist for the US, EU, LATAM and Asia.</p>
+      </div>
+      <div>
+        <div class="q">Potential</div>
+        <p>More territory- and label-specific views could give more colleagues useful oversight of their own rosters. Wider visibility can lead to more conversations, ideas and campaign support.</p>
+      </div>
+    </div>
+
     <div class="grid2" style="margin-top:clamp(.7rem,1.6vw,1.1rem);grid-template-columns:1.15fr 1fr;gap:clamp(1.2rem,2.8vw,2.8rem)">
       <div class="reveal">
-        <div class="cap">Channel Health · Virgin managed channels · 20 October 2026</div>
-        <a class="shot crop" href="/growth" target="_blank" rel="noopener" style="--sh:clamp(160px,23vh,230px);--op:0 0;display:block">
+        <div class="cap">What we can now see · upload activity, recent views, subscriber movement, which content is moving · 20 Oct 2026</div>
+        <a class="shot crop" href="/growth" target="_blank" rel="noopener" style="--sh:clamp(160px,24vh,240px);--op:0 0;display:block">
           <img src="/okr/img/watcher-table.jpg" alt="YouTube dashboard, Channel Health table: artist, 30-day trend, status, formats, subscribers and views over seven days">
         </a>
         <div class="linkrow"><a href="/growth" target="_blank" rel="noopener">Open the YouTube dashboard &rarr;</a><span class="label">Public YouTube data · updated daily</span></div>
-        <ul class="uses compact" style="margin-top:.6rem">
-          <li><i>01</i><span><b>Monitor activity and recent performance</b> across multiple artist channels.</span></li>
-          <li><i>02</i><span><b>Spot campaigns or channels</b> worth a closer look.</span></li>
-          <li><i>03</i><span><b>Bring useful information into conversations</b> with colleagues and labels.</span></li>
-        </ul>
+        <div class="q" style="margin-top:.7rem;font-family:'DM Mono',monospace;font-size:.64rem;letter-spacing:.14em;text-transform:uppercase;color:var(--red-lt)">How it helps</div>
+        <p class="body" style="margin-top:.3rem;max-width:56ch">It lets me follow far more channels than I could reasonably check by hand, prioritise attention, and share useful updates with teams.</p>
       </div>
       <div class="stagger">
         <div class="cap">Quick channel report · copied from the dashboard · 20 October 2026</div>
@@ -310,20 +333,16 @@ body.present .hint{display:block}
           <div class="report-h">Quick Ezra Collective YouTube update</div>
           <ul>
             <li><b>+323K</b> channel views in the last 7 days (to 20 Oct)</li>
-            <li><b>+300</b> public subscribers in the last 7 days; <b>+2,300</b> in the last 30 days (75.8K total)</li>
+            <li><b>+300</b> public subscribers in 7 days; <b>+2,300</b> in 30 days (75.8K total)</li>
             <li><b>23 uploads</b> in the last 30 days; last upload 19 Oct</li>
             <li><b>Rehearsal Tapes</b> (9 Sep): <b>308K</b> views, up from 122K in release week</li>
           </ul>
           <div class="report-c"><b>Context</b> &middot; album out 11 Sep; the channel has stayed active since, with live and tour clips from Japan and Korea this month.</div>
         </div>
         <p class="future" style="margin-top:.6rem">Quick channel reports make key figures easy to share with labels and teams.</p>
-        <p class="body" style="margin-top:.6rem;max-width:54ch;font-size:.88rem">Shared visibility gives more people the context to contribute ideas and share learning, including without Studio access. Studio provides deeper private analytics.</p>
       </div>
     </div>
-    <div class="ext reveal" style="margin-top:.7rem">
-      <div class="label" style="color:var(--red-lt)">Possible extension · a dedicated view for label partners</div>
-      <p class="body" style="font-size:.88rem;max-width:none">The dashboard could also give label partners a view of their own artists and channels, bringing topline performance and upload activity together across their roster: one place to monitor at scale, see where attention might help, and support conversations with VMG. An opportunity to explore with interested partners.</p>
-    </div>
+    <p class="body reveal" style="margin-top:.7rem;padding-top:.5rem;border-top:1px dashed var(--line);font-size:.86rem;max-width:none">Coverage shows scale. Whether it leads to more consistent artist activity and more views or consumption is what we would measure.</p>
   </div>
 </section>
 
@@ -459,7 +478,7 @@ body.present .hint{display:block}
       <div><h3 class="display">Consistent artist activity</h3><p>Priority artists active in more weeks, with shorter gaps and more follow-up around releases.</p></div>
       <div><h3 class="display">Views and consumption</h3><p>Release weeks against the weeks before, and territory consumption over comparable periods.</p></div>
     </div>
-    <p class="body reveal" style="margin-top:clamp(1.2rem,2.6vw,2rem);color:var(--cream);max-width:48ch">Targets and ownership are the group&rsquo;s to decide. Three questions to start the conversation:</p>
+    <p class="body reveal" style="margin-top:clamp(1.2rem,2.6vw,2rem);color:var(--cream);max-width:60ch">Dashboard coverage shows scale; artist activity and consumption show outcomes. Targets and ownership are the group&rsquo;s to decide. Three questions to start:</p>
     <div class="asks reveal">
       <span>Where could this be useful?</span><span>Which measures would help?</span><span>What would teams need to take this further?</span>
     </div>
@@ -488,7 +507,7 @@ body.present .hint{display:block}
       <tr><td>Data used</td><td colspan="2">Public YouTube Data API v3 only; no Studio or Analytics access</td></tr>
     </table>
     <p>The screenshot on slide 3 is the Channel Health table as it looked on 20 October 2026, cropped to the roster rows. The status labels (healthy, weak conversion, underfed, cold) are our own rules over public figures, not YouTube classifications. Slide 5&rsquo;s screenshot is the UK landscape page&rsquo;s Crossover view on the same day; slide 4&rsquo;s is a page from the published Amyl deck (<code>/amyl</code>).</p>
-    <div class="an-note"><b>Team usage, stated carefully.</b> UK, Nordics and Australia teams work from the shared view: Nordics has had its own board since the summer, Australia&rsquo;s board went live on 23 September 2026 with artists the team added. Workspaces also exist for the US, Europe, LATAM and Asia, but a workspace existing, or artists being listed in it, is not evidence of use, and the deck does not count them.</div>
+    <div class="an-note"><b>Team usage, stated carefully.</b> Australia and the Nordics are the confirmed cases of colleagues adding artists: Australia&rsquo;s board went live on 23 September 2026 with artists the team added (12 channels, 6 priority, last updated 20 Oct 2026); the Nordics board has run since the summer (15 channels, last updated 14 Oct 2026). Boards also exist for the US (5 channels), EU (1), LATAM (4) and Asia (1); entries on those boards are not counted as team usage. &ldquo;Starting point&rdquo; on the slide means no shared roster-wide view existed, not that information was unavailable: Studio analytics and channel pages were always there for those with access.</div>
     <h4 style="font-family:'DM Mono',monospace;font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;margin:1.4rem 0 .5rem">The quick report on slide 3</h4>
     <table>
       <tr><th>Line</th><th>Value</th><th>Source · period</th></tr>
