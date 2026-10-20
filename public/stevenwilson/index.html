@@ -130,7 +130,8 @@ h2.display{font-size:clamp(2rem,4.2vw,3.6rem);max-width:22ch}
 .scrim-f::after{content:'';position:absolute;inset:0;background:rgba(14,12,10,.86)}
 .grid2{display:grid;grid-template-columns:1fr 1fr;gap:clamp(1.4rem,3.6vw,3.4rem)}
 .grid2>*{min-width:0}
-@media(max-width:880px){.grid2{grid-template-columns:1fr}}
+.g-vis{grid-template-columns:1.6fr 1fr}
+@media(max-width:880px){.grid2,.g-vis{grid-template-columns:1fr}}
 .pictag{position:absolute;right:clamp(1rem,3vw,2.5rem);top:clamp(1.2rem,4vh,2.6rem);z-index:4;font-family:'DM Mono',monospace;font-size:.66rem;
   letter-spacing:.12em;text-transform:uppercase;color:var(--bone);background:rgba(14,12,10,.8);border:1px solid var(--line);padding:.4rem .65rem}
 
@@ -333,7 +334,8 @@ body.present .pts p{font-size:.82rem}
 body.present .minis .tile img{aspect-ratio:16/8}
 body.present .slide[data-t="Priority one"] .tile:first-child img{aspect-ratio:16/8}
 body.present .steps{margin-top:1.1rem}
-body.present .slide[data-t="Next steps"] .statement{margin-top:1.1rem!important}
+body.present .slide[data-t="Next steps"] .statement{margin-top:.9rem!important}
+body.present .slide[data-t="Next steps"] .split{margin-top:.8rem}
 body.present .q:nth-child(3n+2){transform:rotate(.5deg)} body.present .q:nth-child(3n){transform:rotate(-.6deg)}
 .pbar{display:none;position:fixed;bottom:0;left:0;height:3px;background:var(--rust);z-index:1000;transition:width .3s ease}
 .pcount{display:none;position:fixed;bottom:.9rem;right:1.2rem;z-index:1000;font-family:'DM Mono',monospace;font-size:.6rem;
@@ -623,17 +625,21 @@ body.sheet-open{overflow:hidden}
   <div class="bleed scrim-l"><img src="https://i.ytimg.com/vi/UFEGih4iCFs/maxresdefault.jpg" alt="A spider's web, from the album trailer" onerror="this.onerror=null;this.src='https://i.ytimg.com/vi/UFEGih4iCFs/hqdefault.jpg'"></div>
   <div class="pictag">"The village is alive." · trailer, 8 Sep</div>
   <div class="inner">
+    <div class="grid2 g-vis" style="align-items:end">
+      <div>
     <span class="notice reveal">Third priority · the visual world</span>
     <h2 class="display reveal" style="margin-top:.9rem;max-width:18ch">A visualiser that takes fans <em>further into the village.</em></h2>
-    <div class="give reveal" style="max-width:640px"><div class="label">What it gives the fan</div><p>The words, and more of the world, for a song without a film — around release day, when the whole album arrives.</p></div>
-    <div class="pts stagger" style="max-width:640px">
+    <div class="give reveal" ><div class="label">What it gives the fan</div><p>The words, and more of the world, for a song without a film — around release day, when the whole album arrives.</p></div>
+    <div class="pts stagger" >
       <div><h4>Build it from the village's own material</h4><p>The parish notices, the observances, the hall and the churchyard. Fans already followed the website into the comments.</p></div>
       <div><h4>Fans were invited into the artwork</h4><p>In the spring, Steven asked fans for amateur photos of village life for the special edition. Where permissions allow, images like these could appear in a visualiser — and fans would recognise their own village in it.</p></div>
       <div><h4>Keep the making-of light</h4><p>Video BTS has drawn modest audiences on this channel. A short piece on the wedding and the graveyard — from the shoot's B-roll, or a few words from Mike Bennion — would meet fans' curiosity without a full documentary.</p></div>
     </div>
-    <div class="stagger" style="display:grid;grid-template-columns:repeat(2,minmax(0,220px));gap:.8rem;margin-top:1.1rem">
+      </div>
+    <div class="stagger" style="display:grid;gap:.9rem;max-width:300px;margin-left:auto">
       <a class="tile" href="https://www.youtube.com/watch?v=T0dLypToLzE" target="_blank" rel="noopener"><img src="https://i.ytimg.com/vi/T0dLypToLzE/hqdefault.jpg" alt=""><div class="cap"><b>Refuge (Lyric Video)</b><span>2017 · 2.5M</span></div></a>
       <a class="tile" href="https://www.youtube.com/watch?v=G_yW8ornhK4" target="_blank" rel="noopener"><img src="https://i.ytimg.com/vi/G_yW8ornhK4/hqdefault.jpg" alt=""><div class="cap"><b>Man Of The People (Lyric Video)</b><span>2021 · 352K</span></div></a>
+    </div>
     </div>
     <div class="src reveal">Refuge (Lyric Video) 2.5M (2017) and Man Of The People (Official Lyric Video) 352K (2021), public views 20 Oct 2026 · photo call-out: channel post, spring 2026 (deadline 3 April), 1.2K likes · use of fan photos depends on the terms given at submission.</div>
   </div>
