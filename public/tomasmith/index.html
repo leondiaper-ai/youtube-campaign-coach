@@ -307,9 +307,11 @@ h2.display{font-size:clamp(1.9rem,4vw,3.4rem);max-width:22ch}
 .st6 li{font-size:.85rem;line-height:1.35;padding:.3rem 0;border-top:1px solid var(--line)}
 .st6.r{background:var(--red)} .st6.r .w{color:var(--white)}
 .st6.k{outline:2px dashed var(--yellow);outline-offset:-2px}
-.kit{display:flex;flex-wrap:wrap;gap:.5rem;margin-top:1rem}
-.kit span{font-family:'Archivo',sans-serif;font-variation-settings:'wdth' 110,'wght' 800;text-transform:uppercase;font-size:clamp(.9rem,1.3vw,1.1rem);padding:.4rem .8rem;border:2px solid var(--white)}
-.kit span:nth-child(1){background:var(--red);border-color:var(--red)} .kit span:nth-child(2){border-color:var(--pink);color:var(--pink)} .kit span:nth-child(3){background:var(--yellow);border-color:var(--yellow);color:var(--ink)} .kit span:nth-child(4){border-color:var(--blue);color:var(--blue)}
+.kit{display:grid;grid-template-columns:repeat(5,1fr);gap:.6rem;margin-top:1.1rem}
+@media(max-width:700px){.kit{grid-template-columns:1fr 1fr}}
+.kit span{font-size:.8rem;line-height:1.3;color:var(--warm);border-top:4px solid var(--white);padding-top:.4rem}
+.kit b{display:block;font-family:'Archivo',sans-serif;font-variation-settings:'wdth' 110,'wght' 800;text-transform:uppercase;font-size:clamp(.82rem,1.1vw,.98rem);color:var(--white);margin-bottom:.2rem}
+.kit span:nth-child(1){border-color:var(--red)} .kit span:nth-child(2){border-color:var(--pink)} .kit span:nth-child(3){border-color:var(--yellow)} .kit span:nth-child(4){border-color:var(--blue)}
 .qbox p{font-size:.92rem;color:var(--warm);margin-top:.5rem;line-height:1.45}
 body.present .route{margin-top:1.1rem}
 body.present .tiers{margin-top:1rem}
@@ -318,6 +320,7 @@ body.present .stats{margin-top:1rem}
 body.present .songs{margin-top:1rem}
 @media(min-width:1100px){body.present .songs .cam img{aspect-ratio:1/1}}
 body.present .obs{margin-top:.9rem}
+body.present .src{margin-top:.6rem}
 
 /* ── Reveal / chrome / present ──────────────────────────────────── */
 .reveal{opacity:0;transform:translateY(16px);transition:opacity .6s ease,transform .6s ease}
@@ -623,7 +626,7 @@ body.sheet-open{overflow:hidden}
         <h2 class="display reveal" style="margin-top:.9rem">Give the album a <span class="p">recognisable identity.</span></h2>
         <p class="body reveal" style="margin-top:.8rem">Whatever the album's world is, fans should know a piece belongs to it at a glance. Decide it early, use it everywhere.</p>
         <div class="kit stagger">
-          <span>Artwork</span><span>Video treatment</span><span>Thumbnails</span><span>Language</span><span>Playlists</span>
+          <span><b>Artwork</b>one image that anchors the rest</span><span><b>Video treatment</b>a shared look across videos and Shorts</span><span><b>Thumbnails</b>same type, colour and framing</span><span><b>Language</b>a name or line fans can repeat</span><span><b>Playlists</b>one album playlist, live on release day</span>
         </div>
         <div class="means reveal"><div class="osd">What it means</div><p>It doesn't have to continue Tommy's Dance Place or invent a fictional world — it just has to be recognisable.</p></div>
       </div>
