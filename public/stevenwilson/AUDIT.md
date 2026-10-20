@@ -274,8 +274,8 @@ Analysis sheet. The format medians in §4 are no longer on the slides.*
    with YouTube; Community available now.
 13. **"Three things to do before 6 November."** (1) Check what session, studio, interview and
    BTS material exists, and whether RAH is filmed. (2) Choose one strong follow-up and invite
-   fan questions via a Community post. (3) Talk to YouTube about fan features; choose the best
-   fit for release week. Nothing is described as ready until the source material is confirmed.
+   fan questions via a Community post. (3) "Give us a shout on fan features" — tell us which fits and
+   we'll set something up with YouTube for release week. Audience: the UK commercial team and YouTube. Nothing is described as ready until the source material is confirmed.
 
 ## 6. The places I think this is weakest
 
