@@ -3,26 +3,29 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>YouTube: observations and ideas for the OKR discussion</title>
+<meta name="robots" content="noindex,nofollow">
+<title>YouTube: ideas for the OKR discussion</title>
 
 <!--
-  YOUTUBE: OBSERVATIONS AND IDEAS FOR THE OKR DISCUSSION
-  Virgin Music Group · UK YouTube · October 2026 · review version
+  YOUTUBE: IDEAS FOR THE OKR DISCUSSION
+  Virgin Music Group · UK YouTube · October 2026 · review version 2
 
   A discussion deck for the YouTube group's OKR exercise, built from six
-  months of UK work. Seven slides, one point each. The working — figures,
-  comparisons, scope of each dataset and the claim boundaries — sits in
-  the Analysis panel behind the top-right control, as in every deck here.
+  months of UK work. Seven slides. Each of the four working slides answers
+  the same three questions — what exists today, how it has helped, what we
+  could build on — and shows the actual thing: a Watcher view, an Amyl deck
+  page, the UK landscape page, an Ezra comparison.
 
-  Construction follows /ezra (display type, full-bleed frames with
-  scrims, content filling the canvas) and the directness of /amyl. The
-  look is Virgin's, not any one artist's: artist frames appear only
-  where the artist is the example.
+  Design direction: /defected (condensed Archivo display, solid grounds,
+  labelled screenshots with mono captions) and the Campaign Observatory
+  preview (stat tiles, cream evidence sections against near-black ones,
+  short headlines, readable body). Type always sits on a solid ground;
+  artist frames appear only as the deck pages they come from.
 
-  Every figure on a slide has a row in the Analysis panel. Sources are
-  the public YouTube Data API, our own daily Watcher snapshots of it,
-  Chartmetric (UK monthly views), and VMG UK's own YouTube consumption
-  reporting. No YouTube Studio data anywhere.
+  Every figure on a slide has a row in the Analysis panel. Sources: public
+  YouTube Data API, our own daily Watcher snapshots of it, Chartmetric UK
+  monthly views, and VMG UK's own YouTube consumption reporting. No
+  YouTube Studio data anywhere.
 -->
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -33,119 +36,144 @@
 :root{
   --red:#E20000;        /* Virgin */
   --red-lt:#FF4A3D;
-  --ink:#0C0B0B;
-  --ink-2:#151313;
-  --ink-3:#1F1C1C;
-  --cream:#F4EFE7;
-  --warm:#BEB5AA;       /* body copy on dark */
-  --dim:#857C73;        /* labels only */
+  --ink:#0E0D0D;
+  --ink-2:#161414;
+  --ink-3:#201D1D;
+  --cream:#F4EFE7;      /* light ground */
+  --cream-2:#EBE5DA;
+  --paper:#FFFFFF;
+  --warm:#BEB5AA;       /* body on dark */
+  --dim:#857C73;        /* labels on dark */
+  --inkbody:#4A4640;    /* body on light */
+  --inklbl:#8A847A;     /* labels on light */
   --line:rgba(244,239,231,.14);
-  --pad:clamp(1.6rem,5vw,5.5rem);
+  --line-l:#DDD6CA;
+  --pad:clamp(1.6rem,5vw,5rem);
   --an-accent:var(--red);
 }
 *{box-sizing:border-box;margin:0;padding:0}
 html{scroll-behavior:smooth}
-body{
-  background:var(--ink);color:var(--cream);
-  font-family:'Instrument Sans',system-ui,sans-serif;
-  font-size:clamp(15px,1.05vw,18px);line-height:1.55;-webkit-font-smoothing:antialiased;
-}
+body{background:var(--ink);color:var(--cream);font-family:'Instrument Sans',system-ui,sans-serif;
+  font-size:clamp(15px,1.05vw,18px);line-height:1.55;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+img{display:block}
 
-/* ── Type ──────────────────────────────────────────────────────────── */
-.display{font-family:'Archivo',sans-serif;font-variation-settings:'wdth' 118,'wght' 800;
-  text-transform:uppercase;line-height:.92;letter-spacing:-.005em}
-h1.display{font-size:clamp(2.4rem,6.6vw,5.8rem)}
-h2.display{font-size:clamp(1.5rem,3.1vw,2.8rem);max-width:26ch}
-h3.display{font-size:clamp(1.15rem,2vw,1.7rem);font-variation-settings:'wdth' 110,'wght' 750}
+/* ── Type ────────────────────────────────────────────────────────── */
+.display{font-family:'Archivo',sans-serif;font-variation-settings:'wdth' 78,'wght' 800;
+  text-transform:uppercase;line-height:.92;letter-spacing:.004em}
+h1.display{font-size:clamp(2.6rem,7vw,6.2rem)}
+h2.display{font-size:clamp(1.6rem,3.3vw,3rem);max-width:28ch}
+h3.display{font-size:clamp(1.05rem,1.6vw,1.4rem);font-variation-settings:'wdth' 84,'wght' 760}
 .label{font-family:'DM Mono',monospace;font-size:.68rem;letter-spacing:.16em;text-transform:uppercase;color:var(--dim)}
 .label.red{color:var(--red-lt)}
-.sub{font-size:clamp(1.05rem,1.55vw,1.4rem);line-height:1.4;color:var(--cream);max-width:40ch;margin-top:1rem}
-.body{color:var(--warm);max-width:58ch}
-.big-num{font-family:'Archivo',sans-serif;font-variation-settings:'wdth' 112,'wght' 800;line-height:.86;letter-spacing:-.02em}
+.intro{font-size:clamp(1.02rem,1.45vw,1.3rem);line-height:1.45;color:var(--cream);max-width:58ch;margin-top:.9rem}
+.body{color:var(--warm);font-size:clamp(.9rem,1.1vw,1rem);line-height:1.5}
+.body b{color:var(--cream);font-weight:600}
+.big-num{font-family:'Archivo',sans-serif;font-variation-settings:'wdth' 82,'wght' 800;line-height:.9;letter-spacing:-.01em}
 
-/* ── Slides ────────────────────────────────────────────────────────── */
+/* Light slides: the same classes, re-coloured. */
+.slide.light{background:var(--cream);color:var(--ink)}
+.slide.light .label{color:var(--inklbl)}
+.slide.light .label.red{color:var(--red)}
+.slide.light .intro{color:var(--ink)}
+.slide.light .body{color:var(--inkbody)}
+.slide.light .body b{color:var(--ink)}
+.slide.light .three>div{border-top-color:var(--line-l)}
+.slide.light .three .q{color:var(--inklbl)}
+.slide.light .three p{color:var(--inkbody)}
+.slide.light .three p b{color:var(--ink)}
+.slide.light .quote{color:var(--ink);background:var(--paper);border-color:var(--line-l);border-left-color:var(--red)}
+.slide.light .quote cite{color:var(--inklbl)}
+.slide.light .cap{color:var(--inklbl)}
+.slide.light .shot{border-color:var(--line-l);box-shadow:0 20px 50px rgba(0,0,0,.14)}
+.slide.light .tile{border-top-color:var(--line-l)}
+.slide.light .tile .big-num{color:var(--ink)}
+.slide.light .tile .label{color:var(--inklbl)}
+.slide.light .uses li{border-color:var(--line-l);color:var(--inkbody)}
+.slide.light .uses li b{color:var(--ink)}
+.slide.light .future{border-color:var(--red);color:var(--ink)}
+
+/* ── Slides ──────────────────────────────────────────────────────── */
 .deck{width:100%}
 .slide{position:relative;min-height:100vh;width:100%;display:flex;flex-direction:column;justify-content:center;
-  padding:5rem var(--pad) 3rem;overflow:hidden;border-bottom:1px solid var(--line)}
-.inner{position:relative;z-index:3;width:100%;max-width:1400px;margin:0 auto}
-.bleed{position:absolute;inset:0;z-index:0}
-.bleed img{width:100%;height:100%;object-fit:cover;display:block}
-.scrim-b::after{content:'';position:absolute;inset:0;background:linear-gradient(to top,rgba(12,11,11,.97) 6%,rgba(12,11,11,.78) 40%,rgba(12,11,11,.22) 80%)}
-.scrim-l::after{content:'';position:absolute;inset:0;background:linear-gradient(to right,rgba(12,11,11,.96) 34%,rgba(12,11,11,.72) 60%,rgba(12,11,11,.18) 100%)}
-.scrim-r::after{content:'';position:absolute;inset:0;background:linear-gradient(to left,rgba(12,11,11,.96) 34%,rgba(12,11,11,.72) 60%,rgba(12,11,11,.18) 100%)}
+  padding:4.8rem var(--pad) 3rem;overflow:hidden;border-bottom:1px solid var(--line)}
+.inner{position:relative;z-index:3;width:100%;max-width:1360px;margin:0 auto}
 
-/* ── The three questions each section answers ──────────────────────── */
-.three{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(1rem,2.2vw,2.2rem);margin-top:clamp(1.2rem,2.6vw,2rem)}
-.three>div{border-top:2px solid var(--line);padding-top:.9rem}
-.three>div.on{border-top-color:var(--red)}
-.three .q{font-family:'DM Mono',monospace;font-size:.66rem;letter-spacing:.14em;text-transform:uppercase;color:var(--dim);margin-bottom:.55rem}
-.three p{color:var(--warm);font-size:clamp(.84rem,1.05vw,.98rem);line-height:1.48}
+/* The three questions every working slide answers. */
+.three{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(1rem,2.2vw,2rem)}
+.three>div{border-top:2px solid var(--line);padding-top:.8rem}
+.three>div.on{border-top-color:var(--red)!important}
+.three .q{font-family:'DM Mono',monospace;font-size:.64rem;letter-spacing:.14em;text-transform:uppercase;color:var(--dim);margin-bottom:.5rem}
+.three p{color:var(--warm);font-size:clamp(.86rem,1.05vw,.98rem);line-height:1.48}
 .three p b{color:var(--cream);font-weight:600}
-@media(max-width:860px){.three{grid-template-columns:1fr}}
+.three.stack{grid-template-columns:1fr;gap:.9rem}
+@media(max-width:860px){.three{grid-template-columns:1fr!important}}
 
-.grid2{display:grid;grid-template-columns:1fr 1fr;gap:clamp(1.5rem,4vw,4.5rem);align-items:center}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:clamp(1.4rem,3.4vw,3.6rem);align-items:start}
 @media(max-width:860px){.grid2{grid-template-columns:1fr!important}}
 
-/* A big figure with its label, used sparingly. */
-.fig .big-num{font-size:clamp(2.2rem,4.2vw,3.6rem);color:var(--cream)}
-.fig .big-num.red{color:var(--red-lt)}
-.fig .label{margin-top:.4rem}
-.figs{display:flex;gap:clamp(1.4rem,3.4vw,3.2rem);flex-wrap:wrap}
+/* Screenshots: framed, captioned, cropped on purpose. */
+.cap{font-family:'DM Mono',monospace;font-size:.62rem;letter-spacing:.14em;text-transform:uppercase;color:var(--dim);margin-bottom:.55rem}
+.shot{border-radius:5px;overflow:hidden;border:1px solid var(--line);background:var(--ink-3);box-shadow:0 24px 60px rgba(0,0,0,.5)}
+.shot img{width:100%;height:auto;display:block}
+.shot.crop{height:var(--sh,clamp(220px,34vh,360px))}
+.shot.crop img{height:100%;object-fit:cover;object-position:var(--op,0 0)}
+@media(max-width:860px){.shot.crop{height:auto}.shot.crop img{height:auto;object-fit:fill}}
 
-/* The screenshot, framed like a window so it reads as the product. */
-.shot{border:1px solid var(--line);border-radius:6px;overflow:hidden;background:var(--ink-3);
-  box-shadow:0 30px 80px rgba(0,0,0,.55)}
-.shot .bar{display:flex;gap:6px;padding:.55rem .8rem;background:var(--ink-2);border-bottom:1px solid var(--line)}
-.shot .bar i{width:9px;height:9px;border-radius:50%;background:rgba(244,239,231,.18);display:block}
-.shot img{width:100%;display:block}
+/* Everyday uses — a short list, not cards. */
+.uses{list-style:none;margin-top:.4rem}
+.uses li{padding:.6rem 0;border-bottom:1px solid var(--line);color:var(--warm);font-size:clamp(.9rem,1.1vw,1rem);display:flex;gap:.8rem;align-items:baseline}
+.uses li:last-child{border-bottom:0}
+.uses li b{color:var(--cream);font-weight:600}
+.uses li i{font-style:normal;font-family:'DM Mono',monospace;font-size:.66rem;color:var(--red-lt);flex:none;letter-spacing:.1em}
+.future{border-left:3px solid var(--red);padding:.15rem 0 .15rem 1rem;color:var(--cream);font-size:clamp(.95rem,1.2vw,1.1rem);line-height:1.45;max-width:46ch;margin-top:1.1rem}
 
-/* Quote card — kept visually separate from the artist it sits near. */
-.quote{border-left:3px solid var(--red);padding:.2rem 0 .2rem 1.1rem;
-  font-size:clamp(1rem,1.3vw,1.18rem);line-height:1.42;color:var(--cream);max-width:46ch}
-.quote cite{display:block;margin-top:.55rem;font-style:normal;font-family:'DM Mono',monospace;font-size:.64rem;letter-spacing:.1em;color:var(--dim)}
-.quote.card{border:1px solid var(--line);border-left:3px solid var(--red);background:rgba(21,19,19,.82);
-  padding:1.1rem 1.3rem;border-radius:3px;backdrop-filter:blur(6px)}
+/* Stat tiles. */
+.tiles{display:flex;gap:clamp(1.2rem,3vw,2.8rem);flex-wrap:wrap}
+.tile{border-top:2px solid var(--line);padding-top:.7rem;min-width:9rem}
+.tile .big-num{font-size:clamp(1.7rem,3vw,2.6rem);color:var(--cream)}
+.tile .label{margin-top:.4rem;line-height:1.5;letter-spacing:.12em}
+
+/* Quote card: its own solid ground, never on top of a photo. */
+.quote{border:1px solid var(--line);border-left:3px solid var(--red);background:var(--ink-2);border-radius:4px;
+  padding:1rem 1.2rem;font-size:clamp(.95rem,1.2vw,1.1rem);line-height:1.42;color:var(--cream);max-width:46ch}
+.quote cite{display:block;margin-top:.55rem;font-style:normal;font-family:'DM Mono',monospace;font-size:.62rem;letter-spacing:.1em;color:var(--dim)}
 
 /* Rhythm strip — one tick per day of a campaign window, lit on upload days. */
-.rhythm{display:flex;gap:2px;align-items:flex-end;width:100%;height:var(--rh,30px)}
-.tick{flex:1 1 0;min-width:1px;border-radius:1px;background:rgba(244,239,231,.10);height:26%}
-.tick.on{height:100%;background:var(--cream)}
-.tick.on.r{background:var(--red-lt)}
-.era{border-top:2px solid var(--line);padding-top:.9rem}
+.rhythm{display:flex;gap:2px;align-items:flex-end;width:100%;height:var(--rh,28px)}
+.tick{flex:1 1 0;min-width:1px;border-radius:1px;background:rgba(14,13,13,.12);height:26%}
+.tick.on{height:100%;background:var(--ink)}
+.tick.on.r{background:var(--red)}
+.era{border-top:2px solid var(--line-l);padding-top:.8rem}
 .era.now{border-top-color:var(--red)}
-.era-y{font-family:'DM Mono',monospace;font-size:.74rem;letter-spacing:.16em;text-transform:uppercase;color:var(--dim)}
-.era.now .era-y{color:var(--red-lt)}
+.era-y{font-family:'DM Mono',monospace;font-size:.7rem;letter-spacing:.16em;text-transform:uppercase;color:var(--inklbl)}
+.era.now .era-y{color:var(--red)}
+.era .figs{display:flex;gap:clamp(1.2rem,2.6vw,2.4rem);flex-wrap:wrap;margin:.35rem 0 .5rem}
+.era .fig .big-num{font-size:clamp(1.5rem,2.6vw,2.2rem);color:var(--ink)}
+.era .fig .big-num.red{color:var(--red)}
+.era .fig .label{display:inline;margin-left:.4rem;color:var(--inklbl)}
 
-/* Lenses on the D-Block slide. */
-.lens{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(.8rem,1.8vw,1.6rem)}
-.lens>div{border-top:2px solid var(--line);padding-top:.8rem}
-.lens .big-num{font-size:clamp(1.5rem,2.6vw,2.3rem);color:var(--cream)}
-.lens .label{margin-top:.35rem;line-height:1.5}
-@media(max-width:560px){.lens{grid-template-columns:1fr}}
-
-/* Measures on the closing slide. */
-.measures{display:grid;grid-template-columns:repeat(2,1fr);gap:clamp(1rem,2.2vw,2rem)}
+/* Closing measures. */
+.measures{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(1rem,2.2vw,2rem)}
 @media(max-width:760px){.measures{grid-template-columns:1fr}}
-.measures>div{border-top:2px solid var(--red);padding-top:.9rem}
+.measures>div{border-top:2px solid var(--red);padding-top:.8rem}
 .measures h3{margin-bottom:.4rem}
-.measures p{color:var(--warm);font-size:.93rem;line-height:1.5}
-.asks{display:flex;gap:.6rem;flex-wrap:wrap;margin-top:1.2rem}
-.asks span{font-family:'DM Mono',monospace;font-size:.72rem;letter-spacing:.08em;border:1px solid var(--line);
-  color:var(--cream);border-radius:2px;padding:.5rem .8rem}
+.measures p{color:var(--warm);font-size:clamp(.88rem,1.05vw,.98rem);line-height:1.48}
+.asks{display:flex;gap:.6rem;flex-wrap:wrap;margin-top:1rem}
+.asks span{font-family:'DM Mono',monospace;font-size:.72rem;letter-spacing:.08em;border:1px solid var(--line);color:var(--cream);border-radius:2px;padding:.5rem .8rem}
+.slide.light .asks span{border-color:var(--line-l);color:var(--ink)}
 
-/* Cover and closer: a muted contact sheet of frames from the reviews,
-   so the roster is present without any one artist owning the deck. */
+/* Cover and closer: a muted contact sheet of frames from the reviews. */
 .sheet-grid{position:absolute;inset:0;z-index:0;display:grid;grid-template-columns:repeat(6,1fr);grid-auto-rows:1fr;gap:3px;padding:3px}
 .sheet-grid span{position:relative;overflow:hidden;display:block;background:var(--ink-3)}
-.sheet-grid img{width:100%;height:100%;object-fit:cover;display:block;filter:saturate(.75)}
+.sheet-grid img{width:100%;height:100%;object-fit:cover;display:block;filter:saturate(.7)}
 .sheet-wash{position:absolute;inset:0;z-index:1;pointer-events:none;
-  background:linear-gradient(to top,rgba(12,11,11,.985) 36%,rgba(12,11,11,.93) 52%,rgba(12,11,11,.72) 76%,rgba(12,11,11,.5) 100%)}
+  background:linear-gradient(to top,rgba(14,13,13,.985) 40%,rgba(14,13,13,.94) 56%,rgba(14,13,13,.74) 78%,rgba(14,13,13,.55) 100%)}
 @media(max-width:860px){.sheet-grid{grid-template-columns:repeat(4,1fr)}}
 @media(max-width:560px){.sheet-grid{grid-template-columns:repeat(3,1fr)}}
 
-/* ── Chrome ───────────────────────────────────────────────────────── */
+/* ── Chrome ──────────────────────────────────────────────────────── */
 .chrome{position:fixed;top:0;left:0;right:0;z-index:60;display:flex;justify-content:space-between;align-items:center;gap:1rem;
-  padding:.7rem var(--pad);background:rgba(12,11,11,.9);backdrop-filter:blur(14px);border-bottom:1px solid var(--line);
+  padding:.7rem var(--pad);background:rgba(14,13,13,.92);backdrop-filter:blur(14px);border-bottom:1px solid var(--line);
   font-family:'DM Mono',monospace;font-size:.66rem;letter-spacing:.13em;text-transform:uppercase}
 .chrome-l{display:flex;gap:1.1rem;align-items:baseline;color:var(--dim);min-width:0;overflow:hidden}
 .chrome-l span:first-child{white-space:nowrap;color:var(--red-lt);overflow:hidden;text-overflow:ellipsis}
@@ -156,23 +184,22 @@ h3.display{font-size:clamp(1.15rem,2vw,1.7rem);font-variation-settings:'wdth' 11
 .btn.primary{border-color:var(--red);color:var(--cream);background:var(--red);font-weight:500}
 .btn.primary:hover{background:var(--red-lt);border-color:var(--red-lt)}
 #pbar{position:fixed;top:0;left:0;height:2px;background:var(--red);width:0;z-index:70;transition:width .3s ease}
-/* The shared Analysis control sits in the chrome, not floating. */
 .chrome .an-btn{position:static;font:inherit;text-transform:uppercase;letter-spacing:.13em;cursor:pointer;
   background:transparent;color:var(--warm);border:1px solid var(--line);padding:.45rem .8rem;border-radius:2px}
 .chrome .an-btn:hover{border-color:var(--red-lt);color:var(--red-lt)}
 body.sheet-open .chrome{display:none}
 
-/* ── Present mode ────────────────────────────────────────────────── */
+/* ── Present mode ───────────────────────────────────────────────── */
 body.present .deck .slide{display:none;height:100vh;min-height:100vh;border-bottom:0;padding-top:4rem;padding-bottom:2rem;overflow-y:auto}
 body.present .deck .slide.active{display:flex}
 body.present{overflow:hidden}
 .hint{display:none;position:fixed;bottom:1rem;right:var(--pad);z-index:60;font-family:'DM Mono',monospace;font-size:.62rem;letter-spacing:.12em;text-transform:uppercase;color:var(--dim)}
 body.present .hint{display:block}
 
-/* ── Motion ──────────────────────────────────────────────────────── */
-.reveal{opacity:0;transform:translateY(16px);transition:opacity .6s ease,transform .6s ease}
+/* ── Motion ─────────────────────────────────────────────────────── */
+.reveal{opacity:0;transform:translateY(14px);transition:opacity .55s ease,transform .55s ease}
 .reveal.visible{opacity:1;transform:none}
-.stagger>*{opacity:0;transform:translateY(14px);transition:opacity .5s ease,transform .5s ease}
+.stagger>*{opacity:0;transform:translateY(12px);transition:opacity .5s ease,transform .5s ease}
 .stagger.visible>*{opacity:1;transform:none}
 @media(prefers-reduced-motion:reduce){.reveal,.stagger>*{opacity:1!important;transform:none!important;transition:none!important}html{scroll-behavior:auto}}
 </style>
@@ -185,7 +212,7 @@ body.present .hint{display:block}
 <div class="chrome">
   <div class="chrome-l">
     <span>YouTube · OKR discussion</span>
-    <span>Observations and ideas · UK YouTube · October 2026 · review version</span>
+    <span>Ideas from six months of UK YouTube work · October 2026 · review version</span>
   </div>
   <div style="display:flex;gap:.5rem">
     <button class="an-btn" id="an-open">Analysis</button>
@@ -197,191 +224,182 @@ body.present .hint{display:block}
 <div class="deck" id="deck">
 
 <!-- ═══ 1 · COVER ═══════════════════════════════════════════════════ -->
-<section class="slide" data-t="Cover" style="justify-content:flex-end;padding-bottom:3.6rem">
+<section class="slide" data-t="Cover" style="justify-content:flex-end;padding-bottom:3.4rem">
   <div class="sheet-grid" data-sheet></div>
   <div class="sheet-wash"></div>
   <div class="inner">
     <div class="label red reveal">Virgin Music Group · UK YouTube · October 2026</div>
-    <h1 class="display reveal" style="margin-top:1rem;max-width:14ch">YouTube: observations and ideas for the OKR discussion</h1>
-    <p class="sub reveal" style="margin-top:1.5rem;max-width:52ch;font-size:clamp(1rem,1.45vw,1.3rem)">
-      Six months of exploring how to make YouTube easier to see, easier to talk about and easier to act on — and where that might help the group.
+    <h1 class="display reveal" style="margin-top:.9rem;max-width:17ch">YouTube: ideas for the OKR discussion</h1>
+    <p class="intro reveal" style="margin-top:1.2rem;max-width:50ch">
+      What I&rsquo;ve built, how I use it, and what we could build on together.
     </p>
   </div>
 </section>
 
 <!-- ═══ 2 · WHERE THIS STARTS ═══════════════════════════════════════ -->
-<section class="slide" data-t="Where this starts">
+<section class="slide light" data-t="Where this starts">
   <div class="inner">
     <div class="label reveal">Where this starts</div>
-    <h2 class="display reveal" style="margin-top:.7rem">A shared objective, measured together.</h2>
-    <div class="grid2" style="margin-top:clamp(1.4rem,3vw,2.4rem);align-items:start">
+    <h2 class="display reveal" style="margin-top:.6rem">A shared objective, measured together</h2>
+    <div class="grid2" style="margin-top:clamp(1.2rem,2.6vw,2rem)">
       <div class="reveal">
-        <div class="label red" style="margin-bottom:.7rem">Zack&rsquo;s intention</div>
-        <p class="body" style="font-size:clamp(1rem,1.3vw,1.2rem);color:var(--cream);line-height:1.5;max-width:30ch">
-          Agree a YouTube objective we&rsquo;re all bought into. Choose quarterly results we can measure. Review how we did, and learn together.
-        </p>
+        <div class="label red" style="margin-bottom:.6rem">Zack&rsquo;s intention</div>
+        <p class="intro" style="margin-top:0;max-width:30ch">A shared YouTube objective, measurable quarterly results, and regular review.</p>
       </div>
-      <div class="reveal" style="transition-delay:.15s">
-        <div class="label" style="margin-bottom:.7rem">What I&rsquo;m bringing</div>
-        <p class="body" style="font-size:clamp(1rem,1.3vw,1.2rem);line-height:1.5;max-width:34ch">
-          Over the last six months I&rsquo;ve been exploring ways to make YouTube more visible across teams, turn channel information into useful artist conversations, and find where support could help.
-        </p>
-        <p class="body" style="font-size:clamp(1rem,1.3vw,1.2rem);line-height:1.5;max-width:34ch;margin-top:.9rem;color:var(--cream)">
-          Here&rsquo;s what&rsquo;s been useful, and where it might help us shape and measure OKRs.
-        </p>
+      <div class="reveal" style="transition-delay:.12s">
+        <div class="label" style="margin-bottom:.6rem">What I&rsquo;m bringing</div>
+        <p class="body" style="max-width:40ch">Over the last six months I&rsquo;ve been exploring ways to make YouTube more visible across teams, turn channel information into useful artist conversations, and find where support could help.</p>
+        <p class="body" style="max-width:40ch;margin-top:.7rem"><b>Four pieces of work, each answering the same three questions:</b></p>
       </div>
     </div>
-    <div class="asks reveal" style="margin-top:clamp(1.6rem,3.4vw,2.8rem)">
-      <span>Better visibility</span><span>Useful artist ideas</span><span>Knowing where to focus</span><span>Understanding what changes</span>
+    <div class="three stagger" style="margin-top:clamp(1.2rem,2.6vw,2rem)">
+      <div class="on"><div class="q">01</div><p><b>What exists today?</b></p></div>
+      <div class="on"><div class="q">02</div><p><b>How has it helped me or teams?</b></p></div>
+      <div class="on"><div class="q">03</div><p><b>What could we build on?</b></p></div>
+    </div>
+    <div class="asks reveal" style="margin-top:clamp(1.2rem,2.6vw,2rem)">
+      <span>Watcher</span><span>Artist deep dives</span><span>Territory data</span><span>Campaign reviews</span>
     </div>
   </div>
 </section>
 
-<!-- ═══ 3 · BETTER VISIBILITY ═══════════════════════════════════════ -->
-<section class="slide" data-t="Better visibility">
+<!-- ═══ 3 · WATCHER ═════════════════════════════════════════════════ -->
+<section class="slide" data-t="Watcher">
   <div class="inner">
-    <div class="label reveal">Better visibility</div>
-    <h2 class="display reveal" style="margin-top:.7rem">Once people can see the channels, joining in gets easier.</h2>
-    <div class="grid2" style="margin-top:clamp(1rem,2.2vw,1.8rem);grid-template-columns:1fr 1fr;align-items:start">
-      <div class="shot reveal">
-        <div class="bar"><i></i><i></i><i></i></div>
-        <img src="/okr/img/channel-health.jpg" alt="Watcher — Channel Health view of the Virgin roster, 20 October 2026">
+    <div class="label reveal">What exists today</div>
+    <h2 class="display reveal" style="margin-top:.6rem">Watcher: a shared view of our YouTube channels</h2>
+    <p class="intro reveal">I built Watcher to bring key public YouTube channel information together across the roster. It is live and supports my work and colleagues in the UK, Nordics and Australia.</p>
+    <div class="grid2" style="margin-top:clamp(1rem,2.2vw,1.6rem);grid-template-columns:1.25fr 1fr">
+      <div class="reveal">
+        <div class="cap">Channel Health · Virgin managed channels · 20 October 2026</div>
+        <div class="shot crop" style="--sh:clamp(240px,38vh,400px);--op:0 0">
+          <img src="/okr/img/watcher-table.jpg" alt="Watcher Channel Health table: artist, 30-day trend, status, formats, subscribers and views over seven days">
+        </div>
+        <div class="label" style="margin-top:.55rem">Public YouTube data · updated daily · no Studio access needed</div>
       </div>
       <div class="stagger">
-        <div style="border-top:2px solid var(--red);padding-top:.9rem">
-          <div class="three" style="grid-template-columns:1fr;margin-top:0;gap:1.1rem">
-            <div style="border-top:0;padding-top:0">
-              <div class="q">What it helps us do</div>
-              <p>See key channel information across the roster — who&rsquo;s active, who&rsquo;s gone quiet, how a release week compares with the weeks before — <b>with or without Studio access.</b> That gives more colleagues the context to engage, contribute ideas and share what they&rsquo;re learning.</p>
-            </div>
-            <div>
-              <div class="q">An example</div>
-              <p>When a team asked whether YouTube could extend the GENER8ION &times; Yung Lean <i>STORM</i> moment after the VMAs, the shared data showed the growth had started two weeks earlier and was led by Asia. That <b>helped inform the recommendation</b> on what to try first.</p>
-            </div>
-            <div>
-              <div class="q">Could we build on this?</div>
-              <p>UK, Nordics and Australia work from the same view today. <b>More teams looking at the same picture</b> would make YouTube a shared conversation rather than a specialist one.</p>
-            </div>
-          </div>
+        <div class="label" style="color:var(--red-lt)">How I use it</div>
+        <ul class="uses">
+          <li><i>01</i><span><b>Check channel activity and recent performance.</b> Who&rsquo;s uploading, what&rsquo;s moving, who&rsquo;s gone quiet.</span></li>
+          <li><i>02</i><span><b>Spot artists or campaigns worth a closer look.</b> The weekly roster read is where the deep dives start.</span></li>
+          <li><i>03</i><span><b>Bring useful information into conversations</b> with teams and labels: campaign updates, recaps, asks of YouTube.</span></li>
+        </ul>
+        <p class="future">Making this information available more widely could help more colleagues contribute ideas and share what&rsquo;s working.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ 4 · DEEP DIVES ══════════════════════════════════════════════ -->
+<section class="slide light" data-t="Artist deep dives">
+  <div class="inner">
+    <div class="label reveal">What exists today</div>
+    <h2 class="display reveal" style="margin-top:.6rem">Artist deep dives: useful next steps for teams</h2>
+    <p class="intro reveal">I use the channel data, artist context and YouTube best practices to understand what works and suggest relevant next steps.</p>
+    <div class="grid2" style="margin-top:clamp(1rem,2.2vw,1.6rem);grid-template-columns:1.25fr 1fr">
+      <div class="reveal">
+        <div class="cap">From the Amyl and The Sniffers deck · the archive of live performances</div>
+        <div class="shot crop" style="--sh:clamp(240px,38vh,400px);--op:0 0">
+          <img src="/okr/img/amyl-library.jpg" alt="A page from the Amyl deck: performances already captured, with view counts">
+        </div>
+      </div>
+      <div class="three stack stagger">
+        <div class="on">
+          <div class="q">Amyl and The Sniffers · one example</div>
+          <p><b>Finding:</b> live performance is an established strength on the channel.<br><b>Idea:</b> explore useful follow-up content from existing performances &mdash; no new filming needed.</p>
+        </div>
+        <div>
+          <blockquote class="quote">
+            &ldquo;Superb work on this, it is genuinely impressive. I love how you integrated our best practices into a pitch for the artist.&rdquo;
+            <cite>YouTube UK · feedback on the deep-dive work</cite>
+          </blockquote>
+        </div>
+        <div>
+          <div class="q">The same approach, across the roster</div>
+          <p>Ezra Collective and IDLES for Partisan; Defected Records as a label channel review. Each one: what already works, then what&rsquo;s worth trying.</p>
         </div>
       </div>
     </div>
   </div>
 </section>
 
-<!-- ═══ 4 · USEFUL ARTIST IDEAS ═════════════════════════════════════ -->
-<section class="slide" data-t="Useful artist ideas">
-  <div class="bleed scrim-l">
-    <img src="https://i.ytimg.com/vi/J9fhUladvAU/maxresdefault.jpg" alt="Amyl and The Sniffers — live at The Echo, LA" style="object-position:62% 40%"
-      onerror="this.onerror=null;this.src='https://i.ytimg.com/vi/J9fhUladvAU/hqdefault.jpg'">
-  </div>
+<!-- ═══ 5 · TERRITORY DATA ══════════════════════════════════════════ -->
+<section class="slide" data-t="Territory data">
   <div class="inner">
-    <div class="label reveal">Useful artist ideas</div>
-    <h2 class="display reveal" style="margin-top:.7rem">A channel reading becomes something the artist team can act on.</h2>
-    <div class="grid2" style="margin-top:clamp(1.3rem,2.8vw,2.2rem);align-items:start;grid-template-columns:1.1fr .9fr">
-      <div class="three stagger" style="grid-template-columns:1fr;margin-top:0;gap:1rem">
-        <div class="on">
-          <div class="q">What it helps us do</div>
-          <p>Understand what already works on a channel, then suggest next steps that fit the artist — <b>drawing on YouTube&rsquo;s own best practice</b> rather than inventing a formula.</p>
+    <div class="label reveal">What exists today</div>
+    <h2 class="display reveal" style="margin-top:.6rem">Territory data: finding where to focus</h2>
+    <p class="intro reveal">I&rsquo;ve been bringing UK YouTube consumption and channel information together to understand which artists matter locally and where support could help.</p>
+    <div class="grid2" style="margin-top:clamp(1rem,2.2vw,1.6rem);grid-template-columns:1.25fr 1fr">
+      <div class="reveal">
+        <div class="cap">UK landscape page · crossover view · our UK consumption beside UK monthly YouTube views</div>
+        <div class="shot crop" style="--sh:clamp(240px,38vh,400px);--op:0 0">
+          <img src="/okr/img/uk-crossover.jpg" alt="UK landscape crossover view: D-Block Europe first, with VMG consumption, UK YouTube monthly views and UK territory rank">
         </div>
-        <div>
-          <div class="q">Amyl and The Sniffers</div>
-          <p>Live is already one of their strongest formats: a typical live video does around <b>seven times</b> a typical Short. And <b>none of the last album&rsquo;s four videos</b> had a long-form follow-up inside two weeks. So the ideas are packaging performances already filmed, and planning each release&rsquo;s follow-up before the hero lands &mdash; <b>not more filming.</b></p>
+      </div>
+      <div class="three stack stagger">
+        <div class="on">
+          <div class="q">D&#8209;Block Europe · the example</div>
+          <p>Strong UK consumption made D&#8209;Block worth a closer look. The deep dive explored how more activity around existing demand could support the channel.</p>
+        </div>
+        <div style="border-top:0;padding-top:0">
+          <div class="tiles">
+            <div class="tile"><div class="big-num">3.6M</div><div class="label">UK consumption<br>our data · 23 Mar&ndash;20 Sep 2026</div></div>
+            <div class="tile"><div class="big-num">9.2M</div><div class="label">UK YouTube views a month<br>Chartmetric · Sep 2026</div></div>
+          </div>
         </div>
         <div>
           <div class="q">Could we build on this?</div>
-          <p>The same reading has been done for Partisan artists (Ezra Collective, IDLES) and for Defected&rsquo;s label channel, where it mostly showed what the channel already does well. <b>Any priority artist or label could have one.</b></p>
+          <p>Could other territories combine consumption data with local knowledge to identify priority artists?</p>
         </div>
-      </div>
-      <div class="reveal" style="transition-delay:.2s;align-self:end;justify-self:end;max-width:30rem">
-        <blockquote class="quote card">
-          &ldquo;Superb work on this, it is genuinely impressive. I love how you integrated our best practices into a pitch for the artist.&rdquo;
-          <cite>YouTube UK · feedback on the deep-dive approach</cite>
-        </blockquote>
       </div>
     </div>
   </div>
 </section>
 
-<!-- ═══ 5 · KNOWING WHERE TO FOCUS ══════════════════════════════════ -->
-<section class="slide" data-t="Knowing where to focus">
-  <div class="bleed scrim-r">
-    <img src="https://i.ytimg.com/vi/mecy6K90C0s/maxresdefault.jpg" alt="D-Block Europe — SEPA" style="object-position:30% 40%"
-      onerror="this.onerror=null;this.src='https://i.ytimg.com/vi/mecy6K90C0s/hqdefault.jpg'">
-  </div>
+<!-- ═══ 6 · CAMPAIGN REVIEWS ════════════════════════════════════════ -->
+<section class="slide light" data-t="Campaign reviews">
   <div class="inner">
-    <div class="label reveal">Knowing where to focus</div>
-    <h2 class="display reveal" style="margin-top:.7rem">UK consumption data helped highlight D&#8209;Block as a priority for a closer look.</h2>
-    <div class="grid2" style="margin-top:clamp(1.3rem,2.8vw,2.2rem);align-items:start;grid-template-columns:1.1fr .9fr">
-      <div>
-        <div class="lens stagger">
-          <div><div class="big-num">#2</div><div class="label">our UK consumption data<br>Mar&ndash;Sep 2026 · 145 artists</div></div>
-          <div><div class="big-num">#1</div><div class="label">UK monthly YouTube views<br>30 artists reviewed · 9.2M a month</div></div>
-          <div><div class="big-num">661K</div><div class="label">subscribers<br>a bigger UK audience than the size suggests</div></div>
-        </div>
-        <div class="three stagger" style="grid-template-columns:1fr;gap:.8rem;margin-top:1.1rem">
-          <div class="on">
-            <div class="q">What the channel review found</div>
-            <p>Release days are run brilliantly, then the channel waits for the next one. The <b>biggest records stand alone</b>, with nothing built around them. The opportunity is building around what already performs — mostly without the artist&rsquo;s time.</p>
-          </div>
-          <div>
-            <div class="q">Could other territories try this?</div>
-            <p>Pair local consumption with local knowledge &mdash; rights, relationships and the ability to act &mdash; to pick a <b>short list worth a closer look.</b> The data points; the team decides.</p>
-          </div>
-        </div>
-      </div>
-    </div>
-    <div class="label reveal" style="margin-top:1.4rem">Ideas under discussion · VMG UK consumption data, Chartmetric UK monthly views and public channel figures read separately, not combined</div>
-  </div>
-</section>
-
-<!-- ═══ 6 · UNDERSTANDING WHAT CHANGES ══════════════════════════════ -->
-<section class="slide" data-t="Understanding what changes">
-  <div class="inner">
-    <div class="label reveal">Understanding what changes</div>
-    <h2 class="display reveal" style="margin-top:.7rem">When a campaign stays active, we can see it on the channel.</h2>
-    <div class="grid2" style="margin-top:clamp(1.3rem,2.8vw,2.2rem);align-items:start;grid-template-columns:1.2fr .8fr">
+    <div class="label reveal">What exists today</div>
+    <h2 class="display reveal" style="margin-top:.6rem">Campaign reviews: tracking what changes</h2>
+    <p class="intro reveal">An example of what we can measure: Ezra Collective&rsquo;s 2026 album campaign against the 2024 one. Campaign run by Partisan; analysed and shared by VMG UK.</p>
+    <div class="grid2" style="margin-top:clamp(1rem,2.2vw,1.6rem);grid-template-columns:1.25fr 1fr">
       <div class="stagger">
-        <div class="label red" style="margin-bottom:.8rem">Ezra Collective · album on album · upload days across each campaign window</div>
-        <div class="era" style="margin-bottom:.7rem">
-          <div style="display:flex;justify-content:space-between;align-items:baseline;gap:1rem;flex-wrap:wrap;margin-bottom:.5rem">
-            <div class="era-y">Dance, No One&rsquo;s Watching · 2024</div>
-            <div class="figs"><div class="fig"><span class="big-num" style="font-size:clamp(1.5rem,2.6vw,2.2rem);color:var(--warm)">7<span style="color:var(--dim)">/16</span></span> <span class="label">active weeks</span></div>
-            <div class="fig"><span class="big-num" style="font-size:clamp(1.5rem,2.6vw,2.2rem);color:var(--red-lt)">43</span> <span class="label">days, longest gap</span></div></div>
+        <div class="cap">Upload days across each campaign window · one tick per day</div>
+        <div class="era" style="margin-bottom:.8rem">
+          <div class="era-y">Dance, No One&rsquo;s Watching · 2024</div>
+          <div class="figs">
+            <div class="fig"><span class="big-num" style="color:var(--inklbl)">7<span style="color:var(--line-l)">/16</span></span><span class="label">active weeks</span></div>
+            <div class="fig"><span class="big-num red">43</span><span class="label">days, longest gap</span></div>
           </div>
           <div class="rhythm" id="r24"></div>
         </div>
         <div class="era now">
-          <div style="display:flex;justify-content:space-between;align-items:baseline;gap:1rem;flex-wrap:wrap;margin-bottom:.5rem">
-            <div class="era-y">Here Because of Hope · 2026</div>
-            <div class="figs"><div class="fig"><span class="big-num" style="font-size:clamp(1.5rem,2.6vw,2.2rem)">16<span style="color:var(--dim)">/16</span></span> <span class="label">active weeks</span></div>
-            <div class="fig"><span class="big-num" style="font-size:clamp(1.5rem,2.6vw,2.2rem)">9</span> <span class="label">days, longest gap</span></div></div>
+          <div class="era-y">Here Because of Hope · 2026</div>
+          <div class="figs">
+            <div class="fig"><span class="big-num">16<span style="color:var(--inklbl)">/16</span></span><span class="label">active weeks</span></div>
+            <div class="fig"><span class="big-num">9</span><span class="label">days, longest gap</span></div>
           </div>
           <div class="rhythm" id="r26"></div>
         </div>
-        <div style="border-top:1px solid var(--line);margin-top:1rem;padding-top:.8rem;display:flex;gap:1.2rem;align-items:center;flex-wrap:wrap">
-          <div class="fig"><div class="big-num" style="font-size:clamp(2rem,3.6vw,3rem);color:var(--red-lt)">2.4&times;</div></div>
-          <p class="body" style="max-width:40ch;font-size:.95rem">Release-week channel views against the average of the three weeks before it (225.6K &rarr; 535.5K). A separate reading from the activity comparison above.</p>
+        <div style="border-top:1px solid var(--line-l);margin-top:.8rem;padding-top:.7rem;display:flex;gap:1.1rem;align-items:center;flex-wrap:wrap">
+          <div class="big-num" style="font-size:clamp(1.7rem,3vw,2.6rem);color:var(--red)">2.4&times;</div>
+          <p class="body" style="max-width:44ch;font-size:.92rem"><b>A separate comparison:</b> release-week channel views against the average of the three weeks before (225.6K &rarr; 535.5K).</p>
         </div>
       </div>
-      <div class="three stagger" style="grid-template-columns:1fr;margin-top:0;gap:.8rem">
+      <div class="three stack stagger">
         <div class="on">
-          <div class="q">What it helps us do</div>
-          <p>Track whether an artist uses YouTube <b>more consistently</b>, and whether <b>views grow</b> around a release.</p>
+          <div class="q">What it shows</div>
+          <p><b>More active weeks and a shorter gap between uploads.</b> The channel stayed present for the whole campaign, and release week showed on the channel.</p>
         </div>
         <div>
-          <div class="q">The example</div>
-          <p>Campaign run by Partisan; analysed and shared by VMG UK. Three measures told the story: active weeks, the longest gap, and release week against the weeks before.</p>
-        </div>
-        <div>
-          <blockquote class="quote" style="font-size:.98rem">
+          <blockquote class="quote">
             &ldquo;Love the idea of building a world, not a content calendar. Exactly right for a group like Ezra and so glad to see the change in strategy pay off for them.&rdquo;
             <cite>UK Head of Music · on the Ezra recap</cite>
           </blockquote>
         </div>
         <div>
           <div class="q">Could we build on this?</div>
-          <p>The same three readings could be taken for <b>any priority campaign</b>, in any territory.</p>
+          <p>The same readings &mdash; active weeks, longest gap, release week against the weeks before &mdash; could be taken for any priority campaign.</p>
         </div>
       </div>
     </div>
@@ -394,16 +412,14 @@ body.present .hint{display:block}
   <div class="sheet-wash"></div>
   <div class="inner">
     <div class="label reveal">Could we build on this?</div>
-    <h2 class="display reveal" style="margin-top:.7rem;max-width:22ch">Four things we could track together.</h2>
-    <div class="measures stagger" style="margin-top:clamp(1.3rem,2.8vw,2.2rem)">
-      <div><h3 class="display">Wider engagement</h3><p>More teams working from shared YouTube information, and bringing it into their own conversations.</p></div>
-      <div><h3 class="display">More consistent activity</h3><p>Priority artists active in more weeks, with shorter gaps between uploads.</p></div>
-      <div><h3 class="display">More follow-up</h3><p>Priority releases followed by another music moment, rather than one video and silence.</p></div>
-      <div><h3 class="display">More views and consumption</h3><p>Release weeks against the weeks before, and territory consumption over comparable periods.</p></div>
+    <h2 class="display reveal" style="margin-top:.6rem">Three things we could measure together</h2>
+    <p class="intro reveal">Better visibility helps teams engage, deep dives turn information into ideas, and territory data helps focus attention. Here&rsquo;s what that could look like as results.</p>
+    <div class="measures stagger" style="margin-top:clamp(1.2rem,2.6vw,2rem)">
+      <div><h3 class="display">Team engagement</h3><p>More teams working from shared YouTube information and bringing it into their own conversations.</p></div>
+      <div><h3 class="display">Consistent artist activity</h3><p>Priority artists active in more weeks, with shorter gaps and more follow-up around releases.</p></div>
+      <div><h3 class="display">Views and consumption</h3><p>Release weeks against the weeks before, and territory consumption over comparable periods.</p></div>
     </div>
-    <p class="body reveal" style="margin-top:clamp(1.2rem,2.6vw,2rem);color:var(--cream);font-size:clamp(1rem,1.3vw,1.2rem);max-width:44ch">
-      Targets and ownership are for the group to decide. Three questions to start:
-    </p>
+    <p class="body reveal" style="margin-top:clamp(1.2rem,2.6vw,2rem);color:var(--cream);max-width:48ch">Targets and ownership are the group&rsquo;s to decide. Three questions to start the conversation:</p>
     <div class="asks reveal">
       <span>Where could this be useful?</span><span>Which measures would help?</span><span>What would teams need to take this further?</span>
     </div>
@@ -423,7 +439,7 @@ body.present .hint{display:block}
     <p>Each slide makes one point and uses only the figures needed for it. Everything else &mdash; comparison tables, dataset scope, the claim boundary and the objections a reviewer would raise &mdash; is here. The detailed artist and label reviews referred to are published alongside this page (<code>/ezra</code>, <code>/amyl</code>, <code>/idles</code>, <code>/kol</code>, <code>/dblock</code>, <code>/defected</code>, <code>/ktrap</code>, <code>/angusandjuliastone</code>) and each carries its own Analysis panel and audit pack.</p>
     <div class="an-note"><b>Role labels.</b> Where a campaign is discussed, the deck states whether VMG UK advised before it, supported it, or analysed it afterwards. Ezra Collective: campaign run by Partisan; analysed and shared by VMG UK after release. Nothing in this deck credits channel movement to our involvement.</div>
 
-    <h3>Better visibility &mdash; Watcher</h3>
+    <h3>Watcher</h3>
     <table>
       <tr><th>Measure</th><th>Value</th><th>As at</th></tr>
       <tr class="lead"><td>Channels synced in the daily pass</td><td class="n">263 / 263</td><td>20 Oct 2026, 06:28 UTC</td></tr>
@@ -431,14 +447,14 @@ body.present .hint{display:block}
       <tr><td>Market watch channels (not Virgin)</td><td class="n">114</td><td>20 Oct 2026</td></tr>
       <tr><td>Data used</td><td colspan="2">Public YouTube Data API v3 only; no Studio or Analytics access</td></tr>
     </table>
-    <p>The screenshot on slide 3 is the Channel Health view as it looked on 20 October 2026. The status labels (growing, weak conversion, underfed, cold) are our own rules over public figures, not YouTube classifications.</p>
+    <p>The screenshot on slide 3 is the Channel Health table as it looked on 20 October 2026, cropped to the roster rows. The status labels (healthy, weak conversion, underfed, cold) are our own rules over public figures, not YouTube classifications. Slide 5&rsquo;s screenshot is the UK landscape page&rsquo;s Crossover view on the same day; slide 4&rsquo;s is a page from the published Amyl deck (<code>/amyl</code>).</p>
     <div class="an-note"><b>Team usage, stated carefully.</b> UK, Nordics and Australia teams work from the shared view: Nordics has had its own board since the summer, Australia&rsquo;s board went live on 23 September 2026 with artists the team added. Workspaces also exist for the US, Europe, LATAM and Asia, but a workspace existing, or artists being listed in it, is not evidence of use, and the deck does not count them.</div>
     <dl>
-      <dt>STORM example</dt>
-      <dd>GENER8ION &times; Yung Lean, <em>STORM</em>, October 2026. Watcher daily video series and Chartmetric territory data showed the renewed growth beginning around 12 September, about two weeks before the VMAs performance, with roughly half of viewing in Asia. That reading helped inform the recommendation to fix free things first (metadata, links, Shorts) before any paid test. Implementation and outcome are not confirmed in this deck. Detail at <code>/storm</code>.</dd>
+      <dt>Everyday use</dt>
+      <dd>The weekly roster read (Channel Health, Weekly Pulse and the Campaigns board) is where campaign updates, recaps and the deep dives start. Specific interventions are not claimed on the slide; where one is evidenced it is in the relevant deck&rsquo;s own Analysis panel.</dd>
     </dl>
 
-    <h3>Useful artist ideas &mdash; Amyl and The Sniffers</h3>
+    <h3>Artist deep dives &mdash; Amyl and The Sniffers</h3>
     <table>
       <tr><th>Measure</th><th>Value</th><th>Basis</th></tr>
       <tr><td>Public uploads analysed</td><td class="n">92</td><td>Full public catalogue, 19 Aug 2026</td></tr>
@@ -447,29 +463,29 @@ body.present .hint{display:block}
       <tr><td>Typical official music video (median views)</td><td class="n">3,431,086</td><td>n = 10 &mdash; the strongest format; live is the strongest after it</td></tr>
       <tr class="lead"><td>Cartoon Darkness videos with long-form follow-up inside 14 days</td><td class="n miss">0 / 4</td><td>Measured to the next long-form upload; Shorts continued throughout</td></tr>
     </table>
-    <p>&ldquo;Around seven times&rdquo; on the slide is 210,737 &divide; 28,077 = 7.5, rounded down. Medians, not totals, so the comparison is like for like. The 7&ndash;14 day follow-up window is a planning prompt drawn from multi-format campaign thinking, not a YouTube rule and not a proven optimum.</p>
+    <p>The slide says only that live performance is an established strength; the comparison behind it is a typical live video at 210,737 views against a typical Short at 28,077 (7.5&times;) and typical behind-the-scenes at 38,012 (5.5&times;). Medians, not totals, so the comparison is like for like; official music videos remain the strongest format. The 7&ndash;14 day follow-up window used in the Amyl deck is a planning prompt drawn from multi-format campaign thinking, not a YouTube rule and not a proven optimum.</p>
     <div class="an-note"><b>The YouTube UK quote.</b> Two pieces of written feedback from YouTube UK praised the deep-dive approach and the way YouTube&rsquo;s own best practice was built into an artist pitch. The quote is attributed to that feedback, not to a specific deck, until the association is confirmed.</div>
     <dl>
       <dt>Other reviews referred to</dt>
       <dd>Ezra Collective (<code>/ezra</code>, post-album case study, 15 Sep 2026); IDLES (<code>/idles</code>, TANGK review, Sep 2026: no owned live long-form across the TANGK campaign; one live world rather than more content); Kings of Leon (<code>/kol</code>, Sep 2026: route a catalogue audience to the new era); Defected Records (<code>/defected</code>, channel review, 16 Oct 2026). All public-data reviews; recommendations framed as options.</dd>
     </dl>
 
-    <h3>Knowing where to focus &mdash; D-Block Europe</h3>
+    <h3>Territory data &mdash; D-Block Europe</h3>
     <table>
       <tr><th>Lens</th><th>D-Block Europe</th><th>Scope</th></tr>
       <tr class="lead"><td>VMG UK YouTube consumption, 23 Mar &ndash; 20 Sep 2026</td><td class="n">3,624,175 · #2 of 145</td><td>Our UK supply-chain reporting; Underworld #1 at 4,714,347</td></tr>
-      <tr class="lead"><td>UK monthly YouTube views (Chartmetric)</td><td class="n">9,230,272 · #1 of 30</td><td>The 30 artists reviewed in the UK landscape sample, read 21&ndash;25 Sep 2026</td></tr>
+      <tr class="lead"><td>UK monthly YouTube views (Chartmetric)</td><td class="n">9,230,272 · #1 of 15</td><td>The 15 crossover artists (in our consumption data and with a usable Chartmetric UK read), read 21&ndash;25 Sep 2026; also #1 of the 30-artist landscape sample</td></tr>
       <tr><td>UK share of returned territory views</td><td class="n">67.5%</td><td>UK is the channel&rsquo;s #1 market</td></tr>
       <tr><td>Subscribers · lifetime views</td><td class="n">661K · 972.5M</td><td>Public API, 7 Oct 2026</td></tr>
       <tr><td>Lifetime views on records with no other official asset</td><td class="n">248.7M</td><td>Public API classification, 7 Oct 2026; 11 of the 15 videos over 8M</td></tr>
       <tr><td>Visualisers, and the days they were published on</td><td class="n">66 · 4 days</td><td>All on album release days (2019, 2023, 2024, 2025)</td></tr>
     </table>
     <p>Three lenses, read separately and never combined into a score: what our pipe reports for the UK, what Chartmetric estimates for UK audience, and the global channel figures. D-Block was the one artist all three agreed on, which is what made it the first to get a closer look.</p>
-    <div class="an-note"><b>Rankings are scoped to the dataset reviewed.</b> &ldquo;#2&rdquo; is within the 145 artist strings in our UK consumption data for the period, and &ldquo;#1&rdquo; is within the 30-artist sample given Chartmetric territory reads. Neither is a claim about UK rap or about Virgin&rsquo;s roster as a whole: the Virgin UK universe reviewed has only three rap artists, so a &ldquo;#1 Virgin artist&rdquo; line was removed from the D-Block deck for exactly that reason.</div>
+    <div class="an-note"><b>Rankings are scoped to the dataset reviewed.</b> &ldquo;#2&rdquo; is within the 145 artist strings in our UK consumption data for the period, and &ldquo;#1&rdquo; is within the crossover and landscape samples given Chartmetric territory reads. The slide itself shows the two figures rather than the ranks. Neither is a claim about UK rap or about Virgin&rsquo;s roster as a whole: the Virgin UK universe reviewed has only three rap artists, so a &ldquo;#1 Virgin artist&rdquo; line was removed from the D-Block deck for exactly that reason.</div>
     <div class="an-note"><b>What the consumption data is and isn&rsquo;t.</b> VMG UK&rsquo;s own YouTube reporting (Daily Trend, YouTube tab) for repertoire through our pipe: 51.0M views across 145 artist strings in the period. It is period-level, carries no Shorts/long-form, art-track or UGC split, and is not every UK YouTube view Virgin generates. About half the consumption strings are not yet matched to a tracked channel, and some Virgin UK artists with real UK audiences (Peter Gabriel, Bloc Party, Ezra Collective, IDLES among them) have no record in it at all &mdash; which is why the slide says local knowledge has to sit beside the data.</div>
     <div class="an-note"><b>Status.</b> The D-Block review (<code>/dblock</code>) was built for the management conversation. Its recommendations are options; none is recorded as implemented, and no result is claimed. The 474M gap between the channel&rsquo;s lifetime counter and the sum of its public uploads is unresolved and no share-of-lifetime claim depends on it.</div>
 
-    <h3>Understanding what changes &mdash; Ezra Collective</h3>
+    <h3>Campaign reviews &mdash; Ezra Collective</h3>
     <table>
       <tr><th>Measure</th><th>Dance, No One&rsquo;s Watching · 2024</th><th>Here Because of Hope · 2026</th></tr>
       <tr><td>Campaign window</td><td>18 Jun &ndash; 6 Oct 2024 · 110 days</td><td>27 May &ndash; 15 Sep 2026 · 111 days</td></tr>
@@ -499,12 +515,11 @@ body.present .hint{display:block}
     </table>
     <p>Kept out of the main deck so one example carries the point. Both use the same structural measures and the same rule against comparing lifetime view totals across campaigns.</p>
 
-    <h3>The four measures &mdash; what could be read today</h3>
+    <h3>The measures &mdash; what could be read today</h3>
     <dl>
-      <dt>Wider engagement</dt><dd>Readable now: teams with live boards and artists they have added; reviews requested and delivered. Not a proxy: a workspace existing.</dd>
-      <dt>More consistent activity</dt><dd>Readable now from public upload dates: active weeks and longest gap per campaign window, for any tracked channel.</dd>
-      <dt>More follow-up</dt><dd>Readable now: whether a priority release is followed by a long-form moment within an agreed window. The window itself is a choice for the group, not a rule.</dd>
-      <dt>More views and consumption</dt><dd>Readable now: release-week channel views against the preceding weeks (Watcher weekly snapshots, from late August 2026); UK consumption per artist from our own reporting, period-level. With authorised Studio access in aggregate: traffic sources, returning viewers and the catalogue-to-new-release question, which public data cannot answer.</dd>
+      <dt>Team engagement</dt><dd>Readable now: teams with live boards and artists they have added; reviews requested and delivered. Not a proxy: a workspace existing.</dd>
+      <dt>Consistent artist activity</dt><dd>Readable now from public upload dates: active weeks and longest gap per campaign window, for any tracked channel; and whether a priority release is followed by a long-form moment within an agreed window (the window itself is a choice for the group, not a rule).</dd>
+      <dt>Views and consumption</dt><dd>Readable now: release-week channel views against the preceding weeks (Watcher weekly snapshots, from late August 2026); UK consumption per artist from our own reporting, period-level. With authorised Studio access in aggregate: traffic sources, returning viewers and the catalogue-to-new-release question, which public data cannot answer.</dd>
     </dl>
 
     <h3>Open questions kept here, not on the slides</h3>
