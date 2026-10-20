@@ -13,7 +13,7 @@
   A discussion deck for the YouTube group's OKR exercise, built from six
   months of UK work. Seven slides. Each of the four working slides answers
   the same three questions — what exists today, how it has helped, what we
-  could build on — and shows the actual thing: a Watcher view, an Amyl deck
+  could build on — and shows the actual thing: a dashboard view, an Amyl deck
   page, the UK landscape page, an Ezra comparison.
 
   Design direction: /defected (condensed Archivo display, solid grounds,
@@ -23,7 +23,7 @@
   artist frames appear only as the deck pages they come from.
 
   Every figure on a slide has a row in the Analysis panel. Sources: public
-  YouTube Data API, our own daily Watcher snapshots of it, Chartmetric UK
+  YouTube Data API, our own daily dashboard snapshots of it, Chartmetric UK
   monthly views, and VMG UK's own YouTube consumption reporting. No
   YouTube Studio data anywhere.
 -->
@@ -112,7 +112,7 @@ h3.display{font-size:clamp(1.05rem,1.6vw,1.4rem);font-variation-settings:'wdth' 
 @media(max-width:860px){.grid2{grid-template-columns:1fr!important}}
 
 /* Screenshots: framed, captioned, cropped on purpose. */
-.cap{font-family:'DM Mono',monospace;font-size:.62rem;letter-spacing:.14em;text-transform:uppercase;color:var(--dim);margin-bottom:.55rem}
+.cap{font-family:'DM Mono',monospace;font-size:.62rem;letter-spacing:.14em;text-transform:uppercase;color:var(--dim);margin-bottom:.45rem}
 .shot{border-radius:5px;overflow:hidden;border:1px solid var(--line);background:var(--ink-3);box-shadow:0 24px 60px rgba(0,0,0,.5)}
 .shot img{width:100%;height:auto;display:block}
 .shot.crop{height:var(--sh,clamp(220px,34vh,360px))}
@@ -126,6 +126,28 @@ h3.display{font-size:clamp(1.05rem,1.6vw,1.4rem);font-variation-settings:'wdth' 
 .uses li b{color:var(--cream);font-weight:600}
 .uses li i{font-style:normal;font-family:'DM Mono',monospace;font-size:.66rem;color:var(--red-lt);flex:none;letter-spacing:.1em}
 .future{border-left:3px solid var(--red);padding:.15rem 0 .15rem 1rem;color:var(--cream);font-size:clamp(.95rem,1.2vw,1.1rem);line-height:1.45;max-width:46ch;margin-top:1.1rem}
+
+/* Links beside the examples. */
+.linkrow{display:flex;justify-content:space-between;align-items:baseline;gap:1rem;flex-wrap:wrap;margin-top:.55rem}
+.linkrow a{font-family:'DM Mono',monospace;font-size:.7rem;letter-spacing:.1em;text-transform:uppercase;color:var(--red-lt);text-decoration:none;border-bottom:1px solid currentColor;padding-bottom:.1rem}
+.linkrow a:hover{color:var(--cream)}
+.slide.light .linkrow a{color:var(--red)}
+.slide.light .linkrow a:hover{color:var(--ink)}
+a.shot{text-decoration:none;color:inherit}
+
+/* The quick report: a message, as it would be pasted. */
+.report{background:var(--paper);color:var(--ink);border-radius:5px;border:1px solid var(--line-l);padding:.75rem .95rem;
+  font-size:clamp(.82rem,1vw,.92rem);line-height:1.45;box-shadow:0 18px 40px rgba(0,0,0,.35)}
+.report-h{font-weight:700;margin-bottom:.45rem}
+.report ul{list-style:none}
+.report li{padding:.22rem 0 .22rem 1rem;position:relative;color:var(--inkbody)}
+.report li::before{content:'\2022';position:absolute;left:.1rem;color:var(--red)}
+.report li b{color:var(--ink);font-weight:600}
+.report-c{margin-top:.5rem;padding-top:.5rem;border-top:1px solid var(--line-l);color:var(--inkbody);font-size:.86em}
+.report-c b{color:var(--ink);font-weight:600}
+.ext{margin-top:.6rem;border-top:1px dashed var(--line);padding-top:.5rem}
+.ext .label{margin-bottom:.3rem}
+.uses.compact li{padding:.34rem 0;font-size:clamp(.84rem,1.02vw,.93rem)}
 
 /* Stat tiles. */
 .tiles{display:flex;gap:clamp(1.2rem,3vw,2.8rem);flex-wrap:wrap}
@@ -190,7 +212,7 @@ h3.display{font-size:clamp(1.05rem,1.6vw,1.4rem);font-variation-settings:'wdth' 
 body.sheet-open .chrome{display:none}
 
 /* ── Present mode ───────────────────────────────────────────────── */
-body.present .deck .slide{display:none;height:100vh;min-height:100vh;border-bottom:0;padding-top:4rem;padding-bottom:2rem;overflow-y:auto}
+body.present .deck .slide{display:none;height:100vh;min-height:100vh;border-bottom:0;padding-top:3.8rem;padding-bottom:1.6rem;overflow-y:auto}
 body.present .deck .slide.active{display:flex}
 body.present{overflow:hidden}
 .hint{display:none;position:fixed;bottom:1rem;right:var(--pad);z-index:60;font-family:'DM Mono',monospace;font-size:.62rem;letter-spacing:.12em;text-transform:uppercase;color:var(--dim)}
@@ -258,34 +280,49 @@ body.present .hint{display:block}
       <div class="on"><div class="q">03</div><p><b>What could we build on?</b></p></div>
     </div>
     <div class="asks reveal" style="margin-top:clamp(1.2rem,2.6vw,2rem)">
-      <span>Watcher</span><span>Artist deep dives</span><span>Territory data</span><span>Campaign reviews</span>
+      <span>YouTube dashboard</span><span>Artist deep dives</span><span>Territory data</span><span>Campaign reviews</span>
     </div>
   </div>
 </section>
 
-<!-- ═══ 3 · WATCHER ═════════════════════════════════════════════════ -->
-<section class="slide" data-t="Watcher">
+<!-- ═══ 3 · YOUTUBE DASHBOARD ═══════════════════════════════════════ -->
+<section class="slide" data-t="YouTube dashboard" style="padding-top:3.7rem;padding-bottom:1.2rem">
   <div class="inner">
-    <div class="label reveal">What exists today</div>
-    <h2 class="display reveal" style="margin-top:.6rem">Watcher: a shared view of our YouTube channels</h2>
-    <p class="intro reveal">I built Watcher to bring key public YouTube channel information together across the roster. It is live and supports my work and colleagues in the UK, Nordics and Australia.</p>
-    <div class="grid2" style="margin-top:clamp(1rem,2.2vw,1.6rem);grid-template-columns:1.25fr 1fr">
+    <div class="label reveal">What exists today · YouTube dashboard (Watcher)</div>
+    <h2 class="display reveal" style="margin-top:.5rem;max-width:36ch;font-size:clamp(1.5rem,3vw,2.7rem)">YouTube dashboard: a shared view of our channels</h2>
+    <p class="intro reveal" style="max-width:74ch;font-size:clamp(1rem,1.3vw,1.15rem)">I built this dashboard to bring key public YouTube channel information together across the roster. It is live and supports my work and colleagues in the UK, Nordics and Australia.</p>
+    <div class="grid2" style="margin-top:clamp(.7rem,1.6vw,1.1rem);grid-template-columns:1.15fr 1fr;gap:clamp(1.2rem,2.8vw,2.8rem)">
       <div class="reveal">
         <div class="cap">Channel Health · Virgin managed channels · 20 October 2026</div>
-        <div class="shot crop" style="--sh:clamp(240px,38vh,400px);--op:0 0">
-          <img src="/okr/img/watcher-table.jpg" alt="Watcher Channel Health table: artist, 30-day trend, status, formats, subscribers and views over seven days">
-        </div>
-        <div class="label" style="margin-top:.55rem">Public YouTube data · updated daily · no Studio access needed</div>
+        <a class="shot crop" href="/growth" target="_blank" rel="noopener" style="--sh:clamp(160px,23vh,230px);--op:0 0;display:block">
+          <img src="/okr/img/watcher-table.jpg" alt="YouTube dashboard, Channel Health table: artist, 30-day trend, status, formats, subscribers and views over seven days">
+        </a>
+        <div class="linkrow"><a href="/growth" target="_blank" rel="noopener">Open the YouTube dashboard &rarr;</a><span class="label">Public YouTube data · updated daily</span></div>
+        <ul class="uses compact" style="margin-top:.6rem">
+          <li><i>01</i><span><b>Monitor activity and recent performance</b> across multiple artist channels.</span></li>
+          <li><i>02</i><span><b>Spot campaigns or channels</b> worth a closer look.</span></li>
+          <li><i>03</i><span><b>Bring useful information into conversations</b> with colleagues and labels.</span></li>
+        </ul>
       </div>
       <div class="stagger">
-        <div class="label" style="color:var(--red-lt)">How I use it</div>
-        <ul class="uses">
-          <li><i>01</i><span><b>Check channel activity and recent performance.</b> Who&rsquo;s uploading, what&rsquo;s moving, who&rsquo;s gone quiet.</span></li>
-          <li><i>02</i><span><b>Spot artists or campaigns worth a closer look.</b> The weekly roster read is where the deep dives start.</span></li>
-          <li><i>03</i><span><b>Bring useful information into conversations</b> with teams and labels: campaign updates, recaps, asks of YouTube.</span></li>
-        </ul>
-        <p class="future">Making this information available more widely could help more colleagues contribute ideas and share what&rsquo;s working.</p>
+        <div class="cap">Quick channel report · copied from the dashboard · 20 October 2026</div>
+        <div class="report">
+          <div class="report-h">Quick Ezra Collective YouTube update</div>
+          <ul>
+            <li><b>+323K</b> channel views in the last 7 days (to 20 Oct)</li>
+            <li><b>+300</b> public subscribers in the last 7 days; <b>+2,300</b> in the last 30 days (75.8K total)</li>
+            <li><b>23 uploads</b> in the last 30 days; last upload 19 Oct</li>
+            <li><b>Rehearsal Tapes</b> (9 Sep): <b>308K</b> views, up from 122K in release week</li>
+          </ul>
+          <div class="report-c"><b>Context</b> &middot; album out 11 Sep; the channel has stayed active since, with live and tour clips from Japan and Korea this month.</div>
+        </div>
+        <p class="future" style="margin-top:.6rem">Quick channel reports make key figures easy to share with labels and teams.</p>
+        <p class="body" style="margin-top:.6rem;max-width:54ch;font-size:.88rem">Shared visibility gives more people the context to contribute ideas and share learning, including without Studio access. Studio provides deeper private analytics.</p>
       </div>
+    </div>
+    <div class="ext reveal" style="margin-top:.7rem">
+      <div class="label" style="color:var(--red-lt)">Possible extension · a dedicated view for label partners</div>
+      <p class="body" style="font-size:.88rem;max-width:none">The dashboard could also give label partners a view of their own artists and channels, bringing topline performance and upload activity together across their roster: one place to monitor at scale, see where attention might help, and support conversations with VMG. An opportunity to explore with interested partners.</p>
     </div>
   </div>
 </section>
@@ -299,9 +336,10 @@ body.present .hint{display:block}
     <div class="grid2" style="margin-top:clamp(1rem,2.2vw,1.6rem);grid-template-columns:1.25fr 1fr">
       <div class="reveal">
         <div class="cap">From the Amyl and The Sniffers deck · the archive of live performances</div>
-        <div class="shot crop" style="--sh:clamp(240px,38vh,400px);--op:0 0">
+        <a class="shot crop" href="/amyl" target="_blank" rel="noopener" style="--sh:clamp(230px,36vh,380px);--op:0 0;display:block">
           <img src="/okr/img/amyl-library.jpg" alt="A page from the Amyl deck: performances already captured, with view counts">
-        </div>
+        </a>
+        <div class="linkrow"><a href="/amyl" target="_blank" rel="noopener">View the Amyl deep dive &rarr;</a><span class="label">Other reviews: <a href="/ezra" target="_blank" rel="noopener" style="text-transform:none;letter-spacing:0;font-size:inherit">Ezra</a> · <a href="/idles" target="_blank" rel="noopener" style="text-transform:none;letter-spacing:0;font-size:inherit">IDLES</a> · <a href="/defected" target="_blank" rel="noopener" style="text-transform:none;letter-spacing:0;font-size:inherit">Defected</a></span></div>
       </div>
       <div class="three stack stagger">
         <div class="on">
@@ -332,9 +370,10 @@ body.present .hint{display:block}
     <div class="grid2" style="margin-top:clamp(1rem,2.2vw,1.6rem);grid-template-columns:1.25fr 1fr">
       <div class="reveal">
         <div class="cap">UK landscape page · crossover view · our UK consumption beside UK monthly YouTube views</div>
-        <div class="shot crop" style="--sh:clamp(240px,38vh,400px);--op:0 0">
+        <a class="shot crop" href="/uk-landscape" target="_blank" rel="noopener" style="--sh:clamp(230px,36vh,380px);--op:0 0;display:block">
           <img src="/okr/img/uk-crossover.jpg" alt="UK landscape crossover view: D-Block Europe first, with VMG consumption, UK YouTube monthly views and UK territory rank">
-        </div>
+        </a>
+        <div class="linkrow"><a href="/uk-landscape" target="_blank" rel="noopener">Explore the UK landscape &rarr;</a><a href="/dblock" target="_blank" rel="noopener">D&#8209;Block deep dive &rarr;</a></div>
       </div>
       <div class="three stack stagger">
         <div class="on">
@@ -385,6 +424,7 @@ body.present .hint{display:block}
           <div class="big-num" style="font-size:clamp(1.7rem,3vw,2.6rem);color:var(--red)">2.4&times;</div>
           <p class="body" style="max-width:44ch;font-size:.92rem"><b>A separate comparison:</b> release-week channel views against the average of the three weeks before (225.6K &rarr; 535.5K).</p>
         </div>
+        <div class="linkrow"><a href="/ezra" target="_blank" rel="noopener">View the Ezra campaign review &rarr;</a></div>
       </div>
       <div class="three stack stagger">
         <div class="on">
@@ -413,7 +453,7 @@ body.present .hint{display:block}
   <div class="inner">
     <div class="label reveal">Could we build on this?</div>
     <h2 class="display reveal" style="margin-top:.6rem">Three things we could measure together</h2>
-    <p class="intro reveal">Better visibility helps teams engage, deep dives turn information into ideas, and territory data helps focus attention. Here&rsquo;s what that could look like as results.</p>
+    <p class="intro reveal">The dashboard gives teams visibility, reports make information easy to share, deep dives turn findings into artist-specific ideas, territory data shows where to focus, and campaign reviews track activity and consumption. These are approaches we could build on together &mdash; and possible areas to measure.</p>
     <div class="measures stagger" style="margin-top:clamp(1.2rem,2.6vw,2rem)">
       <div><h3 class="display">Team engagement</h3><p>More teams working from shared YouTube information and bringing it into their own conversations.</p></div>
       <div><h3 class="display">Consistent artist activity</h3><p>Priority artists active in more weeks, with shorter gaps and more follow-up around releases.</p></div>
@@ -433,13 +473,13 @@ body.present .hint{display:block}
   <div class="an-in">
     <button class="an-back">&larr; Back to the deck</button>
     <h2>Analysis</h2>
-    <div class="an-sub">The working behind each slide · figures as read on the dates given · public YouTube Data API, our own daily Watcher snapshots, Chartmetric, and VMG UK&rsquo;s YouTube consumption reporting · no YouTube Studio data anywhere</div>
+    <div class="an-sub">The working behind each slide · figures as read on the dates given · public YouTube Data API, our own daily dashboard snapshots, Chartmetric, and VMG UK&rsquo;s YouTube consumption reporting · no YouTube Studio data anywhere</div>
 
     <h3>How to read this deck</h3>
     <p>Each slide makes one point and uses only the figures needed for it. Everything else &mdash; comparison tables, dataset scope, the claim boundary and the objections a reviewer would raise &mdash; is here. The detailed artist and label reviews referred to are published alongside this page (<code>/ezra</code>, <code>/amyl</code>, <code>/idles</code>, <code>/kol</code>, <code>/dblock</code>, <code>/defected</code>, <code>/ktrap</code>, <code>/angusandjuliastone</code>) and each carries its own Analysis panel and audit pack.</p>
     <div class="an-note"><b>Role labels.</b> Where a campaign is discussed, the deck states whether VMG UK advised before it, supported it, or analysed it afterwards. Ezra Collective: campaign run by Partisan; analysed and shared by VMG UK after release. Nothing in this deck credits channel movement to our involvement.</div>
 
-    <h3>Watcher</h3>
+    <h3>YouTube dashboard (Watcher)</h3>
     <table>
       <tr><th>Measure</th><th>Value</th><th>As at</th></tr>
       <tr class="lead"><td>Channels synced in the daily pass</td><td class="n">263 / 263</td><td>20 Oct 2026, 06:28 UTC</td></tr>
@@ -449,6 +489,17 @@ body.present .hint{display:block}
     </table>
     <p>The screenshot on slide 3 is the Channel Health table as it looked on 20 October 2026, cropped to the roster rows. The status labels (healthy, weak conversion, underfed, cold) are our own rules over public figures, not YouTube classifications. Slide 5&rsquo;s screenshot is the UK landscape page&rsquo;s Crossover view on the same day; slide 4&rsquo;s is a page from the published Amyl deck (<code>/amyl</code>).</p>
     <div class="an-note"><b>Team usage, stated carefully.</b> UK, Nordics and Australia teams work from the shared view: Nordics has had its own board since the summer, Australia&rsquo;s board went live on 23 September 2026 with artists the team added. Workspaces also exist for the US, Europe, LATAM and Asia, but a workspace existing, or artists being listed in it, is not evidence of use, and the deck does not count them.</div>
+    <h4 style="font-family:'DM Mono',monospace;font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;margin:1.4rem 0 .5rem">The quick report on slide 3</h4>
+    <table>
+      <tr><th>Line</th><th>Value</th><th>Source · period</th></tr>
+      <tr><td>Channel views, last 7 days</td><td class="n up">+323,032</td><td>Dashboard, read 20 Oct 2026 15:14 UTC; 7 days to 20 Oct</td></tr>
+      <tr><td>Public subscriber count, 7 days · 30 days · total</td><td class="n">+300 · +2,300 · 75,800</td><td>Same read; counts as displayed by YouTube, rounded</td></tr>
+      <tr><td>Uploads, last 30 days · last upload</td><td class="n">23 · 19 Oct 2026</td><td>Same read</td></tr>
+      <tr class="lead"><td>Rehearsal Tapes (published 9 Sep 2026)</td><td class="n up">308,382</td><td>Same read; 121.5K on 15 Sep per the Ezra review</td></tr>
+    </table>
+    <p>The dashboard&rsquo;s report generator produces a short update of this shape (bullets, then a closing line) for any tracked channel, ready to paste into a message. The example on the slide uses the generator&rsquo;s figures with the closing line written as campaign context rather than a generic recommendation; the generator&rsquo;s own stock recommendations (upload-cadence advice and the like) are not verified campaign guidance and are not shown.</p>
+    <div class="an-note"><b>Label-partner view.</b> The dedicated label view on slide 3 is a possible extension, not a feature that exists. Nothing is built for it; it is an idea to explore with interested partners.</div>
+    <div class="an-note"><b>Links.</b> The deck links to <code>/growth</code>, <code>/amyl</code>, <code>/ezra</code>, <code>/idles</code>, <code>/defected</code>, <code>/dblock</code> and <code>/uk-landscape</code>. All are pages without access keys; none links to a team board. The UK landscape page carries VMG UK consumption figures by artist, so this deck is for the internal YouTube group.</div>
     <dl>
       <dt>Everyday use</dt>
       <dd>The weekly roster read (Channel Health, Weekly Pulse and the Campaigns board) is where campaign updates, recaps and the deep dives start. Specific interventions are not claimed on the slide; where one is evidenced it is in the relevant deck&rsquo;s own Analysis panel.</dd>
@@ -519,7 +570,7 @@ body.present .hint{display:block}
     <dl>
       <dt>Team engagement</dt><dd>Readable now: teams with live boards and artists they have added; reviews requested and delivered. Not a proxy: a workspace existing.</dd>
       <dt>Consistent artist activity</dt><dd>Readable now from public upload dates: active weeks and longest gap per campaign window, for any tracked channel; and whether a priority release is followed by a long-form moment within an agreed window (the window itself is a choice for the group, not a rule).</dd>
-      <dt>Views and consumption</dt><dd>Readable now: release-week channel views against the preceding weeks (Watcher weekly snapshots, from late August 2026); UK consumption per artist from our own reporting, period-level. With authorised Studio access in aggregate: traffic sources, returning viewers and the catalogue-to-new-release question, which public data cannot answer.</dd>
+      <dt>Views and consumption</dt><dd>Readable now: release-week channel views against the preceding weeks (dashboard weekly snapshots, from late August 2026); UK consumption per artist from our own reporting, period-level. With authorised Studio access in aggregate: traffic sources, returning viewers and the catalogue-to-new-release question, which public data cannot answer.</dd>
     </dl>
 
     <h3>Open questions kept here, not on the slides</h3>
