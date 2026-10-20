@@ -38,8 +38,8 @@ fixing, say so: the brief asked for neither.
 | Channel | `@StevenWilsonHQ` — `UC-9mlH6az1Q_XUP3fw1N4Fg`, created 25 June 2012, Official Artist Channel |
 | Uploads | **295** retrieved (the channel shows 281 public videos; the API returns all 295 including Shorts/legacy), YouTube Data API v3 via the project's `/api/full-catalogue`, 20 Oct 2026 09:26 UTC |
 | Public counters | 319,000 subscribers (rounded by YouTube); lifetime views 97,597,940 |
-| Per-video daily series | The project's Watcher (`/api/video-series`): daily public views/likes/comments. Campaign uploads from 15 Sep 2026; On Chapel Slope from its Premiere day |
-| Channel-level series | Watcher channel snapshots since 22 Apr 2026 — **not used**: the lifetime counter only updates intermittently (identical 97,597,940 from 7 to 20 Oct) |
+| Per-video daily series | The project's daily per-video readings (`/api/video-series`): daily public views/likes/comments. Campaign uploads from 15 Sep 2026; On Chapel Slope from its Premiere day |
+| Channel-level series | Channel-level daily snapshots since 22 Apr 2026 — **not used**: the lifetime counter only updates intermittently (identical 97,597,940 from 7 to 20 Oct) |
 | Comments | `/api/comment-scan`, 40 top-level comments per video ordered by relevance, 13 videos, 20 Oct 2026 |
 | Playlists / Home | `/api/channel-shelf`: 18 public playlists, 15 Home sections |
 | Manual surfaces | Posts tab and requiemforavillage.com viewed signed-out in a browser, 20 Oct 2026 |
@@ -69,7 +69,7 @@ fixing, say so: the brief asked for neither.
 ## 3. Rules the deck follows
 
 1. Formats are compared **within one album campaign** (similar ages), or at **matched days
-   since Premiere** using the Watcher. Lifetime totals across eras appear as examples only.
+   since Premiere** using daily readings. Lifetime totals across eras appear as examples only.
 2. Public views are not watch time; likes are not loyalty; nothing infers traffic sources,
    retention or returning viewers.
 3. No supporting upload is said to send views to a main video.
@@ -96,7 +96,7 @@ flag.
 
 The "Requiem for a Village" playlist holds 2 videos.
 
-### 4.2 Watcher daily series — the two singles (day = calendar days since Premiere date)
+### 4.2 Daily series — the two singles (day = calendar days since Premiere date)
 
 Village Hall Session (first reading 15 Sep = day 4):
 `d4 409,343 · d5 452,829 · d6 485,786 · d7 511,864 · d8 533,108 · d9 540,237 · d10 550,339 ·
