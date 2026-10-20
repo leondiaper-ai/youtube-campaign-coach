@@ -258,11 +258,12 @@ h2.display{font-size:clamp(2rem,4.2vw,3.6rem);max-width:22ch}
 .confirm{display:inline-block;font-family:'DM Mono',monospace;font-size:.58rem;letter-spacing:.1em;text-transform:uppercase;
   border:1px solid var(--rust);color:var(--rust);padding:.22rem .45rem;margin-top:.6rem}
 .slide.paper .confirm{border-color:var(--oxblood);color:var(--oxblood)}
-.tile{position:relative;border-radius:3px;overflow:hidden;background:var(--ink-3)}
-.tile img{width:100%;aspect-ratio:16/9;object-fit:cover}
-.tile .cap{position:absolute;left:0;right:0;bottom:0;padding:.7rem .8rem;background:linear-gradient(to top,rgba(14,12,10,.92),rgba(14,12,10,0))}
+.tile{display:block;position:relative}
+.tile img{width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:3px;background:var(--ink-3)}
+.tile .cap{padding:.45rem 0 0}
 .tile .cap b{display:block;font-size:.9rem}
-.tile .cap span{font-family:'DM Mono',monospace;font-size:.58rem;letter-spacing:.06em;color:var(--warm)}
+.tile .cap span{font-family:'DM Mono',monospace;font-size:.58rem;letter-spacing:.06em;color:var(--dim)}
+.slide.paper .tile .cap span{color:var(--mute-l)}
 .minis{display:grid;grid-template-columns:repeat(3,1fr);gap:.7rem;margin-top:.7rem}
 .minis .tile img{aspect-ratio:16/10}
 .minis .cap b{font-size:.76rem}
@@ -326,6 +327,13 @@ body.present .slide{display:none;height:100vh;min-height:100vh;border:0;padding-
 body.present .slide.current{display:flex}
 body.present h2.display{font-size:clamp(1.8rem,3.5vw,3rem);max-width:30ch}
 body.present .reveal,body.present .stagger>*{opacity:1;transform:none;transition:none}
+body.present .pts{gap:.55rem;margin-top:.9rem}
+body.present .give{margin-top:1rem}
+body.present .pts p{font-size:.82rem}
+body.present .minis .tile img{aspect-ratio:16/8}
+body.present .slide[data-t="Priority one"] .tile:first-child img{aspect-ratio:16/8}
+body.present .steps{margin-top:1.1rem}
+body.present .slide[data-t="Next steps"] .statement{margin-top:1.1rem!important}
 body.present .q:nth-child(3n+2){transform:rotate(.5deg)} body.present .q:nth-child(3n){transform:rotate(-.6deg)}
 .pbar{display:none;position:fixed;bottom:0;left:0;height:3px;background:var(--rust);z-index:1000;transition:width .3s ease}
 .pcount{display:none;position:fixed;bottom:.9rem;right:1.2rem;z-index:1000;font-family:'DM Mono',monospace;font-size:.6rem;
@@ -394,7 +402,7 @@ body.sheet-open{overflow:hidden}
     <span>Autumn Festival · 6 Nov · Requiem For A Village</span><span class="dim">·</span>
     <span>The birds and the stones thank you for your comments</span><span class="dim">·</span>
   </div></div>
-  <div class="pictag">On Chapel Slope · official video · dir. Mike Bennion</div>
+  <div class="pictag" style="top:3.4rem">On Chapel Slope · official video · dir. Mike Bennion</div>
   <div class="inner">
     <span class="notice reveal">Steven Wilson × YouTube · channel deep dive</span>
     <h1 class="display reveal" style="margin-top:1rem;max-width:13ch">Welcome to <em>the village.</em></h1>
@@ -427,12 +435,12 @@ body.sheet-open{overflow:hidden}
 <section class="slide" data-t="Formats">
   <div class="inner">
     <span class="notice reveal">What the channel shows · formats compared within the same campaign</span>
-    <h2 class="display reveal" style="margin-top:.9rem">Fans come for the songs, and stay for <em>Steven playing and explaining them.</em></h2>
+    <h2 class="display reveal" style="margin-top:.9rem;max-width:26ch">Official videos lead. <em>Performance and Steven's own voice</em> reliably follow.</h2>
     <p class="body reveal" style="margin-top:.8rem">319K subscribers and 295 uploads since 2012. To avoid comparing a 2013 video with last month's, each figure below is the typical (median) result for one format <b>within a single album campaign</b>, so the videos are of similar age.</p>
     <div class="formats stagger">
       <div class="fmt"><div class="k">Official videos</div><h3>The Harmony Codex singles</h3><div class="fig">562K</div><div class="u">median · 6 videos · Aug–Nov 2023</div><p>The campaign's anchors: What Life Brings 822K, Rock Bottom 631K.</p></div>
       <div class="fmt lead"><div class="k">Performance sessions</div><h3>The Future Bites Sessions</h3><div class="fig r">191K</div><div class="u">median · 8 sessions · Oct 2020–Mar 2021</div><p>A repeatable series — none below 120K. Voyage 34 reached 390K.</p></div>
-      <div class="fmt lead"><div class="k">Concert film</div><h3>Royal Albert Hall clips</h3><div class="fig r">414K</div><div class="u">median · 6 clips · Home Invasion, 2018–24</div><p>Pariah 1.44M. The 2024 4K reissue of Regret #9: 319K.</p></div>
+      <div class="fmt lead"><div class="k">Concert film</div><h3>Royal Albert Hall clips</h3><div class="fig r">414K</div><div class="u">median · 6 clips · one concert film, 2018–24</div><p>Pariah 1.44M. The 2024 4K reissue of Regret #9: 319K.</p></div>
       <div class="fmt"><div class="k">Shorts · Steven on his music</div><h3>Studio, instruments, stories</h3><div class="fig">29K</div><div class="u">median · 9 Shorts · Sep–Dec 2023</div><p>Almost three times the same campaign's announcement Shorts (10K, n=14).</p></div>
       <div class="fmt"><div class="k">Longer films</div><h3>Documentaries &amp; conversations</h3><div class="fig">20–96K</div><div class="u">range · 2024–26 · 22 to 85 minutes</div><p>A smaller, steady audience: The Overview in India, 96K in six months.</p></div>
     </div>
@@ -463,7 +471,7 @@ body.sheet-open{overflow:hidden}
   <div class="inner">
     <span class="notice reveal">The strongest thread</span>
     <h2 class="display reveal" style="margin-top:.9rem;max-width:18ch">Steven and the band, <em>playing the music.</em></h2>
-    <p class="body reveal" style="margin-top:.8rem;max-width:52ch">The Village Hall Session is the campaign's most-viewed upload and the latest in a line of performance videos fans return to. It is credited to three players — Steven, Randy McStine and Russell Holzman — and fans noticed each of them.</p>
+    <p class="body reveal" style="margin-top:.8rem;max-width:52ch">The Village Hall Session is the campaign's most-viewed upload and the latest in a line of performance videos that have found large audiences here. It is credited to three players — Steven, Randy McStine and Russell Holzman — and fans noticed each of them.</p>
     <div style="max-width:640px;margin-top:1.1rem" class="stagger">
       <a class="asset hl" href="https://www.youtube.com/watch?v=RPZ8Xy1hO9s" target="_blank" rel="noopener"><div class="th"><img src="https://i.ytimg.com/vi/RPZ8Xy1hO9s/hqdefault.jpg" alt=""></div><div><div class="t">Requiem for a Village (The Village Hall Sessions)</div><div class="m">Sep 2026 · 8 min · dir. Miles Skarin · 1,966 comments</div></div><div class="fig">706K</div></a>
       <a class="asset" href="https://www.youtube.com/watch?v=I1Ql5nVY4Ao" target="_blank" rel="noopener"><div class="th"><img src="https://i.ytimg.com/vi/I1Ql5nVY4Ao/hqdefault.jpg" alt=""></div><div><div class="t">Voyage 34 (The Future Bites Sessions)</div><div class="m">Dec 2020 · one of 8 sessions, 120K–390K</div></div><div class="fig">390K</div></a>
@@ -480,7 +488,7 @@ body.sheet-open{overflow:hidden}
     <h2 class="display reveal" style="margin-top:.9rem">When Steven explains the music, <em>Shorts travel further.</em></h2>
     <div class="grid2" style="margin-top:1rem;align-items:start">
       <div>
-        <p class="body reveal">Every Short from The Harmony Codex campaign (Aug–Dec 2023), grouped by what it shows. They are all about three years old.</p>
+        <p class="body reveal">26 of the 27 Shorts from The Harmony Codex campaign (Aug–Dec 2023), grouped by what they show — all about three years old. One gift-guide Short fits no group.</p>
         <div class="bars stagger">
           <div class="bar r"><div class="n">Steven on his music<span>studio, instruments, how songs were built · n=9</span></div><div class="track"><div class="fill" style="width:100%"></div><div class="v" style="left:100%;transform:translate(-100%,-50%);padding-right:.5rem;color:var(--ink)">28.6K</div></div></div>
           <div class="bar"><div class="n">Announcements &amp; teasers<span>"Tuesday.", "Out now" · n=14</span></div><div class="track"><div class="fill" style="width:35%"></div><div class="v" style="left:35%">10.0K</div></div></div>
@@ -495,7 +503,7 @@ body.sheet-open{overflow:hidden}
         <a href="https://www.youtube.com/shorts/bnlLUZKutE8" target="_blank" rel="noopener"><div class="th"><img src="https://i.ytimg.com/vi/bnlLUZKutE8/hqdefault.jpg" alt=""></div><div class="t">Playing bass on a new song · 2025</div><div class="fig">213K</div></a>
       </div>
     </div>
-    <div class="src reveal">Medians of public lifetime views, 20 Oct 2026; groups assigned by title and checked by watching · Shorts views are counted differently from long-form and are not compared with them.</div>
+    <div class="src reveal">Medians of public lifetime views, 20 Oct 2026; groups assigned from titles · Shorts views are counted differently from long-form and are not compared with them.</div>
   </div>
 </section>
 
@@ -505,12 +513,12 @@ body.sheet-open{overflow:hidden}
     <span class="notice reveal">The parish guestbook · public comments</span>
     <h2 class="display reveal" style="margin-top:.9rem">Fans talk about the playing, the story — <em>and Steven being open.</em></h2>
     <div class="quotes stagger">
-      <div class="q"><div class="theme">The players</div><blockquote>"Russell Holzman — what a formidable drummer."</blockquote><div class="on">Village Hall Session · 681 likes</div></div>
-      <div class="q"><div class="theme">Steven, in person</div><blockquote>"This new open Steven presence online is highly appreciated."</blockquote><div class="on">Records I've worked on (Short) · 928 likes</div></div>
-      <div class="q"><div class="theme">The process</div><blockquote>"I really love that artists share these moments of the creation process."</blockquote><div class="on">Ask Me Nicely: The Making of To The Bone</div></div>
-      <div class="q"><div class="theme">The story</div><blockquote>"Great to finally see such an upbeat and happy video from Steven Wilson."</blockquote><div class="on">On Chapel Slope · 964 likes — fans also trade readings of the wedding and the graveyard</div></div>
-      <div class="q"><div class="theme">The world</div><blockquote>"Came here from the village parish circular."</blockquote><div class="on">On Chapel Slope — the website's mailing list, in its own words</div></div>
-      <div class="q"><div class="theme">Asking for more</div><blockquote>"Hope he does more of these. Radioactive Toy please!"</blockquote><div class="on">Voyage 34 (The Future Bites Sessions) — requests for sessions recur</div></div>
+      <div class="q"><div class="theme">The players</div><blockquote>“Russell Holzman — what a formidable drummer.”</blockquote><div class="on">Village Hall Session · 681 likes</div></div>
+      <div class="q"><div class="theme">Steven, in person</div><blockquote>“This new open Steven presence online is highly appreciated.”</blockquote><div class="on">Records I've worked on (Short) · 928 likes</div></div>
+      <div class="q"><div class="theme">The process</div><blockquote>“I really love that artists share these moments of the creation process.”</blockquote><div class="on">Ask Me Nicely: The Making of To The Bone</div></div>
+      <div class="q"><div class="theme">The story</div><blockquote>“Great to finally see such an upbeat and happy video from Steven Wilson.”</blockquote><div class="on">On Chapel Slope · 964 likes — fans also trade readings of the wedding and the graveyard</div></div>
+      <div class="q"><div class="theme">The world</div><blockquote>“Came here from the village parish circular.”</blockquote><div class="on">On Chapel Slope — the website's mailing list, in its own words</div></div>
+      <div class="q"><div class="theme">Asking for more</div><blockquote>“Hope he does more of these. Radioactive Toy please!”</blockquote><div class="on">Voyage 34 (The Future Bites Sessions) — requests for sessions recur</div></div>
     </div>
     <div class="src reveal">40 top-level comments per video, by relevance, from 13 videos, 20 Oct 2026 · chosen to illustrate recurring themes, not as representative research · no commenter is named.</div>
   </div>
@@ -525,14 +533,14 @@ body.sheet-open{overflow:hidden}
       <div class="idea s1">
         <div class="rate"><i class="on"></i><i class="on"></i><i class="on"></i></div><div class="rl">Strongest evidence</div>
         <h3>A performance or session version</h3>
-        <p class="gives">The songs played live by the people who made them — the thing fans most often ask for.</p>
+        <p class="gives">The songs played by the people who made them — something fans ask for in the comments.</p>
         <div class="ev"><img src="https://i.ytimg.com/vi/RPZ8Xy1hO9s/hqdefault.jpg" alt=""><p><b>Village Hall Session</b> 706K in 39 days; Future Bites Sessions median 191K.</p></div>
         <p class="need">Needs: further session footage, or new filming.</p>
       </div>
       <div class="idea">
         <div class="rate"><i class="on"></i><i class="on"></i><i class="on"></i></div><div class="rl">Strong · above all in Shorts</div>
         <h3>Making the song</h3>
-        <p class="gives">Steven explaining a part, a sound or a choice — the reason fans go back and listen again.</p>
+        <p class="gives">Steven explaining a part, a sound or a choice — a reason to listen again.</p>
         <div class="ev"><img src="https://i.ytimg.com/vi/5Mex_rhM6ZU/hqdefault.jpg" alt=""><p><b>Steven-on-his-music Shorts</b> ≈3× the same campaign's announcements.</p></div>
         <p class="need">Needs: Steven on camera — short pieces, or existing interview footage.</p>
       </div>
@@ -565,7 +573,7 @@ body.sheet-open{overflow:hidden}
         <div class="give reveal"><div class="label">What it gives the fan</div><p>Another album song, played by the three people on the session — the format fans responded to most this campaign.</p></div>
         <div class="pts stagger">
           <div><h4>If more sessions were recorded</h4><p>The Short called it "the first Village Hall Session". A second, released around the album, would follow the 2020–21 Future Bites Sessions pattern: one song at a time, gathered in one playlist.</p></div>
-          <div><h4>Credit the players</h4><p>Randy McStine and Russell Holzman both have channels. YouTube's Collaborations feature lets a video credit up to 10 creators, so the session can appear for their audiences too.</p></div>
+          <div><h4>Credit the players</h4><p>Randy McStine and Russell Holzman both have channels. YouTube's Collaborations feature lets a video credit up to 10 creators, linking it to each of their channels.</p></div>
           <div><h4>The Royal Albert Hall, 28–29 October</h4><p>His only shows this year, with orchestra and choir. If they are being filmed, a single song could carry the Home Invasion precedent into this campaign.</p></div>
         </div>
         <span class="confirm reveal">Confirm what was filmed · no footage assumed</span>
@@ -592,15 +600,18 @@ body.sheet-open{overflow:hidden}
         <h2 class="display reveal" style="margin-top:.9rem;max-width:17ch">Steven, explaining <em>how the village was built.</em></h2>
         <div class="give reveal"><div class="label" style="color:var(--oxblood)">What it gives the fan</div><p>A reason to hear a song again: the part, the instrument or the decision Steven wants them to notice.</p></div>
         <div class="pts stagger">
-          <div><h4>Short, and in his own words</h4><p>One song or one sound per Short: the instruments in the session, the folk textures, writing with Andy Partridge, David Tennant's narration. This is the format that has worked best for Steven on Shorts.</p></div>
+          <div><h4>Short, and in his own words</h4><p>One song or one sound per Short: the instruments in the session, the folk textures, writing with Andy Partridge, David Tennant's narration. It is the kind of Short that has done best for Steven.</p></div>
           <div><h4>Use what is already filmed</h4><p>The Innerviews conversation (Short, 20K) and the session footage (Short, 46K) suggest longer material may exist. If it does, short cuts need no new filming.</p></div>
           <div><h4>One longer piece, after release</h4><p>A track-by-track or making-of for the album, for the fans who want depth. Precedents: <i>To The Bone</i> track-by-track (2017) 73K; <i>The Overview in India</i> 96K.</p></div>
         </div>
       </div>
-      <div class="stagger" style="display:grid;grid-template-columns:1fr 1fr;gap:.8rem">
-        <a class="tile" href="https://www.youtube.com/shorts/my-LfLeyjRE" target="_blank" rel="noopener"><img src="https://i.ytimg.com/vi/my-LfLeyjRE/hqdefault.jpg" alt="" style="aspect-ratio:9/12"><div class="cap"><b>Talking the themes</b><span>Innerviews · Sep 2026 · 20K</span></div></a>
-        <a class="tile" href="https://www.youtube.com/shorts/Bi9bvwuS4Vk" target="_blank" rel="noopener"><img src="https://i.ytimg.com/vi/Bi9bvwuS4Vk/hqdefault.jpg" alt="" style="aspect-ratio:9/12"><div class="cap"><b>A glimpse of the session</b><span>Sep 2026 · 46K</span></div></a>
-        <a class="tile" href="https://www.youtube.com/watch?v=pVUzCTSiSkE" target="_blank" rel="noopener" style="grid-column:1/-1"><img src="https://i.ytimg.com/vi/pVUzCTSiSkE/hqdefault.jpg" alt="" style="aspect-ratio:16/7"><div class="cap"><b>The Overview in India · mini documentary</b><span>Apr 2026 · 22 min · 96K</span></div></a>
+      <div class="stagger" style="display:grid;grid-template-columns:1fr 1fr 1.5fr;gap:.8rem;align-items:start">
+        <a class="tile" href="https://www.youtube.com/shorts/my-LfLeyjRE" target="_blank" rel="noopener"><img src="https://i.ytimg.com/vi/my-LfLeyjRE/hqdefault.jpg" alt="" style="aspect-ratio:9/13"><div class="cap"><b>Talking the themes</b><span>Innerviews · Short · 20K</span></div></a>
+        <a class="tile" href="https://www.youtube.com/shorts/Bi9bvwuS4Vk" target="_blank" rel="noopener"><img src="https://i.ytimg.com/vi/Bi9bvwuS4Vk/hqdefault.jpg" alt="" style="aspect-ratio:9/13"><div class="cap"><b>A glimpse of the session</b><span>Short · 46K</span></div></a>
+        <div style="display:grid;gap:.8rem">
+          <a class="tile" href="https://www.youtube.com/shorts/5Mex_rhM6ZU" target="_blank" rel="noopener"><img src="https://i.ytimg.com/vi/5Mex_rhM6ZU/hqdefault.jpg" alt=""><div class="cap"><b>Who played the drums?</b><span>Short · 2023 · 138K</span></div></a>
+          <a class="tile" href="https://www.youtube.com/watch?v=pVUzCTSiSkE" target="_blank" rel="noopener"><img src="https://i.ytimg.com/vi/pVUzCTSiSkE/hqdefault.jpg" alt=""><div class="cap"><b>The Overview in India</b><span>22 min · 2026 · 96K</span></div></a>
+        </div>
       </div>
     </div>
     <div class="src reveal">Public views, 20 Oct 2026 · collaborators from the album announcement (Louder, 11 Sep 2026) · whether longer interview footage exists is for the label to confirm.</div>
@@ -618,7 +629,11 @@ body.sheet-open{overflow:hidden}
     <div class="pts stagger" style="max-width:640px">
       <div><h4>Build it from the village's own material</h4><p>The parish notices, the observances, the hall and the churchyard. Fans already followed the website into the comments.</p></div>
       <div><h4>Fans were invited into the artwork</h4><p>In the spring, Steven asked fans for amateur photos of village life for the special edition. Where permissions allow, images like these could appear in a visualiser — and fans would recognise their own village in it.</p></div>
-      <div><h4>Keep the making-of light</h4><p>Video BTS has drawn modest audiences on this channel. A short piece with Mike Bennion on the wedding and the graveyard would answer the questions fans are asking without a full documentary.</p></div>
+      <div><h4>Keep the making-of light</h4><p>Video BTS has drawn modest audiences on this channel. A short piece on the wedding and the graveyard — from the shoot's B-roll, or a few words from Mike Bennion — would meet fans' curiosity without a full documentary.</p></div>
+    </div>
+    <div class="stagger" style="display:grid;grid-template-columns:repeat(2,minmax(0,220px));gap:.8rem;margin-top:1.1rem">
+      <a class="tile" href="https://www.youtube.com/watch?v=T0dLypToLzE" target="_blank" rel="noopener"><img src="https://i.ytimg.com/vi/T0dLypToLzE/hqdefault.jpg" alt=""><div class="cap"><b>Refuge (Lyric Video)</b><span>2017 · 2.5M</span></div></a>
+      <a class="tile" href="https://www.youtube.com/watch?v=G_yW8ornhK4" target="_blank" rel="noopener"><img src="https://i.ytimg.com/vi/G_yW8ornhK4/hqdefault.jpg" alt=""><div class="cap"><b>Man Of The People (Lyric Video)</b><span>2021 · 352K</span></div></a>
     </div>
     <div class="src reveal">Refuge (Lyric Video) 2.5M (2017) and Man Of The People (Official Lyric Video) 352K (2021), public views 20 Oct 2026 · photo call-out: channel post, spring 2026 (deadline 3 April), 1.2K likes · use of fan photos depends on the terms given at submission.</div>
   </div>
@@ -656,7 +671,7 @@ body.sheet-open{overflow:hidden}
 <section class="slide paper" data-t="Next steps">
   <div class="inner">
     <span class="notice reveal">Three next steps</span>
-    <h2 class="display reveal" style="margin-top:.9rem;max-width:24ch">Fans already respond to Steven playing and explaining the music. <em>Give them more of both.</em></h2>
+    <h2 class="display reveal" style="margin-top:.9rem;max-width:34ch">Fans already respond to Steven playing and explaining the music. <em>Give them more of both.</em></h2>
     <div class="split reveal"><span><i></i>Assemble now from what exists</span><span><i></i>Needs new filming</span></div>
     <div class="steps stagger">
       <div class="step"><div class="when">Assemble now · before 6 Nov</div><div class="n">01</div><h3>Steven explains the songs, in Shorts</h3>
