@@ -30,6 +30,7 @@ const nextConfig = {
       { source: '/odenfatzo', destination: '/odenfatzo/index.html' },
       { source: '/stevenwilson', destination: '/stevenwilson/index.html' },
       { source: '/tomasmith', destination: '/tomasmith/index.html' },
+      { source: '/flightfacilities', destination: '/flightfacilities/index.html' },
       // YouTube: observations and ideas for the OKR discussion (internal, review version).
       { source: '/okr', destination: '/okr/index.html' },
     ];
