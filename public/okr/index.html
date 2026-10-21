@@ -260,7 +260,7 @@ body.present .hint{display:block}
   <a class="nav-pill" href="#deepdives">Artist deep dives</a>
   <a class="nav-pill" href="#territory">Territory data</a>
   <a class="nav-pill" href="#campaigns">Campaign reviews</a>
-  <a class="nav-pill" href="#scale">Build on this</a>
+  <a class="nav-pill" href="#scale">Scale and goals</a>
   <a class="nav-pill" href="#okr">The OKR discussion</a>
   <div class="nav-tools">
     <button class="nav-btn primary" id="present-btn" onclick="startPresent()">Present</button>
@@ -324,19 +324,25 @@ body.present .hint{display:block}
 
     <div class="cards two reveal" style="grid-template-columns:1fr 1fr">
       <div class="card">
+        <div class="eyebrow">Channels monitored · dated readings</div>
+        <div class="card-title">233 to 263 channels monitored since late September</div>
+        <div class="chart" id="chart-roster"></div>
+        <div class="legend"><span><i style="background:var(--signal)"></i>Monitoring counts from the dashboard&rsquo;s sync logs</span><span><i style="background:var(--paper);border:2px solid #2C25FF;width:8px;height:8px;border-radius:50%"></i>July analysis sample (138 channels), a separate milestone</span></div>
+        <p class="caption">Before the dashboard there was no shared roster-wide view; the information existed across individual channels and Studio accounts. July&rsquo;s 138 is the sample analysed in the Campaign Observatory, not a monitoring count. Monitoring counts are the dashboard&rsquo;s own daily sync logs. Of the 263, 149 are Virgin-managed and 114 are market channels we watch alongside our own.</p>
+      </div>
+      <div class="card">
         <div class="eyebrow">Coverage by workspace · 20 Oct 2026</div>
         <div class="card-title">Territory boards extend the central view</div>
         <div class="chart" id="chart-boards"></div>
         <div class="legend"><span><i style="background:var(--signal)"></i>Board maintained by the territory team</span><span><i style="background:var(--bone)"></i>Board set up, not yet in regular use</span></div>
-        <p class="caption">Channels listed per board. All boards draw on the same channel pool; the central view covers the full roster. Of the 263, 149 are Virgin-managed and 114 are market channels we watch alongside our own.</p>
+        <p class="caption">Channels listed per board. All boards draw on the same channel pool; the central view covers the full roster.</p>
       </div>
-      <div class="card" style="padding:.6rem .4rem .4rem">
-        <div class="steps" style="grid-template-columns:1fr;gap:.5rem;margin:0">
-          <div class="step" style="border:0;padding:.7rem 1rem"><div class="k">Starting point</div><p>Channel information existed across individual channels and Studio accounts, but we lacked a shared roster-wide view.</p></div>
-          <div class="step now" style="padding:.7rem 1rem"><div class="k">Today</div><p><b>Over 250 channels monitored in one place</b> (263 on 20 Oct 2026), with colleagues in the Nordics and Australia adding artists and extending coverage.</p></div>
-          <div class="step" style="border:0;padding:.7rem 1rem"><div class="k">Potential</div><p>More territory- and label-specific views could make this information useful to more teams.</p></div>
-        </div>
-      </div>
+    </div>
+
+    <div class="steps reveal">
+      <div class="step"><div class="k">Starting point</div><p>Channel information existed across individual channels and Studio accounts, but we lacked a shared roster-wide view.</p></div>
+      <div class="step now"><div class="k">Today</div><p><b>Over 250 channels monitored in one place</b> (263 on 20 Oct 2026), with colleagues in the Nordics and Australia adding artists and extending coverage.</p></div>
+      <div class="step"><div class="k">Potential</div><p>More territory- and label-specific views could make this information useful to more teams.</p></div>
     </div>
 
     <div class="cards two reveal">
@@ -550,13 +556,35 @@ body.present .hint{display:block}
   <div class="container">
     <div class="section-label">Could we build on this?</div>
     <h2 class="section-title">Where we could build on this</h2>
-    <p class="section-subtitle">Wider coverage gives more teams useful visibility, helping them identify opportunities and contribute ideas. Increased artist activity and consumption are outcomes we could then measure.</p>
+    <p class="section-subtitle">We can already measure the scale of coverage and work delivered. We could agree goals to extend that, while tracking whether artist activity and consumption improve. Below: current results, illustrative scenarios and proposed goals, kept distinct.</p>
+
+    <div class="cards reveal" style="grid-template-columns:1.3fr 1fr">
+      <div class="card">
+        <div class="eyebrow">Coverage · current results, then illustrative scenarios</div>
+        <div class="card-title">How territory participation could extend coverage</div>
+        <div class="chart" id="chart-scale"></div>
+        <div class="legend"><span><i style="background:var(--signal)"></i>Recorded monitoring counts</span><span><i style="background:var(--paper);border:2px solid #2C25FF;width:8px;height:8px;border-radius:50%"></i>July analysis sample</span><span><i style="background:#BDB5A8"></i>Scenario: current rate continues, largely one person adding</span><span><i style="background:#2C25FF;opacity:.55"></i>Scenario: four more boards join in January with launch batches like Australia&rsquo;s (12&ndash;15 each)</span><span><i style="background:#2C25FF"></i>Scenario: four more boards each bring a full priority roster (~40)</span></div>
+        <p class="caption">All three lines are illustrations, not forecasts or commitments. The grey line extends the rate of the 25 days to 20 Oct (+30). The blue lines show what territory participation would add: Australia and the Nordics each brought 12&ndash;15 channels when their boards went live; the ~40 full-roster figure is a placeholder only the territories can confirm.</p>
+      </div>
+      <div class="card">
+        <div class="eyebrow">Reviews · current results, then a suggested pace</div>
+        <div class="card-title">Delivery so far, and a pace to discuss</div>
+        <div class="chart" id="chart-reviews-scale"></div>
+        <div class="legend"><span><i style="background:var(--signal)"></i>Published to date (cumulative)</span><span><i style="background:#BDB5A8"></i>Suggested pace: 8 a month</span></div>
+        <p class="caption">23 reviews since August: 3, 9, then 11 in the first 20 days of October. The observed rate is 8&ndash;10 a month over the full months, higher in October so far. A suggested pace of 8 a month, below the current rate, is offered as a goal for discussion; it assumes the current UK capacity and does not imply other territories produce reviews.</p>
+      </div>
+    </div>
 
     <div class="cards reveal" style="grid-template-columns:repeat(4,1fr)">
       <div class="card"><div class="eyebrow">01</div><div class="card-title">More territories contributing their priority artists</div><p class="card-desc">Boards exist for each territory; the Nordics and Australia already add their own artists. Others could do the same, at their own pace.</p></div>
       <div class="card"><div class="eyebrow">02</div><div class="card-title">Dedicated dashboard views for interested label partners</div><p class="card-desc">A label&rsquo;s own artists and channels in one place: topline performance and upload activity across their roster, to support conversations with VMG.</p></div>
       <div class="card"><div class="eyebrow">03</div><div class="card-title">A shared bank of artist examples and campaign learning</div><p class="card-desc">Deep dives ahead of signings and campaigns, and case studies after them, collected where any team can draw on them.</p></div>
       <div class="card"><div class="eyebrow">04</div><div class="card-title">Regular reviews of activity, views and consumption</div><p class="card-desc">The same readings taken each quarter, so we can see whether wider visibility is leading to more consistent activity and more consumption.</p></div>
+    </div>
+
+    <div class="callout">
+      <div class="callout-label">Proposed goals for discussion</div>
+      <div class="callout-text">Extend coverage as territories add their priority artists; keep reviews at a steady pace (8 a month suggested); and review artist activity and consumption together each quarter. Current results are measured; the scenarios are illustrations; the goals are the group&rsquo;s to set.</div>
     </div>
   </div>
 </section>
@@ -614,6 +642,80 @@ function el(n,a,t){var e=document.createElementNS(SVG,n);for(var k in a)e.setAtt
 var tip=document.getElementById('tip');
 function hover(node,text){node.addEventListener('mousemove',function(ev){tip.textContent=text;tip.style.left=(ev.clientX+12)+'px';tip.style.top=(ev.clientY-30)+'px';tip.classList.add('on');});node.addEventListener('mouseleave',function(){tip.classList.remove('on');});}
 
+/* Monitoring counts recorded by the dashboard's own sync logs, by day offset from 15 Jul 2026.
+   The July figure is the analysis sample (138 channels), not a monitoring count, and is drawn
+   as a separate milestone. "No shared roster-wide view" is the starting context, stated in text
+   rather than plotted. */
+var MON=[['25 Sep',233,'Dashboard sync log · 233/233',72],['14 Oct',252,'Dashboard sync log · 252/252',91],['20 Oct',263,'Dashboard sync log · 263/263',97]];
+var SAMPLE=['Jul 2026',138,'July analysis sample · 82 Virgin + 56 market channels · not a monitoring count',0];
+function chartRoster(){
+  var host=document.getElementById('chart-roster'); if(!host)return;
+  var W=520,H=240,L=36,R=16,T=20,B=44,max=300,span=97;
+  var s=el('svg',{viewBox:'0 0 '+W+' '+H,role:'img','aria-label':'Channels monitored: 233 on 25 September, 252 on 14 October, 263 on 20 October 2026; the July analysis sample of 138 channels shown as a separate milestone'});
+  [0,100,200,300].forEach(function(v){var y=T+(H-T-B)*(1-v/max);s.appendChild(el('line',{x1:L,x2:W-R,y1:y,y2:y,class:'grid'}));s.appendChild(el('text',{x:L-8,y:y+4,class:'ax','text-anchor':'end'},v?v:'0'));});
+  var X=function(d){return L+(W-L-R)*(d/span);},Y=function(v){return T+(H-T-B)*(1-v/max);};
+  var path=MON.map(function(d,i){return (i?'L':'M')+X(d[3])+' '+Y(d[1]);}).join(' ');
+  s.appendChild(el('path',{d:path+' L'+X(MON[MON.length-1][3])+' '+(H-B)+' L'+X(MON[0][3])+' '+(H-B)+' Z',class:'area'}));
+  s.appendChild(el('path',{d:path,class:'ln'}));
+  MON.forEach(function(d,i){var g=el('g',{});g.appendChild(el('circle',{cx:X(d[3]),cy:Y(d[1]),r:5,class:'dot'}));g.appendChild(el('circle',{cx:X(d[3]),cy:Y(d[1]),r:16,fill:'transparent'}));hover(g,d[0]+' 2026 · '+d[1]+' channels monitored · '+d[2]);s.appendChild(g);
+    if(i===0||i===MON.length-1) s.appendChild(el('text',{x:X(d[3]),y:Y(d[1])-12,class:'lab','text-anchor':i===0?'middle':'end'},String(d[1])));
+    if(i!==1) s.appendChild(el('text',{x:X(d[3]),y:H-B+18,class:'ax','text-anchor':i===MON.length-1?'end':'middle'},d[0]));});
+  /* July sample: hollow blue milestone, not joined to the monitoring line. */
+  var sg=el('g',{});sg.appendChild(el('circle',{cx:X(SAMPLE[3]),cy:Y(SAMPLE[1]),r:5,style:'fill:var(--paper);stroke:#2C25FF;stroke-width:2'}));sg.appendChild(el('circle',{cx:X(SAMPLE[3]),cy:Y(SAMPLE[1]),r:16,fill:'transparent'}));hover(sg,SAMPLE[0]+' · '+SAMPLE[1]+' channels · '+SAMPLE[2]);s.appendChild(sg);
+  s.appendChild(el('text',{x:X(SAMPLE[3]),y:Y(SAMPLE[1])-12,class:'lab m','text-anchor':'start'},'138 · analysis sample'));
+  s.appendChild(el('text',{x:X(SAMPLE[3]),y:H-B+18,class:'ax','text-anchor':'start'},SAMPLE[0]));
+  s.appendChild(el('text',{x:L,y:H-B+34,class:'ax','text-anchor':'start'},'Before: no shared roster-wide view'));
+  host.appendChild(s);
+}
+function chartScale(){
+  var host=document.getElementById('chart-scale'); if(!host)return;
+  /* Recorded counts by day offset from 15 Jul 2026; projection at the 25 Sep → 20 Oct rate (30 channels in 25 days = 1.2/day) to 20 Apr 2027 (day 279). */
+  var REC=[['25 Sep',233,72],['14 Oct',252,91],['20 Oct',263,97]],rate=30/25,endDay=279,proj=Math.round(263+rate*(endDay-97));
+  var W=520,H=240,L=36,R=52,T=20,B=34,max=800,span=endDay;
+  var s=el('svg',{viewBox:'0 0 '+W+' '+H,role:'img','aria-label':'Channels tracked: recorded counts to 20 October 2026, and an illustrative projection to April 2027 at the September to October rate, about '+proj});
+  [0,200,400,600,800].forEach(function(v){var y=T+(H-T-B)*(1-v/max);s.appendChild(el('line',{x1:L,x2:W-R,y1:y,y2:y,class:'grid'}));s.appendChild(el('text',{x:L-8,y:y+4,class:'ax','text-anchor':'end'},String(v)));});
+  var X=function(d){return L+(W-L-R)*(d/span);},Y=function(v){return T+(H-T-B)*(1-v/max);};
+  var path=REC.map(function(d,i){return (i?'L':'M')+X(d[2])+' '+Y(d[1]);}).join(' ');
+  /* Scenarios, from 1 Jan 2027 (day 170): the four boards not yet in use start adding artists.
+     A: each brings a launch batch like Australia and the Nordics did (12–15 channels) → +55.
+     B: each brings a full priority roster of ~40 channels (to be confirmed by the territories) → +160. */
+  var janDay=170,baseJan=Math.round(263+rate*(janDay-97)),scA=proj+55,scB=proj+160;
+  s.appendChild(el('path',{d:'M'+X(97)+' '+Y(263)+' L'+X(endDay)+' '+Y(proj),class:'ln','stroke-dasharray':'4 5',style:'stroke:#BDB5A8'}));
+  s.appendChild(el('path',{d:'M'+X(janDay)+' '+Y(baseJan)+' L'+X(endDay)+' '+Y(scA),class:'ln','stroke-dasharray':'4 5',style:'stroke:#2C25FF;opacity:.55'}));
+  s.appendChild(el('path',{d:'M'+X(janDay)+' '+Y(baseJan)+' L'+X(endDay)+' '+Y(scB),class:'ln','stroke-dasharray':'4 5',style:'stroke:#2C25FF'}));
+  s.appendChild(el('path',{d:path,class:'ln'}));
+  [[scA,'#2C25FF','.55','~'+scA+' · four more boards, launch batches'],[scB,'#2C25FF','1','~'+scB+' · four more boards, full priority rosters']].forEach(function(sc){
+    var g=el('g',{});g.appendChild(el('circle',{cx:X(endDay),cy:Y(sc[0]),r:5,class:'dot',style:'fill:'+sc[1]+';opacity:'+sc[2]}));g.appendChild(el('circle',{cx:X(endDay),cy:Y(sc[0]),r:16,fill:'transparent'}));hover(g,'Apr 2027 · '+sc[3]+' · scenario, not a target');s.appendChild(g);
+    s.appendChild(el('text',{x:X(endDay)+10,y:Y(sc[0])+4,class:'lab m','text-anchor':'start'},'~'+sc[0]));
+  });
+  s.appendChild(el('text',{x:X(janDay),y:H-B+18,class:'ax','text-anchor':'middle'},'Jan 2027'));
+  REC.forEach(function(d){var g=el('g',{});g.appendChild(el('circle',{cx:X(d[2]),cy:Y(d[1]),r:5,class:'dot'}));g.appendChild(el('circle',{cx:X(d[2]),cy:Y(d[1]),r:16,fill:'transparent'}));hover(g,d[0]+' 2026 · '+d[1]+' channels · recorded');s.appendChild(g);});
+  var jg=el('g',{});jg.appendChild(el('circle',{cx:X(0),cy:Y(138),r:5,style:'fill:var(--paper);stroke:#2C25FF;stroke-width:2'}));jg.appendChild(el('circle',{cx:X(0),cy:Y(138),r:16,fill:'transparent'}));hover(jg,'Jul 2026 · 138 channels · analysis sample, not a monitoring count');s.appendChild(jg);
+  s.appendChild(el('text',{x:X(0)+10,y:Y(138)+4,class:'lab m','text-anchor':'start'},'138 · sample'));
+  var pg=el('g',{});pg.appendChild(el('circle',{cx:X(endDay),cy:Y(proj),r:5,class:'dot',style:'fill:#BDB5A8'}));pg.appendChild(el('circle',{cx:X(endDay),cy:Y(proj),r:16,fill:'transparent'}));hover(pg,'Apr 2027 · ~'+proj+' channels · scenario: current rate continues · not a target');s.appendChild(pg);
+  s.appendChild(el('text',{x:X(97),y:Y(263)-12,class:'lab','text-anchor':'middle'},'263'));
+  s.appendChild(el('text',{x:X(endDay)+10,y:Y(proj)+4,class:'lab m','text-anchor':'start'},'~'+proj));
+  [['Jul 2026',0,'start'],['20 Oct',97,'middle'],['Apr 2027',endDay,'end']].forEach(function(t){s.appendChild(el('text',{x:X(t[1]),y:H-B+18,class:'ax','text-anchor':t[2]},t[0]));});
+  host.appendChild(s);
+}
+function chartReviewsScale(){
+  var host=document.getElementById('chart-reviews-scale'); if(!host)return;
+  /* Cumulative reviews by month-end (Oct to the 20th), then 10 a month to April 2027. Month index from Aug 2026 = 0. */
+  var REC=[['Aug',3,0],['Sep',12,1],['Oct',23,2]],projEnd=8,proj=23+8*6;
+  var W=520,H=240,L=36,R=52,T=20,B=34,max=100,span=projEnd;
+  var s=el('svg',{viewBox:'0 0 '+W+' '+H,role:'img','aria-label':'Cumulative reviews: 3 by August, 12 by September, 23 by 20 October; about 71 by April 2027 at a suggested eight a month'});
+  [0,25,50,75,100].forEach(function(v){var y=T+(H-T-B)*(1-v/max);s.appendChild(el('line',{x1:L,x2:W-R,y1:y,y2:y,class:'grid'}));s.appendChild(el('text',{x:L-8,y:y+4,class:'ax','text-anchor':'end'},String(v)));});
+  var X=function(d){return L+(W-L-R)*(d/span);},Y=function(v){return T+(H-T-B)*(1-v/max);};
+  var path=REC.map(function(d,i){return (i?'L':'M')+X(d[2])+' '+Y(d[1]);}).join(' ');
+  s.appendChild(el('path',{d:'M'+X(2)+' '+Y(23)+' L'+X(projEnd)+' '+Y(proj),class:'ln','stroke-dasharray':'4 5',style:'stroke:#BDB5A8'}));
+  s.appendChild(el('path',{d:path,class:'ln'}));
+  REC.forEach(function(d){var g=el('g',{});g.appendChild(el('circle',{cx:X(d[2]),cy:Y(d[1]),r:5,class:'dot'}));g.appendChild(el('circle',{cx:X(d[2]),cy:Y(d[1]),r:16,fill:'transparent'}));hover(g,d[0]+' 2026 · '+d[1]+' reviews to date');s.appendChild(g);});
+  var pg=el('g',{});pg.appendChild(el('circle',{cx:X(projEnd),cy:Y(proj),r:5,class:'dot',style:'fill:#BDB5A8'}));pg.appendChild(el('circle',{cx:X(projEnd),cy:Y(proj),r:16,fill:'transparent'}));hover(pg,'Apr 2027 · ~'+proj+' reviews at a suggested 8 a month · goal to discuss');s.appendChild(pg);
+  s.appendChild(el('text',{x:X(2),y:Y(23)-12,class:'lab','text-anchor':'middle'},'23'));
+  s.appendChild(el('text',{x:X(projEnd)+10,y:Y(proj)+4,class:'lab m','text-anchor':'start'},'~'+proj));
+  [['Aug 2026',0,'start'],['20 Oct',2,'middle'],['Jan 2027',5,'middle'],['Apr 2027',projEnd,'end']].forEach(function(t){s.appendChild(el('text',{x:X(t[1]),y:H-B+18,class:'ax','text-anchor':t[2]},t[0]));});
+  host.appendChild(s);
+}
 function chartBoards(){
   var host=document.getElementById('chart-boards'); if(!host)return;
   var W=520,rowH=26,L=88,R=52,T=6,H=T+BOARDS.length*rowH+6,max=263;
@@ -710,7 +812,7 @@ document.addEventListener('keydown',function(e){
   if(e.key==='ArrowLeft'||e.key==='PageUp'){e.preventDefault();showSlide(cur-1);}
 });
 document.addEventListener('DOMContentLoaded',function(){
-  chartBoards();chartReviews();
+  chartRoster();chartBoards();chartReviews();chartScale();chartReviewsScale();
   pairBars('chart-weeks','Active weeks: 7 of 16 in 2024, 16 of 16 in 2026',7,16,16,'7 of 16 active weeks','16 of 16 active weeks');
   pairBars('chart-gap','Longest gap between uploads: 43 days in 2024, 9 days in 2026',43,9,43,'43-day longest gap','9-day longest gap');
   stackBars('chart-assets','Uploads by format: 2024 18 long-form and 9 Shorts; 2026 24 long-form and 45 Shorts',[['2024',[[18,'','18 long-form'],[9,'blue','9 Shorts','opacity:.75']]],['2026',[[24,'','24 long-form'],[45,'blue','45 Shorts','opacity:.75']]]],69);
