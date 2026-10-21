@@ -519,6 +519,26 @@ body.present .hint{display:block}
       </div>
     </div>
 
+    <div class="cards three reveal">
+      <div class="card">
+        <div class="eyebrow">Assets used · long-form and Shorts</div>
+        <div class="chart" id="chart-assets"></div>
+        <div class="legend"><span><i style="background:var(--signal)"></i>Long-form</span><span><i style="background:var(--electric);opacity:.75"></i>Shorts</span></div>
+        <p class="caption">27 uploads in 2024 (18 long-form, 9 Shorts) against 69 in 2026 (24 long-form, 45 Shorts): music videos, visualisers, a rehearsal film, three city films and festival Shorts, all inside one creative world.</p>
+      </div>
+      <div class="card">
+        <div class="eyebrow">Where the attention went · share of campaign-window views</div>
+        <div class="chart" id="chart-conc"></div>
+        <p class="caption">In 2024 one video took 62.8% of the window and the top three took 84.7%. In 2026 the leader took 27.4% and the top three 56.5% &mdash; a music video, a second music video and a fourteen-minute rehearsal film. The campaign stopped depending on one upload.</p>
+      </div>
+      <div class="card">
+        <div class="eyebrow">Two jobs · 2026 window views by format</div>
+        <div class="chart" id="chart-jobs"></div>
+        <div class="legend"><span><i style="background:var(--signal)"></i>Long-form · 24 uploads</span><span><i style="background:var(--electric);opacity:.75"></i>Shorts · 45 uploads</span></div>
+        <p class="caption">Long-form carried 83.6% of window views from a third of the uploads; the 45 Shorts kept the channel present every week. Different jobs, judged separately.</p>
+      </div>
+    </div>
+
     <div class="cards two reveal" style="grid-template-columns:1fr 1fr">
       <blockquote class="quote">&ldquo;Love the idea of building a world, not a content calendar. Exactly right for a group like Ezra and so glad to see the change in strategy pay off for them.&rdquo;<cite>YouTube UK Head of Music · on the Ezra recap</cite></blockquote>
       <div class="callout" style="margin-top:0">
@@ -719,6 +739,19 @@ function chartReviewsScale(){
   [['Aug 2026',0,'start'],['20 Oct',2,'middle'],['Jan 2027',5,'middle'],['Apr 2027',projEnd,'end']].forEach(function(t){s.appendChild(el('text',{x:X(t[1]),y:H-B+18,class:'ax','text-anchor':t[2]},t[0]));});
   host.appendChild(s);
 }
+function stackBars(id,label,rows,max){
+  /* rows: [name, [[value, cssClass, tip], ...]] — horizontal stacked bars with a 2px surface gap. */
+  var host=document.getElementById(id); if(!host)return;
+  var W=300,rowH=40,L=58,R=40,T=4,H=T+rows.length*rowH;
+  var s=el('svg',{viewBox:'0 0 '+W+' '+H,role:'img','aria-label':label});
+  rows.forEach(function(r,i){
+    var y=T+i*rowH,x=L,total=r[1].reduce(function(a,v){return a+v[0];},0);
+    s.appendChild(el('text',{x:L-10,y:y+19,class:'ax','text-anchor':'end'},r[0]));
+    r[1].forEach(function(v,j){var w=(W-L-R)*(v[0]/max);var rect=el('rect',{x:x+(j?2:0),y:y+4,width:Math.max(0,w-(j?2:0)),height:22,rx:3,class:'bar '+v[1],style:v[3]||''});hover(rect,r[0]+' · '+v[2]);s.appendChild(rect);x+=w;});
+    s.appendChild(el('text',{x:x+8,y:y+20,class:'lab'},String(total)+(r[2]||'')));
+  });
+  host.appendChild(s);
+}
 function pairBars(id,label,a,b,max,unitA,unitB){
   var host=document.getElementById(id); if(!host)return;
   var W=300,rowH=40,L=58,R=40,T=4,H=T+2*rowH;
@@ -729,7 +762,7 @@ function pairBars(id,label,a,b,max,unitA,unitB){
     var cl=el('clipPath',{id:id+'c'+i});cl.appendChild(el('rect',{x:L,y:y+4,width:w,height:22,rx:4}));s.appendChild(cl);
     var r=el('rect',{x:L,y:y+4,width:w,height:22,class:'bar '+d[2]});r.setAttribute('clip-path','url(#'+id+'c'+i+')');s.appendChild(r);
     hover(r,d[0]+' · '+d[3]);
-    s.appendChild(el('text',{x:L+w+8,y:y+20,class:'lab'},String(d[1])));
+    s.appendChild(el('text',{x:L+w+8,y:y+20,class:'lab'},String(d[1])+(max===100?'%':'')));
   });
   host.appendChild(s);
 }
@@ -776,6 +809,9 @@ document.addEventListener('DOMContentLoaded',function(){
   chartRoster();chartBoards();chartReviews();chartScale();chartReviewsScale();
   pairBars('chart-weeks','Active weeks: 7 of 16 in 2024, 16 of 16 in 2026',7,16,16,'7 of 16 active weeks','16 of 16 active weeks');
   pairBars('chart-gap','Longest gap between uploads: 43 days in 2024, 9 days in 2026',43,9,43,'43-day longest gap','9-day longest gap');
+  stackBars('chart-assets','Uploads by format: 2024 18 long-form and 9 Shorts; 2026 24 long-form and 45 Shorts',[['2024',[[18,'','18 long-form'],[9,'blue','9 Shorts','opacity:.75']]],['2026',[[24,'','24 long-form'],[45,'blue','45 Shorts','opacity:.75']]]],69);
+  pairBars('chart-conc','Top three uploads share of window views: 84.7% in 2024, 56.5% in 2026',84.7,56.5,100,'top three uploads took 84.7% of window views','top three uploads took 56.5% of window views');
+  stackBars('chart-jobs','2026 window views by format: long-form 83.6%, Shorts 16.4%',[['Views',[[83.6,'','long-form 83.6% of window views'],[16.4,'blue','Shorts 16.4% of window views','opacity:.75']],'%']],100);
   observeAll();navSpy();
   document.querySelectorAll('.hero .reveal, #start .reveal').forEach(function(e){e.classList.add('visible')});
 });
