@@ -125,6 +125,7 @@ a{color:inherit}
 .badge{display:inline-block;font-size:.58rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:.2rem .6rem;border-radius:100px;vertical-align:middle}
 .badge.sun{background:#FFD24C;color:var(--foreground)}
 .badge.live{background:var(--mint);color:#fff}
+.card .badge{display:inline-block}
 .badge.ghost{background:rgba(0,0,0,.06);color:var(--warm)}
 .section-dark .badge.ghost{background:rgba(255,255,255,.12);color:#fff}
 
@@ -279,8 +280,8 @@ body.present .hint{display:block}
     <p class="hero-subtitle">Six months of work on channel visibility, artist-specific ideas and territory focus &mdash; and how we could build on it together for the group&rsquo;s objective, quarterly key results and regular review.</p>
     <div class="stats-bar">
       <div class="stat-item"><span class="stat-value">250+</span><span class="stat-label">Channels monitored daily on the YouTube dashboard</span></div>
-      <div class="stat-item"><span class="stat-value">23</span><span class="stat-label">Artist and label reviews published since August</span></div>
-      <div class="stat-item"><span class="stat-value">3</span><span class="stat-label">Territory teams working from boards: UK, Australia, Nordics</span></div>
+      <div class="stat-item"><span class="stat-value">23</span><span class="stat-label">Artist and label reviews completed since August</span></div>
+      <div class="stat-item"><span class="stat-value">3</span><span class="stat-label">Supporting UK, Nordics and Australia</span></div>
       <div class="stat-item"><span class="stat-value">145</span><span class="stat-label">Artists in VMG UK&rsquo;s YouTube consumption data, Mar&ndash;Sep 2026</span></div>
     </div>
     <div class="data-chain"><span>Dashboard</span><i>&#9654;</i><span>Quick reports</span><i>&#9654;</i><span>Deep dives</span><i>&#9654;</i><span>Territory data</span><i>&#9654;</i><span>Campaign reviews</span><i>&#9654;</i><span>What we could measure</span></div>
@@ -294,11 +295,11 @@ body.present .hint{display:block}
     <p class="thesis-statement">Following Zack&rsquo;s note about a shared YouTube objective and measurable quarterly results, I&rsquo;ve brought together some of the work I&rsquo;ve been developing over the last six months.</p>
     <p class="section-subtitle" style="margin-bottom:1.6rem">These examples show what has helped me and colleagues so far, alongside a few ideas we could build on together.</p>
     <div class="thesis-themes">
-      <div class="thesis-theme"><b>The dashboard</b> gives teams visibility of channel activity across the roster.</div>
-      <div class="thesis-theme"><b>Quick reports</b> make key figures easy to share with colleagues and labels.</div>
-      <div class="thesis-theme"><b>Deep dives</b> turn findings into artist-specific ideas.</div>
-      <div class="thesis-theme"><b>Territory data</b> helps identify where to focus.</div>
-      <div class="thesis-theme"><b>Campaign reviews</b> track activity and consumption.</div>
+      <div class="thesis-theme"><b>The dashboard</b> gives visibility.</div>
+      <div class="thesis-theme"><b>Quick reports</b> make information shareable.</div>
+      <div class="thesis-theme"><b>Deep dives</b> suggest artist-specific ideas.</div>
+      <div class="thesis-theme"><b>Territory data</b> helps focus support.</div>
+      <div class="thesis-theme"><b>Campaign reviews</b> help us learn, tracking activity and views.</div>
     </div>
     <div class="qrow">
       <div><div class="n">01</div><p>What exists today?</p></div>
@@ -317,7 +318,7 @@ body.present .hint{display:block}
 
     <div class="tiles reveal">
       <div class="tile"><div class="v">263</div><div class="l">Channels synced</div><div class="d">Daily pass · 20 Oct 2026</div></div>
-      <div class="tile"><div class="v">149</div><div class="l">Virgin managed channels</div><div class="d">plus 114 market-watch channels</div></div>
+      <div class="tile"><div class="v">114</div><div class="l">Market-watch channels</div><div class="d">Watched alongside our own roster</div></div>
       <div class="tile"><div class="v">7</div><div class="l">Workspaces</div><div class="d">Central view and six territory boards</div></div>
       <div class="tile"><div class="v">0</div><div class="l">Studio access needed</div><div class="d">Public YouTube data only</div></div>
     </div>
@@ -325,10 +326,10 @@ body.present .hint{display:block}
     <div class="cards two reveal" style="grid-template-columns:1fr 1fr">
       <div class="card">
         <div class="eyebrow">Channels monitored · dated readings</div>
-        <div class="card-title">Six months ago we monitored no channels this way. Today, 263.</div>
+        <div class="card-title">From no shared roster-wide view to 263 channels in one place</div>
         <div class="chart" id="chart-roster"></div>
-        <div class="legend"><span><i style="background:var(--signal)"></i>Monitoring counts from the dashboard&rsquo;s sync logs</span><span><i style="background:var(--paper);border:2px solid #2C25FF;width:8px;height:8px;border-radius:50%"></i>July analysis sample (138 channels), a separate milestone</span></div>
-        <p class="caption">Six months ago no channels were monitored like this: the information existed across individual channels and Studio accounts, with no shared roster-wide view. July&rsquo;s 138 is the sample analysed in the Campaign Observatory, not a monitoring count. The monitoring counts are the dashboard&rsquo;s own daily sync logs, from 233 in late September to 263 on 20 October. Of the 263, 149 are Virgin-managed and 114 are market channels we watch alongside our own.</p>
+        <div class="legend"><span><i style="background:var(--signal)"></i>Monitoring counts from the dashboard&rsquo;s sync logs</span><span><i style="background:var(--paper);border:2px solid #2C25FF;width:8px;height:8px;border-radius:50%"></i>July research sample (138 channels), not a monitoring count</span></div>
+        <p class="caption">Monitoring counts are the dashboard&rsquo;s daily sync logs. July&rsquo;s 138 is the research sample, not a monitoring count. The 263 includes 114 market channels watched alongside our own.</p>
       </div>
       <div class="card">
         <div class="eyebrow">Coverage by workspace · 20 Oct 2026</div>
@@ -365,7 +366,7 @@ body.present .hint{display:block}
             <li><b>+323K</b> channel views in the last 7 days (to 20 Oct)</li>
             <li><b>+300</b> public subscribers in 7 days; <b>+2,300</b> in 30 days (75.8K total)</li>
             <li><b>23 uploads</b> in the last 30 days; last upload 19 Oct</li>
-            <li><b>Rehearsal Tapes</b> (9 Sep): <b>308K</b> views, up from 122K in release week</li>
+            <li><b>Rehearsal Tapes</b> (9 Sep): <b>308K</b> views, up from 122K on 15 September</li>
           </ul>
           <div class="report-c"><b>Context</b> &middot; album out 11 Sep; the channel has stayed active since, with live and tour clips from Japan and Korea this month.</div>
         </div>
@@ -394,7 +395,7 @@ body.present .hint{display:block}
 
     <div class="callout">
       <div class="callout-label">What this means for the OKR discussion</div>
-      <div class="callout-text">Dashboard coverage demonstrates scale. Whether wider visibility leads to more consistent artist activity and more views or consumption is the outcome we would measure.</div>
+      <div class="callout-text">We can now follow far more channels, share information more easily, and extend coverage as territories contribute.</div>
     </div>
   </div>
 </section>
@@ -424,7 +425,7 @@ body.present .hint{display:block}
       <div>
         <div class="card" style="margin-bottom:1.25rem">
           <div class="eyebrow">Reviews published · by month of data read</div>
-          <div class="card-title">23 artist and label reviews since August</div>
+          <div class="card-title">23 artist and label reviews completed since August</div>
           <div class="chart" id="chart-reviews"></div>
           <p class="caption">October to the 20th. Each review is a public page with its own analysis appendix, and together they form a growing bank of examples teams can draw on. Ezra Collective and IDLES for Partisan; Defected Records as a label channel review.</p>
           <div class="links"><a href="/intelligence#artists" target="_blank" rel="noopener">Browse the bank of examples &rarr;</a></div>
@@ -443,14 +444,14 @@ body.present .hint{display:block}
       <div class="card">
         <div class="eyebrow">Where the work started</div>
         <div class="card-title">How successful YouTube campaigns are built</div>
-        <p class="card-desc">The July analysis of 138 channels and 3,554 videos: multiformat rollouts, the follow-up window, Virgin against the wider market, and eight campaigns worth studying. The dashboard builds on that data and helps us keep understanding how we use YouTube.</p>
-        <div class="links"><a href="https://youtube-insights-pi.vercel.app/preview.html" target="_blank" rel="noopener">Open the July analysis &rarr;</a></div>
+        <p class="card-desc">July 2026 research: a sample-based review of channel activity and content formats, exploring opportunities against YouTube best practices.</p>
+        <div class="links"><a href="https://youtube-insights-pi.vercel.app/preview.html" target="_blank" rel="noopener">Open the July research &rarr;</a></div>
       </div>
     </div>
 
     <div class="callout">
       <div class="callout-label">What this means for the OKR discussion</div>
-      <div class="callout-text">Each review follows the same shape &mdash; what already works, then what is worth trying &mdash; so any priority artist or label channel in any territory could have one: ahead of a signing, ahead of a campaign, or after it as a case study we learn from.</div>
+      <div class="callout-text">Reviews can come ahead of a signing, ahead of a campaign, or after it as a case study. We can share the outputs and learning first, and explore which parts of the process are worth reusing if teams are interested.</div>
     </div>
   </div>
 </section>
@@ -542,10 +543,10 @@ body.present .hint{display:block}
     </div>
 
     <div class="cards two reveal" style="grid-template-columns:1fr 1fr">
-      <blockquote class="quote">&ldquo;Love the idea of building a world, not a content calendar. Exactly right for a group like Ezra and so glad to see the change in strategy pay off for them.&rdquo;<cite>YouTube UK Head of Music · on the Ezra recap</cite></blockquote>
+      <blockquote class="quote">&ldquo;Love the idea of building a world, not a content calendar. Exactly right for a group like Ezra and so glad to see the change in strategy pay off for them.&rdquo;<cite>UK Head of Music · on the Ezra recap</cite></blockquote>
       <div class="callout" style="margin-top:0">
         <div class="callout-label">What this means for the OKR discussion</div>
-        <div class="callout-text">Every priority campaign could close with a case study like this, so the learning compounds: the same readings from public data, the lessons carried into the next campaign, and Studio adding traffic sources and returning viewers where shared.</div>
+        <div class="callout-text">Case studies like this let the learning carry from one campaign to the next.</div>
       </div>
     </div>
   </div>
@@ -556,7 +557,7 @@ body.present .hint{display:block}
   <div class="container">
     <div class="section-label">Could we build on this?</div>
     <h2 class="section-title">Where we could build on this</h2>
-    <p class="section-subtitle">We can already measure the scale of coverage and work delivered. We could agree goals to extend that, while tracking whether artist activity and consumption improve. Below: current results, illustrative scenarios and proposed goals, kept distinct.</p>
+    <p class="section-subtitle">We can already measure the scale of coverage and work delivered. We could agree goals to extend that, while tracking whether artist activity and consumption improve.</p>
 
     <div class="cards reveal" style="grid-template-columns:1.3fr 1fr">
       <div class="card">
@@ -564,27 +565,27 @@ body.present .hint{display:block}
         <div class="card-title">How territory participation could extend coverage</div>
         <div class="chart" id="chart-scale"></div>
         <div class="legend"><span><i style="background:var(--signal)"></i>Recorded monitoring counts</span><span><i style="background:var(--paper);border:2px solid #2C25FF;width:8px;height:8px;border-radius:50%"></i>July analysis sample</span><span><i style="background:#BDB5A8"></i>Scenario: current rate continues, largely one person adding</span><span><i style="background:#2C25FF;opacity:.55"></i>Scenario: four more boards join in January with launch batches like Australia&rsquo;s (12&ndash;15 each)</span><span><i style="background:#2C25FF"></i>Scenario: four more boards each bring a full priority roster (~40)</span></div>
-        <p class="caption">All three lines are illustrations, not forecasts or commitments. The grey line extends the rate of the 25 days to 20 Oct (+30). The blue lines show what territory participation would add: Australia and the Nordics each brought 12&ndash;15 channels when their boards went live; the ~40 full-roster figure is a placeholder only the territories can confirm.</p>
+        <p class="caption">Illustrations, not forecasts. Grey extends the last 25 days&rsquo; rate (+30). Blue adds boards of 12&ndash;15 channels (the size of today&rsquo;s Nordics and Australia boards) or ~40, a placeholder for territories to confirm.</p>
       </div>
       <div class="card">
         <div class="eyebrow">Reviews · current results, then an illustration</div>
         <div class="card-title">Delivery so far, a starting point for wider contribution</div>
         <div class="chart" id="chart-reviews-scale"></div>
-        <div class="legend"><span><i style="background:var(--signal)"></i>Published to date (cumulative)</span><span><i style="background:#BDB5A8"></i>Illustration: the observed rate continued</span></div>
-        <p class="caption">23 reviews since August: 3, 9, then 11 in the first 20 days of October. The dashed line simply continues the observed rate of the two full months as an illustration. It is one contributor&rsquo;s delivery so far, not a quota per person; as more teams contribute, the bank of examples grows faster.</p>
+        <div class="legend"><span><i style="background:var(--signal)"></i>Completed to date (cumulative)</span><span><i style="background:#BDB5A8"></i>Illustrative pace: 8 a month</span></div>
+        <p class="caption">3, 9, then 11 in the first 20 days of October. The dashed line is an illustrative pace of 8 a month based on recent delivery &mdash; one contributor&rsquo;s work, not a quota.</p>
       </div>
     </div>
 
     <div class="cards reveal" style="grid-template-columns:repeat(4,1fr)">
       <div class="card"><div class="eyebrow">01</div><div class="card-title">More territories contributing their priority artists</div><p class="card-desc">Boards exist for each territory; the Nordics and Australia already add their own artists. Others could do the same, at their own pace.</p></div>
       <div class="card"><div class="eyebrow">02</div><div class="card-title">Dedicated dashboard views for interested label partners</div><p class="card-desc">A label&rsquo;s own artists and channels in one place: topline performance and upload activity across their roster, to support conversations with VMG.</p></div>
-      <div class="card"><div class="eyebrow">03</div><div class="card-title">A shared bank of artist examples and campaign learning</div><p class="card-desc">Deep dives ahead of signings and campaigns, and case studies after them, collected where any team can draw on them.</p></div>
+      <div class="card"><div class="eyebrow">03</div><div class="card-title">A shared bank of artist examples and campaign learning</div><p class="card-desc">Share useful outputs and learning first; teams may have their own approaches, and we can explore which parts of the process are worth reusing if there&rsquo;s interest.</p></div>
       <div class="card"><div class="eyebrow">04</div><div class="card-title">Regular reviews of activity, views and consumption</div><p class="card-desc">The same readings taken each quarter, so we can see whether wider visibility is leading to more consistent activity and more consumption.</p></div>
     </div>
 
     <div class="callout">
       <div class="callout-label">Proposed goals for discussion</div>
-      <div class="callout-text">Extend coverage as territories add their priority artists; grow the bank of reviews as more teams contribute; and review artist activity and consumption together each quarter. Current results are measured; the scenarios are illustrations; the goals are the group&rsquo;s to set.</div>
+      <div class="callout-text">Extend coverage as territories add their priority artists; grow the shared bank of examples; review artist activity and consumption each quarter. The goals are the group&rsquo;s to set.</div>
     </div>
   </div>
 </section>
@@ -597,15 +598,15 @@ body.present .hint{display:block}
     <p class="section-subtitle">This work contributes the artist-support, shared-visibility and measurement side of the wider YouTube discussion; the group will also bring its commercial, partnership and owned-channel priorities. Four starting points and proposed directions, for the group to shape.</p>
 
     <div class="cards reveal" style="grid-template-columns:repeat(4,1fr);margin-bottom:0">
-      <div class="card"><div class="card-stat">250+</div><div class="card-title">Channels monitored today</div><p class="card-desc">Extend coverage as more territories add their artists.</p></div>
-      <div class="card"><div class="card-stat">23</div><div class="card-title">Artist and label reviews so far</div><p class="card-desc">A growing bank of insights and ideas that can expand as more teams contribute.</p></div>
-      <div class="card"><div class="card-stat">100<span style="font-size:.45em;color:rgba(255,255,255,.5);font-weight:700"> / territory</span></div><div class="card-title">Proposed priority-channel mapping</div><p class="card-desc">Identify key channels with local teams.</p></div>
-      <div class="card"><div class="card-stat">12<span style="font-size:.45em;color:rgba(255,255,255,.5);font-weight:700"> months</span></div><div class="card-title">Territory consumption data</div><p class="card-desc">Work with Data/Insights to connect consumption with channel performance.</p></div>
+      <div class="card"><span class="badge live" style="margin-bottom:.7rem">Today</span><div class="card-stat">250+</div><div class="card-title">Channels monitored today</div><p class="card-desc">Extend coverage as territories contribute.</p></div>
+      <div class="card"><span class="badge live" style="margin-bottom:.7rem">Today</span><div class="card-stat">23</div><div class="card-title">Artist and label reviews so far</div><p class="card-desc">A growing bank of insights and examples that can expand as more teams contribute.</p></div>
+      <div class="card"><span class="badge sun" style="margin-bottom:.7rem">Proposed</span><div class="card-stat">100<span style="font-size:.45em;color:rgba(255,255,255,.5);font-weight:700"> / territory</span></div><div class="card-title">Priority-channel mapping</div><p class="card-desc">Proposed, with local teams.</p></div>
+      <div class="card"><span class="badge sun" style="margin-bottom:.7rem">Proposed</span><div class="card-stat">12<span style="font-size:.45em;color:rgba(255,255,255,.5);font-weight:700"> months</span></div><div class="card-title">Territory consumption data</div><p class="card-desc">Working with Data/Insights.</p></div>
     </div>
-    <p class="small muted" style="margin:.9rem 0 0;max-width:80ch">The consumption step: work with Data/Insights to establish 12-month YouTube consumption by artist and territory, then connect it with the dashboard&rsquo;s channel information &mdash; keeping consumption reporting and public channel figures distinct, even when shown together.</p>
+    <p class="small muted" style="margin:.9rem 0 0;max-width:80ch">Next data opportunity: work with Data/Insights to establish 12-month consumption by artist and territory, then connect it with the dashboard&rsquo;s channel information.</p>
 
     <div class="callout reveal">
-      <div class="callout-text" style="font-size:clamp(1.05rem,1.6vw,1.3rem);font-weight:600">More teams contributing. More priority artists understood and supported. Consistent activity and consumption growth reviewed quarterly.</div>
+      <div class="callout-text" style="font-size:clamp(1.05rem,1.6vw,1.3rem);font-weight:600">More teams contributing. More priority artists understood and supported. Activity and consumption reviewed quarterly.</div>
     </div>
   </div>
 </section>
@@ -627,7 +628,7 @@ function hover(node,text){node.addEventListener('mousemove',function(ev){tip.tex
    as a separate milestone. "No shared roster-wide view" is the starting context, stated in text
    rather than plotted. */
 var MON=[['25 Sep',233,'Dashboard sync log · 233/233',72],['14 Oct',252,'Dashboard sync log · 252/252',91],['20 Oct',263,'Dashboard sync log · 263/263',97]];
-var SAMPLE=['Jul 2026',138,'July analysis sample · 82 Virgin + 56 market channels · not a monitoring count',0];
+var SAMPLE=['Jul 2026',138,'July research sample · not a monitoring count',0];
 function chartRoster(){
   var host=document.getElementById('chart-roster'); if(!host)return;
   var W=520,H=240,L=36,R=16,T=20,B=44,max=300,span=97;
@@ -642,9 +643,9 @@ function chartRoster(){
     if(i!==1) s.appendChild(el('text',{x:X(d[3]),y:H-B+18,class:'ax','text-anchor':i===MON.length-1?'end':'middle'},d[0]));});
   /* July sample: hollow blue milestone, not joined to the monitoring line. */
   var sg=el('g',{});sg.appendChild(el('circle',{cx:X(SAMPLE[3]),cy:Y(SAMPLE[1]),r:5,style:'fill:var(--paper);stroke:#2C25FF;stroke-width:2'}));sg.appendChild(el('circle',{cx:X(SAMPLE[3]),cy:Y(SAMPLE[1]),r:16,fill:'transparent'}));hover(sg,SAMPLE[0]+' · '+SAMPLE[1]+' channels · '+SAMPLE[2]);s.appendChild(sg);
-  s.appendChild(el('text',{x:X(SAMPLE[3]),y:Y(SAMPLE[1])-12,class:'lab m','text-anchor':'start'},'138 · analysis sample'));
+  s.appendChild(el('text',{x:X(SAMPLE[3]),y:Y(SAMPLE[1])-12,class:'lab m','text-anchor':'start'},'138 · research sample'));
   s.appendChild(el('text',{x:X(SAMPLE[3]),y:H-B+18,class:'ax','text-anchor':'start'},SAMPLE[0]));
-  s.appendChild(el('text',{x:L,y:H-B+34,class:'ax','text-anchor':'start'},'Six months ago: no channels monitored this way'));
+  s.appendChild(el('text',{x:L,y:H-B+34,class:'ax','text-anchor':'start'},'Before: no shared roster-wide view'));
   host.appendChild(s);
 }
 function chartScale(){
@@ -681,16 +682,16 @@ function chartScale(){
 function chartReviewsScale(){
   var host=document.getElementById('chart-reviews-scale'); if(!host)return;
   /* Cumulative reviews by month-end (Oct to the 20th), then 10 a month to April 2027. Month index from Aug 2026 = 0. */
-  var REC=[['Aug',3,0],['Sep',12,1],['Oct',23,2]],projEnd=8,proj=23+8*6; /* 8 a month = the observed rate of the two full months (3, 9), continued as an illustration */
+  var REC=[['Aug',3,0],['Sep',12,1],['Oct',23,2]],projEnd=8,proj=23+8*6; /* 8 a month: an illustrative pace based on recent delivery (Sep 9; Oct 11 to the 20th) */
   var W=520,H=240,L=36,R=52,T=20,B=34,max=100,span=projEnd;
-  var s=el('svg',{viewBox:'0 0 '+W+' '+H,role:'img','aria-label':'Cumulative reviews: 3 by August, 12 by September, 23 by 20 October; about 71 by April 2027 if the observed rate continued'});
+  var s=el('svg',{viewBox:'0 0 '+W+' '+H,role:'img','aria-label':'Cumulative reviews: 3 by August, 12 by September, 23 by 20 October; about 71 by April 2027 at an illustrative eight a month'});
   [0,25,50,75,100].forEach(function(v){var y=T+(H-T-B)*(1-v/max);s.appendChild(el('line',{x1:L,x2:W-R,y1:y,y2:y,class:'grid'}));s.appendChild(el('text',{x:L-8,y:y+4,class:'ax','text-anchor':'end'},String(v)));});
   var X=function(d){return L+(W-L-R)*(d/span);},Y=function(v){return T+(H-T-B)*(1-v/max);};
   var path=REC.map(function(d,i){return (i?'L':'M')+X(d[2])+' '+Y(d[1]);}).join(' ');
   s.appendChild(el('path',{d:'M'+X(2)+' '+Y(23)+' L'+X(projEnd)+' '+Y(proj),class:'ln','stroke-dasharray':'4 5',style:'stroke:#BDB5A8'}));
   s.appendChild(el('path',{d:path,class:'ln'}));
   REC.forEach(function(d){var g=el('g',{});g.appendChild(el('circle',{cx:X(d[2]),cy:Y(d[1]),r:5,class:'dot'}));g.appendChild(el('circle',{cx:X(d[2]),cy:Y(d[1]),r:16,fill:'transparent'}));hover(g,d[0]+' 2026 · '+d[1]+' reviews to date');s.appendChild(g);});
-  var pg=el('g',{});pg.appendChild(el('circle',{cx:X(projEnd),cy:Y(proj),r:5,class:'dot',style:'fill:#BDB5A8'}));pg.appendChild(el('circle',{cx:X(projEnd),cy:Y(proj),r:16,fill:'transparent'}));hover(pg,'Apr 2027 · ~'+proj+' reviews if the observed rate continued · illustration');s.appendChild(pg);
+  var pg=el('g',{});pg.appendChild(el('circle',{cx:X(projEnd),cy:Y(proj),r:5,class:'dot',style:'fill:#BDB5A8'}));pg.appendChild(el('circle',{cx:X(projEnd),cy:Y(proj),r:16,fill:'transparent'}));hover(pg,'Apr 2027 · ~'+proj+' reviews at an illustrative 8 a month');s.appendChild(pg);
   s.appendChild(el('text',{x:X(2),y:Y(23)-12,class:'lab','text-anchor':'middle'},'23'));
   s.appendChild(el('text',{x:X(projEnd)+10,y:Y(proj)+4,class:'lab m','text-anchor':'start'},'~'+proj));
   [['Aug 2026',0,'start'],['20 Oct',2,'middle'],['Jan 2027',5,'middle'],['Apr 2027',projEnd,'end']].forEach(function(t){s.appendChild(el('text',{x:X(t[1]),y:H-B+18,class:'ax','text-anchor':t[2]},t[0]));});
