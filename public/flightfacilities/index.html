@@ -240,10 +240,10 @@ h2.display{font-size:clamp(2.2rem,4.6vw,4rem);max-width:20ch}
 @media(max-width:760px){.hub-out{grid-template-columns:1fr 1fr}}
 .hub-node{padding:1rem .8rem;border:1px solid var(--line);background:var(--navy-3);font-family:'IBM Plex Mono',monospace;font-size:.74rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;text-align:center}
 .hub-node.on{border-color:var(--amber);color:var(--amber)}
-.bar-row{margin-top:.5rem;display:grid;grid-template-columns:17rem 1fr 6.5rem;grid-template-areas:"n t v";align-items:center;gap:.9rem}
+.bar-row{margin-top:.5rem;display:flex;align-items:center;gap:.9rem}
 .bar-top{display:contents}
-.bar-name{grid-area:n} .bar-val{grid-area:v;text-align:right} .bar-track{grid-area:t}
-@media(max-width:700px){.bar-row{grid-template-columns:1fr auto;grid-template-areas:"n v" "t t";gap:.3rem}}
+.bar-name{flex:0 0 17rem;order:1} .bar-track{flex:1 1 auto;order:2} .bar-val{flex:0 0 6.5rem;order:3;text-align:right}
+@media(max-width:700px){.bar-row{flex-wrap:wrap;gap:.3rem}.bar-name{flex:1 1 auto}.bar-val{flex:0 0 auto}.bar-track{flex:1 1 100%;order:4}}
 .bar-top{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:.25rem}
 .bar-name{font-size:.84rem;font-weight:600}
 .bar-name span{font-weight:400;color:var(--dim);font-size:.74rem;margin-left:.4rem}
@@ -494,7 +494,7 @@ body.sheet-open{overflow:hidden}
       <div class="big0 reveal">2/9</div>
       <p class="reveal" style="font-size:clamp(1.05rem,1.7vw,1.4rem);font-weight:600;line-height:1.35;max-width:34ch">singles since 2021 were followed by another long-form video within 14 days — and neither follow-up was for the same song.</p>
     </div>
-    <div class="stagger" style="margin-top:.6rem">
+    <div class="stagger" style="margin-top:1.4rem">
       <div class="bar-row"><div class="bar-top"><span class="bar-name">Lights Up<span>→ The Ghost</span></span><span class="bar-val" style="color:var(--red)">+21 days</span></div><div class="bar-track"><div class="win" style="left:10%;width:10%"></div><div class="bar-fill" style="width:30%;background:var(--red)"></div></div></div>
       <div class="bar-row"><div class="bar-top"><span class="bar-name">The Ghost<span>→ Lights Up remix</span></span><span class="bar-val" style="color:var(--red)">+15 days</span></div><div class="bar-track"><div class="win" style="left:10%;width:10%"></div><div class="bar-fill" style="width:21.4%;background:var(--red)"></div></div></div>
       <div class="bar-row"><div class="bar-top"><span class="bar-name">Forever<span>→ Heavy (audio)</span></span><span class="bar-val" style="color:var(--red)">+25 days</span></div><div class="bar-track"><div class="win" style="left:10%;width:10%"></div><div class="bar-fill" style="width:35.7%;background:var(--red)"></div></div></div>
