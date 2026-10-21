@@ -538,10 +538,10 @@ body.present .hint{display:block}
     <div class="cards two reveal">
       <div class="card">
         <div class="eyebrow">Velocity · measured, then projected</div>
-        <div class="card-title">If coverage continued at the current rate</div>
+        <div class="card-title">If more territories started adding artists</div>
         <div class="chart" id="chart-scale"></div>
-        <div class="legend"><span><i style="background:var(--signal)"></i>Recorded counts</span><span><i style="background:var(--bone)"></i>Illustrative projection at the Sep&ndash;Oct rate</span></div>
-        <p class="caption">263 channels on 20 Oct; +30 in the 25 days since 25 Sep. Continued, that is roughly 450&ndash;500 channels by April 2027. Reviews are running at 9&ndash;11 a month, so 50&ndash;60 more in the same period. Coverage is an input: every territory roster could be on a board within a quarter, because adding a board is configuration, not build.</p>
+        <div class="legend"><span><i style="background:var(--signal)"></i>Recorded counts</span><span><i style="background:#BDB5A8"></i>Current rate, largely one person adding</span><span><i style="background:#2C25FF;opacity:.55"></i>Four more boards join in January with launch batches like Australia&rsquo;s (12&ndash;15 each)</span><span><i style="background:#2C25FF"></i>Four more boards each bring a full priority roster (~40)</span></div>
+        <p class="caption">The grey line is today&rsquo;s rate (+30 in the 25 days to 20 Oct), which is largely one person adding channels: roughly 480 by April 2027. The scenarios are what territory participation would add. Australia and the Nordics each brought 12&ndash;15 channels when their boards went live; if the US, EU, LATAM and Asia did the same from January, about 535. If each brought a full priority roster of around 40 &mdash; a number only the territories can confirm &mdash; about 640. Assumptions, not forecasts; adding a board is configuration, not build. Reviews are running at 9&ndash;11 a month, so 50&ndash;60 more in the same period.</p>
       </div>
       <div class="card">
         <div class="eyebrow">Impact so far · an honest reading</div>
@@ -671,17 +671,28 @@ function chartScale(){
   var host=document.getElementById('chart-scale'); if(!host)return;
   /* Recorded counts by day offset from 15 Jul 2026; projection at the 25 Sep → 20 Oct rate (30 channels in 25 days = 1.2/day) to 20 Apr 2027 (day 279). */
   var REC=[['Jul',138,0],['25 Sep',233,72],['14 Oct',252,91],['20 Oct',263,97]],rate=30/25,endDay=279,proj=Math.round(263+rate*(endDay-97));
-  var W=520,H=230,L=36,R=16,T=20,B=34,max=600,span=endDay;
+  var W=520,H=240,L=36,R=52,T=20,B=34,max=800,span=endDay;
   var s=el('svg',{viewBox:'0 0 '+W+' '+H,role:'img','aria-label':'Channels tracked: recorded counts to 20 October 2026, and an illustrative projection to April 2027 at the September to October rate, about '+proj});
-  [0,200,400,600].forEach(function(v){var y=T+(H-T-B)*(1-v/max);s.appendChild(el('line',{x1:L,x2:W-R,y1:y,y2:y,class:'grid'}));s.appendChild(el('text',{x:L-8,y:y+4,class:'ax','text-anchor':'end'},String(v)));});
+  [0,200,400,600,800].forEach(function(v){var y=T+(H-T-B)*(1-v/max);s.appendChild(el('line',{x1:L,x2:W-R,y1:y,y2:y,class:'grid'}));s.appendChild(el('text',{x:L-8,y:y+4,class:'ax','text-anchor':'end'},String(v)));});
   var X=function(d){return L+(W-L-R)*(d/span);},Y=function(v){return T+(H-T-B)*(1-v/max);};
   var path=REC.map(function(d,i){return (i?'L':'M')+X(d[2])+' '+Y(d[1]);}).join(' ');
+  /* Scenarios, from 1 Jan 2027 (day 170): the four boards not yet in use start adding artists.
+     A: each brings a launch batch like Australia and the Nordics did (12–15 channels) → +55.
+     B: each brings a full priority roster of ~40 channels (to be confirmed by the territories) → +160. */
+  var janDay=170,baseJan=Math.round(263+rate*(janDay-97)),scA=proj+55,scB=proj+160;
   s.appendChild(el('path',{d:'M'+X(97)+' '+Y(263)+' L'+X(endDay)+' '+Y(proj),class:'ln','stroke-dasharray':'4 5',style:'stroke:#BDB5A8'}));
+  s.appendChild(el('path',{d:'M'+X(janDay)+' '+Y(baseJan)+' L'+X(endDay)+' '+Y(scA),class:'ln','stroke-dasharray':'4 5',style:'stroke:#2C25FF;opacity:.55'}));
+  s.appendChild(el('path',{d:'M'+X(janDay)+' '+Y(baseJan)+' L'+X(endDay)+' '+Y(scB),class:'ln','stroke-dasharray':'4 5',style:'stroke:#2C25FF'}));
   s.appendChild(el('path',{d:path,class:'ln'}));
+  [[scA,'#2C25FF','.55','~'+scA+' · four more boards, launch batches'],[scB,'#2C25FF','1','~'+scB+' · four more boards, full priority rosters']].forEach(function(sc){
+    var g=el('g',{});g.appendChild(el('circle',{cx:X(endDay),cy:Y(sc[0]),r:5,class:'dot',style:'fill:'+sc[1]+';opacity:'+sc[2]}));g.appendChild(el('circle',{cx:X(endDay),cy:Y(sc[0]),r:16,fill:'transparent'}));hover(g,'Apr 2027 · '+sc[3]+' · scenario, not a target');s.appendChild(g);
+    s.appendChild(el('text',{x:X(endDay)+10,y:Y(sc[0])+4,class:'lab m','text-anchor':'start'},'~'+sc[0]));
+  });
+  s.appendChild(el('text',{x:X(janDay),y:H-B+18,class:'ax','text-anchor':'middle'},'Jan 2027'));
   REC.forEach(function(d){var g=el('g',{});g.appendChild(el('circle',{cx:X(d[2]),cy:Y(d[1]),r:5,class:'dot'}));g.appendChild(el('circle',{cx:X(d[2]),cy:Y(d[1]),r:16,fill:'transparent'}));hover(g,d[0]+' 2026 · '+d[1]+' channels · recorded');s.appendChild(g);});
   var pg=el('g',{});pg.appendChild(el('circle',{cx:X(endDay),cy:Y(proj),r:5,class:'dot',style:'fill:#BDB5A8'}));pg.appendChild(el('circle',{cx:X(endDay),cy:Y(proj),r:16,fill:'transparent'}));hover(pg,'Apr 2027 · ~'+proj+' channels · illustrative projection, not a target');s.appendChild(pg);
   s.appendChild(el('text',{x:X(97),y:Y(263)-12,class:'lab','text-anchor':'middle'},'263'));
-  s.appendChild(el('text',{x:X(endDay),y:Y(proj)-12,class:'lab m','text-anchor':'end'},'~'+proj+' if continued'));
+  s.appendChild(el('text',{x:X(endDay)+10,y:Y(proj)+4,class:'lab m','text-anchor':'start'},'~'+proj));
   [['Jul 2026',0,'start'],['20 Oct',97,'middle'],['Apr 2027',endDay,'end']].forEach(function(t){s.appendChild(el('text',{x:X(t[1]),y:H-B+18,class:'ax','text-anchor':t[2]},t[0]));});
   host.appendChild(s);
 }
