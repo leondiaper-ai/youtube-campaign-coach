@@ -325,10 +325,10 @@ body.present .hint{display:block}
     <div class="cards two reveal" style="grid-template-columns:1fr 1fr">
       <div class="card">
         <div class="eyebrow">Channels monitored · dated readings</div>
-        <div class="card-title">233 to 263 channels monitored since late September</div>
+        <div class="card-title">Six months ago we monitored no channels this way. Today, 263.</div>
         <div class="chart" id="chart-roster"></div>
         <div class="legend"><span><i style="background:var(--signal)"></i>Monitoring counts from the dashboard&rsquo;s sync logs</span><span><i style="background:var(--paper);border:2px solid #2C25FF;width:8px;height:8px;border-radius:50%"></i>July analysis sample (138 channels), a separate milestone</span></div>
-        <p class="caption">Before the dashboard there was no shared roster-wide view; the information existed across individual channels and Studio accounts. July&rsquo;s 138 is the sample analysed in the Campaign Observatory, not a monitoring count. Monitoring counts are the dashboard&rsquo;s own daily sync logs. Of the 263, 149 are Virgin-managed and 114 are market channels we watch alongside our own.</p>
+        <p class="caption">Six months ago no channels were monitored like this: the information existed across individual channels and Studio accounts, with no shared roster-wide view. July&rsquo;s 138 is the sample analysed in the Campaign Observatory, not a monitoring count. The monitoring counts are the dashboard&rsquo;s own daily sync logs, from 233 in late September to 263 on 20 October. Of the 263, 149 are Virgin-managed and 114 are market channels we watch alongside our own.</p>
       </div>
       <div class="card">
         <div class="eyebrow">Coverage by workspace · 20 Oct 2026</div>
@@ -664,7 +664,7 @@ function chartRoster(){
   var sg=el('g',{});sg.appendChild(el('circle',{cx:X(SAMPLE[3]),cy:Y(SAMPLE[1]),r:5,style:'fill:var(--paper);stroke:#2C25FF;stroke-width:2'}));sg.appendChild(el('circle',{cx:X(SAMPLE[3]),cy:Y(SAMPLE[1]),r:16,fill:'transparent'}));hover(sg,SAMPLE[0]+' · '+SAMPLE[1]+' channels · '+SAMPLE[2]);s.appendChild(sg);
   s.appendChild(el('text',{x:X(SAMPLE[3]),y:Y(SAMPLE[1])-12,class:'lab m','text-anchor':'start'},'138 · analysis sample'));
   s.appendChild(el('text',{x:X(SAMPLE[3]),y:H-B+18,class:'ax','text-anchor':'start'},SAMPLE[0]));
-  s.appendChild(el('text',{x:L,y:H-B+34,class:'ax','text-anchor':'start'},'Before: no shared roster-wide view'));
+  s.appendChild(el('text',{x:L,y:H-B+34,class:'ax','text-anchor':'start'},'Six months ago: no channels monitored this way'));
   host.appendChild(s);
 }
 function chartScale(){
