@@ -110,7 +110,7 @@ h2.display{font-size:clamp(2rem,4.4vw,3.6rem);max-width:20ch}
 .sc .where{font-size:.58rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--cyan)}
 .sc b{display:block;font-size:.9rem;line-height:1.25;margin-top:.15rem}
 .sc .num{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:1.35rem;margin-top:.15rem}
-.sc q{display:block;font-size:.72rem;color:var(--smoke);margin-top:.2rem;line-height:1.35}
+.sc .q{display:block;font-size:.72rem;color:var(--smoke);margin-top:.2rem;line-height:1.35}
 
 /* ritual */
 .rit{display:flex;align-items:stretch;gap:.6rem;margin-top:1.4rem;flex-wrap:wrap}
@@ -141,7 +141,7 @@ h2.display{font-size:clamp(2rem,4.4vw,3.6rem);max-width:20ch}
 .bar-val{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:1.1rem}
 .bar-track{position:relative;height:22px;background:rgba(255,255,255,.07);border-radius:5px;overflow:hidden}
 .bar-fill{height:100%;border-radius:5px}
-.bar-track .win{position:absolute;top:0;bottom:0;border-left:1px dashed var(--cyan);border-right:1px dashed var(--cyan);background:rgba(61,224,213,.12)}
+.bar-track .win{position:absolute;z-index:2;top:0;bottom:0;border-left:1px dashed var(--cyan);border-right:1px dashed var(--cyan);background:rgba(61,224,213,.12)}
 .big0{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:clamp(5rem,15vw,12rem);color:var(--signal);line-height:.82;letter-spacing:-.04em}
 
 /* roses chart */
@@ -224,6 +224,7 @@ body.present .slide.current{display:flex}
 body.present h2.display{font-size:clamp(1.8rem,3.6vw,3rem);max-width:26ch}
 body.present .reveal,body.present .stagger>*{opacity:1;transform:none;transition:none}
 body.present .means{margin-top:1rem}
+@media(min-width:1000px){body.present .row4 .th img{aspect-ratio:16/8}}
 .pbar{display:none;position:fixed;bottom:0;left:0;height:3px;background:var(--signal);z-index:1000;transition:width .3s ease}
 .pcount{display:none;position:fixed;bottom:.8rem;right:1.2rem;z-index:1000;font-size:.66rem;color:var(--smoke);background:rgba(8,7,13,.75);padding:.1rem .6rem}
 body.present .pbar,body.present .pcount{display:block}
@@ -319,12 +320,12 @@ body.sheet-open{overflow:hidden}
     <div class="label reveal">03 · Discovery</div>
     <h2 class="display reveal" style="margin-top:.8rem">Games and TV keep <span class="c">opening the door.</span></h2>
     <div class="sync stagger">
-      <a class="sc" href="https://www.youtube.com/watch?v=_mTRvJ9fugM" target="_blank" rel="noopener"><span class="th"><img src="https://i.ytimg.com/vi/_mTRvJ9fugM/hqdefault.jpg" alt=""></span><div><span class="where">Forza Horizon 2</span><b>The Mother We Share</b><div class="num">31.2M</div><q>Top comment is about the game · 4.8K likes</q></div></a>
-      <a class="sc" href="https://www.youtube.com/watch?v=ifr3O33UpWs" target="_blank" rel="noopener"><span class="th"><img src="https://i.ytimg.com/vi/ifr3O33UpWs/hqdefault.jpg" alt=""></span><div><span class="where">Forza Horizon 4</span><b>Never Say Die (audio)</b><div class="num">8.1M</div><q>"Forza Horizon 4 brought me (back) here"</q></div></a>
-      <a class="sc" href="https://www.youtube.com/watch?v=fB4gjiMVKFI" target="_blank" rel="noopener"><span class="th"><img src="https://i.ytimg.com/vi/fB4gjiMVKFI/hqdefault.jpg" alt=""></span><div><span class="where">Mirror's Edge</span><b>Warning Call (lyric video)</b><div class="num">6.9M</div><q>Game fans fill the comments</q></div></a>
-      <a class="sc" href="https://www.youtube.com/watch?v=mFGq92BYmt4" target="_blank" rel="noopener"><span class="th"><img src="https://i.ytimg.com/vi/mFGq92BYmt4/hqdefault.jpg" alt=""></span><div><span class="where">Death Stranding</span><b>Death Stranding</b><div class="num">5.9M + 5.0M</div><q>Audio and lyric video</q></div></a>
-      <a class="sc" href="https://www.youtube.com/watch?v=BZyzX4c1vIs" target="_blank" rel="noopener"><span class="th"><img src="https://i.ytimg.com/vi/BZyzX4c1vIs/hqdefault.jpg" alt=""></span><div><span class="where">Heartstopper</span><b>Clearest Blue</b><div class="num">15.4M</div><q>"Who's here from Heartstopper?" · 4.1K likes</q></div></a>
-      <a class="sc" href="https://www.youtube.com/watch?v=mDqJIBvcuUw" target="_blank" rel="noopener"><span class="th"><img src="https://i.ytimg.com/vi/mDqJIBvcuUw/hqdefault.jpg" alt=""></span><div><span class="where">Netflix · Nightbooks</span><b>Cry Little Sister</b><div class="num">773K</div><q>Made for the film</q></div></a>
+      <a class="sc" href="https://www.youtube.com/watch?v=_mTRvJ9fugM" target="_blank" rel="noopener"><span class="th"><img src="https://i.ytimg.com/vi/_mTRvJ9fugM/hqdefault.jpg" alt=""></span><div><span class="where">Forza Horizon 2</span><b>The Mother We Share</b><div class="num">31.2M</div><span class="q">Top comment is about the game · 4.8K likes</span></div></a>
+      <a class="sc" href="https://www.youtube.com/watch?v=ifr3O33UpWs" target="_blank" rel="noopener"><span class="th"><img src="https://i.ytimg.com/vi/ifr3O33UpWs/hqdefault.jpg" alt=""></span><div><span class="where">Forza Horizon 4</span><b>Never Say Die (audio)</b><div class="num">8.1M</div><span class="q">"Forza Horizon 4 brought me (back) here"</span></div></a>
+      <a class="sc" href="https://www.youtube.com/watch?v=fB4gjiMVKFI" target="_blank" rel="noopener"><span class="th"><img src="https://i.ytimg.com/vi/fB4gjiMVKFI/hqdefault.jpg" alt=""></span><div><span class="where">Mirror's Edge</span><b>Warning Call (lyric video)</b><div class="num">6.9M</div><span class="q">Game fans fill the comments</span></div></a>
+      <a class="sc" href="https://www.youtube.com/watch?v=mFGq92BYmt4" target="_blank" rel="noopener"><span class="th"><img src="https://i.ytimg.com/vi/mFGq92BYmt4/hqdefault.jpg" alt=""></span><div><span class="where">Death Stranding</span><b>Death Stranding</b><div class="num">5.9M + 5.0M</div><span class="q">Audio and lyric video</span></div></a>
+      <a class="sc" href="https://www.youtube.com/watch?v=BZyzX4c1vIs" target="_blank" rel="noopener"><span class="th"><img src="https://i.ytimg.com/vi/BZyzX4c1vIs/hqdefault.jpg" alt=""></span><div><span class="where">Heartstopper</span><b>Clearest Blue</b><div class="num">15.4M</div><span class="q">"Who's here from Heartstopper?" · 4.1K likes</span></div></a>
+      <a class="sc" href="https://www.youtube.com/watch?v=mDqJIBvcuUw" target="_blank" rel="noopener"><span class="th"><img src="https://i.ytimg.com/vi/mDqJIBvcuUw/hqdefault.jpg" alt=""></span><div><span class="where">Netflix · Nightbooks</span><b>Cry Little Sister</b><div class="num">773K</div><span class="q">Made for the film</span></div></a>
     </div>
     <div class="means reveal"><div class="label">What it means</div><p>When a song lands in a game or a show, YouTube is where people come to find it. Have the right video there, and point it to what's new.</p></div>
   </div>
@@ -650,7 +651,7 @@ var MONTHS = [["2013-01", 0, 0, 0], ["2013-02", 1, 0, 817924], ["2013-03", 2, 0,
     s+='<circle cx="'+x+'" cy="'+(y+4)+'" r="3.5" fill="#3DE0D5"/>';
     s+='<text x="'+x+'" y="'+(y-2)+'" fill="#3DE0D5" font-size="10.5" font-family="Inter" text-anchor="middle">'+h[1]+'</text>';});
   for(var y=2013;y<=2026;y++){var i=idx(y+'-01');s+='<line x1="'+(i*cw)+'" y1="'+base+'" x2="'+(i*cw)+'" y2="'+(base+5)+'" stroke="#8B87A0"/><text x="'+(i*cw+2)+'" y="'+(base+17)+'" fill="#8B87A0" font-size="10" font-family="Inter">'+y+'</text>';}
-  eras.forEach(function(e){var a=idx(e[0]);s+='<text x="'+(a*cw+2)+'" y="'+(base+31)+'" fill="#F3F1F7" opacity=".75" font-size="9.5" font-family="Inter" font-weight="600">'+e[2]+'</text>';});
+  eras.forEach(function(e,k){var a=idx(e[0]);var last=k===eras.length-1;s+='<text x="'+(last?W:(a*cw+2))+'" text-anchor="'+(last?'end':'start')+'" y="'+(base+31)+'" fill="#F3F1F7" opacity=".75" font-size="9.5" font-family="Inter" font-weight="600">'+e[2]+'</text>';});
   var g1=idx('2023-11'),g2=idx('2026-08');var gy=base-20;
   s+='<line x1="'+(g1*cw+6)+'" y1="'+gy+'" x2="'+(g2*cw)+'" y2="'+gy+'" stroke="#FF2D78" stroke-width="1.5" stroke-dasharray="5 4"/>';
   s+='<rect x="'+((g1+g2)/2*cw-92)+'" y="'+(gy-9)+'" width="184" height="18" fill="#08070D"/><text x="'+((g1+g2)/2*cw)+'" y="'+(gy+4)+'" fill="#FF2D78" font-size="10" font-weight="700" letter-spacing="1.2" font-family="Inter" text-anchor="middle">1,068 DAYS · NO LONG-FORM</text>';
@@ -664,7 +665,7 @@ var MONTHS = [["2013-01", 0, 0, 0], ["2013-02", 1, 0, 817924], ["2013-03", 2, 0,
   var f=function(v){return v>=1e6?(v/1e6).toFixed(1)+'M':v>=1e3?Math.round(v/1e3)+'K':v};
   var h=function(v){return Math.max(6,Math.round(Math.sqrt(v)/Math.sqrt(727121)*150));};
   var out=items.map(function(x){return '<div class="tl-item '+x[3]+'"><div class="tl-bar" style="height:'+h(x[2])+'px"></div><div class="tl-cap">'+x[0]+'<br>'+x[1]+'<br>'+f(x[2])+'</div></div>';}).join('');
-  out+='<div class="tl-gap"><span>29 days · no long-form</span></div>';
+  out+='<div class="tl-gap"><span>29 days since Roses · no long-form</span></div>';
   el.innerHTML=out;
   var d=[100820,82455,59077,78600,55901,47142,52822,42989,36509,39300,26603,20072,7215,6471,5492,4824,5431,3250,4710,4758,4719,4717,4780,4839,4903,4645,3975,4165,4558];
   var m=Math.max.apply(null,d);
