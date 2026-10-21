@@ -742,13 +742,13 @@ function chartReviewsScale(){
 function stackBars(id,label,rows,max){
   /* rows: [name, [[value, cssClass, tip], ...]] — horizontal stacked bars with a 2px surface gap. */
   var host=document.getElementById(id); if(!host)return;
-  var W=300,rowH=40,L=58,R=40,T=4,H=T+rows.length*rowH;
+  var W=300,rowH=40,L=58,R=rows.length===1?92:40,T=4,H=T+rows.length*rowH;
   var s=el('svg',{viewBox:'0 0 '+W+' '+H,role:'img','aria-label':label});
   rows.forEach(function(r,i){
     var y=T+i*rowH,x=L,total=r[1].reduce(function(a,v){return a+v[0];},0);
     s.appendChild(el('text',{x:L-10,y:y+19,class:'ax','text-anchor':'end'},r[0]));
     r[1].forEach(function(v,j){var w=(W-L-R)*(v[0]/max);var rect=el('rect',{x:x+(j?2:0),y:y+4,width:Math.max(0,w-(j?2:0)),height:22,rx:3,class:'bar '+v[1],style:v[3]||''});hover(rect,r[0]+' · '+v[2]);s.appendChild(rect);x+=w;});
-    s.appendChild(el('text',{x:x+8,y:y+20,class:'lab'},String(total)+(r[2]||'')));
+    s.appendChild(el('text',{x:x+8,y:y+20,class:'lab'},r[2]||String(total)));
   });
   host.appendChild(s);
 }
@@ -811,7 +811,7 @@ document.addEventListener('DOMContentLoaded',function(){
   pairBars('chart-gap','Longest gap between uploads: 43 days in 2024, 9 days in 2026',43,9,43,'43-day longest gap','9-day longest gap');
   stackBars('chart-assets','Uploads by format: 2024 18 long-form and 9 Shorts; 2026 24 long-form and 45 Shorts',[['2024',[[18,'','18 long-form'],[9,'blue','9 Shorts','opacity:.75']]],['2026',[[24,'','24 long-form'],[45,'blue','45 Shorts','opacity:.75']]]],69);
   pairBars('chart-conc','Top three uploads share of window views: 84.7% in 2024, 56.5% in 2026',84.7,56.5,100,'top three uploads took 84.7% of window views','top three uploads took 56.5% of window views');
-  stackBars('chart-jobs','2026 window views by format: long-form 83.6%, Shorts 16.4%',[['Views',[[83.6,'','long-form 83.6% of window views'],[16.4,'blue','Shorts 16.4% of window views','opacity:.75']],'%']],100);
+  stackBars('chart-jobs','2026 window views by format: long-form 83.6%, Shorts 16.4%',[['Views',[[83.6,'','long-form 83.6% of window views'],[16.4,'blue','Shorts 16.4% of window views','opacity:.75']],'83.6% · 16.4%']],100);
   observeAll();navSpy();
   document.querySelectorAll('.hero .reveal, #start .reveal').forEach(function(e){e.classList.add('visible')});
 });
