@@ -334,8 +334,8 @@ body.present .ph{display:none!important}
         <div class="eyebrow">Channels monitored · dated readings</div>
         <div class="card-title">From no shared roster-wide view to 263 channels in one place</div>
         <div class="chart" id="chart-roster"></div>
-        <div class="legend"><span><i style="background:var(--signal)"></i>Monitoring counts from the dashboard&rsquo;s sync logs</span><span><i style="background:var(--paper);border:2px solid #2C25FF;width:8px;height:8px;border-radius:50%"></i>July research sample (138 channels), not a monitoring count</span></div>
-        <p class="caption">Monitoring counts are the dashboard&rsquo;s daily sync logs. July&rsquo;s 138 is the research sample, not a monitoring count. The 263 includes 114 market channels watched alongside our own.</p>
+        <div class="legend"><span><i style="background:var(--signal)"></i>Monitoring counts from the dashboard&rsquo;s sync logs</span><span><i style="background:var(--paper);border:2px solid #2C25FF;width:8px;height:8px;border-radius:50%"></i>July research sample (138 channels), not a monitoring count</span><span><i style="background:#2C25FF;opacity:.6"></i>Dashed: July sample to first recorded count</span></div>
+        <p class="caption">Monitoring counts are the dashboard&rsquo;s daily sync logs. July&rsquo;s 138 is the research sample, not a monitoring count; the dashed line shows the direction of travel, not daily counts. The 263 includes 114 market channels watched alongside our own.</p>
       </div>
       <div class="card">
         <div class="eyebrow">Coverage by workspace · 20 Oct 2026</div>
@@ -657,9 +657,10 @@ function chartRoster(){
   MON.forEach(function(d,i){var g=el('g',{});g.appendChild(el('circle',{cx:X(d[3]),cy:Y(d[1]),r:5,class:'dot'}));g.appendChild(el('circle',{cx:X(d[3]),cy:Y(d[1]),r:16,fill:'transparent'}));hover(g,d[0]+' 2026 · '+d[1]+' channels monitored · '+d[2]);s.appendChild(g);
     if(i===0||i===MON.length-1) s.appendChild(el('text',{x:X(d[3]),y:Y(d[1])-12,class:'lab','text-anchor':i===0?'middle':'end'},String(d[1])));
     if(i!==1) s.appendChild(el('text',{x:X(d[3]),y:H-B+18,class:'ax','text-anchor':i===MON.length-1?'end':'middle'},d[0]));});
-  /* July sample: hollow blue milestone, not joined to the monitoring line. */
+  /* July sample joined to the first sync-log reading by a dashed line: shows direction of travel; the two are different measures. */
+  s.appendChild(el('path',{d:'M'+X(SAMPLE[3])+' '+Y(SAMPLE[1])+' L'+X(MON[0][3])+' '+Y(MON[0][1]),class:'ln','stroke-dasharray':'4 5',style:'stroke:#2C25FF;opacity:.6'}));
   var sg=el('g',{});sg.appendChild(el('circle',{cx:X(SAMPLE[3]),cy:Y(SAMPLE[1]),r:5,style:'fill:var(--paper);stroke:#2C25FF;stroke-width:2'}));sg.appendChild(el('circle',{cx:X(SAMPLE[3]),cy:Y(SAMPLE[1]),r:16,fill:'transparent'}));hover(sg,SAMPLE[0]+' · '+SAMPLE[1]+' channels · '+SAMPLE[2]);s.appendChild(sg);
-  s.appendChild(el('text',{x:X(SAMPLE[3]),y:Y(SAMPLE[1])-12,class:'lab m','text-anchor':'start'},'138 · research sample'));
+  s.appendChild(el('text',{x:X(SAMPLE[3]),y:Y(SAMPLE[1])+19,class:'lab m','text-anchor':'start'},'138 · research sample'));
   s.appendChild(el('text',{x:X(SAMPLE[3]),y:H-B+18,class:'ax','text-anchor':'start'},SAMPLE[0]));
   s.appendChild(el('text',{x:L,y:H-B+34,class:'ax','text-anchor':'start'},'Before: no shared roster-wide view'));
   host.appendChild(s);
