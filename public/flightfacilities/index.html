@@ -363,6 +363,44 @@ body.present .recs{font-size:.76rem;margin-top:.9rem}
 body.present .rr b{font-size:.84rem}
 body.present .slide[data-t="What we'd do"]{padding-top:2rem;padding-bottom:1.6rem}
 
+
+/* v4 — live, album world, station */
+.lv{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(1rem,2.2vw,2rem);margin-top:1.1rem}
+@media(max-width:900px){.lv{grid-template-columns:1fr}}
+.lv-k{font-family:'IBM Plex Mono',monospace;font-size:.68rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--amber);margin-bottom:.45rem}
+.lv-col .win img{aspect-ratio:16/7}
+.lv ul{list-style:none;margin-top:.45rem}
+.lv li{display:flex;justify-content:space-between;gap:.8rem;padding:.3rem 0;border-bottom:1px solid var(--line);font-size:.8rem;color:var(--warm);line-height:1.3}
+.lv li b{font-family:'Big Shoulders Display',sans-serif;font-weight:800;font-size:1.05rem;color:var(--cream);white-space:nowrap}
+.lv li.hi{color:var(--cream)} .lv li.hi b{color:var(--amber)} .lv li.lo,.lv li.lo b{color:var(--dim)}
+.lv-ref{display:grid;grid-template-columns:150px 1fr;gap:1rem;align-items:center;margin-top:1rem;border:1px dashed rgba(244,183,64,.5);padding:.6rem .8rem}
+@media(max-width:640px){.lv-ref{grid-template-columns:1fr}}
+.lv-ref .win img{aspect-ratio:16/9}
+.lv-ref p{font-size:.84rem;line-height:1.4;margin-top:.25rem} .lv-ref p span{color:var(--warm)}
+.aw{display:grid;grid-template-columns:1.25fr 1fr 1fr 1fr;grid-template-rows:auto auto;gap:3px;margin-top:1.1rem}
+@media(max-width:900px){.aw{grid-template-columns:1fr 1fr}}
+.aw-core{grid-row:span 2;background:var(--red);padding:1rem 1.1rem;display:flex;flex-direction:column}
+@media(max-width:900px){.aw-core{grid-row:auto;grid-column:span 2}}
+.aw-core .board{color:var(--cream)} .aw-core b{font-family:'Big Shoulders Display',sans-serif;font-weight:900;text-transform:uppercase;font-size:1.7rem;line-height:1;margin-top:.3rem}
+.aw-core p{font-size:.86rem;color:#FFE2E2;margin-top:.35rem}
+.aw-av{margin-top:auto;padding-top:.8rem;font-family:'IBM Plex Mono',monospace;font-size:.62rem;line-height:1.5;color:var(--cream);border-top:1px solid rgba(255,255,255,.35)}
+.aw-n{background:var(--navy-3);padding:.85rem .9rem}
+.aw-n b{display:block;font-family:'Big Shoulders Display',sans-serif;font-weight:900;text-transform:uppercase;font-size:1.2rem;line-height:1.02;margin-top:.25rem}
+.aw-n p{font-size:.76rem;color:var(--warm);margin-top:.3rem;line-height:1.35}
+.st-top{display:grid;grid-template-columns:1fr 1.35fr;gap:clamp(1rem,2.4vw,2rem);margin-top:1.1rem;align-items:start}
+@media(max-width:980px){.st-top{grid-template-columns:1fr}}
+.st-what p{font-size:.92rem;line-height:1.45;margin-top:.35rem;color:var(--warm)} .st-what p b{color:var(--cream)}
+.st-what .st-date{font-family:'IBM Plex Mono',monospace;font-size:.66rem;color:var(--dim);line-height:1.5}
+.st-top .ife-screen{padding:.7rem}
+.st-top .ch{padding:.55rem .65rem} .st-top .ch b{font-size:1.05rem}
+.st-cmp{display:grid;grid-template-columns:repeat(4,1fr);gap:3px;margin-top:.9rem}
+@media(max-width:820px){.st-cmp{grid-template-columns:1fr 1fr}}
+.sc2{background:var(--navy-2);padding:.6rem .75rem;border-top:3px solid var(--dim)}
+.sc2.on{border-color:var(--amber);background:var(--navy-3)}
+.sc2 .cn{font-family:'IBM Plex Mono',monospace;font-size:.64rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--dim)} .sc2.on .cn{color:var(--amber)}
+.sc2 p{font-size:.78rem;color:var(--warm);margin-top:.2rem;line-height:1.35} .sc2 p b{color:var(--cream)} .sc2 a{border-bottom:1px solid var(--line);color:var(--cream)}
+.st-ask{margin-top:.7rem;font-size:.8rem;color:var(--warm);border-left:4px solid var(--amber);padding:.2rem 0 .2rem .8rem} .st-ask b{color:var(--amber)}
+
 /* reveal / chrome / present */
 .reveal{opacity:0;transform:translateY(16px);transition:opacity .6s ease,transform .6s ease}
 .reveal.visible{opacity:1;transform:none}
@@ -569,17 +607,34 @@ body.sheet-open{overflow:hidden}
   </div>
 </section>
 
-<!-- 7 · CRAVE YOU -->
-<section class="slide alt" data-t="Crave You">
+<!-- 7 · LIVE -->
+<section class="slide alt" data-t="Live">
   <div class="chev"></div>
   <div class="inner">
-    <span class="tag reveal">06 <i>·</i> 2026 · the Crave You moment</span>
-    <h2 class="display reveal" style="margin-top:.9rem;max-width:26ch">Crave You found a new audience. <span class="a">The long-form wasn't ready.</span></h2>
-    <div class="run" id="run"></div>
-    <div class="obs reveal">
-      <div><span class="board">What we saw</span><p>The four biggest Shorts this year are Crave You sung live, filmed from the stage with the crowd's phone lights. The median Short since 2017 is 3K. The lyric video came two months after the biggest one.</p></div>
-      <div><span class="board">What we'd test</span><p>Film the new single the same way from the first shows. Link a Short to the song only where it helps — some of these did their job just by sending people to Crave You.</p></div>
+    <span class="tag reveal">06 <i>·</i> Live</span>
+    <h2 class="display reveal" style="margin-top:.9rem;max-width:26ch">The show is the destination. <span class="a">The moments travel alone.</span></h2>
+    <div class="lv stagger">
+      <div class="lv-col">
+        <div class="lv-k">The full show</div>
+        <a class="win" href="https://www.youtube.com/watch?v=ts-6KyJUDWY" target="_blank" rel="noopener"><img src="https://i.ytimg.com/vi/ts-6KyJUDWY/hqdefault.jpg" alt=""><span class="o">Airfields · 51 min</span></a>
+        <ul><li class="hi">Live at Airfields, full concert<b>390K</b></li><li>Two songs cut from it, posted earlier<b>36K · 56K</b></li><li>The 2016 MSO concert isn't on the channel in full — "Is the whole concert gone?" (Aug 2026)<b></b></li></ul>
+      </div>
+      <div class="lv-col">
+        <div class="lv-k">Signature songs, special settings</div>
+        <a class="win" href="https://www.youtube.com/watch?v=y8Ndi955iuY" target="_blank" rel="noopener"><img src="https://i.ytimg.com/vi/y8Ndi955iuY/hqdefault.jpg" alt=""><span class="o">With the MSO</span></a>
+        <ul><li class="hi">Clair De Lune, Owl Eyes &amp; the MSO<b>937K</b></li><li class="hi">Shine A Light, live with the MSO<b>607K</b></li><li>Crave You at the ARIAs, Owl Eyes<b>194K</b></li><li class="lo">The other nine MSO songs<b>26–74K</b></li></ul>
+      </div>
+      <div class="lv-col">
+        <div class="lv-k">Moments, as Shorts</div>
+        <a class="win" href="https://www.youtube.com/shorts/tZg27KL7Tc4" target="_blank" rel="noopener"><img src="https://i.ytimg.com/vi/tZg27KL7Tc4/hqdefault.jpg" alt=""><span class="o">Melbourne · 16 sec</span></a>
+        <ul><li class="hi">Crave You live, 2026 (n=5)<b>25–419K</b></li><li class="lo">Shorts overall since 2017, median<b>3K</b></li><li>Owl Eyes runs through it — MSO, ARIAs, Airfields and the 71K stadium Short<b></b></li></ul>
+      </div>
     </div>
+    <div class="lv-ref reveal">
+      <a href="https://www.youtube.com/watch?v=GiXKukOtmeE" target="_blank" rel="noopener" class="win"><img src="https://i.ytimg.com/vi/GiXKukOtmeE/hqdefault.jpg" alt=""></a>
+      <div><div class="board">Creative reference · not a like-for-like</div><p><b>Fred again.. — USB002 EVERY SHOW.</b> 108 hours, every show of a tour, Oct 2025 – Feb 2026, as one video: 1.9M views. <span>A Flight Facilities take, as a proposal: a <b>Flight Log</b> — the album tour's sets in one long-form video, a chapter per city, feeding the Station. They've already published a 5-hour Decades set.</span></p></div>
+    </div>
+    <div class="src reveal">Evidence: full shows (two filmed shows) and signature-song cuts in a special setting · Experiment: cutting every song from a show — most cuts landed at 26–74K.</div>
   </div>
 </section>
 
@@ -587,17 +642,17 @@ body.sheet-open{overflow:hidden}
 <section class="slide" data-t="Fans">
   <div class="chev"></div>
   <div class="inner">
-    <span class="tag reveal">07 <i>·</i> In the comments</span>
-    <h2 class="display reveal" style="margin-top:.9rem;max-width:24ch">What Flight Facilities fans <span class="a">want more of.</span></h2>
+    <span class="tag reveal">07 <i>·</i> In the comments · 2026</span>
+    <h2 class="display reveal" style="margin-top:.9rem;max-width:24ch">What fans are saying <span class="a">this year.</span></h2>
     <div class="fans stagger">
-      <div class="fq"><div class="ft">Nostalgia · on 34 of 44 videos</div><p>"This was made in 2010 but it sounds like something made in 2019"</p><span>Crave You · 2019 · 11K likes</span></div>
-      <div class="fq"><div class="ft">Found by accident</div><p>"One thing I love about GTA is how it's introduced me to so many awesome songs."</p><span>Shine A Light (FF Remix) · 2021 · 2.1K likes · Forza, Sims and a Google Home ad come up too</span></div>
-      <div class="fq"><div class="ft">The vocalists</div><p>"Reggie Watts should just become the third member of Flight Facilities."</p><span>Stranded · 2017 · 323 likes · Owl Eyes is the other name that recurs</span></div>
-      <div class="fq"><div class="ft">More Decade Mixes</div><p>"Who else feels like the mix is just getting started at 1:01:03? Bring on next decade mix please!"</p><span>Decade Mix 2012–2022 · 2023</span></div>
-      <div class="fq"><div class="ft">The edits, everywhere</div><p>"I wish this was on Spotify!"</p><span>Foreign Revolution · 2024 · with requests for vinyl on the Hush Hush bootleg</span></div>
-      <div class="fq weak"><div class="ft">Weak signal · 4 comments</div><p>"Where Is the full show ?"</p><span>Crave You in Melbourne · 2026 · full-show requests are rare</span></div>
+      <div class="fq"><div class="ft">Still listening · 75 comments, 22 videos</div><p>"Song of summer 🧐 2026"</p><span>Crave You · May 2026 · 1.4K likes · plus "Who's listening in 2026?" on most of the classics</span></div>
+      <div class="fq"><div class="ft">Found through fan edits · 6 comments</div><p>"I started listening to this song because of the Deadpool edits on TikTok."</p><span>Crave You · Oct 2026 · NBA, football and Deadpool edits, Aug – Oct</span></div>
+      <div class="fq"><div class="ft">Decades sets, in their city · 4 comments</div><p>"Pleeeeeease come to NYC and do a decades set"</p><span>5 Hour Decades Set · May 2026 · also Mexico, Germany, Brazil</span></div>
+      <div class="fq"><div class="ft">The edits · a handful</div><p>"I enjoy how you make these bootlegs and tracks just for the love of the game"</p><span>Dope Tool · Jul 2026 · and "I need this song for Tidal" on Foreign Revolution</span></div>
+      <div class="fq"><div class="ft">The orchestra, remembered</div><p>"Making the final part an orchestral crescendo was an absolute masterstroke."</p><span>Clair De Lune with the MSO · Apr 2026 · and "Is the whole concert gone?" (Aug)</span></div>
+      <div class="fq weak"><div class="ft">Barely there</div><p>New-album requests, song IDs (2), full shows (2), vocalists (7)</p><span>Little explicit demand for new music in 2026 — the pull is the catalogue and the experience</span></div>
     </div>
-    <div class="src reveal">About 1,640 top comments (ranked by relevance) on 44 selected videos · qualitative signals from a chosen sample, not audience research · few comments ask how the music is made.</div>
+    <div class="src reveal">862 comments posted Jan – Oct 2026 on 50 selected videos (the newest 100 per video), counted by keyword and read by hand · qualitative signals, not audience research.</div>
   </div>
 </section>
 
@@ -629,29 +684,55 @@ body.sheet-open{overflow:hidden}
   </div>
 </section>
 
-<!-- 10 · IN-FLIGHT ENTERTAINMENT -->
+<!-- 10 · ALBUM WORLD -->
+<section class="slide" data-t="Album world">
+  <div class="chev"></div>
+  <div class="inner">
+    <span class="tag reveal">09 <i>·</i> The album era</span>
+    <h2 class="display reveal" style="margin-top:.9rem;max-width:24ch">One album world — <span class="a">in their direction.</span></h2>
+    <p class="body reveal" style="margin-top:.7rem">We don't choose the concept. Whatever look and story the album takes, it can run through every part of the channel — and Flight Facilities already have a language for it.</p>
+    <div class="aw stagger">
+      <div class="aw-core"><div class="board">At the centre</div><b>The album's creative direction</b><p>Theirs. Artwork, title, colour, the story.</p><div class="aw-av">Already theirs: Maiden Voyage, Frequently Flying, European Airspace, The Return Flight, the Flight Deck app, the FF-DTE-10Y plane</div></div>
+      <div class="aw-n"><div class="board">Videos</div><b>A face for the era</b><p>Down To Earth with Sam Rockwell 4.5M · Sunshine with Reggie Watts 3.1M · Heavy with Hugo Weaving 426K</p></div>
+      <div class="aw-n"><div class="board">Live</div><b>One filmed show</b><p>A concert film inside the campaign, with the era's vocalists — Airfields 390K</p></div>
+      <div class="aw-n"><div class="board">Long-form</div><b>A concept mix for the era</b><p>In the Decade Mix line, styled in the album's look — five mixes at 387–592K</p></div>
+      <div class="aw-n"><div class="board">Versions</div><b>Edits and one chosen version</b><p>Their edits as moments; one remix or extended version per focus single</p></div>
+      <div class="aw-n"><div class="board">Home</div><b>The Station</b><p>Where the catalogue and the new album play side by side, always on</p></div>
+      <div class="aw-n"><div class="board">Everywhere</div><b>One look, one set of names</b><p>Thumbnails, titles, playlists and chapters that all read as the same flight</p></div>
+    </div>
+    <div class="means reveal"><div class="board">What it means</div><p>We'd help carry their chosen direction across every format — so each upload feels part of the same album, not a separate post.</p></div>
+  </div>
+</section>
+
+<!-- 11 · STATION -->
 <section class="slide" data-t="In-Flight">
   <div class="chev"></div>
   <div class="inner">
-    <span class="tag reveal">09 <i>·</i> A home for long listening</span>
-    <h2 class="display reveal" style="margin-top:.9rem;max-width:24ch">Flight Facilities <span class="a">In-Flight Entertainment.</span></h2>
-    <div class="ife reveal">
-      <div class="ife-screen">
-        <div class="ife-top"><span>FF · In-Flight Entertainment</span><span>Now playing · Decade Mix 2012–2022</span></div>
+    <span class="tag reveal">10 <i>·</i> A YouTube feature to explore</span>
+    <h2 class="display reveal" style="margin-top:.9rem;max-width:26ch">A YouTube Station: <span class="a">In-Flight Entertainment.</span></h2>
+    <div class="st-top">
+      <div class="st-what reveal">
+        <div class="board">What a Station is</div>
+        <p><b>YouTube's always-on channel.</b> A continuous stream of a channel's own videos that viewers drop into, with live chat and a "Station" badge — in Home and Search on YouTube, YouTube Music and TV.</p>
+        <p class="st-date">Tested with music artists at Coachella, April 2026 · opened to a limited number of creators and select music artists, August 2026.</p>
+      </div>
+      <div class="ife-screen reveal">
+        <div class="ife-top"><span>FF · In-Flight Entertainment</span><span>Station · live chat</span></div>
         <div class="ife-ch">
-          <div class="ch"><div class="cn">CH 1 · Departures</div><b>The classics</b><div class="ths"><img src="https://i.ytimg.com/vi/r0bS-YnLf4s/mqdefault.jpg" alt=""><img src="https://i.ytimg.com/vi/Jcu1AHaTchM/mqdefault.jpg" alt=""><img src="https://i.ytimg.com/vi/gJ5YaApfSdQ/mqdefault.jpg" alt=""></div><p>Crave You · Clair De Lune · Foreign Language · With You · Stand Still</p></div>
-          <div class="ch"><div class="cn">CH 2 · Cruising altitude</div><b>The mixes</b><div class="ths"><img src="https://i.ytimg.com/vi/54a6SjIlJF0/mqdefault.jpg" alt=""><img src="https://i.ytimg.com/vi/YPg37aYz7tM/mqdefault.jpg" alt=""><img src="https://i.ytimg.com/vi/jntQd7U0aSk/mqdefault.jpg" alt=""></div><p>Five Decade Mixes · Forgotten Summer · Down To Earth 10-year mix</p></div>
-          <div class="ch"><div class="cn">CH 3 · Live from the cabin</div><b>Live and sets</b><div class="ths"><img src="https://i.ytimg.com/vi/ts-6KyJUDWY/mqdefault.jpg" alt=""><img src="https://i.ytimg.com/vi/y8Ndi955iuY/mqdefault.jpg" alt=""><img src="https://i.ytimg.com/vi/qeo2NtFQLqo/mqdefault.jpg" alt=""></div><p>Airfields · the MSO shows · the 5 Hour Decades Set</p></div>
-          <div class="ch new"><div class="cn">CH 4 · Arrivals</div><b>The new album</b><div class="ths"><span>Single 1</span><span>Single 2</span><span>Album</span></div><p>Added single by single, then the full album</p></div>
+          <div class="ch"><div class="cn">CH 1 · Departures</div><b>The classics</b><div class="ths"><img src="https://i.ytimg.com/vi/r0bS-YnLf4s/mqdefault.jpg" alt=""><img src="https://i.ytimg.com/vi/Jcu1AHaTchM/mqdefault.jpg" alt=""><img src="https://i.ytimg.com/vi/gJ5YaApfSdQ/mqdefault.jpg" alt=""></div></div>
+          <div class="ch"><div class="cn">CH 2 · Cruising altitude</div><b>The mixes</b><div class="ths"><img src="https://i.ytimg.com/vi/54a6SjIlJF0/mqdefault.jpg" alt=""><img src="https://i.ytimg.com/vi/YPg37aYz7tM/mqdefault.jpg" alt=""><img src="https://i.ytimg.com/vi/jntQd7U0aSk/mqdefault.jpg" alt=""></div></div>
+          <div class="ch"><div class="cn">CH 3 · Live from the cabin</div><b>Live and sets</b><div class="ths"><img src="https://i.ytimg.com/vi/ts-6KyJUDWY/mqdefault.jpg" alt=""><img src="https://i.ytimg.com/vi/y8Ndi955iuY/mqdefault.jpg" alt=""><img src="https://i.ytimg.com/vi/qeo2NtFQLqo/mqdefault.jpg" alt=""></div></div>
+          <div class="ch new"><div class="cn">CH 4 · Arrivals</div><b>The new album</b><div class="ths"><span>Single 1</span><span>Single 2</span><span>Album</span></div></div>
         </div>
       </div>
-      <div class="ife-how">
-        <div class="hw ok"><div class="cn">Can do now · playlists</div><p>Four ordered playlists, one per channel. 17 playlists already exist, including Decade Mixes.</p></div>
-        <div class="hw ok"><div class="cn">Can do now · continuous long-form</div><p>They already make these: the 5 Hour Decades Set (5h23) and the Down To Earth mix — "this in-flight experience", in their words.</p></div>
-        <div class="hw ask"><div class="cn">Depends on YouTube · Station</div><p>An always-on programmed channel from the catalogue, like <a href="https://www.youtube.com/watch?v=1fz60gNnSdU" target="_blank" rel="noopener">Metallica TV ↗</a>. Eligibility to confirm with YouTube. A live stream is a one-off event, not the same thing.</p></div>
-      </div>
     </div>
-    <div class="src reveal">A concept to discuss · we can't promise longer viewing — with Studio access we'd watch average view duration and returning viewers.</div>
+    <div class="st-cmp stagger">
+      <div class="sc2"><div class="cn">Playlist</div><p>Viewers press play and choose. <b>Available now</b> — 17 already exist.</p></div>
+      <div class="sc2"><div class="cn">Long-form mix</div><p>One long video. <b>Available now</b> — the 5 Hour Decades Set, the Down To Earth mix.</p></div>
+      <div class="sc2"><div class="cn">Live stream</div><p>A one-off event at a set time. <b>Available now.</b></p></div>
+      <div class="sc2 on"><div class="cn">Station</div><p>Always on, lean-back, shared chat. <b>Access through YouTube.</b> <a href="https://www.youtube.com/watch?v=1fz60gNnSdU" target="_blank" rel="noopener">Metallica TV ↗</a></p></div>
+    </div>
+    <div class="st-ask reveal"><b>To confirm with YouTube:</b> eligibility and invitation · whether audio-only tracks can be included · how ads and revenue work · how new singles are added as the album lands.</div>
   </div>
 </section>
 
@@ -659,12 +740,12 @@ body.sheet-open{overflow:hidden}
 <section class="slide alt" data-t="Rollout">
   <div class="chev"></div>
   <div class="inner">
-    <span class="tag reveal">10 <i>·</i> The album · dates to come</span>
+    <span class="tag reveal">11 <i>·</i> The album · dates to come</span>
     <h2 class="display reveal" style="margin-top:.9rem;max-width:24ch">A rollout built on <span class="a">what's already working.</span></h2>
     <div class="ro reveal">
       <div class="ro-h"></div><div class="ro-h">Before the single</div><div class="ro-h">Release week</div><div class="ro-h">The weeks after</div><div class="ro-h">Across the album</div>
       <div class="ro-t t1"><b>Core</b><span>every focus single</span></div>
-      <div class="ro-c"><p>Play it live first</p><em class="x">Test</em></div>
+      <div class="ro-c"><p>Agree how shows will be filmed: full songs, multiple angles, audio from the desk</p><em class="e">Setup</em></div>
       <div class="ro-c"><p>One official video, with a story or a face</p><em class="e">Evidence</em><p>Premiere only for a real fan moment — the lead single</p><em class="o">Option</em></div>
       <div class="ro-c"><p>Pinned comment, end screens, related links</p><em class="e">Setup</em></div>
       <div class="ro-c"><p>Album playlist on release day; every track up</p><em class="e">Setup</em></div>
@@ -674,10 +755,10 @@ body.sheet-open{overflow:hidden}
       <div class="ro-c"><p>Their own extended or club version</p><em class="x">Test</em><p>A live version from the tour</p><em class="x">Test</em></div>
       <div class="ro-c"><p>A lyric video where a lyric is catching on</p><em class="x">Test · n=1</em></div>
       <div class="ro-t t3"><b>Creative</b><span>where resources allow</span></div>
-      <div class="ro-c"><p>One story-of-a-song Short — Crave You</p><em class="x">Small test</em></div>
+      <div class="ro-c"><p>One story-of-a-song Short — Crave You</p><em class="x">Small test</em><p>A Flight Log of the tour</p><em class="x">Proposal</em></div>
       <div class="ro-c"><p>The album as a continuous in-flight mix</p><em class="x">Test</em></div>
-      <div class="ro-c"><p>A filmed full show, inside the campaign</p><em class="x">Test · Airfields</em></div>
-      <div class="ro-c"><p>A new concept mix in the Decade Mix line</p><em class="e">Evidence</em><p>In-Flight Entertainment</p><em class="o">YouTube</em></div>
+      <div class="ro-c"><p>A filmed full show inside the campaign, plus cuts of the signature songs</p><em class="e">Evidence · n=2</em></div>
+      <div class="ro-c"><p>A new concept mix in the Decade Mix line</p><em class="e">Evidence</em><p>The In-Flight Entertainment Station</p><em class="o">YouTube</em></div>
     </div>
     <div class="src reveal">Evidence = the format has worked on this channel · Test = promising but not proven here · nothing is added just to fill a calendar.</div>
   </div>
@@ -687,15 +768,15 @@ body.sheet-open{overflow:hidden}
 <section class="slide cream" data-t="What we'd do">
   <div class="chev"></div>
   <div class="inner">
-    <span class="tag reveal">11 · What we'd do</span>
+    <span class="tag reveal">12 <i>·</i> What we'd do</span>
     <h2 class="display reveal" style="margin-top:.9rem;max-width:26ch">What we would actually do <span class="r">for the next album.</span></h2>
     <div class="recs reveal">
       <div class="rh"><span>The move · why it fits</span><span>What we saw</span><span>What we'd do</span><span>What we'd need</span><span>What we'd measure</span></div>
       <div class="rr"><b><i>1</i>Make the Decade Mix the album era's long-form centrepiece<em class="why">Nobody else has a Decade Mix — it's their own long-form format.</em></b><span>Five Decade Mixes at 387–592K; fans write their own tracklists</span><span>Chapters on all long sets now; a new concept mix in the album cycle</span><span>The mix and its tracklist</span><span>Views at day 28 against 2012–2022 at the same age</span></div>
       <div class="rr"><b><i>2</i>Keep the edits as their own moments<em class="why">Reworking other people's records is how they started — Shine A Light, 2010.</em></b><span>Two 2024 edits added 69% of recent views we can track; fans ask for them elsewhere</span><span>Release edits regularly, each pointing to an FF original or the new single</span><span>The edits</span><span>Views in the first 28 days; clicks to the linked video, with Studio</span></div>
-      <div class="rr"><b><i>3</i>Film the new songs on tour<em class="why">They're on stage constantly; Crave You showed what one moment can do.</em></b><span>Live Crave You Shorts: 25–419K, against a 3K median</span><span>The hook from the stage, the city in the title, from the first shows</span><span>Someone filming at shows</span><span>Shorts views; views of the song itself</span></div>
+      <div class="rr"><b><i>3</i>Plan the live capture once, use it three ways<em class="why">They're on stage constantly, and Owl Eyes runs through their best live moments.</em></b><span>Airfields full show 390K; MSO Clair De Lune 937K; live Crave You Shorts 25–419K</span><span>Agree a filming approach early: a full show, signature-song cuts, Shorts</span><span>Access to film one key show; desk audio</span><span>Views of each part at day 28; watch time on the full show, with Studio</span></div>
       <div class="rr"><b><i>4</i>One hero video per focus single, plus one version with a reason<em class="why">Their songs travelled furthest with a face, a guest or a distinct version.</em></b><span>Forever 455K, Heavy 426K; remixes since 2017 median 18K</span><span>The video, then one remix, extended version or live take — not five</span><span>The video; one chosen version</span><span>All versions of the song together at day 28</span></div>
-      <div class="rr"><b><i>5</i>Open In-Flight Entertainment<em class="why">Their words for the Down To Earth mix: "this in-flight experience".</em></b><span>A 5-hour set and an album mix already exist</span><span>Four playlists now; ask YouTube about a Station</span><span>Sign-off on the concept</span><span>Playlist views; watch time, with Studio</span></div>
+      <div class="rr"><b><i>5</i>Explore a YouTube Station with YouTube<em class="why">Their words for the Down To Earth mix: "this in-flight experience".</em></b><span>Decade Mixes, live shows and a 5-hour set already make hours of programming</span><span>Four In-Flight playlists now; ask YouTube about a Station</span><span>Sign-off on the concept</span><span>Playlist views; Station viewing and chat, if live</span></div>
     </div>
   </div>
 </section>
@@ -704,14 +785,14 @@ body.sheet-open{overflow:hidden}
 <section class="slide red" data-t="Next">
   <div class="chev" style="background:var(--navy)"></div>
   <div class="inner">
-    <span class="tag reveal">12 <i>·</i> Next</span>
+    <span class="tag reveal">13 <i>·</i> Next</span>
     <h2 class="display reveal" style="margin-top:.9rem">What we can help with next.</h2>
     <div class="next">
       <div class="stagger">
         <h3>From Flight Facilities and the team</h3>
         <div class="act"><div class="n">1</div><div><h4>The album window and focus singles</h4><p>Even roughly, so the plan can fit around them.</p></div></div>
         <div class="act"><div class="n">2</div><div><h4>A view on a new concept mix</h4><p>Whether a Decade Mix-style mix fits the album era.</p></div></div>
-        <div class="act"><div class="n">3</div><div><h4>The edits and live footage coming up</h4><p>What's planned, so each can be placed in the rollout.</p></div></div>
+        <div class="act"><div class="n">3</div><div><h4>The album's creative direction, and the shows to film</h4><p>So the look can carry across every format, and filming can be planned early.</p></div></div>
       </div>
       <div class="stagger">
         <h3>From VMG</h3>
