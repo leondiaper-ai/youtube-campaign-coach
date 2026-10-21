@@ -16,8 +16,7 @@
   tiles, white cards, orange signal accent. Scrolls as a report; Present
   switches to one section per screen.
 
-  Figures: every number on the page has a row in the Analysis panel.
-  Sources are the public YouTube Data API, the dashboard's own daily
+  Figures: sources are the public YouTube Data API, the dashboard's own daily
   snapshots, Chartmetric UK monthly views, and VMG UK's YouTube
   consumption reporting. No YouTube Studio data anywhere. Charts use
   dated readings only; nothing is modelled or estimated.
@@ -33,7 +32,6 @@
   --cream:#F6F1E7; --smoke:#8A847A; --bone:#E8E3DA; --warm:#4A4640; --paper:#FFFFFF;
   --ink-2:#161616; --line-d:rgba(255,255,255,.1);
   --pad:clamp(1rem,5vw,4rem);
-  --an-accent:var(--signal);
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 html{scroll-behavior:smooth;font-size:16px}
@@ -51,10 +49,7 @@ a{color:inherit}
 .nav-btn{font:inherit;font-size:.74rem;font-weight:600;cursor:pointer;background:transparent;color:rgba(255,255,255,.75);border:1px solid rgba(255,255,255,.22);padding:.38rem .85rem;border-radius:100px}
 .nav-btn:hover{color:#fff;border-color:#fff}
 .nav-btn.primary{background:var(--signal);border-color:var(--signal);color:#fff}
-.nav-tools .an-btn{position:static;font:inherit;font-size:.74rem;font-weight:600;cursor:pointer;background:transparent;color:rgba(255,255,255,.75);border:1px solid rgba(255,255,255,.22);padding:.38rem .85rem;border-radius:100px;text-transform:none;letter-spacing:0}
-.nav-tools .an-btn:hover{color:#fff;border-color:#fff}
 @media(max-width:980px){.sticky-nav{justify-content:flex-start;padding-right:11rem}.nav-pill{font-size:.7rem;padding:.3rem .7rem}}
-body.sheet-open .sticky-nav{display:none}
 #pbar{position:fixed;top:0;left:0;height:3px;background:var(--signal);width:0;z-index:1100;transition:width .3s ease}
 
 /* ── Sections ───────────────────────────────────────────────────── */
@@ -247,8 +242,6 @@ body.present .hint{display:block}
 .reveal.visible{opacity:1;transform:none}
 @media(prefers-reduced-motion:reduce){.reveal{opacity:1!important;transform:none!important;transition:none!important}html{scroll-behavior:auto}}
 </style>
-<link rel="stylesheet" href="/shared/analysis-sheet.css">
-<style>.an-panel{font-family:'Inter',sans-serif}</style>
 </head>
 <body>
 
@@ -263,7 +256,6 @@ body.present .hint{display:block}
   <a class="nav-pill" href="#campaigns">Campaign reviews</a>
   <a class="nav-pill" href="#okr">The OKR discussion</a>
   <div class="nav-tools">
-    <button class="an-btn" id="an-open">Analysis</button>
     <button class="nav-btn primary" id="present-btn" onclick="startPresent()">Present</button>
   </div>
 </nav>
@@ -423,7 +415,7 @@ body.present .hint{display:block}
           <div class="eyebrow">Reviews published · by month of data read</div>
           <div class="card-title">23 artist and label reviews since August</div>
           <div class="chart" id="chart-reviews"></div>
-          <p class="caption">October to the 20th. Each review is a public page with its own Analysis panel. Ezra Collective and IDLES for Partisan; Defected Records as a label channel review.</p>
+          <p class="caption">October to the 20th. Each review is a public page with its own analysis appendix. Ezra Collective and IDLES for Partisan; Defected Records as a label channel review.</p>
         </div>
         <blockquote class="quote">&ldquo;Superb work on this, it is genuinely impressive. I love how you integrated our best practices into a pitch for the artist.&rdquo;<cite>YouTube UK · feedback on the deep-dive work</cite></blockquote>
       </div>
@@ -541,153 +533,6 @@ body.present .hint{display:block}
 
 </div><!-- /deck -->
 <div class="footer">YouTube: ideas for the OKR discussion &mdash; Virgin Music Group &mdash; October 2026</div>
-
-<!-- ═══ ANALYSIS ═══════════════════════════════════════════════════ -->
-<div class="an-panel" id="an-panel" role="dialog" aria-modal="true" aria-label="Analysis appendix">
-  <div class="an-in">
-    <button class="an-back">&larr; Back to the document</button>
-    <h2>Analysis</h2>
-    <div class="an-sub">The working behind each slide · figures as read on the dates given · public YouTube Data API, our own daily dashboard snapshots, Chartmetric, and VMG UK&rsquo;s YouTube consumption reporting · no YouTube Studio data anywhere</div>
-
-    <h3>How to read this document</h3>
-    <p>Each section makes one point and uses only the figures needed for it. Everything else &mdash; comparison tables, dataset scope, the claim boundary and the objections a reviewer would raise &mdash; is here. The detailed artist and label reviews referred to are published alongside this page (<code>/ezra</code>, <code>/amyl</code>, <code>/idles</code>, <code>/kol</code>, <code>/dblock</code>, <code>/defected</code>, <code>/ktrap</code>, <code>/angusandjuliastone</code>) and each carries its own Analysis panel and audit pack.</p>
-    <div class="an-note"><b>Role labels.</b> Where a campaign is discussed, the document states whether VMG UK advised before it, supported it, or analysed it afterwards. Ezra Collective: campaign run by Partisan; analysed and shared by VMG UK after release. Nothing in this document credits channel movement to our involvement.</div>
-
-    <h3>YouTube dashboard (Watcher)</h3>
-    <h4 style="font-family:'DM Mono',monospace;font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;margin:1rem 0 .5rem">Chart: channels tracked, dated readings</h4>
-    <table>
-      <tr><th>Date</th><th>Channels</th><th>Source</th></tr>
-      <tr><td>July 2026</td><td class="n">138</td><td>The July Campaign Observatory sample: 82 Virgin-managed + 56 market channels</td></tr>
-      <tr><td>25 Sep 2026</td><td class="n">233</td><td>Dashboard sync log, 05:45 UTC, 233/233 successful (UK landscape phase-1 audit)</td></tr>
-      <tr><td>14 Oct 2026</td><td class="n">252</td><td>Dashboard sync log, 06:28 UTC, 252/252</td></tr>
-      <tr class="lead"><td>20 Oct 2026</td><td class="n up">263</td><td>Dashboard sync log, 06:28 UTC, 263/263</td></tr>
-    </table>
-    <p>Only recorded counts are plotted; the line joins them for reading and implies nothing about the days between. The July figure is the analysis sample, which was the roster at the time; the October catch-up notes that parts of the system quoted 177, 181 and 185 in September, so no September-only point is used.</p>
-    <h4 style="font-family:'DM Mono',monospace;font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;margin:1rem 0 .5rem">Chart: channels listed per workspace, 20 Oct 2026</h4>
-    <table>
-      <tr><th>Workspace</th><th>Channels listed</th><th>Priority</th><th>Last updated</th></tr>
-      <tr><td>Central view (UK)</td><td class="n">263</td><td>29</td><td>&mdash;</td></tr>
-      <tr><td>Nordics</td><td class="n">15</td><td>2</td><td>14 Oct 2026</td></tr>
-      <tr><td>Australia</td><td class="n">12</td><td>6</td><td>20 Oct 2026</td></tr>
-      <tr><td>US</td><td class="n">5</td><td>2</td><td>14 Oct 2026</td></tr>
-      <tr><td>LATAM</td><td class="n">4</td><td>0</td><td>16 Oct 2026</td></tr>
-      <tr><td>EU</td><td class="n">1</td><td>0</td><td>9 Oct 2026</td></tr>
-      <tr><td>Asia</td><td class="n">1</td><td>0</td><td>14 Oct 2026</td></tr>
-    </table>
-    <p>Read from the Workspaces page on 20 October 2026. Only the Australia and Nordics boards are confirmed as maintained by the territory teams; the other boards are set up and not counted as usage.</p>
-    <table>
-      <tr><th>Measure</th><th>Value</th><th>As at</th></tr>
-      <tr class="lead"><td>Channels synced in the daily pass</td><td class="n">263 / 263</td><td>20 Oct 2026, 06:28 UTC</td></tr>
-      <tr><td>Virgin managed channels on the Channel Health view</td><td class="n">149</td><td>20 Oct 2026</td></tr>
-      <tr><td>Market watch channels (not Virgin)</td><td class="n">114</td><td>20 Oct 2026</td></tr>
-      <tr><td>Data used</td><td colspan="2">Public YouTube Data API v3 only; no Studio or Analytics access</td></tr>
-    </table>
-    <p>The dashboard screenshot is the Channel Health table as it looked on 20 October 2026, cropped to the roster rows. The status labels (healthy, weak conversion, underfed, cold) are our own rules over public figures, not YouTube classifications. The territory screenshot is the UK landscape page&rsquo;s Crossover view on the same day; the deep-dive screenshot is a page from the published Amyl deck (<code>/amyl</code>).</p>
-    <div class="an-note"><b>Team usage, stated carefully.</b> Australia and the Nordics are the confirmed cases of colleagues adding artists: Australia&rsquo;s board went live on 23 September 2026 with artists the team added (12 channels, 6 priority, last updated 20 Oct 2026); the Nordics board has run since the summer (15 channels, last updated 14 Oct 2026). Boards also exist for the US (5 channels), EU (1), LATAM (4) and Asia (1); entries on those boards are not counted as team usage. &ldquo;Starting point&rdquo; on the slide means no shared roster-wide view existed, not that information was unavailable: Studio analytics and channel pages were always there for those with access.</div>
-    <h4 style="font-family:'DM Mono',monospace;font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;margin:1.4rem 0 .5rem">The quick report</h4>
-    <table>
-      <tr><th>Line</th><th>Value</th><th>Source · period</th></tr>
-      <tr><td>Channel views, last 7 days</td><td class="n up">+323,032</td><td>Dashboard, read 20 Oct 2026 15:14 UTC; 7 days to 20 Oct</td></tr>
-      <tr><td>Public subscriber count, 7 days · 30 days · total</td><td class="n">+300 · +2,300 · 75,800</td><td>Same read; counts as displayed by YouTube, rounded</td></tr>
-      <tr><td>Uploads, last 30 days · last upload</td><td class="n">23 · 19 Oct 2026</td><td>Same read</td></tr>
-      <tr class="lead"><td>Rehearsal Tapes (published 9 Sep 2026)</td><td class="n up">308,382</td><td>Same read; 121.5K on 15 Sep per the Ezra review</td></tr>
-    </table>
-    <p>The dashboard&rsquo;s report generator produces a short update of this shape (bullets, then a closing line) for any tracked channel, ready to paste into a message. The example on the page uses the generator&rsquo;s figures with the closing line written as campaign context rather than a generic recommendation; the generator&rsquo;s own stock recommendations (upload-cadence advice and the like) are not verified campaign guidance and are not shown.</p>
-    <div class="an-note"><b>Label-partner view.</b> The dedicated label view is a possible extension, not a feature that exists. Nothing is built for it; it is an idea to explore with interested partners.</div>
-    <div class="an-note"><b>Links.</b> The document links to <code>/growth</code>, <code>/amyl</code>, <code>/ezra</code>, <code>/idles</code>, <code>/defected</code>, <code>/dblock</code> and <code>/uk-landscape</code>. All are pages without access keys; none links to a team board. The UK landscape page carries VMG UK consumption figures by artist, so this document is for the internal YouTube group.</div>
-    <dl>
-      <dt>Everyday use</dt>
-      <dd>The weekly roster read (Channel Health, Weekly Pulse and the Campaigns board) is where campaign updates, recaps and the deep dives start. Specific interventions are not claimed on the page; where one is evidenced it is in the relevant reviewSpecific interventions are not claimed on the slide; where one is evidenced it is in the relevant deck&rsquo;s own Analysis panel.rsquo;s own Analysis panel.</dd>
-    </dl>
-
-    <h3>Artist deep dives &mdash; Amyl and The Sniffers</h3>
-    <h4 style="font-family:'DM Mono',monospace;font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;margin:1rem 0 .5rem">Chart: reviews published by month</h4>
-    <table>
-      <tr><th>Month of data read</th><th>Reviews</th><th>Pages</th></tr>
-      <tr><td>August 2026</td><td class="n">3</td><td>Amyl and The Sniffers (19 Aug), Kings of Leon (24 Aug), CHVRCHES (26 Aug)</td></tr>
-      <tr><td>September 2026</td><td class="n">9</td><td>K-Trap (2 Sep), IDLES (4 Sep), Palaye Royale (4 Sep), VENUS GRRRLS (14 Sep), Antony Szmierek (14 Sep), Ezra Collective (15 Sep), Angus &amp; Julia Stone (23 Sep), TEN (23 Sep), Bleachers (30 Sep)</td></tr>
-      <tr class="lead"><td>October 2026, to the 20th</td><td class="n">11</td><td>Beth McCarthy (2 Oct), Freak Slug (2 Oct), Tove Lo (5 Oct), The Snuts (5 Oct), GENER8ION (7 Oct), D-Block Europe (reworked 9 Oct; first built 15 Sep), underscores (16 Oct), Defected Records (16 Oct), Oden &amp; Fatzo (16 Oct), Steven Wilson (20 Oct), Tom A. Smith (20 Oct)</td></tr>
-    </table>
-    <p>Counted by the data-read date each page states. D-Block is counted once, in October, by its latest read. Each page is a public artist or label review with its own Analysis panel; the count says nothing about outcomes.</p>
-    <table>
-      <tr><th>Measure</th><th>Value</th><th>Basis</th></tr>
-      <tr><td>Public uploads analysed</td><td class="n">92</td><td>Full public catalogue, 19 Aug 2026</td></tr>
-      <tr class="lead"><td>Typical live long-form video (median views)</td><td class="n">210,737</td><td>n = 14</td></tr>
-      <tr><td>Typical Short (median views)</td><td class="n">28,077</td><td>n = 56</td></tr>
-      <tr><td>Typical official music video (median views)</td><td class="n">3,431,086</td><td>n = 10 &mdash; the strongest format; live is the strongest after it</td></tr>
-      <tr class="lead"><td>Cartoon Darkness videos with long-form follow-up inside 14 days</td><td class="n miss">0 / 4</td><td>Measured to the next long-form upload; Shorts continued throughout</td></tr>
-    </table>
-    <p>The page says only that live performance is an established strength; the comparison behind it is a typical live video at 210,737 views against a typical Short at 28,077 (7.5&times;) and typical behind-the-scenes at 38,012 (5.5&times;). Medians, not totals, so the comparison is like for like; official music videos remain the strongest format. The 7&ndash;14 day follow-up window used in the Amyl review is a planning prompt drawn from multi-format campaign thinking, not a YouTube rule and not a proven optimum.</p>
-    <div class="an-note"><b>The YouTube UK quote.</b> Two pieces of written feedback from YouTube UK praised the deep-dive approach and the way YouTube&rsquo;s own best practice was built into an artist pitch. The quote is attributed to that feedback, not to a specific deck, until the association is confirmed.</div>
-    <dl>
-      <dt>Other reviews referred to</dt>
-      <dd>Ezra Collective (<code>/ezra</code>, post-album case study, 15 Sep 2026); IDLES (<code>/idles</code>, TANGK review, Sep 2026: no owned live long-form across the TANGK campaign; one live world rather than more content); Kings of Leon (<code>/kol</code>, Sep 2026: route a catalogue audience to the new era); Defected Records (<code>/defected</code>, channel review, 16 Oct 2026). All public-data reviews; recommendations framed as options.</dd>
-    </dl>
-
-    <h3>Territory data &mdash; D-Block Europe</h3>
-    <table>
-      <tr><th>Lens</th><th>D-Block Europe</th><th>Scope</th></tr>
-      <tr class="lead"><td>VMG UK YouTube consumption, 23 Mar &ndash; 20 Sep 2026</td><td class="n">3,624,175 · #2 of 145</td><td>Our UK supply-chain reporting; Underworld #1 at 4,714,347</td></tr>
-      <tr class="lead"><td>UK monthly YouTube views (Chartmetric)</td><td class="n">9,230,272 · #1 of 15</td><td>The 15 crossover artists (in our consumption data and with a usable Chartmetric UK read), read 21&ndash;25 Sep 2026; also #1 of the 30-artist landscape sample</td></tr>
-      <tr><td>UK share of returned territory views</td><td class="n">67.5%</td><td>UK is the channel&rsquo;s #1 market</td></tr>
-      <tr><td>Subscribers · lifetime views</td><td class="n">661K · 972.5M</td><td>Public API, 7 Oct 2026</td></tr>
-      <tr><td>Lifetime views on records with no other official asset</td><td class="n">248.7M</td><td>Public API classification, 7 Oct 2026; 11 of the 15 videos over 8M</td></tr>
-      <tr><td>Visualisers, and the days they were published on</td><td class="n">66 · 4 days</td><td>All on album release days (2019, 2023, 2024, 2025)</td></tr>
-    </table>
-    <p>Three lenses, read separately and never combined into a score: what our pipe reports for the UK, what Chartmetric estimates for UK audience, and the global channel figures. D-Block was the one artist all three agreed on, which is what made it the first to get a closer look.</p>
-    <div class="an-note"><b>Rankings are scoped to the dataset reviewed.</b> &ldquo;#2&rdquo; is within the 145 artist strings in our UK consumption data for the period, and &ldquo;#1&rdquo; is within the crossover and landscape samples given Chartmetric territory reads. The page itself shows the two figures rather than the ranks. Neither is a claim about UK rap or about Virgin&rsquo;s roster as a whole: the Virgin UK universe reviewed has only three rap artists, so a &ldquo;#1 Virgin artist&rdquo; line was removed from the D-Block deck for exactly that reason.</div>
-    <div class="an-note"><b>What the consumption data is and isn&rsquo;t.</b> VMG UK&rsquo;s own YouTube reporting (Daily Trend, YouTube tab) for repertoire through our pipe: 51.0M views across 145 artist strings in the period. It is period-level, carries no Shorts/long-form, art-track or UGC split, and is not every UK YouTube view Virgin generates. About half the consumption strings are not yet matched to a tracked channel, and some Virgin UK artists with real UK audiences (Peter Gabriel, Bloc Party, Ezra Collective, IDLES among them) have no record in it at all &mdash; which is why the slide says local knowledge has to sit beside the data.</div>
-    <div class="an-note"><b>Status.</b> The D-Block review (<code>/dblock</code>) was built for the management conversation. Its recommendations are options; none is recorded as implemented, and no result is claimed. The 474M gap between the channel&rsquo;s lifetime counter and the sum of its public uploads is unresolved and no share-of-lifetime claim depends on it.</div>
-
-    <h3>Campaign reviews &mdash; Ezra Collective</h3>
-    <table>
-      <tr><th>Measure</th><th>Dance, No One&rsquo;s Watching · 2024</th><th>Here Because of Hope · 2026</th></tr>
-      <tr><td>Campaign window</td><td>18 Jun &ndash; 6 Oct 2024 · 110 days</td><td>27 May &ndash; 15 Sep 2026 · 111 days</td></tr>
-      <tr class="lead"><td>Active weeks</td><td class="n">7 / 16</td><td class="n up">16 / 16</td></tr>
-      <tr class="lead"><td>Longest gap between uploads</td><td class="n">43 days</td><td class="n up">9 days</td></tr>
-      <tr><td>Uploads · upload days</td><td class="n">27 · 9</td><td class="n">69 · 44</td></tr>
-      <tr><td>Long-form · Shorts</td><td class="n">&mdash;</td><td class="n">24 · 45</td></tr>
-      <tr><td>Share of window views on long-form</td><td class="n">&mdash;</td><td class="n">83.6%</td></tr>
-      <tr><td>Top three uploads&rsquo; share of window views</td><td class="n">84.7%</td><td class="n up">56.5%</td></tr>
-    </table>
-    <p>Album-on-album comparison uses structural measures only. The 2024 assets have had two extra years to accumulate views, so campaign view totals are not compared across the two windows.</p>
-    <table>
-      <tr><th>Week starting</th><th>Views in the prior 7 days</th><th>Public subscriber count</th></tr>
-      <tr><td>24 Aug 2026</td><td class="n">234,269</td><td class="n">70,600</td></tr>
-      <tr><td>31 Aug 2026</td><td class="n">259,909</td><td class="n">71,000</td></tr>
-      <tr><td>7 Sep 2026</td><td class="n">182,513</td><td class="n">71,300</td></tr>
-      <tr class="lead"><td>14 Sep 2026 · release week (album out 11 Sep)</td><td class="n up">535,544</td><td class="n up">72,400</td></tr>
-    </table>
-    <p>Release week against the average of the three preceding weeks (225,564): 2.4&times;. This is a separate reading from the activity comparison, taken from our weekly Watcher snapshots, and is shown as co-occurrence with release week, not as the effect of any upload. Public subscriber counts are rounded by YouTube, so no multiple is put on them.</p>
-    <div class="an-note"><b>What this does not show.</b> Snapshots begin 24 August 2026, so there is no release-week reading for the 2024 album and no baseline for the earlier part of the 2026 campaign. The channel went quiet after the 12 September block party and has since resumed (23 uploads in the 30 days to 20 October); the October re-read is not in this document.</div>
-
-    <h3>Other campaign comparisons held in reserve</h3>
-    <table>
-      <tr><th>Campaign · role</th><th>Active weeks</th><th>Longest gap</th><th>Note</th></tr>
-      <tr><td>K-Trap · <em>TRAPO 2</em> vs <em>SMILE?</em> · advised (pre-campaign plan) · matched 159-day windows</td><td class="n">13/23 &rarr; 22/23</td><td class="n">34 &rarr; 15 days</td><td>Premieres 3 &rarr; 5 plus a Premium Afterparty; hero median fell 1.98M &rarr; 419K &mdash; the architecture improved, the breakout didn&rsquo;t repeat</td></tr>
-      <tr><td>Angus &amp; Julia Stone · <em>Karaoke Bar</em> vs <em>Cape Forestier</em> · analysed (Australia board)</td><td class="n">58% &rarr; 90%</td><td class="n">69 &rarr; 16 days</td><td>Long-form pieces 9 &rarr; 27; first channel video past 1M since 2018; top asset&rsquo;s share rose 35% &rarr; 42%</td></tr>
-    </table>
-    <p>Kept out of the main document so one example carries the point. Both use the same structural measures and the same rule against comparing lifetime view totals across campaigns.</p>
-
-    <h3>The measures &mdash; what could be read today</h3>
-    <dl>
-      <dt>Team engagement</dt><dd>Readable now: teams with live boards and artists they have added; reviews requested and delivered. Not a proxy: a workspace existing.</dd>
-      <dt>Consistent artist activity</dt><dd>Readable now from public upload dates: active weeks and longest gap per campaign window, for any tracked channel; and whether a priority release is followed by a long-form moment within an agreed window (the window itself is a choice for the group, not a rule).</dd>
-      <dt>Views and consumption</dt><dd>Readable now: release-week channel views against the preceding weeks (dashboard weekly snapshots, from late August 2026); UK consumption per artist from our own reporting, period-level. With authorised Studio access in aggregate: traffic sources, returning viewers and the catalogue-to-new-release question, which public data cannot answer.</dd>
-    </dl>
-
-    <h3>Open questions kept here, not on the pages</h3>
-    <ul>
-      <li>Which deck each piece of YouTube UK feedback was responding to.</li>
-      <li>Whether the Ezra campaign shift was discussed with Partisan before the campaign, which would change the role label from &ldquo;analysed&rdquo; to &ldquo;supported&rdquo;.
-      <li>The example objective wording on the final page is a starting proposal only; the group&rsquo;s objective, targets and ownership are not set here.</li>
-      <li>Which items of the K-Trap pre-campaign plan the team actioned, and whether the Afterparty was a VMG ask.</li>
-      <li>Whether the D-Block review has been presented to management, and what was taken up.</li>
-      <li>Weekly ingestion of the UK consumption data, so the territory reading moves from period-level to weekly.</li>
-    </ul>
-    <button class="an-back">&larr; Back to the document</button>
-  </div>
-</div>
 
 <script>
 /* ── Chart data: dated readings only ───────────────────────────── */
@@ -807,6 +652,5 @@ document.addEventListener('DOMContentLoaded',function(){
   document.querySelectorAll('.hero .reveal, #start .reveal').forEach(function(e){e.classList.add('visible')});
 });
 </script>
-<script src="/shared/analysis-sheet.js"></script>
 </body>
 </html>
