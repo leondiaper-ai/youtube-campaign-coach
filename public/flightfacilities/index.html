@@ -293,7 +293,7 @@ h2.display{font-size:clamp(2.2rem,4.6vw,4rem);max-width:20ch}
 .dm-list i{font-style:normal;font-family:'IBM Plex Mono',monospace;font-size:.66rem;color:var(--dim)}
 .dm-list b{font-family:'Big Shoulders Display',sans-serif;font-weight:800;font-size:1.35rem;color:var(--amber);min-width:3.5rem;text-align:right}
 .dm-side .quote{margin-top:0;margin-bottom:.6rem}
-.dm-gap{border:1px dashed rgba(244,183,64,.55);padding:.7rem .9rem;font-size:.88rem;color:var(--warm);line-height:1.4} .dm-gap b{color:var(--amber)}
+.dm-gap{background:rgba(13,24,48,.92);border:1px dashed rgba(244,183,64,.55);padding:.7rem .9rem;font-size:.88rem;color:var(--warm);line-height:1.4} .dm-gap b{color:var(--amber)}
 .er{display:grid;grid-template-columns:1fr 1fr;gap:clamp(1.2rem,3vw,3rem);margin-top:1.2rem}
 @media(max-width:880px){.er{grid-template-columns:1fr}}
 .er h3{font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;color:var(--amber);padding-bottom:.45rem;border-bottom:2px solid var(--cream)}
@@ -330,6 +330,9 @@ h2.display{font-size:clamp(2.2rem,4.6vw,4rem);max-width:20ch}
 .ch b{display:block;font-family:'Big Shoulders Display',sans-serif;font-weight:900;text-transform:uppercase;font-size:1.3rem;margin-top:.2rem}
 .ch p{font-size:.76rem;color:var(--warm);margin-top:.25rem;line-height:1.35}
 .ife-how{display:flex;flex-direction:column;gap:.6rem}
+.ths{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;margin-top:.45rem}
+.ths img{width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:4px}
+.ths span{aspect-ratio:16/9;border:1px dashed rgba(244,183,64,.5);border-radius:4px;display:flex;align-items:center;justify-content:center;font-family:'IBM Plex Mono',monospace;font-size:.55rem;color:var(--amber);text-transform:uppercase}
 .hw{padding:.75rem .9rem;border-left:4px solid var(--sky);background:var(--navy-2)} .hw.ask{border-color:var(--amber)}
 .hw.ok .cn{color:var(--sky)} .hw.ask .cn{color:var(--amber)}
 .hw p{font-size:.82rem;color:var(--warm);margin-top:.25rem;line-height:1.4} .hw a{border-bottom:1px solid var(--line);color:var(--cream)}
@@ -457,7 +460,7 @@ body.sheet-open{overflow:hidden}
     <span class="tag reveal">02 <i>·</i> Format by format</span>
     <h2 class="display reveal" style="margin-top:.9rem;max-width:24ch">Not all formats <span class="a">pull their weight.</span></h2>
     <div class="fmt stagger">
-      <div class="fr"><div class="fn">Concept mixes <span>Decade Mix, Forgotten Summer</span></div><div class="fb"><i style="width:100%"></i></div><div class="fv">191K <span>n=4</span></div><div class="fx ev">Build on</div></div>
+      <div class="fr"><div class="fn">Concept mixes <span>Decade Mix, Forgotten Summer, Down To Earth mix</span></div><div class="fb"><i style="width:100%"></i></div><div class="fv">191K <span>n=4</span></div><div class="fx ev">Build on</div></div>
       <div class="fr"><div class="fn">Song videos &amp; album tracks</div><div class="fb"><i style="width:43%"></i></div><div class="fv">83K <span>n=18</span></div><div class="fx ev">Core</div></div>
       <div class="fr"><div class="fn">Official audio</div><div class="fb"><i style="width:42%"></i></div><div class="fv">81K <span>n=13</span></div><div class="fx ev">Core</div></div>
       <div class="fr"><div class="fn">Recorded sets &amp; concerts <span>Airfields 390K · club sets 15–63K</span></div><div class="fb"><i style="width:24%"></i></div><div class="fv">46K <span>n=8</span></div><div class="fx ex">Concert film: test</div></div>
@@ -630,10 +633,10 @@ body.sheet-open{overflow:hidden}
       <div class="ife-screen">
         <div class="ife-top"><span>FF · In-Flight Entertainment</span><span>Now playing · Decade Mix 2012–2022</span></div>
         <div class="ife-ch">
-          <div class="ch"><div class="cn">CH 1 · Departures</div><b>The classics</b><p>Crave You · Clair De Lune · Foreign Language · With You · Stand Still</p></div>
-          <div class="ch"><div class="cn">CH 2 · Cruising altitude</div><b>The mixes</b><p>Five Decade Mixes · Forgotten Summer · Down To Earth 10-year mix</p></div>
-          <div class="ch"><div class="cn">CH 3 · Live from the cabin</div><b>Live and sets</b><p>Airfields · the MSO shows · the 5 Hour Decades Set</p></div>
-          <div class="ch new"><div class="cn">CH 4 · Arrivals</div><b>The new album</b><p>Added single by single, then the full album</p></div>
+          <div class="ch"><div class="cn">CH 1 · Departures</div><b>The classics</b><div class="ths"><img src="https://i.ytimg.com/vi/r0bS-YnLf4s/mqdefault.jpg" alt=""><img src="https://i.ytimg.com/vi/Jcu1AHaTchM/mqdefault.jpg" alt=""><img src="https://i.ytimg.com/vi/gJ5YaApfSdQ/mqdefault.jpg" alt=""></div><p>Crave You · Clair De Lune · Foreign Language · With You · Stand Still</p></div>
+          <div class="ch"><div class="cn">CH 2 · Cruising altitude</div><b>The mixes</b><div class="ths"><img src="https://i.ytimg.com/vi/54a6SjIlJF0/mqdefault.jpg" alt=""><img src="https://i.ytimg.com/vi/YPg37aYz7tM/mqdefault.jpg" alt=""><img src="https://i.ytimg.com/vi/jntQd7U0aSk/mqdefault.jpg" alt=""></div><p>Five Decade Mixes · Forgotten Summer · Down To Earth 10-year mix</p></div>
+          <div class="ch"><div class="cn">CH 3 · Live from the cabin</div><b>Live and sets</b><div class="ths"><img src="https://i.ytimg.com/vi/ts-6KyJUDWY/mqdefault.jpg" alt=""><img src="https://i.ytimg.com/vi/y8Ndi955iuY/mqdefault.jpg" alt=""><img src="https://i.ytimg.com/vi/qeo2NtFQLqo/mqdefault.jpg" alt=""></div><p>Airfields · the MSO shows · the 5 Hour Decades Set</p></div>
+          <div class="ch new"><div class="cn">CH 4 · Arrivals</div><b>The new album</b><div class="ths"><span>Single 1</span><span>Single 2</span><span>Album</span></div><p>Added single by single, then the full album</p></div>
         </div>
       </div>
       <div class="ife-how">
@@ -762,7 +765,7 @@ body.sheet-open{overflow:hidden}
           <tr><td>Official audio</td><td class="r">13</td><td class="r">81K</td><td>32K – 1.5M</td></tr>
           <tr><td>Recorded sets and concerts</td><td class="r">8</td><td class="r">46K</td><td>15K – 390K</td></tr>
           <tr><td>FF edits of other artists' records</td><td class="r">6</td><td class="r">41K</td><td>9K – 515K</td></tr>
-          <tr><td>Remixes of FF songs by other producers</td><td class="r">29</td><td class="r">18K</td><td>4K – 303K</td></tr>
+          <tr><td>Remixes of FF songs by other producers</td><td class="r">29</td><td class="r">18K</td><td>3K – 303K</td></tr>
           <tr><td>Live song uploads</td><td class="r">3</td><td class="r">36K</td><td>13K – 56K</td></tr>
           <tr><td>Lyric video</td><td class="r">1</td><td class="r">75K</td><td>—</td></tr>
           <tr><td>Behind the scenes, tour films, teasers</td><td class="r">8</td><td class="r">3K</td><td>2K – 33K</td></tr>
