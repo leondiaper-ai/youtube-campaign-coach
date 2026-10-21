@@ -1,0 +1,28 @@
+name: pull-watcher
+on: [push, workflow_dispatch]
+jobs:
+  pull:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Fetch
+        run: |
+          set -x
+          B=https://youtube-campaign-coach.vercel.app
+          mkdir out && cd out
+          curl -sS "$B/api/full-catalogue?handle=@chvrches&desc=full" -o catalogue.json
+          curl -sS "$B/api/debug/snapshots?handle=@chvrches" -o snapshots.json
+          CID=$(jq -r .channel.id catalogue.json)
+          curl -sS "$B/api/channel-shelf?channelId=$CID" -o shelf.json
+          jq -r '.videos[].id' catalogue.json > ids.txt
+          split -l 40 ids.txt part_
+          for f in part_*; do curl -sS "$B/api/video-series?ids=$(paste -sd, $f)" -o series_$f.json; done
+          TOP=$(jq -r '[.videos|sort_by(-.views)|.[0:12][].id]|join(",")' catalogue.json)
+          REC=$(jq -r '[.videos|map(select(.publishedAt>="2025-06"))|sort_by(-.views)|.[0:12][].id]|join(",")' catalogue.json)
+          curl -sS "$B/api/comment-scan?ids=$TOP&max=30&order=relevance" -o comments_top.json
+          curl -sS "$B/api/comment-scan?ids=$REC&max=30&order=relevance" -o comments_recent.json
+          curl -sS "$B/api/weekly-pulse" -o pulse.json
+          ls -la
+      - uses: actions/upload-artifact@v4
+        with:
+          name: watcher-data
+          path: out/
