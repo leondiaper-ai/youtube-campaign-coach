@@ -7,6 +7,8 @@ const nextConfig = {
       { source: '/amyl', destination: '/amyl/index.html' },
       { source: '/kol',  destination: '/kol/index.html' },
       { source: '/chvrches', destination: '/chvrches/index.html' },
+      // CHVRCHES deep dive v2 — timeline, best assets, multi-format plan for the key singles.
+      { source: '/chvrches/deep-dive', destination: '/chvrches-deepdive/index.html' },
       { source: '/ktrap', destination: '/ktrap/index.html' },
       { source: '/palaye', destination: '/palaye/index.html' },
       { source: '/idles', destination: '/idles/index.html' },
