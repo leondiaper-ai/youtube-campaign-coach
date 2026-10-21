@@ -577,17 +577,17 @@ body.present .ph{display:none!important}
 
     <div class="cards reveal" style="grid-template-columns:1.3fr 1fr">
       <div class="card">
-        <div class="eyebrow">Coverage · current results, then illustrative scenarios</div>
-        <div class="card-title">How territory participation could extend coverage</div>
+        <div class="eyebrow">Coverage · artist channels on the YouTube dashboard</div>
+        <div class="card-title">263 artist channels monitored today, and how territories could extend it</div>
         <div class="chart" id="chart-scale"></div>
-        <div class="legend"><span><i style="background:var(--signal)"></i>Recorded monitoring counts</span><span><i style="background:var(--paper);border:2px solid #2C25FF;width:8px;height:8px;border-radius:50%"></i>July analysis sample</span><span><i style="background:#BDB5A8"></i>Scenario: current rate continues, largely one person adding</span><span><i style="background:#2C25FF;opacity:.55"></i>Scenario: four more boards join in January with launch batches like Australia&rsquo;s (12&ndash;15 each)</span><span><i style="background:#2C25FF"></i>Scenario: four more boards each bring a full priority roster (~40)</span></div>
-        <p class="caption">Illustrations, not forecasts. Grey extends the last 25 days&rsquo; rate (+30). Blue adds boards of 12&ndash;15 channels (the size of today&rsquo;s Nordics and Australia boards) or ~40, a placeholder for territories to confirm.</p>
+        <div class="legend"><span><i style="background:var(--signal)"></i>Artist channels monitored (dashboard sync logs)</span><span><i style="background:var(--paper);border:2px solid #2C25FF;width:8px;height:8px;border-radius:50%"></i>July analysis sample</span><span><i style="background:#BDB5A8"></i>Scenario: current rate continues, largely one person adding</span><span><i style="background:#2C25FF;opacity:.55"></i>Scenario: four more boards join in January with launch batches like Australia&rsquo;s (12&ndash;15 each)</span><span><i style="background:#2C25FF"></i>Scenario: four more boards each bring a full priority roster (~40)</span></div>
+        <p class="caption">The 263 includes 114 market-watch channels outside our roster. Dashed lines are illustrations, not forecasts. Grey extends the last 25 days&rsquo; rate (+30). Blue adds boards of 12&ndash;15 channels (the size of today&rsquo;s Nordics and Australia boards) or ~40, a placeholder for territories to confirm.</p>
       </div>
       <div class="card">
-        <div class="eyebrow">Reviews · current results, then an illustration</div>
-        <div class="card-title">Delivery so far, a starting point for wider contribution</div>
+        <div class="eyebrow">Delivery · artist deep dives and reviews</div>
+        <div class="card-title">23 artist deep dives and reviews completed so far</div>
         <div class="chart" id="chart-reviews-scale"></div>
-        <div class="legend"><span><i style="background:var(--signal)"></i>Completed to date (cumulative)</span><span><i style="background:#BDB5A8"></i>Illustrative pace: 8 a month</span></div>
+        <div class="legend"><span><i style="background:var(--signal)"></i>Deep dives and reviews completed (cumulative)</span><span><i style="background:#BDB5A8"></i>Illustrative pace: 8 a month</span></div>
         <p class="caption">3, 9, then 11 in the first 20 days of October. The dashed line is an illustrative pace of 8 a month based on recent delivery &mdash; one contributor&rsquo;s work, not a quota.</p>
       </div>
     </div>
@@ -690,7 +690,8 @@ function chartScale(){
   var jg=el('g',{});jg.appendChild(el('circle',{cx:X(0),cy:Y(138),r:5,style:'fill:var(--paper);stroke:#2C25FF;stroke-width:2'}));jg.appendChild(el('circle',{cx:X(0),cy:Y(138),r:16,fill:'transparent'}));hover(jg,'Jul 2026 · 138 channels · analysis sample, not a monitoring count');s.appendChild(jg);
   s.appendChild(el('text',{x:X(0)+10,y:Y(138)+4,class:'lab m','text-anchor':'start'},'138 · sample'));
   var pg=el('g',{});pg.appendChild(el('circle',{cx:X(endDay),cy:Y(proj),r:5,class:'dot',style:'fill:#BDB5A8'}));pg.appendChild(el('circle',{cx:X(endDay),cy:Y(proj),r:16,fill:'transparent'}));hover(pg,'Apr 2027 · ~'+proj+' channels · scenario: current rate continues · not a target');s.appendChild(pg);
-  s.appendChild(el('text',{x:X(97),y:Y(263)-12,class:'lab','text-anchor':'middle'},'263'));
+  s.appendChild(el('text',{x:X(97),y:Y(263)-12,class:'lab','text-anchor':'middle'},'263 channels'));
+  s.appendChild(el('text',{x:4,y:9,class:'ax','text-anchor':'start'},'Artist channels'));
   s.appendChild(el('text',{x:X(endDay)+10,y:Y(proj)+4,class:'lab m','text-anchor':'start'},'~'+proj));
   [['Jul 2026',0,'start'],['20 Oct',97,'middle'],['Apr 2027',endDay,'end']].forEach(function(t){s.appendChild(el('text',{x:X(t[1]),y:H-B+18,class:'ax','text-anchor':t[2]},t[0]));});
   host.appendChild(s);
@@ -708,7 +709,8 @@ function chartReviewsScale(){
   s.appendChild(el('path',{d:path,class:'ln'}));
   REC.forEach(function(d){var g=el('g',{});g.appendChild(el('circle',{cx:X(d[2]),cy:Y(d[1]),r:5,class:'dot'}));g.appendChild(el('circle',{cx:X(d[2]),cy:Y(d[1]),r:16,fill:'transparent'}));hover(g,d[0]+' 2026 · '+d[1]+' reviews to date');s.appendChild(g);});
   var pg=el('g',{});pg.appendChild(el('circle',{cx:X(projEnd),cy:Y(proj),r:5,class:'dot',style:'fill:#BDB5A8'}));pg.appendChild(el('circle',{cx:X(projEnd),cy:Y(proj),r:16,fill:'transparent'}));hover(pg,'Apr 2027 · ~'+proj+' reviews at an illustrative 8 a month');s.appendChild(pg);
-  s.appendChild(el('text',{x:X(2),y:Y(23)-12,class:'lab','text-anchor':'middle'},'23'));
+  s.appendChild(el('text',{x:X(2),y:Y(23)-12,class:'lab','text-anchor':'middle'},'23 reviews'));
+  s.appendChild(el('text',{x:4,y:9,class:'ax','text-anchor':'start'},'Deep dives and reviews'));
   s.appendChild(el('text',{x:X(projEnd)+10,y:Y(proj)+4,class:'lab m','text-anchor':'start'},'~'+proj));
   [['Aug 2026',0,'start'],['20 Oct',2,'middle'],['Jan 2027',5,'middle'],['Apr 2027',projEnd,'end']].forEach(function(t){s.appendChild(el('text',{x:X(t[1]),y:H-B+18,class:'ax','text-anchor':t[2]},t[0]));});
   host.appendChild(s);
