@@ -58,17 +58,19 @@
 
 <style>
 :root{
-  --ink:#0B0A0C;
-  --ink-2:#141217;
-  --ink-3:#1F1B22;
-  --white:#F6F2EE;
-  --red:#D7193A;      /* the polka-dot shirt */
-  --pink:#EE5FAE;     /* the Isle of Wight stage banner */
-  --yellow:#F7D23A;   /* the banner lettering / Our Song */
-  --blue:#2F80E8;     /* the Rockstar visualiser */
-  --warm:#C9C2C6;
-  --dim:#8E8590;
-  --line:rgba(246,242,238,.14);
+  /* palette from the new album artwork: grey wall, skin, black, ochre lettering */
+  --ink:#D7D6DA;      /* page — the grey wall */
+  --ink-2:#CDCCD0;
+  --ink-3:#C6C4C7;    /* cards */
+  --white:#0B0B0C;    /* text — hair and trousers */
+  --red:#2B211C;      /* dark fills — deep shadow brown */
+  --pink:#8E5F49;     /* skin in shadow */
+  --yellow:#9A6D1C;   /* the ochre title lettering, deepened for contrast */
+  --blue:#6E737C;     /* slate, from the cool side of the wall */
+  --warm:#3B322E;
+  --dim:#6F6764;
+  --line:rgba(11,11,12,.14);
+  --light:#E9E7E5;    /* text on dark fills */
   --pad:clamp(1.6rem,5vw,5.5rem);
 }
 *{box-sizing:border-box;margin:0;padding:0}
@@ -375,6 +377,33 @@ body.sheet-open{overflow:hidden}
 .sheet .label{font-family:'VT323',monospace;font-size:1.1rem;text-transform:uppercase;color:#6b636a}
 @media(max-width:560px){.osd{font-size:1rem}}
 @media print{.chrome,.pbar,.pcount{display:none}.slide{min-height:0;page-break-inside:avoid}}
+
+/* ── toned-down palette overrides ───────────────────────────────── */
+.slide.dots{background-image:radial-gradient(rgba(62,42,34,.07) 18%,transparent 19%)}
+.cam img,.bleed img{filter:saturate(.35) contrast(.96)}
+.osd .rec,.cam .o .rec{background:#9C3B2A}
+.tag,.btn.primary{color:var(--white)} .tag{background:#C9A15A} .btn.primary{background:#C9A15A;border-color:#C9A15A}
+.tag.pink{background:#C6A08C}
+.chrome{background:rgba(215,214,218,.92)}
+.pcount{background:rgba(215,214,218,.8)}
+.scrim-b::after{background:linear-gradient(to top,rgba(215,214,218,.97) 14%,rgba(215,214,218,.7) 46%,rgba(215,214,218,.08) 82%)}
+.scrim-l::after{background:linear-gradient(to right,rgba(215,214,218,.97) 34%,rgba(215,214,218,.72) 62%,rgba(215,214,218,.2) 100%)}
+.slide.red,.tier.t1,.st6.r,.ph.r{color:var(--light)}
+.slide.red .display,.slide.red h3,.slide.red h4,.slide.red .n{color:var(--light)}
+.slide.red .body,.act p,.tier.t1 .lift{color:#BDB6B1}
+.slide.red .means{border-color:var(--light)} .slide.red .means .osd{color:var(--light)}
+.act{border-top-color:rgba(233,231,229,.25)}
+.tier.t1 .w,.st6.r .w,.ph.r .w{color:#C9A15A}
+.tier.t1 li{border-color:rgba(233,231,229,.2)} .tier.t1 li::before{background:#C9A15A}
+.st6.r li{border-color:rgba(233,231,229,.2)}
+.q,.post{background:#ECEAE8;color:var(--white)} .post p{color:var(--white)}
+.cond,.month{border-color:rgba(154,109,28,.5)}
+.sheet{background:#ECEAE8;color:var(--white)}
+.sheet .close{background:var(--white);color:var(--light)}
+.sheet li::before{background:var(--yellow)}
+.sheet a{color:var(--pink)}
+.btn:hover{border-color:var(--yellow);color:var(--yellow)}
+.pl{background:#E2E0DF}
 </style>
 </head>
 <body>
