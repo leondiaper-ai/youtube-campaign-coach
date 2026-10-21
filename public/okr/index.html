@@ -567,11 +567,11 @@ body.present .hint{display:block}
         <p class="caption">All three lines are illustrations, not forecasts or commitments. The grey line extends the rate of the 25 days to 20 Oct (+30). The blue lines show what territory participation would add: Australia and the Nordics each brought 12&ndash;15 channels when their boards went live; the ~40 full-roster figure is a placeholder only the territories can confirm.</p>
       </div>
       <div class="card">
-        <div class="eyebrow">Reviews · current results, then a suggested pace</div>
-        <div class="card-title">Delivery so far, and a pace to discuss</div>
+        <div class="eyebrow">Reviews · current results, then an illustration</div>
+        <div class="card-title">Delivery so far, a starting point for wider contribution</div>
         <div class="chart" id="chart-reviews-scale"></div>
-        <div class="legend"><span><i style="background:var(--signal)"></i>Published to date (cumulative)</span><span><i style="background:#BDB5A8"></i>Suggested pace: 8 a month</span></div>
-        <p class="caption">23 reviews since August: 3, 9, then 11 in the first 20 days of October. The observed rate is 8&ndash;10 a month over the full months, higher in October so far. A suggested pace of 8 a month, below the current rate, is offered as a goal for discussion; it assumes the current UK capacity and does not imply other territories produce reviews.</p>
+        <div class="legend"><span><i style="background:var(--signal)"></i>Published to date (cumulative)</span><span><i style="background:#BDB5A8"></i>Illustration: the observed rate continued</span></div>
+        <p class="caption">23 reviews since August: 3, 9, then 11 in the first 20 days of October. The dashed line simply continues the observed rate of the two full months as an illustration. It is one contributor&rsquo;s delivery so far, not a quota per person; as more teams contribute, the bank of examples grows faster.</p>
       </div>
     </div>
 
@@ -584,7 +584,7 @@ body.present .hint{display:block}
 
     <div class="callout">
       <div class="callout-label">Proposed goals for discussion</div>
-      <div class="callout-text">Extend coverage as territories add their priority artists; keep reviews at a steady pace (8 a month suggested); and review artist activity and consumption together each quarter. Current results are measured; the scenarios are illustrations; the goals are the group&rsquo;s to set.</div>
+      <div class="callout-text">Extend coverage as territories add their priority artists; grow the bank of reviews as more teams contribute; and review artist activity and consumption together each quarter. Current results are measured; the scenarios are illustrations; the goals are the group&rsquo;s to set.</div>
     </div>
   </div>
 </section>
@@ -598,11 +598,11 @@ body.present .hint{display:block}
 
     <div class="cards reveal" style="grid-template-columns:repeat(4,1fr);margin-bottom:0">
       <div class="card"><div class="card-stat">250+</div><div class="card-title">Channels monitored today</div><p class="card-desc">Extend coverage as more territories add their artists.</p></div>
-      <div class="card"><div class="card-stat">8<span style="font-size:.45em;color:rgba(255,255,255,.5);font-weight:700"> / month</span></div><div class="card-title">Suggested review pace for one contributor</div><p class="card-desc">More colleagues could expand the shared programme.</p></div>
+      <div class="card"><div class="card-stat">23</div><div class="card-title">Artist and label reviews so far</div><p class="card-desc">A growing bank of insights and ideas that can expand as more teams contribute.</p></div>
       <div class="card"><div class="card-stat">100<span style="font-size:.45em;color:rgba(255,255,255,.5);font-weight:700"> / territory</span></div><div class="card-title">Proposed priority-channel mapping</div><p class="card-desc">Identify key channels with local teams.</p></div>
       <div class="card"><div class="card-stat">12<span style="font-size:.45em;color:rgba(255,255,255,.5);font-weight:700"> months</span></div><div class="card-title">Territory consumption data</div><p class="card-desc">Work with Data/Insights to connect consumption with channel performance.</p></div>
     </div>
-    <p class="small muted" style="margin:.9rem 0 0;max-width:80ch">The review pace is a suggested working pace for one contributor, distinct from the observed monthly delivery shown earlier; it is not a team-wide ceiling, and the group could agree a higher combined ambition based on participating colleagues and their capacity. The consumption step: work with Data/Insights to establish 12-month YouTube consumption by artist and territory, then connect it with the dashboard&rsquo;s channel information &mdash; keeping consumption reporting and public channel figures distinct, even when shown together.</p>
+    <p class="small muted" style="margin:.9rem 0 0;max-width:80ch">The consumption step: work with Data/Insights to establish 12-month YouTube consumption by artist and territory, then connect it with the dashboard&rsquo;s channel information &mdash; keeping consumption reporting and public channel figures distinct, even when shown together.</p>
 
     <div class="callout reveal">
       <div class="callout-text" style="font-size:clamp(1.05rem,1.6vw,1.3rem);font-weight:600">More teams contributing. More priority artists understood and supported. Consistent activity and consumption growth reviewed quarterly.</div>
@@ -681,16 +681,16 @@ function chartScale(){
 function chartReviewsScale(){
   var host=document.getElementById('chart-reviews-scale'); if(!host)return;
   /* Cumulative reviews by month-end (Oct to the 20th), then 10 a month to April 2027. Month index from Aug 2026 = 0. */
-  var REC=[['Aug',3,0],['Sep',12,1],['Oct',23,2]],projEnd=8,proj=23+8*6;
+  var REC=[['Aug',3,0],['Sep',12,1],['Oct',23,2]],projEnd=8,proj=23+8*6; /* 8 a month = the observed rate of the two full months (3, 9), continued as an illustration */
   var W=520,H=240,L=36,R=52,T=20,B=34,max=100,span=projEnd;
-  var s=el('svg',{viewBox:'0 0 '+W+' '+H,role:'img','aria-label':'Cumulative reviews: 3 by August, 12 by September, 23 by 20 October; about 71 by April 2027 at a suggested eight a month'});
+  var s=el('svg',{viewBox:'0 0 '+W+' '+H,role:'img','aria-label':'Cumulative reviews: 3 by August, 12 by September, 23 by 20 October; about 71 by April 2027 if the observed rate continued'});
   [0,25,50,75,100].forEach(function(v){var y=T+(H-T-B)*(1-v/max);s.appendChild(el('line',{x1:L,x2:W-R,y1:y,y2:y,class:'grid'}));s.appendChild(el('text',{x:L-8,y:y+4,class:'ax','text-anchor':'end'},String(v)));});
   var X=function(d){return L+(W-L-R)*(d/span);},Y=function(v){return T+(H-T-B)*(1-v/max);};
   var path=REC.map(function(d,i){return (i?'L':'M')+X(d[2])+' '+Y(d[1]);}).join(' ');
   s.appendChild(el('path',{d:'M'+X(2)+' '+Y(23)+' L'+X(projEnd)+' '+Y(proj),class:'ln','stroke-dasharray':'4 5',style:'stroke:#BDB5A8'}));
   s.appendChild(el('path',{d:path,class:'ln'}));
   REC.forEach(function(d){var g=el('g',{});g.appendChild(el('circle',{cx:X(d[2]),cy:Y(d[1]),r:5,class:'dot'}));g.appendChild(el('circle',{cx:X(d[2]),cy:Y(d[1]),r:16,fill:'transparent'}));hover(g,d[0]+' 2026 · '+d[1]+' reviews to date');s.appendChild(g);});
-  var pg=el('g',{});pg.appendChild(el('circle',{cx:X(projEnd),cy:Y(proj),r:5,class:'dot',style:'fill:#BDB5A8'}));pg.appendChild(el('circle',{cx:X(projEnd),cy:Y(proj),r:16,fill:'transparent'}));hover(pg,'Apr 2027 · ~'+proj+' reviews at a suggested 8 a month · goal to discuss');s.appendChild(pg);
+  var pg=el('g',{});pg.appendChild(el('circle',{cx:X(projEnd),cy:Y(proj),r:5,class:'dot',style:'fill:#BDB5A8'}));pg.appendChild(el('circle',{cx:X(projEnd),cy:Y(proj),r:16,fill:'transparent'}));hover(pg,'Apr 2027 · ~'+proj+' reviews if the observed rate continued · illustration');s.appendChild(pg);
   s.appendChild(el('text',{x:X(2),y:Y(23)-12,class:'lab','text-anchor':'middle'},'23'));
   s.appendChild(el('text',{x:X(projEnd)+10,y:Y(proj)+4,class:'lab m','text-anchor':'start'},'~'+proj));
   [['Aug 2026',0,'start'],['20 Oct',2,'middle'],['Jan 2027',5,'middle'],['Apr 2027',projEnd,'end']].forEach(function(t){s.appendChild(el('text',{x:X(t[1]),y:H-B+18,class:'ax','text-anchor':t[2]},t[0]));});
