@@ -1,0 +1,817 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>YouTube: ideas for the OKR discussion</title>
+
+<!--
+  YOUTUBE: IDEAS FOR THE OKR DISCUSSION
+  Virgin Music Group · UK YouTube · October 2026 · review version 3
+
+  A discussion document for the YouTube group's OKR exercise. Built in
+  the same system as the July Campaign Observatory (preview.html): Inter,
+  a cream page with near-black sections, sticky pill navigation, stat
+  tiles, white cards, orange signal accent. Scrolls as a report; Present
+  switches to one section per screen.
+
+  Figures: sources are the public YouTube Data API, the dashboard's own daily
+  snapshots, Chartmetric UK monthly views, and VMG UK's YouTube
+  consumption reporting. No YouTube Studio data anywhere. Charts use
+  dated readings only; nothing is modelled or estimated.
+-->
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<style>
+:root{
+  --background:#FAF7F2; --foreground:#0E0E0E; --signal:#FF4A1C; --electric:#2C25FF; --mint:#1FBE7A;
+  --cream:#F6F1E7; --smoke:#8A847A; --bone:#E8E3DA; --warm:#4A4640; --paper:#FFFFFF;
+  --ink-2:#161616; --line-d:rgba(255,255,255,.1);
+  --pad:clamp(1rem,5vw,4rem);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;font-size:16px}
+body{font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;background:var(--background);color:var(--foreground);line-height:1.6;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+img{display:block;max-width:100%}
+a{color:inherit}
+
+/* ── Sticky nav ─────────────────────────────────────────────────── */
+.sticky-nav{position:fixed;top:0;left:0;right:0;z-index:1000;background:rgba(14,14,14,.92);backdrop-filter:blur(12px);
+  border-bottom:1px solid rgba(255,255,255,.08);padding:.55rem 1rem;display:flex;justify-content:center;align-items:center;gap:.35rem;flex-wrap:wrap}
+.nav-pill{display:inline-block;padding:.38rem .95rem;border-radius:100px;font-size:.78rem;font-weight:600;color:rgba(255,255,255,.55);text-decoration:none;border:1px solid transparent;white-space:nowrap;transition:all .25s}
+.nav-pill:hover{color:rgba(255,255,255,.85);background:rgba(255,255,255,.06)}
+.nav-pill.active{color:#fff;background:var(--signal);border-color:var(--signal)}
+.nav-tools{position:absolute;right:1rem;top:.55rem;display:flex;gap:.4rem}
+.nav-btn{font:inherit;font-size:.74rem;font-weight:600;cursor:pointer;background:transparent;color:rgba(255,255,255,.75);border:1px solid rgba(255,255,255,.22);padding:.38rem .85rem;border-radius:100px}
+.nav-btn:hover{color:#fff;border-color:#fff}
+.nav-btn.primary{background:var(--signal);border-color:var(--signal);color:#fff}
+@media(max-width:980px){.sticky-nav{justify-content:flex-start;padding-right:11rem}.nav-pill{font-size:.7rem;padding:.3rem .7rem}}
+#pbar{position:fixed;top:0;left:0;height:3px;background:var(--signal);width:0;z-index:1100;transition:width .3s ease}
+
+/* ── Sections ───────────────────────────────────────────────────── */
+.section{padding:clamp(4.6rem,9vw,6.5rem) var(--pad) clamp(3rem,6vw,4.5rem)}
+.section-dark{background:var(--foreground);color:#fff}
+.section-cream{background:var(--cream)}
+.section-light{background:var(--background)}
+.container{max-width:1200px;margin:0 auto}
+
+.section-label{font-size:.7rem;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--signal);margin-bottom:.7rem}
+.section-title{font-size:clamp(1.8rem,4vw,3rem);font-weight:800;letter-spacing:-.04em;line-height:1.08;margin-bottom:.9rem;max-width:22ch}
+.section-subtitle{font-size:clamp(1rem,1.5vw,1.15rem);color:var(--smoke);max-width:760px;line-height:1.6;margin-bottom:2rem}
+.section-dark .section-subtitle{color:rgba(255,255,255,.6)}
+.section-dark .section-label{color:var(--signal)}
+.h3{font-size:1.05rem;font-weight:700;letter-spacing:-.02em;margin-bottom:.4rem}
+.eyebrow{font-size:.62rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--smoke);margin-bottom:.6rem}
+.section-dark .eyebrow{color:rgba(255,255,255,.45)}
+.muted{color:var(--smoke)}
+.section-dark .muted{color:rgba(255,255,255,.6)}
+.small{font-size:.86rem;line-height:1.55}
+.mono{font-family:'DM Mono',monospace;font-size:.7rem;letter-spacing:.08em;text-transform:uppercase}
+
+/* Hero */
+.hero{min-height:100vh;display:flex;flex-direction:column;justify-content:center;padding-top:4.5rem}
+.hero-date{font-size:.78rem;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--signal);margin-bottom:1.6rem}
+.hero-title{font-size:clamp(2.4rem,5.6vw,4.4rem);font-weight:900;letter-spacing:-.04em;line-height:1.04;max-width:880px;margin-bottom:1.3rem}
+.hero-subtitle{font-size:clamp(1rem,1.7vw,1.22rem);color:rgba(255,255,255,.58);max-width:680px;line-height:1.65;margin-bottom:2.6rem}
+.stats-bar{display:flex;gap:2.4rem;flex-wrap:wrap;margin-bottom:2.2rem}
+.stat-item{display:flex;flex-direction:column;gap:.15rem}
+.stat-value{font-size:clamp(1.5rem,3vw,2.1rem);font-weight:800;letter-spacing:-.04em;color:#fff;line-height:1.05}
+.stat-label{font-size:.72rem;font-weight:500;color:rgba(255,255,255,.42);text-transform:uppercase;letter-spacing:.06em;max-width:16rem}
+.data-chain{display:flex;align-items:center;gap:.55rem;flex-wrap:wrap;font-size:.75rem;font-weight:500;color:rgba(255,255,255,.3);padding-top:1.4rem;border-top:1px solid rgba(255,255,255,.08)}
+.data-chain span{color:rgba(255,255,255,.55)}
+.data-chain i{color:var(--signal);font-style:normal;font-size:.65rem}
+
+/* Thesis */
+.thesis-statement{font-size:clamp(1.25rem,2.4vw,1.75rem);font-weight:700;letter-spacing:-.03em;line-height:1.35;color:#fff;max-width:820px;margin-bottom:2rem}
+.thesis-themes{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:.9rem}
+.thesis-theme{padding:.95rem 1.15rem;border-left:3px solid var(--signal);background:rgba(255,255,255,.04);border-radius:0 8px 8px 0;font-size:.9rem;font-weight:500;color:rgba(255,255,255,.78);line-height:1.5}
+.thesis-theme b{color:#fff;display:block;margin-bottom:.15rem;font-weight:700}
+.qrow{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-top:1.6rem}
+.qrow>div{border-top:1px solid rgba(255,255,255,.14);padding-top:.7rem}
+.qrow .n{font-size:.62rem;font-weight:700;letter-spacing:.14em;color:var(--signal)}
+.qrow p{font-weight:600;color:#fff;margin-top:.25rem}
+@media(max-width:760px){.qrow{grid-template-columns:1fr}}
+
+/* Stat tiles */
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:1rem;margin-bottom:1.6rem}
+.tile{background:var(--paper);border:1px solid var(--bone);border-radius:14px;padding:1.1rem 1.25rem}
+.tile .v{font-size:clamp(1.7rem,3vw,2.3rem);font-weight:800;letter-spacing:-.04em;line-height:1;margin-bottom:.35rem}
+.tile .l{font-size:.78rem;font-weight:600;color:var(--foreground)}
+.tile .d{font-size:.72rem;color:var(--smoke);margin-top:.15rem}
+.section-dark .tile{background:rgba(255,255,255,.05);border-color:rgba(255,255,255,.1)}
+.section-dark .tile .v,.section-dark .tile .l{color:#fff}
+.section-dark .tile .d{color:rgba(255,255,255,.5)}
+
+/* Cards */
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:1.25rem;margin-bottom:1.25rem}
+.cards.two{grid-template-columns:1.2fr 1fr}
+.cards.three{grid-template-columns:repeat(3,1fr)}
+@media(max-width:1000px){.cards[style*="repeat(4,1fr)"]{grid-template-columns:1fr 1fr!important}}
+@media(max-width:600px){.cards[style*="repeat(4,1fr)"]{grid-template-columns:1fr!important}}
+@media(max-width:860px){.cards.two,.cards.three{grid-template-columns:1fr}}
+.card{background:var(--paper);border:1px solid var(--bone);border-radius:16px;padding:1.4rem 1.5rem}
+.card.flush{padding:0;overflow:hidden}
+.card.flush .pad{padding:1.1rem 1.4rem}
+.section-dark .card{background:rgba(255,255,255,.05);border-color:rgba(255,255,255,.1);color:#fff}
+.section-dark .card .muted{color:rgba(255,255,255,.6)}
+.card-stat{font-size:clamp(2.2rem,4.5vw,3.2rem);font-weight:900;letter-spacing:-.04em;line-height:1;margin-bottom:.4rem}
+.card-title{font-size:1.02rem;font-weight:700;letter-spacing:-.02em;margin-bottom:.4rem}
+.card-desc{font-size:.9rem;color:var(--smoke);line-height:1.5}
+.section-dark .card-desc{color:rgba(255,255,255,.62)}
+.badge{display:inline-block;font-size:.58rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:.2rem .6rem;border-radius:100px;vertical-align:middle}
+.badge.sun{background:#FFD24C;color:var(--foreground)}
+.badge.live{background:var(--mint);color:#fff}
+.card .badge{display:inline-block}
+.badge.ghost{background:rgba(0,0,0,.06);color:var(--warm)}
+.section-dark .badge.ghost{background:rgba(255,255,255,.12);color:#fff}
+
+/* Screenshot card */
+.shot{border-radius:10px;overflow:hidden;border:1px solid var(--bone);background:var(--cream);display:block;text-decoration:none}
+.shot img{width:100%;height:auto}
+.shot.crop{height:var(--sh,280px)}
+.shot.crop img{height:100%;object-fit:cover;object-position:0 0}
+@media(max-width:860px){.shot.crop{height:auto}.shot.crop img{height:auto;object-fit:fill}}
+.section-dark .shot{border-color:rgba(255,255,255,.12)}
+.caption{font-size:.72rem;color:var(--smoke);margin-top:.55rem;line-height:1.45}
+.section-dark .caption{color:rgba(255,255,255,.5)}
+.links{display:flex;gap:1.2rem;flex-wrap:wrap;margin-top:.8rem}
+.links a{font-size:.8rem;font-weight:700;color:var(--signal);text-decoration:none;border-bottom:2px solid rgba(255,74,28,.35);padding-bottom:.1rem}
+.links a:hover{border-bottom-color:var(--signal)}
+
+/* Report */
+.report{background:var(--cream);border:1px solid var(--bone);border-radius:12px;padding:1rem 1.2rem;font-size:.88rem;line-height:1.5}
+.section-dark .report{background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.12)}
+.report-h{font-weight:700;margin-bottom:.45rem}
+.report ul{list-style:none}
+.report li{padding:.2rem 0 .2rem 1rem;position:relative;color:var(--warm)}
+.section-dark .report li{color:rgba(255,255,255,.75)}
+.report li::before{content:'';position:absolute;left:0;top:.72em;width:6px;height:6px;border-radius:50%;background:var(--signal)}
+.report li b{color:var(--foreground);font-weight:700}
+.section-dark .report li b{color:#fff}
+.report-c{margin-top:.55rem;padding-top:.55rem;border-top:1px solid var(--bone);font-size:.82rem;color:var(--warm)}
+.section-dark .report-c{border-color:rgba(255,255,255,.12);color:rgba(255,255,255,.7)}
+
+/* Callout */
+.callout{padding:1.2rem 1.5rem;border-radius:12px;background:var(--cream);margin-top:1.25rem;border-left:4px solid var(--signal)}
+.section-dark .callout{background:rgba(255,255,255,.05)}
+.callout-label{font-size:.58rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--smoke);margin-bottom:.35rem}
+.section-dark .callout-label{color:rgba(255,255,255,.5)}
+.callout-text{font-size:.95rem;font-weight:500;line-height:1.55}
+
+/* Lists */
+.checks{list-style:none;display:flex;flex-direction:column;gap:.45rem}
+.checks li{display:flex;gap:.55rem;font-size:.92rem;font-weight:500;line-height:1.45}
+.checks li::before{content:'\2713';flex-shrink:0;font-weight:800;color:var(--mint);margin-top:.1em}
+.bullets{list-style:none;display:flex;flex-direction:column;gap:.4rem}
+.bullets li{position:relative;padding-left:1rem;font-size:.9rem;color:var(--warm);line-height:1.5}
+.section-dark .bullets li{color:rgba(255,255,255,.72)}
+.bullets li::before{content:'';position:absolute;left:0;top:.68em;width:6px;height:6px;border-radius:50%;background:var(--signal)}
+.bullets li b{color:var(--foreground);font-weight:700}
+.section-dark .bullets li b{color:#fff}
+
+/* Quote */
+.quote{background:var(--paper);border:1px solid var(--bone);border-left:4px solid var(--signal);border-radius:12px;padding:1.1rem 1.3rem;font-size:1rem;line-height:1.5;font-weight:500}
+.quote cite{display:block;margin-top:.55rem;font-style:normal;font-size:.72rem;font-weight:600;color:var(--smoke);letter-spacing:.04em}
+.section-dark .quote{background:rgba(255,255,255,.05);border-color:rgba(255,255,255,.1);border-left-color:var(--signal);color:#fff}
+.section-dark .quote cite{color:rgba(255,255,255,.5)}
+
+/* Charts */
+.chart{position:relative}
+.chart svg{width:100%;height:auto;display:block;overflow:visible}
+.chart .grid{stroke:var(--bone);stroke-width:1}
+.section-dark .chart .grid{stroke:rgba(255,255,255,.12)}
+.chart .ax{font-family:'Inter',sans-serif;font-size:11px;fill:var(--smoke);font-weight:500}
+.section-dark .chart .ax{fill:rgba(255,255,255,.5)}
+.chart .lab{font-family:'Inter',sans-serif;font-size:12px;fill:var(--foreground);font-weight:700}
+.section-dark .chart .lab{fill:#fff}
+.chart .lab.m{fill:var(--smoke);font-weight:500}
+.chart .bar{fill:var(--signal)}
+.chart .bar.ghost{fill:var(--bone)}
+.section-dark .chart .bar.ghost{fill:rgba(255,255,255,.18)}
+.chart .bar.blue{fill:var(--electric)}
+.chart .ln{fill:none;stroke:var(--signal);stroke-width:2;stroke-linejoin:round;stroke-linecap:round}
+.chart .dot{fill:var(--signal);stroke:var(--paper);stroke-width:2}
+.chart .area{fill:var(--signal);opacity:.08}
+.legend{display:flex;gap:1rem;flex-wrap:wrap;font-size:.74rem;color:var(--smoke);margin-top:.5rem}
+.section-dark .legend{color:rgba(255,255,255,.55)}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:2px;vertical-align:-1px;margin-right:.35rem}
+#tip{position:fixed;z-index:1200;pointer-events:none;background:var(--foreground);color:#fff;font-size:.74rem;font-weight:500;padding:.4rem .6rem;border-radius:6px;opacity:0;transition:opacity .12s;white-space:nowrap;box-shadow:0 6px 20px rgba(0,0,0,.25)}
+#tip.on{opacity:1}
+
+/* Steps */
+.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-bottom:1.25rem}
+@media(max-width:860px){.steps{grid-template-columns:1fr}}
+.step{background:var(--paper);border:1px solid var(--bone);border-radius:14px;padding:1.1rem 1.3rem}
+.step.now{border-color:var(--signal);box-shadow:0 0 0 3px rgba(255,74,28,.12)}
+.step .k{font-size:.6rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--smoke);margin-bottom:.45rem}
+.step.now .k{color:var(--signal)}
+.step p{font-size:.9rem;color:var(--warm);line-height:1.5}
+.step p b{color:var(--foreground);font-weight:700}
+
+/* Benefits */
+.benefits{display:grid;grid-template-columns:1fr 1fr;gap:1.25rem}
+@media(max-width:760px){.benefits{grid-template-columns:1fr}}
+
+/* OKR table */
+.okr{width:100%;border-collapse:collapse;font-size:.88rem}
+.okr th{text-align:left;font-size:.62rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.45);padding:.5rem .8rem;border-bottom:1px solid rgba(255,255,255,.14)}
+.okr td{padding:.75rem .8rem;border-bottom:1px solid rgba(255,255,255,.08);vertical-align:top;color:rgba(255,255,255,.75);line-height:1.45}
+.okr td:first-child{color:#fff;font-weight:700}
+.okr .tag{display:inline-block;font-size:.6rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:.15rem .5rem;border-radius:100px;background:rgba(31,190,122,.18);color:#7EE2B3;margin-right:.3rem}
+.okr .tag.need{background:rgba(255,210,76,.18);color:#FFD24C}
+@media(max-width:760px){.okr{font-size:.8rem}.okr th:nth-child(3),.okr td:nth-child(3){display:none}}
+.okr.light th{color:var(--smoke);border-bottom-color:var(--bone)}
+.okr.light td{color:var(--warm);border-bottom-color:var(--bone)}
+.okr.light td:first-child{color:var(--foreground)}
+.okr.light tr:last-child td{border-bottom:0}
+.asks{display:flex;gap:.6rem;flex-wrap:wrap;margin-top:1.2rem}
+.asks span{font-size:.8rem;font-weight:600;border:1px solid rgba(255,255,255,.22);color:#fff;border-radius:100px;padding:.5rem .95rem}
+
+.footer{padding:2rem var(--pad);text-align:center;font-size:.72rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--smoke);background:var(--background);border-top:1px solid var(--bone)}
+
+/* ── Present mode: one section per screen ───────────────────────── */
+body.present .deck .section{display:none;min-height:100vh;height:100vh;overflow-y:auto;padding-top:4.2rem;padding-bottom:2rem}
+body.present .deck .section.active{display:block}
+body.present .deck .hero{display:none}
+body.present .deck .hero.active{display:flex}
+body.present{overflow:hidden}
+body.present .sticky-nav .nav-pill{display:none}
+body.present .footer{display:none}
+.hint{display:none;position:fixed;bottom:.9rem;right:1rem;z-index:1000;font-size:.66rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--smoke)}
+body.present .hint{display:block}
+
+/* Motion */
+.reveal{opacity:0;transform:translateY(14px);transition:opacity .55s ease,transform .55s ease}
+.reveal.visible{opacity:1;transform:none}
+@media(prefers-reduced-motion:reduce){.reveal{opacity:1!important;transform:none!important;transition:none!important}html{scroll-behavior:auto}}
+</style>
+</head>
+<body>
+
+<div id="pbar"></div>
+<div id="tip"></div>
+
+<nav class="sticky-nav" id="nav">
+  <a class="nav-pill active" href="#start">Where this starts</a>
+  <a class="nav-pill" href="#dashboard">The dashboard</a>
+  <a class="nav-pill" href="#deepdives">Artist deep dives</a>
+  <a class="nav-pill" href="#territory">Territory data</a>
+  <a class="nav-pill" href="#campaigns">Campaign reviews</a>
+  <a class="nav-pill" href="#scale">Scale and goals</a>
+  <a class="nav-pill" href="#okr">Build together</a>
+  <div class="nav-tools">
+    <button class="nav-btn primary" id="present-btn" onclick="startPresent()">Present</button>
+  </div>
+</nav>
+<div class="hint">← → navigate · esc exit</div>
+
+<div class="deck" id="deck">
+
+<!-- ═══ 1 · HERO ════════════════════════════════════════════════════ -->
+<section class="section section-dark hero" id="hero" data-t="Cover">
+  <div class="container">
+    <div class="section-label">Virgin Music Group × YouTube · UK</div>
+    <h1 class="hero-title">YouTube: ideas for the OKR discussion</h1>
+    <div class="hero-date">October 2026 · review version</div>
+    <p class="hero-subtitle">Six months of work on channel visibility, artist-specific ideas and territory focus &mdash; and how we could build on it together for the group&rsquo;s objective, quarterly key results and regular review.</p>
+    <div class="stats-bar">
+      <div class="stat-item"><span class="stat-value">250+</span><span class="stat-label">Channels monitored daily on the YouTube dashboard</span></div>
+      <div class="stat-item"><span class="stat-value">23</span><span class="stat-label">Artist and label reviews completed since August</span></div>
+      <div class="stat-item"><span class="stat-value">3</span><span class="stat-label">Supporting UK, Nordics and Australia</span></div>
+      <div class="stat-item"><span class="stat-value">145</span><span class="stat-label">Artists in VMG UK&rsquo;s YouTube consumption data, Mar&ndash;Sep 2026</span></div>
+    </div>
+    <div class="data-chain"><span>Dashboard</span><i>&#9654;</i><span>Quick reports</span><i>&#9654;</i><span>Deep dives</span><i>&#9654;</i><span>Territory data</span><i>&#9654;</i><span>Campaign reviews</span><i>&#9654;</i><span>What we could measure</span></div>
+  </div>
+</section>
+
+<!-- ═══ 2 · WHERE THIS STARTS ═══════════════════════════════════════ -->
+<section class="section section-dark" id="start" data-t="Where this starts" style="border-top:1px solid rgba(255,255,255,.06)">
+  <div class="container">
+    <div class="section-label">Where this starts</div>
+    <p class="thesis-statement">Following Zack&rsquo;s note about a shared YouTube objective and measurable quarterly results, I&rsquo;ve brought together some of the work I&rsquo;ve been developing over the last six months.</p>
+    <p class="section-subtitle" style="margin-bottom:1.6rem">These examples show what has helped me and colleagues so far, alongside a few ideas we could build on together.</p>
+    <div class="thesis-themes">
+      <div class="thesis-theme"><b>The dashboard</b> gives visibility.</div>
+      <div class="thesis-theme"><b>Quick reports</b> make information shareable.</div>
+      <div class="thesis-theme"><b>Deep dives</b> suggest artist-specific ideas.</div>
+      <div class="thesis-theme"><b>Territory data</b> helps focus support.</div>
+      <div class="thesis-theme"><b>Campaign reviews</b> help us learn, tracking activity and views.</div>
+    </div>
+    <div class="qrow">
+      <div><div class="n">01</div><p>What exists today?</p></div>
+      <div><div class="n">02</div><p>How has it helped us?</p></div>
+      <div><div class="n">03</div><p>What could we build on together?</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ 3 · THE DASHBOARD ═══════════════════════════════════════════ -->
+<section class="section section-light" id="dashboard" data-t="The dashboard">
+  <div class="container">
+    <div class="section-label">What exists today · YouTube dashboard (Watcher)</div>
+    <h2 class="section-title">A shared view of our YouTube channels</h2>
+    <p class="section-subtitle">We built this dashboard to bring key public YouTube channel information together across the roster. It is live and supports colleagues in the UK, Nordics and Australia.</p>
+
+    <div class="tiles reveal">
+      <div class="tile"><div class="v">263</div><div class="l">Channels synced</div><div class="d">Daily pass · 20 Oct 2026</div></div>
+      <div class="tile"><div class="v">114</div><div class="l">Market-watch channels</div><div class="d">Watched alongside our own roster</div></div>
+      <div class="tile"><div class="v">7</div><div class="l">Workspaces</div><div class="d">Central view and six territory boards</div></div>
+      <div class="tile"><div class="v">0</div><div class="l">Studio access needed</div><div class="d">Public YouTube data only</div></div>
+    </div>
+
+    <div class="cards two reveal" style="grid-template-columns:1fr 1fr">
+      <div class="card">
+        <div class="eyebrow">Channels monitored · dated readings</div>
+        <div class="card-title">From no shared roster-wide view to 263 channels in one place</div>
+        <div class="chart" id="chart-roster"></div>
+        <div class="legend"><span><i style="background:var(--signal)"></i>Monitoring counts from the dashboard&rsquo;s sync logs</span><span><i style="background:var(--paper);border:2px solid #2C25FF;width:8px;height:8px;border-radius:50%"></i>July research sample (138 channels), not a monitoring count</span></div>
+        <p class="caption">Monitoring counts are the dashboard&rsquo;s daily sync logs. July&rsquo;s 138 is the research sample, not a monitoring count. The 263 includes 114 market channels watched alongside our own.</p>
+      </div>
+      <div class="card">
+        <div class="eyebrow">Coverage by workspace · 20 Oct 2026</div>
+        <div class="card-title">Territory boards extend the central view</div>
+        <div class="chart" id="chart-boards"></div>
+        <div class="legend"><span><i style="background:var(--signal)"></i>Board maintained by the territory team</span><span><i style="background:var(--bone)"></i>Board set up, not yet in regular use</span></div>
+        <p class="caption">Channels listed per board. All boards draw on the same channel pool; the central view covers the full roster.</p>
+      </div>
+    </div>
+
+    <div class="steps reveal">
+      <div class="step"><div class="k">Starting point</div><p>Channel information existed across individual channels and Studio accounts, but we lacked a shared roster-wide view.</p></div>
+      <div class="step now"><div class="k">Today</div><p><b>Over 250 channels monitored in one place</b> (263 on 20 Oct 2026), with colleagues in the Nordics and Australia adding artists and extending coverage.</p></div>
+      <div class="step"><div class="k">Potential</div><p>More territory- and label-specific views could make this information useful to more teams.</p></div>
+    </div>
+
+    <div class="cards two reveal">
+      <div class="card flush">
+        <div class="pad" style="padding-bottom:.6rem"><div class="eyebrow">What we can now see</div><div class="card-title">Upload activity, recent views, subscriber movement and which content is moving</div></div>
+        <a class="shot crop" href="/growth" target="_blank" rel="noopener" style="--sh:300px;border-radius:0;border-left:0;border-right:0">
+          <img src="/okr/img/watcher-table.jpg" alt="YouTube dashboard, Channel Health table: artist, 30-day trend, status, formats, subscribers and views over seven days">
+        </a>
+        <div class="pad">
+          <div class="eyebrow">How it helps</div>
+          <p class="small" style="color:var(--warm)">It lets us follow far more channels than we could reasonably check by hand, prioritise attention, and share useful updates with teams.</p>
+          <div class="links"><a href="/growth" target="_blank" rel="noopener">Open the YouTube dashboard &rarr;</a></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="eyebrow">Quick channel report · copied from the dashboard · 20 Oct 2026</div>
+        <div class="report">
+          <div class="report-h">Quick Ezra Collective YouTube update</div>
+          <ul>
+            <li><b>+323K</b> channel views in the last 7 days (to 20 Oct)</li>
+            <li><b>+300</b> public subscribers in 7 days; <b>+2,300</b> in 30 days (75.8K total)</li>
+            <li><b>23 uploads</b> in the last 30 days; last upload 19 Oct</li>
+            <li><b>Rehearsal Tapes</b> (9 Sep): <b>308K</b> views, up from 122K on 15 September</li>
+          </ul>
+          <div class="report-c"><b>Context</b> &middot; album out 11 Sep; the channel has stayed active since, with live and tour clips from Japan and Korea this month.</div>
+        </div>
+        <p class="small" style="margin-top:.9rem;font-weight:600">Quick channel reports make key figures easy to share with labels and teams.</p>
+        <p class="small muted" style="margin-top:.5rem">Shared visibility gives more people the context to contribute ideas and share learning, including without Studio access. Studio provides deeper private analytics.</p>
+      </div>
+    </div>
+
+    <div class="benefits reveal">
+      <div class="card">
+        <div class="eyebrow">Internally</div>
+        <ul class="checks">
+          <li>One view of roster activity for UK, territory and campaign teams</li>
+          <li>A market-wide view too: 114 channels outside the roster, so we can compare our channels with the wider market and inform our own strategy</li>
+          <li>Quick reports for campaign updates and internal conversations</li>
+          <li>A starting point for deep dives and campaign reviews</li>
+          <li>Readings that can be repeated each quarter</li>
+        </ul>
+      </div>
+      <div class="card">
+        <div class="eyebrow">Externally <span class="badge sun" style="margin-left:.4rem">Possible extension</span></div>
+        <div class="card-title">A dedicated view for label partners</div>
+        <p class="card-desc">The dashboard could also give label partners a view of their own artists and channels, bringing topline performance and upload activity together across their roster: one place to monitor at scale, see where attention might help, and support conversations with VMG. An opportunity to explore with interested partners; nothing is built for it yet.</p>
+      </div>
+    </div>
+
+    <div class="callout">
+      <div class="callout-label">What this means for the OKR discussion</div>
+      <div class="callout-text">We can now follow far more channels, share information more easily, and extend coverage as territories contribute.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ 4 · ARTIST DEEP DIVES ═══════════════════════════════════════ -->
+<section class="section section-cream" id="deepdives" data-t="Artist deep dives">
+  <div class="container">
+    <div class="section-label">What exists today</div>
+    <h2 class="section-title">Artist deep dives: useful next steps for teams</h2>
+    <p class="section-subtitle">We use the channel data, artist context and YouTube best practices to understand what works and suggest relevant next steps. They can be done before a campaign starts &mdash; or before an artist is signed &mdash; so teams have the intelligence and the ideas early.</p>
+
+    <div class="cards two reveal">
+      <div class="card flush">
+        <div class="pad" style="padding-bottom:.6rem"><div class="eyebrow">From the Amyl and The Sniffers deck <span class="badge ghost" style="margin-left:.4rem">Prepared for a signing conversation</span></div><div class="card-title">The archive of live performances</div></div>
+        <a class="shot crop" href="/amyl" target="_blank" rel="noopener" style="--sh:300px;border-radius:0;border-left:0;border-right:0">
+          <img src="/okr/img/amyl-library.jpg" alt="A page from the Amyl deck: performances already captured, with view counts">
+        </a>
+        <div class="pad">
+          <ul class="bullets">
+            <li><b>Finding:</b> live performance is an established strength on the channel.</li>
+            <li><b>Idea:</b> explore useful follow-up content from existing performances &mdash; no new filming needed.</li>
+            <li><b>Why it was built:</b> to support a signing conversation &mdash; showing the team and the artist what we could bring to YouTube before any deal or campaign.</li>
+          </ul>
+          <div class="links"><a href="/amyl" target="_blank" rel="noopener">View the Amyl deep dive &rarr;</a><a href="/ezra" target="_blank" rel="noopener">Ezra Collective</a><a href="/idles" target="_blank" rel="noopener">IDLES</a><a href="/defected" target="_blank" rel="noopener">Defected Records</a></div>
+        </div>
+      </div>
+      <div>
+        <div class="card" style="margin-bottom:1.25rem">
+          <div class="eyebrow">Reviews published · by month of data read</div>
+          <div class="card-title">23 artist and label reviews completed since August</div>
+          <div class="chart" id="chart-reviews"></div>
+          <p class="caption">October to the 20th. Each review is a public page with its own analysis appendix, and together they form a growing bank of examples teams can draw on. Ezra Collective and IDLES for Partisan; Defected Records as a label channel review.</p>
+          <div class="links"><a href="/intelligence#artists" target="_blank" rel="noopener">Browse the bank of examples &rarr;</a></div>
+        </div>
+        <blockquote class="quote">&ldquo;Superb work on this, it is genuinely impressive. I love how you integrated our best practices into a pitch for the artist.&rdquo;<cite>YouTube UK · feedback on the deep-dive work</cite></blockquote>
+      </div>
+    </div>
+
+    <div class="cards two reveal" style="grid-template-columns:1fr 1fr">
+      <div class="card">
+        <div class="eyebrow">Beyond our own channels <span class="badge ghost" style="margin-left:.4rem">Exploratory</span></div>
+        <div class="card-title">Owned and operated channel networks</div>
+        <p class="card-desc">A public-data review of Create Music Group&rsquo;s owned channels (Trap Nation and others): how views concentrate, how a song moves between artist and network channels, and what the featured artists&rsquo; own channels do. Observations to inform discussion, not a strategy recommendation.</p>
+        <div class="links"><a href="/cmg-youtube" target="_blank" rel="noopener">View the Create Music Group review &rarr;</a></div>
+      </div>
+      <div class="card">
+        <div class="eyebrow">Where the work started</div>
+        <div class="card-title">How successful YouTube campaigns are built</div>
+        <p class="card-desc">July 2026 research: a sample-based review of channel activity and content formats, exploring opportunities against YouTube best practices.</p>
+        <div class="links"><a href="https://youtube-insights-pi.vercel.app/preview.html" target="_blank" rel="noopener">Open the July research &rarr;</a></div>
+      </div>
+    </div>
+
+    <div class="card reveal" style="margin-bottom:1.25rem">
+      <div class="eyebrow">How the reviews fit together</div>
+      <div class="card-title">Before, during and after a campaign</div>
+      <div class="steps" style="margin:.9rem 0 .6rem">
+        <div class="step"><div class="k" style="color:var(--signal)">Before · pre-campaign deep dive</div><p>What already works, ideas, and support for a signing conversation.</p><div class="links" style="margin-top:.5rem"><a href="/amyl" target="_blank" rel="noopener">Amyl and The Sniffers &rarr;</a></div></div>
+        <div class="step"><div class="k" style="color:var(--signal)">During · live campaign view</div><p>Following the campaign as it runs.</p><div class="links" style="margin-top:.5rem"><a href="/kol" target="_blank" rel="noopener">Kings of Leon &rarr;</a></div></div>
+        <div class="step"><div class="k" style="color:var(--signal)">After · post-campaign case study</div><p>What changed, and what we learned for next time.</p><div class="links" style="margin-top:.5rem"><a href="/ezra" target="_blank" rel="noopener">Ezra Collective &rarr;</a></div></div>
+      </div>
+      <p class="small" style="color:var(--warm);font-weight:600">Together they give a full view of an artist on YouTube, from first look to lessons learned.</p>
+    </div>
+    <div class="callout">
+      <div class="callout-label">What this means for the OKR discussion</div>
+      <div class="callout-text">Reviews can come ahead of a signing, ahead of a campaign, or after it as a case study. We can share the outputs and learning first, and explore which parts of the process are worth reusing if teams are interested.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ 5 · TERRITORY DATA ══════════════════════════════════════════ -->
+<section class="section section-dark" id="territory" data-t="Territory data">
+  <div class="container">
+    <div class="section-label">What exists today</div>
+    <h2 class="section-title">Territory data: from isolated videos to key channels</h2>
+    <p class="section-subtitle">Today our YouTube consumption reporting is by song and video. Each year YouTube asks us for our top 100 artist channels, and finding them has always been hard. Combining consumption data with territory audience and overall channel data gives us a better handle on the key channels and ecosystems, not just isolated videos.</p>
+    <div class="steps reveal" style="margin-bottom:1.25rem">
+      <div class="step" style="background:rgba(255,255,255,.05);border-color:rgba(255,255,255,.1)"><div class="k" style="color:rgba(255,255,255,.45)">What we see today</div><p style="color:rgba(255,255,255,.75)"><b style="color:#fff">Consumption by song and video.</b> Useful for repertoire, but it doesn&rsquo;t tell us which channels carry the audience or which to prioritise.</p></div>
+      <div class="step now" style="background:rgba(255,255,255,.05)"><div class="k">What we can see now</div><p style="color:rgba(255,255,255,.75)"><b style="color:#fff">Three lenses, read together.</b> Our UK consumption, UK monthly YouTube views from Chartmetric, and the channel&rsquo;s own public figures &mdash; matched to channels, not just tracks.</p></div>
+      <div class="step" style="background:rgba(255,255,255,.05);border-color:rgba(255,255,255,.1)"><div class="k" style="color:rgba(255,255,255,.45)">What it makes possible</div><p style="color:rgba(255,255,255,.75)"><b style="color:#fff">Key channels and ecosystems.</b> A defensible answer to YouTube&rsquo;s top-100 request, a shortlist per territory, and a view of where support could help.</p></div>
+    </div>
+
+    <div class="cards two reveal">
+      <div class="card flush">
+        <div class="pad" style="padding-bottom:.6rem"><div class="eyebrow">UK landscape page · crossover view <span class="badge sun" style="margin-left:.4rem">Test version · work in progress</span></div><div class="card-title">Consumption, territory audience and channel data on one row per artist</div></div>
+        <a class="shot crop" href="/uk-landscape" target="_blank" rel="noopener" style="--sh:300px;border-radius:0;border-left:0;border-right:0">
+          <img src="/okr/img/uk-crossover.jpg" alt="UK landscape crossover view: D-Block Europe first, with VMG consumption, UK YouTube monthly views and UK territory rank">
+        </a>
+        <div class="pad"><div class="links"><a href="/uk-landscape" target="_blank" rel="noopener">Explore the UK landscape &rarr;</a><a href="/dblock" target="_blank" rel="noopener">D&#8209;Block deep dive &rarr;</a></div></div>
+      </div>
+      <div>
+        <div class="card" style="margin-bottom:1.25rem">
+          <div class="eyebrow">D&#8209;Block Europe · the example</div>
+          <p style="font-size:.95rem;line-height:1.55;color:rgba(255,255,255,.8)">Strong UK consumption made D&#8209;Block worth a closer look. The deep dive explored how more activity around existing demand could support the channel.</p>
+          <div class="tiles" style="margin:1rem 0 0;grid-template-columns:1fr 1fr">
+            <div class="tile"><div class="v">3.6M</div><div class="l">UK consumption</div><div class="d">In the supplied dataset · 23 Mar&ndash;20 Sep 2026 (51M across 145 artists)</div></div>
+            <div class="tile"><div class="v">9.2M</div><div class="l">UK YouTube views a month</div><div class="d">Chartmetric · Sep 2026</div></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="eyebrow">Could we build on this?</div>
+          <p style="font-size:1rem;font-weight:600;line-height:1.5">Could other territories combine consumption data with local knowledge to identify priority artists?</p>
+          <p class="small muted" style="margin-top:.5rem">The data points; the team decides &mdash; rights and participation, relationships and the ability to act.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ 6 · CAMPAIGN REVIEWS ════════════════════════════════════════ -->
+<section class="section section-light" id="campaigns" data-t="Campaign reviews">
+  <div class="container">
+    <div class="section-label">What exists today</div>
+    <h2 class="section-title">Campaign reviews: tracking what changes</h2>
+    <p class="section-subtitle">After an album campaign, a deep dive becomes a post-campaign case study: what the campaign did, what the channel showed, and what we can learn for the next one. Three so far &mdash; Ezra Collective, K&#8209;Trap and Angus &amp; Julia Stone. The example below: Ezra Collective&rsquo;s 2026 album campaign against the 2024 one. Campaign run by Partisan; analysed and shared by VMG UK.</p>
+
+    <div class="cards three reveal">
+      <div class="card">
+        <div class="eyebrow">Active weeks · of 16 in each campaign window</div>
+        <div class="chart" id="chart-weeks"></div>
+        <p class="caption">2024: <i>Dance, No One&rsquo;s Watching</i>. 2026: <i>Here Because of Hope</i>. Weeks with at least one upload.</p>
+      </div>
+      <div class="card">
+        <div class="eyebrow">Longest gap between uploads · days</div>
+        <div class="chart" id="chart-gap"></div>
+        <p class="caption">The channel stayed present for the whole 2026 campaign; the longest silence was nine days.</p>
+      </div>
+      <div class="card">
+        <div class="eyebrow">A separate comparison · release week</div>
+        <div class="card-stat" style="color:var(--signal)">2.4&times;</div>
+        <div class="card-title">Release-week channel views against the three weeks before</div>
+        <p class="card-desc">225.6K average &rarr; 535.5K in release week (album out 11 Sep). Shown as co-occurrence with release week, not as the effect of any single upload.</p>
+        <div class="links"><a href="/ezra" target="_blank" rel="noopener">View the Ezra case study &rarr;</a><a href="/ktrap" target="_blank" rel="noopener">K&#8209;Trap</a><a href="/angusandjuliastone" target="_blank" rel="noopener">Angus &amp; Julia Stone</a><a href="/intelligence#artists" target="_blank" rel="noopener">All examples</a></div>
+      </div>
+    </div>
+
+    <div class="cards three reveal">
+      <div class="card">
+        <div class="eyebrow">Assets used · long-form and Shorts</div>
+        <div class="chart" id="chart-assets"></div>
+        <div class="legend"><span><i style="background:var(--signal)"></i>Long-form</span><span><i style="background:var(--electric);opacity:.75"></i>Shorts</span></div>
+        <p class="caption">27 uploads in 2024 (18 long-form, 9 Shorts) against 69 in 2026 (24 long-form, 45 Shorts): music videos, visualisers, a rehearsal film, three city films and festival Shorts, all inside one creative world.</p>
+      </div>
+      <div class="card">
+        <div class="eyebrow">Where the attention went · share of campaign-window views</div>
+        <div class="chart" id="chart-conc"></div>
+        <p class="caption">In 2024 one video took 62.8% of the window and the top three took 84.7%. In 2026 the leader took 27.4% and the top three 56.5% &mdash; a music video, a second music video and a fourteen-minute rehearsal film. The campaign stopped depending on one upload.</p>
+      </div>
+      <div class="card">
+        <div class="eyebrow">Two jobs · 2026 window views by format</div>
+        <div class="chart" id="chart-jobs"></div>
+        <div class="legend"><span><i style="background:var(--signal)"></i>Long-form · 24 uploads</span><span><i style="background:var(--electric);opacity:.75"></i>Shorts · 45 uploads</span></div>
+        <p class="caption">Long-form carried 83.6% of window views from a third of the uploads; the 45 Shorts kept the channel present every week. Different jobs, judged separately.</p>
+      </div>
+    </div>
+
+    <div class="cards two reveal" style="grid-template-columns:1fr 1fr">
+      <blockquote class="quote">&ldquo;Love the idea of building a world, not a content calendar. Exactly right for a group like Ezra and so glad to see the change in strategy pay off for them.&rdquo;<cite>UK Head of Music · on the Ezra recap</cite></blockquote>
+      <div class="callout" style="margin-top:0">
+        <div class="callout-label">What this means for the OKR discussion</div>
+        <div class="callout-text">Case studies like this let the learning carry from one campaign to the next.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ 6b · WHERE WE COULD BUILD ON THIS ═══════════════════════════ -->
+<section class="section section-cream" id="scale" data-t="Where we could build on this">
+  <div class="container">
+    <div class="section-label">Could we build on this?</div>
+    <h2 class="section-title">Where we could build on this</h2>
+    <p class="section-subtitle">We can already measure the scale of coverage and work delivered. We could agree goals to extend that, while tracking whether artist activity and consumption improve.</p>
+
+    <div class="cards reveal" style="grid-template-columns:1.3fr 1fr">
+      <div class="card">
+        <div class="eyebrow">Coverage · current results, then illustrative scenarios</div>
+        <div class="card-title">How territory participation could extend coverage</div>
+        <div class="chart" id="chart-scale"></div>
+        <div class="legend"><span><i style="background:var(--signal)"></i>Recorded monitoring counts</span><span><i style="background:var(--paper);border:2px solid #2C25FF;width:8px;height:8px;border-radius:50%"></i>July analysis sample</span><span><i style="background:#BDB5A8"></i>Scenario: current rate continues, largely one person adding</span><span><i style="background:#2C25FF;opacity:.55"></i>Scenario: four more boards join in January with launch batches like Australia&rsquo;s (12&ndash;15 each)</span><span><i style="background:#2C25FF"></i>Scenario: four more boards each bring a full priority roster (~40)</span></div>
+        <p class="caption">Illustrations, not forecasts. Grey extends the last 25 days&rsquo; rate (+30). Blue adds boards of 12&ndash;15 channels (the size of today&rsquo;s Nordics and Australia boards) or ~40, a placeholder for territories to confirm.</p>
+      </div>
+      <div class="card">
+        <div class="eyebrow">Reviews · current results, then an illustration</div>
+        <div class="card-title">Delivery so far, a starting point for wider contribution</div>
+        <div class="chart" id="chart-reviews-scale"></div>
+        <div class="legend"><span><i style="background:var(--signal)"></i>Completed to date (cumulative)</span><span><i style="background:#BDB5A8"></i>Illustrative pace: 8 a month</span></div>
+        <p class="caption">3, 9, then 11 in the first 20 days of October. The dashed line is an illustrative pace of 8 a month based on recent delivery &mdash; one contributor&rsquo;s work, not a quota.</p>
+      </div>
+    </div>
+
+    <div class="cards reveal" style="grid-template-columns:repeat(4,1fr)">
+      <div class="card"><div class="eyebrow">01</div><div class="card-title">More territories contributing their priority artists</div><p class="card-desc">Boards exist for each territory; the Nordics and Australia already add their own artists. Others could do the same, at their own pace.</p></div>
+      <div class="card"><div class="eyebrow">02</div><div class="card-title">Dedicated dashboard views for interested label partners</div><p class="card-desc">A label&rsquo;s own artists and channels in one place: topline performance and upload activity across their roster, to support conversations with VMG.</p></div>
+      <div class="card"><div class="eyebrow">03</div><div class="card-title">A shared bank of artist examples and campaign learning</div><p class="card-desc">Share useful outputs and learning first; teams may have their own approaches, and we can explore which parts of the process are worth reusing if there&rsquo;s interest.</p></div>
+      <div class="card"><div class="eyebrow">04</div><div class="card-title">Regular reviews of activity, views and consumption</div><p class="card-desc">The same readings taken each quarter, so we can see whether wider visibility is leading to more consistent activity and more consumption.</p></div>
+    </div>
+
+    <div class="callout">
+      <div class="callout-label">Proposed goals for discussion</div>
+      <div class="callout-text">Extend coverage as territories add their priority artists; grow the shared bank of examples; review artist activity and consumption each quarter. The goals are the group&rsquo;s to set.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ 7 · WHAT COULD WE BUILD TOGETHER? ═══════════════════════════ -->
+<section class="section section-dark" id="okr" data-t="What could we build together?">
+  <div class="container">
+    <div class="section-label">The OKR discussion</div>
+    <h2 class="section-title">What could we build together?</h2>
+    <p class="section-subtitle">This work contributes the artist-support, shared-visibility and measurement side of the wider YouTube discussion; the group will also bring its commercial, partnership and owned-channel priorities. Four starting points and proposed directions, for the group to shape.</p>
+
+    <div class="cards reveal" style="grid-template-columns:repeat(4,1fr);margin-bottom:0">
+      <div class="card"><span class="badge live" style="margin-bottom:.7rem">Today</span><div class="card-stat">250+</div><div class="card-title">Channels monitored today</div><p class="card-desc">Extend coverage as territories contribute.</p></div>
+      <div class="card"><span class="badge live" style="margin-bottom:.7rem">Today</span><div class="card-stat">23</div><div class="card-title">Artist and label reviews so far</div><p class="card-desc">A growing bank of insights and examples that can expand as more teams contribute.</p></div>
+      <div class="card"><span class="badge sun" style="margin-bottom:.7rem">Proposed</span><div class="card-stat">100<span style="font-size:.45em;color:rgba(255,255,255,.5);font-weight:700"> / territory</span></div><div class="card-title">Priority-channel mapping</div><p class="card-desc">Proposed, with local teams.</p></div>
+      <div class="card"><span class="badge sun" style="margin-bottom:.7rem">Proposed</span><div class="card-stat">12<span style="font-size:.45em;color:rgba(255,255,255,.5);font-weight:700"> months</span></div><div class="card-title">Territory consumption data</div><p class="card-desc">Working with Data/Insights.</p></div>
+    </div>
+    <p class="small muted" style="margin:.9rem 0 0;max-width:80ch">Next data opportunity: work with Data/Insights to establish 12-month consumption by artist and territory, then connect it with the dashboard&rsquo;s channel information.</p>
+
+    <div class="callout reveal">
+      <div class="callout-text" style="font-size:clamp(1.05rem,1.6vw,1.3rem);font-weight:600">More teams contributing. More priority artists understood and supported. Activity and consumption reviewed quarterly.</div>
+    </div>
+  </div>
+</section>
+
+</div><!-- /deck -->
+<div class="footer">YouTube: ideas for the OKR discussion &mdash; Virgin Music Group &mdash; October 2026</div>
+
+<script>
+/* ── Chart data: dated readings only ───────────────────────────── */
+var BOARDS=[['Central (UK)',263,1],['Nordics',15,1],['Australia',12,1],['US',5,0],['LATAM',4,0],['EU',1,0],['Asia',1,0]];
+var REVIEWS=[['Aug',3],['Sep',9],['Oct',11]];
+var SVG='http://www.w3.org/2000/svg';
+function el(n,a,t){var e=document.createElementNS(SVG,n);for(var k in a)e.setAttribute(k,a[k]);if(t!=null)e.textContent=t;return e;}
+var tip=document.getElementById('tip');
+function hover(node,text){node.addEventListener('mousemove',function(ev){tip.textContent=text;tip.style.left=(ev.clientX+12)+'px';tip.style.top=(ev.clientY-30)+'px';tip.classList.add('on');});node.addEventListener('mouseleave',function(){tip.classList.remove('on');});}
+
+/* Monitoring counts recorded by the dashboard's own sync logs, by day offset from 15 Jul 2026.
+   The July figure is the analysis sample (138 channels), not a monitoring count, and is drawn
+   as a separate milestone. "No shared roster-wide view" is the starting context, stated in text
+   rather than plotted. */
+var MON=[['25 Sep',233,'Dashboard sync log · 233/233',72],['14 Oct',252,'Dashboard sync log · 252/252',91],['20 Oct',263,'Dashboard sync log · 263/263',97]];
+var SAMPLE=['Jul 2026',138,'July research sample · not a monitoring count',0];
+function chartRoster(){
+  var host=document.getElementById('chart-roster'); if(!host)return;
+  var W=520,H=240,L=36,R=16,T=20,B=44,max=300,span=97;
+  var s=el('svg',{viewBox:'0 0 '+W+' '+H,role:'img','aria-label':'Channels monitored: 233 on 25 September, 252 on 14 October, 263 on 20 October 2026; the July analysis sample of 138 channels shown as a separate milestone'});
+  [0,100,200,300].forEach(function(v){var y=T+(H-T-B)*(1-v/max);s.appendChild(el('line',{x1:L,x2:W-R,y1:y,y2:y,class:'grid'}));s.appendChild(el('text',{x:L-8,y:y+4,class:'ax','text-anchor':'end'},v?v:'0'));});
+  var X=function(d){return L+(W-L-R)*(d/span);},Y=function(v){return T+(H-T-B)*(1-v/max);};
+  var path=MON.map(function(d,i){return (i?'L':'M')+X(d[3])+' '+Y(d[1]);}).join(' ');
+  s.appendChild(el('path',{d:path+' L'+X(MON[MON.length-1][3])+' '+(H-B)+' L'+X(MON[0][3])+' '+(H-B)+' Z',class:'area'}));
+  s.appendChild(el('path',{d:path,class:'ln'}));
+  MON.forEach(function(d,i){var g=el('g',{});g.appendChild(el('circle',{cx:X(d[3]),cy:Y(d[1]),r:5,class:'dot'}));g.appendChild(el('circle',{cx:X(d[3]),cy:Y(d[1]),r:16,fill:'transparent'}));hover(g,d[0]+' 2026 · '+d[1]+' channels monitored · '+d[2]);s.appendChild(g);
+    if(i===0||i===MON.length-1) s.appendChild(el('text',{x:X(d[3]),y:Y(d[1])-12,class:'lab','text-anchor':i===0?'middle':'end'},String(d[1])));
+    if(i!==1) s.appendChild(el('text',{x:X(d[3]),y:H-B+18,class:'ax','text-anchor':i===MON.length-1?'end':'middle'},d[0]));});
+  /* July sample: hollow blue milestone, not joined to the monitoring line. */
+  var sg=el('g',{});sg.appendChild(el('circle',{cx:X(SAMPLE[3]),cy:Y(SAMPLE[1]),r:5,style:'fill:var(--paper);stroke:#2C25FF;stroke-width:2'}));sg.appendChild(el('circle',{cx:X(SAMPLE[3]),cy:Y(SAMPLE[1]),r:16,fill:'transparent'}));hover(sg,SAMPLE[0]+' · '+SAMPLE[1]+' channels · '+SAMPLE[2]);s.appendChild(sg);
+  s.appendChild(el('text',{x:X(SAMPLE[3]),y:Y(SAMPLE[1])-12,class:'lab m','text-anchor':'start'},'138 · research sample'));
+  s.appendChild(el('text',{x:X(SAMPLE[3]),y:H-B+18,class:'ax','text-anchor':'start'},SAMPLE[0]));
+  s.appendChild(el('text',{x:L,y:H-B+34,class:'ax','text-anchor':'start'},'Before: no shared roster-wide view'));
+  host.appendChild(s);
+}
+function chartScale(){
+  var host=document.getElementById('chart-scale'); if(!host)return;
+  /* Recorded counts by day offset from 15 Jul 2026; projection at the 25 Sep → 20 Oct rate (30 channels in 25 days = 1.2/day) to 20 Apr 2027 (day 279). */
+  var REC=[['25 Sep',233,72],['14 Oct',252,91],['20 Oct',263,97]],rate=30/25,endDay=279,proj=Math.round(263+rate*(endDay-97));
+  var W=520,H=240,L=36,R=52,T=20,B=34,max=800,span=endDay;
+  var s=el('svg',{viewBox:'0 0 '+W+' '+H,role:'img','aria-label':'Channels tracked: recorded counts to 20 October 2026, and an illustrative projection to April 2027 at the September to October rate, about '+proj});
+  [0,200,400,600,800].forEach(function(v){var y=T+(H-T-B)*(1-v/max);s.appendChild(el('line',{x1:L,x2:W-R,y1:y,y2:y,class:'grid'}));s.appendChild(el('text',{x:L-8,y:y+4,class:'ax','text-anchor':'end'},String(v)));});
+  var X=function(d){return L+(W-L-R)*(d/span);},Y=function(v){return T+(H-T-B)*(1-v/max);};
+  var path=REC.map(function(d,i){return (i?'L':'M')+X(d[2])+' '+Y(d[1]);}).join(' ');
+  /* Scenarios, from 1 Jan 2027 (day 170): the four boards not yet in use start adding artists.
+     A: each brings a launch batch like Australia and the Nordics did (12–15 channels) → +55.
+     B: each brings a full priority roster of ~40 channels (to be confirmed by the territories) → +160. */
+  var janDay=170,baseJan=Math.round(263+rate*(janDay-97)),scA=proj+55,scB=proj+160;
+  s.appendChild(el('path',{d:'M'+X(97)+' '+Y(263)+' L'+X(endDay)+' '+Y(proj),class:'ln','stroke-dasharray':'4 5',style:'stroke:#BDB5A8'}));
+  s.appendChild(el('path',{d:'M'+X(janDay)+' '+Y(baseJan)+' L'+X(endDay)+' '+Y(scA),class:'ln','stroke-dasharray':'4 5',style:'stroke:#2C25FF;opacity:.55'}));
+  s.appendChild(el('path',{d:'M'+X(janDay)+' '+Y(baseJan)+' L'+X(endDay)+' '+Y(scB),class:'ln','stroke-dasharray':'4 5',style:'stroke:#2C25FF'}));
+  s.appendChild(el('path',{d:path,class:'ln'}));
+  [[scA,'#2C25FF','.55','~'+scA+' · four more boards, launch batches'],[scB,'#2C25FF','1','~'+scB+' · four more boards, full priority rosters']].forEach(function(sc){
+    var g=el('g',{});g.appendChild(el('circle',{cx:X(endDay),cy:Y(sc[0]),r:5,class:'dot',style:'fill:'+sc[1]+';opacity:'+sc[2]}));g.appendChild(el('circle',{cx:X(endDay),cy:Y(sc[0]),r:16,fill:'transparent'}));hover(g,'Apr 2027 · '+sc[3]+' · scenario, not a target');s.appendChild(g);
+    s.appendChild(el('text',{x:X(endDay)+10,y:Y(sc[0])+4,class:'lab m','text-anchor':'start'},'~'+sc[0]));
+  });
+  s.appendChild(el('text',{x:X(janDay),y:H-B+18,class:'ax','text-anchor':'middle'},'Jan 2027'));
+  REC.forEach(function(d){var g=el('g',{});g.appendChild(el('circle',{cx:X(d[2]),cy:Y(d[1]),r:5,class:'dot'}));g.appendChild(el('circle',{cx:X(d[2]),cy:Y(d[1]),r:16,fill:'transparent'}));hover(g,d[0]+' 2026 · '+d[1]+' channels · recorded');s.appendChild(g);});
+  var jg=el('g',{});jg.appendChild(el('circle',{cx:X(0),cy:Y(138),r:5,style:'fill:var(--paper);stroke:#2C25FF;stroke-width:2'}));jg.appendChild(el('circle',{cx:X(0),cy:Y(138),r:16,fill:'transparent'}));hover(jg,'Jul 2026 · 138 channels · analysis sample, not a monitoring count');s.appendChild(jg);
+  s.appendChild(el('text',{x:X(0)+10,y:Y(138)+4,class:'lab m','text-anchor':'start'},'138 · sample'));
+  var pg=el('g',{});pg.appendChild(el('circle',{cx:X(endDay),cy:Y(proj),r:5,class:'dot',style:'fill:#BDB5A8'}));pg.appendChild(el('circle',{cx:X(endDay),cy:Y(proj),r:16,fill:'transparent'}));hover(pg,'Apr 2027 · ~'+proj+' channels · scenario: current rate continues · not a target');s.appendChild(pg);
+  s.appendChild(el('text',{x:X(97),y:Y(263)-12,class:'lab','text-anchor':'middle'},'263'));
+  s.appendChild(el('text',{x:X(endDay)+10,y:Y(proj)+4,class:'lab m','text-anchor':'start'},'~'+proj));
+  [['Jul 2026',0,'start'],['20 Oct',97,'middle'],['Apr 2027',endDay,'end']].forEach(function(t){s.appendChild(el('text',{x:X(t[1]),y:H-B+18,class:'ax','text-anchor':t[2]},t[0]));});
+  host.appendChild(s);
+}
+function chartReviewsScale(){
+  var host=document.getElementById('chart-reviews-scale'); if(!host)return;
+  /* Cumulative reviews by month-end (Oct to the 20th), then 10 a month to April 2027. Month index from Aug 2026 = 0. */
+  var REC=[['Aug',3,0],['Sep',12,1],['Oct',23,2]],projEnd=8,proj=23+8*6; /* 8 a month: an illustrative pace based on recent delivery (Sep 9; Oct 11 to the 20th) */
+  var W=520,H=240,L=36,R=52,T=20,B=34,max=100,span=projEnd;
+  var s=el('svg',{viewBox:'0 0 '+W+' '+H,role:'img','aria-label':'Cumulative reviews: 3 by August, 12 by September, 23 by 20 October; about 71 by April 2027 at an illustrative eight a month'});
+  [0,25,50,75,100].forEach(function(v){var y=T+(H-T-B)*(1-v/max);s.appendChild(el('line',{x1:L,x2:W-R,y1:y,y2:y,class:'grid'}));s.appendChild(el('text',{x:L-8,y:y+4,class:'ax','text-anchor':'end'},String(v)));});
+  var X=function(d){return L+(W-L-R)*(d/span);},Y=function(v){return T+(H-T-B)*(1-v/max);};
+  var path=REC.map(function(d,i){return (i?'L':'M')+X(d[2])+' '+Y(d[1]);}).join(' ');
+  s.appendChild(el('path',{d:'M'+X(2)+' '+Y(23)+' L'+X(projEnd)+' '+Y(proj),class:'ln','stroke-dasharray':'4 5',style:'stroke:#BDB5A8'}));
+  s.appendChild(el('path',{d:path,class:'ln'}));
+  REC.forEach(function(d){var g=el('g',{});g.appendChild(el('circle',{cx:X(d[2]),cy:Y(d[1]),r:5,class:'dot'}));g.appendChild(el('circle',{cx:X(d[2]),cy:Y(d[1]),r:16,fill:'transparent'}));hover(g,d[0]+' 2026 · '+d[1]+' reviews to date');s.appendChild(g);});
+  var pg=el('g',{});pg.appendChild(el('circle',{cx:X(projEnd),cy:Y(proj),r:5,class:'dot',style:'fill:#BDB5A8'}));pg.appendChild(el('circle',{cx:X(projEnd),cy:Y(proj),r:16,fill:'transparent'}));hover(pg,'Apr 2027 · ~'+proj+' reviews at an illustrative 8 a month');s.appendChild(pg);
+  s.appendChild(el('text',{x:X(2),y:Y(23)-12,class:'lab','text-anchor':'middle'},'23'));
+  s.appendChild(el('text',{x:X(projEnd)+10,y:Y(proj)+4,class:'lab m','text-anchor':'start'},'~'+proj));
+  [['Aug 2026',0,'start'],['20 Oct',2,'middle'],['Jan 2027',5,'middle'],['Apr 2027',projEnd,'end']].forEach(function(t){s.appendChild(el('text',{x:X(t[1]),y:H-B+18,class:'ax','text-anchor':t[2]},t[0]));});
+  host.appendChild(s);
+}
+function chartBoards(){
+  var host=document.getElementById('chart-boards'); if(!host)return;
+  var W=520,rowH=26,L=88,R=52,T=6,H=T+BOARDS.length*rowH+6,max=263;
+  var s=el('svg',{viewBox:'0 0 '+W+' '+H,role:'img','aria-label':'Channels listed per workspace on 20 October 2026'});
+  BOARDS.forEach(function(d,i){
+    var y=T+i*rowH,w=Math.max(3,(W-L-R)*(d[1]/max));
+    s.appendChild(el('text',{x:L-10,y:y+16,class:'ax','text-anchor':'end'},d[0]));
+    var r=el('rect',{x:L,y:y+4,width:w,height:16,rx:0,class:'bar'+(d[2]?'':' ghost')});
+    var cl=el('clipPath',{id:'bc'+i});cl.appendChild(el('rect',{x:L,y:y+4,width:w,height:16,rx:4}));s.appendChild(cl);r.setAttribute('clip-path','url(#bc'+i+')');
+    s.appendChild(r);hover(r,d[0]+' · '+d[1]+' channels'+(d[2]?' · team-maintained':' · set up'));
+    s.appendChild(el('text',{x:L+w+8,y:y+16,class:'lab'},String(d[1])));
+  });
+  host.appendChild(s);
+}
+function chartReviews(){
+  var host=document.getElementById('chart-reviews'); if(!host)return;
+  var W=520,H=170,L=30,R=16,T=18,B=30,max=12,n=REVIEWS.length,band=(W-L-R)/n,bw=Math.min(24,band*.5);
+  var s=el('svg',{viewBox:'0 0 '+W+' '+H,role:'img','aria-label':'Reviews published per month: August 3, September 9, October 11 to the 20th'});
+  [0,4,8,12].forEach(function(v){var y=T+(H-T-B)*(1-v/max);s.appendChild(el('line',{x1:L,x2:W-R,y1:y,y2:y,class:'grid'}));s.appendChild(el('text',{x:L-8,y:y+4,class:'ax','text-anchor':'end'},String(v)));});
+  REVIEWS.forEach(function(d,i){
+    var x=L+band*i+(band-bw)/2,h=(H-T-B)*(d[1]/max),y=H-B-h;
+    var cl=el('clipPath',{id:'rc'+i});cl.appendChild(el('rect',{x:x,y:y,width:bw,height:h+6,rx:4}));s.appendChild(cl);
+    var r=el('rect',{x:x,y:y,width:bw,height:h,class:'bar'});r.setAttribute('clip-path','url(#rc'+i+')');s.appendChild(r);
+    hover(r,d[0]+' 2026 · '+d[1]+' reviews'+(d[0]==='Oct'?' (to 20 Oct)':''));
+    s.appendChild(el('text',{x:x+bw/2,y:y-7,class:'lab','text-anchor':'middle'},String(d[1])));
+    s.appendChild(el('text',{x:x+bw/2,y:H-B+18,class:'ax','text-anchor':'middle'},d[0]));
+  });
+  host.appendChild(s);
+}
+function stackBars(id,label,rows,max){
+  /* rows: [name, [[value, cssClass, tip], ...]] — horizontal stacked bars with a 2px surface gap. */
+  var host=document.getElementById(id); if(!host)return;
+  var W=300,rowH=40,L=58,R=rows.length===1?92:40,T=4,H=T+rows.length*rowH;
+  var s=el('svg',{viewBox:'0 0 '+W+' '+H,role:'img','aria-label':label});
+  rows.forEach(function(r,i){
+    var y=T+i*rowH,x=L,total=r[1].reduce(function(a,v){return a+v[0];},0);
+    s.appendChild(el('text',{x:L-10,y:y+19,class:'ax','text-anchor':'end'},r[0]));
+    r[1].forEach(function(v,j){var w=(W-L-R)*(v[0]/max);var rect=el('rect',{x:x+(j?2:0),y:y+4,width:Math.max(0,w-(j?2:0)),height:22,rx:3,class:'bar '+v[1],style:v[3]||''});hover(rect,r[0]+' · '+v[2]);s.appendChild(rect);x+=w;});
+    s.appendChild(el('text',{x:x+8,y:y+20,class:'lab'},r[2]||String(total)));
+  });
+  host.appendChild(s);
+}
+function pairBars(id,label,a,b,max,unitA,unitB){
+  var host=document.getElementById(id); if(!host)return;
+  var W=300,rowH=40,L=58,R=40,T=4,H=T+2*rowH;
+  var s=el('svg',{viewBox:'0 0 '+W+' '+H,role:'img','aria-label':label});
+  [['2024',a,'ghost',unitA],['2026',b,'',unitB]].forEach(function(d,i){
+    var y=T+i*rowH,w=Math.max(3,(W-L-R)*(d[1]/max));
+    s.appendChild(el('text',{x:L-10,y:y+19,class:'ax','text-anchor':'end'},d[0]));
+    var cl=el('clipPath',{id:id+'c'+i});cl.appendChild(el('rect',{x:L,y:y+4,width:w,height:22,rx:4}));s.appendChild(cl);
+    var r=el('rect',{x:L,y:y+4,width:w,height:22,class:'bar '+d[2]});r.setAttribute('clip-path','url(#'+id+'c'+i+')');s.appendChild(r);
+    hover(r,d[0]+' · '+d[3]);
+    s.appendChild(el('text',{x:L+w+8,y:y+20,class:'lab'},String(d[1])+(max===100?'%':'')));
+  });
+  host.appendChild(s);
+}
+
+/* ── Reveal, nav, present ───────────────────────────────────────── */
+function observeAll(){
+  if(!('IntersectionObserver' in window)){document.querySelectorAll('.reveal').forEach(function(e){e.classList.add('visible')});return;}
+  var io=new IntersectionObserver(function(es){es.forEach(function(en){if(en.isIntersecting){en.target.classList.add('visible');io.unobserve(en.target);}});},{threshold:.12});
+  document.querySelectorAll('.reveal').forEach(function(e){io.observe(e)});
+}
+function navSpy(){
+  var pills=[].slice.call(document.querySelectorAll('.nav-pill')),secs=pills.map(function(p){return document.querySelector(p.getAttribute('href'));});
+  function upd(){if(document.body.classList.contains('present'))return;var y=window.scrollY+120,idx=0;secs.forEach(function(s,i){if(s&&s.offsetTop<=y)idx=i;});pills.forEach(function(p,i){p.classList.toggle('active',i===idx);});}
+  window.addEventListener('scroll',upd,{passive:true});upd();
+}
+var cur=0;
+function fsEl(){return document.fullscreenElement||document.webkitFullscreenElement||null;}
+function startPresent(){
+  if(document.body.classList.contains('present')){exitPresent();return;}
+  document.body.classList.add('present');showSlide(0);presentBtn('Exit');
+  var d=document.documentElement,req=d.requestFullscreen||d.webkitRequestFullscreen;
+  if(req&&!fsEl()){try{var r=req.call(d);if(r&&r.catch)r.catch(function(){});}catch(e){}}
+}
+function exitPresent(){
+  document.body.classList.remove('present');document.getElementById('pbar').style.width='0';presentBtn('Present');
+  var ex=document.exitFullscreen||document.webkitExitFullscreen;
+  if(fsEl()&&ex){try{var r=ex.call(document);if(r&&r.catch)r.catch(function(){});}catch(e){}}
+  var s=document.querySelectorAll('.deck .section')[cur];if(s)s.scrollIntoView();
+}
+function presentBtn(t){var b=document.getElementById('present-btn');if(b)b.textContent=t;}
+['fullscreenchange','webkitfullscreenchange'].forEach(function(ev){document.addEventListener(ev,function(){if(!fsEl()&&document.body.classList.contains('present'))exitPresent();});});
+function showSlide(i){
+  var s=document.querySelectorAll('.deck .section');if(i<0)i=0;if(i>s.length-1)i=s.length-1;cur=i;
+  s.forEach(function(e,n){e.classList.toggle('active',n===i);if(n===i){e.scrollTop=0;e.querySelectorAll('.reveal').forEach(function(r){r.classList.add('visible')});}});
+  document.getElementById('pbar').style.width=((i+1)/s.length*100)+'%';
+}
+document.addEventListener('keydown',function(e){
+  if(e.key==='Escape'){if(document.body.classList.contains('present'))exitPresent();return;}
+  if(!document.body.classList.contains('present'))return;
+  if(e.key==='ArrowRight'||e.key===' '||e.key==='PageDown'){e.preventDefault();showSlide(cur+1);}
+  if(e.key==='ArrowLeft'||e.key==='PageUp'){e.preventDefault();showSlide(cur-1);}
+});
+document.addEventListener('DOMContentLoaded',function(){
+  chartRoster();chartBoards();chartReviews();chartScale();chartReviewsScale();
+  pairBars('chart-weeks','Active weeks: 7 of 16 in 2024, 16 of 16 in 2026',7,16,16,'7 of 16 active weeks','16 of 16 active weeks');
+  pairBars('chart-gap','Longest gap between uploads: 43 days in 2024, 9 days in 2026',43,9,43,'43-day longest gap','9-day longest gap');
+  stackBars('chart-assets','Uploads by format: 2024 18 long-form and 9 Shorts; 2026 24 long-form and 45 Shorts',[['2024',[[18,'','18 long-form'],[9,'blue','9 Shorts','opacity:.75']]],['2026',[[24,'','24 long-form'],[45,'blue','45 Shorts','opacity:.75']]]],69);
+  pairBars('chart-conc','Top three uploads share of window views: 84.7% in 2024, 56.5% in 2026',84.7,56.5,100,'top three uploads took 84.7% of window views','top three uploads took 56.5% of window views');
+  stackBars('chart-jobs','2026 window views by format: long-form 83.6%, Shorts 16.4%',[['Views',[[83.6,'','long-form 83.6% of window views'],[16.4,'blue','Shorts 16.4% of window views','opacity:.75']],'83.6% · 16.4%']],100);
+  observeAll();navSpy();
+  document.querySelectorAll('.hero .reveal, #start .reveal').forEach(function(e){e.classList.add('visible')});
+});
+</script>
+</body>
+</html>
