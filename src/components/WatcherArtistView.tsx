@@ -12,7 +12,6 @@ import {
   computeConversion,
   type ConversionResult,
 } from '@/lib/conversion';
-import { CoachCampaignBadge } from '@/components/WatcherCoachOverlay';
 import MissedReachCard, { type MissedReachVideo, type FormatGap } from '@/components/MissedReachCard';
 import MissedReachSection from '@/components/MissedReachSection';
 import LaunchModule, { type LaunchVideo } from '@/components/LaunchModule';
@@ -400,17 +399,6 @@ export default async function WatcherArtistView({
           />
         )}
 
-        {/* Coach is ours; a regional board does not see it. It sits above
-            the overview rather than inside it, because the overview is
-            shared and knows nothing about Coach. */}
-        {coachBadge && (
-          <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.22em] text-ink/45 mb-6">
-            <YouTubeMark />
-            <span>YouTube Watcher</span>
-            <CoachCampaignBadge slug={slug} fallback={artist.campaign} />
-          </div>
-        )}
-
         {/* ─── THE OVERVIEW — identical on every artist page ──────────── */}
         <ArtistOverview
           slug={slug}
@@ -674,19 +662,6 @@ function MetricTile({
     </div>
   );
 }
-
-function YouTubeMark() {
-  return (
-    <svg width="16" height="12" viewBox="0 0 24 17" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-      <path
-        d="M23.5 2.7A3 3 0 0 0 21.4.6C19.6 0 12 0 12 0s-7.6 0-9.4.6A3 3 0 0 0 .5 2.7C0 4.5 0 8.5 0 8.5s0 4 .5 5.8a3 3 0 0 0 2.1 2.1c1.8.6 9.4.6 9.4.6s7.6 0 9.4-.6a3 3 0 0 0 2.1-2.1c.5-1.8.5-5.8.5-5.8s0-4-.5-5.8Z"
-        fill="#FF0000"
-      />
-      <path d="M9.6 12.3 15.8 8.5 9.6 4.7v7.6Z" fill="#FAF7F2" />
-    </svg>
-  );
-}
-
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // 3. CAMPAIGN-AWARE ACTIONS — specific, time-bound, tied to real data

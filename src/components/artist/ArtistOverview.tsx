@@ -395,13 +395,8 @@ export default async function ArtistOverview({
                 <div className="text-[15px] font-bold text-ink leading-snug">
                   Line up a {nextAsset}{nextAlternative ? ` or ${nextAlternative}` : ''}
                 </div>
-                <div className="mt-2 space-y-1.5 text-[12px] text-ink/65 leading-relaxed">
-                  <p><strong className="text-ink/85">No official video planned?</strong> Make {nextAlternative ? 'one of these' : `a ${nextAsset}`} the main full-length asset for the release.</p>
-                  <p><strong className="text-ink/85">Video performing well?</strong> Line up {nextAlternative ? 'one of these' : `a ${nextAsset}`} as the follow-up while interest is high.</p>
-                </div>
-                <p className="text-[11px] text-ink/45 mt-2 leading-relaxed">
-                  {FORMAT_PLURAL[perf.bestSupport.type] ?? `${perf.bestSupport.label}s`} have the highest median views among this channel&rsquo;s supporting formats
-                  {nextAlternative ? `, with ${FORMAT_PLURAL[perf.support[1].type]?.toLowerCase() ?? perf.support[1].label.toLowerCase()} close behind` : ''}.
+                <p className="mt-1.5 text-[12px] text-ink/55 leading-relaxed">
+                  Use as your main release asset or a follow-up to a strong video.
                 </p>
               </div>
             )}
@@ -454,14 +449,8 @@ export default async function ArtistOverview({
               })}
             </div>
 
-            {/* ── WHERE THE NUMBERS CAME FROM, AND THEIR ONE BIAS ──────
-                At 365 days the age spread within a format was small enough
-                to leave in a tooltip. Read across a whole catalogue it is
-                not: CHVRCHES' lyric videos have a median age of 6.5 years
-                against 3.1 for their visualisers, so part of any gap is
-                simply time to accumulate. Stating the span and the oldest
-                format's age lets a reader discount it; hiding it on hover
-                would let the ranking read as settled. */}
+            <details className="mt-2.5 text-[10px] text-ink/40 leading-relaxed">
+              <summary className="cursor-pointer hover:text-ink/65">About these figures</summary>
             {catalogue?.videos.length ? (
               <div className="text-[10px] text-ink/35 mt-2.5 leading-relaxed">
                 Across all {catalogue.retrieved} uploads
@@ -481,6 +470,7 @@ export default async function ArtistOverview({
             <p className="text-[10px] text-ink/35 mt-2 leading-relaxed">
               Percentages compare each format&rsquo;s median views with official videos: this channel / roster benchmark. Historical results, not a forecast.
             </p>
+            </details>
               </>
             )}
           </div>
