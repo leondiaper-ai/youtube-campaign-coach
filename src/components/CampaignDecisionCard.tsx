@@ -35,6 +35,7 @@ import {
 import type { StructureWarning } from '@/lib/contentStructure';
 import Sparkline from './Sparkline';
 import CampaignBehaviour from './CampaignBehaviour';
+import CampaignMetrics from './CampaignMetrics';
 
 const INK = '#0E0E0E';
 const PAPER = '#FAF7F2';
@@ -764,7 +765,6 @@ export function DecisionCard({
   const read = getGrowthRead(card);
   const dStyle = DECISION_STYLE[read.decision];
   const spk = subsPerKViews(card);
-  const conv = conversionLabel(spk);
   const isFix = read.decision === 'FIX';
   const cardBorder = isFix ? dStyle.border : MUTED;
   const cw = card.campaignWindow;
@@ -908,10 +908,9 @@ export function DecisionCard({
 
       <div className="flex flex-col lg:flex-row gap-5 items-start">
         <div className="min-w-0 flex-1 w-full">
-      {/* ─── 2. The read panel ────────────────────────────────────
-          Six cells on a grid: the figures, the content mix folded under
-          the upload count that it qualifies, and the trend. See the
-          StatCell header for why they are shaped the way they are. */}
+      {cw && <CampaignMetrics campaign={cw} />}
+      <h3 className="text-[10px] font-bold uppercase tracking-[0.12em] text-ink/45 mb-2">Channel overview</h3>
+      {/* Current channel totals and recent activity. */}
       {(() => {
         const isStaleMovement = card.movementConfidence === 'stale';
         const views7d = trustedViewDelta(card.views7Delta);
@@ -947,32 +946,49 @@ export function DecisionCard({
                 tone={deltaColor(card.subs7Delta)}
               />
             )}
-            {spk != null && (
-              <StatCell
-                value={spk.toFixed(1)}
-                label="Subs / 1K"
-                sub={conversionLabel(spk).text}
-                tone={conversionColor(spk)}
-              />
-            )}
             <StatCell
               value={String(card.uploads30d)}
               label="Uploads (30d)"
               sub={mixParts.length ? mixParts.join(' · ') : null}
             />
-            <TrendCell
-              data={card.sparkline}
-              stroke={GOS_SPARK_STYLE[gs].stroke}
-              fill={GOS_SPARK_STYLE[gs].fill}
-            />
+
           </div>
         );
       })()}
 
-      {/* ─── 4. Why this matters ───────────────────────────────────
-          The read, the cause and the moves were three separate blocks in
-          three different registers. They are one argument, so they are
-          now one block: what is happening, why, and what to do. */}
+      {/* Keep data freshness visible while assessment sits in the disclosure. */}
+      {(card.movementConfidence === 'stale' ||
+        card.movementConfidence === 'limited') && (
+        <div className="space-y-1 mb-2.5">
+          {(card.movementConfidence === 'stale' || card.movementConfidence === 'limited') && (
+            <div className="flex items-center gap-1.5">
+              <span
+                className="inline-block w-[5px] h-[5px] rounded-full shrink-0"
+                style={{ background: card.movementConfidence === 'stale' ? '#D4A017' : 'rgba(14,14,14,0.2)' }}
+              />
+              <span className="text-micro text-muted">
+                {card.movementConfidence === 'stale' && trustedViewDelta(card.lastKnownGoodViews7d) != null
+                  ? (card.lastKnownGoodDaysAgo === 0 ? 'Latest confirmed view reading: today' : `View reading delayed · last confirmed ${card.lastKnownGoodDaysAgo ?? '?'} days ago`)
+                  : card.movementConfidence === 'stale'
+                    ? 'Public YouTube totals updating'
+                    : 'Movement data building — limited history'}
+              </span>
+            </div>
+          )}
+        </div>
+      )}
+
+      <button
+        aria-expanded={showDetail}
+        onClick={() => setShowDetail(!showDetail)}
+        className="text-micro font-semibold text-muted hover:text-ink mb-2 transition-colors"
+      >
+        {showDetail ? 'Hide detail' : 'Show detail'}
+      </button>
+
+      {showDetail && (
+        <div className="rounded-lg p-4 mb-3" style={{ background: SOFT }}>
+          <h3 className="text-[11px] font-bold text-ink/60 mb-2">Channel assessment</h3>
       <div
         className="rounded-lg px-4 py-3.5 mb-3"
         style={{
@@ -998,63 +1014,23 @@ export function DecisionCard({
         )}
       </div>
 
-      {/* ─── 5. Campaign tracking + weekly progress ──────────────────
-          This was a panel with its own fill and border containing four
-          stacked registers: a header row, a figures row, a momentum
-          sentence and a disclosure. It is campaign totals — one line of
-          them, on the card's own ground, with the momentum underneath. */}
-      {cw && (
-        <div className="mb-3 pl-3" style={{ borderLeft: '2px solid rgba(44,107,255,0.4)' }}>
-          {/* ── CAMPAIGN SCOPE ──────────────────────────────────────
-              The campaign's own assets: what was published since the
-              campaign started, and what those uploads have earned. */}
-          <div className="flex flex-wrap items-baseline gap-x-2.5 gap-y-1 text-body">
-            <span className="font-bold text-ink">Day {cw.campaignDay}</span>
-            <span className="text-faint">·</span>
-            <span className="tabular-nums font-semibold text-ink">
-              {cw.contentViews != null ? fmtNum(cw.contentViews) : '—'}
-              <span className="text-muted font-normal"> campaign views</span>
-            </span>
-            <span className="text-muted tabular-nums">
-              {cw.contentMix.uploads} asset{cw.contentMix.uploads !== 1 ? 's' : ''}
-              {cw.contentMix.uploads > 0 && (
-                <span className="text-faint">
-                  {' '}({cw.contentMix.videos} long-form · {cw.contentMix.shorts} Shorts)
-                </span>
-              )}
-            </span>
-          </div>
-
-          {/* ── CHANNEL SCOPE ───────────────────────────────────────
-              The channel around the campaign, catalogue included. Worth
-              knowing, and never the same number as the line above. */}
-          <div className="text-meta text-muted mt-1 flex flex-wrap items-baseline gap-x-2">
-            <span className="font-semibold text-ink/50">Whole channel</span>
-            {(() => {
-              // Same rule as the headline: a negative channel-window total
-              // is a snapshot disagreement, not views lost.
-              const chViews = trustedViewDelta(cw.channelViewsDelta);
-              return (
-                <span className="tabular-nums font-semibold"
-                  style={{ color: chViews != null ? deltaColor(chViews) : 'rgba(14,14,14,0.3)' }}>
-                  {chViews != null ? `+${fmtNum(chViews)}` : 'Updating'}
-                  <span className="text-muted font-normal"> views</span>
-                </span>
-              );
-            })()}
-            {cw.subsGained != null && (
-              <span className="tabular-nums font-semibold"
-                style={{ color: cw.subsGained > 0 ? '#0C6A3F' : cw.subsGained < 0 ? '#8A1F0C' : 'rgba(14,14,14,0.3)' }}>
-                {cw.subsGained >= 0 ? '+' : ''}{fmtNum(cw.subsGained)}
-                <span className="text-muted font-normal"> subs</span>
-              </span>
+          {card.structureWarning && <StructureWarningLine warning={card.structureWarning} />}
+          <div className="grid grid-cols-2 gap-2 mt-3 mb-3">
+            {spk != null && (
+              <StatCell
+                value={spk.toFixed(1)}
+                label="Subs / 1K"
+                sub={conversionLabel(spk).text}
+                tone={conversionColor(spk)}
+              />
             )}
-            <span className="text-faint">since day 1</span>
-            {ct && ct.currentWeekViews != null && ct.currentWeekViews > 0 && (
-              <span className="tabular-nums text-faint">· {momentumLine(ct)}</span>
-            )}
+            <TrendCell
+              data={card.sparkline}
+              stroke={GOS_SPARK_STYLE[gs].stroke}
+              fill={GOS_SPARK_STYLE[gs].fill}
+            />
           </div>
-
+          {ct && <div className="text-[11px] text-ink/45 mb-2">Channel tracking weeks: {momentumLine(ct)}. The latest tracking week may be incomplete.</div>}
           {/* Weekly progress (expandable dropdown) */}
           {card.weeklyProgress.length > 0 && (
             <div className="mt-1.5">
@@ -1150,50 +1126,6 @@ export function DecisionCard({
               )}
             </div>
           )}
-        </div>
-      )}
-
-      {/* ─── Caveats ───────────────────────────────────────────────
-          The structure warning and the data-confidence note were two
-          separate strips stacked between the tracker and the controls,
-          each with its own fill, icon and type size. They say the same
-          kind of thing — read this with a caveat — so they share one
-          quiet row. Neither is dropped: a card whose figures are stale
-          has to say so. */}
-      {(card.structureWarning ||
-        card.movementConfidence === 'stale' ||
-        card.movementConfidence === 'limited') && (
-        <div className="space-y-1 mb-2.5">
-          {card.structureWarning && (
-            <StructureWarningLine warning={card.structureWarning} />
-          )}
-          {(card.movementConfidence === 'stale' || card.movementConfidence === 'limited') && (
-            <div className="flex items-center gap-1.5">
-              <span
-                className="inline-block w-[5px] h-[5px] rounded-full shrink-0"
-                style={{ background: card.movementConfidence === 'stale' ? '#D4A017' : 'rgba(14,14,14,0.2)' }}
-              />
-              <span className="text-micro text-muted">
-                {card.movementConfidence === 'stale' && trustedViewDelta(card.lastKnownGoodViews7d) != null
-                  ? `Last confirmed +${fmtNum(trustedViewDelta(card.lastKnownGoodViews7d)!)} views, ${card.lastKnownGoodDaysAgo ?? '?'} days ago`
-                  : card.movementConfidence === 'stale'
-                    ? 'Public YouTube totals updating'
-                    : 'Movement data building — limited history'}
-              </span>
-            </div>
-          )}
-        </div>
-      )}
-
-      <button
-        onClick={() => setShowDetail(!showDetail)}
-        className="text-micro font-semibold text-muted hover:text-ink mb-2 transition-colors"
-      >
-        {showDetail ? 'Hide detail' : 'Show detail'}
-      </button>
-
-      {showDetail && (
-        <div className="rounded-lg p-4 mb-3" style={{ background: SOFT }}>
           {/* Cadence */}
           <div className="text-[11px] text-ink/40 mb-2">{card.cadenceLine}</div>
 
