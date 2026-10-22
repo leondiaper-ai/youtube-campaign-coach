@@ -397,13 +397,10 @@ export default async function ArtistOverview({
 
             <div className="flex justify-end gap-2 text-[9px] text-ink/40 mt-3 mb-1 uppercase tracking-wide">
               <span className="w-[46px] text-right">Median views</span>
-              <span className="w-[92px] text-right">Channel / roster</span>
             </div>
             <div className="mt-3 space-y-1.5">
               {perf.support.map((r) => {
                 const top = perf.support[0].median || 1;
-                const bench = ROSTER_SUPPORT_BENCHMARK[r.type];
-                const ahead = bench && r.vsHero != null && r.vsHero >= bench.ratio;
                 return (
                   <div
                     key={r.type}
@@ -428,16 +425,6 @@ export default async function ArtistOverview({
                     <span className="w-[46px] shrink-0 text-right tabular-nums font-bold text-ink">
                       {fmtNum(r.median)}
                     </span>
-                    {/* Against the roster, because this channel's own
-                        number alone does not say whether it is good. */}
-                    <span className="w-[92px] shrink-0 text-right tabular-nums text-ink/40">
-                      {r.vsHero != null ? `${Math.round(r.vsHero * 100)}%` : '—'}
-                      {bench && (
-                        <span style={ahead ? { color: GAIN } : undefined}>
-                          {' '}/ {Math.round(bench.ratio * 100)}%
-                        </span>
-                      )}
-                    </span>
                   </div>
                 );
               })}
@@ -461,9 +448,6 @@ export default async function ArtistOverview({
               </div>
             )}
 
-            <p className="text-[10px] text-ink/35 mt-2 leading-relaxed">
-              Percentages compare each format&rsquo;s median views with official videos: this channel / roster benchmark. Historical results, not a forecast.
-            </p>
             </details>
               </>
             )}
