@@ -45,12 +45,6 @@ import { Eyebrow, Metric, VideoGrid, INK, RULE, GAIN, LOSS } from './primitives'
 const LF_BLUE = '#2C6BFF';
 const SH_AMBER = '#C77A16';
 
-/** Singular names for the asset a team should line up. */
-function supportAsset(type: string, fallback: string): string {
-  return ({ LYRIC_VIDEO: 'lyric video', VISUALIZER: 'visualiser', LIVE: 'live video', BTS: 'BTS film' } as Record<string, string>)[type] ?? fallback.toLowerCase();
-}
-
-
 /** A share, keeping one decimal where rounding would erase the number. */
 function sharePct(x: number): string {
   if (x <= 0) return '0%';
@@ -127,9 +121,9 @@ export default async function ArtistOverview({
   const catalogue = await readCatalogue(slug).catch(() => null);
   const perfUploads = catalogue?.videos.length ? catalogueAsUploads(catalogue) : uploads;
   const perf = formatPerformance(perfUploads, catalogue?.videos.length ? 36_500 : 365);
-  const nextAsset = perf.bestSupport ? supportAsset(perf.bestSupport.type, perf.bestSupport.label) : null;
-  const nextAlternative = !perf.clear && perf.support.length > 1
-    ? supportAsset(perf.support[1].type, perf.support[1].label) : null;
+  const leadingFormat = perf.bestSupport ? (FORMAT_PLURAL[perf.bestSupport.type] ?? perf.bestSupport.label) : null;
+  const closeAlternative = !perf.clear && perf.support.length > 1
+    ? (FORMAT_PLURAL[perf.support[1].type] ?? perf.support[1].label).toLowerCase() : null;
   /* Free — commentCount is already on every cached upload. */
   const demand = commentDemand(uploads);
 
@@ -308,9 +302,9 @@ export default async function ArtistOverview({
           </div>
         )}
 
-        {/* Turn historical format performance into a practical next-asset choice. */}
+        {/* Show which supporting formats have performed best on this channel. */}
         <div>
-            <Eyebrow>What to line up next</Eyebrow>
+            <Eyebrow>What works on this channel</Eyebrow>
             {/* ── NOTHING READABLE YET ──────────────────────────────
                 The section still prints. The question it answers —
                 what should we make after the video — does not stop
@@ -390,13 +384,13 @@ export default async function ArtistOverview({
             )}
             {perf.support.length > 0 && (
               <>
-            {perf.bestSupport && nextAsset && (
+            {perf.bestSupport && leadingFormat && (
               <div className="mt-2.5">
                 <div className="text-[15px] font-bold text-ink leading-snug">
-                  Line up a {nextAsset}{nextAlternative ? ` or ${nextAlternative}` : ''}
+                  {leadingFormat}{closeAlternative ? ` and ${closeAlternative} lead` : perf.bestSupport.type === 'BTS' ? ' leads' : ' lead'}
                 </div>
                 <p className="mt-1.5 text-[12px] text-ink/55 leading-relaxed">
-                  Use as your main release asset or a follow-up to a strong video.
+                  Supporting assets ranked by median views per upload.
                 </p>
               </div>
             )}
