@@ -1,0 +1,203 @@
+{
+  "capturedAt": "2026-10-22T16:20:00.979Z",
+  "channel": {
+    "id": "UCVm7tYTZONPLVujGX0rAJdw",
+    "title": "IDLES",
+    "handle": "@idlesband",
+    "subscribers": 276000,
+    "lifetimeViews": 127647455,
+    "publicVideoCount": 373,
+    "publishedAt": "2011-11-09T11:57:53Z"
+  },
+  "retrieved": 372,
+  "capped": false,
+  "yearUploads": 31,
+  "yearShorts": 31,
+  "tangk": {
+    "uploads": 127,
+    "shorts": 113,
+    "longForm": 14,
+    "views": 19920417,
+    "heroViews": 12839456,
+    "heroShare": 0.644537511438641,
+    "lyricViews": 2687097,
+    "lyricMedian": 275887,
+    "lyricCount": 9,
+    "albumDayLyrics": 8
+  },
+  "heroes": [
+    {
+      "id": "A3ZZj5y6Qt4",
+      "label": "DANCER",
+      "views": 6392850,
+      "publishedAt": "2023-10-18T09:00:10Z",
+      "seconds": 204
+    },
+    {
+      "id": "_HQrM5L9T1g",
+      "label": "GIFT HORSE",
+      "views": 3273560,
+      "publishedAt": "2024-01-15T17:00:07Z",
+      "seconds": 275
+    },
+    {
+      "id": "huWfQdG2_ws",
+      "label": "POP POP POP",
+      "views": 2042531,
+      "publishedAt": "2024-04-17T16:00:07Z",
+      "seconds": 260
+    },
+    {
+      "id": "gnd4jIBRfHE",
+      "label": "GRACE",
+      "views": 1130515,
+      "publishedAt": "2024-02-14T17:00:08Z",
+      "seconds": 241
+    }
+  ],
+  "formats": [
+    {
+      "id": "RaMK4gDYl4o",
+      "label": "Rabbit Run · lyric video",
+      "views": 898967,
+      "publishedAt": "2025-07-30T16:00:59Z",
+      "seconds": 232
+    },
+    {
+      "id": "gLY1PkEOJP4",
+      "label": "Roy · lyric video",
+      "views": 549464,
+      "publishedAt": "2024-02-16T00:00:30Z",
+      "seconds": 250
+    },
+    {
+      "id": "AneIifyXrAI",
+      "label": "Making of CRAWLER · 11 minutes",
+      "views": 221910,
+      "publishedAt": "2022-12-21T17:53:05Z",
+      "seconds": 663
+    }
+  ],
+  "shorts": [
+    {
+      "id": "de4YLiAZbHg",
+      "label": "BO PRO · stage-camera moment",
+      "views": 939916,
+      "publishedAt": "2025-06-13T13:16:21Z",
+      "seconds": 36
+    },
+    {
+      "id": "G2Wm-FLWTx0",
+      "label": "FLYNN! · band personality",
+      "views": 700702,
+      "publishedAt": "2024-07-02T15:07:31Z",
+      "seconds": 61
+    },
+    {
+      "id": "3w-qf9r6yPE",
+      "label": "Jack White · guest moment",
+      "views": 453233,
+      "publishedAt": "2025-09-23T13:06:29Z",
+      "seconds": 44
+    },
+    {
+      "id": "tbAINfavmz4",
+      "label": "Car Crash · live clip",
+      "views": 426013,
+      "publishedAt": "2026-01-29T15:14:25Z",
+      "seconds": 30
+    }
+  ],
+  "bataclan": {
+    "id": "0lbH_Z-Xi1Q",
+    "label": "Le Bataclan · full concert + Q&A",
+    "views": 529288,
+    "publishedAt": "2020-05-01T18:00:26Z",
+    "seconds": 6184
+  },
+  "liveSong": {
+    "id": "jc4XigR4HaQ",
+    "label": "Mother · Live at Le Bataclan",
+    "views": 516904,
+    "publishedAt": "2019-10-17T08:45:32Z",
+    "seconds": 208
+  },
+  "partner": [
+    {
+      "videoId": "wMehItNQKAA",
+      "found": true,
+      "title": "IDLES: NPR Music Tiny Desk Concert",
+      "channelId": "UC4eYXhJI4-7wSWc8UNRwD4A",
+      "channelTitle": "NPR Music",
+      "publishedAt": "2019-06-26T09:00:09Z",
+      "durationSeconds": 786,
+      "isShort": false,
+      "views": 11344123,
+      "likes": 171021,
+      "comments": 8654
+    },
+    {
+      "videoId": "LLCy9Ic9aIQ",
+      "found": true,
+      "title": "IDLES - Dancer | Glastonbury 2024",
+      "channelId": "UCZtDUmC3W7j25XHZWFT_XgQ",
+      "channelTitle": "BBC Music",
+      "publishedAt": "2024-07-05T14:07:20Z",
+      "durationSeconds": 197,
+      "isShort": false,
+      "views": 751353,
+      "likes": 7992,
+      "comments": 320
+    },
+    {
+      "videoId": "OYymMu2WoDM",
+      "found": true,
+      "title": "IDLES - Gift Horse | Later... with Jools Holland",
+      "channelId": "UCZtDUmC3W7j25XHZWFT_XgQ",
+      "channelTitle": "BBC Music",
+      "publishedAt": "2024-05-18T21:35:00Z",
+      "durationSeconds": 257,
+      "isShort": false,
+      "views": 594066,
+      "likes": 8651,
+      "comments": 458
+    },
+    {
+      "videoId": "3NqFrrj0Pcg",
+      "found": true,
+      "title": "IDLES - Gratitude | Glastonbury 2024",
+      "channelId": "UCZtDUmC3W7j25XHZWFT_XgQ",
+      "channelTitle": "BBC Music",
+      "publishedAt": "2024-06-29T16:37:02Z",
+      "durationSeconds": 263,
+      "isShort": false,
+      "views": 227139,
+      "likes": 2334,
+      "comments": 230
+    },
+    {
+      "videoId": "yKdHXNq4rko",
+      "found": true,
+      "title": "IDLES - A Gospel | Later... with Jools Holland",
+      "channelId": "UCZtDUmC3W7j25XHZWFT_XgQ",
+      "channelTitle": "BBC Music",
+      "publishedAt": "2024-05-18T21:35:00Z",
+      "durationSeconds": 234,
+      "isShort": false,
+      "views": 187492,
+      "likes": 2920,
+      "comments": 152
+    }
+  ],
+  "premieres": {
+    "officialSince2021": 13,
+    "actualStarts": 13
+  },
+  "recentShort": {
+    "id": "7HWMwsEtBKY",
+    "label": "I’M SCUM · Tiny Desk Short",
+    "views": 129716,
+    "publishedAt": "2026-10-14T17:09:02Z",
+    "seconds": 30
+  }
+}
