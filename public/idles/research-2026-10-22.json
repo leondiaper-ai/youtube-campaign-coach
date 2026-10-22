@@ -23,7 +23,98 @@
     "lyricViews": 2687097,
     "lyricMedian": 275887,
     "lyricCount": 9,
-    "albumDayLyrics": 8
+    "albumDayLyrics": 8,
+    "monthlyActivity": [
+      {
+        "month": "2023-08",
+        "longForm": 0,
+        "shorts": 1
+      },
+      {
+        "month": "2023-09",
+        "longForm": 0,
+        "shorts": 5
+      },
+      {
+        "month": "2023-10",
+        "longForm": 1,
+        "shorts": 13
+      },
+      {
+        "month": "2023-11",
+        "longForm": 0,
+        "shorts": 5
+      },
+      {
+        "month": "2023-12",
+        "longForm": 1,
+        "shorts": 7
+      },
+      {
+        "month": "2024-01",
+        "longForm": 1,
+        "shorts": 3
+      },
+      {
+        "month": "2024-02",
+        "longForm": 9,
+        "shorts": 9
+      },
+      {
+        "month": "2024-03",
+        "longForm": 0,
+        "shorts": 2
+      },
+      {
+        "month": "2024-04",
+        "longForm": 1,
+        "shorts": 6
+      },
+      {
+        "month": "2024-05",
+        "longForm": 0,
+        "shorts": 10
+      },
+      {
+        "month": "2024-06",
+        "longForm": 0,
+        "shorts": 12
+      },
+      {
+        "month": "2024-07",
+        "longForm": 0,
+        "shorts": 8
+      },
+      {
+        "month": "2024-08",
+        "longForm": 0,
+        "shorts": 6
+      },
+      {
+        "month": "2024-09",
+        "longForm": 0,
+        "shorts": 9
+      },
+      {
+        "month": "2024-10",
+        "longForm": 0,
+        "shorts": 4
+      },
+      {
+        "month": "2024-11",
+        "longForm": 0,
+        "shorts": 9
+      },
+      {
+        "month": "2024-12",
+        "longForm": 1,
+        "shorts": 4
+      }
+    ],
+    "mayToNovember2024": {
+      "shorts": 58,
+      "longForm": 0
+    }
   },
   "heroes": [
     {
@@ -199,5 +290,45 @@
     "views": 129716,
     "publishedAt": "2026-10-14T17:09:02Z",
     "seconds": 30
+  },
+  "attention": {
+    "readAt": "2026-10-22T16:58:04.377Z",
+    "source": "/api/debug/snapshots?handle=@idlesband",
+    "historyFirst": "2026-04-30",
+    "historyLast": "2026-10-22",
+    "historyDays": 175,
+    "historySnapshots": 167,
+    "baselineAt": "2026-09-24",
+    "baselineViews": 125206136,
+    "endAt": "2026-10-22",
+    "endViews": 127647455,
+    "days": 28,
+    "addedViews": 2441319,
+    "weeklyAverage": 610329.75,
+    "annualisedPace": 31824336.964285716,
+    "latest7DayRecordedChange": 1156750,
+    "weeklyBoundaryTotals": [
+      {
+        "date": "2026-09-24",
+        "views": 125206136
+      },
+      {
+        "date": "2026-10-01",
+        "views": 125206136
+      },
+      {
+        "date": "2026-10-08",
+        "views": 126490705
+      },
+      {
+        "date": "2026-10-15",
+        "views": 126490705
+      },
+      {
+        "date": "2026-10-22",
+        "views": 127647455
+      }
+    ],
+    "limits": "Recorded public whole-channel counter changes, combining Shorts and full-length. Repeated totals and uneven updates make individual-week comparisons lumpy. Headline weekly average uses the 28-day recorded increase / 4. Annualised pace = recorded increase / 28 * 365; an equivalent pace, not actual annual views, a forecast, unique viewers or proof of demand for unreleased music. No full-year Watcher history available. Earlier July/August counter decreases fall outside the selected window."
   }
 }

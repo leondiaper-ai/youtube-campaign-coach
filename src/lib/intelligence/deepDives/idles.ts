@@ -10,7 +10,7 @@ export const IDLES_DEEP_DIVE: DeepDiveContext = {
   "deckUpdated": "2026-10-22",
   "deckUrl": "/idles",
   "dataCapturedAt": "2026-10-22",
-  "coreThesis": "Keep the big videos and build depth around them. TANGK’s four major videos account for 64% of current lifetime views across the defined campaign uploads. Lyric videos, selected performances, personality-led Shorts and the CRAWLER making-of film show other ways into the music. All 31 returned 2026 uploads are short-duration clips, leaving room for a full-song or performance destination. For the next album, review existing assets, prepare a few worthwhile follow-ups and align the channel before release. These are label considerations, not a confirmed campaign plan or timetable.",
+  "coreThesis": "Keep the big videos and build depth around them. TANGK’s four major videos account for 64% of current lifetime views across the defined campaign uploads. Lyric videos, selected performances, personality-led Shorts and the CRAWLER making-of film show other ways into the music. All 31 returned 2026 uploads are short-duration clips, leaving room for a full-song or performance destination. For the next album, review existing assets, prepare a few worthwhile follow-ups and align the channel before release. These are label considerations, not a confirmed campaign plan or timetable. Keep major videos, Premieres, lyrics, live identity and personality-led Shorts. Build on that with selected full-length follow-ups, more useful cuts from a strong performance, and clearer onward viewing. Eight TANGK lyrics landed on album day; May–November 2024 had 58 Shorts and no full-length upload. Watcher recorded 2,441,319 added whole-channel views from 24 Sep to 22 Oct 2026: about 610K per week averaged over four weeks. The equivalent annual pace is 31.8M if sustained, not observed yearly viewing or a forecast.",
   "channelStrengths": [
     {
       "point": "Keep major music videos at the centre.",
@@ -48,6 +48,14 @@ export const IDLES_DEEP_DIVE: DeepDiveContext = {
         "premiere_behaviour",
         "community_activation"
       ]
+    },
+    {
+      "point": "There is ongoing channel attention to build on before the next album.",
+      "basis": "Cached Watcher totals increased from 125,206,136 on 24 Sep to 127,647,455 on 22 Oct: 2,441,319 over 28 days, 610,329.75 per average week. Annualised equivalent = 31,824,336.96 if sustained; whole channel including Shorts.",
+      "needTags": [
+        "album_campaign",
+        "catalogue_activation"
+      ]
     }
   ],
   "channelGaps": [
@@ -61,6 +69,14 @@ export const IDLES_DEEP_DIVE: DeepDiveContext = {
     {
       "point": "Prepare worthwhile full-length follow-ups around priority songs.",
       "basis": "DANCER to GIFT HORSE: 89 days with one full-length upload between; GIFT HORSE to GRACE: 30 days with none. Eight lyric videos arrived on album day, then 61 days until POP POP POP. Dates describe sequencing, not lost-view causation.",
+      "needTags": [
+        "hero_continuity",
+        "release_sequencing"
+      ]
+    },
+    {
+      "point": "Full-length uploads arrived in bursts while Shorts continued.",
+      "basis": "Monthly counts in the defined TANGK window show eight lyrics on album day and 58 Shorts / zero full-length uploads from May through November 2024. This is upload activity, not a causal view forecast.",
       "needTags": [
         "hero_continuity",
         "release_sequencing"
@@ -140,6 +156,15 @@ export const IDLES_DEEP_DIVE: DeepDiveContext = {
       "needTags": [
         "shorts_programme"
       ]
+    },
+    {
+      "point": "Package a strong live capture as a full performance, individual songs and selected Shorts.",
+      "basis": "IDLES already has a Bataclan full concert and separately uploaded songs. Borrow the clear asset-role explanation from Amyl; do not transfer its format ratios or promise each cut will perform.",
+      "needTags": [
+        "archive_live",
+        "low_new_production",
+        "shorts_programme"
+      ]
     }
   ],
   "recommendedCampaignArchitecture": [
@@ -173,6 +198,15 @@ export const IDLES_DEEP_DIVE: DeepDiveContext = {
       "needTags": [
         "catalogue_activation",
         "community_activation"
+      ]
+    },
+    {
+      "point": "Connect the stages of the next album with an identifiable role for each asset.",
+      "basis": "Proposed sequence: hero Premiere; connected Shorts; a worthwhile full-length follow-up; album playlist and standout asset; selective live-song releases; catalogue and fan conversation between campaigns. The highlighted change is preparing the second music moment before launch. Amyl supplies the explanatory structure, not fixed dates, quotas or IDLES performance assumptions.",
+      "needTags": [
+        "album_campaign",
+        "hero_continuity",
+        "release_sequencing"
       ]
     }
   ],
@@ -267,6 +301,13 @@ export const IDLES_DEEP_DIVE: DeepDiveContext = {
       "trust": "PARTIAL",
       "sourceRef": "/idles#label-considerations",
       "observedAt": "2026-10-22"
+    },
+    {
+      "claim": "The recorded channel-view increase over 24 Sep–22 Oct is 2,441,319; four-week average 610K per week; annualised equivalent 31.8M if sustained.",
+      "evidenceClass": "DERIVED",
+      "trust": "PARTIAL",
+      "sourceRef": "public/idles/research-2026-10-22.json#attention",
+      "observedAt": "2026-10-22"
     }
   ],
   "knownConstraints": [],
@@ -322,6 +363,8 @@ export const IDLES_DEEP_DIVE: DeepDiveContext = {
     "Previous five-asset Bataclan / 16.7× comparison is withdrawn: this pull returned four full-length title-matched uploads plus one 38-second clip.",
     "A small newest-comment sample is qualitative only; the one quoted comment is not an audience survey.",
     "Homepage observation is public and may differ by viewer; no private Studio settings or analytics were inspected.",
-    "No announced release date, timetable, budget or confirmed next-album plan assumed. Ezra is a narrative reference, not a performance benchmark."
+    "No announced release date, timetable, budget or confirmed next-album plan assumed. Ezra is a narrative reference, not a performance benchmark.",
+    "Amyl and Ezra are narrative and asset-planning references only. Timeline bars are monthly upload counts, not historical views or causal evidence.",
+    "The 31.8M annualised figure is an equivalent pace from a 28-day recorded whole-channel increase, not a full-year total, forecast, unique viewers or proven appetite for unreleased music. Uneven snapshot refreshes make single-week comparisons lumpy; 28 days is the headline baseline."
   ]
 };
