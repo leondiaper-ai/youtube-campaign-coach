@@ -11,8 +11,9 @@
  *   - the slug must already be in the Watcher roster;
  *   - the channel id comes from the Watcher's own snapshot, never from
  *     the caller;
- *   - results are cached in KV for 12 hours, so the cost of being hit
- *     repeatedly is one Chartmetric request per artist per half-day.
+ *   - a shared result is refreshed at most weekly when viewed;
+ *   - an expiring lock prevents concurrent vendor refreshes;
+ *   - failed refreshes back off for a day and preserve existing data.
  *
  * Every failure is a 200 with { ok: false, reason }. The module renders
  * nothing on a falsy result, which is what keeps a Chartmetric outage
@@ -29,7 +30,9 @@ import { fetchTerritories, type TerritoriesResult } from '@/lib/chartmetric/terr
 export const dynamic = 'force-dynamic';
 export const maxDuration = 60;
 
-const TTL_SECONDS = 12 * 60 * 60;
+const WEEK_MS = 7 * 24 * 60 * 60 * 1000;
+const RETENTION_SECONDS = 30 * 24 * 60 * 60;
+const RETRY_SECONDS = 24 * 60 * 60;
 
 async function kv() {
   const url = process.env.UPSTASH_REDIS_REST_URL ?? process.env.KV_REST_API_URL;
@@ -62,22 +65,43 @@ export async function GET(req: NextRequest, ctx: { params: Promise<{ slug: strin
 
   const store = await kv();
   const key = `cm:territories:${channelId}`;
-
-  if (store) {
-    const hit = (await store.get(key)) as TerritoriesResult | null;
-    // Preserve valid country snapshots (including Ezra's existing view),
-    // but let pre-fix city-only snapshots try the dated country lookup once.
-    if (hit && (!hit.ok || hit.countries.length > 0 || hit.countryLookupVersion === 2)) {
-      return NextResponse.json(hit, { status: 200 });
+  // Vendor calls require the shared cache/lock so page visits cannot
+  // silently turn into uncached Chartmetric spending during a KV outage.
+  if (!store) return fail('cache-unavailable');
+  const hit = (await store.get(key)) as TerritoriesResult | null;
+  const cached = () => hit?.ok ? NextResponse.json(hit) : fail('temporarily-unavailable');
+  if (hit?.ok && hit.countryLookupVersion === 3 && hit.countryLookupComplete !== false) {
+    const age = Date.now() - Date.parse(hit.fetchedAt);
+    if (Number.isFinite(age) && age >= 0 && age < WEEK_MS) return NextResponse.json(hit);
+  }
+  const retryKey = `cm:territories:retry:${channelId}`;
+  if (await store.get(retryKey)) return cached();
+  const locked = await store.set(`cm:territories:lock:${channelId}`, true, { nx: true, ex: 90 });
+  if (!locked) {
+    if (hit?.ok) return cached();
+    // A cold concurrent visitor waits for the first result, not a second
+    // Chartmetric refresh. Existing-data visitors return immediately.
+    for (let i = 0; i < 25; i++) {
+      await new Promise((resolve) => setTimeout(resolve, 1500));
+      const ready = (await store.get(key)) as TerritoriesResult | null;
+      if (ready?.ok) return NextResponse.json(ready);
+      if (await store.get(retryKey)) break;
     }
+    return fail('refresh-in-progress');
   }
+  // Keep the last successful reading available while the new one is checked.
+  if (hit?.ok) await store.set(key, hit, { ex: RETENTION_SECONDS });
 
-  const result = await fetchTerritories({ slug: artist.slug, name: artist.name }, channelId);
-
-  // Only cache success. A transient failure should be retried, not pinned.
-  if (store && result.ok && result.countryLookupComplete !== false) {
-    await store.set(key, result, { ex: TTL_SECONDS });
+  try {
+    const result = await fetchTerritories({ slug: artist.slug, name: artist.name }, channelId);
+    if (result.ok && result.countryLookupComplete !== false) {
+      await store.set(key, result, { ex: RETENTION_SECONDS });
+      return NextResponse.json(result);
+    }
+    await store.set(retryKey, true, { ex: RETRY_SECONDS });
+    return hit?.ok ? cached() : NextResponse.json(result);
+  } catch {
+    await store.set(retryKey, true, { ex: RETRY_SECONDS });
+    return cached();
   }
-
-  return NextResponse.json(result, { status: 200 });
 }

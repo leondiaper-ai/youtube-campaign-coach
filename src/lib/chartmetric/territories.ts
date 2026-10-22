@@ -116,7 +116,7 @@ export type TerritoryRow = {
 export type Territories = {
   ok: true;
   /** Allows old city-only cache entries to be retried after the date fallback fix. */
-  countryLookupVersion?: 2;
+  countryLookupVersion?: 3;
   /** Present only for the explicit, bounded country-stat fallback. */
   countryMarketsChecked?: number;
   countryLookupComplete?: boolean;
@@ -187,7 +187,16 @@ const hasCountries = (response: RawResponse) =>
  * a mixture of readings from different dates. The normal cache bounds cost.
  */
 async function completeCountryCoverage(id: number, latest: RawResponse): Promise<RawResponse> {
-  if (hasCountries(latest)) return latest;
+  const readingDate = (data: RawResponse) => {
+    const rows = [...(data.obj?.insights?.countries ?? []), ...(data.obj?.insights?.cities ?? [])];
+    return deriveReportingDate(rows) ?? rows[0]?.timestp?.slice(0, 10) ?? '';
+  };
+  const freshSince = new Date(Date.now() - 7 * 86_400_000).toISOString().slice(0, 10);
+  let best = hasCountries(latest) ? latest : null;
+  const prefer = (candidate: RawResponse | null) => {
+    if (candidate && (!best || readingDate(candidate) > readingDate(best))) best = candidate;
+  };
+  if (best && readingDate(best) >= freshSince) return best;
   const today = new Date().toISOString().slice(0, 10);
   const yesterday = new Date(Date.now() - 86_400_000).toISOString().slice(0, 10);
   const tried = new Set([today]);
@@ -200,22 +209,31 @@ async function completeCountryCoverage(id: number, latest: RawResponse): Promise
     return result.ok && result.data && hasCountries(result.data) ? result.data : null;
   };
   const recent = await dated(yesterday);
-  if (recent) return recent;
+  prefer(recent);
+  if (best && readingDate(best) >= freshSince) return best;
+  let newestStatDate = '';
+  let discoveryComplete = true;
 
   // Two fixed discovery markets, not an unrestricted API proxy or world scan.
   for (const code of ['US', 'AU']) {
     const stat = await cmFetch<{ obj?: { monthly_views?: { timestp?: string | null }[] } }>(
       `/api/artist/${id}/stat/youtube_artist?field=monthly_views&code2=${code}&latest=true`,
     );
-    if (!stat.ok) continue;
+    if (!stat.ok) { discoveryComplete = false; continue; }
     const dates = (stat.data?.obj?.monthly_views ?? [])
       .map((point) => point.timestp?.slice(0, 10) ?? '')
-      .filter((date) => /^\d{4}-\d{2}-\d{2}$/.test(date) && date < today)
+      .filter((date) => /^\d{4}-\d{2}-\d{2}$/.test(date) && date <= today)
       .sort().reverse();
     const date = dates[0];
     if (!date) continue;
+    if (date > newestStatDate) newestStatDate = date;
     const snapshot = await dated(date);
-    if (snapshot) return snapshot;
+    prefer(snapshot);
+    if (best && readingDate(best) >= freshSince) return best;
+  }
+  // If the source has not advanced, stop here rather than re-scan 28 markets.
+  if (best && newestStatDate <= readingDate(best)) {
+    return { ...best, lookupComplete: discoveryComplete };
   }
   // Some artists (Rops1) have country stats but no country coverage even
   // on the reporting date. Check our configured markets, never infer a
@@ -236,10 +254,11 @@ async function completeCountryCoverage(id: number, latest: RawResponse): Promise
     readings.push({ name: market.name, code2: market.code, value: point.value,
       timestp: point.timestp!.slice(0, 10), is_estimate: point.is_estimate });
   }
-  if (!readings.length) return { ...latest, lookupComplete: complete };
+  if (!readings.length) return { ...(best ?? latest), lookupComplete: complete };
   // Keep countries comparable: do not combine latest readings from different days.
   const dates = readings.map((r) => r.timestp!).sort();
   const reporting = dates[dates.length - 1];
+  if (best && reporting <= readingDate(best)) return { ...best, lookupComplete: complete };
   return {
     statsMarketsChecked: Object.keys(MARKETS).length,
     lookupComplete: complete,
@@ -384,7 +403,7 @@ export async function fetchTerritories(
 
   return {
     ok: true,
-    countryLookupVersion: 2,
+    countryLookupVersion: 3,
     countryMarketsChecked: coverage.statsMarketsChecked,
     countryLookupComplete: coverage.lookupComplete ?? true,
     artist: { slug: artist.slug, name: artist.name, channelId },
