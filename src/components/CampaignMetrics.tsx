@@ -17,22 +17,32 @@ export default function CampaignMetrics({ campaign }: { campaign: CampaignWindow
           <h3 className="text-[11px] font-black uppercase tracking-[0.14em]" style={{ color: '#2C25FF' }}>Campaign</h3>
           <span className="text-[12px] font-bold text-ink/60 tabular-nums">Day {campaign.campaignDay}</span>
         </div>
-        <dl className="grid grid-cols-2 gap-4">
+        <dl className="grid grid-cols-2 sm:grid-cols-4 gap-x-4 gap-y-5">
           <div className="flex flex-col">
             <dt className="text-[12px] font-bold text-ink/70 mt-2">Campaign video views</dt>
             <dd className="order-first text-[32px] sm:text-[40px] leading-none font-black tracking-tight tabular-nums text-ink">
               {campaign.contentViews != null ? fmtNum(campaign.contentViews) : '—'}
             </dd>
-            <p className="order-last text-[11px] text-ink/45 mt-1">Views on campaign uploads</p>
+            <dd className="order-last text-[11px] text-ink/45 mt-1">Views on campaign uploads</dd>
           </div>
           <div className="flex flex-col">
-            <dt className="text-[12px] font-bold text-ink/70 mt-2">Campaign uploads</dt>
+            <dt className="text-[12px] font-bold text-ink/70 mt-2">Campaign assets</dt>
             <dd className="order-first text-[32px] sm:text-[40px] leading-none font-black tracking-tight tabular-nums text-ink">
               {campaign.contentMix.uploads}
             </dd>
-            <p className="order-last text-[11px] text-ink/45 mt-1">
-              {campaign.contentMix.videos} long-form · {campaign.contentMix.shorts} Shorts
-            </p>
+            <dd className="order-last text-[11px] text-ink/45 mt-1">Posted during the campaign</dd>
+          </div>
+          <div className="flex flex-col">
+            <dt className="text-[12px] font-bold text-ink/70 mt-2">Shorts</dt>
+            <dd className="order-first text-[32px] sm:text-[40px] leading-none font-black tracking-tight tabular-nums text-ink">
+              {campaign.contentMix.shorts}
+            </dd>
+          </div>
+          <div className="flex flex-col">
+            <dt className="text-[12px] font-bold text-ink/70 mt-2">Long-form</dt>
+            <dd className="order-first text-[32px] sm:text-[40px] leading-none font-black tracking-tight tabular-nums text-ink">
+              {campaign.contentMix.videos}
+            </dd>
           </div>
         </dl>
       </div>
