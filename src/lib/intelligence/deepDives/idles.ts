@@ -295,13 +295,22 @@ export const IDLES_DEEP_DIVE: DeepDiveContext = {
         "premiere_behaviour",
         "community_activation"
       ]
+    },
+    {
+      "point": "Discuss an IDLES YouTube Station as a home between releases.",
+      "basis": "YouTube Stations is a continuous 24/7 stream of curated videos. The deck proposes existing music videos, owned live, lyrics and making-of footage, using Metallica TV (1fz60gNnSdU) as a programming reference only. Access and setup require confirmation with YouTube; no launch or uplift is assumed.",
+      "needTags": [
+        "catalogue_activation",
+        "long_form_event"
+      ]
     }
   ],
   "openQuestions": [
     "Which songs, release priorities and assets will the label confirm for the next album?",
     "What rehearsal, studio, tour and archive footage is usable, cleared and worth watching in full?",
     "What do Studio retention, returning viewers and traffic sources show beyond public views?",
-    "Who owns homepage preparation, playlists, uploads and fan responses?"
+    "Who owns homepage preparation, playlists, uploads and fan responses?",
+    "Can YouTube enable an IDLES Station, and which existing videos should programme it?"
   ],
   "transcribedBy": "Codex — refreshed deck and direct Watcher/API research",
   "transcribedAt": "2026-10-22",
