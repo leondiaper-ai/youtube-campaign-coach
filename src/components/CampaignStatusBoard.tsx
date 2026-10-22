@@ -11,7 +11,7 @@ import {
 } from '@/lib/youtubeGrowthOS';
 import CampaignBehaviour from './CampaignBehaviour';
 import {
-  DecisionCard, DecisionSectionHeader, WeeklySummary, DormantBlock,
+  DecisionCard, DecisionSectionHeader, DormantBlock,
   SectionIssueNote, classifyCard, whatHappening, getGrowthRead,
   type CardData, type AvailableArtist,
 } from './CampaignDecisionCard';
@@ -357,9 +357,6 @@ export default function CampaignStatusBoard({
         </div>
       ) : (
         <div className="space-y-10">
-          {/* ─── Weekly YouTube Read ────────────────────────────────── */}
-          <WeeklySummary cards={cards} />
-
           {/* ─── PUSH — Strong performance, ready to scale ──────────── */}
           {pushCards.length > 0 && (
             <div>
