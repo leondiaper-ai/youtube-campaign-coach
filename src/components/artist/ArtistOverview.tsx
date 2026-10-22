@@ -45,6 +45,12 @@ import { Eyebrow, Metric, VideoGrid, INK, RULE, GAIN, LOSS } from './primitives'
 const LF_BLUE = '#2C6BFF';
 const SH_AMBER = '#C77A16';
 
+/** Singular names for the asset a team should line up. */
+function supportAsset(type: string, fallback: string): string {
+  return ({ LYRIC_VIDEO: 'lyric video', VISUALIZER: 'visualiser', LIVE: 'live video', BTS: 'BTS film' } as Record<string, string>)[type] ?? fallback.toLowerCase();
+}
+
+
 /** A share, keeping one decimal where rounding would erase the number. */
 function sharePct(x: number): string {
   if (x <= 0) return '0%';
@@ -121,6 +127,9 @@ export default async function ArtistOverview({
   const catalogue = await readCatalogue(slug).catch(() => null);
   const perfUploads = catalogue?.videos.length ? catalogueAsUploads(catalogue) : uploads;
   const perf = formatPerformance(perfUploads, catalogue?.videos.length ? 36_500 : 365);
+  const nextAsset = perf.bestSupport ? supportAsset(perf.bestSupport.type, perf.bestSupport.label) : null;
+  const nextAlternative = !perf.clear && perf.support.length > 1
+    ? supportAsset(perf.support[1].type, perf.support[1].label) : null;
   /* Free — commentCount is already on every cached upload. */
   const demand = commentDemand(uploads);
 
@@ -299,16 +308,9 @@ export default async function ArtistOverview({
           </div>
         )}
 
-        {/* ── BEST ASSET AFTER THE VIDEO ───────────────────────────
-            Condensed to a glance. The full version carried its own
-            headline sentence, upload counts, median ages and a
-            four-line caption; all of that is still true and almost
-            none of it was being read. What survives is the ranking,
-            the number, and the one comparison that makes the number
-            mean anything — this channel against the roster. The rest
-            moved into the row's own tooltip. */}
+        {/* Turn historical format performance into a practical next-asset choice. */}
         <div>
-            <Eyebrow>Best asset after the video</Eyebrow>
+            <Eyebrow>What to line up next</Eyebrow>
             {/* ── NOTHING READABLE YET ──────────────────────────────
                 The section still prints. The question it answers —
                 what should we make after the video — does not stop
@@ -388,20 +390,26 @@ export default async function ArtistOverview({
             )}
             {perf.support.length > 0 && (
               <>
-            {perf.bestSupport && (
-              <div className="text-[13px] text-ink mt-2.5 leading-snug">
-                <strong>{FORMAT_PLURAL[perf.bestSupport.type] ?? `${perf.bestSupport.label}s`}</strong>
-                {perf.bestSupport.vsHero != null && (
-                  <span className="text-ink/55">
-                    {' '}— {Math.round(perf.bestSupport.vsHero * 100)}% of an official video here
-                  </span>
-                )}
-                {!perf.clear && perf.support.length > 1 && (
-                  <span className="text-ink/40">, but close to {(FORMAT_PLURAL[perf.support[1].type] ?? `${perf.support[1].label}s`).toLowerCase()}</span>
-                )}
+            {perf.bestSupport && nextAsset && (
+              <div className="mt-2.5">
+                <div className="text-[15px] font-bold text-ink leading-snug">
+                  Line up a {nextAsset}{nextAlternative ? ` or ${nextAlternative}` : ''}
+                </div>
+                <div className="mt-2 space-y-1.5 text-[12px] text-ink/65 leading-relaxed">
+                  <p><strong className="text-ink/85">No official video planned?</strong> Make {nextAlternative ? 'one of these' : `a ${nextAsset}`} the main full-length asset for the release.</p>
+                  <p><strong className="text-ink/85">Video performing well?</strong> Line up {nextAlternative ? 'one of these' : `a ${nextAsset}`} as the follow-up while interest is high.</p>
+                </div>
+                <p className="text-[11px] text-ink/45 mt-2 leading-relaxed">
+                  {FORMAT_PLURAL[perf.bestSupport.type] ?? `${perf.bestSupport.label}s`} have the highest median views among this channel&rsquo;s supporting formats
+                  {nextAlternative ? `, with ${FORMAT_PLURAL[perf.support[1].type]?.toLowerCase() ?? perf.support[1].label.toLowerCase()} close behind` : ''}.
+                </p>
               </div>
             )}
 
+            <div className="flex justify-end gap-2 text-[9px] text-ink/40 mt-3 mb-1 uppercase tracking-wide">
+              <span className="w-[46px] text-right">Median views</span>
+              <span className="w-[92px] text-right">Channel / roster</span>
+            </div>
             <div className="mt-3 space-y-1.5">
               {perf.support.map((r) => {
                 const top = perf.support[0].median || 1;
@@ -470,12 +478,9 @@ export default async function ArtistOverview({
               </div>
             )}
 
-            {/* The caption that stood here explained the two percentages,
-                printed the official-video median and defined the dot. Cut:
-                the pair reads as "ours / theirs" without being told, and
-                everything else it said is on the row it qualifies — the
-                dot carries its own title, and the row tooltip has the
-                upload count, the median age and the age-bias caveat. */}
+            <p className="text-[10px] text-ink/35 mt-2 leading-relaxed">
+              Percentages compare each format&rsquo;s median views with official videos: this channel / roster benchmark. Historical results, not a forecast.
+            </p>
               </>
             )}
           </div>
