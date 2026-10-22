@@ -218,18 +218,6 @@ export function getGrowthRead(card: CardData): GrowthRead {
 
 export type AvailableArtist = { slug: string; name: string };
 
-function fmtNoteDate(iso: string) {
-  const d = new Date(iso);
-  const now = new Date();
-  const dateStr = d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
-  const dDay = new Date(d.getFullYear(), d.getMonth(), d.getDate());
-  const nDay = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-  const diffDays = Math.round((nDay.getTime() - dDay.getTime()) / 86400000);
-  if (diffDays === 0) return `today · ${dateStr}`;
-  if (diffDays === 1) return `yesterday · ${dateStr}`;
-  if (diffDays < 7) return `${diffDays}d ago · ${dateStr}`;
-  return dateStr;
-}
 
 export function gsFor(cs: ChannelState) { return channelStateToGrowthState(cs); }
 
@@ -743,7 +731,6 @@ function StructureWarningLine({ warning }: { warning: StructureWarning }) {
 export function DecisionCard({
   card,
   onUnpin,
-  onNotesChange,
   onViewBehaviour,
   api = CAMPAIGN_API,
 }: {
@@ -754,9 +741,6 @@ export function DecisionCard({
   /** Where notes are written and whether snapshots exist. */
   api?: CardApi;
 }) {
-  const [noteInput, setNoteInput] = useState('');
-  const [saving, setSaving] = useState(false);
-  const [expanded, setExpanded] = useState(false);
   const [showDetail, setShowDetail] = useState(false);
   const [showWeeks, setShowWeeks] = useState(false);
   const [snapshot, setSnapshot] = useState<string | null>(null);
@@ -769,28 +753,6 @@ export function DecisionCard({
   const cardBorder = isFix ? dStyle.border : MUTED;
   const cw = card.campaignWindow;
   const ct = card.campaignTrend;
-
-  async function addNote() {
-    if (!noteInput.trim()) return;
-    setSaving(true);
-    try {
-      const notes = await api.addNote(card.slug, noteInput.trim());
-      if (notes) {
-        onNotesChange(card.slug, notes);
-        setNoteInput('');
-      }
-    } finally {
-      setSaving(false);
-    }
-  }
-
-  async function deleteNote(noteId: string) {
-    const notes = await api.deleteNote(card.slug, noteId);
-    if (notes) onNotesChange(card.slug, notes);
-  }
-
-  const latestNote = card.notes.length > 0 ? card.notes[0] : null;
-  const hasMoreNotes = card.notes.length > 1;
 
   return (
     <div
@@ -1155,79 +1117,6 @@ export function DecisionCard({
         </div>
       )}
 
-      {/* ─── Notes ───────────────────────────────────────────────────── */}
-      <div style={{ borderTop: `1px solid ${SOFT}` }} className="pt-3">
-        {latestNote && (
-          <div className="flex items-start gap-2 mb-2">
-            <div className="flex-1 min-w-0">
-              <div className="text-[12px] text-ink/50 leading-snug truncate">
-                <span className="font-bold text-ink/60">{latestNote.tag ? `${latestNote.tag}: ` : ''}</span>
-                {latestNote.text}
-              </div>
-              <div className="text-[10px] text-ink/25 mt-0.5">{fmtNoteDate(latestNote.createdAt)}</div>
-            </div>
-            <button
-              onClick={() => deleteNote(latestNote.id)}
-              className="text-[12px] text-ink/20 hover:text-ink/50 shrink-0"
-            >
-              &times;
-            </button>
-          </div>
-        )}
-
-        {hasMoreNotes && (
-          <div className="mb-2">
-            <button
-              onClick={() => setExpanded(!expanded)}
-              className="text-[11px] text-ink/30 hover:text-ink/50"
-            >
-              {expanded ? 'Hide older notes' : `+${card.notes.length - 1} more`}
-            </button>
-            {expanded && (
-              <div className="mt-2 space-y-1.5">
-                {card.notes.slice(1).map((n) => (
-                  <div key={n.id} className="flex items-start gap-2">
-                    <div className="flex-1 min-w-0">
-                      <div className="text-[12px] text-ink/40 leading-snug truncate">
-                        <span className="font-bold text-ink/50">{n.tag ? `${n.tag}: ` : ''}</span>
-                        {n.text}
-                      </div>
-                      <div className="text-[10px] text-ink/20 mt-0.5">{fmtNoteDate(n.createdAt)}</div>
-                    </div>
-                    <button
-                      onClick={() => deleteNote(n.id)}
-                      className="text-[12px] text-ink/20 hover:text-ink/50 shrink-0"
-                    >
-                      &times;
-                    </button>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        )}
-
-        <div className="flex items-center gap-2">
-          <input
-            value={noteInput}
-            onChange={(e) => setNoteInput(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && addNote()}
-            placeholder="Add a note…"
-            className="flex-1 text-[12px] px-2.5 py-1.5 rounded-md border-0 outline-none"
-            style={{ background: SOFT, color: INK }}
-          />
-          {noteInput.trim() && (
-            <button
-              onClick={addNote}
-              disabled={saving}
-              className="text-[11px] font-bold px-2.5 py-1.5 rounded-md disabled:opacity-40"
-              style={{ background: INK, color: PAPER }}
-            >
-              {saving ? '…' : 'Add'}
-            </button>
-          )}
-        </div>
-      </div>
         </div>
 
       {/* ─── The work ───────────────────────────────────────────────
