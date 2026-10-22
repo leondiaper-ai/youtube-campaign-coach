@@ -310,7 +310,7 @@ export const IDLES_DEEP_DIVE: DeepDiveContext = {
     "Shorts counts use the existing full-catalogue duration proxy of up to 62 seconds, not verified native YouTube format classification.",
     "TANGK window: 1 August 2023–30 December 2024. All video views are lifetime readings on 22 October 2026, not campaign-period views.",
     "Different upload ages, audiences and distribution prevent causal or like-for-like performance claims; Shorts and long-form view counts are not equivalent measures.",
-    "Previous five-asset Bataclan / 16.7× comparison is withdrawn: this pull returned four title-matched uploads.",
+    "Previous five-asset Bataclan / 16.7× comparison is withdrawn: this pull returned four full-length title-matched uploads plus one 38-second clip.",
     "A small newest-comment sample is qualitative only; the one quoted comment is not an audience survey.",
     "Homepage observation is public and may differ by viewer; no private Studio settings or analytics were inspected.",
     "No announced release date, timetable, budget or confirmed next-album plan assumed. Ezra is a narrative reference, not a performance benchmark."
