@@ -1,0 +1,922 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Flight Facilities × YouTube</title>
+<meta name="description" content="Flight Facilities × YouTube · what works on the channel, how the Forever era did, and a plan for the next album · Virgin Music Group UK · 21 October 2026">
+
+<!--
+  FLIGHT FACILITIES × YOUTUBE — channel deep dive and album preparation · v1 · 21 Oct 2026
+  Virgin Music Group UK
+
+  EDITORIAL UPDATE · 23 Oct 2026
+  12 slides: channel → Forever → strengths → videos → mixes → edits → live
+  → fan signals → Station → next-album architecture → three priorities.
+  Existing 21 Oct research retained; no fresh API requests.
+
+  DATA: @flightfacilities (UCvBxvcqGSQkbs1BRafBIYSg), all 299 public uploads via the
+  Watcher (/api/full-catalogue), 21 Oct 2026; daily readings for 60 recent uploads,
+  29 Sep – 21 Oct; comments on 12 videos; playlists via /api/channel-shelf.
+  The public channel views counter did not move over the period, so it isn't used.
+
+  CONSTRUCTION — the departures board: navy and the red/white chevron of the FF wings,
+  split-flap amber for labels, window-shaped thumbnails. Big Shoulders (airport
+  signage) for headlines, IBM Plex Mono for board text.
+-->
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@700;800;900&family=IBM+Plex+Mono:wght@400;500;600&family=Inter+Tight:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+:root{
+  --navy:#0D1830;
+  --navy-2:#142344;
+  --navy-3:#1B2D55;
+  --cream:#F2EDE3;
+  --warm:#C3C8D4;
+  --dim:#8790A6;
+  --red:#E1363C;
+  --amber:#F4B740;
+  --sky:#7DB4E8;
+  --line:rgba(242,237,227,.14);
+  --pad:clamp(1.6rem,5vw,5.5rem);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--navy);color:var(--cream);font-family:'Inter Tight',system-ui,sans-serif;font-size:clamp(15px,1.05vw,18px);line-height:1.55;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+a{color:inherit;text-decoration:none}
+img{display:block}
+b{font-weight:600}
+
+/* type */
+.display{font-family:'Big Shoulders Display',sans-serif;font-weight:900;text-transform:uppercase;line-height:.9;letter-spacing:.005em}
+h1.display{font-size:clamp(3.4rem,9.5vw,8.6rem)}
+h2.display{font-size:clamp(2.2rem,4.6vw,4rem);max-width:20ch}
+.display .r{color:var(--red)} .display .a{color:var(--amber)} .display .s{color:var(--sky)}
+.board{font-family:'IBM Plex Mono',monospace;font-weight:500;font-size:.82rem;letter-spacing:.08em;text-transform:uppercase;color:var(--amber)}
+.tag{display:inline-flex;gap:.6rem;align-items:center;font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:.78rem;letter-spacing:.1em;text-transform:uppercase;background:var(--cream);color:var(--navy);padding:.3rem .7rem .28rem}
+.tag i{font-style:normal;color:var(--red)}
+.fig{font-family:'Big Shoulders Display',sans-serif;font-weight:800;line-height:.9;font-variant-numeric:tabular-nums}
+.body{color:var(--warm);max-width:62ch}
+.body b{color:var(--cream)}
+.src{font-family:'IBM Plex Mono',monospace;font-size:.72rem;letter-spacing:.02em;line-height:1.45;color:var(--dim);border-left:2px solid var(--line);padding-left:.7rem;max-width:96ch;margin-top:1rem}
+
+/* chevron stripe — the FF wings */
+.chev{position:absolute;top:0;left:0;right:0;height:6px;background:linear-gradient(90deg,var(--red) 0 33.3%,var(--cream) 33.3% 66.6%,var(--sky) 66.6% 100%);opacity:.9;z-index:5}
+
+/* slides */
+.deck{padding-top:48px}
+.slide{position:relative;min-height:100vh;display:flex;flex-direction:column;justify-content:center;padding:5rem var(--pad) 3.4rem;overflow:hidden;border-bottom:1px solid var(--line)}
+.slide.alt{background:var(--navy-2)}
+.slide.cream{background:var(--cream);color:var(--navy)}
+.slide.cream .body{color:#3E4660} .slide.cream .body b{color:var(--navy)}
+.slide.cream .src{color:#6A7290;border-color:rgba(13,24,48,.18)}
+.slide.cream .tag{background:var(--navy);color:var(--cream)}
+.slide.red{background:var(--red)}
+.inner{position:relative;z-index:3;width:100%;max-width:1400px;margin:0 auto}
+.bleed{position:absolute;inset:0;z-index:0}
+.bleed img{width:100%;height:100%;object-fit:cover}
+.scrim-b::after{content:'';position:absolute;inset:0;background:linear-gradient(to top,rgba(13,24,48,.97) 14%,rgba(13,24,48,.6) 48%,rgba(13,24,48,.15) 85%)}
+.board-corner{position:absolute;z-index:4;top:clamp(1.2rem,3vh,2rem);left:var(--pad);right:var(--pad);display:flex;justify-content:space-between}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:clamp(1.4rem,3.6vw,3.4rem)}
+.grid2>*{min-width:0}
+@media(max-width:880px){.grid2{grid-template-columns:1fr!important}}
+.means{margin-top:1.4rem;border-left:5px solid var(--amber);padding:.15rem 0 .15rem 1rem;max-width:780px}
+.means .board{font-size:.74rem}
+.means p{font-size:clamp(1.02rem,1.55vw,1.3rem);font-weight:600;line-height:1.35;margin-top:.25rem}
+.slide.cream .means{border-color:var(--red)} .slide.cream .means .board{color:var(--red)}
+
+/* window thumbnails */
+.win{position:relative;display:block;border-radius:14px;overflow:hidden;background:var(--navy-3)}
+.win img{width:100%;aspect-ratio:16/9;object-fit:cover}
+.win .o{position:absolute;left:.55rem;top:.45rem;z-index:2;font-family:'IBM Plex Mono',monospace;font-size:.66rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;background:rgba(13,24,48,.8);color:var(--amber);padding:.1rem .4rem}
+.v .win img{aspect-ratio:9/13}
+.cap{margin-top:.45rem}
+.cap b{display:block;font-size:.86rem;line-height:1.25}
+.cap span{font-family:'IBM Plex Mono',monospace;font-size:.68rem;color:var(--dim);letter-spacing:.03em}
+.cap .fig{font-size:clamp(1.5rem,2.4vw,2.1rem);margin-top:.15rem;color:inherit}
+
+/* stats */
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:clamp(.8rem,2vw,2rem);margin-top:1.4rem}
+@media(max-width:880px){.stats{grid-template-columns:1fr 1fr}}
+.stat{border-top:3px solid var(--red);padding-top:.55rem}
+.stat:nth-child(2){border-color:var(--cream)} .stat:nth-child(3){border-color:var(--sky)} .stat:nth-child(4){border-color:var(--amber)}
+.stat .fig{font-size:clamp(2.3rem,4.4vw,3.8rem)}
+.stat p{font-size:.84rem;color:var(--warm);margin-top:.3rem;line-height:1.35}
+.row6{display:grid;grid-template-columns:repeat(6,1fr);gap:clamp(.7rem,1.5vw,1.2rem);margin-top:1.4rem}
+@media(max-width:1000px){.row6{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:560px){.row6{grid-template-columns:1fr 1fr}}
+.row4{display:grid;grid-template-columns:repeat(4,1fr);gap:.8rem}
+@media(max-width:700px){.row4{grid-template-columns:1fr 1fr}}
+.row3{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem}
+@media(max-width:700px){.row3{grid-template-columns:1fr}}
+
+/* split */
+.split{display:grid;grid-template-columns:1.5fr 1fr;gap:clamp(1.2rem,3vw,3rem);margin-top:1.3rem;align-items:start}
+@media(max-width:900px){.split{grid-template-columns:1fr}}
+.side h3{font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:.74rem;letter-spacing:.1em;text-transform:uppercase;color:var(--amber);margin-bottom:.6rem}
+.list{list-style:none}
+.list li{display:flex;justify-content:space-between;gap:1rem;padding:.48rem 0;border-bottom:1px solid var(--line);font-size:.86rem;color:var(--warm)}
+.list li b{font-family:'Big Shoulders Display',sans-serif;font-weight:800;font-size:1.15rem;color:var(--cream);white-space:nowrap}
+.quote{background:var(--cream);color:var(--navy);padding:.8rem 1rem;margin-top:.7rem;font-weight:600;line-height:1.3;border-left:6px solid var(--red)}
+.quote span{display:block;font-family:'IBM Plex Mono',monospace;font-size:.66rem;font-weight:500;color:#5A6280;margin-top:.3rem;letter-spacing:.04em}
+.obs{display:grid;grid-template-columns:1fr 1fr;gap:clamp(1rem,2.4vw,2.4rem);margin-top:1.2rem}
+@media(max-width:820px){.obs{grid-template-columns:1fr}}
+.obs>div{border-left:5px solid var(--amber);padding:.1rem 0 .1rem 1rem}
+.obs>div:first-child{border-color:var(--dim)}
+.obs .board{font-size:.72rem} .obs>div:first-child .board{color:var(--warm)}
+.obs p{font-size:clamp(.92rem,1.25vw,1.06rem);font-weight:600;line-height:1.35;margin-top:.2rem}
+
+/* departures timeline */
+.dep{margin-top:1.4rem;border-top:2px solid var(--cream)}
+.dep .r{display:grid;grid-template-columns:7.5rem 1fr 9rem;gap:1rem;align-items:baseline;padding:.5rem 0;border-bottom:1px solid var(--line)}
+.dep .when{font-family:'IBM Plex Mono',monospace;font-size:.78rem;font-weight:600;color:var(--amber);letter-spacing:.06em;text-transform:uppercase}
+.dep .what{font-size:.92rem;line-height:1.35} .dep .what span{color:var(--dim);font-size:.82rem}
+.dep .n{font-family:'Big Shoulders Display',sans-serif;font-weight:800;font-size:1.35rem;text-align:right;white-space:nowrap}
+.dep .r.hi .what b{color:var(--amber)}
+.dep .r.quiet .when{color:var(--red)}
+@media(max-width:640px){.dep .r{grid-template-columns:5.5rem 1fr;}.dep .n{grid-column:2;text-align:left}}
+
+/* keep / change */
+.kc{display:grid;grid-template-columns:1fr 1fr;gap:3px;margin-top:1.4rem}
+@media(max-width:880px){.kc{grid-template-columns:1fr}}
+.kc>div{background:var(--navy-3);padding:1.1rem 1.2rem}
+.kc h3{font-family:'Big Shoulders Display',sans-serif;font-weight:900;text-transform:uppercase;font-size:1.7rem;line-height:1}
+.kc .k h3{color:var(--sky)} .kc .c h3{color:var(--amber)}
+.kc ul{list-style:none;margin-top:.6rem}
+.kc li{padding:.55rem 0;border-top:1px solid var(--line);font-size:.9rem;line-height:1.4;color:var(--warm)}
+.kc li b{color:var(--cream);display:block}
+
+/* peers */
+.peers{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(1rem,2.4vw,2.2rem);margin-top:1.4rem}
+@media(max-width:980px){.peers{grid-template-columns:1fr}}
+.peer h3{font-family:'Big Shoulders Display',sans-serif;font-weight:900;text-transform:uppercase;font-size:clamp(1.4rem,2vw,1.8rem);line-height:1;margin-top:.7rem}
+.peer .sz{font-family:'IBM Plex Mono',monospace;font-size:.68rem;color:var(--dim);letter-spacing:.04em}
+.peer .idea{font-size:.9rem;margin-top:.45rem;line-height:1.4;color:var(--warm)}
+.peer .idea b{color:var(--cream)}
+.peer .adapt{font-size:.88rem;margin-top:.55rem;line-height:1.4;border-left:3px solid var(--red);padding-left:.6rem}
+.peer .adapt span{display:block;font-family:'IBM Plex Mono',monospace;font-size:.66rem;font-weight:600;color:var(--red);text-transform:uppercase;letter-spacing:.08em}
+.slide.alt .peer .win img{aspect-ratio:16/8}
+
+/* tiers */
+.tiers{display:grid;grid-template-columns:1.5fr 1fr 1fr;gap:3px;margin-top:1.4rem}
+@media(max-width:900px){.tiers{grid-template-columns:1fr}}
+.tier{background:var(--navy-3);padding:1rem 1.1rem}
+.tier .w{font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:.78rem;letter-spacing:.1em;text-transform:uppercase}
+.tier.t1{background:var(--cream);color:var(--navy)} .tier.t1 .w{color:var(--red)}
+.tier.t2 .w{color:var(--amber)} .tier.t3 .w{color:var(--dim)}
+.tier h4{font-family:'Big Shoulders Display',sans-serif;font-weight:900;text-transform:uppercase;font-size:clamp(1.3rem,1.9vw,1.6rem);line-height:1;margin-top:.3rem}
+.tier .lift{font-size:.8rem;color:var(--warm);margin-top:.25rem}
+.tier.t1 .lift{color:#4A5270}
+.tier ul{list-style:none;margin-top:.55rem}
+.tier li{font-size:.86rem;line-height:1.35;padding:.32rem 0 .32rem 1.05rem;position:relative;border-top:1px solid var(--line)}
+.tier.t1 li{border-color:rgba(13,24,48,.14)}
+.tier li::before{content:'';position:absolute;left:0;top:.68rem;width:7px;height:7px;background:var(--red);transform:rotate(45deg)}
+.tier.t2 li::before{background:var(--amber)}
+.tier.t3 li{color:var(--warm)} .tier.t3 li::before{background:transparent;border:1.5px solid var(--dim)}
+.month{margin-top:1.1rem;border:1px dashed rgba(244,183,64,.5);padding:.75rem 1rem}
+.mrow{display:grid;grid-template-columns:repeat(4,1fr);gap:.8rem;margin-top:.45rem}
+@media(max-width:820px){.mrow{grid-template-columns:1fr 1fr}}
+.mrow span{font-weight:600;font-size:.9rem;line-height:1.3;border-top:3px solid var(--red);padding-top:.35rem}
+.mrow span:nth-child(2){border-color:var(--cream)} .mrow span:nth-child(3){border-color:var(--sky)} .mrow span:nth-child(4){border-color:var(--amber)}
+.month p{font-size:.78rem;color:var(--dim);margin-top:.5rem}
+
+/* flight path */
+.fp{display:grid;grid-template-columns:repeat(6,1fr);gap:3px;margin-top:1.5rem}
+@media(max-width:1000px){.fp{grid-template-columns:1fr 1fr 1fr}}
+@media(max-width:560px){.fp{grid-template-columns:1fr}}
+.st6{background:var(--navy-3);padding:.9rem .85rem}
+.st6 .w{font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;color:var(--amber);line-height:1.25}
+.st6 ul{list-style:none;margin-top:.55rem}
+.st6 li{font-size:.84rem;line-height:1.35;padding:.3rem 0;border-top:1px solid var(--line)}
+.st6.r{background:var(--red)} .st6.r .w{color:var(--cream)} .st6.r li{border-color:rgba(255,255,255,.25)}
+.st6.k{outline:2px dashed var(--amber);outline-offset:-2px}
+
+/* checklist */
+.chk{display:grid;grid-template-columns:1fr 1fr;gap:3px;margin-top:1.4rem}
+@media(max-width:820px){.chk{grid-template-columns:1fr}}
+.ck{background:rgba(13,24,48,.06);padding:.85rem 1rem;display:grid;grid-template-columns:auto 1fr;gap:.9rem;align-items:start}
+.ck .n{font-family:'Big Shoulders Display',sans-serif;font-weight:900;font-size:1.7rem;line-height:1;color:var(--red)}
+.ck h4{font-size:.98rem;font-weight:700;line-height:1.25}
+.ck p{font-size:.84rem;color:#3E4660;margin-top:.2rem;line-height:1.4}
+.ck .stt{display:inline-block;margin-top:.4rem;font-family:'IBM Plex Mono',monospace;font-size:.64rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;padding:.05rem .4rem;border:1px solid rgba(13,24,48,.25);color:#3E4660}
+.ck .stt.ok{border-color:#2E7D4F;color:#2E7D4F}
+.ck a{border-bottom:1px solid rgba(13,24,48,.3)}
+
+/* next */
+.next{display:grid;grid-template-columns:1fr 1fr;gap:clamp(1.2rem,3vw,3rem);margin-top:1.4rem}
+@media(max-width:980px){.next{grid-template-columns:1fr}}
+.next h3{font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:.76rem;letter-spacing:.1em;text-transform:uppercase;opacity:.9}
+.act{display:grid;grid-template-columns:auto 1fr;gap:.9rem;padding:.75rem 0;border-top:1px solid rgba(255,255,255,.35)}
+.act .n{font-family:'Big Shoulders Display',sans-serif;font-weight:900;font-size:2.1rem;line-height:1}
+.act h4{font-size:1.05rem;font-weight:700;line-height:1.25}
+.act p{font-size:.86rem;color:#FFE2E2;margin-top:.2rem;line-height:1.4}
+
+
+/* v2 — timeline, premieres, lens, window, run, flow */
+.ctl{margin-top:1.3rem}
+.ctl svg{width:100%;height:auto;display:block;overflow:visible}
+.legend{display:flex;gap:1.4rem;flex-wrap:wrap;margin-top:.6rem;font-size:.72rem;color:var(--dim)}
+.legend span{display:inline-flex;align-items:center;gap:.4rem}
+.legend i{width:10px;height:10px;display:inline-block}
+.ptab{width:100%;border-collapse:collapse;margin-top:1.2rem;font-size:.86rem}
+.ptab th{text-align:left;font-family:'IBM Plex Mono',monospace;font-size:.66rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--amber);padding:.4rem .5rem;border-bottom:2px solid var(--cream)}
+.ptab td{padding:.42rem .5rem;border-bottom:1px solid var(--line)}
+.ptab td.r,.ptab th.r{text-align:right;font-variant-numeric:tabular-nums}
+.ptab .y{color:var(--sky)} .ptab .n{color:var(--red)}
+.ptab tr.off td{color:var(--dim)}
+.hub-out{display:grid;grid-template-columns:repeat(5,1fr);gap:.8rem;margin-top:2.4rem;max-width:1050px}
+@media(max-width:760px){.hub-out{grid-template-columns:1fr 1fr}}
+.hub-node{padding:1rem .8rem;border:1px solid var(--line);background:var(--navy-3);font-family:'IBM Plex Mono',monospace;font-size:.74rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;text-align:center}
+.hub-node.on{border-color:var(--amber);color:var(--amber)}
+.bar-row{margin-top:.5rem;display:flex;align-items:center;gap:.9rem}
+.bar-top{display:contents}
+.bar-name{flex:0 0 17rem;order:1} .bar-track{flex:1 1 auto;order:2} .bar-val{flex:0 0 6.5rem;order:3;text-align:right}
+@media(max-width:700px){.bar-row{flex-wrap:wrap;gap:.3rem}.bar-name{flex:1 1 auto}.bar-val{flex:0 0 auto}.bar-track{flex:1 1 100%;order:4}}
+.bar-name{font-size:.84rem;font-weight:600}
+.bar-name span{font-weight:400;color:var(--dim);font-size:.74rem;margin-left:.4rem}
+.bar-val{font-family:'Big Shoulders Display',sans-serif;font-weight:800;font-size:1.15rem}
+.bar-track{position:relative;height:16px;background:rgba(242,237,227,.07);overflow:hidden}
+.bar-fill{height:100%}
+.bar-track .win{position:absolute;z-index:2;top:0;bottom:0;border-left:1px dashed var(--sky);border-right:1px dashed var(--sky);background:rgba(125,180,232,.16)}
+.big0{font-family:'Big Shoulders Display',sans-serif;font-weight:900;font-size:clamp(4.5rem,11vw,8.5rem);color:var(--amber);line-height:.8}
+.run{display:flex;align-items:flex-end;gap:4px;margin-top:1.4rem;overflow-x:auto;padding-bottom:.5rem}
+.run-i{flex:0 0 auto;text-align:center;width:42px}
+.run-b{width:100%;background:var(--dim);opacity:.55}
+.run-i.hot .run-b{background:var(--red);opacity:1}
+.run-i.lf .run-b{background:var(--amber);opacity:1}
+.run-c{font-family:'IBM Plex Mono',monospace;font-size:.5rem;letter-spacing:.03em;text-transform:uppercase;color:var(--dim);margin-top:.35rem;line-height:1.3}
+.run-gap{flex:1 0 170px;border-top:2px dashed rgba(242,237,227,.3);margin:0 .4rem 30px;position:relative;min-width:170px}
+.run-gap span{position:absolute;top:-9px;left:50%;transform:translateX(-50%);background:var(--navy-2);padding:0 .6rem;font-family:'IBM Plex Mono',monospace;font-size:.6rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--red);white-space:nowrap}
+.flow{display:grid;grid-template-columns:repeat(6,1fr);gap:3px;margin-top:1.4rem}
+@media(max-width:1000px){.flow{grid-template-columns:1fr 1fr 1fr}}
+@media(max-width:560px){.flow{grid-template-columns:1fr}}
+.fs{background:var(--navy-3);padding:.9rem .85rem}
+.fs.key{background:var(--red)}
+.fs.win{outline:2px dashed var(--sky);outline-offset:-2px}
+.fs .w{font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:.68rem;letter-spacing:.08em;text-transform:uppercase;color:var(--amber)}
+.fs.key .w{color:var(--cream)} .fs.win .w{color:var(--sky)}
+.fs h4{font-family:'Big Shoulders Display',sans-serif;font-weight:900;text-transform:uppercase;font-size:1.25rem;line-height:1;margin-top:.3rem}
+.fs p{font-size:.8rem;color:var(--warm);margin-top:.35rem;line-height:1.38}
+.fs.key p{color:#FFE2E2}
+.fs .ev{display:block;margin-top:.45rem;font-family:'IBM Plex Mono',monospace;font-size:.62rem;color:var(--sky);line-height:1.35}
+.fs.key .ev{color:var(--cream)}
+
+
+/* v3 — formats, decade mix, edits, versions, fans, in-flight, rollout, recs */
+.fmt{margin-top:1.3rem;border-top:2px solid var(--cream)}
+.fr{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1.6fr) 6.5rem 8.5rem;gap:1rem;align-items:center;padding:.42rem 0;border-bottom:1px solid var(--line)}
+.fn{font-size:.9rem;font-weight:600;line-height:1.25} .fn span{display:block;font-weight:400;font-size:.72rem;color:var(--dim)}
+.fb{height:12px;background:rgba(242,237,227,.07)} .fb i{display:block;height:100%;background:var(--amber)}
+.fv{font-family:'Big Shoulders Display',sans-serif;font-weight:800;font-size:1.25rem;text-align:right;white-space:nowrap} .fv span{font-family:'IBM Plex Mono',monospace;font-weight:500;font-size:.62rem;color:var(--dim);margin-left:.3rem}
+.fx{font-family:'IBM Plex Mono',monospace;font-size:.62rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;text-align:center;padding:.2rem .3rem;border:1px solid}
+.fx.ev{border-color:var(--sky);color:var(--sky)} .fx.ex{border-color:var(--amber);color:var(--amber)} .fx.de{border-color:var(--dim);color:var(--dim)}
+@media(max-width:760px){.fr{grid-template-columns:1fr auto;grid-template-areas:"n v" "b b" "x x"}.fn{grid-area:n}.fb{grid-area:b}.fv{grid-area:v}.fx{grid-area:x;justify-self:start}}
+.scrim-l::after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,rgba(13,24,48,.97) 0%,rgba(13,24,48,.9) 45%,rgba(13,24,48,.45) 75%,rgba(13,24,48,.25) 100%)}
+.dm{display:grid;grid-template-columns:1fr 1fr;gap:clamp(1.2rem,3vw,3rem);margin-top:1.2rem;max-width:1000px}
+@media(max-width:880px){.dm{grid-template-columns:1fr}}
+.dm-list a{display:grid;grid-template-columns:1fr auto auto;gap:1rem;align-items:baseline;padding:.42rem 0;border-bottom:1px solid var(--line)}
+.dm-list a:first-child{border-top:2px solid var(--amber)}
+.dm-list span{font-family:'Big Shoulders Display',sans-serif;font-weight:800;font-size:1.35rem;text-transform:uppercase;line-height:1}
+.dm-list i{font-style:normal;font-family:'IBM Plex Mono',monospace;font-size:.66rem;color:var(--dim)}
+.dm-list b{font-family:'Big Shoulders Display',sans-serif;font-weight:800;font-size:1.35rem;color:var(--amber);min-width:3.5rem;text-align:right}
+.dm-side .quote{margin-top:0;margin-bottom:.6rem}
+.dm-gap{background:rgba(13,24,48,.92);border:1px dashed rgba(244,183,64,.55);padding:.7rem .9rem;font-size:.88rem;color:var(--warm);line-height:1.4} .dm-gap b{color:var(--amber)}
+.er{display:grid;grid-template-columns:1fr 1fr;gap:clamp(1.2rem,3vw,3rem);margin-top:1.2rem}
+@media(max-width:880px){.er{grid-template-columns:1fr}}
+.er h3{font-family:'IBM Plex Mono',monospace;font-weight:600;font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;color:var(--amber);padding-bottom:.45rem;border-bottom:2px solid var(--cream)}
+.er-col:last-child h3{color:var(--sky)}
+.er-rows a{display:grid;grid-template-columns:1fr auto auto;gap:.9rem;align-items:baseline;padding:.4rem 0;border-bottom:1px solid var(--line);font-size:.88rem}
+.er-rows i{font-style:normal;font-family:'IBM Plex Mono',monospace;font-size:.64rem;color:var(--dim)}
+.er-rows b{font-family:'Big Shoulders Display',sans-serif;font-weight:800;font-size:1.2rem;min-width:3.6rem;text-align:right}
+.er-note{font-size:.84rem;color:var(--warm);margin-top:.6rem;line-height:1.4} .er-note b{color:var(--cream)}
+.vt{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(1rem,2.4vw,2.2rem);margin-top:1.2rem}
+@media(max-width:900px){.vt{grid-template-columns:1fr}}
+.vt .win img{aspect-ratio:16/7}
+.vt h3{font-family:'Big Shoulders Display',sans-serif;font-weight:900;text-transform:uppercase;font-size:1.5rem;line-height:1;margin-top:.6rem}
+.vt ul{list-style:none;margin-top:.4rem}
+.vt li{display:flex;justify-content:space-between;gap:.8rem;padding:.32rem 0;border-bottom:1px solid var(--line);font-size:.82rem;color:var(--warm)}
+.vt li b{font-family:'Big Shoulders Display',sans-serif;font-weight:800;font-size:1.05rem;color:var(--cream);white-space:nowrap}
+.vt li.hi{color:var(--cream)} .vt li.hi b{color:var(--amber)} .vt li.lo{color:var(--dim)} .vt li.lo b{color:var(--dim)}
+.fans{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(.8rem,1.6vw,1.3rem);margin-top:1.3rem}
+@media(max-width:880px){.fans{grid-template-columns:1fr 1fr}} @media(max-width:560px){.fans{grid-template-columns:1fr}}
+.fq{background:var(--cream);color:var(--navy);padding:.9rem 1rem;border-left:6px solid var(--red)}
+.fq:nth-child(2){border-color:var(--sky)} .fq:nth-child(3){border-color:var(--amber)} .fq:nth-child(4){border-color:var(--red)} .fq:nth-child(5){border-color:var(--sky)}
+.fq .ft{font-family:'IBM Plex Mono',monospace;font-size:.62rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:#5A6280}
+.fq p{font-family:'Big Shoulders Display',sans-serif;font-weight:800;font-size:clamp(1.05rem,1.45vw,1.3rem);line-height:1.12;margin-top:.35rem;text-transform:none}
+.fq span{display:block;font-size:.7rem;color:#5A6280;margin-top:.45rem;line-height:1.35}
+.fq.weak{background:transparent;color:var(--cream);border:1px dashed var(--dim)} .fq.weak .ft,.fq.weak span{color:var(--dim)}
+.ife{display:grid;grid-template-columns:1.5fr 1fr;gap:clamp(1rem,2.4vw,2rem);margin-top:1.3rem}
+@media(max-width:980px){.ife{grid-template-columns:1fr}}
+.ife-screen{background:#070D1C;border:2px solid var(--navy-3);border-radius:18px;padding:1rem;box-shadow:inset 0 0 0 6px #0A1328}
+.ife-top{display:flex;justify-content:space-between;gap:1rem;font-family:'IBM Plex Mono',monospace;font-size:.62rem;letter-spacing:.08em;text-transform:uppercase;color:var(--amber);padding-bottom:.6rem;border-bottom:1px solid var(--line)}
+.ife-top span:last-child{color:var(--sky)}
+.ife-ch{display:grid;grid-template-columns:1fr 1fr;gap:.6rem;margin-top:.8rem}
+.ch{background:var(--navy-2);padding:.8rem .9rem;border-top:3px solid var(--red)}
+.ch:nth-child(2){border-color:var(--cream)} .ch:nth-child(3){border-color:var(--sky)} .ch.new{border-color:var(--amber);outline:1px dashed rgba(244,183,64,.5);outline-offset:-1px}
+.ch .cn,.hw .cn{font-family:'IBM Plex Mono',monospace;font-size:.6rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--dim)}
+.ch b{display:block;font-family:'Big Shoulders Display',sans-serif;font-weight:900;text-transform:uppercase;font-size:1.3rem;margin-top:.2rem}
+.ch p{font-size:.76rem;color:var(--warm);margin-top:.25rem;line-height:1.35}
+.ife-how{display:flex;flex-direction:column;gap:.6rem}
+.ths{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;margin-top:.45rem}
+.ths img{width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:4px}
+.ths span{aspect-ratio:16/9;border:1px dashed rgba(244,183,64,.5);border-radius:4px;display:flex;align-items:center;justify-content:center;font-family:'IBM Plex Mono',monospace;font-size:.55rem;color:var(--amber);text-transform:uppercase}
+.hw{padding:.75rem .9rem;border-left:4px solid var(--sky);background:var(--navy-2)} .hw.ask{border-color:var(--amber)}
+.hw.ok .cn{color:var(--sky)} .hw.ask .cn{color:var(--amber)}
+.hw p{font-size:.82rem;color:var(--warm);margin-top:.25rem;line-height:1.4} .hw a{border-bottom:1px solid var(--line);color:var(--cream)}
+.ro{display:grid;grid-template-columns:9rem repeat(4,1fr);gap:3px;margin-top:1.3rem}
+@media(max-width:980px){.ro{grid-template-columns:1fr}.ro-h{display:none}}
+.ro-h{font-family:'IBM Plex Mono',monospace;font-size:.64rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--amber);padding:.2rem .5rem}
+.ro-t{padding:.7rem .7rem;background:var(--navy-3);border-left:4px solid var(--red)}
+.ro-t b{display:block;font-family:'Big Shoulders Display',sans-serif;font-weight:900;text-transform:uppercase;font-size:1.3rem;line-height:1}
+.ro-t span{font-size:.7rem;color:var(--dim)}
+.ro-t.t2{border-color:var(--sky)} .ro-t.t3{border-color:var(--amber)}
+.ro-c{background:var(--navy-3);padding:.6rem .7rem}
+.ro-c p{font-size:.8rem;line-height:1.3;margin-top:.3rem} .ro-c p:first-child{margin-top:0}
+.ro-c em{display:inline-block;font-style:normal;font-family:'IBM Plex Mono',monospace;font-size:.56rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;padding:.05rem .35rem;margin-top:.25rem;border:1px solid}
+.ro-c em.e{border-color:var(--sky);color:var(--sky)} .ro-c em.x{border-color:var(--amber);color:var(--amber)} .ro-c em.o{border-color:var(--dim);color:var(--dim)}
+.recs{margin-top:1.2rem;font-size:.8rem}
+.rh,.rr{display:grid;grid-template-columns:1.25fr 1.1fr 1.2fr .9fr 1.1fr;gap:.9rem;padding:.55rem 0;border-bottom:1px solid rgba(13,24,48,.12)}
+.rh{border-bottom:2px solid var(--navy);font-family:'IBM Plex Mono',monospace;font-size:.6rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--red);padding-top:0}
+.rr b{font-size:.9rem;line-height:1.25;display:grid;grid-template-columns:auto 1fr;column-gap:.5rem}
+.rr b em.why{grid-column:2;display:block;font-style:normal;font-weight:400;font-size:.74rem;color:#5A6280;margin-top:.25rem;line-height:1.3}
+.rr b i{font-style:normal;font-family:'Big Shoulders Display',sans-serif;font-weight:900;font-size:1.4rem;line-height:.9;color:var(--red)}
+.rr span{color:#3E4660;line-height:1.35}
+@media(max-width:900px){.rh{display:none}.rr{grid-template-columns:1fr;gap:.25rem}}
+.access{margin-top:1.4rem;padding:.9rem 1.1rem;border:1px solid rgba(255,255,255,.45);font-size:.92rem;line-height:1.45;max-width:980px}
+body.present .vt .win img{aspect-ratio:16/5.6}
+body.present .vt{margin-top:.9rem}
+body.present .rr{padding:.38rem 0}
+body.present .recs{font-size:.76rem;margin-top:.9rem}
+body.present .rr b{font-size:.84rem}
+body.present .slide[data-t="What we'd do"]{padding-top:2rem;padding-bottom:1.6rem}
+
+
+/* v4 — live, album world, station */
+.lv{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(1rem,2.2vw,2rem);margin-top:1.1rem}
+@media(max-width:900px){.lv{grid-template-columns:1fr}}
+.lv-k{font-family:'IBM Plex Mono',monospace;font-size:.68rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--amber);margin-bottom:.45rem}
+.lv-col .win img{aspect-ratio:16/7}
+.lv ul{list-style:none;margin-top:.45rem}
+.lv li{display:flex;justify-content:space-between;gap:.8rem;padding:.3rem 0;border-bottom:1px solid var(--line);font-size:.8rem;color:var(--warm);line-height:1.3}
+.lv li b{font-family:'Big Shoulders Display',sans-serif;font-weight:800;font-size:1.05rem;color:var(--cream);white-space:nowrap}
+.lv li.hi{color:var(--cream)} .lv li.hi b{color:var(--amber)} .lv li.lo,.lv li.lo b{color:var(--dim)}
+.lv-ref{display:grid;grid-template-columns:150px 1fr;gap:1rem;align-items:center;margin-top:1rem;border:1px dashed rgba(244,183,64,.5);padding:.6rem .8rem}
+@media(max-width:640px){.lv-ref{grid-template-columns:1fr}}
+.lv-ref .win img{aspect-ratio:16/9}
+.lv-ref p{font-size:.84rem;line-height:1.4;margin-top:.25rem} .lv-ref p span{color:var(--warm)}
+.aw{display:grid;grid-template-columns:1.25fr 1fr 1fr 1fr;grid-template-rows:auto auto;gap:3px;margin-top:1.1rem}
+@media(max-width:900px){.aw{grid-template-columns:1fr 1fr}}
+.aw-core{grid-row:span 2;background:var(--red);padding:1rem 1.1rem;display:flex;flex-direction:column}
+@media(max-width:900px){.aw-core{grid-row:auto;grid-column:span 2}}
+.aw-core .board{color:var(--cream)} .aw-core b{font-family:'Big Shoulders Display',sans-serif;font-weight:900;text-transform:uppercase;font-size:1.7rem;line-height:1;margin-top:.3rem}
+.aw-core p{font-size:.86rem;color:#FFE2E2;margin-top:.35rem}
+.aw-av{margin-top:auto;padding-top:.8rem;font-family:'IBM Plex Mono',monospace;font-size:.62rem;line-height:1.5;color:var(--cream);border-top:1px solid rgba(255,255,255,.35)}
+.aw-n{background:var(--navy-3);padding:.85rem .9rem}
+.aw-n b{display:block;font-family:'Big Shoulders Display',sans-serif;font-weight:900;text-transform:uppercase;font-size:1.2rem;line-height:1.02;margin-top:.25rem}
+.aw-n p{font-size:.76rem;color:var(--warm);margin-top:.3rem;line-height:1.35}
+.st-top{display:grid;grid-template-columns:1fr 1.35fr;gap:clamp(1rem,2.4vw,2rem);margin-top:1.1rem;align-items:start}
+@media(max-width:980px){.st-top{grid-template-columns:1fr}}
+.st-what p{font-size:.92rem;line-height:1.45;margin-top:.35rem;color:var(--warm)} .st-what p b{color:var(--cream)}
+.st-what .st-date{font-family:'IBM Plex Mono',monospace;font-size:.66rem;color:var(--dim);line-height:1.5}
+.st-top .ife-screen{padding:.7rem}
+.st-top .ch{padding:.55rem .65rem} .st-top .ch b{font-size:1.05rem}
+.st-cmp{display:grid;grid-template-columns:repeat(4,1fr);gap:3px;margin-top:.9rem}
+@media(max-width:820px){.st-cmp{grid-template-columns:1fr 1fr}}
+.sc2{background:var(--navy-2);padding:.6rem .75rem;border-top:3px solid var(--dim)}
+.sc2.on{border-color:var(--amber);background:var(--navy-3)}
+.sc2 .cn{font-family:'IBM Plex Mono',monospace;font-size:.64rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--dim)} .sc2.on .cn{color:var(--amber)}
+.sc2 p{font-size:.78rem;color:var(--warm);margin-top:.2rem;line-height:1.35} .sc2 p b{color:var(--cream)} .sc2 a{border-bottom:1px solid var(--line);color:var(--cream)}
+.st-ask{margin-top:.7rem;font-size:.8rem;color:var(--warm);border-left:4px solid var(--amber);padding:.2rem 0 .2rem .8rem} .st-ask b{color:var(--amber)}
+
+/* reveal / chrome / present */
+.reveal{opacity:0;transform:translateY(16px);transition:opacity .6s ease,transform .6s ease}
+.reveal.visible{opacity:1;transform:none}
+.stagger>*{opacity:0;transform:translateY(14px);transition:opacity .5s ease,transform .5s ease}
+.stagger>*.visible{opacity:1;transform:none}
+@media(prefers-reduced-motion:reduce){.reveal,.stagger>*{opacity:1!important;transform:none!important;transition:none!important}}
+.chrome{position:fixed;top:0;left:0;right:0;z-index:900;display:flex;justify-content:space-between;align-items:center;gap:1rem;padding:.6rem var(--pad);background:rgba(13,24,48,.94);backdrop-filter:blur(14px);border-bottom:1px solid var(--line);font-family:'IBM Plex Mono',monospace;font-size:.74rem;letter-spacing:.08em;text-transform:uppercase;color:var(--dim)}
+.chrome-l b{color:var(--cream);font-weight:600}
+@media(max-width:760px){.chrome-l span{display:none}}
+.chrome-r{display:flex;gap:.5rem}
+.btn{font:inherit;cursor:pointer;background:transparent;color:var(--warm);border:1px solid var(--line);padding:.3rem .8rem;border-radius:2px;white-space:nowrap}
+.btn:hover{border-color:var(--amber);color:var(--amber)}
+.btn.primary{background:var(--amber);border-color:var(--amber);color:var(--navy)}
+body.present{overflow:hidden}
+body.present .chrome{display:none}
+body.present .deck{padding-top:0}
+body.present .slide{display:none;height:100vh;min-height:100vh;border:0;padding-top:2.6rem;padding-bottom:2.2rem;overflow-y:auto}
+body.present .slide.current{display:flex}
+body.present h2.display{font-size:clamp(2rem,3.9vw,3.4rem);max-width:26ch}
+body.present .reveal,body.present .stagger>*{opacity:1;transform:none;transition:none}
+body.present .v .win img{aspect-ratio:9/11}
+body.present .means{margin-top:1rem}
+body.present .src{margin-top:.6rem}
+.pbar{display:none;position:fixed;bottom:0;left:0;height:3px;background:var(--red);z-index:1000;transition:width .3s ease}
+.pcount{display:none;position:fixed;bottom:.8rem;right:1.2rem;z-index:1000;font-family:'IBM Plex Mono',monospace;font-size:.72rem;color:var(--dim);background:rgba(13,24,48,.75);padding:.1rem .6rem}
+body.present .pbar,body.present .pcount{display:block}
+
+/* analysis */
+.sheet{display:none;background:var(--cream);color:var(--navy)}
+.sheet.open{display:block;position:fixed;inset:0;z-index:950;overflow-y:auto;padding:4.2rem clamp(1rem,5vw,4rem) 4rem}
+body.sheet-open{overflow:hidden}
+.sheet .close{position:fixed;top:1rem;right:1.25rem;z-index:960;background:var(--navy);color:var(--cream)}
+.sheet-in{max-width:1120px;margin:0 auto}
+.sheet h2{font-family:'Big Shoulders Display',sans-serif;font-weight:900;text-transform:uppercase;font-size:clamp(2rem,4vw,3.2rem);line-height:.95}
+.sheet h3{font-size:1rem;font-weight:700;margin:2rem 0 .6rem;padding-bottom:.4rem;border-bottom:1px solid rgba(13,24,48,.14)}
+.sheet p,.sheet li{font-size:.86rem;color:#3E4660;line-height:1.6;max-width:80ch}
+.sheet b{color:var(--navy)}
+.sheet ul{list-style:none;margin-top:.4rem}
+.sheet li{padding-left:1.1rem;position:relative;margin-bottom:.35rem}
+.sheet li::before{content:'';position:absolute;left:0;top:.6em;width:6px;height:6px;background:var(--red);transform:rotate(45deg)}
+.sheet table{width:100%;border-collapse:collapse;font-size:.8rem;margin-top:.6rem}
+.sheet th{text-align:left;font-family:'IBM Plex Mono',monospace;font-size:.68rem;letter-spacing:.06em;text-transform:uppercase;color:#6A7290;font-weight:500;padding:.4rem .5rem;border-bottom:1px solid rgba(13,24,48,.14)}
+.sheet td{padding:.4rem .5rem;border-bottom:1px solid rgba(13,24,48,.07);color:#3E4660;vertical-align:top}
+.sheet td.r,.sheet th.r{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.sheet .cols{display:grid;gap:2.4rem}
+@media(min-width:960px){.sheet .cols{grid-template-columns:1fr 1fr}}
+.sheet a{color:var(--red)}
+.sheet .label{font-family:'IBM Plex Mono',monospace;font-size:.74rem;letter-spacing:.1em;text-transform:uppercase;color:var(--red)}
+@media print{.chrome,.pbar,.pcount{display:none}.slide{min-height:0;page-break-inside:avoid}}
+
+/* Editorial pass · 23 Oct: fewer competing messages, larger evidence and real assets. */
+.feature-split{display:grid;grid-template-columns:1.15fr 1fr;gap:2.5rem;align-items:center;margin-top:1.5rem}
+.feature-asset .win img{aspect-ratio:16/10}
+.asset-caption{display:flex;justify-content:space-between;align-items:end;gap:1rem;margin-top:.7rem}
+.asset-caption b,.asset-caption span{display:block}.asset-caption span{font-size:.78rem;color:var(--dim)}
+.asset-caption .fig{font-size:3.5rem;color:var(--amber)}
+.proof-row{display:grid;grid-template-columns:7rem 1fr;gap:1rem;padding:1rem 0;border-bottom:1px solid var(--line)}
+.proof-row .fig{font-size:3.4rem;color:var(--amber)}.proof-row p{font-size:.9rem;color:var(--warm)}
+.evidence-trio{display:grid;grid-template-columns:repeat(3,1fr);gap:2rem;margin-top:1.7rem}
+.evidence-trio>div{border-top:3px solid var(--amber);padding-top:.8rem}.evidence-trio>div:nth-child(2){border-color:var(--sky)}.evidence-trio>div:nth-child(3){border-color:var(--red)}
+.evidence-trio .fig{font-size:clamp(3.7rem,7vw,6rem);margin:.7rem 0}.evidence-trio p{font-size:.87rem;color:var(--warm);line-height:1.4}.evidence-trio h3{font-size:1.2rem;margin-top:1rem;margin-bottom:.35rem}
+.mix-number{font-size:clamp(3rem,6vw,5.5rem);color:var(--amber);margin:.7rem 0 1rem}.dm-side .dm-gap{margin-top:1.3rem}
+.fans-short{grid-template-columns:repeat(3,1fr)}.fans-short .fq{padding:1.2rem}.fans-short .fq p{font-size:1.25rem}.fan-action{display:block;border-top:1px solid var(--line);margin-top:1rem;padding-top:.8rem;color:var(--amber);font-size:.9rem}
+.station-actions{display:grid;grid-template-columns:1fr 1fr;gap:2rem;margin-top:1.2rem;border-top:1px solid var(--line);padding-top:1rem}.station-actions p{font-size:.9rem;color:var(--warm);margin-top:.3rem}.station-actions a{color:var(--cream);text-decoration:underline}
+.architecture{display:grid;grid-template-columns:repeat(5,1fr);gap:3px;margin-top:1.6rem}.phase{background:var(--navy-3);border-top:4px solid var(--sky);padding:1.1rem 1rem}.phase:first-child{border-color:var(--amber)}.phase:last-child{border-color:var(--red)}.phase .board{font-size:.66rem}.phase h3{font-family:'Big Shoulders Display',sans-serif;text-transform:uppercase;font-size:1.8rem;line-height:1.05;margin:.8rem 0}.phase p{font-size:.9rem;color:var(--warm);line-height:1.45}.phase>b{display:block;border-top:1px solid var(--line);padding-top:.7rem;margin-top:1rem;font-size:.78rem;color:var(--sky)}
+.closing-rows{margin-top:1.4rem}.closing-rows>div{display:grid;grid-template-columns:minmax(12rem,.65fr) 1.5fr;gap:2rem;padding:1rem 0;border-top:1px solid rgba(13,24,48,.2);align-items:center}.closing-rows .fig{font-size:clamp(3rem,5.7vw,5rem);color:var(--red)}.closing-rows .board{color:#5b5360;font-size:.66rem}.closing-rows h3{font-size:1.25rem;line-height:1.2;margin:.15rem 0}.closing-rows p{font-size:.9rem;color:#3e4660}.close-next{font-size:.9rem;border-top:2px solid var(--red);margin-top:.6rem;padding-top:.8rem;color:#3e4660}
+@media(max-width:900px){.feature-split,.evidence-trio,.fans-short,.station-actions{grid-template-columns:1fr}.architecture{grid-template-columns:1fr 1fr}.closing-rows>div{grid-template-columns:1fr;gap:.5rem}}
+@media(max-width:560px){.architecture{grid-template-columns:1fr}.asset-caption{align-items:start}.asset-caption .fig{font-size:2.7rem}}
+.sheet .close:focus-visible,.btn:focus-visible,a:focus-visible{outline:3px solid var(--amber);outline-offset:4px}
+
+</style>
+</head>
+<body>
+
+<div class="chrome">
+  <div class="chrome-l"><b>Flight Facilities × YouTube</b> <span>· VMG UK · Updated 23 Oct 2026</span></div>
+  <div class="chrome-r">
+    <button class="btn" onclick="openSheet()">Analysis</button>
+    <button class="btn primary" onclick="startPresent()">Present</button>
+  </div>
+</div>
+<div class="pbar" id="pbar"></div>
+<div class="pcount" id="pcount"></div>
+
+<div class="deck">
+
+<section class="slide" data-t="Cover" style="justify-content:flex-end;padding-bottom:3rem">
+  <div class="bleed scrim-b"><img src="https://i.ytimg.com/vi/3f0e5j2G7IQ/maxresdefault.jpg" alt="The FF plane over the hills at sunset, from the Down To Earth 10 Year Anniversary visualiser" style="object-position:50% 30%" onerror="this.onerror=null;this.src='https://i.ytimg.com/vi/3f0e5j2G7IQ/hqdefault.jpg'"></div>
+  <div class="chev"></div>
+  <div class="board-corner"><span class="board">FF · Channel review · Next album</span><span class="board" style="color:var(--cream)">Now boarding</span></div>
+  <div class="inner">
+    <span class="tag reveal">Flight Facilities <i>×</i> YouTube</span>
+    <h1 class="display reveal" style="margin-top:1rem;max-width:15ch">The channel today.<br><span class="a">The next departure.</span></h1>
+    <p class="reveal" style="margin-top:1.1rem;font-size:clamp(1.1rem,1.8vw,1.5rem);font-weight:600;max-width:48ch;line-height:1.32">What works on YouTube. What Forever taught us.<br><span style="color:var(--amber)">What to build on for the next album.</span></p>
+    <div class="board reveal" style="margin-top:1.2rem;color:var(--dim)">Virgin Music Group UK · Updated 23 Oct 2026 · Data: 21 Oct</div>
+  </div>
+</section>
+
+<section class="slide" data-t="Timeline">
+  <div class="chev"></div>
+  <div class="inner">
+    <span class="tag reveal">01 <i>·</i> The channel over time</span>
+    <h2 class="display reveal" style="margin-top:.9rem;max-width:26ch">A big catalogue.<br><span class="a">Uneven activity.</span></h2>
+    <div class="stats stagger">
+      <div class="stat"><div class="fig">307K</div><p>subscribers · 217M lifetime views</p></div>
+      <div class="stat"><div class="fig">88%</div><p>of views on public uploads sit on 2010–2015 releases</p></div>
+      <div class="stat"><div class="fig">51.9M</div><p>Crave You — still drawing new comments in 2026</p></div>
+      <div class="stat"><div class="fig">432 days</div><p>the longest gap between long-form uploads, 2018–19</p></div>
+    </div>
+    <div class="ctl reveal"><svg id="ctl" viewBox="0 0 1320 230" role="img" aria-label="Uploads per month, 2010 to 2026, with eras marked"></svg></div>
+    <div class="legend reveal"><span><i style="background:var(--cream)"></i>Long-form uploads per month</span><span><i style="background:var(--red)"></i>Short uploads*</span><span><i style="background:var(--amber);border-radius:50%"></i>Hero moment</span></div>
+    <div class="src reveal">299 public uploads · data: 21 Oct 2026. 88% is a share of lifetime views on public uploads, not current listening. *Length-based proxy; older short uploads predate Shorts.</div>
+  </div>
+</section>
+
+<section class="slide alt" data-t="Forever">
+  <div class="chev"></div>
+  <div class="inner">
+    <span class="tag reveal">02 <i>·</i> The last album · Forever, 12 Nov 2021</span>
+    <h2 class="display reveal" style="margin-top:.9rem;max-width:24ch">Keep the videos.<br><span class="a">Plan the follow-through.</span></h2>
+    <div class="grid2" style="grid-template-columns:1.1fr 1fr;margin-top:1.2rem;align-items:start">
+      <div class="dep stagger" style="margin-top:0">
+        <div class="r"><div class="when">May 2021</div><div class="what"><b>Lights Up</b> <span>· audio 323K, then video</span></div><div class="n">302K</div></div>
+        <div class="r hi"><div class="when">Oct</div><div class="what"><b>Forever</b> feat. BROODS · video</div><div class="n">455K</div></div>
+        <div class="r hi"><div class="when">Nov</div><div class="what"><b>Heavy</b> feat. Your Smith · with Hugo Weaving</div><div class="n">426K</div></div>
+        <div class="r"><div class="when">14–15 Nov</div><div class="what">Six album tracks as plain audio</div><div class="n">34K – 91K</div></div>
+        <div class="r"><div class="when">2022</div><div class="what">Remix packs <span>· Roosevelt 117K, the rest 11–63K</span></div><div class="n"></div></div>
+        <div class="r quiet"><div class="when">Dec 2022</div><div class="what"><b>Live at Airfields</b> — 13 months after the album</div><div class="n">390K</div></div>
+      </div>
+      <div class="kc" style="grid-template-columns:1fr;margin-top:0">
+        <div class="k"><h3>Keep</h3><ul>
+          <li><b>A video with a story and a face.</b> Heavy features Hugo Weaving; Forever features BROODS. Give each focus single a clear visual identity.</li>
+          <li><b>The full concert film.</b> Still watched and commented on in 2026.</li></ul></div>
+        <div class="c"><h3>Change</h3><ul>
+          <li><b>Decide the second asset before release.</b> 2 of 9 singles since 2021 had another long-form upload within 14 days. Plan a worthwhile follow-up before launch.</li>
+          <li><b>Bring the live film inside the campaign</b> — and give album tracks a way in beyond plain audio.</li></ul></div>
+      </div>
+    </div>
+    <div class="src reveal">Public upload sequence and lifetime views, read 21 Oct 2026. Timing is an observation: this does not prove that a 14-day follow-up increases views.</div>
+  </div>
+</section>
+
+<section class="slide alt" data-t="What works"><div class="chev"></div><div class="inner"><span class="tag reveal">03 <i>·</i> What works</span><h2 class="display reveal" style="margin-top:.9rem;max-width:27ch">Three strengths.<br><span class="a">Build around these.</span></h2><div class="evidence-trio stagger">
+<div><div class="board">Song videos</div><div class="fig">83K</div><p>Median lifetime views · 18 uploads since 2017</p><h3>Keep the hero video.</h3><p>Give each focus single a visual story. Forever and Heavy reached 455K and 426K.</p></div>
+<div><div class="board">Concept mixes</div><div class="fig">191K</div><p>Median lifetime views · 4 uploads since 2017</p><h3>Make room for a mix.</h3><p>A recognisable Flight Facilities format, with a reason to listen for longer.</p></div>
+<div><div class="board">Live moments</div><div class="fig">419K</div><p>Crave You, Melbourne · 2026 Short</p><h3>Lead with the song.</h3><p>Full shows, standout live songs and crowd moments can each earn a place.</p></div></div>
+<div class="means reveal"><div class="board">Be selective elsewhere</div><p>Edits can be standout releases. Remixes, lyrics and behind-the-scenes need a clear role for the song.</p></div>
+<div class="src reveal">Historical examples, not a forecast or an age-matched format ranking. Lifetime views as of 21 Oct 2026. Full format table and sample sizes in Analysis.</div></div></section>
+
+<section class="slide " data-t="Music videos"><div class="chev"></div><div class="inner"><span class="tag reveal">04 <i>·</i> Music videos</span><h2 class="display reveal" style="margin-top:.9rem;max-width:27ch">The video gives the song<br><span class="a">a world of its own.</span></h2><div class="feature-split stagger"><a class="feature-asset" href="https://www.youtube.com/watch?v=IH5L4qTVsTk" target="_blank" rel="noopener"><div class="win"><img src="https://i.ytimg.com/vi/IH5L4qTVsTk/hqdefault.jpg" alt="Down To Earth"></div><div class="asset-caption"><div><b>Down To Earth</b><span>Sam Rockwell · 2015</span></div><strong class="fig">4.5M</strong></div></a><div class="feature-copy"><div class="board">Also on this channel</div><div class="proof-row"><strong class="fig">3.1M</strong><div><b>Sunshine</b><p>Reggie Watts · a recognisable face and performance.</p></div></div><div class="proof-row"><strong class="fig">426K</strong><div><b>Heavy</b><p>Hugo Weaving · a strong visual idea for the Forever era.</p></div></div><div class="means"><div class="board">For the next album</div><p>Protect the ambition of the main video. Use its best moments in Shorts, and give viewers a clear route to the full song.</p></div></div></div><div class="src reveal">Lifetime views, different release years. These examples support the creative approach; they do not isolate the effect of a guest or a video treatment.</div></div></section>
+
+<section class="slide" data-t="Decade Mix" style="justify-content:flex-end">
+  <div class="bleed scrim-l"><img src="https://i.ytimg.com/vi/54a6SjIlJF0/maxresdefault.jpg" alt="Decade Mix 2012–2022 visualiser" style="object-position:70% 40%" onerror="this.onerror=null;this.src='https://i.ytimg.com/vi/54a6SjIlJF0/hqdefault.jpg'"></div>
+  <div class="chev"></div>
+  <div class="inner">
+    <span class="tag reveal">05 <i>·</i> The signature format</span>
+    <h2 class="display reveal" style="margin-top:.9rem;max-width:20ch">The mixes are a format<br><span class="a">worth returning to.</span></h2>
+    <div class="dm">
+      <div class="dm-list stagger">
+        <a href="https://www.youtube.com/watch?v=YPg37aYz7tM" target="_blank" rel="noopener"><span>1972 – 1982</span><i>2016</i><b>592K</b></a>
+        <a href="https://www.youtube.com/watch?v=2p4fyCtQf7Q" target="_blank" rel="noopener"><span>1982 – 1992</span><i>2016</i><b>525K</b></a>
+        <a href="https://www.youtube.com/watch?v=3jJt288zWDY" target="_blank" rel="noopener"><span>2002 – 2012</span><i>2016</i><b>431K</b></a>
+        <a href="https://www.youtube.com/watch?v=54a6SjIlJF0" target="_blank" rel="noopener"><span>2012 – 2022</span><i>2023</i><b>408K</b></a>
+        <a href="https://www.youtube.com/watch?v=Qta8W5P26sI" target="_blank" rel="noopener"><span>1992 – 2002</span><i>2016</i><b>387K</b></a>
+        <a href="https://www.youtube.com/watch?v=qeo2NtFQLqo" target="_blank" rel="noopener"><span>5 Hour Decades Set, live</span><i>2025</i><b>102K</b></a>
+        <a href="https://www.youtube.com/watch?v=KfPtEdyKaa8" target="_blank" rel="noopener"><span>1962 – 1972</span><i>2023</i><b>45K</b></a>
+      </div>
+      <div class="dm-side stagger"><div class="mix-number fig">387–592K</div><p class="body">Five Decade Mix uploads, published in 2016 and 2023.</p><div class="dm-gap"><b>1 of 16</b> long sets and mixes has chapters. Start by making the existing catalogue easier to navigate.</div></div></div><div class="means reveal"><div class="board">What it means</div><p>Add tracklists and chapters to existing long sets. Explore a new concept mix that belongs to the next album era.</p></div>
+  </div>
+</section>
+
+<section class="slide alt" data-t="Edits and remixes">
+  <div class="chev"></div>
+  <div class="inner">
+    <span class="tag reveal">06 <i>·</i> Edits and remixes</span>
+    <h2 class="display reveal" style="margin-top:.9rem;max-width:24ch">Their edits can stand out.<br><span class="a">Choose remixes carefully.</span></h2>
+    <div class="er">
+      <div class="er-col">
+        <h3>Flight Facilities edit other people's records</h3>
+        <div class="er-rows stagger">
+          <a href="https://www.youtube.com/watch?v=K57dVZ4oHtQ" target="_blank" rel="noopener"><span>The C90s – Shine A Light (FF Remix)</span><i>2010</i><b>8.0M</b></a>
+          
+          <a href="https://www.youtube.com/watch?v=8uKf6lzPpV4" target="_blank" rel="noopener"><span>Room 5 – Make Luv (FF Edit)</span><i>2024</i><b>515K</b></a>
+          <a href="https://www.youtube.com/watch?v=5NpTk-65OWc" target="_blank" rel="noopener"><span>FF x Daft Punk – Foreign Revolution</span><i>2024</i><b>372K</b></a>
+          
+        </div>
+        <p class="er-note"><b>69% of views added across 60 tracked uploads</b> came from Make Luv and Foreign Revolution, 29 Sep – 21 Oct. This is a recent-upload sample, not the whole channel.</p>
+      </div>
+      <div class="er-col">
+        <h3>Other producers remix Flight Facilities</h3>
+        <div class="er-rows stagger">
+          
+          <a href="https://www.youtube.com/watch?v=mJn-frdL600" target="_blank" rel="noopener"><span>Stranded (LNTG Remix)</span><i>2018</i><b>161K</b></a>
+          
+          <a href="https://www.youtube.com/watch?v=ZzN0g4qQM84" target="_blank" rel="noopener"><span>Forever (Roosevelt Remix)</span><i>2022</i><b>117K</b></a>
+          <a href="https://www.youtube.com/watch?v=IFyMQRuh8qk" target="_blank" rel="noopener"><span>Lights Up (Honey Dijon Remix)</span><i>2021</i><b>8K</b></a>
+        </div>
+        <p class="er-note"><b>18K median lifetime views · 29 uploads since 2017.</b> Some remixes reached much further; choose for the track and audience, rather than defaulting to a full pack.</p>
+      </div>
+    </div>
+    <div class="src">Lifetime examples from different years. The recent-view share covers 60 tracked uploads only.</div><div class="means reveal"><div class="board">What it means</div><p>Keep standout FF edits in the programme. For a focus single, prioritise a remix or version with a clear musical reason.</p></div>
+  </div>
+</section>
+
+<section class="slide alt" data-t="Live">
+  <div class="chev"></div>
+  <div class="inner">
+    <span class="tag reveal">07 <i>·</i> Live</span>
+    <h2 class="display reveal" style="margin-top:.9rem;max-width:26ch">Capture the show.<br><span class="a">Release the strongest moments.</span></h2>
+    <div class="lv stagger">
+      <div class="lv-col">
+        <div class="lv-k">The full show</div>
+        <a class="win" href="https://www.youtube.com/watch?v=ts-6KyJUDWY" target="_blank" rel="noopener"><img src="https://i.ytimg.com/vi/ts-6KyJUDWY/hqdefault.jpg" alt=""><span class="o">Airfields · 51 min</span></a>
+        <ul><li class="hi">Live at Airfields, full concert<b>390K</b></li><li>Two songs cut from it, posted earlier<b>36K · 56K</b></li><li>A full performance for viewers who want to stay longer.<b></b></li></ul>
+      </div>
+      <div class="lv-col">
+        <div class="lv-k">Signature songs, special settings</div>
+        <a class="win" href="https://www.youtube.com/watch?v=y8Ndi955iuY" target="_blank" rel="noopener"><img src="https://i.ytimg.com/vi/y8Ndi955iuY/hqdefault.jpg" alt=""><span class="o">With the MSO</span></a>
+        <ul><li class="hi">Clair De Lune, Owl Eyes &amp; the MSO<b>937K</b></li><li class="hi">Shine A Light, live with the MSO<b>607K</b></li><li>Crave You at the ARIAs, Owl Eyes<b>194K</b></li><li class="lo">The other nine MSO songs<b>26–74K</b></li></ul>
+      </div>
+      <div class="lv-col">
+        <div class="lv-k">Moments, as Shorts</div>
+        <a class="win" href="https://www.youtube.com/shorts/tZg27KL7Tc4" target="_blank" rel="noopener"><img src="https://i.ytimg.com/vi/tZg27KL7Tc4/hqdefault.jpg" alt=""><span class="o">Melbourne · 16 sec</span></a>
+        <ul><li class="hi">Crave You live, 2026 (n=5)<b>25–419K</b></li><li class="lo">Shorts overall since 2017, median<b>3K</b></li><li>Start with the recognisable song, vocalist and crowd reaction.<b></b></li></ul>
+      </div>
+    </div>
+    <div class="means reveal"><div class="board">For the next album</div><p>Plan one key live capture: a full performance, selected signature songs and song-led Shorts. Give each a route to the others.</p></div><div class="src reveal">Lifetime views across different years. Airfields song cuts reached 36K / 56K versus 390K for the full film: not every song needs a separate upload. Larger-scale tour-film reference in Analysis.</div>
+  </div>
+</section>
+
+<section class="slide " data-t="Fan signals"><div class="chev"></div><div class="inner"><span class="tag reveal">08 <i>·</i> Fan signals</span><h2 class="display reveal" style="margin-top:.9rem;max-width:27ch">The catalogue is still<br><span class="a">finding listeners.</span></h2><div class="fans fans-short stagger"><div class="fq"><div class="ft">Still listening</div><p>“Song of summer 🧐 2026”</p><span>Crave You · May 2026 · 1.4K likes</span><b class="fan-action">Keep the classics visible alongside the next release.</b></div><div class="fq"><div class="ft">Finding it through edits</div><p>“I started listening to this song because of the Deadpool edits on TikTok.”</p><span>Crave You · Oct 2026</span><b class="fan-action">Give rediscovered songs a clear home on the channel.</b></div><div class="fq"><div class="ft">Returning for the experience</div><p>“Pleeeeeease come to NYC and do a decades set”</p><span>5 Hour Decades Set · May 2026</span><b class="fan-action">Build on the mix and live identity they already know.</b></div></div><div class="src reveal">Selected examples from 862 comments posted in 2026 on 50 selected videos. Qualitative signals; they do not measure audience size, territories or demand for a new album.</div></div></section>
+
+<section class="slide" data-t="In-Flight">
+  <div class="chev"></div>
+  <div class="inner">
+    <span class="tag reveal">09 <i>·</i> A YouTube feature to explore</span>
+    <h2 class="display reveal" style="margin-top:.9rem;max-width:26ch">A YouTube Station: <span class="a">In-Flight Entertainment.</span></h2>
+    <div class="st-top">
+      <div class="st-what reveal"><div class="board">A home for longer listening</div><div class="fig mix-number">5 hours</div><p>The Decades Set is already on the channel, alongside the mixes, live films and music videos.</p><p><b>In-Flight Entertainment</b> could bring that library together. Playlists are the first step; a YouTube Station would offer continuous programming.</p><p class="st-date">Illustrative programme below — these are content strands, not four separate Stations.</p></div><div class="ife-screen reveal">
+        <div class="ife-top"><span>FF · In-Flight Entertainment</span><span>Station · live chat</span></div>
+        <div class="ife-ch">
+          <div class="ch"><div class="cn">CH 1 · Departures</div><b>The classics</b><div class="ths"><img src="https://i.ytimg.com/vi/r0bS-YnLf4s/mqdefault.jpg" alt=""><img src="https://i.ytimg.com/vi/Jcu1AHaTchM/mqdefault.jpg" alt=""><img src="https://i.ytimg.com/vi/gJ5YaApfSdQ/mqdefault.jpg" alt=""></div></div>
+          <div class="ch"><div class="cn">CH 2 · Cruising altitude</div><b>The mixes</b><div class="ths"><img src="https://i.ytimg.com/vi/54a6SjIlJF0/mqdefault.jpg" alt=""><img src="https://i.ytimg.com/vi/YPg37aYz7tM/mqdefault.jpg" alt=""><img src="https://i.ytimg.com/vi/jntQd7U0aSk/mqdefault.jpg" alt=""></div></div>
+          <div class="ch"><div class="cn">CH 3 · Live from the cabin</div><b>Live and sets</b><div class="ths"><img src="https://i.ytimg.com/vi/ts-6KyJUDWY/mqdefault.jpg" alt=""><img src="https://i.ytimg.com/vi/y8Ndi955iuY/mqdefault.jpg" alt=""><img src="https://i.ytimg.com/vi/qeo2NtFQLqo/mqdefault.jpg" alt=""></div></div>
+          <div class="ch new"><div class="cn">CH 4 · Arrivals</div><b>The new album</b><div class="ths"><span>Single 1</span><span>Single 2</span><span>Album</span></div></div>
+        </div>
+      </div>
+    </div>
+    <div class="station-actions reveal"><div><div class="board">Start now</div><p>Curate playlists for the classics, mixes, live performances and new music.</p></div><div><div class="board">Explore with YouTube</div><p>An always-on Station. Access and eligible programming need confirmation. <a href="https://www.youtube.com/watch?v=1fz60gNnSdU" target="_blank" rel="noopener">See Metallica TV ↗</a></p></div></div>
+  </div>
+</section>
+
+<section class="slide alt" data-t="Next album plan"><div class="chev"></div><div class="inner"><span class="tag reveal">10 <i>·</i> Next album plan</span><h2 class="display reveal" style="margin-top:.9rem;max-width:27ch">One campaign.<br><span class="a">More reasons to return.</span></h2><div class="architecture stagger"><div class="phase"><div class="board">01 · Before release</div><h3>Plan the full run</h3><p>Choose the hero video, worthwhile follow-up and live capture. Prepare the album look and playlists.</p><b>Plan before launch</b></div><div class="phase"><div class="board">02 · Lead single</div><h3>Make the moment</h3><p>Lead with the official video. Use a Premiere where the team can build a shared fan moment.</p><b>Video + song-led Shorts</b></div><div class="phase"><div class="board">03 · Between singles</div><h3>Give them more</h3><p>Release a distinct live take, edit or mix when it adds something. Link back to the focus song.</p><b>One clear reason to return</b></div><div class="phase"><div class="board">04 · Album week</div><h3>Make it easy to listen</h3><p>Give every track a home in the album playlist. Keep the visual identity consistent across uploads.</p><b>One connected album world</b></div><div class="phase"><div class="board">05 · After the album</div><h3>Keep the era alive</h3><p>Bring the filmed show into the campaign, then selected songs and Shorts. Continue mixes and catalogue programming.</p><b>Full show → songs → Shorts</b></div></div><div class="means reveal"><div class="board">What changes from Forever</div><p>The follow-up and live film are part of the plan from the start, rather than arriving after the campaign has passed.</p></div><div class="src reveal">Proposed sequence, not a fixed upload quota or proven timing formula. Mixes and live are strengths to build on; additional versions remain selective.</div></div></section>
+
+<section class="slide cream" data-t="The priorities"><div class="chev"></div><div class="inner"><span class="tag reveal">11 <i>·</i> The priorities</span><h2 class="display reveal" style="margin-top:.9rem;max-width:27ch">Keep the identity.<br><span class="r">Connect the moments.</span></h2><div class="closing-rows stagger"><div><strong class="fig">455K</strong><div><span class="board">Forever · official video</span><h3>Keep the main video strong.</h3><p>Protect the creative idea, then use song-led clips to help people find it.</p></div></div><div><strong class="fig">387–592K</strong><div><span class="board">Five Decade Mix uploads</span><h3>Build on their own formats.</h3><p>A concept mix for the era; standout edits with a clear role.</p></div></div><div><strong class="fig">390K</strong><div><span class="board">Airfields · full concert</span><h3>Bring live inside the campaign.</h3><p>One key capture, selected songs and Shorts — planned together.</p></div></div></div><div class="close-next reveal"><b>To shape the plan:</b> the album window, focus singles and shows worth filming. VMG can help with sequencing, channel programming and the YouTube conversation.</div><div class="src reveal">Lifetime views as of 21 Oct 2026. YouTube Studio access would let us assess watch time, traffic sources and onward viewing before setting targets.</div></div></section>
+
+</div><!-- /deck -->
+
+<!-- ══ ANALYSIS ═══════════════════════════════════════════════════ -->
+<div class="sheet" id="sheet" role="dialog" aria-modal="true" aria-label="The data behind the deck" tabindex="-1">
+  <button class="btn close" onclick="closeSheet()">Close ✕</button>
+  <div class="sheet-in">
+    <div class="label">Analysis</div>
+    <h2 style="margin-top:.4rem">The data behind the deck</h2>
+    <p style="margin-top:.8rem">Public YouTube data, read 21 October 2026; editorial update 23 October. All 299 uploads; daily readings for 60 recent uploads, 29 Sep – 21 Oct. Comment samples are described separately below. No new API calls were made for this edit.</p>
+
+    <div class="cols">
+      <div>
+        <h3>The channel</h3>
+        <ul>
+          <li>@flightfacilities · 307K subscribers · 217M lifetime views · since 2009.</li>
+          <li>Albums: <i>Down To Earth</i> (Nov 2014), <i>Forever</i> (12 Nov 2021). Next-album timing to confirm with the team.</li>
+          <li>Last upload: 17 Sep 2026.</li>
+        </ul>
+
+        <h3>Views on public uploads, by release year</h3>
+        <table>
+          <tr><th>Year</th><th class="r">Uploads</th><th class="r">Short uploads*</th><th class="r">Views</th></tr>
+          <tr><td>2010</td><td class="r">24</td><td class="r">4</td><td class="r">66.5M</td></tr>
+          <tr><td>2011</td><td class="r">15</td><td class="r">1</td><td class="r">15.0M</td></tr>
+          <tr><td>2012</td><td class="r">12</td><td class="r">2</td><td class="r">36.5M</td></tr>
+          <tr><td>2013</td><td class="r">15</td><td class="r">0</td><td class="r">12.7M</td></tr>
+          <tr><td>2014</td><td class="r">19</td><td class="r">2</td><td class="r">17.6M</td></tr>
+          <tr><td>2015</td><td class="r">6</td><td class="r">2</td><td class="r">5.0M</td></tr>
+          <tr><td>2016–2020</td><td class="r">50</td><td class="r">7</td><td class="r">12.9M</td></tr>
+          <tr><td>2021</td><td class="r">29</td><td class="r">5</td><td class="r">2.7M</td></tr>
+          <tr><td>2022</td><td class="r">18</td><td class="r">6</td><td class="r">0.9M</td></tr>
+          <tr><td>2023</td><td class="r">31</td><td class="r">23</td><td class="r">0.6M</td></tr>
+          <tr><td>2024</td><td class="r">43</td><td class="r">31</td><td class="r">1.4M</td></tr>
+          <tr><td>2025</td><td class="r">11</td><td class="r">6</td><td class="r">0.3M</td></tr>
+          <tr><td>2026</td><td class="r">23</td><td class="r">18</td><td class="r">1.0M</td></tr>
+        </table>
+
+
+        <p>*Historical short uploads use a length-based proxy. Pre-Shorts releases are not evidence of Shorts publishing. No watch time, click-through rate or traffic-source data is available from this public review.</p><h3>Formats since 2017 (median lifetime views)</h3>
+        <table>
+          <tr><th>Format</th><th class="r">n</th><th class="r">Median</th><th>Range</th></tr>
+          <tr><td>Concept mixes (Decade Mix, Forgotten Summer, Down To Earth 10-year)</td><td class="r">4</td><td class="r">191K</td><td>45K – 408K</td></tr>
+          <tr><td>Song videos and album tracks</td><td class="r">18</td><td class="r">83K</td><td>up to 3.4M (Need You)</td></tr>
+          <tr><td>Official audio</td><td class="r">13</td><td class="r">81K</td><td>32K – 1.5M</td></tr>
+          <tr><td>Recorded sets and concerts</td><td class="r">8</td><td class="r">46K</td><td>15K – 390K</td></tr>
+          <tr><td>FF edits of other artists' records</td><td class="r">6</td><td class="r">41K</td><td>9K – 515K</td></tr>
+          <tr><td>Remixes of FF songs by other producers</td><td class="r">29</td><td class="r">18K</td><td>3K – 303K</td></tr>
+          <tr><td>Live song uploads</td><td class="r">3</td><td class="r">36K</td><td>13K – 56K</td></tr>
+          <tr><td>Lyric video</td><td class="r">1</td><td class="r">75K</td><td>—</td></tr>
+          <tr><td>Behind the scenes, tour films, teasers</td><td class="r">8</td><td class="r">3K</td><td>2K – 33K</td></tr>
+          <tr><td>Shorts</td><td class="r">94</td><td class="r">3K</td><td>up to 419K</td></tr>
+        </table>
+        <p>Lifetime views of uploads of different ages: directional, not like-for-like. Classified from titles.</p>
+
+        <h3>How we read the comments</h3>
+        <p>About 1,640 top-level comments — up to 40 per video, ordered by relevance — on 44 videos chosen to cover the classics, the Forever era, the edits, the mixes, the live uploads and the 2026 Shorts. Themes were counted by keyword and read by hand. A selected sample, so these are qualitative signals, not a measure of the audience.</p>
+        <ul>
+          <li><b>Nostalgia and rediscovery</b> — on 34 of 44 videos.</li>
+          <li><b>Discovery elsewhere</b> — GTA V, Forza Horizon, The Sims, a Google Home ad, a Shrek/Squidward meme, a sample by Bryson Tiller.</li>
+          <li><b>Vocalists</b> — Reggie Watts and Owl Eyes most often; Emma Louise.</li>
+          <li><b>Decade Mixes</b> — requests for the next one; fan-made tracklists.</li>
+          <li><b>Edits</b> — requests for streaming and vinyl releases.</li>
+          <li><b>Rare</b> — full-show requests (4), how songs were made, song-ID questions.</li>
+        </ul>
+
+
+        <h3>Live catalogue</h3>
+        <table>
+          <tr><th>Upload</th><th>Year</th><th class="r">Views</th></tr>
+          <tr><td>Clair De Lune with Owl Eyes &amp; the MSO</td><td>2016</td><td class="r">936,753</td></tr>
+          <tr><td>Shine A Light (live remix with the MSO)</td><td>2016</td><td class="r">607,213</td></tr>
+          <tr><td>Live At Airfields, Sydney (full concert, 13 timestamps)</td><td>2022</td><td class="r">390,222</td></tr>
+          <tr><td>Sunshine feat. Reggie Watts, live with the MSO</td><td>2015</td><td class="r">299,639</td></tr>
+          <tr><td>Crave You with Owl Eyes, live at the ARIAs</td><td>2015</td><td class="r">193,802</td></tr>
+          <tr><td>FOREVER feat. Owl Eyes (Live at Airfields)</td><td>2022</td><td class="r">56,367</td></tr>
+          <tr><td>Foreign Language feat. Owl Eyes (Live at Airfields)</td><td>2022</td><td class="r">36,485</td></tr>
+          <tr><td>Nine other MSO songs (2016)</td><td>2016</td><td class="r">26K – 74K</td></tr>
+          <tr><td>Recorded DJ sets (seven)</td><td>2019 – 25</td><td class="r">15K – 102K</td></tr>
+        </table>
+        <p><b>Reference:</b> Fred again.. — USB002 EVERY SHOW (108 hours, 3 Oct 2025 – 27 Feb 2026), published Apr 2026: 1.87M views, 3.5K comments. A much larger channel (1.5M subscribers).</p>
+
+        <h3>Comments posted in 2026</h3>
+        <p>862 comments posted Jan – Oct 2026 on 50 videos (the newest 100 per video), counted by keyword and read by hand.</p>
+        <table>
+          <tr><th>Theme</th><th class="r">Comments</th><th>Example</th></tr>
+          <tr><td>Still listening / "who's here in 2026"</td><td class="r">75</td><td>"Song of summer 🧐 2026" — Crave You, May</td></tr>
+          <tr><td>Found through fan edits on TikTok</td><td class="r">6</td><td>"…because of the Deadpool edits on TikTok" — Crave You, Oct</td></tr>
+          <tr><td>Decades sets in their city</td><td class="r">4</td><td>NYC, Mexico, Germany, Brazil — on the 5 Hour Decades Set</td></tr>
+          <tr><td>Vocalists by name</td><td class="r">7</td><td>Owl Eyes, Reggie Watts, Giselle</td></tr>
+          <tr><td>Song IDs from sets and Shorts</td><td class="r">2</td><td>"42:52 can someone please tell me what song this is!?" — Knockdown Center set</td></tr>
+          <tr><td>Full shows</td><td class="r">2</td><td>"Where Is the full show ?" · "Is the whole concert gone?"</td></tr>
+          <tr><td>New album requests</td><td class="r">~0</td><td>Few explicit requests in this selected sample; not evidence of low album demand</td></tr>
+        </table>
+
+        <h3>YouTube Stations — sources</h3>
+        <ul>
+          <li><a href="https://www.tubefilter.com/2026/08/24/youtube-expands-stations-beyond-music-and-into-the-realm-of-creator-content/" target="_blank" rel="noopener">Tubefilter, Aug 2026</a> — expansion to a limited number of creators and select music artists; live chat.</li>
+          <li><a href="https://routenote.com/radar/youtube-stations-expand-beyond-music-with-24-7-creator-and-podcast-streams/" target="_blank" rel="noopener">RouteNote, Aug 2026</a> — Home and Search across YouTube, YouTube Music, mobile and TV; not available in Portugal, Switzerland or Türkiye.</li>
+          <li><a href="https://routenote.com/blog/youtube-introduces-24-7-stations-as-tv-style-viewing-grows/" target="_blank" rel="noopener">RouteNote, Apr 2026</a> — first tested around Coachella 2026.</li>
+        </ul>
+
+        <h3>The Forever era (lifetime views)</h3>
+        <table>
+          <tr><th>Upload</th><th>Published</th><th class="r">Views</th></tr>
+          <tr><td>Lights Up feat. Channel Tres (Official Audio)</td><td>4 May 2021</td><td class="r">322,786</td></tr>
+          <tr><td>Lights Up feat. Channel Tres (Official Video)</td><td>20 May 2021</td><td class="r">301,729</td></tr>
+          <tr><td>The Ghost (Official Video)</td><td>10 Jun 2021</td><td class="r">98,687</td></tr>
+          <tr><td>Move feat. DRAMA (Official Audio)</td><td>6 Aug 2021</td><td class="r">190,180</td></tr>
+          <tr><td>Move (Never Forever clip)</td><td>4 Aug 2021</td><td class="r">67,050</td></tr>
+          <tr><td>FOREVER feat. BROODS (Official Audio)</td><td>30 Sep 2021</td><td class="r">91,228</td></tr>
+          <tr><td>Forever feat. BROODS (Official Video)</td><td>7 Oct 2021</td><td class="r">454,959</td></tr>
+          <tr><td>Heavy feat. Your Smith (Official Audio)</td><td>1 Nov 2021</td><td class="r">102,118</td></tr>
+          <tr><td>Heavy feat. Your Smith (Official Video)</td><td>11 Nov 2021</td><td class="r">425,903</td></tr>
+          <tr><td>Wait &amp; See · Stay · What I Want · Pain · If Only · Altitude (audio)</td><td>14–15 Nov 2021</td><td class="r">34K – 91K</td></tr>
+          <tr><td>Forever (Roosevelt Remix)</td><td>17 Mar 2022</td><td class="r">117,018</td></tr>
+          <tr><td>Feel It · Planet Claire visualisers (Never Forever mixtape)</td><td>10 Nov 2022</td><td class="r">55K each</td></tr>
+          <tr><td>Live At Airfields, Sydney (Full Concert)</td><td>1 Dec 2022</td><td class="r">390,222</td></tr>
+        </table>
+
+        <h3>Since Forever — originals and edits</h3>
+        <table>
+          <tr><th>Upload</th><th>Published</th><th class="r">Views</th></tr>
+          <tr><td>Room 5 – Make Luv (FF Edit)</td><td>Sep 2024</td><td class="r">514,284</td></tr>
+          <tr><td>Decade Mix 2012–2022 (Official Visualizer)</td><td>Jul 2023</td><td class="r">407,948</td></tr>
+          <tr><td>FF x Daft Punk – Foreign Revolution</td><td>Sep 2024</td><td class="r">371,526</td></tr>
+          <tr><td>Trouble</td><td>Feb 2024</td><td class="r">217,022</td></tr>
+          <tr><td>5 Hour Decades Set, Sydney</td><td>Nov 2025</td><td class="r">101,704</td></tr>
+          <tr><td>Crave You (Official Lyric Video)</td><td>Jul 2026</td><td class="r">74,943</td></tr>
+          <tr><td>Dancing On My Own feat. DRAMA</td><td>Jan 2025</td><td class="r">67,823</td></tr>
+          <tr><td>Down To Earth 10 Year Anniversary (continuous mix)</td><td>Oct 2025</td><td class="r">50,098</td></tr>
+          <tr><td>FF x Everything But The Girl – Forever In My Room</td><td>Dec 2024</td><td class="r">48,302</td></tr>
+          <tr><td>Days Of The Week (Official Video)</td><td>May 2024</td><td class="r">45,209</td></tr>
+          <tr><td>Run</td><td>Aug 2025</td><td class="r">39,501</td></tr>
+        </table>
+      </div>
+
+      <div>
+        <h3>Shorts in 2026</h3>
+        <table>
+          <tr><th>Short</th><th>What's in it</th><th class="r">Views</th></tr>
+          <tr><td>Crave You in Melbourne</td><td>From behind the vocalist on stage, crowd and phone lights</td><td class="r">419,177</td></tr>
+          <tr><td>Mexico always delivers</td><td>From behind the duo, vocalist and a sea of phone lights; "chills."</td><td class="r">212,439</td></tr>
+          <tr><td>One night in New York</td><td>Crave You sung live, close-ups and crowd, Knockdown Center</td><td class="r">77,819</td></tr>
+          <tr><td>Goosebumps</td><td>Side of stage, stadium crowd; "Crave You feat. Owl Eyes + 10,000 more"</td><td class="r">71,471</td></tr>
+          <tr><td>Crave You in Brisbane</td><td>Crave You live</td><td class="r">25,461</td></tr>
+          <tr><td>Pacha pacha pacha</td><td>DJ booth and club, no recognisable song</td><td class="r">2,182</td></tr>
+        </table>
+        <p>Median Short in 2026: 2.8K (n=18). 2023: 2.3K, 2024: 2.2K.</p>
+
+        <h3>Views added, 29 Sep – 21 Oct</h3>
+        <table>
+          <tr><th>Upload</th><th class="r">Added</th></tr>
+          <tr><td>Room 5 – Make Luv (FF Edit)</td><td class="r">+18,355</td></tr>
+          <tr><td>FF x Daft Punk – Foreign Revolution</td><td class="r">+18,224</td></tr>
+          <tr><td>Dope Tool (bootleg)</td><td class="r">+7,088</td></tr>
+          <tr><td>Dancing On My Own</td><td class="r">+1,385</td></tr>
+          <tr><td>5 Hour Decades Set</td><td class="r">+1,243</td></tr>
+          <tr><td>All 60 tracked uploads</td><td class="r">+53,267</td></tr>
+        </table>
+
+        <h3>What fans say</h3>
+        <ul>
+          <li><b>Crave You, again:</b> "Song of summer 2026" · "Who's listening in 2026?" · "Suddenly I'm 20 again."</li>
+          <li><b>The edits:</b> "I wish this was on Spotify!" · "Definitely gonna need a whole set of this."</li>
+          <li><b>Heavy:</b> almost every top comment is about Hugo Weaving.</li>
+          <li><b>Forever:</b> new viewers arriving from Heartbreak High.</li>
+          <li><b>Live:</b> "Where is the full show?" · fans writing in from Mexico and South Africa.</li>
+          <li><b>Decade Mix:</b> "I have waited 10 years for this mix!"</li>
+        </ul>
+
+        <h3>The videos</h3>
+        <table>
+          <tr><th>Video</th><th>What's in it</th></tr>
+          <tr><td>Make Luv (edit)</td><td>Archive TV dance footage, cars</td></tr>
+          <tr><td>Foreign Revolution</td><td>Archive Daft Punk and vocalist performance footage, warm glow</td></tr>
+          <tr><td>Forever</td><td>Night-time story, figures in water and woods</td></tr>
+          <tr><td>Heavy</td><td>Short film with Hugo Weaving</td></tr>
+          <tr><td>Lights Up</td><td>Neon outline graphics, the FOREVER mark</td></tr>
+          <tr><td>Decade Mix 2012–2022</td><td>News and culture collage</td></tr>
+          <tr><td>Run</td><td>Bold red title, archive black-and-white athletes</td></tr>
+        </table>
+
+        <h3>Peer examples</h3>
+        <ul>
+          <li><b>Peggy Gou</b> (465K): Nanana karaoke video (Jun 2023) 8.1M; crowd Shorts 0.2–1.3M; official video (Sep 2023) 92.7M.</li>
+          <li><b>Fred again..</b> (1.5M): Rooftop Live, London 31.7M; Studio Live 7.6M; USB002 with Thomas Bangalter 11.4M.</li>
+          <li><b>Eric Prydz</b> (441K): EPIC Radio episodes 0.9–1.6M each, fortnightly in 2026.</li>
+        </ul>
+
+        <h3>Sources</h3><p><a href="https://www.youtube.com/watch?v=IH5L4qTVsTk" target="_blank" rel="noopener">Down To Earth feat. Sam Rockwell</a> — official Flight Facilities upload, published 25 February 2015. Image and date checked during the editorial update.</p>
+        <ul>
+          <li><a href="https://www.youtube.com/@flightfacilities" target="_blank" rel="noopener">@flightfacilities</a> — uploads, descriptions, playlists</li>
+          <li><a href="https://flightfacilities.bandcamp.com/album/forever" target="_blank" rel="noopener">Forever on Bandcamp</a> — release date and tracklist</li>
+          <li><a href="https://support.google.com/youtube/answer/14075157" target="_blank" rel="noopener">YouTube Help</a> — Shorts related video</li>
+        </ul>
+      </div>
+    </div>
+    <p style="margin-top:2.6rem;font-size:.74rem">Virgin Music Group UK · 21 October 2026</p>
+  </div>
+</div>
+
+<script>
+/* channel timeline */
+(function(){
+  var M=[["2010-01",1,0],["2010-02",0,0],["2010-03",8,0],["2010-04",0,0],["2010-05",1,0],["2010-06",0,0],["2010-07",3,1],["2010-08",2,0],["2010-09",2,1],["2010-10",1,0],["2010-11",0,1],["2010-12",2,1],["2011-01",1,1],["2011-02",0,0],["2011-03",2,0],["2011-04",1,0],["2011-05",0,0],["2011-06",0,0],["2011-07",7,0],["2011-08",2,0],["2011-09",0,0],["2011-10",0,0],["2011-11",0,0],["2011-12",1,0],["2012-01",0,0],["2012-02",0,0],["2012-03",0,0],["2012-04",0,1],["2012-05",6,0],["2012-06",0,0],["2012-07",1,0],["2012-08",0,0],["2012-09",0,0],["2012-10",1,1],["2012-11",2,0],["2012-12",0,0],["2013-01",1,0],["2013-02",1,0],["2013-03",0,0],["2013-04",0,0],["2013-05",4,0],["2013-06",0,0],["2013-07",1,0],["2013-08",0,0],["2013-09",1,0],["2013-10",3,0],["2013-11",1,0],["2013-12",3,0],["2014-01",0,0],["2014-02",0,0],["2014-03",1,0],["2014-04",0,1],["2014-05",0,0],["2014-06",0,0],["2014-07",0,0],["2014-08",1,0],["2014-09",1,0],["2014-10",2,1],["2014-11",12,0],["2014-12",0,0],["2015-01",0,0],["2015-02",1,1],["2015-03",0,0],["2015-04",0,0],["2015-05",1,0],["2015-06",0,0],["2015-07",0,0],["2015-08",0,0],["2015-09",0,1],["2015-10",0,0],["2015-11",0,0],["2015-12",2,0],["2016-01",0,0],["2016-02",0,0],["2016-03",1,1],["2016-04",4,1],["2016-05",2,0],["2016-06",3,0],["2016-07",4,0],["2016-08",1,0],["2016-09",1,0],["2016-10",0,0],["2016-11",1,0],["2016-12",1,0],["2017-01",0,0],["2017-02",0,0],["2017-03",0,0],["2017-04",0,0],["2017-05",0,0],["2017-06",1,0],["2017-07",0,0],["2017-08",3,0],["2017-09",0,0],["2017-10",5,0],["2017-11",1,0],["2017-12",0,0],["2018-01",0,0],["2018-02",3,0],["2018-03",0,0],["2018-04",0,0],["2018-05",1,0],["2018-06",0,1],["2018-07",3,0],["2018-08",0,0],["2018-09",0,0],["2018-10",0,0],["2018-11",0,0],["2018-12",0,0],["2019-01",0,0],["2019-02",0,0],["2019-03",0,0],["2019-04",0,0],["2019-05",0,0],["2019-06",0,0],["2019-07",0,0],["2019-08",0,0],["2019-09",0,0],["2019-10",3,1],["2019-11",1,0],["2019-12",1,0],["2020-01",0,0],["2020-02",0,0],["2020-03",0,1],["2020-04",1,0],["2020-05",0,0],["2020-06",0,0],["2020-07",1,0],["2020-08",0,0],["2020-09",1,0],["2020-10",0,1],["2020-11",0,1],["2020-12",0,0],["2021-01",0,0],["2021-02",0,0],["2021-03",0,0],["2021-04",0,0],["2021-05",2,0],["2021-06",2,1],["2021-07",5,1],["2021-08",2,0],["2021-09",3,2],["2021-10",1,1],["2021-11",8,0],["2021-12",1,0],["2022-01",3,0],["2022-02",0,1],["2022-03",2,0],["2022-04",1,0],["2022-05",0,0],["2022-06",1,0],["2022-07",1,2],["2022-08",0,0],["2022-09",0,1],["2022-10",0,1],["2022-11",3,1],["2022-12",1,0],["2023-01",0,3],["2023-02",0,1],["2023-03",0,1],["2023-04",0,1],["2023-05",1,0],["2023-06",0,0],["2023-07",2,6],["2023-08",1,0],["2023-09",2,5],["2023-10",0,3],["2023-11",1,2],["2023-12",1,1],["2024-01",1,2],["2024-02",1,5],["2024-03",0,6],["2024-04",1,5],["2024-05",2,6],["2024-06",0,1],["2024-07",2,2],["2024-08",0,0],["2024-09",2,1],["2024-10",2,1],["2024-11",0,2],["2024-12",1,0],["2025-01",1,1],["2025-02",0,0],["2025-03",0,0],["2025-04",0,0],["2025-05",0,0],["2025-06",0,1],["2025-07",0,0],["2025-08",1,1],["2025-09",0,0],["2025-10",1,0],["2025-11",1,3],["2025-12",1,0],["2026-01",2,1],["2026-02",0,0],["2026-03",0,0],["2026-04",0,0],["2026-05",1,5],["2026-06",0,7],["2026-07",2,2],["2026-08",0,1],["2026-09",0,2],["2026-10",0,0]];var el=document.getElementById('ctl');if(!el)return;
+  var W=1320,top=46,base=180,n=M.length,cw=W/n,unit=(base-top)/12;
+  var idx=function(k){for(var i=0;i<n;i++) if(M[i][0]===k) return i; return -1;};
+  var eras=[['2010-03','2011-12','Crave You · early singles'],['2014-08','2015-05','Down To Earth'],['2016-03','2016-07','Live · MSO'],['2021-05','2021-11','Forever'],['2023-07','2024-05','Decades · edits'],['2026-05','2026-07','Crave You again']];
+  var heroes=[['2010-09','Crave You'],['2012-11','Clair De Lune'],['2014-11','Down To Earth'],['2018-02','Need You'],['2021-10','Forever'],['2022-12','Airfields'],['2024-09','Make Luv edit'],['2026-05','Melbourne Short']];
+  var s='';
+  eras.forEach(function(e){var a=idx(e[0]),b=idx(e[1]);s+='<rect x="'+(a*cw)+'" y="'+(top-8)+'" width="'+((b-a+1)*cw)+'" height="'+(base-top+8)+'" fill="rgba(242,237,227,.05)"/>';});
+  M.forEach(function(m,i){var x=i*cw+.6,w=Math.max(2,cw-1.2),hl=m[1]*unit,hs=m[2]*unit*.6;
+    if(hl) s+='<rect x="'+x+'" y="'+(base-hl)+'" width="'+w+'" height="'+hl+'" fill="#F2EDE3" opacity=".85"/>';
+    if(hs) s+='<rect x="'+x+'" y="'+(base-hl-hs)+'" width="'+w+'" height="'+hs+'" fill="#E1363C"/>';});
+  heroes.forEach(function(h,j){var i=idx(h[0]);var x=i*cw+cw/2;var y=(j%2)?18:31;
+    s+='<line x1="'+x+'" y1="'+(y+4)+'" x2="'+x+'" y2="'+base+'" stroke="#F4B740" stroke-width="1" stroke-dasharray="2 3" opacity=".7"/>';
+    s+='<circle cx="'+x+'" cy="'+(y+4)+'" r="3.5" fill="#F4B740"/>';
+    var last=j===heroes.length-1;
+    s+='<text x="'+x+'" y="'+(y-2)+'" fill="#F4B740" font-size="10.5" font-family="IBM Plex Mono" text-anchor="'+(last?'end':'middle')+'">'+h[1]+'</text>';});
+  for(var y=2010;y<=2026;y++){var i=idx(y+'-01');s+='<line x1="'+(i*cw)+'" y1="'+base+'" x2="'+(i*cw)+'" y2="'+(base+5)+'" stroke="#8790A6"/><text x="'+(i*cw+2)+'" y="'+(base+17)+'" fill="#8790A6" font-size="10" font-family="IBM Plex Mono">'+y+'</text>';}
+  eras.forEach(function(e,k){var a=idx(e[0]);var last=k===eras.length-1;s+='<text x="'+(last?W:(a*cw+2))+'" text-anchor="'+(last?'end':'start')+'" y="'+(base+31)+'" fill="#F2EDE3" opacity=".8" font-size="9.5" font-family="Inter Tight" font-weight="600">'+e[2]+'</text>';});
+  var g1=idx('2018-08'),g2=idx('2019-09'),gy=base-20;
+  s+='<line x1="'+(g1*cw)+'" y1="'+gy+'" x2="'+((g2+1)*cw)+'" y2="'+gy+'" stroke="#E1363C" stroke-width="1.5" stroke-dasharray="5 4"/>';
+  s+='<text x="'+((g1+g2+1)/2*cw)+'" y="'+(gy-6)+'" fill="#E1363C" font-size="9.5" font-weight="600" font-family="IBM Plex Mono" text-anchor="middle">432 DAYS</text>';
+  s+='<line x1="0" y1="'+base+'" x2="'+W+'" y2="'+base+'" stroke="rgba(242,237,227,.3)"/>';
+  el.innerHTML=s;
+})();
+/* 2026 run */
+(function(){
+  var el=document.getElementById('run');if(!el)return;
+  var it=[['12 May','Brisbane',25463,''],['13 May','Short',3013,''],['14 May','Goosebumps',71471,'hot'],['15 May','Melbourne',419184,'hot'],['25 May','Short',2802,''],['5 Jun','New York',77819,'hot'],['6 Jun','Short',1677,''],['9 Jun','Short',1228,''],['11 Jun','Short',1592,''],['16 Jun','Short',6035,''],['26 Jun','Short',2490,''],['29 Jun','Short',2082,''],['8 Jul','Mexico',212439,'hot'],['13 Jul','Bootleg',33852,'lf'],['16 Jul','Lyric video',74949,'lf'],['30 Jul','Short',1766,''],['24 Aug','Short',818,''],['16 Sep','Short',2183,''],['17 Sep','Short',760,'']];
+  var f=function(v){return v>=1e6?(v/1e6).toFixed(1)+'M':v>=1e3?Math.round(v/1e3)+'K':v};
+  var h=function(v){return Math.max(5,Math.round(Math.sqrt(v)/Math.sqrt(419184)*140));};
+  el.innerHTML=it.map(function(x){return '<div class="run-i '+x[3]+'"><div class="run-b" style="height:'+h(x[2])+'px"></div><div class="run-c">'+x[0]+'<br>'+x[1]+'<br>'+f(x[2])+'</div></div>';}).join('')+'<div class="run-gap"><span>97 days since the lyric video · no long-form</span></div>';
+})();
+
+var io = new IntersectionObserver(function(es){
+  es.forEach(function(e){
+    if(!e.isIntersecting) return;
+    e.target.classList.add('visible');
+    if(e.target.classList.contains('stagger'))
+      [].slice.call(e.target.children).forEach(function(c,i){ setTimeout(function(){ c.classList.add('visible'); }, i*70); });
+    io.unobserve(e.target);
+  });
+},{threshold:.1});
+document.querySelectorAll('.reveal,.stagger').forEach(function(el){ io.observe(el); });
+
+var cur = 0;
+function slides(){ return [].slice.call(document.querySelectorAll('.slide')); }
+function startPresent(){ closeSheet(); document.body.classList.add('present'); showSlide(0); var el=document.documentElement; if(el.requestFullscreen) el.requestFullscreen().catch(function(){}); }
+function exitPresent(){ document.body.classList.remove('present'); slides().forEach(function(s){ s.classList.remove('current'); }); if(document.fullscreenElement && document.exitFullscreen) document.exitFullscreen().catch(function(){}); var s=slides()[cur]; if(s) s.scrollIntoView({block:'start'}); }
+function showSlide(i){
+  var s=slides(); cur=Math.max(0,Math.min(i,s.length-1));
+  s.forEach(function(el,n){ el.classList.toggle('current', n===cur); });
+  s[cur].scrollTop=0;
+  s[cur].querySelectorAll('.reveal,.stagger,.stagger>*').forEach(function(e){ e.classList.add('visible'); });
+  document.getElementById('pbar').style.width=((cur+1)/s.length*100)+'%';
+  document.getElementById('pcount').textContent=(cur+1)+' / '+s.length;
+}
+document.addEventListener('keydown', function(e){
+  if(!document.body.classList.contains('present')){ if(e.key==='Escape') closeSheet(); return; }
+  if(e.key==='ArrowRight'||e.key===' '||e.key==='PageDown'){ e.preventDefault(); showSlide(cur+1); }
+  else if(e.key==='ArrowLeft'||e.key==='PageUp'){ e.preventDefault(); showSlide(cur-1); }
+  else if(e.key==='Escape'){ exitPresent(); }
+  else if(e.key==='Home'){ showSlide(0); } else if(e.key==='End'){ showSlide(slides().length-1); }
+});
+document.addEventListener('fullscreenchange', function(){ if(!document.fullscreenElement && document.body.classList.contains('present')) exitPresent(); });
+var sheetFocus; function openSheet(){ sheetFocus=document.activeElement; document.getElementById('sheet').classList.add('open'); document.body.classList.add('sheet-open'); document.querySelector('#sheet .close').focus(); }
+function closeSheet(){ var s=document.getElementById('sheet'); if(s) s.classList.remove('open'); document.body.classList.remove('sheet-open'); if(sheetFocus) sheetFocus.focus(); }
+</script>
+</body>
+</html>
