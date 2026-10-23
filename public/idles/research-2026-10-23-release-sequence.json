@@ -1,0 +1,125 @@
+{
+  "capturedAt": "2026-10-23T10:20:57.445Z",
+  "source": "Same one-off 23 Oct catalogue pull used for conversation research; no further API request.",
+  "premiereEvidence": "All four TANGK prerecorded, title-labelled official music videos have both scheduledStart and actualStart. Classified as Premiere use by inference from broadcast metadata; YouTube API does not supply a native isPremiere flag. No audience uplift inferred.",
+  "sequence": [
+    {
+      "video": {
+        "id": "A3ZZj5y6Qt4",
+        "title": "IDLES - DANCER  (Official Video)",
+        "publishedAt": "2023-10-18T09:00:10Z",
+        "durationSec": 204,
+        "isShort": false,
+        "views": 6396309,
+        "likes": 79868,
+        "comments": 2729,
+        "wasLive": true,
+        "scheduledStart": "2023-10-18T09:00:00Z",
+        "actualStart": "2023-10-18T09:00:10Z"
+      },
+      "nextFullLength": {
+        "id": "XvXYZ3uAkVc",
+        "title": "IDLES - GRACE (Official Lyric Video)",
+        "publishedAt": "2023-12-06T17:02:31Z",
+        "durationSec": 234,
+        "isShort": false,
+        "views": 430499,
+        "likes": 9255,
+        "comments": 598,
+        "wasLive": false,
+        "scheduledStart": null,
+        "actualStart": null
+      },
+      "calendarDaysToNextFullLength": 49
+    },
+    {
+      "video": {
+        "id": "_HQrM5L9T1g",
+        "title": "IDLES - GIFT HORSE (Official Video)",
+        "publishedAt": "2024-01-15T17:00:07Z",
+        "durationSec": 275,
+        "isShort": false,
+        "views": 3275076,
+        "likes": 44583,
+        "comments": 1715,
+        "wasLive": true,
+        "scheduledStart": "2024-01-15T17:00:00Z",
+        "actualStart": "2024-01-15T17:00:07Z"
+      },
+      "nextFullLength": {
+        "id": "gnd4jIBRfHE",
+        "title": "IDLES - GRACE (Official Video)",
+        "publishedAt": "2024-02-14T17:00:08Z",
+        "durationSec": 241,
+        "isShort": false,
+        "views": 1130857,
+        "likes": 18370,
+        "comments": 985,
+        "wasLive": true,
+        "scheduledStart": "2024-02-14T17:00:00Z",
+        "actualStart": "2024-02-14T17:00:08Z"
+      },
+      "calendarDaysToNextFullLength": 30
+    },
+    {
+      "video": {
+        "id": "gnd4jIBRfHE",
+        "title": "IDLES - GRACE (Official Video)",
+        "publishedAt": "2024-02-14T17:00:08Z",
+        "durationSec": 241,
+        "isShort": false,
+        "views": 1130857,
+        "likes": 18370,
+        "comments": 985,
+        "wasLive": true,
+        "scheduledStart": "2024-02-14T17:00:00Z",
+        "actualStart": "2024-02-14T17:00:08Z"
+      },
+      "nextFullLength": {
+        "id": "1_3VGCC3TwM",
+        "title": "IDLES - A GOSPEL (Official Lyric Video)",
+        "publishedAt": "2024-02-16T00:00:01Z",
+        "durationSec": 226,
+        "isShort": false,
+        "views": 192361,
+        "likes": 1912,
+        "comments": 110,
+        "wasLive": false,
+        "scheduledStart": null,
+        "actualStart": null
+      },
+      "calendarDaysToNextFullLength": 2
+    },
+    {
+      "video": {
+        "id": "huWfQdG2_ws",
+        "title": "IDLES - POP POP POP (Official Video)",
+        "publishedAt": "2024-04-17T16:00:07Z",
+        "durationSec": 260,
+        "isShort": false,
+        "views": 2043614,
+        "likes": 35883,
+        "comments": 1472,
+        "wasLive": true,
+        "scheduledStart": "2024-04-17T16:00:00Z",
+        "actualStart": "2024-04-17T16:00:07Z"
+      },
+      "nextFullLength": {
+        "id": "uvr6-DzNu24",
+        "title": "IDLES - POP POP POP (feat. Danny Brown) (Official Audio)",
+        "publishedAt": "2024-12-17T00:00:38Z",
+        "durationSec": 201,
+        "isShort": false,
+        "views": 146825,
+        "likes": 4890,
+        "comments": 222,
+        "wasLive": false,
+        "scheduledStart": null,
+        "actualStart": null
+      },
+      "calendarDaysToNextFullLength": 244
+    }
+  ],
+  "gapMethod": "UTC calendar-date differences to the next publicly returned upload over 62 seconds, any song or format, across the uncapped 372-upload catalogue. This is not same-song follow-up timing. Shorts in between are not treated as silence.",
+  "limits": "Gaps describe publishing, not missed viewing or causal outcomes. GRACE was followed by album-day lyrics two days later. POP POP POP was followed by Danny Brown official audio 244 days later. No fixed follow-up quota or claim that 7–14 days guarantees improvement. View totals and lyric median on the main slides remain from 22 October."
+}
