@@ -18,11 +18,18 @@ export async function collectOwnedChannel(id: string): Promise<OwnedSnapshot> {
   if (!validChannelId(id)) throw new Error('Channel ID needs checking (expected 24 characters).');
   const apiKey = process.env.YOUTUBE_API_KEY;
   if (!apiKey) throw new Error('YouTube access is not configured for this preview.');
-  async function get(resource: string, params: Record<string, string>): Promise<{ items: YtItem[]; nextPageToken?: string }> {
+  async function get(resource: string, params: Record<string, string>, emptyOn404 = false): Promise<{ items: YtItem[]; nextPageToken?: string }> {
     const query = new URLSearchParams({ ...params, key: apiKey! });
     const response = await fetch(`https://www.googleapis.com/youtube/v3/${resource}?${query}`, {
       cache: 'no-store', signal: AbortSignal.timeout(20000),
     });
+    /* A channel that has never published has no uploads playlist, so
+       playlistItems answers 404 even though the channel itself resolved.
+       That is a real state for a new network, not a collection failure:
+       the channel totals are already in hand, and discarding them makes
+       an unlaunched channel read as "not collected", which is
+       indistinguishable from an outage. */
+    if (emptyOn404 && response.status === 404) return { items: [] };
     // Do not echo upstream request URLs or credentials into errors.
     if (!response.ok) throw new Error(`YouTube returned ${response.status}; collection was not saved.`);
     return response.json();
@@ -39,7 +46,7 @@ export async function collectOwnedChannel(id: string): Promise<OwnedSnapshot> {
   for (let page = 0; page < 6; page++) {
     const result = await get('playlistItems', { part: 'contentDetails,snippet', maxResults: '50', playlistId,
       ...(token ? { pageToken: token } : {}),
-    });
+    }, true);
     for (const item of result.items) {
       const at = item.contentDetails?.videoPublishedAt ?? item.snippet?.publishedAt;
       const videoId = item.contentDetails?.videoId ?? item.snippet?.resourceId?.videoId;
