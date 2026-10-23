@@ -46,6 +46,44 @@ export function observedMovement(readings: Reading[], metric: 'views' | 'subs', 
     days: (Date.parse(last.at) - Date.parse(first.at)) / DAY };
 }
 
+export type LibrarySummary = {
+  uploads: number;
+  /** Summed across uploads that reported a count. Not the channel counter. */
+  views: number | null;
+  withViews: number;
+  medianViews: number | null;
+  /** Uploads needed, best first, to reach half the library's views. */
+  halfShareCount: number | null;
+  /** Share of library views held by the single best upload. */
+  topShare: number | null;
+  /** The stored sample is the channel's whole public upload list. */
+  complete: boolean;
+};
+
+/* These channels are listening destinations with catalogues, not artist
+   channels mid-campaign: most of what they have done sits outside any
+   recent publishing window. This summarises the stored library instead.
+   It never mixes with the channel's own view counter, which also counts
+   uploads since deleted — the two are reported side by side, not merged.
+   Where the collection hit its cap every figure here is a floor, which
+   is why `complete` travels with the numbers rather than being inferred. */
+export function librarySummary(items: OwnedVideo[], complete: boolean): LibrarySummary {
+  const counted = items.filter(v => v.views != null).map(v => v.views!).sort((a, b) => b - a);
+  const views = counted.length ? counted.reduce((sum, v) => sum + v, 0) : null;
+  let halfShareCount: number | null = null;
+  if (views != null && views > 0) {
+    let running = 0;
+    for (let i = 0; i < counted.length; i++) {
+      running += counted[i];
+      if (running * 2 >= views) { halfShareCount = i + 1; break; }
+    }
+  }
+  return {
+    uploads: items.length, views, withViews: counted.length, medianViews: median(counted),
+    halfShareCount, topShare: views ? counted[0] / views : null, complete,
+  };
+}
+
 export function meanDailyViews(video: OwnedVideo, at: number) {
   const days = (at - Date.parse(video.publishedAt)) / DAY;
   return days >= 1 && video.views != null ? video.views / days : null;

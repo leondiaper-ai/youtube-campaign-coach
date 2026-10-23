@@ -4,12 +4,13 @@ import Link from 'next/link';
 import { useState, type ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
 import { OWNED_CHANNELS, validChannelId } from '@/lib/ownedChannels/channels';
-import { DAY, LENGTH_LABELS, lengthGroup, lengthBreakdown, meanDailyViews, observedMovement, publishingSeries, type OwnedAnalysis } from '@/lib/ownedChannels/analysis';
+import { DAY, LENGTH_LABELS, lengthGroup, lengthBreakdown, librarySummary, meanDailyViews, observedMovement, publishingSeries, type OwnedAnalysis } from '@/lib/ownedChannels/analysis';
 import { GrowthChart, PublishingChart, LengthChart } from './OwnedChannelCharts';
 
 const fmt = (n: number | null | undefined) => n == null ? '—' : new Intl.NumberFormat('en-GB', { notation: 'compact', maximumFractionDigits: 1 }).format(n);
 const date = (at: string | number) => new Date(at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' });
 const delta = (n: number) => `${n > 0 ? '+' : ''}${fmt(n)}`;
+const share = (n: number | null) => n == null ? '—' : `${n < 0.01 ? '<1' : Math.round(n * 100)}%`;
 const duration = (n: number | null) => n == null ? '—' : `${Math.floor(n / 60)}:${String(n % 60).padStart(2, '0')}`;
 const control = 'border border-line bg-surface rounded-control px-3 py-2 text-body focus-visible:outline-electric';
 
@@ -23,6 +24,7 @@ export default function OwnedChannelAnalysis({ analysis, canCollect, readFailed,
   const [search, setSearch] = useState('');
   const [length, setLength] = useState('all');
   const [sort, setSort] = useState('views');
+  const [scope, setScope] = useState<'library' | 'window'>('library');
   const [page, setPage] = useState(0);
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState('');
@@ -35,7 +37,12 @@ export default function OwnedChannelAnalysis({ analysis, canCollect, readFailed,
   const covered = series.every(p => p.count != null);
   const viewsMovement = observedMovement(readings, 'views', from);
   const subsMovement = observedMovement(readings, 'subs', from);
-  const filtered = windowItems.filter(v => v.title.toLowerCase().includes(search.toLowerCase()) && (length === 'all' || lengthGroup(v) === Number(length)));
+  /* The library is the default scope. Most of what a destination channel
+     has done sits outside the publishing window, so framing the table on
+     the window hides the part that is actually carrying the channel. */
+  const library = librarySummary(currentItems, !!row.current?.reachedEnd);
+  const tableItems = scope === 'library' ? currentItems : windowItems;
+  const filtered = tableItems.filter(v => v.title.toLowerCase().includes(search.toLowerCase()) && (length === 'all' || lengthGroup(v) === Number(length)));
   const sortValue = (v: typeof currentItems[number]) => sort === 'published' ? Date.parse(v.publishedAt) : sort === 'daily' ? meanDailyViews(v, at) : sort === 'gain' ? videoGains[v.id]?.value ?? null : v.views;
   filtered.sort((a, b) => {
     const av = sortValue(a), bv = sortValue(b);
@@ -91,8 +98,25 @@ export default function OwnedChannelAnalysis({ analysis, canCollect, readFailed,
         `This reading is more than 48 hours old. Figures below are historical, as of ${date(asOf)}. Refresh before treating them as current.`}
     </div>}
 
+    <div className="mb-5">
+      <h2 className="text-h4 font-bold">Channel library</h2>
+      <p className="text-micro text-muted mt-1">
+        {row.current ? <>Everything stored for this channel, not a recent window · as of {date(at)}{library.complete ? '' : ' · collection cap reached, every figure here is a floor'}</> : 'Awaiting channel data'}
+      </p>
+    </div>
+    <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-8">
+      <Metric label="Uploads in library" value={row.current ? `${library.complete ? '' : '≥'}${library.uploads}` : '—'}
+        note={!row.current ? 'No reading yet' : library.complete ? `Full public history${row.firstUpload ? ` since ${date(row.firstUpload)}` : ''}` : 'Cap reached · the library is larger than this'} />
+      <Metric label="Views across library" value={row.current ? `${library.complete ? '' : '≥'}${fmt(library.views)}` : '—'}
+        note={!row.current ? 'No reading yet' : `Summed over ${library.withViews} uploads · the channel counter reads ${fmt(row.current.views)} and includes uploads since removed`} />
+      <Metric label="Median upload" value={fmt(library.medianViews)}
+        note={row.current ? `Half the library does better than this · n=${library.withViews}` : 'No reading yet'} />
+      <Metric label="Carrying half the views" value={library.halfShareCount == null ? '—' : String(library.halfShareCount)}
+        note={!row.current ? 'No reading yet' : library.halfShareCount == null ? 'No view counts recorded' : `of ${library.complete ? '' : '≥'}${library.uploads} uploads · the best one holds ${share(library.topShare)}`} />
+    </div>
+
     <div className="flex flex-wrap items-center justify-between gap-3 mb-5">
-      <div><h2 className="text-h4 font-bold">Channel overview</h2><p className="text-micro text-muted mt-1">{date(from)} – {date(at)} · {row.current ? 'as of the latest reading' : 'awaiting channel data'} · publication dates in UTC</p></div>
+      <div><h2 className="text-h4 font-bold">Recent window</h2><p className="text-micro text-muted mt-1">{date(from)} – {date(at)} · {row.current ? 'as of the latest reading' : 'awaiting channel data'} · publication dates in UTC</p></div>
       <div className="inline-flex border border-line rounded-control bg-surface p-1" aria-label="Analysis period">{([7, 30] as const).map(n => <button key={n} type="button" aria-pressed={days === n} onClick={() => { setDays(n); setPage(0); }} className={`text-meta font-semibold px-3 py-1 rounded ${days === n ? 'bg-ink text-white' : 'text-muted hover:text-ink'}`}>{n} days</button>)}</div>
     </div>
     <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-5">
@@ -116,7 +140,18 @@ export default function OwnedChannelAnalysis({ analysis, canCollect, readFailed,
     </Panel>
 
     <section className="mt-8" aria-labelledby="upload-performance">
-      <div className="flex flex-wrap justify-between items-end gap-3 mb-4"><div><h2 id="upload-performance" className="text-h4 font-bold">Upload performance</h2><p className="text-meta text-muted mt-1">Views to date on uploads published in the selected period. Search a song, artist or version.</p></div><span className="text-meta text-muted tabular-nums">{filtered.length} uploads</span></div>
+      <div className="flex flex-wrap justify-between items-end gap-3 mb-4">
+        <div><h2 id="upload-performance" className="text-h4 font-bold">Upload performance</h2>
+          <p className="text-meta text-muted mt-1">Views to date on {scope === 'library' ? 'every stored upload' : `uploads published in the last ${days} days`}. Search a song, artist or version.</p></div>
+        <div className="flex items-center gap-3">
+          <div className="inline-flex border border-line rounded-control bg-surface p-1" aria-label="Upload scope">
+            {([['library', 'Whole library'], ['window', `Last ${days} days`]] as const).map(([key, label]) =>
+              <button key={key} type="button" aria-pressed={scope === key} onClick={() => { setScope(key); setPage(0); }}
+                className={`text-meta font-semibold px-3 py-1 rounded ${scope === key ? 'bg-ink text-white' : 'text-muted hover:text-ink'}`}>{label}</button>)}
+          </div>
+          <span className="text-meta text-muted tabular-nums">{filtered.length} uploads</span>
+        </div>
+      </div>
       <div className="flex flex-wrap gap-3 mb-3">
         <label className="flex-1 min-w-[200px]"><span className="sr-only">Search uploads</span><input value={search} onChange={e => { setSearch(e.target.value); setPage(0); }} placeholder="Find an upload…" className={`${control} w-full placeholder:text-faint`} /></label>
         <label><span className="sr-only">Filter by video length</span><select value={length} onChange={e => { setLength(e.target.value); setPage(0); }} className={control}><option value="all">All lengths</option>{LENGTH_LABELS.map((label, i) => <option value={i} key={label}>{label}</option>)}</select></label>
@@ -142,7 +177,7 @@ export default function OwnedChannelAnalysis({ analysis, canCollect, readFailed,
             </tr>;
           })}</tbody>
         </table></div>
-        {!filtered.length && <div className="p-10 text-center text-meta text-muted">{!row.current ? 'Refresh the channel to load its uploads.' : !windowItems.length ? 'No sampled public uploads in this period.' : <>No uploads match. <button className="underline text-ink" onClick={() => { setSearch(''); setLength('all'); setPage(0); }}>Clear filters</button></>}</div>}
+        {!filtered.length && <div className="p-10 text-center text-meta text-muted">{!row.current ? 'Refresh the channel to load its uploads.' : !tableItems.length ? (scope === 'library' ? 'No public uploads were recorded for this channel.' : <>No uploads published in the last {days} days. <button className="underline text-ink" onClick={() => { setScope('library'); setPage(0); }}>Show the whole library</button></>) : <>No uploads match. <button className="underline text-ink" onClick={() => { setSearch(''); setLength('all'); setPage(0); }}>Clear filters</button></>}</div>}
         <div className="px-4 py-3 bg-raised/50 border-t border-line flex flex-wrap justify-between items-center gap-3 text-micro text-muted">
           <span>{filtered.length ? `${safePage * 10 + 1}–${Math.min((safePage + 1) * 10, filtered.length)} of ${filtered.length}` : '0 uploads'} · Average / day is lifetime views ÷ age; it is not recent daily growth.</span>
           <div className="flex gap-2"><button type="button" disabled={safePage === 0} onClick={() => setPage(safePage - 1)} className="px-2 py-1 border border-line rounded bg-surface disabled:opacity-40">Previous</button><button type="button" disabled={safePage >= pageCount - 1} onClick={() => setPage(safePage + 1)} className="px-2 py-1 border border-line rounded bg-surface disabled:opacity-40">Next</button></div>
