@@ -1,0 +1,113 @@
+{
+  "source": "Watcher cached snapshot history; read-only /api/debug/snapshots?handle=@flightfacilities",
+  "capturedAt": "2026-10-23T12:27:24.137Z",
+  "channelId": "UCvBxvcqGSQkbs1BRafBIYSg",
+  "dateRange": {
+    "first": "2026-09-29",
+    "last": "2026-10-23"
+  },
+  "observations": [
+    {
+      "ts": "2026-09-29",
+      "views": 216652282
+    },
+    {
+      "ts": "2026-09-30",
+      "views": 216652282
+    },
+    {
+      "ts": "2026-10-01",
+      "views": 216652282
+    },
+    {
+      "ts": "2026-10-02",
+      "views": 216652282
+    },
+    {
+      "ts": "2026-10-03",
+      "views": 216652282
+    },
+    {
+      "ts": "2026-10-04",
+      "views": 216652282
+    },
+    {
+      "ts": "2026-10-05",
+      "views": 216652282
+    },
+    {
+      "ts": "2026-10-06",
+      "views": 216652282
+    },
+    {
+      "ts": "2026-10-07",
+      "views": 216652282
+    },
+    {
+      "ts": "2026-10-08",
+      "views": 216652282
+    },
+    {
+      "ts": "2026-10-09",
+      "views": 216652282
+    },
+    {
+      "ts": "2026-10-10",
+      "views": 216652282
+    },
+    {
+      "ts": "2026-10-11",
+      "views": 216652282
+    },
+    {
+      "ts": "2026-10-12",
+      "views": 216652282
+    },
+    {
+      "ts": "2026-10-13",
+      "views": 216652282
+    },
+    {
+      "ts": "2026-10-14",
+      "views": 216652282
+    },
+    {
+      "ts": "2026-10-15",
+      "views": 216652282
+    },
+    {
+      "ts": "2026-10-16",
+      "views": 216652282
+    },
+    {
+      "ts": "2026-10-17",
+      "views": 216652282
+    },
+    {
+      "ts": "2026-10-18",
+      "views": 216652282
+    },
+    {
+      "ts": "2026-10-19",
+      "views": 216652282
+    },
+    {
+      "ts": "2026-10-20",
+      "views": 216652282
+    },
+    {
+      "ts": "2026-10-21",
+      "views": 216652282
+    },
+    {
+      "ts": "2026-10-22",
+      "views": 216652282
+    },
+    {
+      "ts": "2026-10-23",
+      "views": 218901844
+    }
+  ],
+  "recordedIncrease": 2249562,
+  "limitation": "Counter flat 29 Sep\u201322 Oct, then updated 23 Oct. Not a verified seven-day view total; delayed reporting possible. No annual forecast."
+}

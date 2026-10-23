@@ -12,18 +12,17 @@
   Virgin Music Group UK
 
   EDITORIAL UPDATE · 23 Oct 2026
-  13 slides: album world → channel → Forever → strengths → videos → mixes → edits → live
-  → fan signals → Station → next-album architecture → three priorities.
+  14 slides: channel scale → key markets → Crave You in 2026 → activity → Forever → evidence and recommendations
+  → videos → mixes → edits → live → Station → album plan → priorities.
   Existing 21 Oct research retained; no fresh API requests.
 
   DATA: @flightfacilities (UCvBxvcqGSQkbs1BRafBIYSg), all 299 public uploads via the
   Watcher (/api/full-catalogue), 21 Oct 2026; daily readings for 60 recent uploads,
   29 Sep – 21 Oct; comments on 12 videos; playlists via /api/channel-shelf.
-  The public channel views counter did not move over the period, so it isn't used.
+  The public channel views counter was flat through 22 Oct. A 23 Oct refresh
+  is shown as recorded counter movement, not as a verified weekly rate.
 
-  CONSTRUCTION — the departures board: navy and the red/white chevron of the FF wings,
-  split-flap amber for labels, window-shaped thumbnails. Big Shoulders (airport
-  signage) for headlines, IBM Plex Mono for board text.
+  DESIGN — navy, cream, red and amber; bold headlines and real channel imagery.
 -->
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -130,7 +129,7 @@ h2.display{font-size:clamp(2.2rem,4.6vw,4rem);max-width:20ch}
 .obs .board{font-size:.72rem} .obs>div:first-child .board{color:var(--warm)}
 .obs p{font-size:clamp(.92rem,1.25vw,1.06rem);font-weight:600;line-height:1.35;margin-top:.2rem}
 
-/* departures timeline */
+/* campaign timeline */
 .dep{margin-top:1.4rem;border-top:2px solid var(--cream)}
 .dep .r{display:grid;grid-template-columns:7.5rem 1fr 9rem;gap:1rem;align-items:baseline;padding:.5rem 0;border-bottom:1px solid var(--line)}
 .dep .when{font-family:'IBM Plex Mono',monospace;font-size:.78rem;font-weight:600;color:var(--amber);letter-spacing:.06em;text-transform:uppercase}
@@ -184,7 +183,7 @@ h2.display{font-size:clamp(2.2rem,4.6vw,4rem);max-width:20ch}
 .mrow span:nth-child(2){border-color:var(--cream)} .mrow span:nth-child(3){border-color:var(--sky)} .mrow span:nth-child(4){border-color:var(--amber)}
 .month p{font-size:.78rem;color:var(--dim);margin-top:.5rem}
 
-/* flight path */
+/* campaign sequence */
 .fp{display:grid;grid-template-columns:repeat(6,1fr);gap:3px;margin-top:1.5rem}
 @media(max-width:1000px){.fp{grid-template-columns:1fr 1fr 1fr}}
 @media(max-width:560px){.fp{grid-template-columns:1fr}}
@@ -266,7 +265,7 @@ h2.display{font-size:clamp(2.2rem,4.6vw,4rem);max-width:20ch}
 .fs.key .ev{color:var(--cream)}
 
 
-/* v3 — formats, decade mix, edits, versions, fans, in-flight, rollout, recs */
+/* v3 — formats, decade mix, edits, versions, fans, channel programming, rollout, recs */
 .fmt{margin-top:1.3rem;border-top:2px solid var(--cream)}
 .fr{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1.6fr) 6.5rem 8.5rem;gap:1rem;align-items:center;padding:.42rem 0;border-bottom:1px solid var(--line)}
 .fn{font-size:.9rem;font-weight:600;line-height:1.25} .fn span{display:block;font-weight:400;font-size:.72rem;color:var(--dim)}
@@ -463,7 +462,7 @@ body.sheet-open{overflow:hidden}
 .sheet .close:focus-visible,.btn:focus-visible,a:focus-visible{outline:3px solid var(--amber);outline-offset:4px}
 
 
-/* Flight Facilities world: real films, musical journeys and performance, led by the album. */
+/* Flight Facilities world: real films, mixes and performance, led by the album. */
 .world-slide{background:radial-gradient(ellipse at 100% 0,rgba(125,180,232,.13),transparent 60%),var(--navy)}
 .world-intro{display:grid;grid-template-columns:1.2fr 1fr;gap:3rem;align-items:end;margin-top:1rem}.world-intro .body{font-size:1.05rem;line-height:1.5;max-width:44ch}
 .world-contact{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;margin-top:1.4rem}.world-contact>a{position:relative;background:var(--navy-3);border-bottom:3px solid var(--sky)}.world-contact>a:nth-child(2){border-color:var(--amber)}.world-contact>a:nth-child(3){border-color:var(--cream)}.world-contact>a:nth-child(4){border-color:var(--red)}.world-contact img{width:100%;aspect-ratio:16/10;object-fit:cover}.world-contact a>div{padding:.8rem}.world-contact .board{font-size:.65rem}.world-contact b{display:block;font-family:'Big Shoulders Display',sans-serif;font-size:1.4rem;text-transform:uppercase;line-height:1.05;margin:.3rem 0}.world-contact small{display:block;color:var(--warm);font-size:.71rem;line-height:1.3}
@@ -476,6 +475,21 @@ body.sheet-open{overflow:hidden}
 @media(max-width:900px){.world-intro{grid-template-columns:1fr;gap:1rem}.world-contact{grid-template-columns:1fr 1fr}.era-strip img{height:100px}}
 @media(max-width:560px){.world-contact{grid-template-columns:1fr}.era-strip{grid-template-columns:1fr}.era-strip img{height:150px}.world-rule p{font-size:1rem}}
 
+
+/* A clear opening read: size, catalogue and current output, followed by evidence → action. */
+.overview-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:2rem;margin-top:1.6rem}.overview-stats>div{border-top:3px solid var(--red);padding-top:.7rem}.overview-stats>div:nth-child(2){border-color:var(--sky)}.overview-stats>div:nth-child(3){border-color:var(--amber)}.overview-stats .fig{display:block;font-size:clamp(4rem,7.8vw,7rem)}.overview-stats span{display:block;color:var(--warm);font-size:1rem;margin-top:.4rem}
+.overview-context{display:grid;grid-template-columns:1fr 1fr;gap:2rem;margin-top:1.5rem;padding-top:1rem;border-top:1px solid var(--line)}.overview-context .fig{display:block;font-size:2.7rem;margin:.4rem 0}.overview-context p{font-size:.9rem;line-height:1.4;color:var(--warm);max-width:48ch}.overview-context b{color:var(--cream)}
+.activity-points{display:flex;gap:4rem;margin-top:1.4rem}.activity-points .fig{font-size:3.5rem;color:var(--amber)}.activity-points p{font-size:.85rem;color:var(--warm);margin-top:.4rem}
+.strength-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1.4rem;margin-top:1.5rem}.strength-grid>div{border-top:3px solid var(--amber);padding-top:.8rem;display:flex;flex-direction:column}.strength-grid .fig{display:block;font-size:clamp(3rem,5vw,4.5rem);margin:.7rem 0 .4rem}.evidence-label{font-size:.8rem;color:var(--warm);min-height:2.5em}.strength-why{font-size:.9rem;color:var(--warm);line-height:1.4;margin:.9rem 0}.strength-move{margin-top:auto;border-top:1px solid var(--line);padding-top:.8rem}.strength-move .board{font-size:.64rem;color:var(--sky)}.strength-move b{display:block;font-size:1rem;line-height:1.35;margin-top:.3rem}
+@media(max-width:900px){.strength-grid{grid-template-columns:1fr 1fr}.overview-stats{gap:1rem}.overview-context{gap:1rem}}@media(max-width:560px){.overview-stats,.overview-context,.strength-grid{grid-template-columns:1fr}.activity-points{flex-direction:column;gap:1rem}.overview-stats .fig{font-size:4rem}}
+
+
+.crave-proof{display:grid;grid-template-columns:1.1fr 1fr;gap:2.4rem;margin-top:1.2rem;align-items:center}.crave-proof .win img{aspect-ratio:16/8;object-fit:cover}.crave-proof>div>p{font-size:.95rem;color:var(--warm)}.crave-big{display:block;font-size:5rem;color:var(--amber);margin:.5rem 0}.crave-small{display:grid;grid-template-columns:1fr 1fr;gap:1.2rem;margin-top:1rem}.crave-small .fig{font-size:2.8rem}.crave-small p{font-size:.8rem;line-height:1.35;margin-top:.3rem;color:var(--warm)}.crave-bridge{display:grid;grid-template-columns:repeat(3,1fr);gap:1.4rem;border-top:2px solid var(--red);padding-top:.9rem;margin-top:1.2rem}.crave-bridge .board{font-size:.65rem;color:var(--sky)}.crave-bridge b{display:block;font-size:1rem;line-height:1.25;margin:.35rem 0}.crave-bridge p{font-size:.85rem;line-height:1.35;color:var(--warm)}
+@media(max-width:900px){.crave-proof{grid-template-columns:1fr}.crave-bridge{grid-template-columns:1fr}}
+
+
+.market-sub{color:var(--warm);font-size:1rem;margin-top:.8rem}.market-layout{display:grid;grid-template-columns:1fr 1.25fr;gap:3rem;margin-top:1.5rem;align-items:center}.market-lead{border-left:5px solid var(--red);padding-left:1.2rem}.market-lead>.fig{display:block;font-size:clamp(5rem,10vw,8rem);color:var(--amber);margin:.7rem 0}.market-lead h3{font-size:1.5rem}.market-lead p{font-size:.9rem;color:var(--warm);line-height:1.4;max-width:35ch;margin-top:.4rem}.market-head{font-size:.68rem;border-bottom:2px solid var(--cream);padding-bottom:.6rem}.market-row{display:grid;grid-template-columns:2rem 1fr auto;gap:1rem;align-items:center;padding:.8rem 0;border-bottom:1px solid var(--line)}.market-rank{font-family:'IBM Plex Mono',monospace;font-size:.72rem;color:var(--dim)}.market-row>.fig{font-size:2.4rem}.market-row>b{font-size:1.1rem}
+@media(max-width:900px){.market-layout{grid-template-columns:1fr;gap:1.5rem}}
 </style>
 </head>
 <body>
@@ -493,45 +507,39 @@ body.sheet-open{overflow:hidden}
 <div class="deck">
 
 <section class="slide" data-t="Cover" style="justify-content:flex-end;padding-bottom:3rem">
-  <div class="bleed scrim-b"><img src="https://i.ytimg.com/vi/3f0e5j2G7IQ/maxresdefault.jpg" alt="The FF plane over the hills at sunset, from the Down To Earth 10 Year Anniversary visualiser" style="object-position:50% 30%" onerror="this.onerror=null;this.src='https://i.ytimg.com/vi/3f0e5j2G7IQ/hqdefault.jpg'"></div>
+  <div class="bleed scrim-b"><img src="https://i.ytimg.com/vi/ts-6KyJUDWY/maxresdefault.jpg" alt="Flight Facilities performing live at Airfields, Sydney" style="object-position:50% 40%" onerror="this.onerror=null;this.src='https://i.ytimg.com/vi/ts-6KyJUDWY/hqdefault.jpg'"></div>
   <div class="chev"></div>
-  <div class="board-corner"><span class="board">FF · The next album on YouTube</span><span class="board" style="color:var(--cream)">Now boarding</span></div>
+  <div class="board-corner"><span class="board">FF · The next album on YouTube</span><span class="board" style="color:var(--cream)">Channel review · October 2026</span></div>
   <div class="inner">
     <span class="tag reveal">Flight Facilities <i>×</i> YouTube</span>
-    <h1 class="display reveal" style="margin-top:1rem;max-width:17ch">The next album.<br><span class="a">A whole new world.</span></h1>
-    <p class="reveal" style="margin-top:1.1rem;font-size:clamp(1.1rem,1.8vw,1.5rem);font-weight:600;max-width:48ch;line-height:1.32">Build on what makes Flight Facilities recognisable.<br><span style="color:var(--amber)">Bring the next album to life across the whole channel.</span></p>
+    <h1 class="display reveal" style="margin-top:1rem;max-width:17ch">The channel today.<br><span class="a">The next album.</span></h1>
+    <p class="reveal" style="margin-top:1.1rem;font-size:clamp(1.1rem,1.8vw,1.5rem);font-weight:600;max-width:48ch;line-height:1.32">What works on the channel, what the last campaign tells us,<br><span style="color:var(--amber)">and what to build on for the next album.</span></p>
     <div class="board reveal" style="margin-top:1.2rem;color:var(--dim)">Virgin Music Group UK · Updated 23 Oct 2026 · Data: 21 Oct</div>
   </div>
 </section>
 
-<section class="slide world-slide" data-t="The album world"><div class="chev"></div><div class="inner"><span class="tag reveal">01 <i>·</i> The next album starts here</span><div class="world-intro"><h2 class="display reveal">A new album.<br><span class="a">A world to step into.</span></h2><p class="body reveal">Flight Facilities already have a world: cinematic videos, musical journeys, guest voices and shared live moments. The next album can give all of it a new identity.</p></div><div class="world-contact stagger">
-<a href="https://www.youtube.com/watch?v=IH5L4qTVsTk" target="_blank" rel="noopener"><img src="https://i.ytimg.com/vi/IH5L4qTVsTk/hqdefault.jpg" alt="Sam Rockwell in Down To Earth"><div><span class="board">The films</span><b>A story you remember.</b><small>Down To Earth · Sam Rockwell</small></div></a>
-<a href="https://www.youtube.com/watch?v=54a6SjIlJF0" target="_blank" rel="noopener"><img src="https://i.ytimg.com/vi/54a6SjIlJF0/hqdefault.jpg" alt="Decade Mix 2012–2022 artwork"><div><span class="board">The journeys</span><b>A mix to get lost in.</b><small>Decade Mix · 2012–2022</small></div></a>
-<a href="https://www.youtube.com/watch?v=y8Ndi955iuY" target="_blank" rel="noopener"><img src="https://i.ytimg.com/vi/y8Ndi955iuY/hqdefault.jpg" alt="Clair De Lune performed with Owl Eyes and the MSO"><div><span class="board">The people</span><b>Familiar voices. New settings.</b><small>Owl Eyes · Melbourne Symphony Orchestra</small></div></a>
-<a href="https://www.youtube.com/watch?v=ts-6KyJUDWY" target="_blank" rel="noopener"><img src="https://i.ytimg.com/vi/ts-6KyJUDWY/hqdefault.jpg" alt="Flight Facilities live at Airfields"><div><span class="board">The experience</span><b>A place to come together.</b><small>Live at Airfields · Sydney</small></div></a>
-</div><div class="world-rule reveal"><span class="board">For the next campaign</span><p>Set the album’s visual direction first. Carry it through the videos, mixes, live films, Shorts and channel — so every release feels part of the same era.</p></div></div></section>
+<section class="slide channel-overview" data-t="The channel today"><div class="chev"></div><div class="inner"><span class="tag reveal">01 <i>·</i> The channel today</span><h2 class="display reveal" style="margin-top:.9rem">Flight Facilities<br><span class="a">at a glance.</span></h2><div class="overview-stats stagger"><div><strong class="fig">307K</strong><span>Subscribers</span></div><div><strong class="fig">218.9M</strong><span>Channel lifetime views · 23 Oct</span></div><div><strong class="fig">299</strong><span>Public uploads analysed</span></div></div><div class="overview-context stagger"><div><span class="board">Recorded channel movement · 29 Sep–23 Oct</span><strong class="fig">+2.25M</strong><p>Increase between Watcher’s first and latest channel readings. <b>Weekly pace is not yet reliable.*</b></p></div><div><span class="board">2026 output · to 21 October</span><strong class="fig">23 uploads</strong><p><b>5 long-form · 18 short uploads*</b><br>The channel’s recent output is mainly short clips.</p></div></div><div class="means reveal"><div class="board">The starting point</div><p>Crave You’s 2026 rediscovery gives the next campaign a recent reference point. Build a route from the familiar song into more of the catalogue and the new music.</p></div><div class="src reveal">Channel readings: 29 Sep and 23 Oct 2026; catalogue/output audit: 21 Oct. *The channel counter stayed flat until 22 Oct, then refreshed on 23 Oct. The +2.25M may include delayed reporting: it is not a verified weekly total, so no annual pace is projected. Short uploads use a length-based proxy.</div></div></section>
+
+<section class="slide" data-t="Key markets"><div class="chev"></div><div class="inner"><span class="tag reveal">02 <i>·</i> Wider YouTube context</span><h2 class="display reveal" style="margin-top:.9rem">The audience<br><span class="a">across markets.</span></h2><p class="market-sub reveal">Chartmetric monthly YouTube views by country · reported 1 October 2026</p><div class="market-layout stagger"><div class="market-lead"><span class="board">01 · Largest reported market</span><strong class="fig">877K</strong><h3>United States</h3><p>Monthly YouTube views in Chartmetric’s artist-level country breakdown.</p></div><div><div class="market-head board">Next largest markets · monthly views</div><div class="market-row"><span class="market-rank">02</span><b>Australia</b><strong class="fig">109.8K</strong></div><div class="market-row"><span class="market-rank">03</span><b>Canada</b><strong class="fig">80.7K</strong></div><div class="market-row"><span class="market-rank">04</span><b>Mexico</b><strong class="fig">78.1K</strong></div><div class="market-row"><span class="market-rank">05</span><b>United Kingdom</b><strong class="fig">77.1K</strong></div></div></div><div class="means reveal"><div class="board">What this adds to the plan</div><p>Lead the cross-market YouTube conversation with the US and Australia. Include Canada, Mexico and the UK when planning promotion around the next release.</p></div><div class="src reveal">Source: Watcher’s cached Chartmetric data, fetched 22 Oct; reporting date 1 Oct. Artist-level YouTube coverage, not channel-only Studio analytics or a Crave You breakdown. These are the five largest of 17 returned countries; the list is not a verified worldwide total.</div></div></section>
+
+<section class="slide alt" data-t="Crave You in 2026"><div class="chev"></div><div class="inner"><span class="tag reveal">03 <i>·</i> Crave You · the 2026 viral moment</span><h2 class="display reveal" style="margin-top:.9rem;max-width:27ch">Crave You’s viral moment.<br><span class="a">How the channel responded.</span></h2><div class="crave-proof stagger"><a class="feature-asset" href="https://www.youtube.com/shorts/tZg27KL7Tc4" target="_blank" rel="noopener"><div class="win"><img src="https://i.ytimg.com/vi/tZg27KL7Tc4/hqdefault.jpg" alt="Crave You performed live in Melbourne, May 2026"></div><div class="asset-caption"><div><b>Crave You in Melbourne</b><span>15 May 2026 · live Short</span></div><strong class="fig">419K</strong></div></a><div><div class="board">What worked on the artist channel</div><strong class="fig crave-big">806K</strong><p>Views across five Crave You live Shorts, published May–July.</p><div class="crave-small"><div><strong class="fig">96%</strong><p>of views on the 18 short uploads published in 2026 through 21 Oct.</p></div><div><strong class="fig">75K</strong><p>on the lyric video, posted 16 July. A full-song home alongside the clips.</p></div></div></div></div><div class="board reveal" style="margin-top:1rem;color:var(--sky)">What we could build from this</div><div class="crave-bridge reveal" style="margin-top:.5rem"><div><span class="board">Keep the discovery</span><b>Keep Crave You visible.</b><p>A clear full-song destination for people finding the track.</p></div><div><span class="board">Introduce more of the band</span><b>Connect the catalogue.</b><p>Relevant live films, songs and mixes in playlists and video links.</p></div><div><span class="board">When the single is ready</span><b>Give the new music a route in.</b><p>Feature it on the channel and link from relevant catalogue assets.</p></div></div><div class="src reveal">Cached Watcher data, 23 Oct 2026. Views on 2026 uploads, not unique viewers or the total viral audience. Most of these views predate 29 Sep; this is a recent-year opportunity, not evidence of a continuing October spike. Proposed routes are not proven conversion.</div></div></section>
 
 <section class="slide" data-t="Timeline">
   <div class="chev"></div>
   <div class="inner">
-    <span class="tag reveal">02 <i>·</i> The channel over time</span>
-    <h2 class="display reveal" style="margin-top:.9rem;max-width:26ch">A big catalogue.<br><span class="a">Uneven activity.</span></h2>
-    <div class="stats stagger">
-      <div class="stat"><div class="fig">307K</div><p>subscribers · 217M lifetime views</p></div>
-      <div class="stat"><div class="fig">88%</div><p>of views on public uploads sit on 2010–2015 releases</p></div>
-      <div class="stat"><div class="fig">51.9M</div><p>Crave You — still drawing new comments in 2026</p></div>
-      <div class="stat"><div class="fig">432 days</div><p>the longest gap between long-form uploads, 2018–19</p></div>
-    </div>
+    <span class="tag reveal">04 <i>·</i> The channel over time</span>
+    <h2 class="display reveal" style="margin-top:.9rem;max-width:26ch">Activity comes in bursts.<br><span class="a">Plan beyond release day.</span></h2>
+    <div class="activity-points reveal"><div><strong class="fig">432 days</strong><p>Longest gap between long-form uploads · 2018–19</p></div><div><strong class="fig">5</strong><p>Long-form uploads in 2026 · to 21 October</p></div></div>
     <div class="ctl reveal"><svg id="ctl" viewBox="0 0 1320 230" role="img" aria-label="Uploads per month, 2010 to 2026, with eras marked"></svg></div>
     <div class="legend reveal"><span><i style="background:var(--cream)"></i>Long-form uploads per month</span><span><i style="background:var(--red)"></i>Short uploads*</span><span><i style="background:var(--amber);border-radius:50%"></i>Hero moment</span></div>
-    <div class="src reveal">299 public uploads · data: 21 Oct 2026. 88% is a share of lifetime views on public uploads, not current listening. *Length-based proxy; older short uploads predate Shorts.</div>
+    <div class="src reveal">299 public uploads · data: 21 Oct 2026. The chart shows publishing activity, not views. *Length-based proxy; older short uploads predate Shorts.</div>
   </div>
 </section>
 
 <section class="slide alt" data-t="Forever">
   <div class="chev"></div>
   <div class="inner">
-    <span class="tag reveal">03 <i>·</i> The last album · Forever, 12 Nov 2021</span>
+    <span class="tag reveal">05 <i>·</i> The last album · Forever, 12 Nov 2021</span>
     <h2 class="display reveal" style="margin-top:.9rem;max-width:24ch">Keep the videos.<br><span class="a">Plan the follow-through.</span></h2>
     <div class="grid2" style="grid-template-columns:1.1fr 1fr;margin-top:1.2rem;align-items:start">
       <div class="dep stagger" style="margin-top:0">
@@ -555,21 +563,16 @@ body.sheet-open{overflow:hidden}
   </div>
 </section>
 
-<section class="slide alt" data-t="What works"><div class="chev"></div><div class="inner"><span class="tag reveal">04 <i>·</i> What works</span><h2 class="display reveal" style="margin-top:.9rem;max-width:27ch">Three strengths.<br><span class="a">Build around these.</span></h2><div class="era-strip reveal"><a href="https://www.youtube.com/watch?v=IH5L4qTVsTk" target="_blank" rel="noopener"><img src="https://i.ytimg.com/vi/IH5L4qTVsTk/hqdefault.jpg" alt="Down To Earth"><span>Down To Earth · the film</span></a><a href="https://www.youtube.com/watch?v=54a6SjIlJF0" target="_blank" rel="noopener"><img src="https://i.ytimg.com/vi/54a6SjIlJF0/hqdefault.jpg" alt="Decade Mix"><span>Decade Mix · the journey</span></a><a href="https://www.youtube.com/watch?v=ts-6KyJUDWY" target="_blank" rel="noopener"><img src="https://i.ytimg.com/vi/ts-6KyJUDWY/hqdefault.jpg" alt="Live at Airfields"><span>Airfields · the shared moment</span></a></div><div class="evidence-trio stagger">
-<div><div class="board">Song videos</div><div class="fig">83K</div><p>Median lifetime views · 18 uploads since 2017</p><h3>Keep the hero video.</h3><p>Give each focus single a visual story. Forever and Heavy reached 455K and 426K.</p></div>
-<div><div class="board">Concept mixes</div><div class="fig">191K</div><p>Median lifetime views · 4 uploads since 2017</p><h3>Make room for a mix.</h3><p>A recognisable Flight Facilities format, with a reason to listen for longer.</p></div>
-<div><div class="board">Live moments</div><div class="fig">419K</div><p>Crave You, Melbourne · 2026 Short</p><h3>Lead with the song.</h3><p>Full shows, standout live songs and crowd moments can each earn a place.</p></div></div>
-<div class="means reveal"><div class="board">Be selective elsewhere</div><p>Edits can be standout releases. Remixes, lyrics and behind-the-scenes need a clear role for the song.</p></div>
-<div class="src reveal">Historical examples, not a forecast or an age-matched format ranking. Lifetime views as of 21 Oct 2026. Full format table and sample sizes in Analysis.</div></div></section>
+<section class="slide alt" data-t="What works"><div class="chev"></div><div class="inner"><span class="tag reveal">06 <i>·</i> What already works</span><h2 class="display reveal" style="margin-top:.9rem">Four things<br><span class="a">to build on.</span></h2><div class="strength-grid stagger"><div><span class="board">Music videos</span><strong class="fig">455K</strong><p class="evidence-label">Forever · official video</p><p class="strength-why">A strong visual story; Heavy also reached 426K.</p><div class="strength-move"><span class="board">Build on this</span><b>Keep the ambitious video as the main release moment.</b></div></div><div><span class="board">Concept mixes</span><strong class="fig">387–592K</strong><p class="evidence-label">Five Decade Mix uploads</p><p class="strength-why">An established, named series fans can return to.</p><div class="strength-move"><span class="board">Build on this</span><b>Plan a concept mix as a substantial album-era asset.</b></div></div><div><span class="board">FF edits</span><strong class="fig">69%</strong><p class="evidence-label">Of views added across 60 tracked uploads</p><p class="strength-why">Make Luv + Foreign Revolution drove this tracked sample.</p><div class="strength-move"><span class="board">Build on this</span><b>Keep standout edits in the programme between releases.</b></div></div><div><span class="board">Live</span><strong class="fig">390K</strong><p class="evidence-label">Airfields · full concert</p><p class="strength-why">The full film worked; individual cuts reached 36K / 56K.</p><div class="strength-move"><span class="board">Build on this</span><b>Bring a filmed show into the campaign, plus selected songs.</b></div></div></div><div class="src reveal">Examples, not an age-matched ranking or a forecast. Lifetime views as of 21 Oct 2026. Edits figure: views added 29 Sep–21 Oct across 60 tracked uploads, not the whole channel. Detail follows.</div></div></section>
 
-<section class="slide " data-t="Music videos"><div class="chev"></div><div class="inner"><span class="tag reveal">05 <i>·</i> Music videos</span><h2 class="display reveal" style="margin-top:.9rem;max-width:27ch">The video gives the song<br><span class="a">a world of its own.</span></h2><div class="feature-split stagger"><a class="feature-asset" href="https://www.youtube.com/watch?v=IH5L4qTVsTk" target="_blank" rel="noopener"><div class="win"><img src="https://i.ytimg.com/vi/IH5L4qTVsTk/hqdefault.jpg" alt="Down To Earth"></div><div class="asset-caption"><div><b>Down To Earth</b><span>Sam Rockwell · 2015</span></div><strong class="fig">4.5M</strong></div></a><div class="feature-copy"><div class="board">Also on this channel</div><div class="proof-row"><strong class="fig">3.1M</strong><div><b>Sunshine</b><p>Reggie Watts · a recognisable face and performance.</p></div></div><div class="proof-row"><strong class="fig">426K</strong><div><b>Heavy</b><p>Hugo Weaving · a strong visual idea for the Forever era.</p></div></div><div class="means"><div class="board">For the next album</div><p>Let the album’s world lead the main video. Carry its images into Shorts, thumbnails and the channel, with a clear route to the full song.</p></div></div></div><div class="src reveal">Lifetime views, different release years. These examples support the creative approach; they do not isolate the effect of a guest or a video treatment.</div></div></section>
+<section class="slide " data-t="Music videos"><div class="chev"></div><div class="inner"><span class="tag reveal">07 <i>·</i> Music videos</span><h2 class="display reveal" style="margin-top:.9rem;max-width:27ch">The creative videos<br><span class="a">have earned their place.</span></h2><div class="feature-split stagger"><a class="feature-asset" href="https://www.youtube.com/watch?v=IH5L4qTVsTk" target="_blank" rel="noopener"><div class="win"><img src="https://i.ytimg.com/vi/IH5L4qTVsTk/hqdefault.jpg" alt="Down To Earth"></div><div class="asset-caption"><div><b>Down To Earth</b><span>Sam Rockwell · 2015</span></div><strong class="fig">4.5M</strong></div></a><div class="feature-copy"><div class="board">Also on this channel</div><div class="proof-row"><strong class="fig">3.1M</strong><div><b>Sunshine</b><p>Reggie Watts · a recognisable face and performance.</p></div></div><div class="proof-row"><strong class="fig">426K</strong><div><b>Heavy</b><p>Hugo Weaving · a strong visual idea for the Forever era.</p></div></div><div class="means"><div class="board">For the next album</div><p>Keep the creative ambition shown by Down To Earth, Sunshine and Heavy. Give the new video supporting Shorts and a consistent look across the channel.</p></div></div></div><div class="src reveal">Lifetime views, different release years. These examples support the creative approach; they do not isolate the effect of a guest or a video treatment.</div></div></section>
 
 <section class="slide" data-t="Decade Mix" style="justify-content:flex-end">
   <div class="bleed scrim-l"><img src="https://i.ytimg.com/vi/54a6SjIlJF0/maxresdefault.jpg" alt="Decade Mix 2012–2022 visualiser" style="object-position:70% 40%" onerror="this.onerror=null;this.src='https://i.ytimg.com/vi/54a6SjIlJF0/hqdefault.jpg'"></div>
   <div class="chev"></div>
   <div class="inner">
-    <span class="tag reveal">06 <i>·</i> The signature format</span>
-    <h2 class="display reveal" style="margin-top:.9rem;max-width:20ch">The mixes are a format<br><span class="a">worth returning to.</span></h2>
+    <span class="tag reveal">08 <i>·</i> The signature format</span>
+    <h2 class="display reveal" style="margin-top:.9rem;max-width:20ch">The Decade Mix is<br><span class="a">a proven part of the channel.</span></h2>
     <div class="dm">
       <div class="dm-list stagger">
         <a href="https://www.youtube.com/watch?v=YPg37aYz7tM" target="_blank" rel="noopener"><span>1972 – 1982</span><i>2016</i><b>592K</b></a>
@@ -580,47 +583,47 @@ body.sheet-open{overflow:hidden}
         <a href="https://www.youtube.com/watch?v=qeo2NtFQLqo" target="_blank" rel="noopener"><span>5 Hour Decades Set, live</span><i>2025</i><b>102K</b></a>
         <a href="https://www.youtube.com/watch?v=KfPtEdyKaa8" target="_blank" rel="noopener"><span>1962 – 1972</span><i>2023</i><b>45K</b></a>
       </div>
-      <div class="dm-side stagger"><div class="mix-number fig">387–592K</div><p class="body">Five Decade Mix uploads, published in 2016 and 2023.</p><div class="dm-gap"><b>1 of 16</b> long sets and mixes has chapters. Start by making the existing catalogue easier to navigate.</div></div></div><div class="means reveal"><div class="board">What it means</div><p>Add tracklists and chapters to existing long sets. Give a new concept mix the album’s artwork, atmosphere and story — another way into the same world.</p></div>
+      <div class="dm-side stagger"><div class="mix-number fig">387–592K</div><p class="body">Five Decade Mix uploads, published in 2016 and 2023.</p><div class="dm-gap"><b>1 of 16</b> long sets and mixes has chapters. Start by making the existing catalogue easier to navigate.</div></div></div><div class="means reveal"><div class="board">What we suggest</div><p>Five mixes reached 387–592K. Build on that series with a new concept mix for the album era; add chapters to the existing long sets.</p></div>
   </div>
 </section>
 
 <section class="slide alt" data-t="Edits and remixes">
   <div class="chev"></div>
   <div class="inner">
-    <span class="tag reveal">07 <i>·</i> Edits and remixes</span>
+    <span class="tag reveal">09 <i>·</i> Edits and remixes</span>
     <h2 class="display reveal" style="margin-top:.9rem;max-width:24ch">Their edits can stand out.<br><span class="a">Choose remixes carefully.</span></h2>
     <div class="er">
       <div class="er-col">
         <h3>Flight Facilities edit other people's records</h3>
         <div class="er-rows stagger">
           <a href="https://www.youtube.com/watch?v=K57dVZ4oHtQ" target="_blank" rel="noopener"><span>The C90s – Shine A Light (FF Remix)</span><i>2010</i><b>8.0M</b></a>
-          
+
           <a href="https://www.youtube.com/watch?v=8uKf6lzPpV4" target="_blank" rel="noopener"><span>Room 5 – Make Luv (FF Edit)</span><i>2024</i><b>515K</b></a>
           <a href="https://www.youtube.com/watch?v=5NpTk-65OWc" target="_blank" rel="noopener"><span>FF x Daft Punk – Foreign Revolution</span><i>2024</i><b>372K</b></a>
-          
+
         </div>
         <p class="er-note"><b>69% of views added across 60 tracked uploads</b> came from Make Luv and Foreign Revolution, 29 Sep – 21 Oct. This is a recent-upload sample, not the whole channel.</p>
       </div>
       <div class="er-col">
         <h3>Other producers remix Flight Facilities</h3>
         <div class="er-rows stagger">
-          
+
           <a href="https://www.youtube.com/watch?v=mJn-frdL600" target="_blank" rel="noopener"><span>Stranded (LNTG Remix)</span><i>2018</i><b>161K</b></a>
-          
+
           <a href="https://www.youtube.com/watch?v=ZzN0g4qQM84" target="_blank" rel="noopener"><span>Forever (Roosevelt Remix)</span><i>2022</i><b>117K</b></a>
           <a href="https://www.youtube.com/watch?v=IFyMQRuh8qk" target="_blank" rel="noopener"><span>Lights Up (Honey Dijon Remix)</span><i>2021</i><b>8K</b></a>
         </div>
         <p class="er-note"><b>18K median lifetime views · 29 uploads since 2017.</b> Some remixes reached much further; choose for the track and audience, rather than defaulting to a full pack.</p>
       </div>
     </div>
-    <div class="src">Lifetime examples from different years. The recent-view share covers 60 tracked uploads only.</div><div class="means reveal"><div class="board">What it means</div><p>Keep standout FF edits in the programme. For a focus single, prioritise a remix or version with a clear musical reason.</p></div>
+    <div class="src">Lifetime examples from different years. The recent-view share covers 60 tracked uploads only.</div><div class="means reveal"><div class="board">What we suggest</div><p>Keep standout FF edits in the programme. For a focus single, prioritise a remix or version with a clear musical reason.</p></div>
   </div>
 </section>
 
 <section class="slide alt" data-t="Live">
   <div class="chev"></div>
   <div class="inner">
-    <span class="tag reveal">08 <i>·</i> Live</span>
+    <span class="tag reveal">10 <i>·</i> Live</span>
     <h2 class="display reveal" style="margin-top:.9rem;max-width:26ch">Capture the show.<br><span class="a">Release the strongest moments.</span></h2>
     <div class="lv stagger">
       <div class="lv-col">
@@ -639,25 +642,23 @@ body.sheet-open{overflow:hidden}
         <ul><li class="hi">Crave You live, 2026 (n=5)<b>25–419K</b></li><li class="lo">Shorts overall since 2017, median<b>3K</b></li><li>Start with the recognisable song, vocalist and crowd reaction.<b></b></li></ul>
       </div>
     </div>
-    <div class="means reveal"><div class="board">For the next album</div><p>Make one key show feel part of the album world: staging, guests and visuals carried into the full film, selected songs and Shorts.</p></div><div class="src reveal">Lifetime views across different years. Airfields song cuts reached 36K / 56K versus 390K for the full film: not every song needs a separate upload. Larger-scale tour-film reference in Analysis.</div>
+    <div class="means reveal"><div class="board">For the next album</div><p>Airfields supports a full film; the MSO songs and Crave You Shorts show other live formats can work too. Plan one capture, then select the strongest songs and clips.</p></div><div class="src reveal">Lifetime views across different years. Airfields song cuts reached 36K / 56K versus 390K for the full film: not every song needs a separate upload. Larger-scale tour-film reference in Analysis.</div>
   </div>
 </section>
 
-<section class="slide " data-t="Fan signals"><div class="chev"></div><div class="inner"><span class="tag reveal">09 <i>·</i> Fan signals</span><h2 class="display reveal" style="margin-top:.9rem;max-width:27ch">The catalogue is still<br><span class="a">finding listeners.</span></h2><div class="fans fans-short stagger"><div class="fq"><div class="ft">Still listening</div><p>“Song of summer 🧐 2026”</p><span>Crave You · May 2026 · 1.4K likes</span><b class="fan-action">Keep the classics visible alongside the next release.</b></div><div class="fq"><div class="ft">Finding it through edits</div><p>“I started listening to this song because of the Deadpool edits on TikTok.”</p><span>Crave You · Oct 2026</span><b class="fan-action">Give rediscovered songs a clear home on the channel.</b></div><div class="fq"><div class="ft">Returning for the experience</div><p>“Pleeeeeease come to NYC and do a decades set”</p><span>5 Hour Decades Set · May 2026</span><b class="fan-action">Build on the mix and live identity they already know.</b></div></div><div class="src reveal">Selected examples from 862 comments posted in 2026 on 50 selected videos. Qualitative signals; they do not measure audience size, territories or demand for a new album.</div></div></section>
-
-<section class="slide" data-t="In-Flight">
+<section class="slide" data-t="Channel programming">
   <div class="chev"></div>
   <div class="inner">
-    <span class="tag reveal">10 <i>·</i> A YouTube feature to explore</span>
-    <h2 class="display reveal" style="margin-top:.9rem;max-width:26ch">A YouTube Station: <span class="a">In-Flight Entertainment.</span></h2>
+    <span class="tag reveal">11 <i>·</i> A YouTube feature to explore</span>
+    <h2 class="display reveal" style="margin-top:.9rem;max-width:26ch">A YouTube Station: <span class="a">Flight Facilities TV.</span></h2>
     <div class="st-top">
-      <div class="st-what reveal"><div class="board">A home for longer listening</div><div class="fig mix-number">5 hours</div><p>The Decades Set is already on the channel, alongside the mixes, live films and music videos.</p><p><b>In-Flight Entertainment</b> could bring that library together. Playlists are the first step; a YouTube Station would offer continuous programming.</p><p class="st-date">Illustrative programme below — these are content strands, not four separate Stations.</p></div><div class="ife-screen reveal">
-        <div class="ife-top"><span>FF · In-Flight Entertainment</span><span>Station · live chat</span></div>
+      <div class="st-what reveal"><div class="board">A home for longer listening</div><div class="fig mix-number">5 hours</div><p>The Decades Set is already on the channel, alongside the mixes, live films and music videos.</p><p><b>Flight Facilities TV</b> could bring that library together. Playlists are the first step; a YouTube Station would offer continuous programming.</p><p class="st-date">Illustrative programme below — these are content strands, not four separate Stations.</p></div><div class="ife-screen reveal">
+        <div class="ife-top"><span>FF · Flight Facilities TV</span><span>Station · live chat</span></div>
         <div class="ife-ch">
-          <div class="ch"><div class="cn">CH 1 · Departures</div><b>The classics</b><div class="ths"><img src="https://i.ytimg.com/vi/r0bS-YnLf4s/mqdefault.jpg" alt=""><img src="https://i.ytimg.com/vi/Jcu1AHaTchM/mqdefault.jpg" alt=""><img src="https://i.ytimg.com/vi/gJ5YaApfSdQ/mqdefault.jpg" alt=""></div></div>
-          <div class="ch"><div class="cn">CH 2 · Cruising altitude</div><b>The mixes</b><div class="ths"><img src="https://i.ytimg.com/vi/54a6SjIlJF0/mqdefault.jpg" alt=""><img src="https://i.ytimg.com/vi/YPg37aYz7tM/mqdefault.jpg" alt=""><img src="https://i.ytimg.com/vi/jntQd7U0aSk/mqdefault.jpg" alt=""></div></div>
-          <div class="ch"><div class="cn">CH 3 · Live from the cabin</div><b>Live and sets</b><div class="ths"><img src="https://i.ytimg.com/vi/ts-6KyJUDWY/mqdefault.jpg" alt=""><img src="https://i.ytimg.com/vi/y8Ndi955iuY/mqdefault.jpg" alt=""><img src="https://i.ytimg.com/vi/qeo2NtFQLqo/mqdefault.jpg" alt=""></div></div>
-          <div class="ch new"><div class="cn">CH 4 · Arrivals</div><b>The new album</b><div class="ths"><span>Single 1</span><span>Single 2</span><span>Album</span></div></div>
+          <div class="ch"><div class="cn">01 · Catalogue</div><b>The classics</b><div class="ths"><img src="https://i.ytimg.com/vi/r0bS-YnLf4s/mqdefault.jpg" alt=""><img src="https://i.ytimg.com/vi/Jcu1AHaTchM/mqdefault.jpg" alt=""><img src="https://i.ytimg.com/vi/gJ5YaApfSdQ/mqdefault.jpg" alt=""></div></div>
+          <div class="ch"><div class="cn">02 · Mixes</div><b>The mixes</b><div class="ths"><img src="https://i.ytimg.com/vi/54a6SjIlJF0/mqdefault.jpg" alt=""><img src="https://i.ytimg.com/vi/YPg37aYz7tM/mqdefault.jpg" alt=""><img src="https://i.ytimg.com/vi/jntQd7U0aSk/mqdefault.jpg" alt=""></div></div>
+          <div class="ch"><div class="cn">03 · Performance</div><b>Live and sets</b><div class="ths"><img src="https://i.ytimg.com/vi/ts-6KyJUDWY/mqdefault.jpg" alt=""><img src="https://i.ytimg.com/vi/y8Ndi955iuY/mqdefault.jpg" alt=""><img src="https://i.ytimg.com/vi/qeo2NtFQLqo/mqdefault.jpg" alt=""></div></div>
+          <div class="ch new"><div class="cn">04 · New music</div><b>The new album</b><div class="ths"><span>Single 1</span><span>Single 2</span><span>Album</span></div></div>
         </div>
       </div>
     </div>
@@ -665,9 +666,9 @@ body.sheet-open{overflow:hidden}
   </div>
 </section>
 
-<section class="slide alt" data-t="Next album plan"><div class="chev"></div><div class="inner"><span class="tag reveal">11 <i>·</i> Next album plan</span><h2 class="display reveal" style="margin-top:.9rem;max-width:27ch">One album world.<br><span class="a">From first single to final show.</span></h2><div class="architecture stagger"><div class="phase"><div class="phase-frame"><img src="https://i.ytimg.com/vi/3f0e5j2G7IQ/hqdefault.jpg" alt="Existing FF visual language"></div><div class="board">01 · Before release</div><h3>Define the world</h3><p>Agree the album’s look, story and atmosphere. Plan how the films, mixes and live show express it.</p><b>One creative direction</b></div><div class="phase"><div class="phase-frame"><img src="https://i.ytimg.com/vi/IH5L4qTVsTk/hqdefault.jpg" alt="Reference: a cinematic single"></div><div class="board">02 · Lead single</div><h3>Make the moment</h3><p>Introduce the era through the main video. Carry the same imagery into Shorts, artwork and the channel.</p><b>Video + song-led Shorts</b></div><div class="phase"><div class="phase-frame"><img src="https://i.ytimg.com/vi/54a6SjIlJF0/hqdefault.jpg" alt="Reference: a concept mix"></div><div class="board">03 · Between singles</div><h3>Give them more</h3><p>A mix, edit or live take can reveal another side of the record. Keep the era’s look and link back to the song.</p><b>One clear reason to return</b></div><div class="phase"><div class="phase-frame"><img src="https://i.ytimg.com/vi/3f0e5j2G7IQ/hqdefault.jpg" alt="Reference: a consistent visual identity"></div><div class="board">04 · Album week</div><h3>Make it easy to listen</h3><p>Give every track a home. Bring the videos, track artwork and album playlist together as one recognisable collection.</p><b>One connected album world</b></div><div class="phase"><div class="phase-frame"><img src="https://i.ytimg.com/vi/ts-6KyJUDWY/hqdefault.jpg" alt="Reference: a filmed live show"></div><div class="board">05 · After the album</div><h3>Keep the era alive</h3><p>Bring the album world onto the stage and back to YouTube: the full film, selected songs and Shorts.</p><b>Full show → songs → Shorts</b></div></div><div class="means reveal"><div class="board">What changes from Forever</div><p>The creative direction connects the whole campaign. The follow-up, mix and live film are planned as part of that world from the start.</p></div><div class="src reveal">Existing FF imagery illustrates the approach; this is not proposed artwork for the new album. Proposed sequence, not a fixed upload quota. Mixes and live are strengths to build on; additional versions remain selective.</div></div></section>
+<section class="slide alt" data-t="Next album plan"><div class="chev"></div><div class="inner"><span class="tag reveal">12 <i>·</i> Next album plan</span><h2 class="display reveal" style="margin-top:.9rem;max-width:27ch">The next album.<br><span class="a">Build on what works.</span></h2><div class="architecture stagger"><div class="phase"><div class="phase-frame"><img src="https://i.ytimg.com/vi/ts-6KyJUDWY/hqdefault.jpg" alt="Existing FF visual language"></div><div class="board">01 · Before release</div><h3>Define the world</h3><p>Agree the album’s look and plan a route from Crave You and the wider catalogue into the new single.</p><b>One look across the channel</b></div><div class="phase"><div class="phase-frame"><img src="https://i.ytimg.com/vi/IH5L4qTVsTk/hqdefault.jpg" alt="Reference: a cinematic single"></div><div class="board">02 · Lead single</div><h3>Make the moment</h3><p>Introduce the era through the main video. Carry the same imagery into Shorts, artwork and the channel.</p><b>Forever 455K · Heavy 426K</b></div><div class="phase"><div class="phase-frame"><img src="https://i.ytimg.com/vi/54a6SjIlJF0/hqdefault.jpg" alt="Reference: a concept mix"></div><div class="board">03 · Between singles</div><h3>Give them more</h3><p>Connect catalogue favourites, live clips and mixes with the new songs through playlists and relevant video links.</p><b>Crave You: 806K across five live Shorts</b></div><div class="phase"><div class="phase-frame"><img src="https://i.ytimg.com/vi/ts-6KyJUDWY/hqdefault.jpg" alt="Reference: a consistent visual identity"></div><div class="board">04 · Album week</div><h3>Make it easy to listen</h3><p>Give every track a home. Bring the videos, track artwork and album playlist together as one recognisable collection.</p><b>Forever: six tracks were plain audio</b></div><div class="phase"><div class="phase-frame"><img src="https://i.ytimg.com/vi/ts-6KyJUDWY/hqdefault.jpg" alt="Reference: a filmed live show"></div><div class="board">05 · After the album</div><h3>Keep the era alive</h3><p>Bring the album world onto the stage and back to YouTube: the full film, selected songs and Shorts.</p><b>Airfields 390K · live Shorts 25–419K</b></div></div><div class="means reveal"><div class="board">What changes from Forever</div><p>Keep one visual identity across the campaign, and plan the mix, follow-up and live film before the first single lands.</p></div><div class="src reveal">Existing FF imagery illustrates the approach; this is not proposed artwork for the new album. Proposed sequence, not a fixed upload quota. Mixes and live are strengths to build on; additional versions remain selective.</div></div></section>
 
-<section class="slide cream" data-t="The priorities"><div class="chev"></div><div class="inner"><span class="tag reveal">12 <i>·</i> The priorities</span><h2 class="display reveal" style="margin-top:.9rem;max-width:27ch">Their world.<br><span class="r">The next chapter.</span></h2><div class="closing-rows stagger"><div><strong class="fig">455K</strong><div><span class="board">Forever · official video</span><h3>Let the video introduce the era.</h3><p>A strong creative idea, carried through the channel and song-led clips.</p></div></div><div><strong class="fig">387–592K</strong><div><span class="board">Five Decade Mix uploads</span><h3>Build on their own formats.</h3><p>The mix and standout edits should feel like extensions of the same record.</p></div></div><div><strong class="fig">390K</strong><div><span class="board">Airfields · full concert</span><h3>Bring live inside the campaign.</h3><p>The album’s atmosphere on stage, then a full film, selected songs and Shorts.</p></div></div></div><div class="close-next reveal"><b>Start with the creative direction:</b> then map the album window, focus singles and shows worth filming. VMG can help with sequencing, channel programming and the YouTube conversation.</div><div class="src reveal">Lifetime views as of 21 Oct 2026. YouTube Studio access would let us assess watch time, traffic sources and onward viewing before setting targets.</div></div></section>
+<section class="slide cream" data-t="The priorities"><div class="chev"></div><div class="inner"><span class="tag reveal">13 <i>·</i> The priorities</span><h2 class="display reveal" style="margin-top:.9rem;max-width:27ch">Keep what works.<br><span class="r">Build the campaign around it.</span></h2><div class="closing-rows stagger"><div><strong class="fig">455K</strong><div><span class="board">Forever · official video</span><h3>Keep the creative music video.</h3><p>Forever reached 455K and Heavy 426K. Keep the video central, with supporting discovery clips.</p></div></div><div><strong class="fig">387–592K</strong><div><span class="board">Five Decade Mix uploads</span><h3>Build on their own formats.</h3><p>Five mixes reached 387–592K. Plan a new concept mix; use standout FF edits between singles.</p></div></div><div><strong class="fig">390K</strong><div><span class="board">Airfields · full concert</span><h3>Bring live inside the campaign.</h3><p>Airfields reached 390K. Plan the full film within the campaign, then choose song cuts and Shorts selectively.</p></div></div></div><div class="close-next reveal"><b>The bridge:</b> Crave You → more of Flight Facilities → the next single. Agree the creative direction, release window and shows worth filming. VMG can help with sequencing, channel programming and the YouTube conversation.</div><div class="src reveal">Lifetime views as of 21 Oct 2026. YouTube Studio access would let us assess watch time, traffic sources and onward viewing before setting targets.</div></div></section>
 
 </div><!-- /deck -->
 
@@ -681,9 +682,9 @@ body.sheet-open{overflow:hidden}
 
     <div class="cols">
       <div>
-        <h3>The channel</h3>
+        <h3>YouTube territories · Chartmetric through Watcher</h3><p>Artist: Flight Facilities; Chartmetric artist ID 3657; resolved from YouTube channel UCvBxvcqGSQkbs1BRafBIYSg. Reporting date: 1 Oct 2026. Fetched: 2026-10-22T13:43:41.720Z. Read from the shared Watcher cache on 23 Oct; no forced refresh or recurring requests were added to the deck.</p><p>Monthly artist-level YouTube views by country, not verified channel-only Studio geography and not Crave You-specific views. All 17 returned countries sum to 1,628,738; this is a partial coverage sum, not a worldwide total. Two rows are marked estimated. No growth comparisons are shown because the previous reporting date is unavailable.</p><table><tr><th>Rank</th><th>Market</th><th class="r">Monthly views</th><th>Provider flag</th></tr><tr><td>1</td><td>United States</td><td class="r">877,378</td><td>Not flagged as estimated</td></tr><tr><td>2</td><td>Australia</td><td class="r">109,831</td><td>Not flagged as estimated</td></tr><tr><td>3</td><td>Canada</td><td class="r">80,719</td><td>Not flagged as estimated</td></tr><tr><td>4</td><td>Mexico</td><td class="r">78,119</td><td>Not flagged as estimated</td></tr><tr><td>5</td><td>United Kingdom</td><td class="r">77,141</td><td>Not flagged as estimated</td></tr><tr><td>6</td><td>Brazil</td><td class="r">66,854</td><td>Not flagged as estimated</td></tr><tr><td>7</td><td>France</td><td class="r">64,374</td><td>Not flagged as estimated</td></tr><tr><td>8</td><td>Germany</td><td class="r">47,922</td><td>Not flagged as estimated</td></tr><tr><td>9</td><td>Poland</td><td class="r">44,290</td><td>Not flagged as estimated</td></tr><tr><td>10</td><td>South Africa</td><td class="r">43,329</td><td>Not flagged as estimated</td></tr><tr><td>11</td><td>Ukraine</td><td class="r">29,864</td><td>Not flagged as estimated</td></tr><tr><td>12</td><td>Argentina</td><td class="r">23,474</td><td>Not flagged as estimated</td></tr><tr><td>13</td><td>India</td><td class="r">22,418</td><td>Not flagged as estimated</td></tr><tr><td>14</td><td>Spain</td><td class="r">16,514</td><td>Not flagged as estimated</td></tr><tr><td>15</td><td>Philippines</td><td class="r">16,153</td><td>Not flagged as estimated</td></tr><tr><td>16</td><td>Hungary</td><td class="r">15,189</td><td>Estimated</td></tr><tr><td>17</td><td>South Korea</td><td class="r">15,169</td><td>Estimated</td></tr></table><p><a href="/flightfacilities/territories-2026-10-01.json">Watcher territory snapshot</a> · <a href="https://app.chartmetric.com/artist/3657" target="_blank" rel="noopener">Chartmetric artist profile</a></p><p>Recommendations about priority markets are planning inferences from the current ranking. No territory lift or conversion is attributed to the viral moment. Filming a live clip in a city does not establish where its viewers are located.</p><h3>Recent channel viewing · 23 October update</h3><p>Read-only Watcher snapshot history: 25 daily observations from 29 Sep to 23 Oct. The counter is 216,652,282 in every reading from 29 Sep through 22 Oct, then 218,901,844 on 23 Oct. Recorded movement: +2,249,562.</p><p>Do not label that increase as seven-day viewing. The refresh may contain delayed reporting from before the final week. There is no verified annual total. A weekly average or annual projection is deliberately withheld until more reliable observations accumulate. This update made no YouTube or Chartmetric API calls.</p><p><a href="/flightfacilities/channel-history-2026-10-23.json">Channel history used for this update</a></p><h3>The channel</h3>
         <ul>
-          <li>@flightfacilities · 307K subscribers · 217M lifetime views · since 2009.</li>
+          <li>@flightfacilities · 307K subscribers · 218,901,844 channel lifetime views, cached 23 Oct 2026 at 05:05 UTC · since 2009. The original catalogue audit is dated 21 Oct.</li>
           <li>Albums: <i>Down To Earth</i> (Nov 2014), <i>Forever</i> (12 Nov 2021). Next-album timing to confirm with the team.</li>
           <li>Last upload: 17 Sep 2026.</li>
         </ul>
@@ -806,7 +807,7 @@ body.sheet-open{overflow:hidden}
       </div>
 
       <div>
-        <h3>Shorts in 2026</h3>
+        <h3>Crave You · the 2026 channel moment</h3><p>Five selected live Shorts published May–July have 806,430 views at the 23 Oct cached reading: Melbourne 419,223; Mexico 212,440; New York 77,820; Goosebumps 71,474; Brisbane 25,473. They account for 96.4% of 836,379 lifetime views on the 18 short uploads published in 2026 through 21 Oct (length proxy ≤62 seconds). The 23 Oct Clair De Lune Short is outside this comparison cohort.</p><p>The lyric video, posted 16 Jul, has 75,004 views. The channel also posted <a href="https://www.youtube.com/shorts/3sZ8a4hFMzA" target="_blank" rel="noopener">a welcome for people discovering Crave You</a> on 25 May. The channel had already responded to the rediscovery; the proposal is to connect that interest to more catalogue and future releases.</p><p>The five live Shorts added just 1,026 views across the recorded 29 Sep–23 Oct window; the lyric video added 864. This supports an earlier-2026 moment, not a claim that the channel is currently surging. No source shows unique new fans, total viral reach or conversion to an album. Cross-platform totals have not been added.</p><p><a href="/flightfacilities/crave-you-2026-evidence.json">Snapshot values, denominator and raw daily series</a></p><h3>Shorts in 2026</h3>
         <table>
           <tr><th>Short</th><th>What's in it</th><th class="r">Views</th></tr>
           <tr><td>Crave You in Melbourne</td><td>From behind the vocalist on stage, crowd and phone lights</td><td class="r">419,177</td></tr>
@@ -850,13 +851,6 @@ body.sheet-open{overflow:hidden}
           <tr><td>Decade Mix 2012–2022</td><td>News and culture collage</td></tr>
           <tr><td>Run</td><td>Bold red title, archive black-and-white athletes</td></tr>
         </table>
-
-        <h3>Peer examples</h3>
-        <ul>
-          <li><b>Peggy Gou</b> (465K): Nanana karaoke video (Jun 2023) 8.1M; crowd Shorts 0.2–1.3M; official video (Sep 2023) 92.7M.</li>
-          <li><b>Fred again..</b> (1.5M): Rooftop Live, London 31.7M; Studio Live 7.6M; USB002 with Thomas Bangalter 11.4M.</li>
-          <li><b>Eric Prydz</b> (441K): EPIC Radio episodes 0.9–1.6M each, fortnightly in 2026.</li>
-        </ul>
 
         <h3>Sources</h3><p><a href="https://www.youtube.com/watch?v=IH5L4qTVsTk" target="_blank" rel="noopener">Down To Earth feat. Sam Rockwell</a> — official Flight Facilities upload, published 25 February 2015. Image and date checked during the editorial update.</p>
         <ul>

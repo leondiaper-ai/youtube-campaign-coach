@@ -1,6 +1,7 @@
 'use client';
 
 import { Fragment, useState } from 'react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { validChannelId } from '@/lib/ownedChannels/channels';
 import { FORMAT_LABELS, videoFormat, type OwnedRow } from '@/lib/ownedChannels/metrics';
@@ -10,7 +11,7 @@ const gain = (n: number | null) => n == null ? '—' : `${n > 0 ? '+' : ''}${num
 const date = (at: string) => new Date(at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'Europe/London' });
 const formatColors = ['bg-longform', 'bg-shorts', 'bg-positive', 'bg-line-strong'];
 
-export default function OwnedChannelsBoard({ rows, canCollect, readFailed }: { rows: OwnedRow[]; canCollect: boolean; readFailed: boolean }) {
+export default function OwnedChannelsBoard({ rows, canCollect, readFailed, linkSuffix = '' }: { rows: OwnedRow[]; canCollect: boolean; readFailed: boolean; linkSuffix?: string }) {
   const router = useRouter();
   const [search, setSearch] = useState('');
   const [role, setRole] = useState('All purposes');
@@ -119,14 +120,15 @@ export default function OwnedChannelsBoard({ rows, canCollect, readFailed }: { r
           </thead>
           <tbody>{filtered.map(row => <Fragment key={row.id}>
             <tr className="border-b border-line-faint hover:bg-raised/40">
-              <td className="px-4 py-4"><button type="button" onClick={() => setExpanded(expanded === row.id ? null : row.id)} aria-expanded={expanded === row.id} aria-controls={`channel-${row.id}`}
-                className="text-left flex items-center gap-3 w-full group">
+              <td className="px-4 py-4"><div className="flex items-center gap-3">
+                <Link href={`/growth/owned/${row.slug}${linkSuffix}`} className="text-left flex items-center gap-3 flex-1 group no-underline">
                 {row.current?.thumbnail ? <img src={row.current.thumbnail} width={36} height={36} alt="" className="rounded-full shrink-0" /> :
                   <span aria-hidden className="w-9 h-9 rounded-full bg-raised text-muted flex items-center justify-center font-bold shrink-0">{row.identityVerified ? row.name[0] : '?'}</span>}
                 <span><span className="font-bold group-hover:text-electric">{row.current?.title ?? row.name}</span>
                   <span className="block text-micro text-muted">{row.role} · {row.purpose}</span></span>
-                <span aria-hidden className="ml-auto text-muted">{expanded === row.id ? '−' : '+'}</span>
-              </button></td>
+                </Link>
+                <button type="button" onClick={() => setExpanded(expanded === row.id ? null : row.id)} aria-expanded={expanded === row.id} aria-controls={`channel-${row.id}`} aria-label={`Quick view: ${row.name}`} className="p-2 text-muted hover:text-ink"><span aria-hidden>{expanded === row.id ? '−' : '+'}</span></button>
+              </div></td>
               <td className="px-4 py-4 tabular-nums font-semibold">{number(row.current?.subs)}<span className="block text-micro font-normal text-muted">{row.subs7d != null ? `${gain(row.subs7d)} in 7d` : 'Public count'}</span></td>
               <td className="px-4 py-4 tabular-nums font-semibold">{gain(row.views7d)}<span className="block text-micro font-normal text-muted">{row.views7d == null ? `${number(row.current?.views)} total views` : row.views7d < 0 ? 'Net count correction' : `${number(row.current?.views)} total views`}</span></td>
               <td className="px-4 py-4 tabular-nums font-semibold">{row.current ? `${row.covers30d ? '' : '≥'}${row.recent.length}` : '—'}

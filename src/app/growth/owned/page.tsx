@@ -38,7 +38,7 @@ export default async function OwnedChannelsPage({ searchParams }: {
         <PageTitle title="Owned Channels" lede="New listening destinations: track early traction, build a publishing rhythm, and see which uploads start finding an audience." />
         <Link href={`/growth${mq}`} className="inline-block text-meta font-semibold text-secondary mb-3">← Back to Watcher</Link>
         <p className="text-meta text-muted mb-7">VMG owned network · all markets · early-stage channels, measured against their own progress.</p>
-        <OwnedChannelsBoard rows={rows} canCollect={!!ownedStore() && !readFailed && !!process.env.YOUTUBE_API_KEY} readFailed={readFailed} />
+        <OwnedChannelsBoard rows={rows} canCollect={!!ownedStore() && !readFailed && !!process.env.YOUTUBE_API_KEY} readFailed={readFailed} linkSuffix={mq} />
         <footer className="mt-10 pt-5 border-t border-line text-meta text-muted flex flex-wrap justify-between gap-3">
           <span>Build a baseline first. Compare each channel with its own progress.</span>
           <Link href="/cmg-youtube" className="text-secondary font-semibold">Research background ↗</Link>

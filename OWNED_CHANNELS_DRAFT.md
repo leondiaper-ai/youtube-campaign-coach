@@ -7,6 +7,17 @@ formats and listening, rather than supplying benchmarks.
 
 - Direct preview entry only: `/growth/owned`. No tab is added to `/growth`.
 - Reuses the Watcher header, type scale, colours, table and expandable details.
+- Channel names open dedicated analysis pages at `/growth/owned/[slug]`, with
+  a channel switcher and a direct link back to the network. No public tab is added.
+- Individual pages include 7/30-day period controls, recorded view/subscriber
+  charts, daily publishing bars, video-length breakdowns and a searchable,
+  sortable, paginated uploads table. Views per day are labelled as lifetime
+  averages; observed seven-day video gains are shown separately.
+- Growth graphs contain recorded readings only. Missing days over 36 hours
+  break the line. A single reading is a baseline, not a reconstructed trend.
+- Length groups avoid claiming that a short song is necessarily a YouTube Short.
+- Likes and comments are included on new manual collections; older snapshots
+  lacking them remain blank. Collection uses the same videos.list statistics call.
 - Main figures: public views to date, subscribers, 7-day net growth, 30-day output.
 - Per-channel purpose, first public upload and publishing age where complete
   upload history is available. A first public upload is not the channel creation date.
@@ -26,7 +37,7 @@ Reading the dashboard makes no YouTube calls. A manual refresh reads one
 allowlisted channel per request, up to 300 uploads / 18 months. Missing counters
 stay null. Seven-day gains require a fresh reading and a baseline seven days
 earlier (12-hour tolerance); short observation windows are never extrapolated.
-Preview history uses isolated `owned:preview:` keys, 10 days of readings and
+Preview history uses isolated `owned:preview:` keys, 29 days of readings and
 30-day expiry. No artist roster, shared live cache or scheduled job is changed.
 
 ## Preview and production

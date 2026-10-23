@@ -4,6 +4,8 @@ export type OwnedVideo = {
   id: string; title: string; publishedAt: string;
   durationSec: number | null; views: number | null;
   live: string;
+  likes?: number | null;
+  comments?: number | null;
 };
 export type OwnedSnapshot = {
   channelId: string; title: string; thumbnail: string | null;

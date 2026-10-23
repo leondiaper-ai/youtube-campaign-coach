@@ -4,6 +4,7 @@
  */
 export const OWNED_CHANNELS = [
   {
+    "slug": "edm-society",
     "id": "UCCRF5F6VXxGog9ears8WCfg",
     "name": "EDM Society",
     "handle": "@TheEDMSociety",
@@ -12,6 +13,7 @@ export const OWNED_CHANNELS = [
     "identityVerified": true
   },
   {
+    "slug": "folk-and-nature",
     "id": "UC2_BNEOjEi2plnmHUppPLzQ",
     "name": "Folk and Nature",
     "handle": "@FolkandNature",
@@ -20,6 +22,7 @@ export const OWNED_CHANNELS = [
     "identityVerified": true
   },
   {
+    "slug": "electronic-color-streams",
     "id": "UCMO6YRfAG4npIHsSKcDXANA",
     "name": "Electronic Color Streams",
     "handle": "@ElectronicColorStreams",
@@ -28,6 +31,7 @@ export const OWNED_CHANNELS = [
     "identityVerified": true
   },
   {
+    "slug": "venue-floor",
     "id": "UC10pqmuYFkyqWc4O51T2KIA",
     "name": "Venue Floor",
     "handle": "@VenueFloor",
@@ -36,6 +40,7 @@ export const OWNED_CHANNELS = [
     "identityVerified": true
   },
   {
+    "slug": "kinetic-pulse-music",
     "id": "UCKF7C3b-iqea_-qn_fFchMw",
     "name": "Kinetic Pulse Music",
     "handle": "@KineticPulsemusic",
@@ -44,6 +49,7 @@ export const OWNED_CHANNELS = [
     "identityVerified": true
   },
   {
+    "slug": "halloween-divinations",
     "id": "UCC-hsDZsRa_Qc3YdgDs3KZA",
     "name": "Halloween Divinations",
     "handle": "@HalloweenDivinations",
@@ -52,6 +58,7 @@ export const OWNED_CHANNELS = [
     "identityVerified": true
   },
   {
+    "slug": "el-patio",
     "id": "UC0EUZKrkdhSiGwA61GyqJdA",
     "name": "El Patio",
     "handle": "@MusicaElPatio",
@@ -60,6 +67,7 @@ export const OWNED_CHANNELS = [
     "identityVerified": true
   },
   {
+    "slug": "unresolved-channel",
     "id": "UChVWfn28jaZSxBqwwP0VnL",
     "name": "Unresolved channel",
     "handle": null,
@@ -68,6 +76,7 @@ export const OWNED_CHANNELS = [
     "identityVerified": false
   },
   {
+    "slug": "study-room",
     "id": "UCY4yaAaAEs66vlwAkKhmzkA",
     "name": "Study Room",
     "handle": "@study-room-fm",
@@ -76,6 +85,7 @@ export const OWNED_CHANNELS = [
     "identityVerified": true
   },
   {
+    "slug": "game-day-radio",
     "id": "UC0tfvGUDEmYh169ZBlMH0gw",
     "name": "Game Day Radio",
     "handle": "@GameDayRadio",

@@ -4,7 +4,7 @@ import type { OwnedSnapshot, OwnedVideo } from './metrics';
 type YtItem = {
   id: string; snippet?: { title?: string; publishedAt?: string; liveBroadcastContent?: string;
     thumbnails?: { default?: { url?: string } }; resourceId?: { videoId?: string } };
-  statistics?: { subscriberCount?: string; hiddenSubscriberCount?: boolean; viewCount?: string };
+  statistics?: { subscriberCount?: string; hiddenSubscriberCount?: boolean; viewCount?: string; likeCount?: string; commentCount?: string };
   contentDetails?: { relatedPlaylists?: { uploads?: string }; duration?: string; videoPublishedAt?: string; videoId?: string };
 };
 const count = (v: string | undefined) => v != null && v.trim() !== '' && Number.isFinite(Number(v)) ? Number(v) : null;
@@ -57,7 +57,8 @@ export async function collectOwnedChannel(id: string): Promise<OwnedSnapshot> {
       if (!v.snippet?.publishedAt) continue;
       items.push({ id: v.id, title: v.snippet.title ?? v.id, publishedAt: v.snippet.publishedAt,
         durationSec: duration(v.contentDetails?.duration), views: count(v.statistics?.viewCount),
-        live: v.snippet.liveBroadcastContent ?? 'none' });
+        live: v.snippet.liveBroadcastContent ?? 'none',
+        likes: count(v.statistics?.likeCount), comments: count(v.statistics?.commentCount) });
     }
   }
   return { channelId: id, title: ch.snippet?.title ?? id,

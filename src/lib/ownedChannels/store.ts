@@ -16,7 +16,7 @@ export async function saveOwnedSnapshot(snap: OwnedSnapshot) {
   if (!store) throw new Error('Preview storage is not configured.');
   const history = await readOwnedHistory(snap.channelId);
   const day = snap.collectedAt.slice(0, 10);
-  const cutoff = Date.parse(snap.collectedAt) - 10 * 86400000;
+  const cutoff = Date.parse(snap.collectedAt) - 29 * 86400000;
   const next = history.filter(s => Date.parse(s.collectedAt) >= cutoff && s.collectedAt.slice(0, 10) !== day);
   next.push(snap);
   // Separate preview namespace; never touches artist rosters, caches or cron.
