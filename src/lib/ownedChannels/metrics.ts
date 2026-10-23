@@ -53,6 +53,16 @@ export type LibraryStats = {
   underTen: number;
   oldestPublishedAt: string | null;
   newestPublishedAt: string | null;
+  /* Short-form by duration only. Counts are sound; the medians beside
+     them are NOT comparable across the two groups, because YouTube
+     counts a Short's view differently from a long-form view. They are
+     here to describe each group, not to rank one against the other. */
+  shortCount: number;
+  shortWithViews: number;
+  shortMedianViews: number | null;
+  longMedianViews: number | null;
+  /** Uploads whose duration was not recorded, so neither group claims them. */
+  unknownDuration: number;
 };
 
 /* Summarises a whole sweep. Kept here rather than in the collector so the
@@ -82,10 +92,20 @@ export function buildLibraryStats(items: OwnedVideo[], complete: boolean, videoC
     withViews: counted.length, totalViews, medianViews: median(counted),
     halfShareCount, topShare: totalViews ? counted[0] / totalViews : null,
     underTen: counted.filter(v => v < 10).length,
+    shortCount: items.filter(v => v.durationSec != null && v.durationSec > 0 && v.durationSec <= SHORT_MAX_SEC).length,
+    shortWithViews: items.filter(v => v.views != null && v.durationSec != null && v.durationSec > 0 && v.durationSec <= SHORT_MAX_SEC).length,
+    shortMedianViews: median(items.filter(v => v.views != null && v.durationSec != null && v.durationSec > 0 && v.durationSec <= SHORT_MAX_SEC).map(v => v.views!)),
+    longMedianViews: median(items.filter(v => v.views != null && v.durationSec != null && v.durationSec > SHORT_MAX_SEC).map(v => v.views!)),
+    unknownDuration: items.filter(v => v.durationSec == null || v.durationSec <= 0).length,
     oldestPublishedAt: oldest == null ? null : new Date(oldest).toISOString(),
     newestPublishedAt: newest == null ? null : new Date(newest).toISOString(),
   };
 }
+/* Three minutes is YouTube's current Shorts ceiling, so it is the best
+   available proxy. It is only that: the Data API exposes no field saying
+   a video is a Short, and a 2:30 lyric video is not one. Everything built
+   on this says "short-form", never "Shorts". */
+export const SHORT_MAX_SEC = 180;
 export const FORMAT_LABELS = ['Tracks & videos', 'Short-form', 'Mixes & sets', 'Other'] as const;
 export type OwnedFormat = typeof FORMAT_LABELS[number];
 const DAY = 86400000;
@@ -93,7 +113,7 @@ const DAY = 86400000;
 /** Duration is a proxy, not proof that a video is on YouTube's Shorts surface. */
 export function videoFormat(v: OwnedVideo): OwnedFormat {
   if (v.durationSec == null || v.durationSec <= 0) return 'Other';
-  if (v.durationSec <= 180) return 'Short-form';
+  if (v.durationSec <= SHORT_MAX_SEC) return 'Short-form';
   if (/\b(mix|dj set|full set|radio|compilation)\b/i.test(v.title) || v.durationSec >= 1200) return 'Mixes & sets';
   if (/\b(interview|podcast|behind the scenes)\b/i.test(v.title) || v.live === 'live') return 'Other';
   return 'Tracks & videos';

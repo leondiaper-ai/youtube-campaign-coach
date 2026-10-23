@@ -1,4 +1,4 @@
-import { countPublishedSince, type LibraryStats, type OwnedVideo } from './metrics';
+import { countPublishedSince, SHORT_MAX_SEC, type LibraryStats, type OwnedVideo } from './metrics';
 import type { VideoGain } from './analysis';
 
 /* Observations, not recommendations.
@@ -49,48 +49,126 @@ function leadName(title: string): string | null {
   return name.length >= 2 && name.length <= 60 ? name : null;
 }
 
+/** Bracketed descriptor: "(Lyrics Video)", "[Remix]", "(Official Audio)". */
+function formatTag(title: string): string | null {
+  const match = title.match(/[[(]([^\])]{2,40})[\])]/);
+  if (!match) return null;
+  const tag = match[1].replace(/\s+/g, ' ').trim();
+  return /\d{4}/.test(tag) ? null : tag;
+}
+
+/* Finds a value recurring among the leaders, and refuses it when the same
+   value is on much of the catalogue — at which point it is the channel's
+   naming convention rather than anything about these uploads. */
+function recurring(sample: OwnedVideo[], items: OwnedVideo[], extract: (title: string) => string | null) {
+  const tally = new Map<string, OwnedVideo[]>();
+  for (const video of sample) {
+    const value = extract(video.title);
+    if (!value) continue;
+    const key = value.toLowerCase();
+    tally.set(key, [...(tally.get(key) ?? []), video]);
+  }
+  const best = Array.from(tally.entries()).sort((a, b) => b[1].length - a[1].length)[0];
+  if (!best || best[1].length < 3 || sample.length < 6) return null;
+  const acrossLibrary = items.filter(v => extract(v.title)?.toLowerCase() === best[0]).length;
+  if (acrossLibrary >= items.length * 0.4) return null;
+  return { label: extract(best[1][0].title) ?? best[0], videos: best[1], acrossLibrary };
+}
+
 export function observeChannel(input: ObservationInput): Observation[] {
   const { items, library, gains, baselineDays, at, perDay, viewsGain } = input;
   const found: Observation[] = [];
   const byViews = items.filter(v => v.views != null).sort((a, b) => b.views! - a.views!);
 
-  /* 1. Concentration. Only worth saying when a genuinely small number of
-        uploads carries the channel, and only with enough uploads behind
-        it that "small" means something. */
-  if (library.halfShareCount != null && library.withViews >= 20 && library.totalViews &&
-      library.halfShareCount <= Math.max(1, library.withViews * 0.1)) {
-    const n = library.halfShareCount;
-    found.push({
-      id: 'concentration',
-      headline: `${n} upload${n === 1 ? '' : 's'} account for half the recorded upload views`,
-      detail: `Of the ${compact(library.withViews)} uploads read, the top ${n} hold half of ${compact(library.totalViews)} views between them${library.topShare != null ? `; the single best holds ${pct(library.topShare)}` : ''}.`,
-      prompt: `Worth understanding what those uploads have in common — though ${n} is a thin base to generalise from, and a video can land for reasons that are not repeatable.`,
-      videos: byViews.slice(0, Math.min(n, 5)),
-    });
+  /* 0. Concentration. When one upload dominates, name it and stop: asking
+        what several uploads "have in common" is nonsense for a sample of
+        one. The coverage is stated here once, and nowhere else. */
+  if (library.totalViews && library.withViews >= 20 && byViews.length) {
+    const coverage = library.videoCount != null && library.swept < library.videoCount
+      ? `Across ${compact(library.swept)} collected uploads of ${compact(library.videoCount)} on the channel.`
+      : `Across all ${compact(library.swept)} collected uploads.`;
+    if (library.topShare != null && library.topShare >= 0.25) {
+      const top = byViews[0];
+      found.push({
+        id: 'concentration',
+        headline: `${top.title} accounts for ${pct(library.topShare)} of recorded upload views.`,
+        detail: coverage,
+        prompt: `One upload is not a pattern. Whether anything else on the channel moves with it is the question a second reading answers.`,
+        videos: [top],
+      });
+    } else if (library.halfShareCount != null && library.halfShareCount <= Math.max(1, library.withViews * 0.1)) {
+      const n = library.halfShareCount;
+      const top = byViews.slice(0, Math.min(n, 5));
+      found.push({
+        id: 'concentration',
+        headline: `${n} uploads account for half of recorded upload views.`,
+        detail: coverage,
+        prompt: `Worth checking what they share — though ${n} is a thin base, and a video can land for reasons that do not repeat.`,
+        videos: top,
+      });
+    }
   }
 
-  /* 2. A name recurring among the leaders. Guarded against the obvious
+  /* 1. A name recurring among the leaders. Guarded against the obvious
         false positive: if the name is on most of the catalogue it is the
         channel's naming convention, not a signal about an artist. */
   const sample = byViews.slice(0, 12);
-  const tally = new Map<string, OwnedVideo[]>();
-  for (const video of sample) {
-    const name = leadName(video.title);
-    if (!name) continue;
-    const key = name.toLowerCase();
-    tally.set(key, [...(tally.get(key) ?? []), video]);
+  const name = recurring(sample, items, leadName);
+  if (name) {
+    found.push({
+      id: 'repeated-name',
+      headline: `“${name.label}” appears on ${name.videos.length} of the ${sample.length} most-viewed uploads`,
+      detail: `It appears on ${name.acrossLibrary} of the ${compact(items.length)} uploads held, so it is not simply the channel's naming pattern.`,
+      prompt: `Is the name drawing the views, or do these uploads share something else — length, era, thumbnail? Comparing them against uploads carrying the same name that did not land would separate the two.`,
+      videos: name.videos.slice(0, 5),
+    });
   }
-  const best = Array.from(tally.entries()).sort((a, b) => b[1].length - a[1].length)[0];
-  if (best && best[1].length >= 3 && sample.length >= 6) {
-    const acrossLibrary = items.filter(v => leadName(v.title)?.toLowerCase() === best[0]).length;
-    if (acrossLibrary < items.length * 0.4) {
-      const label = leadName(best[1][0].title) ?? best[0];
+
+  /* 2. A recurring format or version among the leaders. Same guard: a
+         tag on most of the catalogue says nothing about these uploads. */
+  const tag = recurring(sample, items, formatTag);
+  if (tag) {
+    found.push({
+      id: 'repeated-format',
+      headline: `${tag.videos.length} of the ${sample.length} most-viewed uploads are tagged “${tag.label}”`,
+      detail: `${tag.acrossLibrary} of the ${compact(items.length)} uploads held carry that tag, so it is over-represented among the leaders rather than being the house style.`,
+      prompt: `These uploads differ in age and subject as well as format, so this is not evidence the format causes the views. A fair test would be matched pairs — same kind of track, published around the same time, one tagged and one not.`,
+      videos: tag.videos.slice(0, 5),
+    });
+  }
+
+  /* 2b. Short-form, by duration. Three states are worth saying: none at
+         all, over-represented among the leaders, or published steadily
+         while absent from them. None of them compares the two groups'
+         view counts, because a Short's view and a long-form view are not
+         the same measurement. */
+  if (library.withViews >= 20) {
+    const shortShare = library.shortCount / Math.max(1, library.swept);
+    const shortLeaders = byViews.slice(0, 12).filter(v => v.durationSec != null && v.durationSec > 0 && v.durationSec <= SHORT_MAX_SEC);
+    const leaderSample = Math.min(12, byViews.length);
+    if (library.shortCount === 0 && library.swept >= 30) {
       found.push({
-        id: 'repeated-name',
-        headline: `“${label}” appears on ${best[1].length} of the ${sample.length} most-viewed uploads`,
-        detail: `It appears on ${acrossLibrary} of the ${compact(items.length)} uploads held, so it is not simply the channel's naming pattern.`,
-        prompt: `Is the name drawing the views, or do these uploads share something else — length, era, thumbnail? Comparing them against uploads carrying the same name that did not land would separate the two.`,
-        videos: best[1].slice(0, 5),
+        id: 'no-short-form',
+        headline: `Nothing under three minutes in ${compact(library.swept)} collected uploads`,
+        detail: `Every upload collected runs longer than three minutes, so this channel is not publishing short-form at all.`,
+        prompt: `Deliberate, or simply untried? If it is untried, a small batch would at least establish whether the audience is there — the catalogue cannot answer it.`,
+        videos: [],
+      });
+    } else if (leaderSample >= 6 && shortLeaders.length >= 3 && shortShare < 0.25) {
+      found.push({
+        id: 'short-form-over-represented',
+        headline: `${shortLeaders.length} of the ${leaderSample} most-viewed uploads are under three minutes`,
+        detail: `Short-form is ${pct(shortShare)} of the ${compact(library.swept)} uploads collected but ${pct(shortLeaders.length / leaderSample)} of the leaders. Note that YouTube counts a Short's view differently from a long-form view, so these totals are not like for like.`,
+        prompt: `The counting difference alone could explain this. Comparing short-form against short-form over time, rather than against long-form, would show whether it is really outperforming.`,
+        videos: shortLeaders.slice(0, 5),
+      });
+    } else if (shortShare >= 0.25 && shortLeaders.length === 0 && leaderSample >= 6) {
+      found.push({
+        id: 'short-form-absent-from-leaders',
+        headline: `Short-form is ${pct(shortShare)} of output but none of the ${leaderSample} most-viewed uploads`,
+        detail: `${compact(library.shortCount)} of ${compact(library.swept)} collected uploads run under three minutes, and none of them reach the leaders.`,
+        prompt: `Worth checking whether these are reaching the Shorts surface at all. Duration is all the public data shows; placement needs channel analytics.`,
+        videos: [],
       });
     }
   }

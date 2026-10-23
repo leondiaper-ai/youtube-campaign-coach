@@ -1,11 +1,11 @@
-import { summariseChannel, median, type OwnedSnapshot, type OwnedVideo } from './metrics';
+import { summariseChannel, median, SHORT_MAX_SEC, type OwnedSnapshot, type OwnedVideo } from './metrics';
 import type { OwnedChannel } from './channels';
 
 export const DAY = 86400000;
 export const LENGTH_LABELS = ['Up to 3 min', '3–20 min', '20 min+', 'Unknown length'] as const;
 export function lengthGroup(video: OwnedVideo): number {
   if (video.durationSec == null || video.durationSec <= 0) return 3;
-  if (video.durationSec <= 180) return 0;
+  if (video.durationSec <= SHORT_MAX_SEC) return 0;
   return video.durationSec < 1200 ? 1 : 2;
 }
 export type Reading = { at: string; views: number | null; subs: number | null };
