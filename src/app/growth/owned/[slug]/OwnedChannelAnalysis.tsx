@@ -99,20 +99,26 @@ export default function OwnedChannelAnalysis({ analysis, canCollect, readFailed,
     </div>}
 
     <div className="mb-5">
-      <h2 className="text-h4 font-bold">Channel library</h2>
+      <h2 className="text-h4 font-bold">{library.complete ? 'Channel library' : 'Newest uploads'}</h2>
       <p className="text-micro text-muted mt-1">
-        {row.current ? <>Everything stored for this channel, not a recent window · as of {date(at)}{library.complete ? '' : ' · collection cap reached, every figure here is a floor'}</> : 'Awaiting channel data'}
+        {!row.current ? 'Awaiting channel data' : library.complete
+          ? <>Everything stored for this channel, not a recent window · as of {date(at)}</>
+          : <>Collection stopped at the {library.uploads}-upload cap, newest first, so this is the most recent slice rather than the library · as of {date(at)}</>}
       </p>
     </div>
     <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-8">
-      <Metric label="Uploads in library" value={row.current ? `${library.complete ? '' : '≥'}${library.uploads}` : '—'}
+      <Metric label={library.complete ? 'Uploads in library' : 'Uploads sampled'} value={row.current ? `${library.complete ? '' : '≥'}${library.uploads}` : '—'}
         note={!row.current ? 'No reading yet' : library.complete ? `Full public history${row.firstUpload ? ` since ${date(row.firstUpload)}` : ''}` : 'Cap reached · the library is larger than this'} />
-      <Metric label="Views across library" value={row.current ? `${library.complete ? '' : '≥'}${fmt(library.views)}` : '—'}
-        note={!row.current ? 'No reading yet' : `Summed over ${library.withViews} uploads · the channel counter reads ${fmt(row.current.views)} and includes uploads since removed`} />
-      <Metric label="Median upload" value={fmt(library.medianViews)}
-        note={row.current ? `Half the library does better than this · n=${library.withViews}` : 'No reading yet'} />
+      <Metric label={library.complete ? 'Views across library' : 'Views in this slice'} value={row.current ? `${library.complete ? '' : '≥'}${fmt(library.views)}` : '—'}
+        note={!row.current ? 'No reading yet' : library.complete
+          ? `Summed over ${library.withViews} uploads · the channel counter reads ${fmt(row.current.views)} and also counts uploads since removed`
+          : `The channel counter reads ${fmt(row.current.views)}, so nearly all of this channel's views sit in older uploads the cap excluded`} />
+      <Metric label={library.complete ? 'Median upload' : 'Median of the slice'} value={fmt(library.medianViews)}
+        note={!row.current ? 'No reading yet' : library.complete
+          ? `Half the library does better than this · n=${library.withViews}`
+          : `Newest-first sampling means these uploads are days old · age, not quality, drives this · n=${library.withViews}`} />
       <Metric label="Carrying half the views" value={library.halfShareCount == null ? '—' : String(library.halfShareCount)}
-        note={!row.current ? 'No reading yet' : library.halfShareCount == null ? 'No view counts recorded' : `of ${library.complete ? '' : '≥'}${library.uploads} uploads · the best one holds ${share(library.topShare)}`} />
+        note={!row.current ? 'No reading yet' : library.halfShareCount == null ? 'No view counts recorded' : `of the ${library.complete ? library.uploads : `${library.uploads} sampled`} uploads · the best one holds ${share(library.topShare)}${library.complete ? '' : ' of this slice'}`} />
     </div>
 
     <div className="flex flex-wrap items-center justify-between gap-3 mb-5">
