@@ -12,7 +12,7 @@
    ═══════════════════════════════════════════════════════════════════════ */
 
 import { Redis } from '@upstash/redis';
-import type { CatalogueTrack, ChartObservation, Decision } from './types';
+import type { CatalogueTrack, ChartObservation, Decision, HumanLabel } from './types';
 
 export function labsStore() {
   const url = process.env.UPSTASH_REDIS_REST_URL ?? process.env.KV_REST_API_URL;
@@ -28,6 +28,7 @@ export const KEYS = {
   uploadsChunk: (channelId: string, n: number) => `${NS}:uploads:${channelId}:${n}`,
   sourceCatalogue: `${NS}:catalogue:source`,
   decisions: `${NS}:decisions`,
+  labels: `${NS}:labels:human`,
   lock: (name: string) => `${NS}:lock:${name}`,
 };
 
@@ -140,4 +141,28 @@ export async function withLock<T>(name: string, seconds: number, fn: () => Promi
   const acquired = await store.set(key, '1', { nx: true, ex: seconds });
   if (!acquired) throw new Error('Already refreshing. Try again in a minute.');
   try { return await fn(); } finally { await store.del(key); }
+}
+
+/* ── Human labels ─────────────────────────────────────────────────
+   One list; a new label for the same subject and dimension replaces
+   the old one, so the record never holds two human genres for a song. */
+export const KEEP_LABELS = 2000;
+export async function readHumanLabels(): Promise<HumanLabel[]> {
+  const store = labsStore();
+  return store ? await store.get<HumanLabel[]>(KEYS.labels) ?? [] : [];
+}
+export async function writeHumanLabel(label: HumanLabel): Promise<HumanLabel[]> {
+  const store = labsStore();
+  if (!store) throw new Error('Preview storage is not configured.');
+  const list = (await readHumanLabels()).filter(l => !(l.subject === label.subject && l.dimension === label.dimension && l.value === label.value));
+  list.push(label);
+  await store.set(KEYS.labels, list.slice(-KEEP_LABELS), { ex: 365 * 86400 });
+  return list;
+}
+export async function removeHumanLabel(subject: string, dimension: string, value: string): Promise<HumanLabel[]> {
+  const store = labsStore();
+  if (!store) throw new Error('Preview storage is not configured.');
+  const list = (await readHumanLabels()).filter(l => !(l.subject === subject && l.dimension === dimension && l.value === value));
+  await store.set(KEYS.labels, list, { ex: 365 * 86400 });
+  return list;
 }

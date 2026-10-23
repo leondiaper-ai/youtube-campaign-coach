@@ -3,18 +3,19 @@
 
    Three tiers, kept apart because they mean different things:
 
-     1. Published on an owned channel — from this sandbox's upload
-        inventory (every public upload, title-indexed), falling back
-        to the Owned Channels working set for channels not yet swept.
+     1. Published on an owned channel. Sources, in order of preference:
+          a. the sandbox's live upload inventory in Redis (incremental
+             sweeps started from the page);
+          b. a committed inventory snapshot under ./seed/uploads, read
+             through the production /api/full-catalogue route on the
+             date in its meta (titles, dates, lifetime views, duration);
+          c. the Owned Channels working set (newest 300 + top 100).
+        Each channel says which it is using and whether it is complete.
      2. In a verified source catalogue but not published — only once a
         catalogue export has been imported. None was found in the
         repository or the connected Drive, Dropbox and Airtable sources
         on 23 Oct 2026, so this tier is empty until one is supplied.
-     3. Unverified — anything else. The sandbox never promotes a text
-        match into availability or rights.
-
-   Coverage is reported with every list so that "published uploads" is
-   never mistaken for "everything we hold".
+     3. Unverified — anything else. Text matches never become rights.
    ═══════════════════════════════════════════════════════════════════════ */
 
 import { OWNED_CHANNELS } from '@/lib/ownedChannels/channels';
@@ -22,28 +23,66 @@ import { readOwnedHistory } from '@/lib/ownedChannels/store';
 import type { OwnedSnapshot } from '@/lib/ownedChannels/metrics';
 import { readSourceCatalogue, readUploads, type UploadsMeta } from './store';
 import { parseUploadTitle } from './match';
-import type { CatalogueTrack } from './types';
+import { classifyUpload, humanLabelsFor, normArtist } from './classify';
+import type { CatalogueTrack, HumanLabel, Label } from './types';
+
+import folkAndNature from './seed/uploads/folk-and-nature.json';
+import elPatio from './seed/uploads/el-patio.json';
+import venueFloor from './seed/uploads/venue-floor.json';
+
+type SeedRow = [string, string, string, number | null, number | null];
+type SeedInventory = { meta: { slug: string; channelId: string; handle: string; fetchedAt: string; publicVideoCount: number; complete: boolean; lifetimeViews: number; subscribers: number; channelCreated: string; note?: string; rows: number; source: string }; rows: SeedRow[] };
+const SEED_INVENTORIES: SeedInventory[] = [folkAndNature, elPatio, venueFloor] as unknown as SeedInventory[];
 
 export type ChannelCoverage = {
   slug: string; name: string; channelId: string; identityVerified: boolean;
-  /** Rows in the sandbox inventory; null when never swept. */
-  inventory: { count: number; complete: boolean; videoCount: number | null; sweptAt: string; lastIncrementalAt: string | null } | null;
-  /** The Owned Channels working set used as a fallback. */
-  ownedWorkingSet: { count: number; readingAt: string } | null;
-  /** Which of the two the matcher is using for this channel. */
-  using: 'inventory' | 'owned-working-set' | 'none';
+  using: 'inventory' | 'seed-snapshot' | 'owned-working-set' | 'none';
+  rows: number;
+  complete: boolean | null;
+  /** YouTube's public count at the time of the reading used. */
+  videoCount: number | null;
+  readAt: string | null;
+  note: string | null;
+  /** Lifetime views held by the rows the matcher sees (sum), where known, against the channel's lifetime total. */
+  rowViews: number | null;
+  channelViews: number | null;
+  /** Label distribution of the channel's own catalogue, for channel fit. value → count, per dimension. */
+  profile: Record<string, Record<string, number>>;
+  topUploads: { videoId: string; title: string; views: number | null; publishedAt: string }[];
 };
 
 export type CatalogueLayer = {
   tracks: CatalogueTrack[];
   coverage: ChannelCoverage[];
   source: { present: boolean; rows: number; importedAt: string | null; note: string | null };
-  /** Latest owned reading per channel, for evidence. */
   ownedLatest: Record<string, OwnedSnapshot | undefined>;
   ownedHistory: Record<string, OwnedSnapshot[]>;
 };
 
-export async function loadCatalogue(): Promise<CatalogueLayer> {
+function profileOf(tracks: CatalogueTrack[]) {
+  const profile: Record<string, Record<string, number>> = {};
+  for (const t of tracks) for (const l of t.labels) {
+    profile[l.dimension] ??= {};
+    profile[l.dimension][l.value] = (profile[l.dimension][l.value] ?? 0) + 1;
+  }
+  return profile;
+}
+
+function uploadTrack(def: typeof OWNED_CHANNELS[number], row: { id: string; title: string; publishedAt: string; views?: number | null; durationSec?: number | null }, human: HumanLabel[]): CatalogueTrack {
+  const parsed = parseUploadTitle(row.title);
+  /* These channels title uploads "Title - Artist". parseUploadTitle returns the
+     first segment as `artist`, which is therefore the TITLE here; the matcher
+     tries both orders, but for labelling we want the credit, so swap. */
+  const artist = parsed.artist ? parsed.title : null;
+  const subjects = [`upload:${row.id}`, ...(artist ? [`artist:${normArtist(artist)}`] : [])];
+  const labels: Label[] = classifyUpload(row.title, artist, humanLabelsFor(subjects, human));
+  return { id: `upload:${row.id}`, origin: 'owned-upload', title: row.title, artist, version: parsed.version, isrc: null,
+    channelSlug: def.slug, channelName: def.name, videoId: row.id, publishedAt: row.publishedAt,
+    views: row.views ?? null, durationSec: row.durationSec ?? null,
+    genre: null, language: null, releaseYear: null, territories: null, rightsNote: null, labels };
+}
+
+export async function loadCatalogue(human: HumanLabel[] = []): Promise<CatalogueLayer> {
   const tracks: CatalogueTrack[] = [];
   const coverage: ChannelCoverage[] = [];
   const ownedLatest: Record<string, OwnedSnapshot | undefined> = {};
@@ -59,32 +98,42 @@ export async function loadCatalogue(): Promise<CatalogueLayer> {
     const history = [...histories[i]].sort((a, b) => Date.parse(a.collectedAt) - Date.parse(b.collectedAt));
     const latest = history.at(-1);
     ownedLatest[def.id] = latest; ownedHistory[def.id] = history;
-    const rows = inv.meta && inv.rows.length ? inv.rows.map(r => ({ id: r.id, title: r.title, publishedAt: r.publishedAt }))
-      : (latest?.items ?? []).map(v => ({ id: v.id, title: v.title, publishedAt: v.publishedAt }));
-    for (const row of rows) {
-      const parsed = parseUploadTitle(row.title);
-      tracks.push({ id: `upload:${row.id}`, origin: 'owned-upload', title: row.title, artist: parsed.artist, version: parsed.version,
-        isrc: null, channelSlug: def.slug, channelName: def.name, videoId: row.id, publishedAt: row.publishedAt,
-        genre: null, language: null, releaseYear: null, territories: null, rightsNote: null });
+    const seed = SEED_INVENTORIES.find(s => s.meta.channelId === def.id);
+    let rows: { id: string; title: string; publishedAt: string; views?: number | null; durationSec?: number | null }[] = [];
+    let using: ChannelCoverage['using'] = 'none', complete: boolean | null = null, videoCount: number | null = null, readAt: string | null = null, note: string | null = null, channelViews: number | null = latest?.views ?? null;
+    if (inv.meta && inv.rows.length) {
+      rows = inv.rows.map(r => ({ id: r.id, title: r.title, publishedAt: r.publishedAt, views: latest?.items.find(v => v.id === r.id)?.views ?? latest?.viewsById?.[r.id] ?? null }));
+      using = 'inventory'; complete = inv.meta.complete; videoCount = inv.meta.videoCount; readAt = inv.meta.sweptAt;
+      note = 'Live title index from the sandbox sweep. Views only where the Owned Channels readings hold them.';
+    } else if (seed) {
+      rows = seed.rows.map(([id, title, publishedAt, views, durationSec]) => ({ id, title, publishedAt, views, durationSec }));
+      using = 'seed-snapshot'; complete = seed.meta.complete; videoCount = seed.meta.publicVideoCount; readAt = seed.meta.fetchedAt;
+      note = seed.meta.note ?? `Snapshot read via ${seed.meta.source.split(' (')[0]} on ${seed.meta.fetchedAt.slice(0, 10)}; lifetime views as of that reading.`;
+      channelViews = seed.meta.lifetimeViews;
+    } else if (latest?.items.length) {
+      rows = latest.items.map(v => ({ id: v.id, title: v.title, publishedAt: v.publishedAt, views: v.views, durationSec: v.durationSec }));
+      using = 'owned-working-set'; complete = false; videoCount = latest.library?.videoCount ?? null; readAt = latest.collectedAt;
+      note = 'Owned Channels working set (newest 300 + top 100). Partial by design.';
     }
+    const channelTracks = rows.map(r => uploadTrack(def, r, human));
+    tracks.push(...channelTracks);
+    const withViews = channelTracks.filter(t => t.views != null);
     coverage.push({
-      slug: def.slug, name: def.name, channelId: def.id, identityVerified: def.identityVerified,
-      inventory: inv.meta ? { count: inv.meta.count, complete: inv.meta.complete, videoCount: inv.meta.videoCount, sweptAt: inv.meta.sweptAt, lastIncrementalAt: inv.meta.lastIncrementalAt } : null,
-      ownedWorkingSet: latest ? { count: latest.items.length, readingAt: latest.collectedAt } : null,
-      using: inv.meta && inv.rows.length ? 'inventory' : latest?.items.length ? 'owned-working-set' : 'none',
+      slug: def.slug, name: def.name, channelId: def.id, identityVerified: true, using, rows: rows.length, complete, videoCount, readAt, note,
+      rowViews: withViews.length ? withViews.reduce((s, t) => s + t.views!, 0) : null, channelViews,
+      profile: profileOf(channelTracks),
+      topUploads: withViews.sort((a, b) => b.views! - a.views!).slice(0, 8).map(t => ({ videoId: t.videoId!, title: t.title, views: t.views, publishedAt: t.publishedAt ?? '' })),
     });
   });
-  const unresolved = OWNED_CHANNELS.filter(c => !c.identityVerified);
-  for (const def of unresolved) coverage.push({ slug: def.slug, name: def.name, channelId: def.id, identityVerified: false, inventory: null, ownedWorkingSet: null, using: 'none' });
-  if (source?.rows.length) tracks.push(...source.rows);
+  for (const def of OWNED_CHANNELS.filter(c => !c.identityVerified)) {
+    coverage.push({ slug: def.slug, name: def.name, channelId: def.id, identityVerified: false, using: 'none', rows: 0, complete: null, videoCount: null, readAt: null, note: `Supplied ID has ${def.id.length} characters; expected 24. Not matched.`, rowViews: null, channelViews: null, profile: {}, topUploads: [] });
+  }
+  if (source?.rows.length) tracks.push(...source.rows.map(r => ({ ...r, labels: r.labels ?? [] })));
   return { tracks, coverage, ownedLatest, ownedHistory,
     source: { present: !!source?.rows.length, rows: source?.rows.length ?? 0, importedAt: source?.importedAt ?? null, note: source?.note ?? null } };
 }
 
-/* ── Source catalogue import ───────────────────────────────────────
-   CSV/TSV with a header. Recognised columns: isrc, title, artist,
-   version, genre, language, year, territories, rights/cleared. Rows
-   without a title are skipped; nothing is inferred for missing cells. */
+/* ── Source catalogue import ─────────────────────────────────────── */
 const COLS: Record<string, RegExp> = {
   isrc: /^isrc$/i, title: /^(title|track|track title|song|recording)$/i, artist: /^(artist|artists|artist name|main artist)$/i,
   version: /^(version|mix|subtitle)$/i, genre: /^(genre|genres)$/i, language: /^(language|lang)$/i,
@@ -112,11 +161,16 @@ export function parseSourceCatalogue(text: string): { rows: CatalogueTrack[]; sk
     const isrc = cell(cells, 'isrc')?.toUpperCase().replace(/[^A-Z0-9]/g, '') ?? null;
     const yearRaw = cell(cells, 'year');
     const year = yearRaw ? Number(yearRaw.match(/\d{4}/)?.[0]) : NaN;
+    const genre = cell(cells, 'genre'), language = cell(cells, 'language');
+    /* Catalogue-stated fields are verified metadata; they outrank anything inferred. */
+    const labels: Label[] = [];
+    if (genre) labels.push({ dimension: 'genre', value: genre, provenance: 'verified', confidence: 'high', basis: 'source catalogue field' });
+    if (language) labels.push({ dimension: 'language', value: language, provenance: 'verified', confidence: 'high', basis: 'source catalogue field' });
     rows.push({ id: `source:${isrc ?? `${rows.length}-${title}-${artist}`.toLowerCase().replace(/[^a-z0-9]+/g, '-').slice(0, 80)}`,
-      origin: 'source-catalogue', title, artist, version: cell(cells, 'version'), isrc: isrc && /^[A-Z]{2}[A-Z0-9]{3}\d{7}$/.test(isrc) ? isrc : isrc,
-      channelSlug: null, channelName: null, videoId: null, publishedAt: null,
-      genre: cell(cells, 'genre'), language: cell(cells, 'language'), releaseYear: Number.isFinite(year) ? year : null,
-      territories: cell(cells, 'territories'), rightsNote: cell(cells, 'rights') });
+      origin: 'source-catalogue', title, artist, version: cell(cells, 'version'), isrc,
+      channelSlug: null, channelName: null, videoId: null, publishedAt: null, views: null, durationSec: null,
+      genre, language, releaseYear: Number.isFinite(year) ? year : null,
+      territories: cell(cells, 'territories'), rightsNote: cell(cells, 'rights'), labels });
   }
   return { rows, skipped, columns: Object.keys(col) };
 }

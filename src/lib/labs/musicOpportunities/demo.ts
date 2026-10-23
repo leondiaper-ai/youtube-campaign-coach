@@ -23,7 +23,7 @@ export function demoObservation(): ChartObservation {
     periodLabel: 'DEMONSTRATION · invented chart entry · not a live finding', sourceUrl: 'https://charts.youtube.com/',
     collectedAt: new Date(0).toISOString(), note: 'Invented chart entry for demonstration. Not a real reading.',
     entries: [{ rank: 42, previousRank: null, isNew: true, periodsOnChart: 1, title: 'What a Friend We Have in Jesus', artists: ['Dolly Parton'],
-      isrc: null, videoId: null, channelId: null, channelTitle: null, measureValue: null }],
+      isrc: null, videoId: null, channelId: null, channelTitle: null, measureValue: null, releaseDate: null }],
   };
 }
 

@@ -1,15 +1,15 @@
 /* ═══════════════════════════════════════════════════════════════════════
-   OPPORTUNITIES — SIGNAL × CATALOGUE × OWNED EVIDENCE
+   DIRECT OPPORTUNITIES — SIGNAL × CATALOGUE × OWNED EVIDENCE
 
-   One opportunity per charted song that has at least an artist-level
-   connection to the catalogue, plus the stage it has reached:
+   One opportunity per charted song or video that has at least an
+   artist-level connection to what we hold, plus the stage it has reached:
 
      monitor              a signal exists; no credible match, or a match
                           that needs a human check first
      act-editorially      a credible match AND a feasible editorial action
      consider-paid-test   verified recording, the signal held across
-                          comparable readings, and we have an owned
-                          baseline to measure against
+                          comparable readings, and the verified upload has
+                          its own owned baseline to measure against
 
    The third stage is a gate, not a recommendation: it means the
    evidence is good enough to write a test hypothesis down, and it
@@ -18,18 +18,14 @@
 
 import type { OwnedSnapshot } from '@/lib/ownedChannels/metrics';
 import type { CatalogueLayer } from './catalogue';
-import { indexCatalogue, matchEntry, normalise, splitArtists } from './match';
+import { indexCatalogue, matchEntry } from './match';
+import { songKey as bankSongKey } from './bank';
 import { MATCH_STRENGTH, type CatalogueMatch, type ChartEntry, type ChartObservation, type Opportunity, type OwnedUploadEvidence, type Stage } from './types';
 
 const DAY = 86400000;
 
-/** A key for "the same song" across readings, in order of reliability. */
-export function songKey(e: ChartEntry): string {
-  if (e.isrc) return `isrc:${e.isrc.toUpperCase()}`;
-  if (e.videoId) return `video:${e.videoId}`;
-  const artist = e.artists.length ? splitArtists(e.artists[0])[0] ?? '' : '';
-  return `text:${normalise(e.title)}|${artist}`;
-}
+/** A key for "the same song" across readings. Shared with the research bank. */
+export const songKey = bankSongKey;
 
 /** Lifetime views for one upload at the latest reading, and a gain against the earliest comparable reading. */
 export function ownedEvidence(videoId: string, history: OwnedSnapshot[]): Pick<OwnedUploadEvidence, 'views' | 'readingAt' | 'gain'> {
@@ -59,7 +55,9 @@ function action(best: CatalogueMatch | undefined, matches: CatalogueMatch[], e: 
         ? { stage: 'act-editorially', action: `Feature the matching recording on ${where}: playlist placement at the top of the relevant playlist and a Short cut from it. Check the charted version against ours before any paid consideration.` }
         : { stage: 'act-editorially', action: `The recording is in the source catalogue but not on an owned channel. Decide which channel fits (by its actual catalogue, not its name), confirm the rights note, then upload with the chart territory in mind.` };
     case 'title-artist':
-      return { stage: 'act-editorially', action: `Confirm "${t.title}" on ${where} is the same recording as the charted "${e.title}"; if so, move it to the front of the channel's playlist and cut a Short from it for ${territory}.` };
+      return t.version
+        ? { stage: 'act-editorially', action: `The charted song is "${e.title}"; we hold a "${t.version}" recording of the same composition on ${where}. Feature that version (front of the relevant playlist, a Short cut from it) for ${territory}; do not describe it as the charted recording.` }
+        : { stage: 'act-editorially', action: `Confirm "${t.title}" on ${where} is the same recording as the charted "${e.title}"; if so, move it to the front of the channel's playlist and cut a Short from it for ${territory}.` };
     case 'title-only':
       return { stage: 'monitor', action: `Check whether "${t.title}" on ${where} is the same song as "${e.title}" (${e.artists.join(', ') || 'artist not supplied'}). Act only if it is the composition; a shared title is not a connection.` };
     case 'artist':
@@ -101,8 +99,11 @@ export function buildOpportunities(observations: ChartObservation[], catalogue: 
       const owned: OwnedUploadEvidence[] = matches.filter(m => m.track.origin === 'owned-upload' && m.track.videoId).slice(0, 4).map(m => {
         const slugDef = catalogue.coverage.find(c => c.slug === m.track.channelSlug);
         const history = slugDef ? catalogue.ownedHistory[slugDef.channelId] ?? [] : [];
+        const ev = ownedEvidence(m.track.videoId!, history);
+        /* No Owned Channels reading for this upload: fall back to the inventory snapshot's lifetime count, dated by that snapshot. A single reading, so no gain. */
+        const fallback = ev.views == null && m.track.views != null ? { views: m.track.views, readingAt: slugDef?.readAt ?? null, gain: null } : ev;
         return { videoId: m.track.videoId!, title: m.track.title, channelSlug: m.track.channelSlug ?? '', channelName: m.track.channelName ?? '',
-          publishedAt: m.track.publishedAt ?? '', matchKind: m.kind, ...ownedEvidence(m.track.videoId!, history) };
+          publishedAt: m.track.publishedAt ?? '', matchKind: m.kind, ...fallback };
       });
       let { stage, action: text } = action(best, matches, e, obs.territory);
       const verified = best.kind === 'exact-upload' || best.kind === 'isrc';
@@ -113,7 +114,6 @@ export function buildOpportunities(observations: ChartObservation[], catalogue: 
       const hasBaseline = owned.some(o => o.gain);
       if (verified && persistence.periods.size >= 2 && verifiedBaseline && stage === 'act-editorially') stage = 'consider-paid-test';
       const unknowns: string[] = [];
-      if (obs.source === 'youtube-data-api') unknowns.push('The Data API "most popular" list publishes no measure, period or previous rank; movement is only visible across our own daily readings.');
       if (!verified) unknowns.push(`${MATCH_STRENGTH[best.kind].caveat}`);
       if (!best.track.rightsNote) unknowns.push('Rights and territory clearance are not recorded for this recording.');
       if (owned.length && !hasBaseline) unknowns.push('No earlier owned reading for the matched upload: lifetime views are a baseline, not growth.');

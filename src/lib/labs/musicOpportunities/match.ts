@@ -117,7 +117,11 @@ export function matchEntry(entry: ChartEntry, index: CatalogueIndex): CatalogueM
     if (seen.has(row.track.id)) continue;
     const titleHit = titles.find(t => row.titleKeys.includes(t));
     const artistHit = artistKeys.find(a => row.artistKeys.includes(a));
-    if (titleHit && artistHit) titleArtist.push({ kind: 'title-artist', track: row.track, evidence: `Title "${titleHit}" and artist "${artistHit}" both match after normalisation.` });
+    if (titleHit && artistHit) {
+      const ours = row.track.version ? ` Our upload is marked "${row.track.version}".` : '';
+      const theirs = entry.title.match(/[[(]([^\])]{2,40})[\])]/)?.[1];
+      titleArtist.push({ kind: 'title-artist', track: row.track, evidence: `Title "${titleHit}" and artist "${artistHit}" both match after normalisation.${ours}${theirs ? ` The charted entry is marked "${theirs}".` : ''}${ours || theirs ? ' Same composition; the recording differs or is unverified.' : ''}` });
+    }
     else if (titleHit) titleOnly.push({ kind: 'title-only', track: row.track, evidence: `Title "${titleHit}" matches; artist credit does not (${entry.artists.join(', ') || 'not supplied by source'}).` });
     else if (artistHit && artistHit.length >= 4) artistOnly.push({ kind: 'artist', track: row.track, evidence: `Artist credit "${artistHit}" matches; a different track.` });
   }

@@ -1,11 +1,13 @@
 import { labsEnabled, sameOrigin } from '@/lib/labs/musicOpportunities/gate';
-import { labsStore, readAllObservations } from '@/lib/labs/musicOpportunities/store';
+import { labsStore, readAllObservations, readHumanLabels } from '@/lib/labs/musicOpportunities/store';
 import { loadCatalogue } from '@/lib/labs/musicOpportunities/catalogue';
 import { buildOpportunities } from '@/lib/labs/musicOpportunities/opportunities';
+import { mergeObservations, seedObservations } from '@/lib/labs/musicOpportunities/sources/youtubeCharts';
 import { recordDecision } from '@/lib/labs/musicOpportunities/decisions';
 import type { Decision, Stage } from '@/lib/labs/musicOpportunities/types';
 
 export const dynamic = 'force-dynamic';
+
 const STAGES: Stage[] = ['monitor', 'act-editorially', 'consider-paid-test'];
 const clip = (v: unknown, n = 600) => typeof v === 'string' ? v.trim().slice(0, n) : '';
 
@@ -20,7 +22,9 @@ export async function POST(req: Request) {
   if (!labsStore()) return Response.json({ error: 'Preview storage is not configured.' }, { status: 503 });
   const body = await req.json().catch(() => null) as { opportunityId?: string; stage?: Stage; actualAction?: string; notes?: string; test?: Record<string, unknown> } | null;
   if (!body?.opportunityId || !body.stage || !STAGES.includes(body.stage)) return Response.json({ error: 'Opportunity and stage are required.' }, { status: 400 });
-  const [observations, catalogue] = await Promise.all([readAllObservations(), loadCatalogue()]);
+  const human = await readHumanLabels().catch(() => []);
+  const [stored, catalogue] = await Promise.all([readAllObservations(), loadCatalogue(human)]);
+  const observations = mergeObservations(seedObservations(), stored);
   const opportunity = buildOpportunities(observations, catalogue).find(o => o.id === body.opportunityId);
   if (!opportunity) return Response.json({ error: 'That opportunity is no longer in the stored evidence.' }, { status: 404 });
   let test: Decision['test'] = null;

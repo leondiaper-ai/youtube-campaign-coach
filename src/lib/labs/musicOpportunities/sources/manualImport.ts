@@ -46,6 +46,7 @@ const COLUMNS: Record<string, RegExp> = {
   value: /^(views|view count|shorts creations|creations|shorts created|value)$/i,
   url: /^(youtube url|url|link|video url)$/i,
   isrc: /^isrc$/i,
+  release: /^(release date|released|release)$/i,
 };
 
 export type ManualImportInput = {
@@ -82,6 +83,7 @@ export function parseManualChart(input: ManualImportInput): { observation: Chart
       isrc: col.isrc != null && cells[col.isrc] ? cells[col.isrc].toUpperCase() : null,
       videoId, channelId: null, channelTitle: null,
       measureValue: col.value != null ? num(cells[col.value]) : null,
+      releaseDate: col.release != null && /^\d{4}(-\d{2}-\d{2})?$/.test(cells[col.release] ?? '') ? cells[col.release] : null,
     });
   }
   if (!entries.length) throw new Error('No chart rows could be read.');
