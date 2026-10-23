@@ -21,6 +21,7 @@ import { resolveRowFormatSplit } from '@/lib/formatSplit';
 import { readFormatDaysBatch } from '@/lib/formatHistory';
 import AddArtistButton from '@/components/AddArtistButton';
 import { AppHeader, PageTitle } from '@/components/ui/AppHeader';
+import { ownedChannelsEnabled } from '@/lib/ownedChannels/gate';
 
 export const revalidate = 600;
 
@@ -37,6 +38,7 @@ export default async function ControlPage({
     | Promise<Record<string, string | string[] | undefined>>;
 }) {
   const market = await getMarketFromRequest(searchParams);
+  const initialView = (await searchParams)?.view === 'market' ? 'market' : 'managed';
   /* Every internal link on this page carries the market. The page resolved it
      and then discarded it, which is the most common way a workspace leaks. */
   const mq = market.id === 'uk' ? '' : `?market=${market.id}`;
@@ -282,7 +284,7 @@ export default async function ControlPage({
         />
 
         {/* Client-side board with toggle */}
-        <ChannelHealthBoard linkSuffix={mq} behaviourBase={`/campaigns${mq}`} rows={rows} topVideos={topVideos} marketFormatStats={marketFormatStats} pinnedSlugs={pinnedSlugs} />
+        <ChannelHealthBoard initialView={initialView} ownedHref={ownedChannelsEnabled() ? `/growth/owned${mq}` : undefined} linkSuffix={mq} behaviourBase={`/campaigns${mq}`} rows={rows} topVideos={topVideos} marketFormatStats={marketFormatStats} pinnedSlugs={pinnedSlugs} />
 
         <div className="mt-14 pt-5 pb-10 border-t border-line flex items-center gap-2 text-micro text-faint">
           <span className="font-semibold text-muted">Channel Health</span>
