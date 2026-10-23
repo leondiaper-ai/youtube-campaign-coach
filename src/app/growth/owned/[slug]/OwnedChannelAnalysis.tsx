@@ -29,6 +29,7 @@ export default function OwnedChannelAnalysis({ analysis, canCollect, readFailed,
   const [view, setView] = useState<'views' | 'gains' | 'newest'>('views');
   const [published, setPublished] = useState<'all' | 'window'>('all');
   const [detail, setDetail] = useState(false);
+  const [showAll, setShowAll] = useState(false);
   const [page, setPage] = useState(0);
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState('');
@@ -67,9 +68,12 @@ export default function OwnedChannelAnalysis({ analysis, canCollect, readFailed,
     if (av == null || bv == null) return av == null ? (bv == null ? a.title.localeCompare(b.title) : 1) : -1;
     return bv - av || a.id.localeCompare(b.id);
   });
-  const pageCount = Math.max(1, Math.ceil(filtered.length / 10));
+  /* Five rows is enough to see what is working; browsing the rest is a
+     deliberate act rather than the default wall of table. */
+  const perPage = showAll ? 10 : 5;
+  const pageCount = Math.max(1, Math.ceil(filtered.length / perPage));
   const safePage = Math.min(page, pageCount - 1);
-  const paged = filtered.slice(safePage * 10, safePage * 10 + 10);
+  const paged = filtered.slice(safePage * perPage, safePage * perPage + perPage);
   const observationNote = (m: typeof viewsMovement) => !m ? 'A second reading is needed' : `${delta(m.value)} over ${m.days.toFixed(1)} recorded days`;
 
   const baselineDays = analysis.baselineAt ? (at - Date.parse(analysis.baselineAt)) / DAY : null;
@@ -140,16 +144,23 @@ export default function OwnedChannelAnalysis({ analysis, canCollect, readFailed,
       </div>
       <div className="inline-flex border border-line rounded-control bg-surface p-1" aria-label="Analysis period">{([7, 30] as const).map(n => <button key={n} type="button" aria-pressed={days === n} onClick={() => { setDays(n); setPage(0); }} className={`text-meta font-semibold px-3 py-1 rounded ${days === n ? 'bg-ink text-white' : 'text-muted hover:text-ink'}`}>{n} days</button>)}</div>
     </div>
-    <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-8">
-      <Metric label="Channel views" value={fmt(row.current?.views)} note={row.current ? 'Lifetime' : 'No reading yet'} />
-      <Metric label="Subscribers" value={fmt(row.current?.subs)} note={row.current ? 'Lifetime · rounded' : 'No reading yet'} />
-      <Metric label="Public videos" value={fmt(library.videoCount ?? (row.current ? library.swept : null))}
-        note={!row.current ? 'No reading yet'
-          : (library.videoCount ?? library.swept) === 0 ? 'No uploads yet'
-          : library.videoCount == null ? `${exact(library.swept)} collected · public count not recorded`
-          : library.swept >= library.videoCount ? `All ${exact(library.videoCount)} collected`
-          : `YouTube's count · ${exact(library.swept)} read`} />
-      <Metric label={`Uploads · ${days}d`} value={row.current ? `${covered ? '' : '≥'}${fmt(windowCount)}` : '—'} note={row.current ? (covered ? 'In this period' : 'Partial coverage') : 'No reading yet'} />
+    <div className="bg-surface border border-line rounded-card shadow-card grid grid-cols-2 sm:grid-cols-4 mb-7 overflow-hidden">
+      {[
+        ['Channel views', fmt(row.current?.views), 'Lifetime'],
+        ['Subscribers', fmt(row.current?.subs), 'Lifetime · rounded'],
+        ['Public videos', fmt(library.videoCount ?? (row.current ? library.swept : null)),
+          !row.current ? 'No reading yet'
+            : (library.videoCount ?? library.swept) === 0 ? 'No uploads yet'
+            : library.videoCount == null ? `${exact(library.swept)} read`
+            : library.swept >= library.videoCount ? 'All read'
+            : `${exact(library.swept)} read`],
+        [`Uploads · ${days}d`, row.current ? `${covered ? '' : '≥'}${fmt(windowCount)}` : '—',
+          !row.current ? 'No reading yet' : covered ? 'In this period' : `Partial · from ${coveredFrom ? date(coveredFrom) : 'mid-period'}`],
+      ].map(([label, value, note], i) => <div key={label} className={`px-4 py-4 ${i ? 'border-l border-line-faint' : ''} ${i > 1 ? 'border-t sm:border-t-0 border-line-faint' : ''}`}>
+        <p className="text-micro font-semibold text-secondary">{label}</p>
+        <p className="text-h3 font-black tabular-nums mt-1">{value}</p>
+        <p className="text-micro text-muted mt-0.5">{note}</p>
+      </div>)}
     </div>
 
     {/* 2 — The working section. Everything else on the page supports it. */}
@@ -220,8 +231,11 @@ export default function OwnedChannelAnalysis({ analysis, canCollect, readFailed,
           : !tableItems.length ? 'No public uploads were recorded for this channel.'
           : <>No uploads match. <button className="underline text-ink" onClick={() => { setSearch(''); setLength('all'); setPage(0); }}>Clear filters</button></>}</div>}
         <div className="px-4 py-3 bg-raised/50 border-t border-line flex flex-wrap justify-between items-center gap-3 text-micro text-muted">
-          <span>{filtered.length ? `${safePage * 10 + 1}–${Math.min((safePage + 1) * 10, filtered.length)} of ${fmt(filtered.length)}` : '0 uploads'}{detail ? ' · Avg / day is lifetime views ÷ age, not recent growth.' : ''}</span>
-          <div className="flex gap-2"><button type="button" disabled={safePage === 0} onClick={() => setPage(safePage - 1)} className="px-2 py-1 border border-line rounded bg-surface disabled:opacity-40">Previous</button><button type="button" disabled={safePage >= pageCount - 1} onClick={() => setPage(safePage + 1)} className="px-2 py-1 border border-line rounded bg-surface disabled:opacity-40">Next</button></div>
+          <span>{filtered.length ? `${safePage * perPage + 1}–${Math.min((safePage + 1) * perPage, filtered.length)} of ${fmt(filtered.length)}` : '0 uploads'}{detail ? ' · Avg / day is lifetime views ÷ age, not recent growth.' : ''}</span>
+          <div className="flex gap-2 items-center">
+            {!showAll && filtered.length > 5 && <button type="button" onClick={() => { setShowAll(true); setPage(0); }} className="px-2 py-1 border border-line rounded bg-surface font-semibold text-ink">Browse all {fmt(filtered.length)}</button>}
+            {showAll && <><button type="button" disabled={safePage === 0} onClick={() => setPage(safePage - 1)} className="px-2 py-1 border border-line rounded bg-surface disabled:opacity-40">Previous</button><button type="button" disabled={safePage >= pageCount - 1} onClick={() => setPage(safePage + 1)} className="px-2 py-1 border border-line rounded bg-surface disabled:opacity-40">Next</button></>}
+          </div>
         </div>
       </div>
     </section>
@@ -233,15 +247,12 @@ export default function OwnedChannelAnalysis({ analysis, canCollect, readFailed,
       <div className="grid gap-3">
         {observations.map(o => <div key={o.id} className="bg-surface border border-line rounded-card shadow-card p-5">
           <p className="text-body font-bold text-ink">{o.headline}</p>
-          <p className="text-meta text-secondary mt-2 leading-relaxed">{o.detail}</p>
-          {o.videos.length > 0 && <div className="flex flex-wrap gap-2 mt-3">
-            {o.videos.map(v => <a key={v.id} href={`https://www.youtube.com/watch?v=${v.id}`} target="_blank" rel="noopener noreferrer"
-              className="flex items-center gap-2 no-underline border border-line rounded-control bg-raised/40 pr-3 hover:border-line-strong group max-w-[280px]">
-              <img src={`https://i.ytimg.com/vi/${v.id}/mqdefault.jpg`} alt="" width={48} height={27} loading="lazy" className="w-12 aspect-video object-cover rounded-l-control bg-raised" />
-              <span className="text-micro text-secondary group-hover:text-ink truncate py-1">{v.title}</span>
-            </a>)}
-          </div>}
-          <p className="text-meta text-muted mt-3 pt-3 border-t border-line-faint leading-relaxed"><strong className="text-secondary">Worth asking:</strong> {o.prompt}</p>
+          <p className="text-meta text-secondary mt-2 leading-relaxed">{o.detail}{o.note ? <span className="text-muted"> {o.note}</span> : null}</p>
+          {o.videos.length > 0 && <p className="text-meta mt-3 leading-relaxed">
+            {o.videos.map((v, i) => <span key={v.id}>{i > 0 ? ' · ' : ''}
+              <a href={`https://www.youtube.com/watch?v=${v.id}`} target="_blank" rel="noopener noreferrer" className="text-electric font-semibold no-underline hover:underline">{v.title.length > 48 ? `${v.title.slice(0, 48)}…` : v.title}</a>
+            </span>)}
+          </p>}
         </div>)}
       </div>
     </section>}
@@ -249,7 +260,30 @@ export default function OwnedChannelAnalysis({ analysis, canCollect, readFailed,
     {/* 4 — Activity. The chart only when it can show a change. */}
     <section className="mb-8" aria-labelledby="activity">
       <h2 id="activity" className="text-h4 font-bold mb-4">Activity</h2>
-      {row.current && library.swept > 0 && <div className="bg-surface border border-line rounded-card shadow-card px-5 py-4 mb-5">
+      <div className="grid gap-5">
+        <Panel title="Publishing rhythm" description={covered ? `Uploads per day over ${days} days` : `Uploads per day · coverage starts ${coveredFrom ? date(coveredFrom) : 'mid-period'}`} action={<span className="text-meta font-bold tabular-nums text-secondary">{row.current ? fmt(windowCount) : '—'}</span>}>
+          {!row.current ? <p className="text-meta text-muted py-6">A first reading will populate the publishing timeline.</p>
+            : windowCount === 0 ? <p className="text-meta text-muted py-6">No uploads published in the last {days} days{coveredFrom && !covered ? `, over the part of the period covered (from ${date(coveredFrom)})` : ''}.</p>
+            : <PublishingChart series={series} />}
+        </Panel>
+      </div>
+      <p className="text-meta text-muted mt-3">{growthPoints >= 2
+        ? <>Channel growth is charted in supporting analysis below.</>
+        : row.current ? <>One reading recorded, {date(asOf)}. Channel growth and per-upload gains need a second reading on another day.</>
+        : <>No readings yet.</>}</p>
+    </section>
+
+    <details className="mt-6 bg-surface border border-line rounded-card px-5 py-4 text-meta text-secondary">
+      <summary className="font-semibold text-ink cursor-pointer">Data coverage and definitions</summary>
+      {growthPoints >= 2 && <div className="mt-4 mb-5">
+        <div className="flex flex-wrap justify-between items-center gap-3">
+          <p className="text-meta font-semibold text-ink">Channel growth across recorded readings</p>
+          <div className="inline-flex gap-1 bg-raised rounded-control p-1">{(['views', 'subs'] as const).map(key => <button type="button" key={key} aria-pressed={metric === key} onClick={() => setMetric(key)} className={`px-2 py-1 rounded text-micro font-semibold ${metric === key ? 'bg-surface text-ink shadow-control' : 'text-muted'}`}>{key === 'views' ? 'Views' : 'Subscribers'}</button>)}</div>
+        </div>
+        <GrowthChart key={`${metric}-${days}`} readings={readings} metric={metric} from={from} to={at} />
+      </div>}
+
+      {row.current && library.swept > 0 && <div className="mb-5">
         <div className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-2">
           <div>
             <p className="text-meta font-semibold text-secondary">Short-form <span className="font-normal text-muted">· 3 minutes or less</span></p>
@@ -266,25 +300,7 @@ export default function OwnedChannelAnalysis({ analysis, canCollect, readFailed,
           <p className="text-micro text-muted mt-3 pt-3 border-t border-line-faint leading-relaxed">Those two medians are not comparable: YouTube counts a Short's view differently from a long-form view, and the groups differ in age. Read each as a description of its own group.</p>}
         {library.unknownDuration > 0 && <p className="text-micro text-muted mt-2">{fmt(library.unknownDuration)} collected upload{library.unknownDuration === 1 ? '' : 's'} had no duration recorded and sit in neither group.</p>}
       </div>}
-      <div className="grid lg:grid-cols-[minmax(0,1.7fr)_minmax(280px,1fr)] gap-5">
-        <Panel title="Publishing rhythm" description={covered ? `Uploads per day over ${days} days` : `Uploads per day · coverage starts ${coveredFrom ? date(coveredFrom) : 'mid-period'}`} action={<span className="text-meta font-bold tabular-nums text-secondary">{row.current ? fmt(windowCount) : '—'}</span>}>
-          {!row.current ? <p className="text-meta text-muted py-6">A first reading will populate the publishing timeline.</p>
-            : windowCount === 0 ? <p className="text-meta text-muted py-6">No uploads published in the last {days} days{coveredFrom && !covered ? `, over the part of the period covered (from ${date(coveredFrom)})` : ''}.</p>
-            : <PublishingChart series={series} />}
-        </Panel>
-        <Panel title="Audience growth" description={growthPoints >= 2 ? 'Channel totals across recorded readings' : 'Needs more readings'}
-          action={growthPoints >= 2 ? <div className="inline-flex gap-1 bg-raised rounded-control p-1">{(['views', 'subs'] as const).map(key => <button type="button" key={key} aria-pressed={metric === key} onClick={() => setMetric(key)} className={`px-2 py-1 rounded text-micro font-semibold ${metric === key ? 'bg-surface text-ink shadow-control' : 'text-muted'}`}>{key === 'views' ? 'Views' : 'Subscribers'}</button>)}</div> : undefined}>
-          {growthPoints >= 2
-            ? <GrowthChart key={`${metric}-${days}`} readings={readings} metric={metric} from={from} to={at} />
-            : <p className="text-meta text-muted py-6">{row.current
-                ? `One reading recorded (${date(asOf)}). A curve needs at least two; refresh on another day to start one.`
-                : 'No readings yet.'}</p>}
-        </Panel>
-      </div>
-    </section>
 
-    <details className="mt-6 bg-surface border border-line rounded-card px-5 py-4 text-meta text-secondary">
-      <summary className="font-semibold text-ink cursor-pointer">Data coverage and definitions</summary>
       <div className="mt-4 mb-5">
         <p className="text-meta font-semibold text-ink mb-1">Where views sit, by length</p>
         <p className="text-micro text-muted mb-3">Uploads published in the last {days} days, grouped by length. Groups differ in age and size, so this compares exposure, not format quality.</p>
