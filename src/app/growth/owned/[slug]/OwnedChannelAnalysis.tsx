@@ -12,6 +12,7 @@ import { GrowthChart, PublishingChart, LengthChart } from './OwnedChannelCharts'
 const fmt = (n: number | null | undefined) => n == null ? '—' : new Intl.NumberFormat('en-GB', { notation: 'compact', maximumFractionDigits: 1 }).format(n);
 const date = (at: string | number) => new Date(at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' });
 const delta = (n: number) => `${n > 0 ? '+' : ''}${fmt(n)}`;
+const exact = (n: number | null | undefined) => n == null ? '—' : new Intl.NumberFormat('en-GB').format(n);
 const share = (n: number | null) => n == null ? '—' : `${n < 0.01 ? '<1' : Math.round(n * 100)}%`;
 const duration = (n: number | null) => n == null ? '—' : `${Math.floor(n / 60)}:${String(n % 60).padStart(2, '0')}`;
 const control = 'border border-line bg-surface rounded-control px-3 py-2 text-body focus-visible:outline-electric';
@@ -144,9 +145,10 @@ export default function OwnedChannelAnalysis({ analysis, canCollect, readFailed,
       <Metric label="Subscribers" value={fmt(row.current?.subs)} note={row.current ? 'Lifetime · rounded' : 'No reading yet'} />
       <Metric label="Public videos" value={fmt(library.videoCount ?? (row.current ? library.swept : null))}
         note={!row.current ? 'No reading yet'
-          : library.videoCount == null ? `${fmt(library.swept)} collected · public count not recorded`
-          : library.swept >= library.videoCount ? `All ${fmt(library.videoCount)} collected`
-          : `YouTube's count · ${fmt(library.swept)} collected`} />
+          : (library.videoCount ?? library.swept) === 0 ? 'No uploads yet'
+          : library.videoCount == null ? `${exact(library.swept)} collected · public count not recorded`
+          : library.swept >= library.videoCount ? `All ${exact(library.videoCount)} collected`
+          : `YouTube's count · ${exact(library.swept)} read`} />
       <Metric label={`Uploads · ${days}d`} value={row.current ? `${covered ? '' : '≥'}${fmt(windowCount)}` : '—'} note={row.current ? (covered ? 'In this period' : 'Partial coverage') : 'No reading yet'} />
     </div>
 
@@ -173,9 +175,12 @@ export default function OwnedChannelAnalysis({ analysis, canCollect, readFailed,
         {hasGains
           ? <>Gains are measured between two readings {baselineDays!.toFixed(1)} days apart{analysis.baselineAt ? ` (baseline ${date(analysis.baselineAt)})` : ''}. That measured period is separate from the publication filter below, which selects uploads by when they were published.</>
           : <>Recent gains need two readings about a week apart and only one is stored, so no gains column is shown. Views below are lifetime totals.</>}
-        {' '}{library.videoCount != null && library.swept < library.videoCount
-          ? <>Covers {fmt(library.swept)} collected uploads of {fmt(library.videoCount)} on the channel.</>
-          : <>Covers all {fmt(library.swept)} collected uploads.</>}
+        {' '}{library.swept === 0 ? <>No uploads yet.</> : <>
+          {library.videoCount != null && library.videoCount > library.swept
+            ? <>Figures cover {exact(library.swept)} uploads read of {exact(library.videoCount)} on the channel.</>
+            : <>Figures cover all {exact(library.swept)} uploads on the channel.</>}
+          {tableItems.length < library.swept && <> The table lists the {exact(currentItems.length)} kept from that read — the most viewed and the most recent.</>}
+        </>}
       </p>
 
       <div className="flex flex-wrap gap-3 mb-3">
@@ -252,7 +257,7 @@ export default function OwnedChannelAnalysis({ analysis, canCollect, readFailed,
           </div>
           <div className="flex flex-wrap gap-x-8 gap-y-2 tabular-nums">
             <span><span className="text-h4 font-black">{fmt(library.shortCount)}</span><span className="text-micro text-muted block">of {fmt(library.swept)} collected · {share(library.shortCount / Math.max(1, library.swept))}</span></span>
-            <span><span className="text-h4 font-black">{fmt(shortInWindow)}</span><span className="text-micro text-muted block">of {fmt(windowItems.length)} held in this {days}d period</span></span>
+            <span><span className="text-h4 font-black">{fmt(shortInWindow)}</span><span className="text-micro text-muted block">of {exact(windowItems.length)} kept uploads published in this {days}d period</span></span>
             <span><span className="text-h4 font-black">{fmt(library.shortMedianViews)}</span><span className="text-micro text-muted block">median, across {fmt(library.shortWithViews)} short uploads</span></span>
             <span><span className="text-h4 font-black">{fmt(library.longMedianViews)}</span><span className="text-micro text-muted block">median, longer uploads</span></span>
           </div>

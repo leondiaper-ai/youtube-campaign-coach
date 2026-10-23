@@ -13,6 +13,8 @@ import type { VideoGain } from './analysis';
 
 const DAY = 86400000;
 const compact = (n: number) => new Intl.NumberFormat('en-GB', { notation: 'compact', maximumFractionDigits: 1 }).format(n);
+/* Counts are stated exactly: "6.6k of 6.6k" reads as a rounding bug. */
+const exact = (n: number) => new Intl.NumberFormat('en-GB').format(n);
 const pct = (n: number) => `${n < 0.01 ? '<1' : Math.round(n * 100)}%`;
 
 export type Observation = {
@@ -84,9 +86,9 @@ export function observeChannel(input: ObservationInput): Observation[] {
         what several uploads "have in common" is nonsense for a sample of
         one. The coverage is stated here once, and nowhere else. */
   if (library.totalViews && library.withViews >= 20 && byViews.length) {
-    const coverage = library.videoCount != null && library.swept < library.videoCount
-      ? `Across ${compact(library.swept)} collected uploads of ${compact(library.videoCount)} on the channel.`
-      : `Across all ${compact(library.swept)} collected uploads.`;
+    const coverage = library.videoCount != null && library.videoCount > library.swept
+      ? `Across ${exact(library.swept)} uploads read of ${exact(library.videoCount)} on the channel.`
+      : `Across all ${exact(library.swept)} uploads on the channel.`;
     if (library.topShare != null && library.topShare >= 0.25) {
       const top = byViews[0];
       found.push({
@@ -149,7 +151,7 @@ export function observeChannel(input: ObservationInput): Observation[] {
     if (library.shortCount === 0 && library.swept >= 30) {
       found.push({
         id: 'no-short-form',
-        headline: `Nothing under three minutes in ${compact(library.swept)} collected uploads`,
+        headline: `Nothing under three minutes in ${exact(library.swept)} uploads read`,
         detail: `Every upload collected runs longer than three minutes, so this channel is not publishing short-form at all.`,
         prompt: `Deliberate, or simply untried? If it is untried, a small batch would at least establish whether the audience is there — the catalogue cannot answer it.`,
         videos: [],
@@ -158,7 +160,7 @@ export function observeChannel(input: ObservationInput): Observation[] {
       found.push({
         id: 'short-form-over-represented',
         headline: `${shortLeaders.length} of the ${leaderSample} most-viewed uploads are under three minutes`,
-        detail: `Short-form is ${pct(shortShare)} of the ${compact(library.swept)} uploads collected but ${pct(shortLeaders.length / leaderSample)} of the leaders. Note that YouTube counts a Short's view differently from a long-form view, so these totals are not like for like.`,
+        detail: `Short-form is ${pct(shortShare)} of the ${exact(library.swept)} uploads read but ${pct(shortLeaders.length / leaderSample)} of the leaders. Note that YouTube counts a Short's view differently from a long-form view, so these totals are not like for like.`,
         prompt: `The counting difference alone could explain this. Comparing short-form against short-form over time, rather than against long-form, would show whether it is really outperforming.`,
         videos: shortLeaders.slice(0, 5),
       });
@@ -166,7 +168,7 @@ export function observeChannel(input: ObservationInput): Observation[] {
       found.push({
         id: 'short-form-absent-from-leaders',
         headline: `Short-form is ${pct(shortShare)} of output but none of the ${leaderSample} most-viewed uploads`,
-        detail: `${compact(library.shortCount)} of ${compact(library.swept)} collected uploads run under three minutes, and none of them reach the leaders.`,
+        detail: `${exact(library.shortCount)} of ${exact(library.swept)} uploads read run under three minutes, and none of them reach the leaders.`,
         prompt: `Worth checking whether these are reaching the Shorts surface at all. Duration is all the public data shows; placement needs channel analytics.`,
         videos: [],
       });
@@ -178,7 +180,7 @@ export function observeChannel(input: ObservationInput): Observation[] {
     found.push({
       id: 'dormant-tail',
       headline: `${pct(library.underTen / library.withViews)} of uploads read have fewer than ten views`,
-      detail: `${compact(library.underTen)} of the ${compact(library.withViews)} uploads read sit under ten views.`,
+      detail: `${exact(library.underTen)} of the ${exact(library.withViews)} uploads read sit under ten views.`,
       prompt: `Worth asking whether this volume is helping discovery or competing with itself. Publishing rate and view rate over the next few readings would show which.`,
       videos: [],
     });
