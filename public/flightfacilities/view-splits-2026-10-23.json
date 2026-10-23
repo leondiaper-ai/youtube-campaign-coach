@@ -1,0 +1,2124 @@
+{
+  "capturedAt": "2026-10-23T12:55:55.900Z",
+  "channel": {
+    "id": "UCvBxvcqGSQkbs1BRafBIYSg",
+    "title": "Flight Facilities",
+    "handle": "@flightfacilities",
+    "subscribers": 307000,
+    "lifetimeViews": 218901844,
+    "publicVideoCount": 300,
+    "publishedAt": "2009-12-22T14:06:38Z"
+  },
+  "retrieved": 300,
+  "capped": false,
+  "shortUploads": 108,
+  "shortViews": 1480201,
+  "longUploads": 192,
+  "longViews": 171823254,
+  "publicUploadViews": 173303455,
+  "shortSharePct": 0.8541093424825258,
+  "longSharePct": 99.14589065751747,
+  "method": "Shorts proxy: duration greater than zero and no more than 62 seconds. Longer uploads are the complement. Not native YouTube format classification; short landscape clips and old teasers can be included; longer native Shorts can be missed. Lifetime views on returned public uploads, not period views. Public-upload sum differs from channel lifetime counter; do not fill the gap with an invented format allocation.",
+  "videos": [
+    {
+      "id": "TcfSRvl3RIo",
+      "title": "Clair de lune with 15000 people",
+      "views": 1073,
+      "durationSec": 29,
+      "shortProxy": true
+    },
+    {
+      "id": "jD9y2QZG7p4",
+      "title": "\ud83c\udde8\ud83c\udde6 has our hearts",
+      "views": 766,
+      "durationSec": 16,
+      "shortProxy": true
+    },
+    {
+      "id": "L9H9Q_r9AKo",
+      "title": "Pacha pacha pacha #housemusic #electronicmusic",
+      "views": 2189,
+      "durationSec": 61,
+      "shortProxy": true
+    },
+    {
+      "id": "PZDTVpzJcjw",
+      "title": "Speaking a foreign language in Britain \ud83c\uddec\ud83c\udde7 #housemusic #summer #festivalvibes",
+      "views": 818,
+      "durationSec": 53,
+      "shortProxy": true
+    },
+    {
+      "id": "TfnY_8hJMuQ",
+      "title": "ID / album sleeper #music #housemusic #vocoder #festival",
+      "views": 1766,
+      "durationSec": 39,
+      "shortProxy": true
+    },
+    {
+      "id": "sWMXjayCL9o",
+      "title": "Flight Facilities - Crave You feat. Giselle (Official Lyric Video)",
+      "views": 75034,
+      "durationSec": 244,
+      "shortProxy": false
+    },
+    {
+      "id": "4E14PDRNEHk",
+      "title": "Flight Facilities - Dope Tool (Oliver Dollar x Busta Rhymes Bootleg)",
+      "views": 34403,
+      "durationSec": 217,
+      "shortProxy": false
+    },
+    {
+      "id": "fdN6JZp2wAc",
+      "title": "Mexico always delivers",
+      "views": 212440,
+      "durationSec": 16,
+      "shortProxy": true
+    },
+    {
+      "id": "olr4CCVpUU0",
+      "title": "here we are now, entertain us",
+      "views": 2082,
+      "durationSec": 29,
+      "shortProxy": true
+    },
+    {
+      "id": "W1IwPUOF-uU",
+      "title": "Knicks in \u270b",
+      "views": 2490,
+      "durationSec": 11,
+      "shortProxy": true
+    },
+    {
+      "id": "rKWczwrRGG8",
+      "title": "It really doesn\u2019t get much better than this feeling \ud83d\udc99\u2764\ufe0f",
+      "views": 6035,
+      "durationSec": 10,
+      "shortProxy": true
+    },
+    {
+      "id": "ecuSqjvJBbo",
+      "title": "Tour ending afterparty for the ages #concert #newyork #groovejet #craveyou",
+      "views": 1592,
+      "durationSec": 49,
+      "shortProxy": true
+    },
+    {
+      "id": "DzjIXYctb0E",
+      "title": "Rehearsed steps on an empty stage #craveyou #concert",
+      "views": 1228,
+      "durationSec": 49,
+      "shortProxy": true
+    },
+    {
+      "id": "P9_5Iw4t_7Y",
+      "title": "Forgot we wrote this song #concert #standstill #craveyou",
+      "views": 1678,
+      "durationSec": 46,
+      "shortProxy": true
+    },
+    {
+      "id": "3wCKuF7YcI8",
+      "title": "One night in New York #knockdown #craveyou #electronicmusic",
+      "views": 77820,
+      "durationSec": 32,
+      "shortProxy": true
+    },
+    {
+      "id": "3sZ8a4hFMzA",
+      "title": "everyone discovering Crave You for the first time... welcome \ud83d\udd4a\ufe0fHere\u2019s where it all started.",
+      "views": 2817,
+      "durationSec": 53,
+      "shortProxy": true
+    },
+    {
+      "id": "tZg27KL7Tc4",
+      "title": "Crave You in Melbourne",
+      "views": 419243,
+      "durationSec": 16,
+      "shortProxy": true
+    },
+    {
+      "id": "Ww_4m26jo8o",
+      "title": "Goosebumps",
+      "views": 71474,
+      "durationSec": 33,
+      "shortProxy": true
+    },
+    {
+      "id": "JLrHVjQIEYU",
+      "title": "13 May 2026",
+      "views": 3013,
+      "durationSec": 17,
+      "shortProxy": true
+    },
+    {
+      "id": "h7d1FsJGFSk",
+      "title": "Crave You in Brisbane",
+      "views": 25475,
+      "durationSec": 24,
+      "shortProxy": true
+    },
+    {
+      "id": "n28po4L8Wn4",
+      "title": "Flight Facilities - Afterthrill (Michael Jackson x Tame Impala Bootleg)",
+      "views": 9125,
+      "durationSec": 225,
+      "shortProxy": false
+    },
+    {
+      "id": "tXss7_aeRM4",
+      "title": "Flight Facilities - Run (Make A Dance Dub)",
+      "views": 3312,
+      "durationSec": 360,
+      "shortProxy": false
+    },
+    {
+      "id": "SZf1r5AskMY",
+      "title": "Flight Facilities - Run (Make A Dance Remix)",
+      "views": 4673,
+      "durationSec": 360,
+      "shortProxy": false
+    },
+    {
+      "id": "Wmysvg5YhGM",
+      "title": "There\u2019s always one \ud83d\udeeb",
+      "views": 3481,
+      "durationSec": 20,
+      "shortProxy": true
+    },
+    {
+      "id": "23zy8l4WzdI",
+      "title": "Flight Facilities | Forever In My Room feat. BROODS",
+      "views": 16478,
+      "durationSec": 206,
+      "shortProxy": false
+    },
+    {
+      "id": "Nw1iX0PvaVs",
+      "title": "Tour packing essentials:",
+      "views": 6208,
+      "durationSec": 13,
+      "shortProxy": true
+    },
+    {
+      "id": "aORVFwOTqQQ",
+      "title": "Based on a true story \ud83d\udc28 #australia",
+      "views": 18025,
+      "durationSec": 58,
+      "shortProxy": true
+    },
+    {
+      "id": "WhYy6pKulgg",
+      "title": "Cut Copy Forever",
+      "views": 2915,
+      "durationSec": 32,
+      "shortProxy": true
+    },
+    {
+      "id": "qeo2NtFQLqo",
+      "title": "5 Hour Decades Set | Live From Sydney - Flight Facilities",
+      "views": 101833,
+      "durationSec": 19350,
+      "shortProxy": false
+    },
+    {
+      "id": "3f0e5j2G7IQ",
+      "title": "Flight Facilities - Down To Earth 10 Year Anniversary Visualiser [Continuous Mix]",
+      "views": 50260,
+      "durationSec": 4060,
+      "shortProxy": false
+    },
+    {
+      "id": "o2TnUO4jI7w",
+      "title": "Can someone let her know? She\u2019s got guestlist for live",
+      "views": 5796,
+      "durationSec": 20,
+      "shortProxy": true
+    },
+    {
+      "id": "ImiDTh4nzwI",
+      "title": "Flight Facilities - Run",
+      "views": 39605,
+      "durationSec": 212,
+      "shortProxy": false
+    },
+    {
+      "id": "c1mqKZfltXE",
+      "title": "Back Aug 16. Sunset to sunrise \ud83c\udf05",
+      "views": 1527,
+      "durationSec": 60,
+      "shortProxy": true
+    },
+    {
+      "id": "vf8-ZkhUe7U",
+      "title": "Flight Facilities - Dancing On My Own feat. DRAMA",
+      "views": 67959,
+      "durationSec": 240,
+      "shortProxy": false
+    },
+    {
+      "id": "CMgt28s7BCw",
+      "title": "One last show in 2024, bringing in 2025 #countdown #lostparadise #festival #dj",
+      "views": 1752,
+      "durationSec": 30,
+      "shortProxy": true
+    },
+    {
+      "id": "TZ0iJJzB0bQ",
+      "title": "Flight Facilities x Everything But The Girl - Forever In My Room (Flight Facilities Edit)",
+      "views": 48356,
+      "durationSec": 265,
+      "shortProxy": false
+    },
+    {
+      "id": "k5IKfUqhhOM",
+      "title": "No Shazam shaming here.. #dj #housemusic",
+      "views": 7140,
+      "durationSec": 17,
+      "shortProxy": true
+    },
+    {
+      "id": "bqO44JJ5UjA",
+      "title": "In honour of \u2019Crave U - sped up [slowed down & reverb version]\u2019",
+      "views": 1036,
+      "durationSec": 30,
+      "shortProxy": true
+    },
+    {
+      "id": "v5iKO5yxZmo",
+      "title": "Jennifer Paige - Crush (Flight Facilities Edit)",
+      "views": 18005,
+      "durationSec": 266,
+      "shortProxy": false
+    },
+    {
+      "id": "LRJ_aEYJuaI",
+      "title": "Higher 004 is live now",
+      "views": 1096,
+      "durationSec": 20,
+      "shortProxy": true
+    },
+    {
+      "id": "OfNFX3zuA40",
+      "title": "Flight Facilities b2b Airwolf Paradise - Live at HIGHER, Bali 2024",
+      "views": 14912,
+      "durationSec": 5880,
+      "shortProxy": false
+    },
+    {
+      "id": "NOzKiq5GTJE",
+      "title": "We made this for our dj sets, now it\u2019s yours \ud83e\udd32\ud83c\udffb #daftpunk x Flight Facilities \ud83e\udd16 \u2708\ufe0f #dj",
+      "views": 5569,
+      "durationSec": 59,
+      "shortProxy": true
+    },
+    {
+      "id": "5NpTk-65OWc",
+      "title": "Flight Facilities x Daft Punk - Foreign Revolution (Flight Facilities Edit)",
+      "views": 373305,
+      "durationSec": 160,
+      "shortProxy": false
+    },
+    {
+      "id": "8uKf6lzPpV4",
+      "title": "Room 5 - Make Luv feat. Oliver Cheatham (Flight Facilities Edit)",
+      "views": 516768,
+      "durationSec": 293,
+      "shortProxy": false
+    },
+    {
+      "id": "PzsjQvkIF_Y",
+      "title": "Flight Facilities - Days Of The Week (DJ Sabrina The Teenage DJ Remix)",
+      "views": 4401,
+      "durationSec": 245,
+      "shortProxy": false
+    },
+    {
+      "id": "VxcIZOknAI8",
+      "title": "Who wants a slice? \ud83c\udf55 #katyperry #dj",
+      "views": 1899,
+      "durationSec": 43,
+      "shortProxy": true
+    },
+    {
+      "id": "yISTkrQX2Cg",
+      "title": "And we\u2019d let her do it again \ud83c\udf55 #katyperry #ibiza",
+      "views": 2350,
+      "durationSec": 31,
+      "shortProxy": true
+    },
+    {
+      "id": "uMqLinOUYsc",
+      "title": "Flight Facilities - Days Of The Week (VXSION Remix)",
+      "views": 8400,
+      "durationSec": 253,
+      "shortProxy": false
+    },
+    {
+      "id": "bkMKU_A264g",
+      "title": "We don't always go b2b but when we do it's with SG Lewis in Bali.",
+      "views": 1434,
+      "durationSec": 38,
+      "shortProxy": true
+    },
+    {
+      "id": "3Jbww702ig4",
+      "title": "No one can harmonise a broken toe like Reggie #reggiewatts #meme",
+      "views": 3437,
+      "durationSec": 10,
+      "shortProxy": true
+    },
+    {
+      "id": "ECuCxTd388c",
+      "title": "This is what the Courtside experience is like at Barclays Center in New York City \ud83c\udfc0 #Nyc #Brooklyn",
+      "views": 3987,
+      "durationSec": 41,
+      "shortProxy": true
+    },
+    {
+      "id": "KZ3xZAKda4w",
+      "title": "f&ck marry kill #out2lunch #goldcoast",
+      "views": 1074,
+      "durationSec": 20,
+      "shortProxy": true
+    },
+    {
+      "id": "iD19cJAm-Eo",
+      "title": "2 many to name #out2lunch #goldcoast",
+      "views": 1067,
+      "durationSec": 13,
+      "shortProxy": true
+    },
+    {
+      "id": "f-zxtQClezg",
+      "title": "Flight Facilities Live at Knockdown Center 2024",
+      "views": 35150,
+      "durationSec": 9896,
+      "shortProxy": false
+    },
+    {
+      "id": "HaSDxp-Bmj8",
+      "title": "#Out2LunchFestival FF News investigates",
+      "views": 1489,
+      "durationSec": 27,
+      "shortProxy": true
+    },
+    {
+      "id": "_FVTAnI2f-U",
+      "title": "It\u2019s a hot girl thing \ud83d\udc85 Days of the week music video out now",
+      "views": 1875,
+      "durationSec": 19,
+      "shortProxy": true
+    },
+    {
+      "id": "VhUFIOyvCXA",
+      "title": "Flight Facilities - Days Of The Week (Official Video)",
+      "views": 45231,
+      "durationSec": 190,
+      "shortProxy": false
+    },
+    {
+      "id": "vjadpIX36w0",
+      "title": "Packed out the Yuma for Weekend 2 Coachella #coachella",
+      "views": 965,
+      "durationSec": 39,
+      "shortProxy": true
+    },
+    {
+      "id": "3Nx34A4_bZM",
+      "title": "Why? #hotel #shorts",
+      "views": 9425,
+      "durationSec": 21,
+      "shortProxy": true
+    },
+    {
+      "id": "XM_P7Ri3O1k",
+      "title": "A couple of Aussies take on chella 10 years later #coachella",
+      "views": 4896,
+      "durationSec": 29,
+      "shortProxy": true
+    },
+    {
+      "id": "S1mtGoXQtug",
+      "title": "Is this sleigh? #slay #runyon",
+      "views": 1221,
+      "durationSec": 61,
+      "shortProxy": true
+    },
+    {
+      "id": "T5THbXHoiwU",
+      "title": "Flight Facilities - Trouble (Chlo\u00e9 Caillet remix)",
+      "views": 9506,
+      "durationSec": 272,
+      "shortProxy": false
+    },
+    {
+      "id": "to2qKj-Z3Qk",
+      "title": "Stop the music and go home #rehearsals #livemusic #daftpunk",
+      "views": 3643,
+      "durationSec": 59,
+      "shortProxy": true
+    },
+    {
+      "id": "FOynXTxQ_Dc",
+      "title": "Graphic design is her passion #electronicmusic",
+      "views": 3614,
+      "durationSec": 8,
+      "shortProxy": true
+    },
+    {
+      "id": "mPeTnhxHKkU",
+      "title": "@DomDolla  have you met our boy Mitch #mitch #btv #newtrack",
+      "views": 921,
+      "durationSec": 56,
+      "shortProxy": true
+    },
+    {
+      "id": "v-g6gz7h1Qc",
+      "title": "From rehearsal to reality \ud83e\udea9 #livemusic",
+      "views": 2152,
+      "durationSec": 25,
+      "shortProxy": true
+    },
+    {
+      "id": "cxaFWjOCuro",
+      "title": "We were bored #livemusic #indiemusic",
+      "views": 2552,
+      "durationSec": 29,
+      "shortProxy": true
+    },
+    {
+      "id": "wwQIHnFIsc0",
+      "title": "I think we found something \ud83d\udc40 #livemusic #indiemusic",
+      "views": 6189,
+      "durationSec": 24,
+      "shortProxy": true
+    },
+    {
+      "id": "Yl2jIot9PbM",
+      "title": "Everybody loves a Lauren #dj #musicfestival",
+      "views": 1246,
+      "durationSec": 30,
+      "shortProxy": true
+    },
+    {
+      "id": "OAFDuRsHZLA",
+      "title": "they guessed wrong then right \u2714\ufe0f #peggygou #dj",
+      "views": 4739,
+      "durationSec": 32,
+      "shortProxy": true
+    },
+    {
+      "id": "lxecEAayvbQ",
+      "title": "Flight Facilities - Trouble",
+      "views": 217498,
+      "durationSec": 201,
+      "shortProxy": false
+    },
+    {
+      "id": "bLaY3pZ1s1Y",
+      "title": "Hail To The Gail #musicfestival #gaillewis",
+      "views": 3090,
+      "durationSec": 22,
+      "shortProxy": true
+    },
+    {
+      "id": "UM2EeyjEjxM",
+      "title": "Future NASA eno managers and current legends; Tyson & Ed #dj #musicfestival",
+      "views": 1152,
+      "durationSec": 39,
+      "shortProxy": true
+    },
+    {
+      "id": "F5hm4Dk73wQ",
+      "title": "Plot Twist: It was our fault. #musicfestival  #dj",
+      "views": 1460,
+      "durationSec": 56,
+      "shortProxy": true
+    },
+    {
+      "id": "z96CjEyFu7A",
+      "title": "Playing our unreleased track to festival punters. 1 was vibing, 1 wasn\u2019t. \ud83c\udfa7 #dj  #festival",
+      "views": 4165,
+      "durationSec": 45,
+      "shortProxy": true
+    },
+    {
+      "id": "Em-_xXve4Pg",
+      "title": "Flight Facilities - The Final Decades Set of 2023 @ Beyond The Valley",
+      "views": 34837,
+      "durationSec": 7117,
+      "shortProxy": false
+    },
+    {
+      "id": "La8O28Q3GdQ",
+      "title": "Best fan submission ever #festival #livemusic",
+      "views": 6970,
+      "durationSec": 14,
+      "shortProxy": true
+    },
+    {
+      "id": "ZpeTVI9ekdA",
+      "title": "Mission Accomplished \u2714\ufe0f #musicfestival #dj",
+      "views": 2055,
+      "durationSec": 14,
+      "shortProxy": true
+    },
+    {
+      "id": "K-f-euXwM8A",
+      "title": "1 year ago we posted this. 500+ dm\u2019s later, here it is #newmusic #DJ #flightfacilities",
+      "views": 4033,
+      "durationSec": 37,
+      "shortProxy": true
+    },
+    {
+      "id": "TCCdgA0yas4",
+      "title": "Flight Facilities - Crave You (FF's NYD Club Edit)",
+      "views": 18258,
+      "durationSec": 332,
+      "shortProxy": false
+    },
+    {
+      "id": "Hnqf2974PrE",
+      "title": "When your mom sneaks into the DJ booth \ud83d\ude02 #dj",
+      "views": 2686,
+      "durationSec": 25,
+      "shortProxy": true
+    },
+    {
+      "id": "TWv__xIeiTI",
+      "title": "Best track of the 2010s? #innerbloom #r\u00fcf\u00fcsdusol",
+      "views": 2387,
+      "durationSec": 47,
+      "shortProxy": true
+    },
+    {
+      "id": "KfPtEdyKaa8",
+      "title": "Flight Facilities Decade Mix: 1962 - 1972",
+      "views": 44616,
+      "durationSec": 3563,
+      "shortProxy": false
+    },
+    {
+      "id": "k3x0cGyqXZA",
+      "title": "When Hugo goes hype man you know it's gonna be a good day\ud83d\ude0d #DJ #fypp #flightfacilities",
+      "views": 1619,
+      "durationSec": 44,
+      "shortProxy": true
+    },
+    {
+      "id": "6P6OgkJIpeo",
+      "title": "Non stop energy at the Decades sets \ud83d\udd25 #djset #shorts #party",
+      "views": 917,
+      "durationSec": 14,
+      "shortProxy": true
+    },
+    {
+      "id": "_eoF2rl8jW4",
+      "title": "Dancing through the Decades \ud83e\udea9 #djset #shorts #party",
+      "views": 3458,
+      "durationSec": 10,
+      "shortProxy": true
+    },
+    {
+      "id": "r2eQvBkcIEU",
+      "title": "Flight Facilities - Clair de Lune (Dixon Remix) [Official Visualizer]",
+      "views": 21129,
+      "durationSec": 415,
+      "shortProxy": false
+    },
+    {
+      "id": "tRrQqqiHYsk",
+      "title": "Steven the security guard holds the keys to a good time #djset",
+      "views": 1250,
+      "durationSec": 26,
+      "shortProxy": true
+    },
+    {
+      "id": "jj0yiUSLfSU",
+      "title": "Hugo\u2019s coming as Britney, what will you do?  #decadesmix #decadestour #britneyspears",
+      "views": 1528,
+      "durationSec": 22,
+      "shortProxy": true
+    },
+    {
+      "id": "BY198O6wtKo",
+      "title": "Hoarding songs with 56kbs internet #podcast #interview",
+      "views": 5946,
+      "durationSec": 25,
+      "shortProxy": true
+    },
+    {
+      "id": "TYNOBIn3fJ4",
+      "title": "70s #decades @YouTube #djset #musicperformance",
+      "views": 1223,
+      "durationSec": 20,
+      "shortProxy": true
+    },
+    {
+      "id": "mD_W68pAysg",
+      "title": "We here @YouTube #djset",
+      "views": 1466,
+      "durationSec": 9,
+      "shortProxy": true
+    },
+    {
+      "id": "nNRQ3lcNoRs",
+      "title": "Unearthing Files From 1998 Napster",
+      "views": 1880,
+      "durationSec": 212,
+      "shortProxy": false
+    },
+    {
+      "id": "eChD_Vp7z3o",
+      "title": "Who The F**K Made This Bootleg Remix?",
+      "views": 1985,
+      "durationSec": 82,
+      "shortProxy": false
+    },
+    {
+      "id": "pcKsISQKA_E",
+      "title": "Droppenheimer - splitting the EDM atom \u269b\ufe0f#decadesmix #Oppenheimer #thepresets",
+      "views": 1792,
+      "durationSec": 26,
+      "shortProxy": true
+    },
+    {
+      "id": "W41Vn6pqlOE",
+      "title": "How We Lost (Then Remade) The Decade Mix",
+      "views": 2564,
+      "durationSec": 204,
+      "shortProxy": false
+    },
+    {
+      "id": "TcMi99nVJjI",
+      "title": "The 2010s was defined by memes #harlemshake",
+      "views": 2281,
+      "durationSec": 30,
+      "shortProxy": true
+    },
+    {
+      "id": "amEh1HdbSNA",
+      "title": "\ud835\ude3e\ud835\ude5d\ud835\ude56\ud835\ude61\ud835\ude60\ud835\ude5a\ud835\ude59 \ud835\ude50\ud835\ude65 #decadesmix #kickons #djset",
+      "views": 2942,
+      "durationSec": 49,
+      "shortProxy": true
+    },
+    {
+      "id": "mCfR13sRcDo",
+      "title": "Fred again.. \ud83e\udd1d Suez Canal \ud83e\udd1d Lauren #decademix #fredagain",
+      "views": 2250,
+      "durationSec": 26,
+      "shortProxy": true
+    },
+    {
+      "id": "t9nbRDpqxOM",
+      "title": "When everyone was an activist in 2012 #kony2012 #decadesmix #thedecadesmix",
+      "views": 4754,
+      "durationSec": 20,
+      "shortProxy": true
+    },
+    {
+      "id": "dCIGA5yBAUg",
+      "title": "When this daredevil fell to earth at 833 miles perhour \ud83c\udf0e  #thedecademix #decadesmix",
+      "views": 1539,
+      "durationSec": 34,
+      "shortProxy": true
+    },
+    {
+      "id": "54a6SjIlJF0",
+      "title": "Flight Facilities Decade Mix: 2012 - 2022 (Official Visualizer)",
+      "views": 408266,
+      "durationSec": 3664,
+      "shortProxy": false
+    },
+    {
+      "id": "JIrvI74cg9s",
+      "title": "Flight Facilities DJ Set @ DoLaB Coachella 2023",
+      "views": 36557,
+      "durationSec": 4184,
+      "shortProxy": false
+    },
+    {
+      "id": "ipxB5lRuT8Q",
+      "title": "Our POV of the madness that was #coachella2023",
+      "views": 1862,
+      "durationSec": 43,
+      "shortProxy": true
+    },
+    {
+      "id": "N1gzhS2qyuk",
+      "title": "East coast laser fatigue, it\u2019s a thing #electronicmusic #dj",
+      "views": 1757,
+      "durationSec": 61,
+      "shortProxy": true
+    },
+    {
+      "id": "NcXP4HHIbmM",
+      "title": "Everything she touches turns to gold #electronicmusic #edm",
+      "views": 24359,
+      "durationSec": 17,
+      "shortProxy": true
+    },
+    {
+      "id": "SVt9hz1RO8w",
+      "title": "Surprise proposal during Clair De Lune. Congrats Sam & Greta \ud83e\udd42\ud83d\udc8d\u2764\ufe0f #ausopen #proposal",
+      "views": 2570,
+      "durationSec": 61,
+      "shortProxy": true
+    },
+    {
+      "id": "xo7GyjDVwr4",
+      "title": "I wanna know if you\u2019ll be my girl #shorts #livemusic #musicfestival",
+      "views": 14028,
+      "durationSec": 58,
+      "shortProxy": true
+    },
+    {
+      "id": "s2FH73Yoo_s",
+      "title": "Always pack your USB.. #flightfacilities #btv22",
+      "views": 2400,
+      "durationSec": 27,
+      "shortProxy": true
+    },
+    {
+      "id": "ts-6KyJUDWY",
+      "title": "Flight Facilities - Live At Airfields, Sydney (Full Concert)",
+      "views": 390381,
+      "durationSec": 3055,
+      "shortProxy": false
+    },
+    {
+      "id": "ctCvKJw_diU",
+      "title": "FOREVER feat. Owl Eyes (Live at Airfields, Sydney)",
+      "views": 56387,
+      "durationSec": 251,
+      "shortProxy": false
+    },
+    {
+      "id": "_LkiyCkpzRg",
+      "title": "West is best!!!",
+      "views": 1869,
+      "durationSec": 12,
+      "shortProxy": true
+    },
+    {
+      "id": "Y416mEzjM1Y",
+      "title": "Flight Facilities - Planet Claire Visualiser (taken from Never Forever Mixtape)",
+      "views": 55373,
+      "durationSec": 254,
+      "shortProxy": false
+    },
+    {
+      "id": "cMOhHaZsMWo",
+      "title": "Flight Facilities - Feel It Visualiser (taken from Never Forever Mixtape)",
+      "views": 55925,
+      "durationSec": 309,
+      "shortProxy": false
+    },
+    {
+      "id": "Fv1W9tdqX_M",
+      "title": "It\u2019s getting close",
+      "views": 1454,
+      "durationSec": 15,
+      "shortProxy": true
+    },
+    {
+      "id": "FVKCXid0xNY",
+      "title": "We flew a drone through our DJ set in Bali last Sunday. #drone",
+      "views": 2423,
+      "durationSec": 45,
+      "shortProxy": true
+    },
+    {
+      "id": "vRy1zjW9Iyw",
+      "title": "From now on, don\u2019t talk to us unless this is how you do lighting. #flightfacilities #edm",
+      "views": 4415,
+      "durationSec": 25,
+      "shortProxy": true
+    },
+    {
+      "id": "ITum87wO8eI",
+      "title": "Toronto on a MONDAY, you really know how to show up \ud83c\udde8\ud83c\udde6  #Toronto #flightfacilities",
+      "views": 2525,
+      "durationSec": 16,
+      "shortProxy": true
+    },
+    {
+      "id": "_mAoPbGBNnY",
+      "title": "Flight Facilities - Foreign Language (Riva Starr Turbo Disco Remix) | Official Audio",
+      "views": 23186,
+      "durationSec": 187,
+      "shortProxy": false
+    },
+    {
+      "id": "nuoU2MSNDy0",
+      "title": "Flight Facilities - Foreign Language feat. Owl Eyes (Live at Airfields, Sydney)",
+      "views": 36529,
+      "durationSec": 301,
+      "shortProxy": false
+    },
+    {
+      "id": "ic8dpdDeqoo",
+      "title": "Airfields - Turbulence At Takeoff",
+      "views": 6782,
+      "durationSec": 204,
+      "shortProxy": false
+    },
+    {
+      "id": "umjpARI1ZrI",
+      "title": "Forever (feat. BROODS) [Pot\u00e9 Remix] - Flight Facilities l Official Audio",
+      "views": 14694,
+      "durationSec": 247,
+      "shortProxy": false
+    },
+    {
+      "id": "ZzN0g4qQM84",
+      "title": "Flight Facilities - Forever feat. BROODS (Roosevelt Remix)",
+      "views": 117069,
+      "durationSec": 272,
+      "shortProxy": false
+    },
+    {
+      "id": "7ASHO7VhwVs",
+      "title": "Australia, we\u2018ve spent the last month working on our biggest tour ever. This one will be v special",
+      "views": 3309,
+      "durationSec": 40,
+      "shortProxy": true
+    },
+    {
+      "id": "nvbIT73a43w",
+      "title": "Flight Facilities - Heavy feat. Your Smith (Harvey M Remix)",
+      "views": 29414,
+      "durationSec": 202,
+      "shortProxy": false
+    },
+    {
+      "id": "t88yfXI8R34",
+      "title": "Flight Facilities - Heavy feat. Your Smith (CC:DISCO! DUB)",
+      "views": 10540,
+      "durationSec": 300,
+      "shortProxy": false
+    },
+    {
+      "id": "SNL49jbEcNc",
+      "title": "Flight Facilities - Heavy feat. Your Smith (Folamour Remix)",
+      "views": 62566,
+      "durationSec": 277,
+      "shortProxy": false
+    },
+    {
+      "id": "Hi1imtehyH4",
+      "title": "Flight Facilities - Move feat DRAMA [Official Audio]",
+      "views": 32483,
+      "durationSec": 264,
+      "shortProxy": false
+    },
+    {
+      "id": "pXDcmxVcWJo",
+      "title": "Flight Facilities - Pain feat. Jordy Felix [Official Audio]",
+      "views": 60973,
+      "durationSec": 319,
+      "shortProxy": false
+    },
+    {
+      "id": "A8s6etmFMIQ",
+      "title": "Flight Facilities - If Only feat. Emma Louise [Official Audio]",
+      "views": 48004,
+      "durationSec": 354,
+      "shortProxy": false
+    },
+    {
+      "id": "Y40-si3w3m4",
+      "title": "Flight Facilities - Wait & See feat. BRUX [Official Audio]",
+      "views": 91062,
+      "durationSec": 373,
+      "shortProxy": false
+    },
+    {
+      "id": "JxXPBzXKYok",
+      "title": "Flight Facilities - Stay feat. Your Smith [Official Audio]",
+      "views": 80813,
+      "durationSec": 227,
+      "shortProxy": false
+    },
+    {
+      "id": "6-G-0ypYiMA",
+      "title": "Flight Facilities - What I Want feat. BROODS [Official Audio]",
+      "views": 79839,
+      "durationSec": 212,
+      "shortProxy": false
+    },
+    {
+      "id": "wOINULMARPs",
+      "title": "Flight Facilities - Altitude [Official Audio]",
+      "views": 34002,
+      "durationSec": 258,
+      "shortProxy": false
+    },
+    {
+      "id": "cQl_eV3pP3E",
+      "title": "Flight Facilities - Heavy feat. Your Smith (Official Video)",
+      "views": 426125,
+      "durationSec": 222,
+      "shortProxy": false
+    },
+    {
+      "id": "AGftihWRCEg",
+      "title": "Flight Facilities - Heavy (feat. Your Smith) [Official Audio]",
+      "views": 102139,
+      "durationSec": 203,
+      "shortProxy": false
+    },
+    {
+      "id": "1cPFeEgtZA0",
+      "title": "Flight Facilities - Forever Tour",
+      "views": 5876,
+      "durationSec": 45,
+      "shortProxy": true
+    },
+    {
+      "id": "LbDprMno3bo",
+      "title": "Flight Facilities - Forever feat. BROODS (Official Video)",
+      "views": 455120,
+      "durationSec": 225,
+      "shortProxy": false
+    },
+    {
+      "id": "LmN1gSilTHM",
+      "title": "Flight Facilities - FOREVER (feat. BROODS) [Official Audio]",
+      "views": 91246,
+      "durationSec": 229,
+      "shortProxy": false
+    },
+    {
+      "id": "wz0xD_b8V3I",
+      "title": "Flight Facilities Presents: FOREVER",
+      "views": 20953,
+      "durationSec": 61,
+      "shortProxy": true
+    },
+    {
+      "id": "8wzXcjhi7xA",
+      "title": "FOREVER",
+      "views": 2561,
+      "durationSec": 14,
+      "shortProxy": true
+    },
+    {
+      "id": "RBDPWLRrbgI",
+      "title": "Flight Facilities - Move feat. DRAMA (Loods Remix) [Official Audio]",
+      "views": 29340,
+      "durationSec": 364,
+      "shortProxy": false
+    },
+    {
+      "id": "O3v2K8Ofo0o",
+      "title": "Flight Facilities - Move feat. DRAMA (kryptogram Remix) [Official Audio]",
+      "views": 11290,
+      "durationSec": 276,
+      "shortProxy": false
+    },
+    {
+      "id": "7yuy65JPprM",
+      "title": "Flight Facilities - Move feat. DRAMA (Official Audio)",
+      "views": 190248,
+      "durationSec": 227,
+      "shortProxy": false
+    },
+    {
+      "id": "5atq1TwhvFk",
+      "title": "Flight Facilities - Move feat. DRAMA (Never Forever Clip)",
+      "views": 67056,
+      "durationSec": 116,
+      "shortProxy": false
+    },
+    {
+      "id": "o2bYA60g1vs",
+      "title": "Flight Facilities - NEVER FOREVER | Behind The Scenes",
+      "views": 3019,
+      "durationSec": 60,
+      "shortProxy": true
+    },
+    {
+      "id": "f-roWvCuCZ4",
+      "title": "Flight Facilities - Lights Up feat. Channel Tres (Mousse T.'s Dutty Club mix)",
+      "views": 17084,
+      "durationSec": 378,
+      "shortProxy": false
+    },
+    {
+      "id": "C5a1UMthBbE",
+      "title": "Flight Facilities - Lights Up feat. Channel Tres (Mousse T.'s Boogie Shizzle Remix)",
+      "views": 8983,
+      "durationSec": 190,
+      "shortProxy": false
+    },
+    {
+      "id": "IFyMQRuh8qk",
+      "title": "Flight Facilities - Lights Up feat. Channel Tres (Honey Dijon Remix)",
+      "views": 7728,
+      "durationSec": 222,
+      "shortProxy": false
+    },
+    {
+      "id": "1QbeYSaxGe4",
+      "title": "Flight Facilities - The Ghost (ABSOLUTE. Remix) [Official Visualizer]",
+      "views": 9124,
+      "durationSec": 421,
+      "shortProxy": false
+    },
+    {
+      "id": "1NADgbEnsec",
+      "title": "Flight Facilities - The Ghost (Gerd Janson Dance Mix) [Official Visualizer]",
+      "views": 14449,
+      "durationSec": 426,
+      "shortProxy": false
+    },
+    {
+      "id": "2s6L2Xdcr1U",
+      "title": "Flight Facilities - Lights Up feat. Channel Tres (Myd Remix) [Official Audio]",
+      "views": 29744,
+      "durationSec": 216,
+      "shortProxy": false
+    },
+    {
+      "id": "Pzo6oU9ugDE",
+      "title": "Flight Facilities - The Ghost (Official Video)",
+      "views": 98714,
+      "durationSec": 243,
+      "shortProxy": false
+    },
+    {
+      "id": "dVc2iQ_UxRo",
+      "title": "Flight Facilities - NEVER FOREVER",
+      "views": 12585,
+      "durationSec": 31,
+      "shortProxy": true
+    },
+    {
+      "id": "fEl6Onr4VKg",
+      "title": "Flight Facilities - Lights Up feat. Channel Tres (Official Video)",
+      "views": 301928,
+      "durationSec": 193,
+      "shortProxy": false
+    },
+    {
+      "id": "Fc08NJ2W7-I",
+      "title": "Flight Facilities - Lights Up feat. Channel Tres (Official Audio)",
+      "views": 322828,
+      "durationSec": 192,
+      "shortProxy": false
+    },
+    {
+      "id": "lr32Es4K5w0",
+      "title": "Flight Deck: The Flight Facilities Music App.",
+      "views": 9980,
+      "durationSec": 38,
+      "shortProxy": true
+    },
+    {
+      "id": "bp6lGT70TWk",
+      "title": "Flight Facilities Decade Mix: 1962 - 1972 - Coming Soon",
+      "views": 11216,
+      "durationSec": 61,
+      "shortProxy": true
+    },
+    {
+      "id": "qBcXicSieLQ",
+      "title": "Flight Facilities - Crave You feat. Giselle (Hush Hush Bootleg)",
+      "views": 302951,
+      "durationSec": 342,
+      "shortProxy": false
+    },
+    {
+      "id": "jntQd7U0aSk",
+      "title": "Flight Facilities Forgotten Summer Mix",
+      "views": 332338,
+      "durationSec": 4873,
+      "shortProxy": false
+    },
+    {
+      "id": "h1vPvIAbmRo",
+      "title": "Flight Facilities DJ set @ ReConnect | Beatport Live",
+      "views": 63391,
+      "durationSec": 3596,
+      "shortProxy": false
+    },
+    {
+      "id": "mym6ApO1IBw",
+      "title": "10 years of Crave you",
+      "views": 10902,
+      "durationSec": 61,
+      "shortProxy": true
+    },
+    {
+      "id": "dhHYSKPDSpM",
+      "title": "Flight Facilities journey through the Grapevines",
+      "views": 9286,
+      "durationSec": 154,
+      "shortProxy": false
+    },
+    {
+      "id": "zBJBV5hmgAk",
+      "title": "The making-of Better Than Ever in South Africa",
+      "views": 2910,
+      "durationSec": 200,
+      "shortProxy": false
+    },
+    {
+      "id": "HyTtyhwRG5w",
+      "title": "In the studio with Flight Facilities and Aloe Blacc for Better Than Ever",
+      "views": 2785,
+      "durationSec": 133,
+      "shortProxy": false
+    },
+    {
+      "id": "xKDudLRncWA",
+      "title": "Flight Facilities - Better Than Ever feat. Aloe Blacc (Official Video)",
+      "views": 487442,
+      "durationSec": 203,
+      "shortProxy": false
+    },
+    {
+      "id": "mi_YD0CRQqY",
+      "title": "Flight Facilities Live... next flight departing to?",
+      "views": 5720,
+      "durationSec": 60,
+      "shortProxy": true
+    },
+    {
+      "id": "hgFlaR_KmAE",
+      "title": "Flight Facilities: Paris Social Club 70's DJ Set (2010)",
+      "views": 55739,
+      "durationSec": 5109,
+      "shortProxy": false
+    },
+    {
+      "id": "G_ZatyBOtAk",
+      "title": "All Your Love feat. Dustin Tebbutt (Morgan Page Remix)",
+      "views": 43338,
+      "durationSec": 214,
+      "shortProxy": false
+    },
+    {
+      "id": "LDWIL2gxB4E",
+      "title": "Flight Facilities - All Your Love feat. Dustin Tebbutt (Joakim Paradise Remix)",
+      "views": 13180,
+      "durationSec": 452,
+      "shortProxy": false
+    },
+    {
+      "id": "W5C_nfjpdsk",
+      "title": "All Your Love ft. Dustin Tebbutt [LIVE]",
+      "views": 12731,
+      "durationSec": 116,
+      "shortProxy": false
+    },
+    {
+      "id": "SVw6wF2RDWk",
+      "title": "Flight Facilities - All Your Love Australia Tour",
+      "views": 9336,
+      "durationSec": 61,
+      "shortProxy": true
+    },
+    {
+      "id": "DMNmG0IPSK0",
+      "title": "Flight Facilities - All Your Love feat. Dustin Tebbutt (Official Audio)",
+      "views": 1460916,
+      "durationSec": 286,
+      "shortProxy": false
+    },
+    {
+      "id": "e6HyZmczW3k",
+      "title": "Flight Facilities \u2014\u00a0Need You feat. N\u00cfKA (Official)",
+      "views": 3419036,
+      "durationSec": 201,
+      "shortProxy": false
+    },
+    {
+      "id": "O5N3_fBeQHc",
+      "title": "Flight Facilities 'The Return Flight'",
+      "views": 32879,
+      "durationSec": 91,
+      "shortProxy": false
+    },
+    {
+      "id": "mJn-frdL600",
+      "title": "Flight Facilities - Stranded feat. Broods, Reggie Watts & Saro (LNTG Remix)",
+      "views": 161023,
+      "durationSec": 429,
+      "shortProxy": false
+    },
+    {
+      "id": "i-ktB4wQe-M",
+      "title": "Flight Facilities - Stranded feat. Broods, Reggie Watts & Saro (Official Video)",
+      "views": 1127863,
+      "durationSec": 358,
+      "shortProxy": false
+    },
+    {
+      "id": "quk_OafvKGM",
+      "title": "Flight Facilities - Arty Boy (Ninajirachi Remix)",
+      "views": 43677,
+      "durationSec": 228,
+      "shortProxy": false
+    },
+    {
+      "id": "1Y3wQpA_8Vo",
+      "title": "Flight Facilites - Arty Boy (Set Mo Remix)",
+      "views": 21776,
+      "durationSec": 382,
+      "shortProxy": false
+    },
+    {
+      "id": "O-WN9PDxYdk",
+      "title": "Flight Facilties - Arty Boy with Emma Louise (Tennyson Remix)",
+      "views": 61070,
+      "durationSec": 144,
+      "shortProxy": false
+    },
+    {
+      "id": "8xZVyw0yayE",
+      "title": "Flight Facilities - Arty Boy (Dom Dolla (P)Arty Boy Remix)",
+      "views": 142369,
+      "durationSec": 309,
+      "shortProxy": false
+    },
+    {
+      "id": "4phM-sNFgGw",
+      "title": "Flight Facilities - Arty Boy (Manila Killa Remix)",
+      "views": 26047,
+      "durationSec": 190,
+      "shortProxy": false
+    },
+    {
+      "id": "cjp7091IYn0",
+      "title": "Flight Facilities - Arty Boy (Swindail remix)",
+      "views": 18173,
+      "durationSec": 301,
+      "shortProxy": false
+    },
+    {
+      "id": "VpZncTycTdo",
+      "title": "Flight Facilities - Arty Boy (Jarreau Vandal remix)",
+      "views": 15635,
+      "durationSec": 225,
+      "shortProxy": false
+    },
+    {
+      "id": "4iEB8vZQIDc",
+      "title": "Flight Facilities - Arty Boy (Joe Goddard Remix)",
+      "views": 41337,
+      "durationSec": 366,
+      "shortProxy": false
+    },
+    {
+      "id": "kNJFG6zQBlo",
+      "title": "Flight Facilities - Arty Boy with Emma Louise (Official)",
+      "views": 839980,
+      "durationSec": 329,
+      "shortProxy": false
+    },
+    {
+      "id": "CWk-RJbXHgY",
+      "title": "2016: In Retrospect",
+      "views": 16396,
+      "durationSec": 278,
+      "shortProxy": false
+    },
+    {
+      "id": "ySspS4iOwMM",
+      "title": "The C90s - Shine A Light (Flight Facilities live remix with MSO)",
+      "views": 607523,
+      "durationSec": 425,
+      "shortProxy": false
+    },
+    {
+      "id": "Lnd-x85DG-s",
+      "title": "Flight Facilities - The North American Equinox Tour",
+      "views": 9299,
+      "durationSec": 90,
+      "shortProxy": false
+    },
+    {
+      "id": "o2GX99WXHvM",
+      "title": "Flight Facilities - Apollo (Willy Wonka Edit)",
+      "views": 110269,
+      "durationSec": 248,
+      "shortProxy": false
+    },
+    {
+      "id": "TD1kbnnHIdU",
+      "title": "Flight Facilities \u2013 Crave You feat. Owl Eyes [Live with the MSO]",
+      "views": 54283,
+      "durationSec": 361,
+      "shortProxy": false
+    },
+    {
+      "id": "rEj6gO3WWKE",
+      "title": "Flight Facilities \u2013 Merimbula [Live with the MSO]",
+      "views": 26392,
+      "durationSec": 243,
+      "shortProxy": false
+    },
+    {
+      "id": "Iau-Z-C060k",
+      "title": "Flight Facilities \u2013 I Didn\u2019t Believe feat. Owl Eyes [Live with the MSO]",
+      "views": 35738,
+      "durationSec": 214,
+      "shortProxy": false
+    },
+    {
+      "id": "82GhSTIzPUk",
+      "title": "The Lowbrows \u2013 Dream In The Desert [Flight Facilities Remix with the MSO]",
+      "views": 50385,
+      "durationSec": 476,
+      "shortProxy": false
+    },
+    {
+      "id": "WCd5fsa4edw",
+      "title": "Flight Facilities \u2013 With You feat Kurt Kristen [Live with the MSO]",
+      "views": 61317,
+      "durationSec": 292,
+      "shortProxy": false
+    },
+    {
+      "id": "7OndR0HMMU8",
+      "title": "Flight Facilities \u2013 Waking Bliss feat. Owl Eyes [Live with the MSO]",
+      "views": 42944,
+      "durationSec": 251,
+      "shortProxy": false
+    },
+    {
+      "id": "BhF820zausk",
+      "title": "Flight Facilities \u2013 Foreign Language feat. George Maple [Live with the MSO]",
+      "views": 52415,
+      "durationSec": 240,
+      "shortProxy": false
+    },
+    {
+      "id": "bgXoBGTrMfA",
+      "title": "James Curd \u2013 Got To Have (Flight Facilities Remix live with MSO)",
+      "views": 73963,
+      "durationSec": 522,
+      "shortProxy": false
+    },
+    {
+      "id": "Y7wYG1anmMQ",
+      "title": "Flight Facilities \u2013 Apollo feat. Katie Noonan [Live with the MSO]",
+      "views": 68538,
+      "durationSec": 284,
+      "shortProxy": false
+    },
+    {
+      "id": "Rf8McIXH-3A",
+      "title": "Flight Facilities x Sydney Symphony Orchestra",
+      "views": 8461,
+      "durationSec": 41,
+      "shortProxy": true
+    },
+    {
+      "id": "y8Ndi955iuY",
+      "title": "Flight Facilities - Clair De Lune with Owl Eyes & the MSO",
+      "views": 937065,
+      "durationSec": 501,
+      "shortProxy": false
+    },
+    {
+      "id": "3jJt288zWDY",
+      "title": "Flight Facilities Decade Mix: 2002 - 2012",
+      "views": 430663,
+      "durationSec": 3658,
+      "shortProxy": false
+    },
+    {
+      "id": "Qta8W5P26sI",
+      "title": "Flight Facilities Decade Mix: 1992 - 2002",
+      "views": 386873,
+      "durationSec": 3650,
+      "shortProxy": false
+    },
+    {
+      "id": "2p4fyCtQf7Q",
+      "title": "Flight Facilities Decade Mix: 1982 - 1992",
+      "views": 524834,
+      "durationSec": 3608,
+      "shortProxy": false
+    },
+    {
+      "id": "YPg37aYz7tM",
+      "title": "Flight Facilities Decade Mix: 1972-1982",
+      "views": 591962,
+      "durationSec": 3644,
+      "shortProxy": false
+    },
+    {
+      "id": "TXqPKUFJJ7I",
+      "title": "Flight Facilities Live at Beyond The Valley - NYE 2015/16",
+      "views": 8373,
+      "durationSec": 61,
+      "shortProxy": true
+    },
+    {
+      "id": "Iox02E-kyP4",
+      "title": "Flight Facilities - Sunshine feat. Reggie Watts [Live with the Melbourne Symphony Orchestra]",
+      "views": 299670,
+      "durationSec": 301,
+      "shortProxy": false
+    },
+    {
+      "id": "BWUwgWgrB4Q",
+      "title": "Flight Facilities - Crave You featuring Owl Eyes Live at the ARIAs 2015",
+      "views": 193843,
+      "durationSec": 225,
+      "shortProxy": false
+    },
+    {
+      "id": "7Ngmlk-EKEM",
+      "title": "European Airspace Tour 2015",
+      "views": 4756,
+      "durationSec": 31,
+      "shortProxy": true
+    },
+    {
+      "id": "GZtVityNUms",
+      "title": "Sam Rockwell chats 'Down To Earth' music video",
+      "views": 24834,
+      "durationSec": 73,
+      "shortProxy": false
+    },
+    {
+      "id": "IH5L4qTVsTk",
+      "title": "Flight Facilities - Down To Earth feat. Sam Rockwell",
+      "views": 4507550,
+      "durationSec": 252,
+      "shortProxy": false
+    },
+    {
+      "id": "3UTvsyCeyQ4",
+      "title": "Down to Earth / Coming Soon",
+      "views": 13987,
+      "durationSec": 15,
+      "shortProxy": true
+    },
+    {
+      "id": "WD-6X_QD0lE",
+      "title": "Flight Facilities - Stand Still (feat. Micky Green)",
+      "views": 810144,
+      "durationSec": 262,
+      "shortProxy": false
+    },
+    {
+      "id": "lKlBTmylvqY",
+      "title": "Flight Facilities - Clair De Lune (feat. Christine Hoberg)",
+      "views": 2076239,
+      "durationSec": 460,
+      "shortProxy": false
+    },
+    {
+      "id": "G5eVBnOY-mI",
+      "title": "Flight Facilities - Sunshine (feat. Reggie Watts)",
+      "views": 476073,
+      "durationSec": 266,
+      "shortProxy": false
+    },
+    {
+      "id": "90luQzm_Pdo",
+      "title": "Flight Facilities - Merimbula",
+      "views": 723284,
+      "durationSec": 391,
+      "shortProxy": false
+    },
+    {
+      "id": "PO6NiAUbZP4",
+      "title": "Flight Facilities - Down To Earth",
+      "views": 888506,
+      "durationSec": 271,
+      "shortProxy": false
+    },
+    {
+      "id": "Q7kKg_gHyx0",
+      "title": "Flight Facilities - Waking Bliss",
+      "views": 663616,
+      "durationSec": 241,
+      "shortProxy": false
+    },
+    {
+      "id": "SJnJANr30SM",
+      "title": "Flight Facilities - Hold Me Down (feat. Stee Downes)",
+      "views": 568575,
+      "durationSec": 284,
+      "shortProxy": false
+    },
+    {
+      "id": "YkugcUqGDYQ",
+      "title": "Flight Facilities - Apollo",
+      "views": 757275,
+      "durationSec": 232,
+      "shortProxy": false
+    },
+    {
+      "id": "zFaUOHe2UDY",
+      "title": "Flight Facilities - Heart Attack (feat. Owl Eyes)",
+      "views": 1853220,
+      "durationSec": 389,
+      "shortProxy": false
+    },
+    {
+      "id": "HBK9TejcZZk",
+      "title": "Flight Facilities - Why Do You Feel (feat. Bishop Nehru)",
+      "views": 740194,
+      "durationSec": 247,
+      "shortProxy": false
+    },
+    {
+      "id": "UGDqolmIhF8",
+      "title": "Flight Facilities - Two Bodies (feat. Emma Louise)",
+      "views": 2859733,
+      "durationSec": 370,
+      "shortProxy": false
+    },
+    {
+      "id": "PO0rHyLZKCg",
+      "title": "Intro",
+      "views": 467808,
+      "durationSec": 111,
+      "shortProxy": false
+    },
+    {
+      "id": "zXUWso_uZ64",
+      "title": "Flight Facilities - Sunshine feat. Reggie Watts (Official)",
+      "views": 3141733,
+      "durationSec": 355,
+      "shortProxy": false
+    },
+    {
+      "id": "diXJGGkmgCw",
+      "title": "Flight Facilities - Sunshine feat. Reggie Watts (TRAILER)",
+      "views": 53574,
+      "durationSec": 39,
+      "shortProxy": true
+    },
+    {
+      "id": "ZX8Ycvj0MHk",
+      "title": "Flight Facilities - Crave You [Reprise] feat. Kylie Minogue",
+      "views": 382002,
+      "durationSec": 86,
+      "shortProxy": false
+    },
+    {
+      "id": "WmUvFMJpLZU",
+      "title": "Flight Facilities - Two Bodies feat. Emma Louise (Official Video)",
+      "views": 1032654,
+      "durationSec": 268,
+      "shortProxy": false
+    },
+    {
+      "id": "eLcEvKEd5nM",
+      "title": "Flight Facilities - Down To Earth (The Album)",
+      "views": 82802,
+      "durationSec": 98,
+      "shortProxy": false
+    },
+    {
+      "id": "oCdqiazsktw",
+      "title": "The Dublin Thong",
+      "views": 17705,
+      "durationSec": 8,
+      "shortProxy": true
+    },
+    {
+      "id": "hDTOa1hAVng",
+      "title": "Flight Facilities - Stand Still Tour 2014",
+      "views": 37783,
+      "durationSec": 91,
+      "shortProxy": false
+    },
+    {
+      "id": "oaIoTmn29Gc",
+      "title": "Flight Facilities - Stand Still feat. Micky Green (Wave Racer Remix)",
+      "views": 401732,
+      "durationSec": 179,
+      "shortProxy": false
+    },
+    {
+      "id": "oUuOMqJQ3JU",
+      "title": "Flight Facilities - Stand Still feat. Micky Green (Com Truise Remix)",
+      "views": 78199,
+      "durationSec": 310,
+      "shortProxy": false
+    },
+    {
+      "id": "Bs4J8-TsqTg",
+      "title": "Flight Facilities - Stand Still feat. Micky Green (Mario Basanov Remix)",
+      "views": 1098550,
+      "durationSec": 468,
+      "shortProxy": false
+    },
+    {
+      "id": "GgJ-pSmC6Eg",
+      "title": "Flight Facilities - Stand Still feat. Micky Green",
+      "views": 5306621,
+      "durationSec": 336,
+      "shortProxy": false
+    },
+    {
+      "id": "8PSZYX4YAsQ",
+      "title": "Flight Facilities - Clair De Lune (Crazy P Remix)",
+      "views": 32470,
+      "durationSec": 419,
+      "shortProxy": false
+    },
+    {
+      "id": "a-VJW5_guUY",
+      "title": "Flight Facilities - Clair De Lune feat. Christine Hoberg (Prins Thomas Diskomiks)",
+      "views": 38752,
+      "durationSec": 463,
+      "shortProxy": false
+    },
+    {
+      "id": "jWWjQqGn4eg",
+      "title": "Flight Facilities - Clair De Lune feat. Christine Hoberg (Them Jeans Edit)",
+      "views": 197077,
+      "durationSec": 320,
+      "shortProxy": false
+    },
+    {
+      "id": "F8VEF8sDPS0",
+      "title": "Jagwar Ma - Come Save Me (Flight Facilities Graceland Remix)",
+      "views": 52077,
+      "durationSec": 343,
+      "shortProxy": false
+    },
+    {
+      "id": "CrLRzxYq4Z8",
+      "title": "Fleetwood Mac - Family Man (Flight Facilities Edit)",
+      "views": 46874,
+      "durationSec": 407,
+      "shortProxy": false
+    },
+    {
+      "id": "-kMjUj7_w8Y",
+      "title": "Flight Facilities - I Didn't Believe feat. Elizabeth Rose (Light Year Remix)",
+      "views": 17262,
+      "durationSec": 321,
+      "shortProxy": false
+    },
+    {
+      "id": "bQnCCOc6UzE",
+      "title": "Flight Facilities - I Didn't Believe feat. Elizabeth Rose (Lou Teti Remix)",
+      "views": 63950,
+      "durationSec": 418,
+      "shortProxy": false
+    },
+    {
+      "id": "EsF9xE09aIM",
+      "title": "Flight Facilities - I Didn't Believe feat. Elizabeth Rose (Tiger & Woods Remix)",
+      "views": 46052,
+      "durationSec": 396,
+      "shortProxy": false
+    },
+    {
+      "id": "FdsvtnOoFAg",
+      "title": "Flight Facilities - I Didn't Believe feat. Elizabeth Rose",
+      "views": 4292573,
+      "durationSec": 274,
+      "shortProxy": false
+    },
+    {
+      "id": "6oNvd4J9KR4",
+      "title": "Paul Simon - You Can Call Me Al (Flight Facilities Edit)",
+      "views": 1013722,
+      "durationSec": 433,
+      "shortProxy": false
+    },
+    {
+      "id": "FDK3rWdzzLg",
+      "title": "Walter Murphy - A Fifth of Beethoven (Flight Facilities Edit)",
+      "views": 56625,
+      "durationSec": 307,
+      "shortProxy": false
+    },
+    {
+      "id": "Jcu1AHaTchM",
+      "title": "Flight Facilities - Clair De Lune feat. Christine Hoberg",
+      "views": 28575135,
+      "durationSec": 464,
+      "shortProxy": false
+    },
+    {
+      "id": "jleYj7O2Ghc",
+      "title": "Flight Facilities - Clair De Lune (Instrumental)",
+      "views": 135252,
+      "durationSec": 462,
+      "shortProxy": false
+    },
+    {
+      "id": "XcRmJh0Ltfg",
+      "title": "Flight Facilities - Clair De Lune feat. Christine Hoberg (Teaser)",
+      "views": 101706,
+      "durationSec": 46,
+      "shortProxy": true
+    },
+    {
+      "id": "pXFyXKXXOQU",
+      "title": "Flight Facilities - Frequently Flying Tour 2012",
+      "views": 35429,
+      "durationSec": 100,
+      "shortProxy": false
+    },
+    {
+      "id": "Mv5yl9jazcM",
+      "title": "Miike Snow - The Wave (Flight Facilities Mix)",
+      "views": 210836,
+      "durationSec": 427,
+      "shortProxy": false
+    },
+    {
+      "id": "iUbViBbqGzQ",
+      "title": "Flight Facilities - Foreign Language feat. Jess (Extended Mix)",
+      "views": 213662,
+      "durationSec": 359,
+      "shortProxy": false
+    },
+    {
+      "id": "b7xRNspm1Sg",
+      "title": "Flight Facilities - With You feat. Grovesnor (Official Video)",
+      "views": 6236121,
+      "durationSec": 225,
+      "shortProxy": false
+    },
+    {
+      "id": "-bfnJzl8T54",
+      "title": "Flight Facilities - With You feat Grovesnor (Danny Daze 5am Mix)",
+      "views": 63127,
+      "durationSec": 362,
+      "shortProxy": false
+    },
+    {
+      "id": "tPN14_qzL50",
+      "title": "Flight Facilities - With You feat Grovesnor (David August Remix)",
+      "views": 425731,
+      "durationSec": 311,
+      "shortProxy": false
+    },
+    {
+      "id": "jSARBWDT8Jw",
+      "title": "Flight Facilities - With You feat. Grovesnor (Extended 12\" Mix)",
+      "views": 133185,
+      "durationSec": 338,
+      "shortProxy": false
+    },
+    {
+      "id": "6VKlOSa6RRg",
+      "title": "Flight Facilities - With You feat Grovesnor (MAM Remix)",
+      "views": 279542,
+      "durationSec": 330,
+      "shortProxy": false
+    },
+    {
+      "id": "mXsThu4ImRk",
+      "title": "Flight Facilities - With You feat. Grovesnor (Teaser)",
+      "views": 55676,
+      "durationSec": 39,
+      "shortProxy": true
+    },
+    {
+      "id": "JI6fDb6IBmU",
+      "title": "Flight Facilities - Foreign Language feat. Jess (Official Video)",
+      "views": 4069689,
+      "durationSec": 269,
+      "shortProxy": false
+    },
+    {
+      "id": "qETgr_NK6aI",
+      "title": "Flight Facilities - Foreign Language (Elizabeth Rose Remix)",
+      "views": 60186,
+      "durationSec": 328,
+      "shortProxy": false
+    },
+    {
+      "id": "NzWXifaA_8A",
+      "title": "Flight Facilities - Foreign Language EP (Teaser)",
+      "views": 10234,
+      "durationSec": 70,
+      "shortProxy": false
+    },
+    {
+      "id": "qwHMGwvRC5M",
+      "title": "Flight Facilities - Feeling (Jonny Pow!! Mix)",
+      "views": 25271,
+      "durationSec": 314,
+      "shortProxy": false
+    },
+    {
+      "id": "JVImKoSXUDo",
+      "title": "Flight Facilities - Feeling",
+      "views": 412202,
+      "durationSec": 377,
+      "shortProxy": false
+    },
+    {
+      "id": "RcGUEarzYbU",
+      "title": "Flight Facilities - Foreign Language feat. Jess (Will Saul & Tam Cooper Remix)",
+      "views": 335552,
+      "durationSec": 432,
+      "shortProxy": false
+    },
+    {
+      "id": "is_dY0HJ298",
+      "title": "Flight Facilities - Foreign Language feat. Jess (Beni Remix)",
+      "views": 93097,
+      "durationSec": 259,
+      "shortProxy": false
+    },
+    {
+      "id": "IAYieEUV-iI",
+      "title": "Flight Facilities - Foreign Language feat. Jess (Rocco Raimundo Re-Interpretation)",
+      "views": 24571,
+      "durationSec": 465,
+      "shortProxy": false
+    },
+    {
+      "id": "Spp1le794ZE",
+      "title": "Flight Facilities - Foreign Language feat. Jess (Drop Out Orchestra Remix)",
+      "views": 49511,
+      "durationSec": 441,
+      "shortProxy": false
+    },
+    {
+      "id": "gJ5YaApfSdQ",
+      "title": "Flight Facilities - Foreign Language feat. Jess",
+      "views": 9360516,
+      "durationSec": 248,
+      "shortProxy": false
+    },
+    {
+      "id": "bwAaLlHqprQ",
+      "title": "Holy Ghost - Wait & See (Flight Facilities Remix)",
+      "views": 146974,
+      "durationSec": 313,
+      "shortProxy": false
+    },
+    {
+      "id": "7Mnt2gJvpSE",
+      "title": "Aeroplane vs. Friendly Fires vs. Giselle (Flight Facilities Edit)",
+      "views": 39558,
+      "durationSec": 343,
+      "shortProxy": false
+    },
+    {
+      "id": "JZYNYrAPGlc",
+      "title": "The Swiss & Flight Facilities - Backstage at Surreal Sounds",
+      "views": 9621,
+      "durationSec": 205,
+      "shortProxy": false
+    },
+    {
+      "id": "fA8juzGzbW4",
+      "title": "Cut Copy - Take Me Over (Flight Facilities Remix)",
+      "views": 326863,
+      "durationSec": 414,
+      "shortProxy": false
+    },
+    {
+      "id": "MB-FADTe3lE",
+      "title": "Flight Facilities - Shore Thing 2010",
+      "views": 6377,
+      "durationSec": 35,
+      "shortProxy": true
+    },
+    {
+      "id": "WCRiOX9sQqQ",
+      "title": "DJ Kentaro Playing at Night Walker (03.12.10)",
+      "views": 4347,
+      "durationSec": 58,
+      "shortProxy": true
+    },
+    {
+      "id": "AFV5lu7jeQg",
+      "title": "Jurassic Park Theme Song Live",
+      "views": 7660,
+      "durationSec": 97,
+      "shortProxy": false
+    },
+    {
+      "id": "ANYip4JuLDU",
+      "title": "Flight Facilities - Crave You feat. Giselle (James Curd Pretty Mix)",
+      "views": 132075,
+      "durationSec": 243,
+      "shortProxy": false
+    },
+    {
+      "id": "tB40DK-ANkg",
+      "title": "The Magician - Abracada @ XOYO",
+      "views": 4639,
+      "durationSec": 54,
+      "shortProxy": true
+    },
+    {
+      "id": "K57dVZ4oHtQ",
+      "title": "The C90s - Shine A Light (Flight Facilities Remix)",
+      "views": 7994157,
+      "durationSec": 350,
+      "shortProxy": false
+    },
+    {
+      "id": "LArSCR-Z6WE",
+      "title": "Flight Facilities & Louie Austen - Second Single Preview",
+      "views": 25721,
+      "durationSec": 21,
+      "shortProxy": true
+    },
+    {
+      "id": "r0bS-YnLf4s",
+      "title": "Flight Facilities - Crave you feat. Giselle (Official Video)",
+      "views": 51909777,
+      "durationSec": 232,
+      "shortProxy": false
+    },
+    {
+      "id": "dZm6DunP7yE",
+      "title": "James Curd - Got To Have (Flight Facilities Remix)",
+      "views": 168225,
+      "durationSec": 466,
+      "shortProxy": false
+    },
+    {
+      "id": "oIiMfBwrEWk",
+      "title": "Jennifer Hawkins Crave you 'Dripping in Gold?'",
+      "views": 14743,
+      "durationSec": 193,
+      "shortProxy": false
+    },
+    {
+      "id": "M0V3Afm7uR0",
+      "title": "Flight Facilities - Splendour In The Grass",
+      "views": 152051,
+      "durationSec": 145,
+      "shortProxy": false
+    },
+    {
+      "id": "UaZxAIMxdlM",
+      "title": "Flight Facilities - Maiden Voyage Tour (2010 Teaser)",
+      "views": 10078,
+      "durationSec": 60,
+      "shortProxy": true
+    },
+    {
+      "id": "rMghyQ6MBgU",
+      "title": "Foals - Miami (Tim Fuchs Remix feat. Flight Facilities)",
+      "views": 89555,
+      "durationSec": 397,
+      "shortProxy": false
+    },
+    {
+      "id": "z2GnDxHYmNY",
+      "title": "Flight Facilities - Maiden Voyage Tour 2010",
+      "views": 9562,
+      "durationSec": 84,
+      "shortProxy": false
+    },
+    {
+      "id": "ln5CDLQyIjk",
+      "title": "Crave Paris - Aeroplane Mashup",
+      "views": 21933,
+      "durationSec": 274,
+      "shortProxy": false
+    },
+    {
+      "id": "pBc0HHaHMCA",
+      "title": "James Curd - Got To Have",
+      "views": 20630,
+      "durationSec": 473,
+      "shortProxy": false
+    },
+    {
+      "id": "yDTwGmF4-X0",
+      "title": "Flight Facilities - Crave You feat. Giselle (Ted & Francis Cover)",
+      "views": 24439,
+      "durationSec": 259,
+      "shortProxy": false
+    },
+    {
+      "id": "NTweo9N5DmY",
+      "title": "Flight Facilities - Crave You feat. Giselle (An-2 Remix)",
+      "views": 93102,
+      "durationSec": 469,
+      "shortProxy": false
+    },
+    {
+      "id": "VRb6bKQPH-c",
+      "title": "Flight Facilities - Crave You feat. Giselle (James Curd Dub)",
+      "views": 19166,
+      "durationSec": 318,
+      "shortProxy": false
+    },
+    {
+      "id": "fuAbKwe9Fjo",
+      "title": "Flight Facilities - Crave You feat. Giselle (Cassian Remix)",
+      "views": 211110,
+      "durationSec": 338,
+      "shortProxy": false
+    },
+    {
+      "id": "FeqC7Nr3yfw",
+      "title": "Flight Facilities - Crave You feat. Giselle (Graz Remix)",
+      "views": 74191,
+      "durationSec": 271,
+      "shortProxy": false
+    },
+    {
+      "id": "rPg-qTGX3tI",
+      "title": "Flight Facilities - Crave You feat. Giselle (Version 2)",
+      "views": 185247,
+      "durationSec": 453,
+      "shortProxy": false
+    },
+    {
+      "id": "8iXcEdIZQYI",
+      "title": "Flight Facilities - Crave You feat. Giselle",
+      "views": 5174513,
+      "durationSec": 232,
+      "shortProxy": false
+    },
+    {
+      "id": "RJ0UngzqRXk",
+      "title": "Flight Facilities - Crave You feat. Giselle (The C90s Remix)",
+      "views": 123833,
+      "durationSec": 450,
+      "shortProxy": false
+    },
+    {
+      "id": "e503goZZsoU",
+      "title": "Toecutter - Best Party Ever (Flight Facilities Edit)",
+      "views": 54500,
+      "durationSec": 302,
+      "shortProxy": false
+    },
+    {
+      "id": "q95uqLt4EJc",
+      "title": "Sneaky Sound System - 16 (Flight Facilities Remix)",
+      "views": 83412,
+      "durationSec": 379,
+      "shortProxy": false
+    },
+    {
+      "id": "l6_DrXd1uAw",
+      "title": "The Lowbrows - Dream in the Desert (Flight Facilities Red Tailed Hawk Remix)",
+      "views": 56489,
+      "durationSec": 492,
+      "shortProxy": false
+    },
+    {
+      "id": "_i3zijjXANg",
+      "title": "Bag Raiders - Turbo Love feat. Louie Austen (Flight Facilities Business Class Lounge Version)",
+      "views": 48740,
+      "durationSec": 220,
+      "shortProxy": false
+    }
+  ]
+}

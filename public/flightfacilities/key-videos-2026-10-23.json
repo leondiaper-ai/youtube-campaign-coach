@@ -1,0 +1,88 @@
+{
+  "capturedAt": "2026-10-23T12:55:55.900Z",
+  "scope": "Six selected official music videos, not all music videos on the channel",
+  "videos": [
+    {
+      "id": "r0bS-YnLf4s",
+      "title": "Flight Facilities - Crave you feat. Giselle (Official Video)",
+      "publishedAt": "2010-09-10T13:47:09Z",
+      "durationSec": 232,
+      "isShort": false,
+      "views": 51909777,
+      "likes": 478334,
+      "comments": 14622,
+      "wasLive": false,
+      "scheduledStart": null,
+      "actualStart": null
+    },
+    {
+      "id": "Jcu1AHaTchM",
+      "title": "Flight Facilities - Clair De Lune feat. Christine Hoberg",
+      "publishedAt": "2012-11-13T16:30:25Z",
+      "durationSec": 464,
+      "isShort": false,
+      "views": 28575135,
+      "likes": 204008,
+      "comments": 6480,
+      "wasLive": false,
+      "scheduledStart": null,
+      "actualStart": null
+    },
+    {
+      "id": "b7xRNspm1Sg",
+      "title": "Flight Facilities - With You feat. Grovesnor (Official Video)",
+      "publishedAt": "2012-05-14T15:13:03Z",
+      "durationSec": 225,
+      "isShort": false,
+      "views": 6236121,
+      "likes": 37031,
+      "comments": 1015,
+      "wasLive": false,
+      "scheduledStart": null,
+      "actualStart": null
+    },
+    {
+      "id": "IH5L4qTVsTk",
+      "title": "Flight Facilities - Down To Earth feat. Sam Rockwell",
+      "publishedAt": "2015-02-25T19:30:46Z",
+      "durationSec": 252,
+      "isShort": false,
+      "views": 4507550,
+      "likes": 62158,
+      "comments": 1741,
+      "wasLive": false,
+      "scheduledStart": null,
+      "actualStart": null
+    },
+    {
+      "id": "zXUWso_uZ64",
+      "title": "Flight Facilities - Sunshine feat. Reggie Watts (Official)",
+      "publishedAt": "2014-10-29T17:57:06Z",
+      "durationSec": 355,
+      "isShort": false,
+      "views": 3141733,
+      "likes": 31762,
+      "comments": 598,
+      "wasLive": false,
+      "scheduledStart": null,
+      "actualStart": null
+    },
+    {
+      "id": "cQl_eV3pP3E",
+      "title": "Flight Facilities - Heavy feat. Your Smith (Official Video)",
+      "publishedAt": "2021-11-11T22:00:10Z",
+      "durationSec": 222,
+      "isShort": false,
+      "views": 426125,
+      "likes": 5611,
+      "comments": 244,
+      "wasLive": true,
+      "scheduledStart": "2021-11-11T22:00:00Z",
+      "actualStart": "2021-11-11T22:00:10Z"
+    }
+  ],
+  "combinedViews": 94796441,
+  "channelLifetimeViews": 218901844,
+  "equivalentShareOfChannelCounterPct": 43.3054556634982,
+  "limits": "Lifetime comparison across different upload ages. Not unique people, recent viewing, or proof that creative treatment caused the views. Crave You and Clair De Lune supply most of this selected total."
+}

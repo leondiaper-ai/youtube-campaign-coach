@@ -1,0 +1,2628 @@
+{
+  "capturedAt": "2026-10-23T13:10:39.326Z",
+  "channel": {
+    "id": "UCVm7tYTZONPLVujGX0rAJdw",
+    "title": "IDLES",
+    "handle": "@idlesband",
+    "subscribers": 276000,
+    "lifetimeViews": 127647455,
+    "publicVideoCount": 373,
+    "publishedAt": "2011-11-09T11:57:53Z"
+  },
+  "retrieved": 372,
+  "capped": false,
+  "shortUploads": 215,
+  "shortViews": 10348686,
+  "longUploads": 157,
+  "longViews": 93329928,
+  "publicUploadViews": 103678614,
+  "shortSharePct": 9.981504961090625,
+  "longSharePct": 90.01849503890938,
+  "method": "Shorts proxy: duration greater than zero and no more than 62 seconds. Longer uploads are the complement. Not native YouTube format classification; short landscape clips and old teasers can be included; longer native Shorts can be missed. Lifetime views on returned public uploads, not period views. Public-upload sum differs from channel lifetime counter; do not fill the gap with an invented format allocation.",
+  "videos": [
+    {
+      "id": "ryT_oWpfewM",
+      "title": "3 years of DANCER.",
+      "views": 21790,
+      "durationSec": 34,
+      "shortProxy": true
+    },
+    {
+      "id": "7HWMwsEtBKY",
+      "title": "I\u2019M SCUM. Live from NPR Tiny Desk.",
+      "views": 131341,
+      "durationSec": 30,
+      "shortProxy": true
+    },
+    {
+      "id": "3TPV0CHPDO0",
+      "title": "Dirty. Rotten. Filthy. Scum. Edinburgh, 27.08.26.",
+      "views": 37032,
+      "durationSec": 36,
+      "shortProxy": true
+    },
+    {
+      "id": "XM7_p1k5HMU",
+      "title": "Never Fight A Man With A Perm.Open'er Festival, 02.07.26.",
+      "views": 31181,
+      "durationSec": 29,
+      "shortProxy": true
+    },
+    {
+      "id": "67gTBb8o67g",
+      "title": "1049 GOTHO. Belfast, 26.09.26.",
+      "views": 6142,
+      "durationSec": 35,
+      "shortProxy": true
+    },
+    {
+      "id": "ImYHiqZb7aI",
+      "title": "BELFAST. 26.08.26.",
+      "views": 33357,
+      "durationSec": 30,
+      "shortProxy": true
+    },
+    {
+      "id": "00yP99zTCtw",
+      "title": "U N I T Y. Danny Nedelko. Open\u2019er Festival, 02.06.26.",
+      "views": 22084,
+      "durationSec": 38,
+      "shortProxy": true
+    },
+    {
+      "id": "a_7JQMVSRaA",
+      "title": "3 weeks until our headline show at Custom House Square in Belfast.",
+      "views": 78333,
+      "durationSec": 36,
+      "shortProxy": true
+    },
+    {
+      "id": "CgdAEZXITzA",
+      "title": "LOOK AT HIM GO. Northside festival, 05.06.26",
+      "views": 9630,
+      "durationSec": 33,
+      "shortProxy": true
+    },
+    {
+      "id": "vnQjG5mbmuQ",
+      "title": "1049 Gotho. Pohoda Festival, 09.07.26.",
+      "views": 35187,
+      "durationSec": 45,
+      "shortProxy": true
+    },
+    {
+      "id": "G4nmCUPouGs",
+      "title": "WHEREVER YOU ARE",
+      "views": 130374,
+      "durationSec": 32,
+      "shortProxy": true
+    },
+    {
+      "id": "UFO1pwySHx8",
+      "title": "Night 1 with Foo Fighters. Danke Berlin.",
+      "views": 103136,
+      "durationSec": 36,
+      "shortProxy": true
+    },
+    {
+      "id": "rXeV1aS2zWg",
+      "title": "SMASH. I\u2019m a car crash. D Festival. 28.06.26.",
+      "views": 25941,
+      "durationSec": 45,
+      "shortProxy": true
+    },
+    {
+      "id": "0mgTbvy4_a8",
+      "title": "If you see me down on my knees. Please, do not think that I pray. Mannheim. 21.06.26",
+      "views": 26043,
+      "durationSec": 46,
+      "shortProxy": true
+    },
+    {
+      "id": "mRylFJHf_I4",
+      "title": "BO PRO. Pinkpop Festival. 20.06.26.",
+      "views": 19612,
+      "durationSec": 28,
+      "shortProxy": true
+    },
+    {
+      "id": "kO94V2CZEcA",
+      "title": "I\u2019m Scum. Primavera Porto. 13.06.25.See you tonight Pinkpop Festival. North Stage, 6:45pm.",
+      "views": 100275,
+      "durationSec": 26,
+      "shortProxy": true
+    },
+    {
+      "id": "KX2lDSsEXZU",
+      "title": "I give myself to you, Northside Festival. 05.06.26.",
+      "views": 128439,
+      "durationSec": 34,
+      "shortProxy": true
+    },
+    {
+      "id": "j2rnRWWjlFU",
+      "title": "One year since Primavera. ALL IS LOVE AND LOVE IS ALL.",
+      "views": 74919,
+      "durationSec": 35,
+      "shortProxy": true
+    },
+    {
+      "id": "UeSgCp7x8bg",
+      "title": "Mexico City. 28.05.26.",
+      "views": 25418,
+      "durationSec": 25,
+      "shortProxy": true
+    },
+    {
+      "id": "LGwhuduUkRE",
+      "title": "Mexico City. 27.05.22.",
+      "views": 101947,
+      "durationSec": 20,
+      "shortProxy": true
+    },
+    {
+      "id": "hK6NNdjC0-k",
+      "title": "Mr Motivator. Corona Capital, 21.05.23. Mexico City, we\u2019re back. See you tonight.",
+      "views": 59074,
+      "durationSec": 40,
+      "shortProxy": true
+    },
+    {
+      "id": "BGydBMEldf0",
+      "title": "M O T H E R. Le Bataclan, Paris. 2019.",
+      "views": 24787,
+      "durationSec": 38,
+      "shortProxy": true
+    },
+    {
+      "id": "wSxkUloD0RQ",
+      "title": "The Beachland Ballroom. Live from Lollapalooza Chile, 2022.",
+      "views": 39585,
+      "durationSec": 31,
+      "shortProxy": true
+    },
+    {
+      "id": "-WH5Zlx7GzU",
+      "title": "G R O U N D S. Live on KEXP, 2020.",
+      "views": 46023,
+      "durationSec": 27,
+      "shortProxy": true
+    },
+    {
+      "id": "5aHqdqWRd00",
+      "title": "Gift Horse. Later... with Jools Holland, 2024.",
+      "views": 60598,
+      "durationSec": 30,
+      "shortProxy": true
+    },
+    {
+      "id": "cAbW7RKVuso",
+      "title": "Never Fight A Man With A Perm. Primavera, 05.06.25.",
+      "views": 68139,
+      "durationSec": 48,
+      "shortProxy": true
+    },
+    {
+      "id": "W7Jdf86NDto",
+      "title": "C R A W L !",
+      "views": 28039,
+      "durationSec": 49,
+      "shortProxy": true
+    },
+    {
+      "id": "tbAINfavmz4",
+      "title": "Car Crash. Primavera, 2025.",
+      "views": 426021,
+      "durationSec": 30,
+      "shortProxy": true
+    },
+    {
+      "id": "gw4q87EL_W4",
+      "title": "Gift Horse. Primavera, 2025.",
+      "views": 53171,
+      "durationSec": 34,
+      "shortProxy": true
+    },
+    {
+      "id": "6StUm1KCETo",
+      "title": "W H I T E  P R I V I L E G E. Glastonbury, 2022.",
+      "views": 36344,
+      "durationSec": 32,
+      "shortProxy": true
+    },
+    {
+      "id": "CFuStfkCkhI",
+      "title": "Colossus. Pukkelpop. 16.08.25.",
+      "views": 59775,
+      "durationSec": 36,
+      "shortProxy": true
+    },
+    {
+      "id": "O6tJ27S79rI",
+      "title": "ALL I WANT FOR CHRISTMAS IS YOU",
+      "views": 20898,
+      "durationSec": 39,
+      "shortProxy": true
+    },
+    {
+      "id": "jth0lBYmpRo",
+      "title": "Mannheim & all other 2026 tour dates on sale now. Link in bio.",
+      "views": 129465,
+      "durationSec": 27,
+      "shortProxy": true
+    },
+    {
+      "id": "V9kv2stdBic",
+      "title": "MOTHER. More headline EU shows announced. Tickets on sale now. Link in bio.",
+      "views": 33704,
+      "durationSec": 36,
+      "shortProxy": true
+    },
+    {
+      "id": "TfrqbCujyjI",
+      "title": "Caught Stealing Remixes - out now.",
+      "views": 13033,
+      "durationSec": 34,
+      "shortProxy": true
+    },
+    {
+      "id": "Mkjm0Mxiz2E",
+      "title": "IDLES - Rabbit Run (Nick Zinner Remix) [Official Audio]",
+      "views": 37400,
+      "durationSec": 237,
+      "shortProxy": false
+    },
+    {
+      "id": "ENez3xgV6V8",
+      "title": "IDLES - Doom (Lip Critic Remix) [Official Audio]",
+      "views": 10641,
+      "durationSec": 125,
+      "shortProxy": false
+    },
+    {
+      "id": "CT0as8Fxvc4",
+      "title": "IDLES - Rabbit Run (Interpol Remix) [Official Audio]",
+      "views": 18360,
+      "durationSec": 218,
+      "shortProxy": false
+    },
+    {
+      "id": "xPxsD9nRRLA",
+      "title": "And so it turns. Again and again",
+      "views": 34085,
+      "durationSec": 37,
+      "shortProxy": true
+    },
+    {
+      "id": "D1sUdEIQeww",
+      "title": "Tickets for Custom House Square, Belfast are on sale now. Link in bio.",
+      "views": 17546,
+      "durationSec": 25,
+      "shortProxy": true
+    },
+    {
+      "id": "MWZZ8Wci04M",
+      "title": "We\u2019re joining our friends, Deftones, at All Points East. Tickets on sale tomorrow at 9am GMT.",
+      "views": 317258,
+      "durationSec": 30,
+      "shortProxy": true
+    },
+    {
+      "id": "89r9nAN7b7I",
+      "title": "Listen now, The God of Lying ft. IDLES.",
+      "views": 24622,
+      "durationSec": 23,
+      "shortProxy": true
+    },
+    {
+      "id": "Eq4iJvhUpOo",
+      "title": "See you in August All Points East. Tickets on sale Friday 14th November at 9am.",
+      "views": 27606,
+      "durationSec": 30,
+      "shortProxy": true
+    },
+    {
+      "id": "hsFhnK6ax_E",
+      "title": "Divide & Conquer. Kansas City, 17.09.25.",
+      "views": 21508,
+      "durationSec": 31,
+      "shortProxy": true
+    },
+    {
+      "id": "y72lv5Y60Lo",
+      "title": "CAR CRASH. Festi\u2019neuch, 13.06.25.",
+      "views": 24688,
+      "durationSec": 40,
+      "shortProxy": true
+    },
+    {
+      "id": "Orh6rlZxeX0",
+      "title": "SCUM.",
+      "views": 33720,
+      "durationSec": 31,
+      "shortProxy": true
+    },
+    {
+      "id": "7wKyis9qmDs",
+      "title": "Colossus. Kansas City. 17.09.25.",
+      "views": 53052,
+      "durationSec": 35,
+      "shortProxy": true
+    },
+    {
+      "id": "_eGuRbXiLOQ",
+      "title": "Thank you for reminding us that love is all and all is love.",
+      "views": 26116,
+      "durationSec": 38,
+      "shortProxy": true
+    },
+    {
+      "id": "3w-qf9r6yPE",
+      "title": "Welcoming to the stage, Jack White. Riot Fest, 21.08.25.",
+      "views": 453394,
+      "durationSec": 44,
+      "shortProxy": true
+    },
+    {
+      "id": "KXwhFLKE5QI",
+      "title": "Joe and Darren Aronofsky on scoring the Caught Stealing movie.",
+      "views": 18909,
+      "durationSec": 29,
+      "shortProxy": true
+    },
+    {
+      "id": "-v12ayo6XQw",
+      "title": "Everybody Scream, by Florence Welch. Produced by our very own Mark Bowen.",
+      "views": 25458,
+      "durationSec": 26,
+      "shortProxy": true
+    },
+    {
+      "id": "3EUmfcHGiRs",
+      "title": "Mother. Bell Centre, Montreal. 08.09.25",
+      "views": 34148,
+      "durationSec": 30,
+      "shortProxy": true
+    },
+    {
+      "id": "S8Iax6roeds",
+      "title": "Welcome to Oh Gatekeeper. Episode 1 available wherever you stream your podcasts. #tonyhawk",
+      "views": 13720,
+      "durationSec": 46,
+      "shortProxy": true
+    },
+    {
+      "id": "xEC4Lb2YMo4",
+      "title": "IDLES - Coper (Official Audio)",
+      "views": 73863,
+      "durationSec": 223,
+      "shortProxy": false
+    },
+    {
+      "id": "xrqx8q-c93o",
+      "title": "IDLES - Kim's Video (Official Audio)",
+      "views": 35004,
+      "durationSec": 123,
+      "shortProxy": false
+    },
+    {
+      "id": "tHeKs48SHww",
+      "title": "IDLES - Loisaida (Official Audio)",
+      "views": 13100,
+      "durationSec": 239,
+      "shortProxy": false
+    },
+    {
+      "id": "mXo5GxgNpsk",
+      "title": "IDLES - Flushing, Queens (Official Audio)",
+      "views": 24092,
+      "durationSec": 153,
+      "shortProxy": false
+    },
+    {
+      "id": "jnLqEpxwaHQ",
+      "title": "IDLES - Doom (Official Audio)",
+      "views": 67950,
+      "durationSec": 117,
+      "shortProxy": false
+    },
+    {
+      "id": "jCxp2vKQq7w",
+      "title": "IDLES - Walk/Don't Walk (Official Audio)",
+      "views": 14047,
+      "durationSec": 164,
+      "shortProxy": false
+    },
+    {
+      "id": "gBCW9EQ7deE",
+      "title": "IDLES - 5th Floor Walk Up (Official Audio)",
+      "views": 13854,
+      "durationSec": 141,
+      "shortProxy": false
+    },
+    {
+      "id": "ZhyMSHB4oFk",
+      "title": "IDLES - Tompkins Square Park (Official Audio)",
+      "views": 8809,
+      "durationSec": 96,
+      "shortProxy": false
+    },
+    {
+      "id": "Wm-6wiza8XU",
+      "title": "IDLES - Blessings and Successes (Official Audio)",
+      "views": 11431,
+      "durationSec": 115,
+      "shortProxy": false
+    },
+    {
+      "id": "R2hNdUSFaZ4",
+      "title": "IDLES - Police & Thieves (Official Audio)",
+      "views": 44953,
+      "durationSec": 209,
+      "shortProxy": false
+    },
+    {
+      "id": "M00O9KfDab0",
+      "title": "IDLES - Alphabet City (Official Audio)",
+      "views": 11787,
+      "durationSec": 202,
+      "shortProxy": false
+    },
+    {
+      "id": "DvgfOk144GA",
+      "title": "IDLES - Bay 15 (Official Audio)",
+      "views": 9210,
+      "durationSec": 239,
+      "shortProxy": false
+    },
+    {
+      "id": "F-yMWCGiHr4",
+      "title": "IDLES - Under the EL (Official Audio)",
+      "views": 9599,
+      "durationSec": 193,
+      "shortProxy": false
+    },
+    {
+      "id": "4hgT1cehhw8",
+      "title": "IDLES - 6th and A (Official Audio)",
+      "views": 13304,
+      "durationSec": 28,
+      "shortProxy": true
+    },
+    {
+      "id": "64JlPimeVPU",
+      "title": "IDLES - Cheerleader (Official Audio)",
+      "views": 31128,
+      "durationSec": 210,
+      "shortProxy": false
+    },
+    {
+      "id": "MOAcYr8SXmE",
+      "title": "The Idles at The Pyramid Club, 1998. The \u2018Caught Stealing\u2019 Motion Picture Soundtrack out tomorrow.",
+      "views": 24609,
+      "durationSec": 59,
+      "shortProxy": true
+    },
+    {
+      "id": "qxnlp8AAUeQ",
+      "title": "Mother // Pukkelpop // 16.08.25",
+      "views": 98073,
+      "durationSec": 25,
+      "shortProxy": true
+    },
+    {
+      "id": "AFCOnB7VjFE",
+      "title": "Pre-save now.",
+      "views": 18363,
+      "durationSec": 29,
+      "shortProxy": true
+    },
+    {
+      "id": "XIIi_h-9gEw",
+      "title": "R A B B I T  R U N",
+      "views": 20768,
+      "durationSec": 25,
+      "shortProxy": true
+    },
+    {
+      "id": "s-_m7ZmT25k",
+      "title": "Introducing: The Mayor Of Bristol // Queen Square Bristol. 02.08.25.",
+      "views": 56503,
+      "durationSec": 37,
+      "shortProxy": true
+    },
+    {
+      "id": "MsTeRmZKRG8",
+      "title": "Aidan \ud83d\udda4 // Queen Square Bristol // 01.08.25",
+      "views": 67874,
+      "durationSec": 57,
+      "shortProxy": true
+    },
+    {
+      "id": "tBmY76oEF-E",
+      "title": "H O M E // See you tonight, Queen Square.",
+      "views": 25502,
+      "durationSec": 42,
+      "shortProxy": true
+    },
+    {
+      "id": "RaMK4gDYl4o",
+      "title": "IDLES - Rabbit Run (Official Lyric Video)",
+      "views": 899425,
+      "durationSec": 232,
+      "shortProxy": false
+    },
+    {
+      "id": "UNNEpZPS6Eo",
+      "title": "Rabbit Run // 30.07.25\r\rRSVP now via link in bio.",
+      "views": 24411,
+      "durationSec": 23,
+      "shortProxy": true
+    },
+    {
+      "id": "HmvO1VQdgYo",
+      "title": "One year since Glastonbury.",
+      "views": 22350,
+      "durationSec": 36,
+      "shortProxy": true
+    },
+    {
+      "id": "jsEtGLKFQok",
+      "title": "LOVE IS THE FING.",
+      "views": 67218,
+      "durationSec": 52,
+      "shortProxy": true
+    },
+    {
+      "id": "pnaSKkI7VjQ",
+      "title": "I M  S C U M // 13.06.25",
+      "views": 39726,
+      "durationSec": 26,
+      "shortProxy": true
+    },
+    {
+      "id": "de4YLiAZbHg",
+      "title": "BO PRO. Rock For People // Czech // 12.06.25",
+      "views": 939938,
+      "durationSec": 36,
+      "shortProxy": true
+    },
+    {
+      "id": "4SUyOIlQ6ZA",
+      "title": "Primavera // 05.06.25",
+      "views": 57038,
+      "durationSec": 43,
+      "shortProxy": true
+    },
+    {
+      "id": "qWmse4B-mIw",
+      "title": "Danny Nedelko / Montreux Jazz Festival 2023",
+      "views": 32613,
+      "durationSec": 55,
+      "shortProxy": true
+    },
+    {
+      "id": "vrZRsTvUoNU",
+      "title": "D I V I D E  &  C O N Q U E R",
+      "views": 22626,
+      "durationSec": 32,
+      "shortProxy": true
+    },
+    {
+      "id": "kuSf2gwtrdA",
+      "title": "Gary is available at your nearest EarthQuaker. Limited-edition flavour available only on Reverb.com",
+      "views": 12490,
+      "durationSec": 45,
+      "shortProxy": true
+    },
+    {
+      "id": "70kaKAXfSpU",
+      "title": "M O T H E R // Live from Forest Hills Stadium.",
+      "views": 52811,
+      "durationSec": 25,
+      "shortProxy": true
+    },
+    {
+      "id": "wGQRSgWKL68",
+      "title": "Glastonbury 2024 feat Banksy. #idles #shorts",
+      "views": 29496,
+      "durationSec": 57,
+      "shortProxy": true
+    },
+    {
+      "id": "0SGEM2AG0rc",
+      "title": "Happy Birthday TANGK. A year old today. #idles #shorts",
+      "views": 17884,
+      "durationSec": 16,
+      "shortProxy": true
+    },
+    {
+      "id": "MW9-WEm38Cs",
+      "title": "1049 Gotho // Melbourne // 21.01.25 #idles #shorts",
+      "views": 15897,
+      "durationSec": 41,
+      "shortProxy": true
+    },
+    {
+      "id": "NRjIjnneOy4",
+      "title": "IDLES - Gift Horse (Live from The Tonight Show Starring Jimmy Fallon)",
+      "views": 121018,
+      "durationSec": 291,
+      "shortProxy": false
+    },
+    {
+      "id": "8RVkK7f4aqk",
+      "title": "GRAMMYs & Silverlake Lounge // 02.02.25 #idles #shorts",
+      "views": 36516,
+      "durationSec": 20,
+      "shortProxy": true
+    },
+    {
+      "id": "SZYiuBGyqbY",
+      "title": "Motivation // Osaka // 25.01.25",
+      "views": 7409,
+      "durationSec": 26,
+      "shortProxy": true
+    },
+    {
+      "id": "JB5I4iu7tiU",
+      "title": "Jungle // Melbourne // 21.01.25 #idles #shorts",
+      "views": 14452,
+      "durationSec": 41,
+      "shortProxy": true
+    },
+    {
+      "id": "1PttS7ujs9U",
+      "title": "Brisbane // 18.01.25",
+      "views": 24609,
+      "durationSec": 23,
+      "shortProxy": true
+    },
+    {
+      "id": "iJ-ycfl3za8",
+      "title": "Auckland // 16.01.25 #idles #shorts",
+      "views": 11967,
+      "durationSec": 52,
+      "shortProxy": true
+    },
+    {
+      "id": "pJp_k5cxZlU",
+      "title": "Bo-pro reprise. #idles #shorts",
+      "views": 20440,
+      "durationSec": 29,
+      "shortProxy": true
+    },
+    {
+      "id": "uvr6-DzNu24",
+      "title": "IDLES - POP POP POP (feat. Danny Brown) (Official Audio)",
+      "views": 146831,
+      "durationSec": 201,
+      "shortProxy": false
+    },
+    {
+      "id": "UqIKe-yWLg4",
+      "title": "POP POP POP ft. Danny Brown. Tomorrow. #idles #dannybrown #shorts",
+      "views": 17101,
+      "durationSec": 39,
+      "shortProxy": true
+    },
+    {
+      "id": "6Nnr1EKoZ2g",
+      "title": "All is love and love is all. #idles #shorts",
+      "views": 9189,
+      "durationSec": 36,
+      "shortProxy": true
+    },
+    {
+      "id": "HPDwYeTR_wQ",
+      "title": "A year of TANGK #idles #shorts",
+      "views": 17538,
+      "durationSec": 28,
+      "shortProxy": true
+    },
+    {
+      "id": "reop64Q_nhQ",
+      "title": "Team A vs Team B at the Grammy Museum with Kenny Beats. #idles #shorts",
+      "views": 9909,
+      "durationSec": 39,
+      "shortProxy": true
+    },
+    {
+      "id": "Wg0IY42KbyE",
+      "title": "Ally Pally. Night 2 tonight. #idles #shorts",
+      "views": 30581,
+      "durationSec": 18,
+      "shortProxy": true
+    },
+    {
+      "id": "FbHK4badx2U",
+      "title": "I\u2019m Scum. Dublin. 20.11.24. #IDLES #shorts",
+      "views": 35914,
+      "durationSec": 26,
+      "shortProxy": true
+    },
+    {
+      "id": "E-fekLqqwCU",
+      "title": "Belfast, you were full of love and energy, Dublin, we\u2019re coming for you. #idles #shorts",
+      "views": 19337,
+      "durationSec": 37,
+      "shortProxy": true
+    },
+    {
+      "id": "pyB-l6JbAS8",
+      "title": "Joe in conversation with Kenny Beats and Bowen at the Grammy Museum. #IDLES #Shorts",
+      "views": 17239,
+      "durationSec": 52,
+      "shortProxy": true
+    },
+    {
+      "id": "vhpfgh8GKfE",
+      "title": "Our Queen Square Bristol Block Parties are on sale now. Link in bio. DGG.",
+      "views": 5672,
+      "durationSec": 30,
+      "shortProxy": true
+    },
+    {
+      "id": "lLaT7unGfYk",
+      "title": "IDLES - QUEEN SQUARE BRISTOL ON SALE NOW",
+      "views": 33563,
+      "durationSec": 30,
+      "shortProxy": true
+    },
+    {
+      "id": "a3VRfuav310",
+      "title": "Queens Square Bristol pre-sale is now sold out. General sale tickets on sale Friday at 10am. x",
+      "views": 10784,
+      "durationSec": 47,
+      "shortProxy": true
+    },
+    {
+      "id": "bvWr4IuIVq8",
+      "title": "Our only UK dates of 2025 go on sale this Friday. Pre-sale starts tomorrow at 10 a.m. \ud83d\udd17 in bio.",
+      "views": 13791,
+      "durationSec": 21,
+      "shortProxy": true
+    },
+    {
+      "id": "dVh89G0F8bc",
+      "title": "So far we have played 97 shows in Bristol. 97 shows?  #shorts #IDLES",
+      "views": 6948,
+      "durationSec": 8,
+      "shortProxy": true
+    },
+    {
+      "id": "KGL9mqO1m8A",
+      "title": "The Beachland Ballroom | Mexico City | 04.10.24 #idles #shorts",
+      "views": 11478,
+      "durationSec": 22,
+      "shortProxy": true
+    },
+    {
+      "id": "Oo5iOCGt0w8",
+      "title": "North America in 30 seconds. #idles #shorts",
+      "views": 10467,
+      "durationSec": 31,
+      "shortProxy": true
+    },
+    {
+      "id": "rOZngyeu_xQ",
+      "title": "TRACKSTAR, BABY.",
+      "views": 74354,
+      "durationSec": 49,
+      "shortProxy": true
+    },
+    {
+      "id": "0rBja-TEXG0",
+      "title": "Thank you, North America. Until next time. LOVE IS THE FING #shorts #idles",
+      "views": 16725,
+      "durationSec": 28,
+      "shortProxy": true
+    },
+    {
+      "id": "xwFCV0W758U",
+      "title": "ASH. Thank you New York. FTK. #idles #shorts",
+      "views": 36494,
+      "durationSec": 39,
+      "shortProxy": true
+    },
+    {
+      "id": "pOtG-R7Ndm8",
+      "title": "Our comrade Bowen, making friends in Chicago. #idles #shorts",
+      "views": 18710,
+      "durationSec": 29,
+      "shortProxy": true
+    },
+    {
+      "id": "xm1MTSQ_Rfk",
+      "title": "Thank you, Montreal.  Boston & NYC up next \ud83d\udda4 #IDLES #shorts",
+      "views": 26485,
+      "durationSec": 20,
+      "shortProxy": true
+    },
+    {
+      "id": "y6wGJKUAdqE",
+      "title": "DRAG IS NOT A CRIME. #IDLES #shorts",
+      "views": 19696,
+      "durationSec": 31,
+      "shortProxy": true
+    },
+    {
+      "id": "ZosbGDyXjkE",
+      "title": "Thank you, Nashville. See you tonight  Chicago. #IDLES #shorts",
+      "views": 9659,
+      "durationSec": 27,
+      "shortProxy": true
+    },
+    {
+      "id": "dkSs9v1Mk44",
+      "title": "Touring is brat. #IDLES #shorts",
+      "views": 145112,
+      "durationSec": 25,
+      "shortProxy": true
+    },
+    {
+      "id": "vzxVnIQ1878",
+      "title": "All is love. #idles #shorts",
+      "views": 211525,
+      "durationSec": 16,
+      "shortProxy": true
+    },
+    {
+      "id": "aFbF46hdKcQ",
+      "title": "Limited tickets are available for Nashville, Toronto, New York, Guadalajara, and Mexico City.",
+      "views": 11567,
+      "durationSec": 36,
+      "shortProxy": true
+    },
+    {
+      "id": "nJYguI1ft9o",
+      "title": "Community spirit at End of The Road Festival. #IDLES #shorts",
+      "views": 6197,
+      "durationSec": 31,
+      "shortProxy": true
+    },
+    {
+      "id": "saPsNZ72dKc",
+      "title": "6 months of TANGK. #IDLES #shorts",
+      "views": 12606,
+      "durationSec": 20,
+      "shortProxy": true
+    },
+    {
+      "id": "S-eY_jbXUl4",
+      "title": "Choccy. #idles #shorts",
+      "views": 21489,
+      "durationSec": 23,
+      "shortProxy": true
+    },
+    {
+      "id": "uNvdKPgoAAc",
+      "title": "Thank you, Lowlands Festival. #IDLES #shorts",
+      "views": 17676,
+      "durationSec": 41,
+      "shortProxy": true
+    },
+    {
+      "id": "bTX8Qjfz8DU",
+      "title": "This snowflake\u2019s an avalanche #idles #shorts",
+      "views": 14694,
+      "durationSec": 39,
+      "shortProxy": true
+    },
+    {
+      "id": "1Hpta2JvMsM",
+      "title": "LOVE IS THE FING TOUR 24/25 \ud83d\udd17 in  bio for all dates & \ud83c\udf9f\ufe0f #idles #shorts",
+      "views": 18557,
+      "durationSec": 30,
+      "shortProxy": true
+    },
+    {
+      "id": "r6yzp53U3cI",
+      "title": "Danny Nedelko. Truck Festival, 25/07/24",
+      "views": 9683,
+      "durationSec": 25,
+      "shortProxy": true
+    },
+    {
+      "id": "K-6fxg32gU0",
+      "title": "Gratitude live from Glastonbury.The full live set is available on BBC iPlayer until Sunday.",
+      "views": 7418,
+      "durationSec": 21,
+      "shortProxy": true
+    },
+    {
+      "id": "EjA3ShJ_m3o",
+      "title": "Dreamland Margate, 20.07.24 #idles #shorts",
+      "views": 22605,
+      "durationSec": 21,
+      "shortProxy": true
+    },
+    {
+      "id": "sKxezClgtJY",
+      "title": "Next stop: Margate",
+      "views": 22720,
+      "durationSec": 23,
+      "shortProxy": true
+    },
+    {
+      "id": "OTLNcSbOYmc",
+      "title": "Introducing to the stage, our brother, Danny Brown #idles #shorts",
+      "views": 18437,
+      "durationSec": 55,
+      "shortProxy": true
+    },
+    {
+      "id": "l08kKB79QyE",
+      "title": "\ud83c\udde7\ud83c\uddea\u27a1\ufe0f\ud83c\uddeb\ud83c\uddf7\u27a1\ufe0f\ud83c\udff4\udb40\udc67\udb40\udc62\udb40\udc77\udb40\udc6c\udb40\udc73\udb40\udc7f\u27a1\ufe0f\ud83c\uddec\ud83c\udde7 #idles #shorts",
+      "views": 12751,
+      "durationSec": 43,
+      "shortProxy": true
+    },
+    {
+      "id": "G9ZN9Tja_DU",
+      "title": "Joe reads a CBeebies Bedtime Story, The Boy with Flowers in His Hair by Jarvis. #idles #shorts",
+      "views": 45833,
+      "durationSec": 34,
+      "shortProxy": true
+    },
+    {
+      "id": "5epXerBZaSE",
+      "title": "Fear leads to panic, panic leads to pain. Pain leads to anger, anger leads to hate. #idles #shorts",
+      "views": 33944,
+      "durationSec": 33,
+      "shortProxy": true
+    },
+    {
+      "id": "G2Wm-FLWTx0",
+      "title": "FLYNN! #idles #shorts",
+      "views": 700714,
+      "durationSec": 61,
+      "shortProxy": true
+    },
+    {
+      "id": "Q6S7GL5DMJ8",
+      "title": "3 more days\u2026. #IDLES #glastonbury #shorts",
+      "views": 10917,
+      "durationSec": 32,
+      "shortProxy": true
+    },
+    {
+      "id": "okRcxi8i58U",
+      "title": "Get into the Glasto feels with our cover of Hey Duggee\u2019s hit song Stick. \ud83d\udda4 #idles #shorts",
+      "views": 25451,
+      "durationSec": 24,
+      "shortProxy": true
+    },
+    {
+      "id": "jZfAH_t_FjE",
+      "title": "Even Mary Berry likes football #idles #shorts",
+      "views": 14707,
+      "durationSec": 22,
+      "shortProxy": true
+    },
+    {
+      "id": "7WVor1pZvdg",
+      "title": "1 week today until we return to Glastonbury,  \ud83c\udfaa Tune into BBC iPlayer at 2215 pm BST. #idles",
+      "views": 18772,
+      "durationSec": 25,
+      "shortProxy": true
+    },
+    {
+      "id": "AKMGE4HFJzg",
+      "title": "What else is in the teaches of Peaches \ud83c\udf51? #idles #shorts",
+      "views": 23761,
+      "durationSec": 34,
+      "shortProxy": true
+    },
+    {
+      "id": "_rUdHbvT8ws",
+      "title": "HELLO! #idles #shorts",
+      "views": 200275,
+      "durationSec": 39,
+      "shortProxy": true
+    },
+    {
+      "id": "XzYu06i7NMU",
+      "title": "On September 16th we\u2019ll be coming to Nashville! Pre sale begins Tuesday June 18th at 10am C.T.",
+      "views": 8178,
+      "durationSec": 19,
+      "shortProxy": true
+    },
+    {
+      "id": "7RKSKN0WAwk",
+      "title": "Our Spotify singles cover of \u201cMood Swings\u201d by Little Simz is out now. #idles #shorts",
+      "views": 49191,
+      "durationSec": 54,
+      "shortProxy": true
+    },
+    {
+      "id": "0gzORB6HjDM",
+      "title": "The best way to scare a Tory is to register to vote. See you in 2 weeks Glastonbury. #idles #shorts",
+      "views": 68779,
+      "durationSec": 24,
+      "shortProxy": true
+    },
+    {
+      "id": "fzCMTkyNrK8",
+      "title": "Feeling festive. See you tonight, Fort Lauderdale. #IDLES #shorts",
+      "views": 8991,
+      "durationSec": 35,
+      "shortProxy": true
+    },
+    {
+      "id": "m9XGi8DZvxU",
+      "title": "It felt like god to me. #idles #shorts",
+      "views": 11218,
+      "durationSec": 25,
+      "shortProxy": true
+    },
+    {
+      "id": "q7Wgn3z_gp8",
+      "title": "G R A T I T U D E \ud83d\udda4 #idles #shorts",
+      "views": 32505,
+      "durationSec": 31,
+      "shortProxy": true
+    },
+    {
+      "id": "t_adi6BUFZY",
+      "title": "I wanna dance \u2018til the sun comes up. #idles #shorts",
+      "views": 10058,
+      "durationSec": 25,
+      "shortProxy": true
+    },
+    {
+      "id": "CRRc0AIHR60",
+      "title": "D A N N Y  N E D E L K O #idles #shorts",
+      "views": 18000,
+      "durationSec": 21,
+      "shortProxy": true
+    },
+    {
+      "id": "spOS0pDXOEI",
+      "title": "Rounding up our sublime US May run in Dallas tonight \ud83e\udd75 #idles",
+      "views": 19800,
+      "durationSec": 34,
+      "shortProxy": true
+    },
+    {
+      "id": "baly47Ai_so",
+      "title": "GIFT HORSE. \ud83d\udc0e Watch full performance on BBC iPlayer now.",
+      "views": 13232,
+      "durationSec": 34,
+      "shortProxy": true
+    },
+    {
+      "id": "AlvxD2T7dzs",
+      "title": "The gratitude cuts through our veins \u2764\ufe0f\u200d\ud83d\udd25 Head to the link in bio to see all our upcoming dates.",
+      "views": 6351,
+      "durationSec": 31,
+      "shortProxy": true
+    },
+    {
+      "id": "YL7eBxtvYkI",
+      "title": "A Gospel, live on \u2018Later\u2026 With Jools Holland\u2019.  Stream on BBC iplayer now now \ud83d\udda4 #idles #shorts",
+      "views": 8304,
+      "durationSec": 30,
+      "shortProxy": true
+    },
+    {
+      "id": "bsY2olhWl4U",
+      "title": "We turned to you and you saved us. Thank you. #shorts #IDLES",
+      "views": 61848,
+      "durationSec": 32,
+      "shortProxy": true
+    },
+    {
+      "id": "vkRckXT75Us",
+      "title": "C O M M U N I T Y   #idles #shorts",
+      "views": 15284,
+      "durationSec": 33,
+      "shortProxy": true
+    },
+    {
+      "id": "Zyop8a577bk",
+      "title": "I'm a real boy. Boy and I cry. I love myself. And I want to try. #shorts #idles",
+      "views": 13816,
+      "durationSec": 27,
+      "shortProxy": true
+    },
+    {
+      "id": "v2lZEq5U6Z4",
+      "title": "And so it begins. Vancouver, let\u2019s dance \ud83d\udda4 #idles",
+      "views": 13111,
+      "durationSec": 35,
+      "shortProxy": true
+    },
+    {
+      "id": "h7m-QR1IAcw",
+      "title": "I did not come from nothing, and nothing comes from me. See you this week North America.",
+      "views": 39450,
+      "durationSec": 23,
+      "shortProxy": true
+    },
+    {
+      "id": "BsJ6zRZefLk",
+      "title": "See. My. Steed. Go. Far. Live from Maida Vale for the king Steve Lamacq. #idles #shorts",
+      "views": 58240,
+      "durationSec": 41,
+      "shortProxy": true
+    },
+    {
+      "id": "Rp0F4L6CtHk",
+      "title": "I kissed a boy and I liked it #idles #shorts",
+      "views": 123790,
+      "durationSec": 8,
+      "shortProxy": true
+    },
+    {
+      "id": "EY7Gv3scygY",
+      "title": "Love Song from the side of stage in Istanbul. Just over a week until we head back out on tour.",
+      "views": 17861,
+      "durationSec": 18,
+      "shortProxy": true
+    },
+    {
+      "id": "TCaIuEywJ98",
+      "title": "Hold Tight. #IDLES",
+      "views": 12064,
+      "durationSec": 19,
+      "shortProxy": true
+    },
+    {
+      "id": "pYMu5Gam0RM",
+      "title": "Watch the new video for \u201cPOP POP POP\u201d now \u2764\ufe0f\u200d\ud83d\udd25 #idles #shorts",
+      "views": 21348,
+      "durationSec": 24,
+      "shortProxy": true
+    },
+    {
+      "id": "huWfQdG2_ws",
+      "title": "IDLES - POP POP POP (Official Video)",
+      "views": 2043760,
+      "durationSec": 260,
+      "shortProxy": false
+    },
+    {
+      "id": "v6aifiEvPGA",
+      "title": "Vegas, Salt Lake City & Boulder on sale now. Lingk in bio for these & all other LITF \u201924 dates x",
+      "views": 14456,
+      "durationSec": 23,
+      "shortProxy": true
+    },
+    {
+      "id": "Zr2K_lzNpmw",
+      "title": "This is really unprofessional #idles #shorts",
+      "views": 31193,
+      "durationSec": 27,
+      "shortProxy": true
+    },
+    {
+      "id": "ghWHQV_5_S8",
+      "title": "Our very own Joe Talbot will be reading the @CBeebies bedtime this evening at 6:50pm. Tune in.",
+      "views": 48625,
+      "durationSec": 27,
+      "shortProxy": true
+    },
+    {
+      "id": "gIFSr8SvJFw",
+      "title": "Exclusive vinyl available all weekend at our POP POP POP up shop at The Truman Brewery, London",
+      "views": 14096,
+      "durationSec": 12,
+      "shortProxy": true
+    },
+    {
+      "id": "nSNiz5gMk7A",
+      "title": "TANGK is out now. Listen now: https://idles.lnk.to/tangk",
+      "views": 23938,
+      "durationSec": 13,
+      "shortProxy": true
+    },
+    {
+      "id": "oSltepl-i-I",
+      "title": "IDLES - HALL & OATES (Official Lyric Video)",
+      "views": 227899,
+      "durationSec": 144,
+      "shortProxy": false
+    },
+    {
+      "id": "gLY1PkEOJP4",
+      "title": "IDLES - ROY (Official Lyric Video)",
+      "views": 549681,
+      "durationSec": 250,
+      "shortProxy": false
+    },
+    {
+      "id": "mLn6RLfAay0",
+      "title": "IDLES - MONOLITH (Official Lyric Video)",
+      "views": 144008,
+      "durationSec": 173,
+      "shortProxy": false
+    },
+    {
+      "id": "_dlCdqfay2Y",
+      "title": "IDLES - GRATITUDE (Official Lyric Video)",
+      "views": 317819,
+      "durationSec": 222,
+      "shortProxy": false
+    },
+    {
+      "id": "YfNemf8S6Ls",
+      "title": "IDLES - POP POP POP (Official Lyric Video)",
+      "views": 230665,
+      "durationSec": 257,
+      "shortProxy": false
+    },
+    {
+      "id": "WYo4NxhDHz0",
+      "title": "IDLES - IDEA 01 (Official Lyric Video)",
+      "views": 319108,
+      "durationSec": 219,
+      "shortProxy": false
+    },
+    {
+      "id": "7ZDsVdK8GXg",
+      "title": "IDLES - JUNGLE (Official Lyric Video)",
+      "views": 275986,
+      "durationSec": 252,
+      "shortProxy": false
+    },
+    {
+      "id": "1_3VGCC3TwM",
+      "title": "IDLES - A GOSPEL (Official Lyric Video)",
+      "views": 192376,
+      "durationSec": 226,
+      "shortProxy": false
+    },
+    {
+      "id": "HEQPJcsJa1g",
+      "title": "TANGK IS OUT AT MIDNIGHT. Feel its power. What mysteries lie within? https://idles.lnk.to/tangk",
+      "views": 19630,
+      "durationSec": 59,
+      "shortProxy": true
+    },
+    {
+      "id": "up5cJOxjbmU",
+      "title": "The idea for this video came to Joe in a dream. Love is the thing #idles #coldplay #yellow",
+      "views": 44039,
+      "durationSec": 26,
+      "shortProxy": true
+    },
+    {
+      "id": "gnd4jIBRfHE",
+      "title": "IDLES - GRACE (Official Video)",
+      "views": 1130897,
+      "durationSec": 241,
+      "shortProxy": false
+    },
+    {
+      "id": "2zEYjPCqHgI",
+      "title": "Grace. YouTube premiere, tomorrow 5pm.",
+      "views": 5316,
+      "durationSec": 24,
+      "shortProxy": true
+    },
+    {
+      "id": "q99e0ItPdWA",
+      "title": "Let\u2019s dance, New York. Forest Hills Stadium, Sept 27. Sign up via the lingk in our bio for tickets x",
+      "views": 15616,
+      "durationSec": 20,
+      "shortProxy": true
+    },
+    {
+      "id": "-yvbhamYSWI",
+      "title": "Drinking the sweet nectar of TANGK to keep us strong. #IDLES #shorts",
+      "views": 17152,
+      "durationSec": 15,
+      "shortProxy": true
+    },
+    {
+      "id": "4XD5ou4KBoY",
+      "title": "Tickets for the extra UK & Ireland shows are on sale now. https://idles.lnk.to/tour",
+      "views": 11647,
+      "durationSec": 25,
+      "shortProxy": true
+    },
+    {
+      "id": "TMLPCFXiZFs",
+      "title": "More tour dates incoming. Tickets go on sale for these dates this Friday at 9am. LOVE IS THE FING x",
+      "views": 17904,
+      "durationSec": 26,
+      "shortProxy": true
+    },
+    {
+      "id": "TN3IT9f9QL4",
+      "title": "Be bold and ride us like the disco donkeys we are. \u201cGift Horse\u201d is out everywhere now.",
+      "views": 94843,
+      "durationSec": 29,
+      "shortProxy": true
+    },
+    {
+      "id": "_HQrM5L9T1g",
+      "title": "IDLES - GIFT HORSE (Official Video)",
+      "views": 3275284,
+      "durationSec": 275,
+      "shortProxy": false
+    },
+    {
+      "id": "psU-t7qSwaY",
+      "title": "He ain't the king. She's the king.",
+      "views": 31540,
+      "durationSec": 33,
+      "shortProxy": true
+    },
+    {
+      "id": "IMvhoZLcOOM",
+      "title": "It's good to be back. Bring on 2024. We've been waiting for you.",
+      "views": 28605,
+      "durationSec": 27,
+      "shortProxy": true
+    },
+    {
+      "id": "B_02XSlcLC8",
+      "title": "Mother...",
+      "views": 17108,
+      "durationSec": 24,
+      "shortProxy": true
+    },
+    {
+      "id": "TcERVDnlqeE",
+      "title": "All I want for Christmas (Bowen's version)",
+      "views": 10342,
+      "durationSec": 34,
+      "shortProxy": true
+    },
+    {
+      "id": "lpEH9R3NJzc",
+      "title": "A TANGK by any other name would smell as sweet.",
+      "views": 22788,
+      "durationSec": 23,
+      "shortProxy": true
+    },
+    {
+      "id": "UJ4c4AFZhE0",
+      "title": "Tickets for our 'LOVE IS THE FING '24 Tour' are now on sale!",
+      "views": 5760,
+      "durationSec": 34,
+      "shortProxy": true
+    },
+    {
+      "id": "XvXYZ3uAkVc",
+      "title": "IDLES - GRACE (Official Lyric Video)",
+      "views": 430504,
+      "durationSec": 234,
+      "shortProxy": false
+    },
+    {
+      "id": "pFO76TKIwh0",
+      "title": "Listen to our new single \"Grace\" now - LOVE IS THE FING \u2764\ufe0f https://idles.lnk.to/grace",
+      "views": 5847,
+      "durationSec": 31,
+      "shortProxy": true
+    },
+    {
+      "id": "KR6-8-FnZA8",
+      "title": "\"Grace\" out on the 6th of December. Pre save now. https://idles.lnk.to/grace",
+      "views": 18556,
+      "durationSec": 28,
+      "shortProxy": true
+    },
+    {
+      "id": "DuE4VYerAg0",
+      "title": "\ud83d\udca5 We're going back on tour \ud83d\udca5 Pre order TANGK for pre sale access at idlesband.com",
+      "views": 13108,
+      "durationSec": 14,
+      "shortProxy": true
+    },
+    {
+      "id": "uKpwgXlJtg4",
+      "title": "Give me Grace.",
+      "views": 23557,
+      "durationSec": 18,
+      "shortProxy": true
+    },
+    {
+      "id": "Mtz9Y7AcFTc",
+      "title": "No God. No King. I said LOVE IS THE FING.#IDLES #shorts",
+      "views": 164188,
+      "durationSec": 32,
+      "shortProxy": true
+    },
+    {
+      "id": "eV3Z6hGjIAA",
+      "title": "Dancer. #IDLES #shorts",
+      "views": 42298,
+      "durationSec": 35,
+      "shortProxy": true
+    },
+    {
+      "id": "BO-_X0Av7G8",
+      "title": "Who's the best Dancer? #IDLES #shorts",
+      "views": 223255,
+      "durationSec": 30,
+      "shortProxy": true
+    },
+    {
+      "id": "550FQ5PQU8o",
+      "title": "Read the rest of Joe\u2019s article about TANGK, IDLES in the Big Issue #IDLES #shorts #thebigissue",
+      "views": 31906,
+      "durationSec": 27,
+      "shortProxy": true
+    },
+    {
+      "id": "a8XYSQRs2_k",
+      "title": "Watch & listen to Dancer everywhere now - https://idles.lnk.to/dancer \ud83d\udda4",
+      "views": 9538,
+      "durationSec": 34,
+      "shortProxy": true
+    },
+    {
+      "id": "oXGzE-U91rc",
+      "title": "You are all Dancers. Thangk you for indulging us village underground #IDLES #shorts",
+      "views": 16476,
+      "durationSec": 26,
+      "shortProxy": true
+    },
+    {
+      "id": "I_a1j8tZfOc",
+      "title": "Watch the full music video for \"Dancer\" now. https://idles.lnk.to/dancer  #IDLES #shorts",
+      "views": 13374,
+      "durationSec": 34,
+      "shortProxy": true
+    },
+    {
+      "id": "r8HiKtIG04k",
+      "title": "The new album out 16th February 2024. Pre-order now - https://idles.lnk.to/TANGK",
+      "views": 289287,
+      "durationSec": 14,
+      "shortProxy": true
+    },
+    {
+      "id": "A3ZZj5y6Qt4",
+      "title": "IDLES - DANCER  (Official Video)",
+      "views": 6396758,
+      "durationSec": 204,
+      "shortProxy": false
+    },
+    {
+      "id": "Mm2WfQXF2-U",
+      "title": "LOVE IS THE FING #IDLES #shorts",
+      "views": 4971,
+      "durationSec": 14,
+      "shortProxy": true
+    },
+    {
+      "id": "rLtoxMvYPWM",
+      "title": "I'm Scum.. #IDLES #shorts",
+      "views": 10931,
+      "durationSec": 35,
+      "shortProxy": true
+    },
+    {
+      "id": "o_9nFjXBttc",
+      "title": "There is a YouTube premiere of the music video for our new songk, \"Dancer\" on 18th Oct at 10AM BST",
+      "views": 9779,
+      "durationSec": 16,
+      "shortProxy": true
+    },
+    {
+      "id": "GWlz4EFzYdY",
+      "title": "Danny Nedelko at Splendour in the grass #IDLES #shorts",
+      "views": 8152,
+      "durationSec": 28,
+      "shortProxy": true
+    },
+    {
+      "id": "uFdBHocqZFk",
+      "title": "LOVE IS THE FING. Pre-save \"Dancer\" now - https://idles.lnk.to/dancer",
+      "views": 7123,
+      "durationSec": 14,
+      "shortProxy": true
+    },
+    {
+      "id": "DY_71_5AfaA",
+      "title": "\"Dancer\" out October 18th. Pre-save now - https://idles.lnk.to/dancer",
+      "views": 6202,
+      "durationSec": 21,
+      "shortProxy": true
+    },
+    {
+      "id": "O5bA1hWAckk",
+      "title": "Hip to hip. Cheek to cheek. Pre-save \"Dancer\" now https://idles.lnk.to/dancer",
+      "views": 14311,
+      "durationSec": 21,
+      "shortProxy": true
+    },
+    {
+      "id": "fRXwdE0IO7I",
+      "title": "LOVE IS THE FING #IDLES #tangk #shorts",
+      "views": 17045,
+      "durationSec": 12,
+      "shortProxy": true
+    },
+    {
+      "id": "S6LgxHcvHgk",
+      "title": "Send it #idles #shorts",
+      "views": 7247,
+      "durationSec": 19,
+      "shortProxy": true
+    },
+    {
+      "id": "ygk8RKoyVkA",
+      "title": "g r e a t #idles #shorts",
+      "views": 10066,
+      "durationSec": 18,
+      "shortProxy": true
+    },
+    {
+      "id": "78FWwuL3Pb4",
+      "title": "EUROPE 2024 TOUR ON SALE NOW #idles #shorts",
+      "views": 7863,
+      "durationSec": 60,
+      "shortProxy": true
+    },
+    {
+      "id": "uUcVPVQrKMw",
+      "title": "Fear leads to panic. Panic leads to pain. Pain leads to anger. Anger leads to hate #idles #shorts",
+      "views": 9389,
+      "durationSec": 31,
+      "shortProxy": true
+    },
+    {
+      "id": "MpfxopNzGVc",
+      "title": "LOVE IS THE FING #idles #shorts",
+      "views": 13425,
+      "durationSec": 13,
+      "shortProxy": true
+    },
+    {
+      "id": "RCLgMvr1e6w",
+      "title": "JOY IS STILL AN ACT OF RESISTANCE",
+      "views": 84808,
+      "durationSec": 60,
+      "shortProxy": true
+    },
+    {
+      "id": "03aWUYWqRrA",
+      "title": "Sending love and gratitude to everyone at @fallontonight for having us on and making us feel special",
+      "views": 36708,
+      "durationSec": 34,
+      "shortProxy": true
+    },
+    {
+      "id": "AneIifyXrAI",
+      "title": "IDLES - MAKING OF CRAWLER",
+      "views": 221924,
+      "durationSec": 663,
+      "shortProxy": false
+    },
+    {
+      "id": "IpvpJnR1MJk",
+      "title": "IDLES - 1049 GOTHO (Official Video)",
+      "views": 663863,
+      "durationSec": 227,
+      "shortProxy": false
+    },
+    {
+      "id": "qnAZrigEJhU",
+      "title": "IDLES - FAITH IN THE CITY (Live from BBC Introducing at Glastonbury)",
+      "views": 9583,
+      "durationSec": 156,
+      "shortProxy": false
+    },
+    {
+      "id": "1MUeCCAvmHg",
+      "title": "IDLES -  STENDHAL SYNDROME (Live from BBC Introducing at Glastonbury)",
+      "views": 4090,
+      "durationSec": 173,
+      "shortProxy": false
+    },
+    {
+      "id": "6DGT7WYrpw4",
+      "title": "IDLES - BENZOCAINE (Live from BBC Introducing at Glastonbury)",
+      "views": 4974,
+      "durationSec": 236,
+      "shortProxy": false
+    },
+    {
+      "id": "CHNMHoDDfeY",
+      "title": "IDLES -  EXETER (Live from BBC Introducing at Glastonbury)",
+      "views": 4452,
+      "durationSec": 289,
+      "shortProxy": false
+    },
+    {
+      "id": "WdmmAInwZkU",
+      "title": "IDLES - WELL DONE (Live from BBC Introducing at Glastonbury)",
+      "views": 7389,
+      "durationSec": 198,
+      "shortProxy": false
+    },
+    {
+      "id": "atvNu1jTp0Q",
+      "title": "IDLES - HEEL / HEAL (Live from BBC Introducing at Glastonbury)",
+      "views": 9156,
+      "durationSec": 235,
+      "shortProxy": false
+    },
+    {
+      "id": "c_VjnbMg5sU",
+      "title": "IDLES - DATE NIGHT (Live from BBC Introducing at Glastonbury)",
+      "views": 6347,
+      "durationSec": 199,
+      "shortProxy": false
+    },
+    {
+      "id": "g816yEC5rPM",
+      "title": "IDLES - RACHEL KHOO (Live from BBC Introducing at Glastonbury)",
+      "views": 3773,
+      "durationSec": 198,
+      "shortProxy": false
+    },
+    {
+      "id": "is2iOZ4GEao",
+      "title": "IDLES - SLOW SAVAGE (Live from BBC Introducing at Glastonbury)",
+      "views": 5279,
+      "durationSec": 214,
+      "shortProxy": false
+    },
+    {
+      "id": "l8CJpOc9wzU",
+      "title": "IDLES - MOTHER (Live from BBC Introducing at Glastonbury)",
+      "views": 9232,
+      "durationSec": 215,
+      "shortProxy": false
+    },
+    {
+      "id": "rtJUiStjaUY",
+      "title": "IDLES - DIVIDE AND CONQUER (Live from BBC Introducing at Glastonbury)",
+      "views": 7328,
+      "durationSec": 201,
+      "shortProxy": false
+    },
+    {
+      "id": "jVwkseKcXPM",
+      "title": "IDLES - WHITE PRIVILEGE (Live from BBC Introducing at Glastonbury)",
+      "views": 14615,
+      "durationSec": 343,
+      "shortProxy": false
+    },
+    {
+      "id": "c8lzs9ijRjI",
+      "title": "IDLES - The Beachland Ballroom (Live from My Den)",
+      "views": 108380,
+      "durationSec": 250,
+      "shortProxy": false
+    },
+    {
+      "id": "V1cvu0T440U",
+      "title": "IDLES - 1049 GOTHO (Live from BBC introducing at Glastonbury)",
+      "views": 53520,
+      "durationSec": 251,
+      "shortProxy": false
+    },
+    {
+      "id": "Swz8oLz0ifI",
+      "title": "Stockholm Syndrome music video out now! #idles #crawler #stockholmsyndrome #shorts",
+      "views": 10949,
+      "durationSec": 31,
+      "shortProxy": true
+    },
+    {
+      "id": "SNLTeeRkH6o",
+      "title": "IDLES - STOCKHOLM SYNDROME (Official Video)",
+      "views": 444407,
+      "durationSec": 183,
+      "shortProxy": false
+    },
+    {
+      "id": "AdtPymRWdtE",
+      "title": "IDLES - STOCKHOLM SYNDROME (OFFICIAL VIDEO TEASER)",
+      "views": 14955,
+      "durationSec": 15,
+      "shortProxy": true
+    },
+    {
+      "id": "Ip3m2JbKrGs",
+      "title": "IDLES - From The Basement Teaser",
+      "views": 15703,
+      "durationSec": 12,
+      "shortProxy": true
+    },
+    {
+      "id": "_j7hkKUd-1U",
+      "title": "Our US Tour starts tonight in San Diego at 6:30pm \ud83c\uddfa\ud83c\uddf8! #IDLES #CRAWLER #shorts",
+      "views": 14107,
+      "durationSec": 5,
+      "shortProxy": true
+    },
+    {
+      "id": "orxOMvmtgX8",
+      "title": "IDLES - CRAWL! (Official Video)",
+      "views": 1287443,
+      "durationSec": 261,
+      "shortProxy": false
+    },
+    {
+      "id": "K47KI6WC-MA",
+      "title": "IDLES - The End (In The Studio)",
+      "views": 24632,
+      "durationSec": 17,
+      "shortProxy": true
+    },
+    {
+      "id": "UGiThX22pqc",
+      "title": "IDLES - King Snake (In The Studio)",
+      "views": 109085,
+      "durationSec": 19,
+      "shortProxy": true
+    },
+    {
+      "id": "Xa8-dwnNEUM",
+      "title": "IDLES - Wizz (In The Studio)",
+      "views": 31974,
+      "durationSec": 25,
+      "shortProxy": true
+    },
+    {
+      "id": "JOEwdVhYsSw",
+      "title": "IDLES - Progress (In The Studio)",
+      "views": 23134,
+      "durationSec": 10,
+      "shortProxy": true
+    },
+    {
+      "id": "_WPuoQntpXg",
+      "title": "IDLES - Kelechi (In The Studio)",
+      "views": 10672,
+      "durationSec": 9,
+      "shortProxy": true
+    },
+    {
+      "id": "JyfSQE1WpMo",
+      "title": "IDLES - Meds (In The Studio)",
+      "views": 20641,
+      "durationSec": 14,
+      "shortProxy": true
+    },
+    {
+      "id": "SFFYSVlOHWg",
+      "title": "IDLES - Crawl! (In The Studio)",
+      "views": 33003,
+      "durationSec": 13,
+      "shortProxy": true
+    },
+    {
+      "id": "YS3TGwzDWaY",
+      "title": "IDLES - The Beachland Ballroom (In The Studio)",
+      "views": 24121,
+      "durationSec": 18,
+      "shortProxy": true
+    },
+    {
+      "id": "nyLlswYB_zY",
+      "title": "IDLES - WHEN THE LIGHTS COME ON (Official Video)",
+      "views": 1009782,
+      "durationSec": 194,
+      "shortProxy": false
+    },
+    {
+      "id": "vB2P3eaUPm8",
+      "title": "Q&A with Lee Kiernan - When the Lights Come On",
+      "views": 16954,
+      "durationSec": 2820,
+      "shortProxy": false
+    },
+    {
+      "id": "Up5gBtmGiZA",
+      "title": "IDLES - Stockholm Syndrome (In The Studio)",
+      "views": 28498,
+      "durationSec": 22,
+      "shortProxy": true
+    },
+    {
+      "id": "KYuIQW_Hydg",
+      "title": "IDLES - The New Sensation (In The Studio)",
+      "views": 52717,
+      "durationSec": 22,
+      "shortProxy": true
+    },
+    {
+      "id": "wqabBXNaT7M",
+      "title": "IDLES - Car Crash (In The Studio)",
+      "views": 214682,
+      "durationSec": 27,
+      "shortProxy": true
+    },
+    {
+      "id": "1Pa02zFAGtU",
+      "title": "IDLES - When The Lights Come On (In The Studio)",
+      "views": 21578,
+      "durationSec": 18,
+      "shortProxy": true
+    },
+    {
+      "id": "X1ZgwtJTvk0",
+      "title": "IDLES - The Wheel (In The Studio)",
+      "views": 49816,
+      "durationSec": 17,
+      "shortProxy": true
+    },
+    {
+      "id": "eKHLIpP_RGw",
+      "title": "IDLES - MTT 420 RR (In The Studio)",
+      "views": 40939,
+      "durationSec": 26,
+      "shortProxy": true
+    },
+    {
+      "id": "vJrlzxC4cCo",
+      "title": "IDLES - WHEN THE LIGHTS COME ON (Official Audio)",
+      "views": 198433,
+      "durationSec": 193,
+      "shortProxy": false
+    },
+    {
+      "id": "cLT6P0Q7Mt0",
+      "title": "IDLES - THE NEW SENSATION (Official Audio)",
+      "views": 346258,
+      "durationSec": 254,
+      "shortProxy": false
+    },
+    {
+      "id": "jlkInAScIfM",
+      "title": "IDLES - KELECHI (Official Audio)",
+      "views": 35920,
+      "durationSec": 30,
+      "shortProxy": true
+    },
+    {
+      "id": "geGMnjG9fYE",
+      "title": "IDLES - WIZZ (Official Audio)",
+      "views": 39524,
+      "durationSec": 31,
+      "shortProxy": true
+    },
+    {
+      "id": "drLL2aCPNtc",
+      "title": "IDLES - MTT 420 RR (Official Audio)",
+      "views": 1133112,
+      "durationSec": 332,
+      "shortProxy": false
+    },
+    {
+      "id": "9sLjJTQbSc8",
+      "title": "IDLES - STOCKHOLM SYNDROME (Official Audio)",
+      "views": 122012,
+      "durationSec": 183,
+      "shortProxy": false
+    },
+    {
+      "id": "OiiebWkA61M",
+      "title": "IDLES - CRAWL! (Official Audio)",
+      "views": 223991,
+      "durationSec": 261,
+      "shortProxy": false
+    },
+    {
+      "id": "1djRY4B749I",
+      "title": "IDLES - MEDS (Official Audio)",
+      "views": 268900,
+      "durationSec": 237,
+      "shortProxy": false
+    },
+    {
+      "id": "5lCciDewb24",
+      "title": "IDLES - PROGRESS (Official Audio)",
+      "views": 281325,
+      "durationSec": 227,
+      "shortProxy": false
+    },
+    {
+      "id": "aCTx3519xiU",
+      "title": "IDLES - THE END (Official Audio)",
+      "views": 188959,
+      "durationSec": 199,
+      "shortProxy": false
+    },
+    {
+      "id": "2MKk-33XRGM",
+      "title": "IDLES - THE WHEEL (Official Audio)",
+      "views": 532788,
+      "durationSec": 206,
+      "shortProxy": false
+    },
+    {
+      "id": "30Dzxl4BnMg",
+      "title": "IDLES - KING SNAKE (Official Audio)",
+      "views": 131037,
+      "durationSec": 175,
+      "shortProxy": false
+    },
+    {
+      "id": "t0QGMKPBmXw",
+      "title": "IDLES - THE BEACHLAND BALLROOM (Behind the Scenes #2)",
+      "views": 35378,
+      "durationSec": 15,
+      "shortProxy": true
+    },
+    {
+      "id": "3-vI2VGSV7w",
+      "title": "IDLES - THE BEACHLAND BALLROOM (Behind the Scenes)",
+      "views": 31489,
+      "durationSec": 16,
+      "shortProxy": true
+    },
+    {
+      "id": "Cw7jOq0op5E",
+      "title": "IDLES - CAR CRASH (Official Video)",
+      "views": 1152271,
+      "durationSec": 234,
+      "shortProxy": false
+    },
+    {
+      "id": "1VcAs2UuotI",
+      "title": "IDLES - THE BEACHLAND BALLROOM (Official Video, Pt. 2)",
+      "views": 802913,
+      "durationSec": 247,
+      "shortProxy": false
+    },
+    {
+      "id": "t7aktt5cDqs",
+      "title": "IDLES - THE BEACHLAND BALLROOM (Official Video, Pt. 1)",
+      "views": 1606258,
+      "durationSec": 247,
+      "shortProxy": false
+    },
+    {
+      "id": "CimwIuYvpxM",
+      "title": "IDLES \u2013 THE GOD THAT FAILED from The Metallica Blacklist (Official Video)",
+      "views": 264543,
+      "durationSec": 237,
+      "shortProxy": false
+    },
+    {
+      "id": "7zetAnXjudU",
+      "title": "BALLEY TV SPECIAL - IDLES - In Defence of the Arts (recorded at House of Vans London)",
+      "views": 91152,
+      "durationSec": 3382,
+      "shortProxy": false
+    },
+    {
+      "id": "hahL7VZiJtk",
+      "title": "IDLES - MODEL VILLAGE ft SLOWTHAI (Official Audio)",
+      "views": 121181,
+      "durationSec": 236,
+      "shortProxy": false
+    },
+    {
+      "id": "UumTb9kUMnc",
+      "title": "IDLES - SODIUM (Dark Nights: Death Metal Soundtrack)",
+      "views": 119672,
+      "durationSec": 232,
+      "shortProxy": false
+    },
+    {
+      "id": "JyuItb3SX9o",
+      "title": "IDLES - DAMAGED GOODS (Official Audio)",
+      "views": 395255,
+      "durationSec": 160,
+      "shortProxy": false
+    },
+    {
+      "id": "llu3A0q2o74",
+      "title": "IDLES - WHITE PRIVILEGE (OffIcial Audio)",
+      "views": 94184,
+      "durationSec": 183,
+      "shortProxy": false
+    },
+    {
+      "id": "OEDlS6vd7ac",
+      "title": "IDLES - SLOW SAVAGE (Official Audio)",
+      "views": 108799,
+      "durationSec": 222,
+      "shortProxy": false
+    },
+    {
+      "id": "gTUx90RKHR0",
+      "title": "IDLES - RACHEL KHOO (Official Audio)",
+      "views": 127063,
+      "durationSec": 207,
+      "shortProxy": false
+    },
+    {
+      "id": "jyPQXFlOM5E",
+      "title": "IDLES - HEEL/HEAL (Official Audio)",
+      "views": 163063,
+      "durationSec": 209,
+      "shortProxy": false
+    },
+    {
+      "id": "yYXp7H4Qb-4",
+      "title": "IDLES - FAITH IN THE CITY (Official Audio)",
+      "views": 73980,
+      "durationSec": 157,
+      "shortProxy": false
+    },
+    {
+      "id": "JyLronZ5HTo",
+      "title": "IDLES - EXETER (Official Audio)",
+      "views": 87517,
+      "durationSec": 240,
+      "shortProxy": false
+    },
+    {
+      "id": "nVxyUNtELUM",
+      "title": "IDLES -  DATE NIGHT (Official Audio)",
+      "views": 117170,
+      "durationSec": 188,
+      "shortProxy": false
+    },
+    {
+      "id": "Jrc1DnEaJ_o",
+      "title": "IDLES - BENZOCAINE (Official Audio)",
+      "views": 127984,
+      "durationSec": 159,
+      "shortProxy": false
+    },
+    {
+      "id": "KfFA84BZkb4",
+      "title": "IDLES - 1049 GOTHO (Official Audio)",
+      "views": 202443,
+      "durationSec": 227,
+      "shortProxy": false
+    },
+    {
+      "id": "sGiyPfSX2WU",
+      "title": "IDLES - CARCINOGENIC (Live for Independent Venue Week)",
+      "views": 481656,
+      "durationSec": 244,
+      "shortProxy": false
+    },
+    {
+      "id": "NLLL4MSiLZM",
+      "title": "IDLES Live Stream",
+      "views": 0,
+      "durationSec": 0,
+      "shortProxy": false
+    },
+    {
+      "id": "fO11I2v4JOY",
+      "title": "IDLES - REIGNS  (Official Video)",
+      "views": 484713,
+      "durationSec": 255,
+      "shortProxy": false
+    },
+    {
+      "id": "mu-eGA10NBw",
+      "title": "GENKS - Episode 4 Xmas Special with Warren Ellis",
+      "views": 15781,
+      "durationSec": 4820,
+      "shortProxy": false
+    },
+    {
+      "id": "SELdxmlg2Cw",
+      "title": "IDLES - KILL THEM WITH KINDNESS  (Official Video)",
+      "views": 1403281,
+      "durationSec": 231,
+      "shortProxy": false
+    },
+    {
+      "id": "_2a0W3-nulA",
+      "title": "Don't Go Gentle: A Film about IDLES (Official Trailer)",
+      "views": 88446,
+      "durationSec": 87,
+      "shortProxy": false
+    },
+    {
+      "id": "xxt-ZaPFcO0",
+      "title": "IDLES - NE TOUCHE PAS MOI (Official Audio)",
+      "views": 300321,
+      "durationSec": 154,
+      "shortProxy": false
+    },
+    {
+      "id": "DiRc2YIRQWQ",
+      "title": "IDLES - CARCINOGENIC (Official Audio)",
+      "views": 322527,
+      "durationSec": 231,
+      "shortProxy": false
+    },
+    {
+      "id": "fXpRitJkGuM",
+      "title": "IDLES - REIGNS (Official Audio)",
+      "views": 274382,
+      "durationSec": 243,
+      "shortProxy": false
+    },
+    {
+      "id": "QZxNmZufpEc",
+      "title": "IDLES - ANXIETY (Official Audio)",
+      "views": 321023,
+      "durationSec": 180,
+      "shortProxy": false
+    },
+    {
+      "id": "Jh8L4wmC8-U",
+      "title": "IDLES - THE LOVER (Official Audio)",
+      "views": 189619,
+      "durationSec": 197,
+      "shortProxy": false
+    },
+    {
+      "id": "QK43Shs6CgQ",
+      "title": "IDLES - DANKE (Official Audio)",
+      "views": 183464,
+      "durationSec": 215,
+      "shortProxy": false
+    },
+    {
+      "id": "vlP9zxYFmSM",
+      "title": "IDLES - KILL THEM WITH KINDNESS (Official Audio)",
+      "views": 233206,
+      "durationSec": 230,
+      "shortProxy": false
+    },
+    {
+      "id": "BLcM3fq6Quk",
+      "title": "IDLES - WAR (Official Video)",
+      "views": 2168946,
+      "durationSec": 189,
+      "shortProxy": false
+    },
+    {
+      "id": "2YPcApjn9hw",
+      "title": "DUMB & DRUMBER - Episode 4 - IDLES vs HEAVY LUNGS",
+      "views": 5042,
+      "durationSec": 1252,
+      "shortProxy": false
+    },
+    {
+      "id": "L2NMOsDP3zA",
+      "title": "GENKS - Episode 3 with Oliver Ackermann (Death By Audio/A Place to Bury Strangers)",
+      "views": 15654,
+      "durationSec": 3765,
+      "shortProxy": false
+    },
+    {
+      "id": "Nr0sTMSmcOo",
+      "title": "DUMB & DRUMBER - Episode 3 - IDLES vs SURFBORT",
+      "views": 5182,
+      "durationSec": 1406,
+      "shortProxy": false
+    },
+    {
+      "id": "NyOh4UKjcpo",
+      "title": "DUMB & DRUMBER - Episode 2 - IDLES vs LIFE",
+      "views": 5823,
+      "durationSec": 1676,
+      "shortProxy": false
+    },
+    {
+      "id": "Lxl8OP19UvA",
+      "title": "24.08.20",
+      "views": 19698,
+      "durationSec": 14,
+      "shortProxy": true
+    },
+    {
+      "id": "XHDAk5dRdG4",
+      "title": "BALLEY TV - Episode 6 with Ishmael Butler and Sharon Van Etten",
+      "views": 10568,
+      "durationSec": 2376,
+      "shortProxy": false
+    },
+    {
+      "id": "sjr11lGEBg4",
+      "title": "IDLES - MODEL VILLAGE (Official Video)",
+      "views": 1154909,
+      "durationSec": 248,
+      "shortProxy": false
+    },
+    {
+      "id": "4blhPUS6aSQ",
+      "title": "GENKS - Episode 2 with Cate Le Bon",
+      "views": 18757,
+      "durationSec": 2490,
+      "shortProxy": false
+    },
+    {
+      "id": "P7muy2NFDrQ",
+      "title": "IDLES - Model Village (Teaser)",
+      "views": 19445,
+      "durationSec": 30,
+      "shortProxy": true
+    },
+    {
+      "id": "Fej2QbN9yJs",
+      "title": "ULTRA MONO - A HYMN (Guitar Play Through)",
+      "views": 28330,
+      "durationSec": 809,
+      "shortProxy": false
+    },
+    {
+      "id": "bRvUZ5TLLm8",
+      "title": "ULTRA MONO - MR. MOTIVATOR  (Guitar Play Through)",
+      "views": 23795,
+      "durationSec": 795,
+      "shortProxy": false
+    },
+    {
+      "id": "HRj8P5ssviw",
+      "title": "ULTRA MONO - GROUNDS (Guitar Play Through)",
+      "views": 95489,
+      "durationSec": 876,
+      "shortProxy": false
+    },
+    {
+      "id": "E5dF0wf2xq8",
+      "title": "Mark Bowen - Lollapalooza 2020 Livestream",
+      "views": 26465,
+      "durationSec": 873,
+      "shortProxy": false
+    },
+    {
+      "id": "ZNM3lE74JNg",
+      "title": "BALLEY TV - Episode 5 with Jeff Ament, Jehnny Beth & Fern Ford",
+      "views": 12059,
+      "durationSec": 2703,
+      "shortProxy": false
+    },
+    {
+      "id": "VaOBZekxOjY",
+      "title": "DUMB & DRUMBER - Episode 1 - IDLES vs THE NATIONAL",
+      "views": 23609,
+      "durationSec": 1990,
+      "shortProxy": false
+    },
+    {
+      "id": "Y7BtLlNO30w",
+      "title": "BALLEY TV - Episode 4 with Kenny Beats & Kate Tempest",
+      "views": 22437,
+      "durationSec": 3586,
+      "shortProxy": false
+    },
+    {
+      "id": "BJHn6ab-DtE",
+      "title": "IDLES - A HYMN (Edit) (Official Audio)",
+      "views": 78983,
+      "durationSec": 263,
+      "shortProxy": false
+    },
+    {
+      "id": "eYGtGcJ8rKw",
+      "title": "IDLES - A HYMN (Official Video)",
+      "views": 2800587,
+      "durationSec": 320,
+      "shortProxy": false
+    },
+    {
+      "id": "itHze8bccCU",
+      "title": "GENKS - Episode 1 with Alan Duggan (Girl Band)",
+      "views": 32573,
+      "durationSec": 2520,
+      "shortProxy": false
+    },
+    {
+      "id": "3jCKpqwFIuQ",
+      "title": "BALLEY TV - Episode 3 with Billy Bragg & Arlo Parks",
+      "views": 18105,
+      "durationSec": 2547,
+      "shortProxy": false
+    },
+    {
+      "id": "gV1FKjMi6FQ",
+      "title": "BALLEY TV - Episode 2 with Lauren Mayberry & Hak Baker",
+      "views": 29354,
+      "durationSec": 2490,
+      "shortProxy": false
+    },
+    {
+      "id": "mRkUt9VnaR0",
+      "title": "IDLES - GROUNDS (Official Video)",
+      "views": 3077215,
+      "durationSec": 221,
+      "shortProxy": false
+    },
+    {
+      "id": "hHsbPcYdi34",
+      "title": "BALLEY TV - Episode 1 with Mike Skinner and Nadya Tolokonnikova",
+      "views": 72429,
+      "durationSec": 2035,
+      "shortProxy": false
+    },
+    {
+      "id": "YNCopmqsw1Q",
+      "title": "IDLES - MR.MOTIVATOR (Official Video)",
+      "views": 2999733,
+      "durationSec": 208,
+      "shortProxy": false
+    },
+    {
+      "id": "XBdspjpXBm4",
+      "title": "Part 5 Live Q&A with Joe",
+      "views": 23655,
+      "durationSec": 4848,
+      "shortProxy": false
+    },
+    {
+      "id": "0lbH_Z-Xi1Q",
+      "title": "IDLES live at Le Bataclan in Paris, Dec 2018 (Full Concert)",
+      "views": 529340,
+      "durationSec": 6184,
+      "shortProxy": false
+    },
+    {
+      "id": "f7QWyzOKzrg",
+      "title": "Part 4 Live Q&A with Bobo",
+      "views": 10563,
+      "durationSec": 3168,
+      "shortProxy": false
+    },
+    {
+      "id": "EC0bBLqZcVQ",
+      "title": "Part 3 Live Q&A with Leeeeeeeee",
+      "views": 10246,
+      "durationSec": 2901,
+      "shortProxy": false
+    },
+    {
+      "id": "_H8x3qvs7z4",
+      "title": "Part 2 Live Q&A with Dev from IDLES",
+      "views": 9787,
+      "durationSec": 2200,
+      "shortProxy": false
+    },
+    {
+      "id": "thO361NjdXs",
+      "title": "Part 1 Live Q&A with Jon from IDLES",
+      "views": 11014,
+      "durationSec": 2047,
+      "shortProxy": false
+    },
+    {
+      "id": "aU0RhVzp268",
+      "title": "IDLES - GREAT (Live at Le Bataclan)",
+      "views": 167749,
+      "durationSec": 199,
+      "shortProxy": false
+    },
+    {
+      "id": "ggFrG6Wliiw",
+      "title": "IDLES - TELEVISION (Live at Le Bataclan)",
+      "views": 122753,
+      "durationSec": 207,
+      "shortProxy": false
+    },
+    {
+      "id": "jc4XigR4HaQ",
+      "title": "IDLES - MOTHER (Live at Le Bataclan)",
+      "views": 517044,
+      "durationSec": 208,
+      "shortProxy": false
+    },
+    {
+      "id": "2W6zK9givao",
+      "title": "IDLES - MERCEDES MARXIST (Official Video)",
+      "views": 1690374,
+      "durationSec": 217,
+      "shortProxy": false
+    },
+    {
+      "id": "ZvNc2i5vIBE",
+      "title": "IDLES - I DREAM GUILLOTINE (Official Audio)",
+      "views": 291053,
+      "durationSec": 237,
+      "shortProxy": false
+    },
+    {
+      "id": "dEe4i2osF5A",
+      "title": "IDLES - NEVER FIGHT A MAN WITH A PERM (Official Video)",
+      "views": 4340171,
+      "durationSec": 229,
+      "shortProxy": false
+    },
+    {
+      "id": "GZeukZ7wEyw",
+      "title": "IDLES x Love Music Hate Racism Part 1",
+      "views": 15343,
+      "durationSec": 240,
+      "shortProxy": false
+    },
+    {
+      "id": "GK0IoBb-nhM",
+      "title": "IDLES - TELEVISION (Official Audio)",
+      "views": 1021395,
+      "durationSec": 194,
+      "shortProxy": false
+    },
+    {
+      "id": "HyB6aN__y5w",
+      "title": "IDLES - LOVE SONG (Official Audio)",
+      "views": 794296,
+      "durationSec": 186,
+      "shortProxy": false
+    },
+    {
+      "id": "LrM5y-iCNiE",
+      "title": "IDLES - I'M SCUM (Official Audio)",
+      "views": 2841155,
+      "durationSec": 191,
+      "shortProxy": false
+    },
+    {
+      "id": "NZ0_xyNBev4",
+      "title": "IDLES - GRAM ROCK (Official Audio)",
+      "views": 342540,
+      "durationSec": 149,
+      "shortProxy": false
+    },
+    {
+      "id": "TCORxrEgr1o",
+      "title": "IDLES - JUNE (Official Audio)",
+      "views": 477651,
+      "durationSec": 216,
+      "shortProxy": false
+    },
+    {
+      "id": "mHBDqT0GF-U",
+      "title": "IDLES - ROTTWEILER (Official Audio)",
+      "views": 364495,
+      "durationSec": 326,
+      "shortProxy": false
+    },
+    {
+      "id": "oeiqpSoiQFI",
+      "title": "IDLES - CRY TO ME Official Audio)",
+      "views": 289350,
+      "durationSec": 145,
+      "shortProxy": false
+    },
+    {
+      "id": "3CzNOD7ukMA",
+      "title": "IDLES - GREAT (Official Video)",
+      "views": 1843673,
+      "durationSec": 180,
+      "shortProxy": false
+    },
+    {
+      "id": "_pfiW6I495Q",
+      "title": "Joy as an Act of Resistance London Exhibition",
+      "views": 21403,
+      "durationSec": 102,
+      "shortProxy": false
+    },
+    {
+      "id": "si2pZRifgIo",
+      "title": "IDLES - SAMARITANS (Official Video)",
+      "views": 2625884,
+      "durationSec": 217,
+      "shortProxy": false
+    },
+    {
+      "id": "QkF_G-RF66M",
+      "title": "IDLES - DANNY NEDELKO (Official Video)",
+      "views": 5506949,
+      "durationSec": 220,
+      "shortProxy": false
+    },
+    {
+      "id": "VODKZxsRa_E",
+      "title": "IDLES - COLOSSUS (Official Video)",
+      "views": 7421849,
+      "durationSec": 345,
+      "shortProxy": false
+    },
+    {
+      "id": "F901emh112U",
+      "title": "IDLES - BRUTALISM (FULL ALBUM)",
+      "views": 634170,
+      "durationSec": 2512,
+      "shortProxy": false
+    },
+    {
+      "id": "v49AE2nMhTI",
+      "title": "IDLES - DIVIDE & CONQUER Yala! Session",
+      "views": 43222,
+      "durationSec": 215,
+      "shortProxy": false
+    },
+    {
+      "id": "PdTlflhCRjU",
+      "title": "IDLES - WELL DONE Yala! Session",
+      "views": 23740,
+      "durationSec": 181,
+      "shortProxy": false
+    },
+    {
+      "id": "BuQG6_evFc8",
+      "title": "IDLES - MOTHER (Official Video)",
+      "views": 6562081,
+      "durationSec": 305,
+      "shortProxy": false
+    },
+    {
+      "id": "sBdQZins_qM",
+      "title": "IDLES - STENDHAL SYNDROME (Official Video)",
+      "views": 636976,
+      "durationSec": 158,
+      "shortProxy": false
+    },
+    {
+      "id": "7Oxqf_15k0w",
+      "title": "IDLES - WELL DONE (Official Video)",
+      "views": 2395399,
+      "durationSec": 206,
+      "shortProxy": false
+    },
+    {
+      "id": "P4SAIOp7Q3U",
+      "title": "IDLES - DIVIDE & CONQUER (Official Video)",
+      "views": 621210,
+      "durationSec": 212,
+      "shortProxy": false
+    },
+    {
+      "id": "Lw6DHUBPTf4",
+      "title": "IDLES - QUEENS (David Pajo - Remix)",
+      "views": 7544,
+      "durationSec": 215,
+      "shortProxy": false
+    },
+    {
+      "id": "901QI6Dk1B8",
+      "title": "IDLES -  THE IDLES CHANT (Official Video)",
+      "views": 937920,
+      "durationSec": 291,
+      "shortProxy": false
+    },
+    {
+      "id": "oUL6A8gwSdI",
+      "title": "IDLES - ROMANTIC GESTURES (Official Video)",
+      "views": 270363,
+      "durationSec": 203,
+      "shortProxy": false
+    },
+    {
+      "id": "vblt9D9piUM",
+      "title": "IDLES - QUEENS (Official Video)",
+      "views": 313926,
+      "durationSec": 201,
+      "shortProxy": false
+    },
+    {
+      "id": "tV4BrjlUpSk",
+      "title": "IDLES - TWO TONE (Official Video)",
+      "views": 465763,
+      "durationSec": 235,
+      "shortProxy": false
+    },
+    {
+      "id": "P-3RrM-U8FQ",
+      "title": "IDLES - GERMANY (Official Video)",
+      "views": 356556,
+      "durationSec": 238,
+      "shortProxy": false
+    },
+    {
+      "id": "sF92adgDwGE",
+      "title": "IDLES - 26/27 (Official Video)",
+      "views": 421515,
+      "durationSec": 327,
+      "shortProxy": false
+    },
+    {
+      "id": "Zllq2ZqM700",
+      "title": "IDLES - MEYDEI (Official Video)",
+      "views": 847055,
+      "durationSec": 286,
+      "shortProxy": false
+    },
+    {
+      "id": "qpvVZVVMeJk",
+      "title": "IDLES - THIEVES (Official Video)",
+      "views": 366292,
+      "durationSec": 190,
+      "shortProxy": false
+    }
+  ]
+}
