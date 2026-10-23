@@ -39,7 +39,7 @@ export function findPatterns(bank: Bank): Pattern[] {
   const bySeries = new Map<string, Row[]>();
   for (const r of rows) { const k = seriesKey(r.obs); bySeries.set(k, [...(bySeries.get(k) ?? []), r]); }
   const out: Pattern[] = [];
-  for (const [sk, series] of bySeries) {
+  for (const [sk, series] of Array.from(bySeries.entries())) {
     const obs = series[0].obs;
     const periods = bank.seriesPeriods.get(sk) ?? [obs.period];
     const entity = MEASURE_ENTITY[obs.measure];
@@ -47,7 +47,7 @@ export function findPatterns(bank: Bank): Pattern[] {
       if (dimension === 'presentation' && entity !== 'video') continue;
       const labelled = series.filter(r => labelsOf(r).some(l => l.dimension === dimension));
       if (!labelled.length) continue;
-      const values = new Set(labelled.flatMap(r => labelsOf(r).filter(l => l.dimension === dimension).map(l => l.value)));
+      const values = Array.from(new Set(labelled.flatMap(r => labelsOf(r).filter(l => l.dimension === dimension).map(l => l.value))));
       for (const value of values) {
         const hits = labelled.filter(r => labelsOf(r).some(l => l.dimension === dimension && l.value === value));
         const entities = new Set(hits.map(entityKey));

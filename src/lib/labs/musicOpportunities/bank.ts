@@ -82,14 +82,14 @@ export function buildBank(observations: ChartObservation[], human: HumanLabel[] 
       songs.set(key, s);
     }
   }
-  for (const s of songs.values()) {
+  for (const s of Array.from(songs.values())) {
     s.appearances.sort((a, b) => a.period.localeCompare(b.period) || a.territory.localeCompare(b.territory));
     const latestPeriod = s.appearances.at(-1)!.period;
     const subjects = [s.key, ...s.artists.flatMap(splitCredit).map(a => `artist:${normArtist(a)}`)];
     s.labels = classifyChartRow({ title: s.title, artists: s.artists, releaseDate: s.releaseDate }, 'song', latestPeriod, humanLabelsFor(subjects, human));
     for (const vid of s.linkedVideoIds) { const v = videos.get(vid); if (v && !v.songKey) v.songKey = s.key; }
   }
-  for (const v of videos.values()) {
+  for (const v of Array.from(videos.values())) {
     v.appearances.sort((a, b) => a.period.localeCompare(b.period) || a.territory.localeCompare(b.territory));
     const subjects = [`video:${v.videoId}`, ...(v.songKey ? [v.songKey] : []), ...v.artists.flatMap(splitCredit).map(a => `artist:${normArtist(a)}`)];
     v.labels = classifyChartRow({ title: v.title, artists: v.artists, releaseDate: v.releaseDate }, 'video', v.appearances.at(-1)!.period, humanLabelsFor(subjects, human));
@@ -125,7 +125,7 @@ export function persistence(appearances: Appearance[], seriesPeriods: Map<string
 /** Rows of the latest reading per series, with the record behind each row. */
 export function latestRows(bank: Bank): { obs: ChartObservation; entry: ChartEntry; song: SongRecord | null; video: VideoRecord | null }[] {
   const out: ReturnType<typeof latestRows> = [];
-  for (const obs of bank.latest.values()) {
+  for (const obs of Array.from(bank.latest.values())) {
     const entity = MEASURE_ENTITY[obs.measure];
     for (const entry of obs.entries) {
       out.push({ obs, entry, song: entity === 'song' ? bank.songs.get(songKey(entry)) ?? null : null, video: entity === 'video' && entry.videoId ? bank.videos.get(entry.videoId) ?? null : null });

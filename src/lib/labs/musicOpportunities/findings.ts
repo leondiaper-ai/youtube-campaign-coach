@@ -54,7 +54,7 @@ export function buildFindings(bank: Bank, patterns: Pattern[], opportunities: Op
 
   /* 2. Era: how much of the song chart is catalogue. */
   const songByRow = new Map<string, SongRecord>();
-  for (const s of bank.songs.values()) for (const a of s.appearances) songByRow.set(`${a.observationId}#${a.rank}`, s);
+  for (const s of Array.from(bank.songs.values())) for (const a of s.appearances) songByRow.set(`${a.observationId}#${a.rank}`, s);
   for (const obs of series.filter(o => o.measure === 'song-views-weekly')) {
     const songs = obs.entries.map(e => songByRow.get(`${obs.id}#${e.rank}`)).filter((s): s is SongRecord => !!s);
     const era = (v: RegExp) => songs.filter(s => s.labels.some(l => l.dimension === 'era' && v.test(l.value)));
