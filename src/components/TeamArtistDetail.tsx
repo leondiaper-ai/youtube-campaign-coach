@@ -60,7 +60,9 @@ export default async function TeamArtistDetail({ slug, team = 'nordics', backHre
   const snap = await readLiveSnap(entry.channelId);
   const history = snap?.channelId ? await readHistory(snap.channelId) : [];
 
-  const campaignStart = entry.campaignStartDate || null;
+  // Match the priority card: a manual campaign date takes precedence,
+  // otherwise the pin/add date is the tracking baseline, not a stated start.
+  const campaignStart = entry.campaignStartDate || entry.pinnedAt || entry.createdAt;
   const nc = normalizeChannelData(snap, history, campaignStart ? {
     campaignName: entry.campaignName || 'Tracking',
     campaignStartDate: campaignStart,
@@ -106,8 +108,9 @@ export default async function TeamArtistDetail({ slug, team = 'nordics', backHre
      somebody who ran the campaign knows when it started. */
   const perf = campaignPerformanceFor({
     uploads: (snap?.recentUploads ?? []) as { publishedAt: string; viewCount?: number | null; durationSec?: number | null }[],
-    statedAt: campaignStart || null,
+    statedAt: entry.campaignStartDate || null,
     statedBy: 'Team Watcher',
+    baselineAt: campaignStart,
   });
   if (campaignStart) {
     campaignDay = perf?.day ?? null;
@@ -135,7 +138,7 @@ export default async function TeamArtistDetail({ slug, team = 'nordics', backHre
   // Campaign content stats (if campaign is active)
   const campaignUploads = campaignStart
     ? (snap?.recentUploads ?? []).filter(
-        (u: { publishedAt: string }) => new Date(u.publishedAt).getTime() >= new Date(campaignStart).getTime()
+        (u: { publishedAt: string }) => new Date(u.publishedAt).getTime() >= new Date(perf?.start.at ?? campaignStart).getTime()
       )
     : [];
   /* From campaignWindow.ts, not from a fourth copy of the same reduce. */

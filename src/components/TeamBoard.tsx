@@ -16,6 +16,8 @@ import {
 import { rankByMomentum } from '@/lib/videoMomentum';
 import { commentDemand } from '@/lib/commentDemand';
 import { bestFormatStack } from '@/lib/formatStack';
+import { resolveRowFormatSplit } from '@/lib/formatSplit';
+import { readFormatDaysBatch } from '@/lib/formatHistory';
 import { checkContentStructure, computeMultiformat } from '@/lib/contentStructure';
 import { listEntries, type TeamWatcherEntry } from '@/lib/teamWatcherStore';
 import ChannelHealthBoard, { type RowData } from '@/components/ChannelHealthBoard';
@@ -69,10 +71,19 @@ export default async function TeamBoard({ team, linkPrefix, linkSuffix = '' }: {
   const custom = await listCustomArtists();
   const allArtists = mergeArtistLists(ARTISTS, custom);
 
+  // Read each channel once for both tabs. Format history is a single cached
+  // batch, matching the UK board without adding any YouTube API requests.
+  const [snapEntries, formatDaysByChannel] = await Promise.all([
+    Promise.all(entries.map(async (entry) =>
+      [entry.channelId, await readLiveSnap(entry.channelId)] as const)),
+    readFormatDaysBatch(entries.map((entry) => entry.channelId)),
+  ]);
+  const snapsByChannel = new Map(snapEntries);
+
   // ── Build RowData for Channel Health table (ALL entries) ──────────────
   const rows: RowData[] = await Promise.all(
     entries.map(async (entry) => {
-      const snap = await readLiveSnap(entry.channelId);
+      const snap = snapsByChannel.get(entry.channelId) ?? null;
       const history = snap?.channelId ? await readHistory(snap.channelId) : [];
       const nc = normalizeChannelData(snap, history);
 
@@ -133,6 +144,13 @@ export default async function TeamBoard({ team, linkPrefix, linkSuffix = '' }: {
         formatStack: snap?.recentUploads
           ? bestFormatStack(snap.recentUploads, entry.displayName) ?? undefined
           : undefined,
+        formatSplit: snap?.recentUploads
+          ? resolveRowFormatSplit(
+              snap.recentUploads,
+              formatDaysByChannel.get(entry.channelId) ?? [],
+              snap.views ?? null,
+            ) ?? undefined
+          : undefined,
       };
     }),
   );
@@ -152,9 +170,12 @@ export default async function TeamBoard({ team, linkPrefix, linkSuffix = '' }: {
 
   const campaignCards: TeamCardData[] = await Promise.all(
     pinnedEntries.map(async (entry) => {
-      const snap = await readLiveSnap(entry.channelId);
+      const snap = snapsByChannel.get(entry.channelId) ?? null;
       const history = snap?.channelId ? await readHistory(snap.channelId) : [];
-      const campaignStart = entry.campaignStartDate || null;
+      // A missing manual date must not remove the campaign panel. As on
+      // the UK board, pinning supplies a tracking baseline; the shared
+      // resolver can still identify an earlier observable campaign onset.
+      const campaignStart = entry.campaignStartDate || entry.pinnedAt || entry.createdAt;
       /* Ranked by views added in the last week, exactly as the campaigns
          board does it, so a team's priority tiles and the central board
          never order the same channel differently. */
@@ -222,8 +243,9 @@ export default async function TeamBoard({ team, linkPrefix, linkSuffix = '' }: {
          The uploads were one property away. */
       const perf = campaignPerformanceFor({
         uploads: (snap?.recentUploads ?? []) as { publishedAt: string; viewCount?: number | null; durationSec?: number | null }[],
-        statedAt: campaignStart || null,
+        statedAt: entry.campaignStartDate || null,
         statedBy: 'Team Watcher',
+        baselineAt: campaignStart,
       });
       let campaignViews: number | null = null;
       let campaignAssets: number | null = null;
@@ -245,8 +267,8 @@ export default async function TeamBoard({ team, linkPrefix, linkSuffix = '' }: {
       /* ── WEEKLY PROGRESS AND TREND ──────────────────────────────
          Same windows the campaigns board uses, from the same helper,
          so a team's week 3 is our week 3. Absent when there is no
-         stated campaign start, because without one there is nothing to
-         count weeks from. */
+         tracking start, keeping channel movement separate from the
+         resolved campaign-upload window. */
       const weeklyWindows = campaignStart
         ? computeWeeklyWindows(history, campaignStart)
         : [];
@@ -307,6 +329,8 @@ export default async function TeamBoard({ team, linkPrefix, linkSuffix = '' }: {
         priority: 'normal' as const,
         subs7Delta: subs7Val,
         views7Delta: views7Val,
+        subs30Delta: rawDelta(nc.subs30d),
+        views30Delta: rawDelta(nc.views30d),
         uploads30d: nc.cadence.uploads30d,
         shorts30d: nc.cadence.shorts30d,
         boardStatus: currentStatus,
@@ -361,7 +385,10 @@ export default async function TeamBoard({ team, linkPrefix, linkSuffix = '' }: {
           daysAgo: Math.max(0, Math.floor((Date.now() - Date.parse(v.publishedAt)) / 86400000)),
         })),
         structureWarning: snap?.recentUploads
-          ? checkContentStructure(snap.recentUploads)
+          ? checkContentStructure(perf
+              ? snap.recentUploads.filter((upload) =>
+                  Date.parse(upload.publishedAt) >= Date.parse(perf.start.at))
+              : snap.recentUploads)
           : null,
         confidence: nc.confidence,
         healthNote: nc.healthNote,
