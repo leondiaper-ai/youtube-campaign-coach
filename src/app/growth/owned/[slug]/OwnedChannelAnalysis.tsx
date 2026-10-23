@@ -5,6 +5,7 @@ import { useState, type ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
 import { OWNED_CHANNELS, validChannelId } from '@/lib/ownedChannels/channels';
 import { DAY, LENGTH_LABELS, lengthGroup, lengthBreakdown, librarySummary, meanDailyViews, observedMovement, publishingSeries, type OwnedAnalysis } from '@/lib/ownedChannels/analysis';
+import { UPLOAD_SAMPLE_CAP } from '@/lib/ownedChannels/metrics';
 import { GrowthChart, PublishingChart, LengthChart } from './OwnedChannelCharts';
 
 const fmt = (n: number | null | undefined) => n == null ? '—' : new Intl.NumberFormat('en-GB', { notation: 'compact', maximumFractionDigits: 1 }).format(n);
@@ -194,7 +195,7 @@ export default function OwnedChannelAnalysis({ analysis, canCollect, readFailed,
     <details className="mt-6 bg-surface border border-line rounded-card px-5 py-4 text-meta text-secondary">
       <summary className="font-semibold text-ink cursor-pointer">Data coverage and definitions</summary>
       <div className="grid md:grid-cols-3 gap-5 mt-4 leading-relaxed">
-        <p><strong className="block text-ink mb-1">What is recorded</strong>{row.current ? `${row.current.items.length} public uploads in the latest sample. ${row.current.reachedEnd ? 'The public upload list was exhausted.' : row.current.reachedWindow ? 'The 18-month sample window was reached.' : 'The 300-upload cap was reached; coverage may be partial.'}` : 'No public upload reading yet.'} Channel totals and video totals can differ. No growth is backfilled.</p>
+        <p><strong className="block text-ink mb-1">What is recorded</strong>{row.current ? `${row.current.items.length} public uploads in the latest sample. ${row.current.reachedEnd ? 'The public upload list was exhausted.' : row.current.reachedWindow ? 'The 18-month sample window was reached.' : `The ${UPLOAD_SAMPLE_CAP}-upload cap was reached; coverage may be partial.`}` : 'No public upload reading yet.'} Channel totals and video totals can differ. No growth is backfilled.</p>
         <p><strong className="block text-ink mb-1">How to read comparisons</strong>Typical track views use eligible tracks aged 7–30 days; the sample is not age matched. Recorded video gains require readings about seven days apart.{analysis.baselineAt ? ` Baseline: ${date(analysis.baselineAt)}.` : ' No seven-day baseline is available yet.'} Count corrections can be negative. Missing counts stay blank.</p>
         <p><strong className="block text-ink mb-1">What needs channel access</strong>Watch time, returning viewers, traffic sources, revenue and audience movement to artist channels are not available in these public readings. Likes and comments appear after a new collection; older readings may not contain them.</p>
       </div>

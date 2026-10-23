@@ -1,4 +1,5 @@
 import { validChannelId } from './channels';
+import { UPLOAD_SAMPLE_CAP } from './metrics';
 import type { OwnedSnapshot, OwnedVideo } from './metrics';
 
 type YtItem = {
@@ -13,7 +14,16 @@ const duration = (s?: string) => {
   return m ? (+m[1] || 0) * 86400 + (+m[2] || 0) * 3600 + (+m[3] || 0) * 60 + (+m[4] || 0) : null;
 };
 
-/** One channel per request, max 13 cheap list calls. No search.list or cron changes. */
+/* 40 pages of 50 uploads. The previous 6-page cap stopped at 300, which
+   on a channel publishing seventy a week returned only the newest few
+   weeks — all of it too young to have views — while the catalogue
+   actually carrying the channel went uncollected. Still bounded: each
+   page is one quota unit and the route has a 180s budget, so a runaway
+   channel must not page forever. A library that exceeds this still
+   reports reachedEnd false, and the page says so. */
+const MAX_PAGES = Math.ceil(UPLOAD_SAMPLE_CAP / 50);
+
+/** One channel per request. Cheap list calls only: no search.list, no cron changes. */
 export async function collectOwnedChannel(id: string): Promise<OwnedSnapshot> {
   if (!validChannelId(id)) throw new Error('Channel ID needs checking (expected 24 characters).');
   const apiKey = process.env.YOUTUBE_API_KEY;
@@ -43,7 +53,7 @@ export async function collectOwnedChannel(id: string): Promise<OwnedSnapshot> {
   const cutoff = Date.parse(collectedAt) - 548 * 86400000;
   const ids = new Set<string>();
   let token: string | undefined, reachedEnd = false, reachedWindow = false;
-  for (let page = 0; page < 6; page++) {
+  for (let page = 0; page < MAX_PAGES; page++) {
     const result = await get('playlistItems', { part: 'contentDetails,snippet', maxResults: '50', playlistId,
       ...(token ? { pageToken: token } : {}),
     }, true);

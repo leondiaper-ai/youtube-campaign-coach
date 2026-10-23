@@ -4,7 +4,7 @@ import { Fragment, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { validChannelId } from '@/lib/ownedChannels/channels';
-import { FORMAT_LABELS, videoFormat, type OwnedRow } from '@/lib/ownedChannels/metrics';
+import { FORMAT_LABELS, UPLOAD_SAMPLE_CAP, videoFormat, type OwnedRow } from '@/lib/ownedChannels/metrics';
 
 const number = (n: number | null | undefined) => n == null ? '—' : new Intl.NumberFormat('en-GB', { notation: 'compact', maximumFractionDigits: 1 }).format(n);
 const gain = (n: number | null) => n == null ? '—' : `${n > 0 ? '+' : ''}${number(n)}`;
@@ -177,7 +177,7 @@ function ChannelDetail({ row }: { row: OwnedRow }) {
           <p className="text-h3 font-black tabular-nums">{number(row.current.views)}</p>
           <p className="text-meta text-muted mt-1">channel views to date</p>
           <p className="text-micro text-muted mt-3">{row.firstUpload ? `First public upload: ${date(row.firstUpload)}.` : 'First public upload is not yet confirmed.'} {row.current.items.length} uploads in the reading.</p>
-          <p className="text-micro text-muted mt-2">{row.current.reachedEnd ? 'All public uploads reached.' : row.current.reachedWindow ? '18-month window reached; earlier uploads are outside the sample.' : '300-upload cap reached; upload coverage may be partial.'}</p>
+          <p className="text-micro text-muted mt-2">{row.current.reachedEnd ? 'All public uploads reached.' : row.current.reachedWindow ? '18-month window reached; earlier uploads are outside the sample.' : `${UPLOAD_SAMPLE_CAP}-upload cap reached; upload coverage may be partial.`}</p>
         </div>
         <div><h3 className="font-bold text-body mb-2">Early track response</h3>
           <p className="text-h3 font-black tabular-nums">{number(row.medianTrack)}</p>

@@ -19,12 +19,21 @@ export function analyseOwnedChannel(def: OwnedChannel, history: OwnedSnapshot[],
   const target = at - 7 * DAY;
   const baseline = !row.stale ? valid.filter(s => Math.abs(Date.parse(s.collectedAt) - target) <= DAY / 2)
     .sort((a, b) => Math.abs(Date.parse(a.collectedAt) - target) - Math.abs(Date.parse(b.collectedAt) - target))[0] : undefined;
-  const before = new Map(baseline?.items.map(v => [v.id, v]) ?? []);
+  /* A baseline reading holds either its full uploads (if it is still the
+     newest stored) or the compact id→views map it was reduced to. Both
+     answer the only question asked of it: what did this upload read last
+     time. Treat them as one lookup so a reduced baseline is not mistaken
+     for an absent one, which would silently relabel every gain "new". */
+  const before = new Map<string, number>(
+    baseline?.items.length
+      ? baseline.items.flatMap(v => (v.views != null ? [[v.id, v.views] as [string, number]] : []))
+      : Object.entries(baseline?.viewsById ?? {}),
+  );
   const videoGains: Record<string, VideoGain> = {};
   for (const video of row.current?.items ?? []) {
     const previous = before.get(video.id);
     videoGains[video.id] = !baseline || video.views == null ? { value: null, kind: 'missing' } :
-      previous?.views != null ? { value: video.views - previous.views, kind: 'measured' } :
+      previous != null ? { value: video.views - previous, kind: 'measured' } :
       Date.parse(video.publishedAt) >= Date.parse(baseline.collectedAt) ? { value: video.views, kind: 'new' } :
       { value: null, kind: 'missing' };
   }

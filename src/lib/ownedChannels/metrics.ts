@@ -11,7 +11,15 @@ export type OwnedSnapshot = {
   channelId: string; title: string; thumbnail: string | null;
   collectedAt: string; subs: number | null; views: number | null;
   items: OwnedVideo[]; reachedEnd: boolean; reachedWindow: boolean;
+  /* Older readings keep only this instead of their full upload list: a
+     month of libraries at full fidelity runs to megabytes in one Redis
+     value. Per-upload gains need a previous view count and nothing else,
+     so that is all a superseded reading carries. */
+  viewsById?: Record<string, number>;
 };
+/** Most uploads one collection will walk. Shared so the collector and the
+ *  pages that explain partial coverage always name the same number. */
+export const UPLOAD_SAMPLE_CAP = 2000;
 export const FORMAT_LABELS = ['Tracks & videos', 'Short-form', 'Mixes & sets', 'Other'] as const;
 export type OwnedFormat = typeof FORMAT_LABELS[number];
 const DAY = 86400000;
