@@ -5,7 +5,7 @@ it does not grade them against Create Music, mature networks, or artist campaign
 The Create review informs the distinction between channel purpose, publishing
 formats and listening, rather than supplying benchmarks.
 
-- Entry: a third tab on `/growth`; draft page: `/growth/owned`.
+- Direct preview entry only: `/growth/owned`. No tab is added to `/growth`.
 - Reuses the Watcher header, type scale, colours, table and expandable details.
 - Main figures: public views to date, subscribers, 7-day net growth, 30-day output.
 - Per-channel purpose, first public upload and publishing age where complete
@@ -32,7 +32,7 @@ Preview history uses isolated `owned:preview:` keys, 10 days of readings and
 ## Preview and production
 
 This branch is a draft. Production always returns 404 for the page and write API,
-and omits the tab. The feature is enabled only in development or Vercel Preview.
+and no navigation tab is added. The feature is enabled only in development or Vercel Preview.
 Preview access relies on the project's existing Vercel Deployment Protection;
 do not disable that protection. Collection also checks request origin, validates
 the channel allowlist and uses a per-channel lock and one-hour cooldown.

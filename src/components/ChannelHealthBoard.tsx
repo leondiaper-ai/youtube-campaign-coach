@@ -567,8 +567,6 @@ export default function ChannelHealthBoard({
   /** Channel ids currently pinned, so the toggle can show its state. */
   pinnedChannelIds,
   pinnedSlugs = [],
-  ownedHref,
-  initialView = 'managed',
 }: {
   rows: RowData[];
   linkPrefix?: string;
@@ -584,12 +582,9 @@ export default function ChannelHealthBoard({
   pinnedChannelIds?: string[];
   /** Only show Behaviour button for artists with pinned campaigns */
   pinnedSlugs?: string[];
-  /** Draft owned-network view, supplied only outside production. */
-  ownedHref?: string;
-  initialView?: ViewMode;
 }) {
   const router = useRouter();
-  const [view, setView] = useState<ViewMode>(initialView);
+  const [view, setView] = useState<ViewMode>('managed');
   const [expandedRow, setExpandedRow] = useState<string | null>(null);
   const [explainerOpen, setExplainerOpen] = useState(false);
   const [removingId, setRemovingId] = useState<string | null>(null);
@@ -774,11 +769,6 @@ export default function ChannelHealthBoard({
                 )}
               </button>
             ))}
-            {ownedHref && (
-              <Link href={ownedHref} className="pb-2.5 text-h4 font-semibold text-muted hover:text-ink no-underline">
-                Owned Channels <span className="ml-1 text-micro font-semibold text-faint">Draft</span>
-              </Link>
-            )}
           </div>
           <div className="text-meta text-muted mt-2.5 mb-7">
             {view === 'managed'
