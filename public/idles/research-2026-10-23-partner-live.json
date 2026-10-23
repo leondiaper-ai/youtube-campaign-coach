@@ -1,0 +1,209 @@
+{
+  "capturedAt": "2026-10-23T10:27:53.237Z",
+  "views": 21573850,
+  "videoCount": 11,
+  "channelCount": 8,
+  "channels": [
+    {
+      "name": "NPR Music",
+      "views": 11347679,
+      "videos": 1,
+      "url": "https://www.youtube.com/watch?v=wMehItNQKAA"
+    },
+    {
+      "name": "From The Basement",
+      "views": 4494742,
+      "videos": 1,
+      "url": "https://www.youtube.com/watch?v=7rdSlshLV9U"
+    },
+    {
+      "name": "KEXP",
+      "views": 2579709,
+      "videos": 2,
+      "url": "https://www.youtube.com/watch?v=5Sbbiv5iSiQ"
+    },
+    {
+      "name": "BBC Music",
+      "views": 1346263,
+      "videos": 2,
+      "url": "https://www.youtube.com/watch?v=LLCy9Ic9aIQ"
+    },
+    {
+      "name": "3voor12",
+      "views": 1223433,
+      "videos": 2,
+      "url": "https://www.youtube.com/watch?v=eUsZNqmCT4Q"
+    },
+    {
+      "name": "WDR Rockpalast",
+      "views": 316657,
+      "videos": 1,
+      "url": "https://www.youtube.com/watch?v=s2-wX9LVSkk"
+    },
+    {
+      "name": "Pohoda Festival",
+      "views": 143168,
+      "videos": 1,
+      "url": "https://www.youtube.com/watch?v=Pt1QQfDTkxo"
+    },
+    {
+      "name": "Pukkelpop",
+      "views": 122199,
+      "videos": 1,
+      "url": "https://www.youtube.com/watch?v=UibX7sESCLM"
+    }
+  ],
+  "videos": [
+    {
+      "videoId": "wMehItNQKAA",
+      "found": true,
+      "title": "IDLES: NPR Music Tiny Desk Concert",
+      "channelId": "UC4eYXhJI4-7wSWc8UNRwD4A",
+      "channelTitle": "NPR Music",
+      "publishedAt": "2019-06-26T09:00:09Z",
+      "durationSeconds": 786,
+      "isShort": false,
+      "views": 11347679,
+      "likes": 171048,
+      "comments": 8656
+    },
+    {
+      "videoId": "7rdSlshLV9U",
+      "found": true,
+      "title": "IDLES Full Set | From The Basement",
+      "channelId": "UCGxLOaA_QnWLhTnf5depKLg",
+      "channelTitle": "From The Basement",
+      "publishedAt": "2022-06-01T17:00:10Z",
+      "durationSeconds": 1754,
+      "isShort": false,
+      "views": 4494742,
+      "likes": 82939,
+      "comments": 4443
+    },
+    {
+      "videoId": "5Sbbiv5iSiQ",
+      "found": true,
+      "title": "IDLES - Full Performance (Live on KEXP)",
+      "channelId": "UC3I2GFN_F8WudD_2jUZbojA",
+      "channelTitle": "KEXP",
+      "publishedAt": "2018-11-29T17:00:00Z",
+      "durationSeconds": 1943,
+      "isShort": false,
+      "views": 2137295,
+      "likes": 38954,
+      "comments": 2112
+    },
+    {
+      "videoId": "go_nJ42a8PE",
+      "found": true,
+      "title": "IDLES - Full Performance (Live on KEXP)",
+      "channelId": "UC3I2GFN_F8WudD_2jUZbojA",
+      "channelTitle": "KEXP",
+      "publishedAt": "2019-09-06T15:00:12Z",
+      "durationSeconds": 2057,
+      "isShort": false,
+      "views": 442414,
+      "likes": 8740,
+      "comments": 463
+    },
+    {
+      "videoId": "LLCy9Ic9aIQ",
+      "found": true,
+      "title": "IDLES - Dancer | Glastonbury 2024",
+      "channelId": "UCZtDUmC3W7j25XHZWFT_XgQ",
+      "channelTitle": "BBC Music",
+      "publishedAt": "2024-07-05T14:07:20Z",
+      "durationSeconds": 197,
+      "isShort": false,
+      "views": 751821,
+      "likes": 7997,
+      "comments": 320
+    },
+    {
+      "videoId": "OYymMu2WoDM",
+      "found": true,
+      "title": "IDLES - Gift Horse | Later... with Jools Holland",
+      "channelId": "UCZtDUmC3W7j25XHZWFT_XgQ",
+      "channelTitle": "BBC Music",
+      "publishedAt": "2024-05-18T21:35:00Z",
+      "durationSeconds": 257,
+      "isShort": false,
+      "views": 594442,
+      "likes": 8651,
+      "comments": 458
+    },
+    {
+      "videoId": "s2-wX9LVSkk",
+      "found": true,
+      "title": "Idles live | Rockpalast | 2017",
+      "channelId": "UCqXk3Lmgjj_hbN9cb6ht4wA",
+      "channelTitle": "WDR Rockpalast",
+      "publishedAt": "2018-02-05T16:00:03Z",
+      "durationSeconds": 3282,
+      "isShort": false,
+      "views": 316657,
+      "likes": 4449,
+      "comments": 301
+    },
+    {
+      "videoId": "eUsZNqmCT4Q",
+      "found": true,
+      "title": "IDLES - Live at Pinkpop 2022",
+      "channelId": "UC-p9faJQsBObRNiKY8QF2NQ",
+      "channelTitle": "3voor12",
+      "publishedAt": "2022-06-18T10:00:38Z",
+      "durationSeconds": 3533,
+      "isShort": false,
+      "views": 971527,
+      "likes": 11308,
+      "comments": 739
+    },
+    {
+      "videoId": "qWhLKQtlFLA",
+      "found": true,
+      "title": "IDLES - live at Pinkpop 2026",
+      "channelId": "UC-p9faJQsBObRNiKY8QF2NQ",
+      "channelTitle": "3voor12",
+      "publishedAt": "2026-06-21T08:00:04Z",
+      "durationSeconds": 3623,
+      "isShort": false,
+      "views": 251906,
+      "likes": 4151,
+      "comments": 253
+    },
+    {
+      "videoId": "Pt1QQfDTkxo",
+      "found": true,
+      "title": "IDLES – Live at Pohoda Festival 2017",
+      "channelId": "UCgVGU2o1CxSypYLydQngHrw",
+      "channelTitle": "Pohoda Festival",
+      "publishedAt": "2017-09-25T08:33:26Z",
+      "durationSeconds": 2951,
+      "isShort": false,
+      "views": 143168,
+      "likes": 1385,
+      "comments": 70
+    },
+    {
+      "videoId": "UibX7sESCLM",
+      "found": true,
+      "title": "IDLES - live at Pukkelpop 2025",
+      "channelId": "UCRDq3wfVbRgwmRA0bLleNVg",
+      "channelTitle": "Pukkelpop",
+      "publishedAt": "2025-10-29T10:16:22Z",
+      "durationSeconds": 4225,
+      "isShort": false,
+      "views": 122199,
+      "likes": 2649,
+      "comments": 177
+    }
+  ],
+  "excluded": [
+    {
+      "videoId": "2XwS3fIrPYc",
+      "found": false
+    }
+  ],
+  "method": "Search-led selection of major official broadcaster, session and festival uploads. One current video-stats batch for 12 candidates, 11 found. IDs deduplicated. Each selected video represents a different performance event. Full sets and individual songs included; no Shorts or artist-channel videos. Not an exhaustive ranking.",
+  "limits": "Lifetime views across 2017–2026 publication dates; not unique viewers, recent demand, watch time, incremental new fans or proven conversion. Audience overlap and repeat viewing are not removed. Publisher discovery and original production contribute to reach. Do not describe these views as lost to IDLES or assume viewers have not already engaged with the band."
+}
