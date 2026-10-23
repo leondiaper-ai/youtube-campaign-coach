@@ -1,0 +1,213 @@
+{
+  "capturedAt": "2026-10-23T10:20:57.445Z",
+  "method": "One uncapped slim full-catalogue request for @idlesband on 23 October 2026; 372 returned. Series matched by title. Lifetime public views, not period growth. Separate capture from the main 22 October deck snapshot.",
+  "balley": {
+    "episodes": [
+      {
+        "id": "XHDAk5dRdG4",
+        "title": "BALLEY TV - Episode 6 with Ishmael Butler and Sharon Van Etten",
+        "publishedAt": "2020-08-14T20:00:09Z",
+        "durationSec": 2376,
+        "isShort": false,
+        "views": 10568,
+        "likes": 361,
+        "comments": 32,
+        "wasLive": true,
+        "scheduledStart": "2020-08-14T20:00:00Z",
+        "actualStart": "2020-08-14T20:00:09Z"
+      },
+      {
+        "id": "ZNM3lE74JNg",
+        "title": "BALLEY TV - Episode 5 with Jeff Ament, Jehnny Beth & Fern Ford",
+        "publishedAt": "2020-07-31T20:00:11Z",
+        "durationSec": 2703,
+        "isShort": false,
+        "views": 12059,
+        "likes": 386,
+        "comments": 30,
+        "wasLive": true,
+        "scheduledStart": "2020-07-31T20:00:00Z",
+        "actualStart": "2020-07-31T20:00:11Z"
+      },
+      {
+        "id": "Y7BtLlNO30w",
+        "title": "BALLEY TV - Episode 4 with Kenny Beats & Kate Tempest",
+        "publishedAt": "2020-07-17T20:00:12Z",
+        "durationSec": 3586,
+        "isShort": false,
+        "views": 22437,
+        "likes": 997,
+        "comments": 66,
+        "wasLive": true,
+        "scheduledStart": "2020-07-17T20:00:00Z",
+        "actualStart": "2020-07-17T20:00:12Z"
+      },
+      {
+        "id": "3jCKpqwFIuQ",
+        "title": "BALLEY TV - Episode 3 with Billy Bragg & Arlo Parks",
+        "publishedAt": "2020-07-03T20:00:10Z",
+        "durationSec": 2547,
+        "isShort": false,
+        "views": 18105,
+        "likes": 671,
+        "comments": 40,
+        "wasLive": true,
+        "scheduledStart": "2020-07-03T20:00:00Z",
+        "actualStart": "2020-07-03T20:00:10Z"
+      },
+      {
+        "id": "gV1FKjMi6FQ",
+        "title": "BALLEY TV - Episode 2 with Lauren Mayberry & Hak Baker",
+        "publishedAt": "2020-06-19T20:00:11Z",
+        "durationSec": 2490,
+        "isShort": false,
+        "views": 29354,
+        "likes": 974,
+        "comments": 85,
+        "wasLive": true,
+        "scheduledStart": "2020-06-19T20:00:00Z",
+        "actualStart": "2020-06-19T20:00:11Z"
+      },
+      {
+        "id": "hHsbPcYdi34",
+        "title": "BALLEY TV - Episode 1 with Mike Skinner and Nadya Tolokonnikova",
+        "publishedAt": "2020-05-30T21:00:11Z",
+        "durationSec": 2035,
+        "isShort": false,
+        "views": 72429,
+        "likes": 2935,
+        "comments": 132,
+        "wasLive": true,
+        "scheduledStart": "2020-05-30T21:00:00Z",
+        "actualStart": "2020-05-30T21:00:11Z"
+      }
+    ],
+    "count": 6,
+    "views": 164952
+  },
+  "genks": {
+    "episodes": [
+      {
+        "id": "mu-eGA10NBw",
+        "title": "GENKS - Episode 4 Xmas Special with Warren Ellis",
+        "publishedAt": "2020-12-20T20:00:10Z",
+        "durationSec": 4820,
+        "isShort": false,
+        "views": 15780,
+        "likes": 511,
+        "comments": 32,
+        "wasLive": true,
+        "scheduledStart": "2020-12-20T20:00:00Z",
+        "actualStart": "2020-12-20T20:00:10Z"
+      },
+      {
+        "id": "L2NMOsDP3zA",
+        "title": "GENKS - Episode 3 with Oliver Ackermann (Death By Audio/A Place to Bury Strangers)",
+        "publishedAt": "2020-09-11T20:00:32Z",
+        "durationSec": 3765,
+        "isShort": false,
+        "views": 15653,
+        "likes": 469,
+        "comments": 33,
+        "wasLive": true,
+        "scheduledStart": "2020-09-11T20:00:00Z",
+        "actualStart": "2020-09-11T20:00:32Z"
+      },
+      {
+        "id": "4blhPUS6aSQ",
+        "title": "GENKS - Episode 2 with Cate Le Bon",
+        "publishedAt": "2020-08-07T20:00:10Z",
+        "durationSec": 2490,
+        "isShort": false,
+        "views": 18757,
+        "likes": 568,
+        "comments": 74,
+        "wasLive": true,
+        "scheduledStart": "2020-08-07T20:00:00Z",
+        "actualStart": "2020-08-07T20:00:10Z"
+      },
+      {
+        "id": "itHze8bccCU",
+        "title": "GENKS - Episode 1 with Alan Duggan (Girl Band)",
+        "publishedAt": "2020-07-10T20:00:11Z",
+        "durationSec": 2520,
+        "isShort": false,
+        "views": 32573,
+        "likes": 1073,
+        "comments": 54,
+        "wasLive": true,
+        "scheduledStart": "2020-07-10T20:00:00Z",
+        "actualStart": "2020-07-10T20:00:11Z"
+      }
+    ],
+    "count": 4,
+    "views": 82763
+  },
+  "otherOwnedExamples": [
+    {
+      "id": "S8Iax6roeds",
+      "title": "Welcome to Oh Gatekeeper. Episode 1 available wherever you stream your podcasts. #tonyhawk",
+      "publishedAt": "2025-09-03T14:10:57Z",
+      "durationSec": 46,
+      "isShort": true,
+      "views": 13720,
+      "likes": 471,
+      "comments": 14,
+      "wasLive": false,
+      "scheduledStart": null,
+      "actualStart": null
+    },
+    {
+      "id": "ghWHQV_5_S8",
+      "title": "Our very own Joe Talbot will be reading the @CBeebies bedtime this evening at 6:50pm. Tune in.",
+      "publishedAt": "2024-02-20T10:16:08Z",
+      "durationSec": 27,
+      "isShort": true,
+      "views": 48625,
+      "likes": 3568,
+      "comments": 90,
+      "wasLive": false,
+      "scheduledStart": null,
+      "actualStart": null
+    },
+    {
+      "id": "7zetAnXjudU",
+      "title": "BALLEY TV SPECIAL - IDLES - In Defence of the Arts (recorded at House of Vans London)",
+      "publishedAt": "2021-07-20T18:00:09Z",
+      "durationSec": 3382,
+      "isShort": false,
+      "views": 91151,
+      "likes": 2265,
+      "comments": 132,
+      "wasLive": true,
+      "scheduledStart": "2021-07-20T18:00:00Z",
+      "actualStart": "2021-07-20T18:00:09Z"
+    }
+  ],
+  "externalExamples": [
+    {
+      "title": "Oh Gatekeeper: Julian Casablancas",
+      "url": "https://www.youtube.com/watch?v=dfLAVO9I7R0",
+      "publisherEpisode": "https://audioboom.com/posts/8767125-julian-casablancas",
+      "year": 2025,
+      "note": "Separate podcast channel. No audience total transferred to IDLES."
+    },
+    {
+      "title": "Distraction Pieces #610",
+      "url": "https://shows.acast.com/distractionpieces/episodes/610talbot",
+      "date": "2025-03-19",
+      "note": "Audio guest appearance, not owned YouTube viewing."
+    },
+    {
+      "title": "Distraction Pieces #651",
+      "url": "https://shows.acast.com/distractionpieces/episodes/651joegrace2",
+      "date": "2026-01-01",
+      "note": "Audio guest appearance, not owned YouTube viewing."
+    },
+    {
+      "title": "Midnight Chats #122",
+      "url": "https://omny.fm/shows/midnight-chats/ep-122-idles-joe-talbot",
+      "note": "Recorded December 2023, released 2024. Publisher confirms social video clips; not assumed to be full YouTube video."
+    }
+  ]
+}
