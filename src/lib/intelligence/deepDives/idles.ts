@@ -202,7 +202,7 @@ export const IDLES_DEEP_DIVE: DeepDiveContext = {
     },
     {
       "point": "Connect the stages of the next album with an identifiable role for each asset.",
-      "basis": "Proposed sequence: hero Premiere; connected Shorts; a worthwhile full-length follow-up; album playlist and standout asset; selective live-song releases; catalogue and fan conversation between campaigns. The highlighted change is preparing the second music moment before launch. Amyl supplies the explanatory structure, not fixed dates, quotas or IDLES performance assumptions.",
+      "basis": "Proposed sequence: hero Premiere; connected Shorts; a worthwhile full-length follow-up; album playlist and standout asset; selective live-song releases; catalogue and fan conversation between campaigns. Each stage now names its purpose: anticipation, discovery, return visits, album depth, live and catalogue. Scheduled Premieres provide an advance watch page, opt-in reminders and shared live chat, with ordinary Search, Home and recommendation eligibility; they do not guarantee extra reach. IDLES broadcast-start metadata supports established practice, not measured incremental Premiere uplift. Prepare the live capture before launch. Amyl supplies the explanatory structure, not fixed dates, quotas or IDLES performance assumptions.",
       "needTags": [
         "album_campaign",
         "hero_continuity",
