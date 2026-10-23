@@ -4,8 +4,8 @@ import Link from 'next/link';
 import { useState, type ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
 import { OWNED_CHANNELS, validChannelId } from '@/lib/ownedChannels/channels';
-import { DAY, LENGTH_LABELS, lengthGroup, lengthBreakdown, librarySummary, meanDailyViews, observedMovement, publishingSeries, type OwnedAnalysis } from '@/lib/ownedChannels/analysis';
-import { UPLOAD_SAMPLE_CAP } from '@/lib/ownedChannels/metrics';
+import { DAY, LENGTH_LABELS, lengthGroup, lengthBreakdown, meanDailyViews, observedMovement, publishingSeries, type OwnedAnalysis } from '@/lib/ownedChannels/analysis';
+import { buildLibraryStats, countPublishedSince, UPLOAD_SWEEP_CAP } from '@/lib/ownedChannels/metrics';
 import { GrowthChart, PublishingChart, LengthChart } from './OwnedChannelCharts';
 
 const fmt = (n: number | null | undefined) => n == null ? '—' : new Intl.NumberFormat('en-GB', { notation: 'compact', maximumFractionDigits: 1 }).format(n);
@@ -34,14 +34,18 @@ export default function OwnedChannelAnalysis({ analysis, canCollect, readFailed,
   const currentItems = row.current?.items.filter(v => Number.isFinite(Date.parse(v.publishedAt)) && Date.parse(v.publishedAt) <= at && v.live !== 'upcoming') ?? [];
   const windowItems = currentItems.filter(v => Date.parse(v.publishedAt) >= from);
   const breakdown = lengthBreakdown(windowItems);
-  const series = publishingSeries(currentItems, at, days, !!row.current && (row.current.reachedEnd || row.current.reachedWindow));
+  const series = publishingSeries(currentItems, at, days, !!row.current && (row.current.reachedEnd || row.current.reachedWindow), row.current?.publishedPerDay);
   const covered = series.every(p => p.count != null);
   const viewsMovement = observedMovement(readings, 'views', from);
   const subsMovement = observedMovement(readings, 'subs', from);
   /* The library is the default scope. Most of what a destination channel
      has done sits outside the publishing window, so framing the table on
      the window hides the part that is actually carrying the channel. */
-  const library = librarySummary(currentItems, !!row.current?.reachedEnd);
+  /* Older readings predate sweeps and carry no `library`, so rebuild the
+     same shape from whatever they stored rather than showing nothing. */
+  const library = row.current?.library ?? buildLibraryStats(currentItems, !!row.current?.reachedEnd, null);
+  const perDay = row.current?.publishedPerDay;
+  const windowCount = perDay ? countPublishedSince(perDay, from, at) : windowItems.length;
   const tableItems = scope === 'library' ? currentItems : windowItems;
   const filtered = tableItems.filter(v => v.title.toLowerCase().includes(search.toLowerCase()) && (length === 'all' || lengthGroup(v) === Number(length)));
   const sortValue = (v: typeof currentItems[number]) => sort === 'published' ? Date.parse(v.publishedAt) : sort === 'daily' ? meanDailyViews(v, at) : sort === 'gain' ? videoGains[v.id]?.value ?? null : v.views;
@@ -100,26 +104,32 @@ export default function OwnedChannelAnalysis({ analysis, canCollect, readFailed,
     </div>}
 
     <div className="mb-5">
-      <h2 className="text-h4 font-bold">{library.complete ? 'Channel library' : 'Newest uploads'}</h2>
+      <h2 className="text-h4 font-bold">Channel library</h2>
       <p className="text-micro text-muted mt-1">
-        {!row.current ? 'Awaiting channel data' : library.complete
-          ? <>Everything stored for this channel, not a recent window · as of {date(at)}</>
-          : <>Collection stopped at the {library.uploads}-upload cap, newest first, so this is the most recent slice rather than the library · as of {date(at)}</>}
+        {!row.current ? 'Awaiting channel data'
+          : <>{library.complete
+            ? <>Every upload read and summarised</>
+            : <>Reading stopped at the {UPLOAD_SWEEP_CAP}-upload ceiling, so the per-upload figures below cover the newest {library.swept}</>}
+            {' · as of '}{date(at)}</>}
       </p>
     </div>
     <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-8">
-      <Metric label={library.complete ? 'Uploads in library' : 'Uploads sampled'} value={row.current ? `${library.complete ? '' : '≥'}${library.uploads}` : '—'}
-        note={!row.current ? 'No reading yet' : library.complete ? `Full public history${row.firstUpload ? ` since ${date(row.firstUpload)}` : ''}` : 'Cap reached · the library is larger than this'} />
-      <Metric label={library.complete ? 'Views across library' : 'Views in this slice'} value={row.current ? `${library.complete ? '' : '≥'}${fmt(library.views)}` : '—'}
-        note={!row.current ? 'No reading yet' : library.complete
-          ? `Summed over ${library.withViews} uploads · the channel counter reads ${fmt(row.current.views)} and also counts uploads since removed`
-          : `The channel counter reads ${fmt(row.current.views)}, so nearly all of this channel's views sit in older uploads the cap excluded`} />
-      <Metric label={library.complete ? 'Median upload' : 'Median of the slice'} value={fmt(library.medianViews)}
-        note={!row.current ? 'No reading yet' : library.complete
-          ? `Half the library does better than this · n=${library.withViews}`
-          : `Newest-first sampling means these uploads are days old · age, not quality, drives this · n=${library.withViews}`} />
+      <Metric label="Videos on channel" value={fmt(library.videoCount ?? (row.current ? library.swept : null))}
+        note={!row.current ? 'No reading yet'
+          : library.videoCount == null ? `${library.swept} read in this sweep`
+          : library.complete ? `All read${row.firstUpload ? ` · publishing since ${date(row.firstUpload)}` : ''}`
+          : `YouTube's own count · ${library.swept} of them read`} />
+      <Metric label="Channel views" value={fmt(row.current?.views)}
+        note={!row.current ? 'No reading yet'
+          : library.totalViews == null ? "YouTube's lifetime counter"
+          : `Lifetime counter · the uploads read account for ${fmt(library.totalViews)}`} />
+      <Metric label="Median upload" value={fmt(library.medianViews)}
+        note={!row.current ? 'No reading yet'
+          : `Half do better, half worse · n=${library.withViews}${library.underTen ? ` · ${share(library.underTen / Math.max(library.withViews, 1))} under ten views` : ''}`} />
       <Metric label="Carrying half the views" value={library.halfShareCount == null ? '—' : String(library.halfShareCount)}
-        note={!row.current ? 'No reading yet' : library.halfShareCount == null ? 'No view counts recorded' : `of the ${library.complete ? library.uploads : `${library.uploads} sampled`} uploads · the best one holds ${share(library.topShare)}${library.complete ? '' : ' of this slice'}`} />
+        note={!row.current ? 'No reading yet'
+          : library.halfShareCount == null ? 'No view counts recorded'
+          : `of ${library.withViews} uploads read · the best one holds ${share(library.topShare)}`} />
     </div>
 
     <div className="flex flex-wrap items-center justify-between gap-3 mb-5">
@@ -129,7 +139,7 @@ export default function OwnedChannelAnalysis({ analysis, canCollect, readFailed,
     <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-5">
       <Metric label="Channel views" value={fmt(row.current?.views)} note={row.current ? observationNote(viewsMovement) : 'No reading yet'} />
       <Metric label="Subscribers" value={fmt(row.current?.subs)} note={row.current ? `${observationNote(subsMovement)} · rounded public count` : 'No reading yet'} />
-      <Metric label={`Uploads · ${days}d`} value={row.current ? `${covered ? '' : '≥'}${windowItems.length}` : '—'} note={row.current ? `${fmt(windowItems.length / (days / 7))} per week${covered ? '' : ' · incomplete window'}` : 'No publication sample yet'} />
+      <Metric label={`Uploads · ${days}d`} value={row.current ? `${covered ? '' : '≥'}${windowCount}` : '—'} note={row.current ? `${fmt(windowCount / (days / 7))} per week${covered ? '' : ' · incomplete window'}` : 'No publication sample yet'} />
       <Metric label="Typical track views" value={fmt(row.medianTrack)} note={`Median · ${row.trackSample} tracks aged 7–30d${row.trackSample && row.trackSample < 5 ? ' · small sample' : ''}`} />
     </div>
 
@@ -142,17 +152,17 @@ export default function OwnedChannelAnalysis({ analysis, canCollect, readFailed,
       </Panel>
     </div>
 
-    <Panel title="Publishing rhythm" description="How regularly this channel is building its library." action={<span className="text-meta font-bold tabular-nums text-secondary">{row.current ? windowItems.length : '—'} uploads</span>}>
+    <Panel title="Publishing rhythm" description="How regularly this channel is building its library." action={<span className="text-meta font-bold tabular-nums text-secondary">{row.current ? windowCount : '—'} uploads</span>}>
       {row.current ? <PublishingChart series={series} /> : <div className="h-[200px] flex items-center justify-center text-meta text-muted">A first upload reading will populate the publishing timeline.</div>}
     </Panel>
 
     <section className="mt-8" aria-labelledby="upload-performance">
       <div className="flex flex-wrap justify-between items-end gap-3 mb-4">
         <div><h2 id="upload-performance" className="text-h4 font-bold">Upload performance</h2>
-          <p className="text-meta text-muted mt-1">Views to date on {scope === 'library' ? 'every stored upload' : `uploads published in the last ${days} days`}. Search a song, artist or version.</p></div>
+          <p className="text-meta text-muted mt-1">Views to date on {scope === 'library' ? `the ${tableItems.length} uploads kept from this sweep — the best performers and the most recent` : `uploads published in the last ${days} days`}. Search a song, artist or version.</p></div>
         <div className="flex items-center gap-3">
           <div className="inline-flex border border-line rounded-control bg-surface p-1" aria-label="Upload scope">
-            {([['library', 'Whole library'], ['window', `Last ${days} days`]] as const).map(([key, label]) =>
+            {([['library', 'Top & newest'], ['window', `Last ${days} days`]] as const).map(([key, label]) =>
               <button key={key} type="button" aria-pressed={scope === key} onClick={() => { setScope(key); setPage(0); }}
                 className={`text-meta font-semibold px-3 py-1 rounded ${scope === key ? 'bg-ink text-white' : 'text-muted hover:text-ink'}`}>{label}</button>)}
           </div>
@@ -195,7 +205,7 @@ export default function OwnedChannelAnalysis({ analysis, canCollect, readFailed,
     <details className="mt-6 bg-surface border border-line rounded-card px-5 py-4 text-meta text-secondary">
       <summary className="font-semibold text-ink cursor-pointer">Data coverage and definitions</summary>
       <div className="grid md:grid-cols-3 gap-5 mt-4 leading-relaxed">
-        <p><strong className="block text-ink mb-1">What is recorded</strong>{row.current ? `${row.current.items.length} public uploads in the latest sample. ${row.current.reachedEnd ? 'The public upload list was exhausted.' : row.current.reachedWindow ? 'The 18-month sample window was reached.' : `The ${UPLOAD_SAMPLE_CAP}-upload cap was reached; coverage may be partial.`}` : 'No public upload reading yet.'} Channel totals and video totals can differ. No growth is backfilled.</p>
+        <p><strong className="block text-ink mb-1">What is recorded</strong>{row.current ? `${row.current.items.length} public uploads in the latest sample. ${row.current.reachedEnd ? 'The public upload list was exhausted.' : row.current.reachedWindow ? 'The 18-month sample window was reached.' : `The ${UPLOAD_SWEEP_CAP}-upload sweep ceiling was reached; coverage may be partial.`}` : 'No public upload reading yet.'} Channel totals and video totals can differ. No growth is backfilled.</p>
         <p><strong className="block text-ink mb-1">How to read comparisons</strong>Typical track views use eligible tracks aged 7–30 days; the sample is not age matched. Recorded video gains require readings about seven days apart.{analysis.baselineAt ? ` Baseline: ${date(analysis.baselineAt)}.` : ' No seven-day baseline is available yet.'} Count corrections can be negative. Missing counts stay blank.</p>
         <p><strong className="block text-ink mb-1">What needs channel access</strong>Watch time, returning viewers, traffic sources, revenue and audience movement to artist channels are not available in these public readings. Likes and comments appear after a new collection; older readings may not contain them.</p>
       </div>

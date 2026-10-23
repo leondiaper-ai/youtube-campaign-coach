@@ -4,7 +4,7 @@ import { Fragment, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { validChannelId } from '@/lib/ownedChannels/channels';
-import { FORMAT_LABELS, UPLOAD_SAMPLE_CAP, videoFormat, type OwnedRow } from '@/lib/ownedChannels/metrics';
+import { FORMAT_LABELS, UPLOAD_SWEEP_CAP, videoFormat, type OwnedRow } from '@/lib/ownedChannels/metrics';
 
 const number = (n: number | null | undefined) => n == null ? '—' : new Intl.NumberFormat('en-GB', { notation: 'compact', maximumFractionDigits: 1 }).format(n);
 const gain = (n: number | null) => n == null ? '—' : `${n > 0 ? '+' : ''}${number(n)}`;
@@ -29,10 +29,10 @@ export default function OwnedChannelsBoard({ rows, canCollect, readFailed, linkS
   const totalSubs = totals.length ? totals.reduce((s, r) => s + r.current!.subs!, 0) : null;
   const totalViews = viewTotals.length ? viewTotals.reduce((s, r) => s + r.current!.views!, 0) : null;
   const totalGain = movement.length ? movement.reduce((s, r) => s + r.views7d!, 0) : null;
-  const uploads = cadence.length ? cadence.reduce((s, r) => s + r.recent.length, 0) : null;
+  const uploads = cadence.length ? cadence.reduce((s, r) => s + r.uploads30d, 0) : null;
   const filtered = rows.filter(r => (role === 'All purposes' || r.role === role) &&
     `${r.name} ${r.handle ?? ''} ${r.id} ${r.purpose}`.toLowerCase().includes(search.toLowerCase()));
-  const sortValue = (r: OwnedRow): number | null => sort === 'views' ? r.views7d : sort === 'typical' ? r.medianTrack : r.current ? r.recent.length : null;
+  const sortValue = (r: OwnedRow): number | null => sort === 'views' ? r.views7d : sort === 'typical' ? r.medianTrack : r.current ? r.uploads30d : null;
   filtered.sort((a, b) => {
     if (sort === 'name') return a.name.localeCompare(b.name);
     const av = sortValue(a), bv = sortValue(b);
@@ -131,8 +131,8 @@ export default function OwnedChannelsBoard({ rows, canCollect, readFailed, linkS
               </div></td>
               <td className="px-4 py-4 tabular-nums font-semibold">{number(row.current?.subs)}<span className="block text-micro font-normal text-muted">{row.subs7d != null ? `${gain(row.subs7d)} in 7d` : 'Public count'}</span></td>
               <td className="px-4 py-4 tabular-nums font-semibold">{gain(row.views7d)}<span className="block text-micro font-normal text-muted">{row.views7d == null ? `${number(row.current?.views)} total views` : row.views7d < 0 ? 'Net count correction' : `${number(row.current?.views)} total views`}</span></td>
-              <td className="px-4 py-4 tabular-nums font-semibold">{row.current ? `${row.covers30d ? '' : '≥'}${row.recent.length}` : '—'}
-                <span className="block text-micro font-normal text-muted">{row.current ? `${number(row.recent.length / (30 / 7))} / week${row.covers30d ? '' : ' · partial'}` : 'No reading yet'}</span></td>
+              <td className="px-4 py-4 tabular-nums font-semibold">{row.current ? `${row.covers30d ? '' : '≥'}${row.uploads30d}` : '—'}
+                <span className="block text-micro font-normal text-muted">{row.current ? `${number(row.uploads30d / (30 / 7))} / week${row.covers30d ? '' : ' · partial'}` : 'No reading yet'}</span></td>
               <td className="px-4 py-4 tabular-nums font-semibold">{number(row.medianTrack)}<span className="block text-micro font-normal text-muted">{row.trackSample ? `n=${row.trackSample}${row.typicalCoverage ? '' : ' · partial'}` : 'Building a baseline'}</span></td>
               <td className="px-4 py-4 text-meta font-semibold whitespace-nowrap">{row.firstUpload ? date(row.firstUpload) : '—'}<span className="block text-micro font-normal text-muted">{row.firstUpload && row.current ? `${Math.floor((Date.parse(row.current.collectedAt) - Date.parse(row.firstUpload)) / 86400000)} days publishing` : row.current ? 'Full history needed' : 'Not collected'}</span></td>
               <td className="px-4 py-4 text-micro whitespace-nowrap"><span className={row.stale || !validChannelId(row.id) ? 'text-warn font-semibold' : 'text-muted'}>
@@ -177,7 +177,7 @@ function ChannelDetail({ row }: { row: OwnedRow }) {
           <p className="text-h3 font-black tabular-nums">{number(row.current.views)}</p>
           <p className="text-meta text-muted mt-1">channel views to date</p>
           <p className="text-micro text-muted mt-3">{row.firstUpload ? `First public upload: ${date(row.firstUpload)}.` : 'First public upload is not yet confirmed.'} {row.current.items.length} uploads in the reading.</p>
-          <p className="text-micro text-muted mt-2">{row.current.reachedEnd ? 'All public uploads reached.' : row.current.reachedWindow ? '18-month window reached; earlier uploads are outside the sample.' : `${UPLOAD_SAMPLE_CAP}-upload cap reached; upload coverage may be partial.`}</p>
+          <p className="text-micro text-muted mt-2">{row.current.reachedEnd ? 'All public uploads reached.' : row.current.reachedWindow ? '18-month window reached; earlier uploads are outside the sample.' : `${UPLOAD_SWEEP_CAP}-upload sweep ceiling reached; upload coverage may be partial.`}</p>
         </div>
         <div><h3 className="font-bold text-body mb-2">Early track response</h3>
           <p className="text-h3 font-black tabular-nums">{number(row.medianTrack)}</p>

@@ -55,59 +55,26 @@ export function observedMovement(readings: Reading[], metric: 'views' | 'subs', 
     days: (Date.parse(last.at) - Date.parse(first.at)) / DAY };
 }
 
-export type LibrarySummary = {
-  uploads: number;
-  /** Summed across uploads that reported a count. Not the channel counter. */
-  views: number | null;
-  withViews: number;
-  medianViews: number | null;
-  /** Uploads needed, best first, to reach half the library's views. */
-  halfShareCount: number | null;
-  /** Share of library views held by the single best upload. */
-  topShare: number | null;
-  /** The stored sample is the channel's whole public upload list. */
-  complete: boolean;
-};
-
-/* These channels are listening destinations with catalogues, not artist
-   channels mid-campaign: most of what they have done sits outside any
-   recent publishing window. This summarises the stored library instead.
-   It never mixes with the channel's own view counter, which also counts
-   uploads since deleted — the two are reported side by side, not merged.
-   Where the collection hit its cap every figure here is a floor, which
-   is why `complete` travels with the numbers rather than being inferred. */
-export function librarySummary(items: OwnedVideo[], complete: boolean): LibrarySummary {
-  const counted = items.filter(v => v.views != null).map(v => v.views!).sort((a, b) => b - a);
-  const views = counted.length ? counted.reduce((sum, v) => sum + v, 0) : null;
-  let halfShareCount: number | null = null;
-  if (views != null && views > 0) {
-    let running = 0;
-    for (let i = 0; i < counted.length; i++) {
-      running += counted[i];
-      if (running * 2 >= views) { halfShareCount = i + 1; break; }
-    }
-  }
-  return {
-    uploads: items.length, views, withViews: counted.length, medianViews: median(counted),
-    halfShareCount, topShare: views ? counted[0] / views : null, complete,
-  };
-}
-
 export function meanDailyViews(video: OwnedVideo, at: number) {
   const days = (at - Date.parse(video.publishedAt)) / DAY;
   return days >= 1 && video.views != null ? video.views / days : null;
 }
 
-export function publishingSeries(items: OwnedVideo[], at: number, days: number, complete: boolean) {
+/* `perDay` is the sweep's own tally and is authoritative when present:
+   counting the stored uploads instead would show a channel publishing
+   fifty a day as having stopped a week ago, because that is where the
+   bounded working set ends. */
+export function publishingSeries(items: OwnedVideo[], at: number, days: number, complete: boolean, perDay?: Record<string, number>) {
   const end = new Date(at).toISOString().slice(0, 10);
   const endDay = Date.parse(`${end}T00:00:00Z`);
   const oldest = items.length ? Math.min(...items.map(v => Date.parse(v.publishedAt)).filter(Number.isFinite)) : null;
   return Array.from({ length: days }, (_, i) => {
     const start = endDay - (days - 1 - i) * DAY;
-    const count = items.filter(v => v.live !== 'upcoming' && Date.parse(v.publishedAt) >= start &&
+    const day = new Date(start).toISOString().slice(0, 10);
+    const count = perDay ? perDay[day] ?? 0 : items.filter(v => v.live !== 'upcoming' && Date.parse(v.publishedAt) >= start &&
       Date.parse(v.publishedAt) < start + DAY && Date.parse(v.publishedAt) <= at).length;
-    const covered = complete || (oldest != null && oldest <= start);
-    return { day: new Date(start).toISOString().slice(0, 10), count: covered ? count : null, minimum: count };
+    const covered = !!perDay || complete || (oldest != null && oldest <= start);
+    return { day, count: covered ? count : null, minimum: count };
   });
 }
 

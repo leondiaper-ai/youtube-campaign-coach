@@ -1,11 +1,11 @@
 import { validChannelId } from './channels';
-import { UPLOAD_SAMPLE_CAP } from './metrics';
+import { buildLibraryStats, KEEP_NEWEST, KEEP_TOP, UPLOAD_SWEEP_CAP } from './metrics';
 import type { OwnedSnapshot, OwnedVideo } from './metrics';
 
 type YtItem = {
   id: string; snippet?: { title?: string; publishedAt?: string; liveBroadcastContent?: string;
     thumbnails?: { default?: { url?: string } }; resourceId?: { videoId?: string } };
-  statistics?: { subscriberCount?: string; hiddenSubscriberCount?: boolean; viewCount?: string; likeCount?: string; commentCount?: string };
+  statistics?: { subscriberCount?: string; hiddenSubscriberCount?: boolean; viewCount?: string; videoCount?: string; likeCount?: string; commentCount?: string };
   contentDetails?: { relatedPlaylists?: { uploads?: string }; duration?: string; videoPublishedAt?: string; videoId?: string };
 };
 const count = (v: string | undefined) => v != null && v.trim() !== '' && Number.isFinite(Number(v)) ? Number(v) : null;
@@ -14,14 +14,14 @@ const duration = (s?: string) => {
   return m ? (+m[1] || 0) * 86400 + (+m[2] || 0) * 3600 + (+m[3] || 0) * 60 + (+m[4] || 0) : null;
 };
 
-/* 40 pages of 50 uploads. The previous 6-page cap stopped at 300, which
-   on a channel publishing seventy a week returned only the newest few
-   weeks — all of it too young to have views — while the catalogue
-   actually carrying the channel went uncollected. Still bounded: each
-   page is one quota unit and the route has a 180s budget, so a runaway
-   channel must not page forever. A library that exceeds this still
-   reports reachedEnd false, and the page says so. */
-const MAX_PAGES = Math.ceil(UPLOAD_SAMPLE_CAP / 50);
+/* The sweep walks the whole uploads list — these channels run to 6,500
+   uploads, so any cap low enough to keep storage sane was also low enough
+   to miss the handful of videos actually bringing the views. Paging is
+   cheap (one unit per fifty), so the sweep reads everything, summarises
+   it, and keeps only a bounded working set. The ceiling is a stop against
+   a runaway channel exhausting the route's 180s budget, not a sample
+   size: 10,000 uploads is roughly 400 calls and about 75 seconds. */
+const MAX_PAGES = Math.ceil(UPLOAD_SWEEP_CAP / 50);
 
 /** One channel per request. Cheap list calls only: no search.list, no cron changes. */
 export async function collectOwnedChannel(id: string): Promise<OwnedSnapshot> {
@@ -78,8 +78,30 @@ export async function collectOwnedChannel(id: string): Promise<OwnedSnapshot> {
         likes: count(v.statistics?.likeCount), comments: count(v.statistics?.commentCount) });
     }
   }
+  const library = buildLibraryStats(items, reachedEnd, count(ch.statistics?.videoCount));
+
+  /* Cadence as day tallies rather than as kept uploads. Three hundred
+     stored uploads is four days on a channel publishing fifty a day, so
+     counting the stored set would under-report a month of output. A few
+     hundred integers describes the whole sweep instead. */
+  const publishedPerDay: Record<string, number> = {};
+  for (const video of items) {
+    if (video.live === 'upcoming') continue;
+    const day = video.publishedAt.slice(0, 10);
+    if (/^\d{4}-\d{2}-\d{2}$/.test(day)) publishedPerDay[day] = (publishedPerDay[day] ?? 0) + 1;
+  }
+
+  /* Keep the newest, for cadence and format, and the best, because those
+     are what carry these channels. Everything between is already
+     summarised above and would only cost storage. */
+  const newest = [...items].sort((a, b) => Date.parse(b.publishedAt) - Date.parse(a.publishedAt)).slice(0, KEEP_NEWEST);
+  const best = items.filter(v => v.views != null).sort((a, b) => b.views! - a.views!).slice(0, KEEP_TOP);
+  const kept = new Map<string, OwnedVideo>();
+  for (const video of [...newest, ...best]) kept.set(video.id, video);
+
   return { channelId: id, title: ch.snippet?.title ?? id,
     thumbnail: ch.snippet?.thumbnails?.default?.url ?? null,
     collectedAt, subs: ch.statistics?.hiddenSubscriberCount ? null : count(ch.statistics?.subscriberCount),
-    views: count(ch.statistics?.viewCount), items, reachedEnd, reachedWindow };
+    views: count(ch.statistics?.viewCount), items: Array.from(kept.values()),
+    reachedEnd, reachedWindow, library, publishedPerDay };
 }
