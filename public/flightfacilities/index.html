@@ -22,9 +22,7 @@
   The public channel views counter was flat through 22 Oct. A 23 Oct refresh
   is shown as recorded counter movement, not as a verified weekly rate.
 
-  CONSTRUCTION — the departures board: navy and the red/white chevron of the FF wings,
-  split-flap amber for labels, window-shaped thumbnails. Big Shoulders (airport
-  signage) for headlines, IBM Plex Mono for board text.
+  DESIGN — navy, cream, red and amber; bold headlines and real channel imagery.
 -->
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -131,7 +129,7 @@ h2.display{font-size:clamp(2.2rem,4.6vw,4rem);max-width:20ch}
 .obs .board{font-size:.72rem} .obs>div:first-child .board{color:var(--warm)}
 .obs p{font-size:clamp(.92rem,1.25vw,1.06rem);font-weight:600;line-height:1.35;margin-top:.2rem}
 
-/* departures timeline */
+/* campaign timeline */
 .dep{margin-top:1.4rem;border-top:2px solid var(--cream)}
 .dep .r{display:grid;grid-template-columns:7.5rem 1fr 9rem;gap:1rem;align-items:baseline;padding:.5rem 0;border-bottom:1px solid var(--line)}
 .dep .when{font-family:'IBM Plex Mono',monospace;font-size:.78rem;font-weight:600;color:var(--amber);letter-spacing:.06em;text-transform:uppercase}
@@ -185,7 +183,7 @@ h2.display{font-size:clamp(2.2rem,4.6vw,4rem);max-width:20ch}
 .mrow span:nth-child(2){border-color:var(--cream)} .mrow span:nth-child(3){border-color:var(--sky)} .mrow span:nth-child(4){border-color:var(--amber)}
 .month p{font-size:.78rem;color:var(--dim);margin-top:.5rem}
 
-/* flight path */
+/* campaign sequence */
 .fp{display:grid;grid-template-columns:repeat(6,1fr);gap:3px;margin-top:1.5rem}
 @media(max-width:1000px){.fp{grid-template-columns:1fr 1fr 1fr}}
 @media(max-width:560px){.fp{grid-template-columns:1fr}}
@@ -267,7 +265,7 @@ h2.display{font-size:clamp(2.2rem,4.6vw,4rem);max-width:20ch}
 .fs.key .ev{color:var(--cream)}
 
 
-/* v3 — formats, decade mix, edits, versions, fans, in-flight, rollout, recs */
+/* v3 — formats, decade mix, edits, versions, fans, channel programming, rollout, recs */
 .fmt{margin-top:1.3rem;border-top:2px solid var(--cream)}
 .fr{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1.6fr) 6.5rem 8.5rem;gap:1rem;align-items:center;padding:.42rem 0;border-bottom:1px solid var(--line)}
 .fn{font-size:.9rem;font-weight:600;line-height:1.25} .fn span{display:block;font-weight:400;font-size:.72rem;color:var(--dim)}
@@ -464,7 +462,7 @@ body.sheet-open{overflow:hidden}
 .sheet .close:focus-visible,.btn:focus-visible,a:focus-visible{outline:3px solid var(--amber);outline-offset:4px}
 
 
-/* Flight Facilities world: real films, musical journeys and performance, led by the album. */
+/* Flight Facilities world: real films, mixes and performance, led by the album. */
 .world-slide{background:radial-gradient(ellipse at 100% 0,rgba(125,180,232,.13),transparent 60%),var(--navy)}
 .world-intro{display:grid;grid-template-columns:1.2fr 1fr;gap:3rem;align-items:end;margin-top:1rem}.world-intro .body{font-size:1.05rem;line-height:1.5;max-width:44ch}
 .world-contact{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;margin-top:1.4rem}.world-contact>a{position:relative;background:var(--navy-3);border-bottom:3px solid var(--sky)}.world-contact>a:nth-child(2){border-color:var(--amber)}.world-contact>a:nth-child(3){border-color:var(--cream)}.world-contact>a:nth-child(4){border-color:var(--red)}.world-contact img{width:100%;aspect-ratio:16/10;object-fit:cover}.world-contact a>div{padding:.8rem}.world-contact .board{font-size:.65rem}.world-contact b{display:block;font-family:'Big Shoulders Display',sans-serif;font-size:1.4rem;text-transform:uppercase;line-height:1.05;margin:.3rem 0}.world-contact small{display:block;color:var(--warm);font-size:.71rem;line-height:1.3}
@@ -502,12 +500,12 @@ body.sheet-open{overflow:hidden}
 <div class="deck">
 
 <section class="slide" data-t="Cover" style="justify-content:flex-end;padding-bottom:3rem">
-  <div class="bleed scrim-b"><img src="https://i.ytimg.com/vi/3f0e5j2G7IQ/maxresdefault.jpg" alt="The FF plane over the hills at sunset, from the Down To Earth 10 Year Anniversary visualiser" style="object-position:50% 30%" onerror="this.onerror=null;this.src='https://i.ytimg.com/vi/3f0e5j2G7IQ/hqdefault.jpg'"></div>
+  <div class="bleed scrim-b"><img src="https://i.ytimg.com/vi/ts-6KyJUDWY/maxresdefault.jpg" alt="Flight Facilities performing live at Airfields, Sydney" style="object-position:50% 40%" onerror="this.onerror=null;this.src='https://i.ytimg.com/vi/ts-6KyJUDWY/hqdefault.jpg'"></div>
   <div class="chev"></div>
-  <div class="board-corner"><span class="board">FF · The next album on YouTube</span><span class="board" style="color:var(--cream)">Now boarding</span></div>
+  <div class="board-corner"><span class="board">FF · The next album on YouTube</span><span class="board" style="color:var(--cream)">Channel review · October 2026</span></div>
   <div class="inner">
     <span class="tag reveal">Flight Facilities <i>×</i> YouTube</span>
-    <h1 class="display reveal" style="margin-top:1rem;max-width:11ch">Prepare for <span class="a">departure.</span></h1>
+    <h1 class="display reveal" style="margin-top:1rem;max-width:17ch">The channel today.<br><span class="a">The next album.</span></h1>
     <p class="reveal" style="margin-top:1.1rem;font-size:clamp(1.1rem,1.8vw,1.5rem);font-weight:600;max-width:48ch;line-height:1.32">What works on the channel, what the last campaign tells us,<br><span style="color:var(--amber)">and what to build on for the next album.</span></p>
     <div class="board reveal" style="margin-top:1.2rem;color:var(--dim)">Virgin Music Group UK · Updated 23 Oct 2026 · Data: 21 Oct</div>
   </div>
@@ -637,19 +635,19 @@ body.sheet-open{overflow:hidden}
   </div>
 </section>
 
-<section class="slide" data-t="In-Flight">
+<section class="slide" data-t="Channel programming">
   <div class="chev"></div>
   <div class="inner">
     <span class="tag reveal">09 <i>·</i> A YouTube feature to explore</span>
-    <h2 class="display reveal" style="margin-top:.9rem;max-width:26ch">A YouTube Station: <span class="a">In-Flight Entertainment.</span></h2>
+    <h2 class="display reveal" style="margin-top:.9rem;max-width:26ch">A YouTube Station: <span class="a">Flight Facilities TV.</span></h2>
     <div class="st-top">
-      <div class="st-what reveal"><div class="board">A home for longer listening</div><div class="fig mix-number">5 hours</div><p>The Decades Set is already on the channel, alongside the mixes, live films and music videos.</p><p><b>In-Flight Entertainment</b> could bring that library together. Playlists are the first step; a YouTube Station would offer continuous programming.</p><p class="st-date">Illustrative programme below — these are content strands, not four separate Stations.</p></div><div class="ife-screen reveal">
-        <div class="ife-top"><span>FF · In-Flight Entertainment</span><span>Station · live chat</span></div>
+      <div class="st-what reveal"><div class="board">A home for longer listening</div><div class="fig mix-number">5 hours</div><p>The Decades Set is already on the channel, alongside the mixes, live films and music videos.</p><p><b>Flight Facilities TV</b> could bring that library together. Playlists are the first step; a YouTube Station would offer continuous programming.</p><p class="st-date">Illustrative programme below — these are content strands, not four separate Stations.</p></div><div class="ife-screen reveal">
+        <div class="ife-top"><span>FF · Flight Facilities TV</span><span>Station · live chat</span></div>
         <div class="ife-ch">
-          <div class="ch"><div class="cn">CH 1 · Departures</div><b>The classics</b><div class="ths"><img src="https://i.ytimg.com/vi/r0bS-YnLf4s/mqdefault.jpg" alt=""><img src="https://i.ytimg.com/vi/Jcu1AHaTchM/mqdefault.jpg" alt=""><img src="https://i.ytimg.com/vi/gJ5YaApfSdQ/mqdefault.jpg" alt=""></div></div>
-          <div class="ch"><div class="cn">CH 2 · Cruising altitude</div><b>The mixes</b><div class="ths"><img src="https://i.ytimg.com/vi/54a6SjIlJF0/mqdefault.jpg" alt=""><img src="https://i.ytimg.com/vi/YPg37aYz7tM/mqdefault.jpg" alt=""><img src="https://i.ytimg.com/vi/jntQd7U0aSk/mqdefault.jpg" alt=""></div></div>
-          <div class="ch"><div class="cn">CH 3 · Live from the cabin</div><b>Live and sets</b><div class="ths"><img src="https://i.ytimg.com/vi/ts-6KyJUDWY/mqdefault.jpg" alt=""><img src="https://i.ytimg.com/vi/y8Ndi955iuY/mqdefault.jpg" alt=""><img src="https://i.ytimg.com/vi/qeo2NtFQLqo/mqdefault.jpg" alt=""></div></div>
-          <div class="ch new"><div class="cn">CH 4 · Arrivals</div><b>The new album</b><div class="ths"><span>Single 1</span><span>Single 2</span><span>Album</span></div></div>
+          <div class="ch"><div class="cn">01 · Catalogue</div><b>The classics</b><div class="ths"><img src="https://i.ytimg.com/vi/r0bS-YnLf4s/mqdefault.jpg" alt=""><img src="https://i.ytimg.com/vi/Jcu1AHaTchM/mqdefault.jpg" alt=""><img src="https://i.ytimg.com/vi/gJ5YaApfSdQ/mqdefault.jpg" alt=""></div></div>
+          <div class="ch"><div class="cn">02 · Mixes</div><b>The mixes</b><div class="ths"><img src="https://i.ytimg.com/vi/54a6SjIlJF0/mqdefault.jpg" alt=""><img src="https://i.ytimg.com/vi/YPg37aYz7tM/mqdefault.jpg" alt=""><img src="https://i.ytimg.com/vi/jntQd7U0aSk/mqdefault.jpg" alt=""></div></div>
+          <div class="ch"><div class="cn">03 · Performance</div><b>Live and sets</b><div class="ths"><img src="https://i.ytimg.com/vi/ts-6KyJUDWY/mqdefault.jpg" alt=""><img src="https://i.ytimg.com/vi/y8Ndi955iuY/mqdefault.jpg" alt=""><img src="https://i.ytimg.com/vi/qeo2NtFQLqo/mqdefault.jpg" alt=""></div></div>
+          <div class="ch new"><div class="cn">04 · New music</div><b>The new album</b><div class="ths"><span>Single 1</span><span>Single 2</span><span>Album</span></div></div>
         </div>
       </div>
     </div>
@@ -657,7 +655,7 @@ body.sheet-open{overflow:hidden}
   </div>
 </section>
 
-<section class="slide alt" data-t="Next album plan"><div class="chev"></div><div class="inner"><span class="tag reveal">10 <i>·</i> Next album plan</span><h2 class="display reveal" style="margin-top:.9rem;max-width:27ch">The next album.<br><span class="a">Build on what works.</span></h2><div class="architecture stagger"><div class="phase"><div class="phase-frame"><img src="https://i.ytimg.com/vi/3f0e5j2G7IQ/hqdefault.jpg" alt="Existing FF visual language"></div><div class="board">01 · Before release</div><h3>Define the world</h3><p>Agree the album’s look, story and atmosphere. Plan how the films, mixes and live show express it.</p><b>One look across the channel</b></div><div class="phase"><div class="phase-frame"><img src="https://i.ytimg.com/vi/IH5L4qTVsTk/hqdefault.jpg" alt="Reference: a cinematic single"></div><div class="board">02 · Lead single</div><h3>Make the moment</h3><p>Introduce the era through the main video. Carry the same imagery into Shorts, artwork and the channel.</p><b>Forever 455K · Heavy 426K</b></div><div class="phase"><div class="phase-frame"><img src="https://i.ytimg.com/vi/54a6SjIlJF0/hqdefault.jpg" alt="Reference: a concept mix"></div><div class="board">03 · Between singles</div><h3>Give them more</h3><p>A mix, edit or live take can reveal another side of the record. Keep the era’s look and link back to the song.</p><b>Five Decade Mixes: 387–592K</b></div><div class="phase"><div class="phase-frame"><img src="https://i.ytimg.com/vi/3f0e5j2G7IQ/hqdefault.jpg" alt="Reference: a consistent visual identity"></div><div class="board">04 · Album week</div><h3>Make it easy to listen</h3><p>Give every track a home. Bring the videos, track artwork and album playlist together as one recognisable collection.</p><b>Forever: six tracks were plain audio</b></div><div class="phase"><div class="phase-frame"><img src="https://i.ytimg.com/vi/ts-6KyJUDWY/hqdefault.jpg" alt="Reference: a filmed live show"></div><div class="board">05 · After the album</div><h3>Keep the era alive</h3><p>Bring the album world onto the stage and back to YouTube: the full film, selected songs and Shorts.</p><b>Airfields 390K · live Shorts 25–419K</b></div></div><div class="means reveal"><div class="board">What changes from Forever</div><p>Keep one visual identity across the campaign, and plan the mix, follow-up and live film before the first single lands.</p></div><div class="src reveal">Existing FF imagery illustrates the approach; this is not proposed artwork for the new album. Proposed sequence, not a fixed upload quota. Mixes and live are strengths to build on; additional versions remain selective.</div></div></section>
+<section class="slide alt" data-t="Next album plan"><div class="chev"></div><div class="inner"><span class="tag reveal">10 <i>·</i> Next album plan</span><h2 class="display reveal" style="margin-top:.9rem;max-width:27ch">The next album.<br><span class="a">Build on what works.</span></h2><div class="architecture stagger"><div class="phase"><div class="phase-frame"><img src="https://i.ytimg.com/vi/ts-6KyJUDWY/hqdefault.jpg" alt="Existing FF visual language"></div><div class="board">01 · Before release</div><h3>Define the world</h3><p>Agree the album’s look, story and atmosphere. Plan how the films, mixes and live show express it.</p><b>One look across the channel</b></div><div class="phase"><div class="phase-frame"><img src="https://i.ytimg.com/vi/IH5L4qTVsTk/hqdefault.jpg" alt="Reference: a cinematic single"></div><div class="board">02 · Lead single</div><h3>Make the moment</h3><p>Introduce the era through the main video. Carry the same imagery into Shorts, artwork and the channel.</p><b>Forever 455K · Heavy 426K</b></div><div class="phase"><div class="phase-frame"><img src="https://i.ytimg.com/vi/54a6SjIlJF0/hqdefault.jpg" alt="Reference: a concept mix"></div><div class="board">03 · Between singles</div><h3>Give them more</h3><p>A mix, edit or live take can reveal another side of the record. Keep the era’s look and link back to the song.</p><b>Five Decade Mixes: 387–592K</b></div><div class="phase"><div class="phase-frame"><img src="https://i.ytimg.com/vi/ts-6KyJUDWY/hqdefault.jpg" alt="Reference: a consistent visual identity"></div><div class="board">04 · Album week</div><h3>Make it easy to listen</h3><p>Give every track a home. Bring the videos, track artwork and album playlist together as one recognisable collection.</p><b>Forever: six tracks were plain audio</b></div><div class="phase"><div class="phase-frame"><img src="https://i.ytimg.com/vi/ts-6KyJUDWY/hqdefault.jpg" alt="Reference: a filmed live show"></div><div class="board">05 · After the album</div><h3>Keep the era alive</h3><p>Bring the album world onto the stage and back to YouTube: the full film, selected songs and Shorts.</p><b>Airfields 390K · live Shorts 25–419K</b></div></div><div class="means reveal"><div class="board">What changes from Forever</div><p>Keep one visual identity across the campaign, and plan the mix, follow-up and live film before the first single lands.</p></div><div class="src reveal">Existing FF imagery illustrates the approach; this is not proposed artwork for the new album. Proposed sequence, not a fixed upload quota. Mixes and live are strengths to build on; additional versions remain selective.</div></div></section>
 
 <section class="slide cream" data-t="The priorities"><div class="chev"></div><div class="inner"><span class="tag reveal">11 <i>·</i> The priorities</span><h2 class="display reveal" style="margin-top:.9rem;max-width:27ch">Keep what works.<br><span class="r">Build the campaign around it.</span></h2><div class="closing-rows stagger"><div><strong class="fig">455K</strong><div><span class="board">Forever · official video</span><h3>Keep the creative music video.</h3><p>Forever reached 455K and Heavy 426K. Keep the video central, with supporting discovery clips.</p></div></div><div><strong class="fig">387–592K</strong><div><span class="board">Five Decade Mix uploads</span><h3>Build on their own formats.</h3><p>Five mixes reached 387–592K. Plan a new concept mix; use standout FF edits between singles.</p></div></div><div><strong class="fig">390K</strong><div><span class="board">Airfields · full concert</span><h3>Bring live inside the campaign.</h3><p>Airfields reached 390K. Plan the full film within the campaign, then choose song cuts and Shorts selectively.</p></div></div></div><div class="close-next reveal"><b>Start with the creative direction:</b> then map the album window, focus singles and shows worth filming. VMG can help with sequencing, channel programming and the YouTube conversation.</div><div class="src reveal">Lifetime views as of 21 Oct 2026. YouTube Studio access would let us assess watch time, traffic sources and onward viewing before setting targets.</div></div></section>
 
