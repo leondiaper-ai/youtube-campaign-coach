@@ -32,7 +32,7 @@ export default function OwnedChannelsBoard({ rows, canCollect, readFailed, linkS
   const uploads = cadence.length ? cadence.reduce((s, r) => s + r.uploads30d, 0) : null;
   const filtered = rows.filter(r => (role === 'All purposes' || r.role === role) &&
     `${r.name} ${r.handle ?? ''} ${r.id} ${r.purpose}`.toLowerCase().includes(search.toLowerCase()));
-  const sortValue = (r: OwnedRow): number | null => sort === 'views' ? r.views7d : sort === 'typical' ? r.medianTrack : r.current ? r.uploads30d : null;
+  const sortValue = (r: OwnedRow): number | null => sort === 'views' ? r.views7d : sort === 'scale' ? r.current?.views ?? null : r.current ? r.uploads30d : null;
   filtered.sort((a, b) => {
     if (sort === 'name') return a.name.localeCompare(b.name);
     const av = sortValue(a), bv = sortValue(b);
@@ -106,7 +106,7 @@ export default function OwnedChannelsBoard({ rows, canCollect, readFailed, linkS
       <label><span className="sr-only">Sort channels</span>
         <select value={sort} onChange={e => setSort(e.target.value)} className="border border-line rounded-control bg-surface px-3 py-2 text-body">
           <option value="name">Sort: channel name</option><option value="views">Sort: views gained · 7d</option>
-          <option value="typical">Sort: typical track views</option><option value="uploads">Sort: uploads · 30d</option>
+          <option value="scale">Sort: channel views</option><option value="uploads">Sort: uploads · 30d</option>
         </select></label>
       <span className="text-meta text-muted tabular-nums">{filtered.length} channels</span>
     </div>
@@ -115,7 +115,7 @@ export default function OwnedChannelsBoard({ rows, canCollect, readFailed, linkS
       <div className="overflow-x-auto">
         <table className="w-full min-w-[1020px] text-left text-body">
           <thead className="bg-raised/60 border-b border-line text-micro text-muted uppercase tracking-label">
-            <tr>{['Channel / purpose', 'Subscribers', 'Views gained · 7d', 'Uploads · 30d', 'Typical track · 7–30d', 'First upload', 'Reading'].map(t =>
+            <tr>{['Channel / purpose', 'Scale', 'Subscribers', 'Views gained · 7d', 'Uploads · 30d', 'First upload', 'Reading'].map(t =>
               <th scope="col" key={t} className="px-4 py-3 font-bold whitespace-nowrap">{t}</th>)}</tr>
           </thead>
           <tbody>{filtered.map(row => <Fragment key={row.id}>
@@ -129,12 +129,13 @@ export default function OwnedChannelsBoard({ rows, canCollect, readFailed, linkS
                 </Link>
                 <button type="button" onClick={() => setExpanded(expanded === row.id ? null : row.id)} aria-expanded={expanded === row.id} aria-controls={`channel-${row.id}`} aria-label={`Quick view: ${row.name}`} className="p-2 text-muted hover:text-ink"><span aria-hidden>{expanded === row.id ? '−' : '+'}</span></button>
               </div></td>
+              <td className="px-4 py-4 tabular-nums font-semibold">{row.current ? number(row.current.views) : '—'}
+                <span className="block text-micro font-normal text-muted">{!row.current ? 'No reading yet' : row.current.library?.videoCount != null ? `${number(row.current.library.videoCount)} videos` : row.current.items.length ? `${number(row.current.items.length)} uploads held` : 'No uploads yet'}</span></td>
               <td className="px-4 py-4 tabular-nums font-semibold">{number(row.current?.subs)}<span className="block text-micro font-normal text-muted">{row.subs7d != null ? `${gain(row.subs7d)} in 7d` : 'Public count'}</span></td>
-              <td className="px-4 py-4 tabular-nums font-semibold">{gain(row.views7d)}<span className="block text-micro font-normal text-muted">{row.views7d == null ? `${number(row.current?.views)} total views` : row.views7d < 0 ? 'Net count correction' : `${number(row.current?.views)} total views`}</span></td>
+              <td className="px-4 py-4 tabular-nums font-semibold">{gain(row.views7d)}<span className="block text-micro font-normal text-muted">{row.views7d == null ? 'Needs a second reading' : row.views7d < 0 ? 'Net count correction' : 'Measured between readings'}</span></td>
               <td className="px-4 py-4 tabular-nums font-semibold">{row.current ? `${row.covers30d ? '' : '≥'}${row.uploads30d}` : '—'}
                 <span className="block text-micro font-normal text-muted">{row.current ? `${number(row.uploads30d / (30 / 7))} / week${row.covers30d ? '' : ' · partial'}` : 'No reading yet'}</span></td>
-              <td className="px-4 py-4 tabular-nums font-semibold">{number(row.medianTrack)}<span className="block text-micro font-normal text-muted">{row.trackSample ? `across ${row.trackSample} track${row.trackSample === 1 ? '' : 's'}${row.typicalCoverage ? '' : ' · partial'}` : 'Building a baseline'}</span></td>
-              <td className="px-4 py-4 text-meta font-semibold whitespace-nowrap">{row.firstUpload ? date(row.firstUpload) : '—'}<span className="block text-micro font-normal text-muted">{row.firstUpload && row.current ? `${Math.floor((Date.parse(row.current.collectedAt) - Date.parse(row.firstUpload)) / 86400000)} days publishing` : row.current ? 'Full history needed' : 'Not collected'}</span></td>
+              <td className="px-4 py-4 text-meta font-semibold whitespace-nowrap">{row.firstUpload ? date(row.firstUpload) : '—'}<span className="block text-micro font-normal text-muted">{row.firstUpload && row.current ? `${Math.floor((Date.parse(row.current.collectedAt) - Date.parse(row.firstUpload)) / 86400000)} days publishing` : !row.current ? 'Not collected' : row.current.items.length === 0 ? 'No uploads yet' : 'Full history needed'}</span></td>
               <td className="px-4 py-4 text-micro whitespace-nowrap"><span className={row.stale || !validChannelId(row.id) ? 'text-warn font-semibold' : 'text-muted'}>
                 {!validChannelId(row.id) ? 'Check channel ID' : row.current ? (row.stale ? 'Stale reading' : date(row.current.collectedAt)) : 'Not collected'}</span></td>
             </tr>
@@ -145,7 +146,7 @@ export default function OwnedChannelsBoard({ rows, canCollect, readFailed, linkS
         </table>
       </div>
       {!filtered.length && <div className="px-5 py-10 text-center text-body text-muted">No channels match. <button type="button" className="underline text-ink" onClick={() => { setSearch(''); setRole('All purposes'); }}>Clear filters</button></div>}
-      <div className="px-4 py-3 text-micro text-muted bg-raised/50 border-t border-line">Typical track = median views to date on track uploads aged 7–30 days (sample size shown). Small samples are an early signal, not a performance grade. First upload is shown only when the public upload history is complete.</div>
+      <div className="px-4 py-3 text-micro text-muted bg-raised/50 border-t border-line">Scale is YouTube's lifetime view counter and its public video count. Views gained is measured between two readings and is blank until a second exists. Uploads marked ≥ cover only part of the period. Open a channel for its leading uploads and observations.</div>
     </div>
 
     <details className="mt-6 border border-line rounded-card bg-surface px-5 py-4 text-meta text-secondary">
