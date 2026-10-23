@@ -1,0 +1,1520 @@
+{
+  "capturedAt": "2026-10-23T12:39:24.563Z",
+  "source": "Read-only Watcher /api/channel?q=@flightfacilities and /api/video-series",
+  "selectedLiveShorts": [
+    {
+      "id": "fdN6JZp2wAc",
+      "title": "Mexico always delivers",
+      "description": "",
+      "publishedAt": "2026-07-08T23:43:27Z",
+      "durationSec": 16,
+      "live": "none",
+      "scheduledStart": null,
+      "actualStart": null,
+      "captions": false,
+      "viewCount": 212440,
+      "likeCount": 9686,
+      "commentCount": 15
+    },
+    {
+      "id": "3wCKuF7YcI8",
+      "title": "One night in New York #knockdown #craveyou #electronicmusic",
+      "description": "",
+      "publishedAt": "2026-06-05T03:58:24Z",
+      "durationSec": 32,
+      "live": "none",
+      "scheduledStart": null,
+      "actualStart": null,
+      "captions": false,
+      "viewCount": 77820,
+      "likeCount": 4952,
+      "commentCount": 30
+    },
+    {
+      "id": "tZg27KL7Tc4",
+      "title": "Crave You in Melbourne",
+      "description": "",
+      "publishedAt": "2026-05-15T06:15:42Z",
+      "durationSec": 16,
+      "live": "none",
+      "scheduledStart": null,
+      "actualStart": null,
+      "captions": false,
+      "viewCount": 419223,
+      "likeCount": 5302,
+      "commentCount": 23
+    },
+    {
+      "id": "Ww_4m26jo8o",
+      "title": "Goosebumps",
+      "description": "",
+      "publishedAt": "2026-05-14T10:25:30Z",
+      "durationSec": 33,
+      "live": "none",
+      "scheduledStart": null,
+      "actualStart": null,
+      "captions": false,
+      "viewCount": 71474,
+      "likeCount": 2930,
+      "commentCount": 15
+    },
+    {
+      "id": "h7d1FsJGFSk",
+      "title": "Crave You in Brisbane",
+      "description": "",
+      "publishedAt": "2026-05-12T01:14:42Z",
+      "durationSec": 24,
+      "live": "none",
+      "scheduledStart": null,
+      "actualStart": null,
+      "captions": false,
+      "viewCount": 25473,
+      "likeCount": 804,
+      "commentCount": 11
+    }
+  ],
+  "comparisonShortsPublishedThrough20261021": [
+    {
+      "id": "jD9y2QZG7p4",
+      "title": "\ud83c\udde8\ud83c\udde6 has our hearts",
+      "description": "",
+      "publishedAt": "2026-09-17T23:00:20Z",
+      "durationSec": 16,
+      "live": "none",
+      "scheduledStart": null,
+      "actualStart": null,
+      "captions": false,
+      "viewCount": 763,
+      "likeCount": 29,
+      "commentCount": 3
+    },
+    {
+      "id": "L9H9Q_r9AKo",
+      "title": "Pacha pacha pacha #housemusic #electronicmusic",
+      "description": "",
+      "publishedAt": "2026-09-16T09:48:02Z",
+      "durationSec": 61,
+      "live": "none",
+      "scheduledStart": null,
+      "actualStart": null,
+      "captions": false,
+      "viewCount": 2187,
+      "likeCount": 90,
+      "commentCount": 1,
+      "shortCompanion": "likely",
+      "lyricCompanion": "likely",
+      "visualizerCompanion": "likely",
+      "audioCompanion": "none",
+      "hasShortSibling": true,
+      "hasLyricSibling": true,
+      "hasVisualizerSibling": true,
+      "hasAudioSibling": false
+    },
+    {
+      "id": "PZDTVpzJcjw",
+      "title": "Speaking a foreign language in Britain \ud83c\uddec\ud83c\udde7 #housemusic #summer #festivalvibes",
+      "description": "",
+      "publishedAt": "2026-08-24T20:06:47Z",
+      "durationSec": 53,
+      "live": "none",
+      "scheduledStart": null,
+      "actualStart": null,
+      "captions": false,
+      "viewCount": 818,
+      "likeCount": 28,
+      "commentCount": 1
+    },
+    {
+      "id": "TfnY_8hJMuQ",
+      "title": "ID / album sleeper #music #housemusic #vocoder #festival",
+      "description": "",
+      "publishedAt": "2026-07-30T02:02:07Z",
+      "durationSec": 39,
+      "live": "none",
+      "scheduledStart": null,
+      "actualStart": null,
+      "captions": false,
+      "viewCount": 1766,
+      "likeCount": 25,
+      "commentCount": 1
+    },
+    {
+      "id": "fdN6JZp2wAc",
+      "title": "Mexico always delivers",
+      "description": "",
+      "publishedAt": "2026-07-08T23:43:27Z",
+      "durationSec": 16,
+      "live": "none",
+      "scheduledStart": null,
+      "actualStart": null,
+      "captions": false,
+      "viewCount": 212440,
+      "likeCount": 9686,
+      "commentCount": 15
+    },
+    {
+      "id": "olr4CCVpUU0",
+      "title": "here we are now, entertain us",
+      "description": "",
+      "publishedAt": "2026-06-29T11:32:35Z",
+      "durationSec": 29,
+      "live": "none",
+      "scheduledStart": null,
+      "actualStart": null,
+      "captions": false,
+      "viewCount": 2082,
+      "likeCount": 31,
+      "commentCount": 2
+    },
+    {
+      "id": "W1IwPUOF-uU",
+      "title": "Knicks in \u270b",
+      "description": "",
+      "publishedAt": "2026-06-26T06:31:06Z",
+      "durationSec": 11,
+      "live": "none",
+      "scheduledStart": null,
+      "actualStart": null,
+      "captions": false,
+      "viewCount": 2490,
+      "likeCount": 47,
+      "commentCount": 3
+    },
+    {
+      "id": "rKWczwrRGG8",
+      "title": "It really doesn\u2019t get much better than this feeling \ud83d\udc99\u2764\ufe0f",
+      "description": "",
+      "publishedAt": "2026-06-16T17:27:22Z",
+      "durationSec": 10,
+      "live": "none",
+      "scheduledStart": null,
+      "actualStart": null,
+      "captions": false,
+      "viewCount": 6035,
+      "likeCount": 45,
+      "commentCount": 1
+    },
+    {
+      "id": "ecuSqjvJBbo",
+      "title": "Tour ending afterparty for the ages #concert #newyork #groovejet #craveyou",
+      "description": "",
+      "publishedAt": "2026-06-11T01:32:24Z",
+      "durationSec": 49,
+      "live": "none",
+      "scheduledStart": null,
+      "actualStart": null,
+      "captions": false,
+      "viewCount": 1592,
+      "likeCount": 20,
+      "commentCount": 7
+    },
+    {
+      "id": "DzjIXYctb0E",
+      "title": "Rehearsed steps on an empty stage #craveyou #concert",
+      "description": "",
+      "publishedAt": "2026-06-09T09:32:18Z",
+      "durationSec": 49,
+      "live": "none",
+      "scheduledStart": null,
+      "actualStart": null,
+      "captions": false,
+      "viewCount": 1228,
+      "likeCount": 54,
+      "commentCount": 7
+    },
+    {
+      "id": "P9_5Iw4t_7Y",
+      "title": "Forgot we wrote this song #concert #standstill #craveyou",
+      "description": "",
+      "publishedAt": "2026-06-06T22:26:24Z",
+      "durationSec": 46,
+      "live": "none",
+      "scheduledStart": null,
+      "actualStart": null,
+      "captions": false,
+      "viewCount": 1678,
+      "likeCount": 33,
+      "commentCount": 1
+    },
+    {
+      "id": "3wCKuF7YcI8",
+      "title": "One night in New York #knockdown #craveyou #electronicmusic",
+      "description": "",
+      "publishedAt": "2026-06-05T03:58:24Z",
+      "durationSec": 32,
+      "live": "none",
+      "scheduledStart": null,
+      "actualStart": null,
+      "captions": false,
+      "viewCount": 77820,
+      "likeCount": 4952,
+      "commentCount": 30
+    },
+    {
+      "id": "3sZ8a4hFMzA",
+      "title": "everyone discovering Crave You for the first time... welcome \ud83d\udd4a\ufe0fHere\u2019s where it all started.",
+      "description": "",
+      "publishedAt": "2026-05-25T05:12:01Z",
+      "durationSec": 53,
+      "live": "none",
+      "scheduledStart": null,
+      "actualStart": null,
+      "captions": false,
+      "viewCount": 2816,
+      "likeCount": 80,
+      "commentCount": 4
+    },
+    {
+      "id": "tZg27KL7Tc4",
+      "title": "Crave You in Melbourne",
+      "description": "",
+      "publishedAt": "2026-05-15T06:15:42Z",
+      "durationSec": 16,
+      "live": "none",
+      "scheduledStart": null,
+      "actualStart": null,
+      "captions": false,
+      "viewCount": 419223,
+      "likeCount": 5302,
+      "commentCount": 23
+    },
+    {
+      "id": "Ww_4m26jo8o",
+      "title": "Goosebumps",
+      "description": "",
+      "publishedAt": "2026-05-14T10:25:30Z",
+      "durationSec": 33,
+      "live": "none",
+      "scheduledStart": null,
+      "actualStart": null,
+      "captions": false,
+      "viewCount": 71474,
+      "likeCount": 2930,
+      "commentCount": 15
+    },
+    {
+      "id": "JLrHVjQIEYU",
+      "title": "13 May 2026",
+      "description": "",
+      "publishedAt": "2026-05-13T10:58:58Z",
+      "durationSec": 17,
+      "live": "none",
+      "scheduledStart": null,
+      "actualStart": null,
+      "captions": false,
+      "viewCount": 3013,
+      "likeCount": 37,
+      "commentCount": 4
+    },
+    {
+      "id": "h7d1FsJGFSk",
+      "title": "Crave You in Brisbane",
+      "description": "",
+      "publishedAt": "2026-05-12T01:14:42Z",
+      "durationSec": 24,
+      "live": "none",
+      "scheduledStart": null,
+      "actualStart": null,
+      "captions": false,
+      "viewCount": 25473,
+      "likeCount": 804,
+      "commentCount": 11
+    },
+    {
+      "id": "Wmysvg5YhGM",
+      "title": "There\u2019s always one \ud83d\udeeb",
+      "description": "",
+      "publishedAt": "2026-01-14T03:58:52Z",
+      "durationSec": 20,
+      "live": "none",
+      "scheduledStart": null,
+      "actualStart": null,
+      "captions": false,
+      "viewCount": 3481,
+      "likeCount": 32,
+      "commentCount": 2
+    }
+  ],
+  "liveShortViews": 806430,
+  "all18ShortViews": 836379,
+  "selectedLiveShare": 0.9641920708195686,
+  "lyricVideo": {
+    "id": "sWMXjayCL9o",
+    "title": "Flight Facilities - Crave You feat. Giselle (Official Lyric Video)",
+    "description": "In 2010, we released our debut single, Crave You. In light of the track finding a plethora of new ears on viral trends, here is a look back at our humble beginnings.\n\nListen to Crave You: https://drop.cobrand.com/d/FlightFacilities/craveyou\n\nCrave You Music Video: https://youtu.be/r0bS-YnLf4s?si=BejPj_HvQxjbk4ZG\n\nHow we made Crave You: https://www.tiktok.com/@flightfacilities/video/7297054664753728786\n\nEdited by Isaiah Cirillo (@overcastweather)\nPhotos provided by Pat Stevenson (@patstevenson) \n\n--- ---  Control Tower  --- ---\nw http://www.flightfacilities.com\nf http://www.facebook.com/flightfacilities\ni https://www.instagram.com/flightfac/\ntt https://www.tiktok.com/@flightfacilities?",
+    "publishedAt": "2026-07-16T22:57:32Z",
+    "durationSec": 244,
+    "live": "none",
+    "scheduledStart": null,
+    "actualStart": null,
+    "captions": false,
+    "viewCount": 75004,
+    "likeCount": 574,
+    "commentCount": 47,
+    "shortCompanion": "likely",
+    "lyricCompanion": "none",
+    "visualizerCompanion": "likely",
+    "audioCompanion": "none",
+    "hasShortSibling": true,
+    "hasLyricSibling": false,
+    "hasVisualizerSibling": true,
+    "hasAudioSibling": false,
+    "isTopPerformer": true
+  },
+  "welcomeVideo": {
+    "id": "3sZ8a4hFMzA",
+    "title": "everyone discovering Crave You for the first time... welcome \ud83d\udd4a\ufe0fHere\u2019s where it all started.",
+    "description": "",
+    "publishedAt": "2026-05-25T05:12:01Z",
+    "durationSec": 53,
+    "live": "none",
+    "scheduledStart": null,
+    "actualStart": null,
+    "captions": false,
+    "viewCount": 2816,
+    "likeCount": 80,
+    "commentCount": 4
+  },
+  "series": [
+    {
+      "videoId": "tZg27KL7Tc4",
+      "has": true,
+      "publishedAt": "2026-05-15T06:15:42Z",
+      "first": "2026-09-29",
+      "last": "2026-10-23",
+      "count": 25,
+      "spanDays": 25,
+      "observations": [
+        {
+          "ts": "2026-09-29",
+          "views": 418412,
+          "likes": 5317,
+          "comments": 23
+        },
+        {
+          "ts": "2026-09-30",
+          "views": 418451,
+          "likes": 5317,
+          "comments": 23
+        },
+        {
+          "ts": "2026-10-01",
+          "views": 418498,
+          "likes": 5318,
+          "comments": 23
+        },
+        {
+          "ts": "2026-10-02",
+          "views": 418538,
+          "likes": 5318,
+          "comments": 23
+        },
+        {
+          "ts": "2026-10-03",
+          "views": 418572,
+          "likes": 5318,
+          "comments": 23
+        },
+        {
+          "ts": "2026-10-04",
+          "views": 418621,
+          "likes": 5317,
+          "comments": 23
+        },
+        {
+          "ts": "2026-10-05",
+          "views": 418647,
+          "likes": 5317,
+          "comments": 23
+        },
+        {
+          "ts": "2026-10-06",
+          "views": 418684,
+          "likes": 5317,
+          "comments": 23
+        },
+        {
+          "ts": "2026-10-07",
+          "views": 418730,
+          "likes": 5317,
+          "comments": 23
+        },
+        {
+          "ts": "2026-10-08",
+          "views": 418768,
+          "likes": 5317,
+          "comments": 23
+        },
+        {
+          "ts": "2026-10-09",
+          "views": 418809,
+          "likes": 5317,
+          "comments": 23
+        },
+        {
+          "ts": "2026-10-10",
+          "views": 418844,
+          "likes": 5317,
+          "comments": 23
+        },
+        {
+          "ts": "2026-10-11",
+          "views": 418899,
+          "likes": 5318,
+          "comments": 23
+        },
+        {
+          "ts": "2026-10-12",
+          "views": 418927,
+          "likes": 5317,
+          "comments": 23
+        },
+        {
+          "ts": "2026-10-13",
+          "views": 418946,
+          "likes": 5318,
+          "comments": 23
+        },
+        {
+          "ts": "2026-10-14",
+          "views": 418972,
+          "likes": 5318,
+          "comments": 23
+        },
+        {
+          "ts": "2026-10-15",
+          "views": 419000,
+          "likes": 5319,
+          "comments": 23
+        },
+        {
+          "ts": "2026-10-16",
+          "views": 419028,
+          "likes": 5315,
+          "comments": 23
+        },
+        {
+          "ts": "2026-10-17",
+          "views": 419073,
+          "likes": 5309,
+          "comments": 23
+        },
+        {
+          "ts": "2026-10-18",
+          "views": 419114,
+          "likes": 5306,
+          "comments": 23
+        },
+        {
+          "ts": "2026-10-19",
+          "views": 419142,
+          "likes": 5304,
+          "comments": 23
+        },
+        {
+          "ts": "2026-10-20",
+          "views": 419163,
+          "likes": 5305,
+          "comments": 23
+        },
+        {
+          "ts": "2026-10-21",
+          "views": 419177,
+          "likes": 5305,
+          "comments": 23
+        },
+        {
+          "ts": "2026-10-22",
+          "views": 419199,
+          "likes": 5303,
+          "comments": 23
+        },
+        {
+          "ts": "2026-10-23",
+          "views": 419223,
+          "likes": 5302,
+          "comments": 23
+        }
+      ],
+      "gaps": []
+    },
+    {
+      "videoId": "fdN6JZp2wAc",
+      "has": true,
+      "publishedAt": "2026-07-08T23:43:27Z",
+      "first": "2026-09-29",
+      "last": "2026-10-23",
+      "count": 25,
+      "spanDays": 25,
+      "observations": [
+        {
+          "ts": "2026-09-29",
+          "views": 212423,
+          "likes": 9718,
+          "comments": 15
+        },
+        {
+          "ts": "2026-09-30",
+          "views": 212425,
+          "likes": 9718,
+          "comments": 15
+        },
+        {
+          "ts": "2026-10-01",
+          "views": 212425,
+          "likes": 9718,
+          "comments": 15
+        },
+        {
+          "ts": "2026-10-02",
+          "views": 212425,
+          "likes": 9718,
+          "comments": 15
+        },
+        {
+          "ts": "2026-10-03",
+          "views": 212425,
+          "likes": 9718,
+          "comments": 15
+        },
+        {
+          "ts": "2026-10-04",
+          "views": 212428,
+          "likes": 9718,
+          "comments": 15
+        },
+        {
+          "ts": "2026-10-05",
+          "views": 212428,
+          "likes": 9718,
+          "comments": 15
+        },
+        {
+          "ts": "2026-10-06",
+          "views": 212429,
+          "likes": 9718,
+          "comments": 15
+        },
+        {
+          "ts": "2026-10-07",
+          "views": 212429,
+          "likes": 9718,
+          "comments": 15
+        },
+        {
+          "ts": "2026-10-08",
+          "views": 212431,
+          "likes": 9718,
+          "comments": 15
+        },
+        {
+          "ts": "2026-10-09",
+          "views": 212431,
+          "likes": 9718,
+          "comments": 15
+        },
+        {
+          "ts": "2026-10-10",
+          "views": 212433,
+          "likes": 9718,
+          "comments": 15
+        },
+        {
+          "ts": "2026-10-11",
+          "views": 212434,
+          "likes": 9718,
+          "comments": 15
+        },
+        {
+          "ts": "2026-10-12",
+          "views": 212434,
+          "likes": 9718,
+          "comments": 15
+        },
+        {
+          "ts": "2026-10-13",
+          "views": 212434,
+          "likes": 9718,
+          "comments": 15
+        },
+        {
+          "ts": "2026-10-14",
+          "views": 212434,
+          "likes": 9717,
+          "comments": 15
+        },
+        {
+          "ts": "2026-10-15",
+          "views": 212434,
+          "likes": 9717,
+          "comments": 15
+        },
+        {
+          "ts": "2026-10-16",
+          "views": 212436,
+          "likes": 9713,
+          "comments": 15
+        },
+        {
+          "ts": "2026-10-17",
+          "views": 212438,
+          "likes": 9707,
+          "comments": 15
+        },
+        {
+          "ts": "2026-10-18",
+          "views": 212438,
+          "likes": 9697,
+          "comments": 15
+        },
+        {
+          "ts": "2026-10-19",
+          "views": 212439,
+          "likes": 9694,
+          "comments": 15
+        },
+        {
+          "ts": "2026-10-20",
+          "views": 212439,
+          "likes": 9694,
+          "comments": 15
+        },
+        {
+          "ts": "2026-10-21",
+          "views": 212439,
+          "likes": 9694,
+          "comments": 15
+        },
+        {
+          "ts": "2026-10-22",
+          "views": 212440,
+          "likes": 9686,
+          "comments": 15
+        },
+        {
+          "ts": "2026-10-23",
+          "views": 212440,
+          "likes": 9686,
+          "comments": 15
+        }
+      ],
+      "gaps": []
+    },
+    {
+      "videoId": "3wCKuF7YcI8",
+      "has": true,
+      "publishedAt": "2026-06-05T03:58:24Z",
+      "first": "2026-09-29",
+      "last": "2026-10-23",
+      "count": 25,
+      "spanDays": 25,
+      "observations": [
+        {
+          "ts": "2026-09-29",
+          "views": 77802,
+          "likes": 4961,
+          "comments": 30
+        },
+        {
+          "ts": "2026-09-30",
+          "views": 77804,
+          "likes": 4961,
+          "comments": 30
+        },
+        {
+          "ts": "2026-10-01",
+          "views": 77804,
+          "likes": 4961,
+          "comments": 30
+        },
+        {
+          "ts": "2026-10-02",
+          "views": 77804,
+          "likes": 4961,
+          "comments": 30
+        },
+        {
+          "ts": "2026-10-03",
+          "views": 77804,
+          "likes": 4961,
+          "comments": 30
+        },
+        {
+          "ts": "2026-10-04",
+          "views": 77804,
+          "likes": 4961,
+          "comments": 30
+        },
+        {
+          "ts": "2026-10-05",
+          "views": 77804,
+          "likes": 4961,
+          "comments": 30
+        },
+        {
+          "ts": "2026-10-06",
+          "views": 77804,
+          "likes": 4961,
+          "comments": 30
+        },
+        {
+          "ts": "2026-10-07",
+          "views": 77805,
+          "likes": 4961,
+          "comments": 30
+        },
+        {
+          "ts": "2026-10-08",
+          "views": 77807,
+          "likes": 4961,
+          "comments": 30
+        },
+        {
+          "ts": "2026-10-09",
+          "views": 77807,
+          "likes": 4961,
+          "comments": 30
+        },
+        {
+          "ts": "2026-10-10",
+          "views": 77808,
+          "likes": 4961,
+          "comments": 30
+        },
+        {
+          "ts": "2026-10-11",
+          "views": 77808,
+          "likes": 4961,
+          "comments": 30
+        },
+        {
+          "ts": "2026-10-12",
+          "views": 77810,
+          "likes": 4961,
+          "comments": 30
+        },
+        {
+          "ts": "2026-10-13",
+          "views": 77810,
+          "likes": 4961,
+          "comments": 30
+        },
+        {
+          "ts": "2026-10-14",
+          "views": 77812,
+          "likes": 4961,
+          "comments": 30
+        },
+        {
+          "ts": "2026-10-15",
+          "views": 77814,
+          "likes": 4961,
+          "comments": 30
+        },
+        {
+          "ts": "2026-10-16",
+          "views": 77815,
+          "likes": 4961,
+          "comments": 30
+        },
+        {
+          "ts": "2026-10-17",
+          "views": 77817,
+          "likes": 4959,
+          "comments": 30
+        },
+        {
+          "ts": "2026-10-18",
+          "views": 77818,
+          "likes": 4955,
+          "comments": 30
+        },
+        {
+          "ts": "2026-10-19",
+          "views": 77819,
+          "likes": 4955,
+          "comments": 30
+        },
+        {
+          "ts": "2026-10-20",
+          "views": 77819,
+          "likes": 4955,
+          "comments": 30
+        },
+        {
+          "ts": "2026-10-21",
+          "views": 77819,
+          "likes": 4955,
+          "comments": 30
+        },
+        {
+          "ts": "2026-10-22",
+          "views": 77820,
+          "likes": 4953,
+          "comments": 30
+        },
+        {
+          "ts": "2026-10-23",
+          "views": 77820,
+          "likes": 4952,
+          "comments": 30
+        }
+      ],
+      "gaps": []
+    },
+    {
+      "videoId": "Ww_4m26jo8o",
+      "has": true,
+      "publishedAt": "2026-05-14T10:25:30Z",
+      "first": "2026-09-29",
+      "last": "2026-10-23",
+      "count": 25,
+      "spanDays": 25,
+      "observations": [
+        {
+          "ts": "2026-09-29",
+          "views": 71457,
+          "likes": 2941,
+          "comments": 15
+        },
+        {
+          "ts": "2026-09-30",
+          "views": 71458,
+          "likes": 2941,
+          "comments": 15
+        },
+        {
+          "ts": "2026-10-01",
+          "views": 71458,
+          "likes": 2940,
+          "comments": 15
+        },
+        {
+          "ts": "2026-10-02",
+          "views": 71458,
+          "likes": 2940,
+          "comments": 15
+        },
+        {
+          "ts": "2026-10-03",
+          "views": 71458,
+          "likes": 2940,
+          "comments": 15
+        },
+        {
+          "ts": "2026-10-04",
+          "views": 71458,
+          "likes": 2940,
+          "comments": 15
+        },
+        {
+          "ts": "2026-10-05",
+          "views": 71459,
+          "likes": 2940,
+          "comments": 15
+        },
+        {
+          "ts": "2026-10-06",
+          "views": 71459,
+          "likes": 2940,
+          "comments": 15
+        },
+        {
+          "ts": "2026-10-07",
+          "views": 71460,
+          "likes": 2940,
+          "comments": 15
+        },
+        {
+          "ts": "2026-10-08",
+          "views": 71461,
+          "likes": 2940,
+          "comments": 15
+        },
+        {
+          "ts": "2026-10-09",
+          "views": 71465,
+          "likes": 2940,
+          "comments": 15
+        },
+        {
+          "ts": "2026-10-10",
+          "views": 71465,
+          "likes": 2939,
+          "comments": 15
+        },
+        {
+          "ts": "2026-10-11",
+          "views": 71465,
+          "likes": 2939,
+          "comments": 15
+        },
+        {
+          "ts": "2026-10-12",
+          "views": 71465,
+          "likes": 2939,
+          "comments": 15
+        },
+        {
+          "ts": "2026-10-13",
+          "views": 71465,
+          "likes": 2939,
+          "comments": 15
+        },
+        {
+          "ts": "2026-10-14",
+          "views": 71467,
+          "likes": 2939,
+          "comments": 15
+        },
+        {
+          "ts": "2026-10-15",
+          "views": 71467,
+          "likes": 2939,
+          "comments": 15
+        },
+        {
+          "ts": "2026-10-16",
+          "views": 71469,
+          "likes": 2937,
+          "comments": 15
+        },
+        {
+          "ts": "2026-10-17",
+          "views": 71471,
+          "likes": 2936,
+          "comments": 15
+        },
+        {
+          "ts": "2026-10-18",
+          "views": 71471,
+          "likes": 2934,
+          "comments": 15
+        },
+        {
+          "ts": "2026-10-19",
+          "views": 71471,
+          "likes": 2932,
+          "comments": 15
+        },
+        {
+          "ts": "2026-10-20",
+          "views": 71471,
+          "likes": 2932,
+          "comments": 15
+        },
+        {
+          "ts": "2026-10-21",
+          "views": 71471,
+          "likes": 2932,
+          "comments": 15
+        },
+        {
+          "ts": "2026-10-22",
+          "views": 71472,
+          "likes": 2932,
+          "comments": 15
+        },
+        {
+          "ts": "2026-10-23",
+          "views": 71474,
+          "likes": 2930,
+          "comments": 15
+        }
+      ],
+      "gaps": []
+    },
+    {
+      "videoId": "h7d1FsJGFSk",
+      "has": true,
+      "publishedAt": "2026-05-12T01:14:42Z",
+      "first": "2026-09-29",
+      "last": "2026-10-23",
+      "count": 25,
+      "spanDays": 25,
+      "observations": [
+        {
+          "ts": "2026-09-29",
+          "views": 25310,
+          "likes": 799,
+          "comments": 11
+        },
+        {
+          "ts": "2026-09-30",
+          "views": 25320,
+          "likes": 799,
+          "comments": 11
+        },
+        {
+          "ts": "2026-10-01",
+          "views": 25328,
+          "likes": 799,
+          "comments": 11
+        },
+        {
+          "ts": "2026-10-02",
+          "views": 25336,
+          "likes": 799,
+          "comments": 11
+        },
+        {
+          "ts": "2026-10-03",
+          "views": 25348,
+          "likes": 799,
+          "comments": 11
+        },
+        {
+          "ts": "2026-10-04",
+          "views": 25358,
+          "likes": 800,
+          "comments": 11
+        },
+        {
+          "ts": "2026-10-05",
+          "views": 25369,
+          "likes": 802,
+          "comments": 11
+        },
+        {
+          "ts": "2026-10-06",
+          "views": 25377,
+          "likes": 802,
+          "comments": 11
+        },
+        {
+          "ts": "2026-10-07",
+          "views": 25381,
+          "likes": 802,
+          "comments": 11
+        },
+        {
+          "ts": "2026-10-08",
+          "views": 25387,
+          "likes": 802,
+          "comments": 11
+        },
+        {
+          "ts": "2026-10-09",
+          "views": 25396,
+          "likes": 802,
+          "comments": 11
+        },
+        {
+          "ts": "2026-10-10",
+          "views": 25407,
+          "likes": 802,
+          "comments": 11
+        },
+        {
+          "ts": "2026-10-11",
+          "views": 25412,
+          "likes": 802,
+          "comments": 11
+        },
+        {
+          "ts": "2026-10-12",
+          "views": 25413,
+          "likes": 802,
+          "comments": 11
+        },
+        {
+          "ts": "2026-10-13",
+          "views": 25415,
+          "likes": 802,
+          "comments": 11
+        },
+        {
+          "ts": "2026-10-14",
+          "views": 25421,
+          "likes": 802,
+          "comments": 11
+        },
+        {
+          "ts": "2026-10-15",
+          "views": 25428,
+          "likes": 802,
+          "comments": 11
+        },
+        {
+          "ts": "2026-10-16",
+          "views": 25433,
+          "likes": 802,
+          "comments": 11
+        },
+        {
+          "ts": "2026-10-17",
+          "views": 25439,
+          "likes": 803,
+          "comments": 11
+        },
+        {
+          "ts": "2026-10-18",
+          "views": 25448,
+          "likes": 803,
+          "comments": 11
+        },
+        {
+          "ts": "2026-10-19",
+          "views": 25454,
+          "likes": 803,
+          "comments": 11
+        },
+        {
+          "ts": "2026-10-20",
+          "views": 25459,
+          "likes": 803,
+          "comments": 11
+        },
+        {
+          "ts": "2026-10-21",
+          "views": 25461,
+          "likes": 803,
+          "comments": 11
+        },
+        {
+          "ts": "2026-10-22",
+          "views": 25467,
+          "likes": 803,
+          "comments": 11
+        },
+        {
+          "ts": "2026-10-23",
+          "views": 25473,
+          "likes": 804,
+          "comments": 11
+        }
+      ],
+      "gaps": []
+    },
+    {
+      "videoId": "sWMXjayCL9o",
+      "has": true,
+      "publishedAt": "2026-07-16T22:57:32Z",
+      "first": "2026-09-29",
+      "last": "2026-10-23",
+      "count": 25,
+      "spanDays": 25,
+      "observations": [
+        {
+          "ts": "2026-09-29",
+          "views": 74140,
+          "likes": 560,
+          "comments": 46
+        },
+        {
+          "ts": "2026-09-30",
+          "views": 74185,
+          "likes": 560,
+          "comments": 46
+        },
+        {
+          "ts": "2026-10-01",
+          "views": 74232,
+          "likes": 562,
+          "comments": 46
+        },
+        {
+          "ts": "2026-10-02",
+          "views": 74278,
+          "likes": 562,
+          "comments": 46
+        },
+        {
+          "ts": "2026-10-03",
+          "views": 74322,
+          "likes": 564,
+          "comments": 46
+        },
+        {
+          "ts": "2026-10-04",
+          "views": 74355,
+          "likes": 565,
+          "comments": 46
+        },
+        {
+          "ts": "2026-10-05",
+          "views": 74403,
+          "likes": 565,
+          "comments": 46
+        },
+        {
+          "ts": "2026-10-06",
+          "views": 74444,
+          "likes": 565,
+          "comments": 46
+        },
+        {
+          "ts": "2026-10-07",
+          "views": 74490,
+          "likes": 565,
+          "comments": 46
+        },
+        {
+          "ts": "2026-10-08",
+          "views": 74519,
+          "likes": 566,
+          "comments": 46
+        },
+        {
+          "ts": "2026-10-09",
+          "views": 74557,
+          "likes": 567,
+          "comments": 46
+        },
+        {
+          "ts": "2026-10-10",
+          "views": 74595,
+          "likes": 568,
+          "comments": 47
+        },
+        {
+          "ts": "2026-10-11",
+          "views": 74626,
+          "likes": 568,
+          "comments": 47
+        },
+        {
+          "ts": "2026-10-12",
+          "views": 74662,
+          "likes": 568,
+          "comments": 47
+        },
+        {
+          "ts": "2026-10-13",
+          "views": 74682,
+          "likes": 568,
+          "comments": 47
+        },
+        {
+          "ts": "2026-10-14",
+          "views": 74706,
+          "likes": 569,
+          "comments": 48
+        },
+        {
+          "ts": "2026-10-15",
+          "views": 74762,
+          "likes": 570,
+          "comments": 48
+        },
+        {
+          "ts": "2026-10-16",
+          "views": 74799,
+          "likes": 570,
+          "comments": 48
+        },
+        {
+          "ts": "2026-10-17",
+          "views": 74822,
+          "likes": 570,
+          "comments": 47
+        },
+        {
+          "ts": "2026-10-18",
+          "views": 74854,
+          "likes": 571,
+          "comments": 47
+        },
+        {
+          "ts": "2026-10-19",
+          "views": 74873,
+          "likes": 571,
+          "comments": 47
+        },
+        {
+          "ts": "2026-10-20",
+          "views": 74902,
+          "likes": 574,
+          "comments": 47
+        },
+        {
+          "ts": "2026-10-21",
+          "views": 74943,
+          "likes": 574,
+          "comments": 47
+        },
+        {
+          "ts": "2026-10-22",
+          "views": 74978,
+          "likes": 574,
+          "comments": 47
+        },
+        {
+          "ts": "2026-10-23",
+          "views": 75004,
+          "likes": 574,
+          "comments": 47
+        }
+      ],
+      "gaps": []
+    },
+    {
+      "videoId": "3sZ8a4hFMzA",
+      "has": true,
+      "publishedAt": "2026-05-25T05:12:01Z",
+      "first": "2026-09-29",
+      "last": "2026-10-23",
+      "count": 25,
+      "spanDays": 25,
+      "observations": [
+        {
+          "ts": "2026-09-29",
+          "views": 2741,
+          "likes": 79,
+          "comments": 4
+        },
+        {
+          "ts": "2026-09-30",
+          "views": 2745,
+          "likes": 79,
+          "comments": 4
+        },
+        {
+          "ts": "2026-10-01",
+          "views": 2747,
+          "likes": 79,
+          "comments": 4
+        },
+        {
+          "ts": "2026-10-02",
+          "views": 2748,
+          "likes": 79,
+          "comments": 4
+        },
+        {
+          "ts": "2026-10-03",
+          "views": 2749,
+          "likes": 79,
+          "comments": 4
+        },
+        {
+          "ts": "2026-10-04",
+          "views": 2754,
+          "likes": 79,
+          "comments": 4
+        },
+        {
+          "ts": "2026-10-05",
+          "views": 2757,
+          "likes": 79,
+          "comments": 4
+        },
+        {
+          "ts": "2026-10-06",
+          "views": 2758,
+          "likes": 79,
+          "comments": 4
+        },
+        {
+          "ts": "2026-10-07",
+          "views": 2758,
+          "likes": 79,
+          "comments": 4
+        },
+        {
+          "ts": "2026-10-08",
+          "views": 2761,
+          "likes": 79,
+          "comments": 4
+        },
+        {
+          "ts": "2026-10-09",
+          "views": 2763,
+          "likes": 79,
+          "comments": 4
+        },
+        {
+          "ts": "2026-10-10",
+          "views": 2763,
+          "likes": 79,
+          "comments": 4
+        },
+        {
+          "ts": "2026-10-11",
+          "views": 2767,
+          "likes": 80,
+          "comments": 4
+        },
+        {
+          "ts": "2026-10-12",
+          "views": 2767,
+          "likes": 80,
+          "comments": 4
+        },
+        {
+          "ts": "2026-10-13",
+          "views": 2768,
+          "likes": 80,
+          "comments": 4
+        },
+        {
+          "ts": "2026-10-14",
+          "views": 2773,
+          "likes": 80,
+          "comments": 4
+        },
+        {
+          "ts": "2026-10-15",
+          "views": 2777,
+          "likes": 80,
+          "comments": 4
+        },
+        {
+          "ts": "2026-10-16",
+          "views": 2781,
+          "likes": 80,
+          "comments": 4
+        },
+        {
+          "ts": "2026-10-17",
+          "views": 2783,
+          "likes": 80,
+          "comments": 4
+        },
+        {
+          "ts": "2026-10-18",
+          "views": 2785,
+          "likes": 80,
+          "comments": 4
+        },
+        {
+          "ts": "2026-10-19",
+          "views": 2792,
+          "likes": 80,
+          "comments": 4
+        },
+        {
+          "ts": "2026-10-20",
+          "views": 2796,
+          "likes": 80,
+          "comments": 4
+        },
+        {
+          "ts": "2026-10-21",
+          "views": 2799,
+          "likes": 80,
+          "comments": 4
+        },
+        {
+          "ts": "2026-10-22",
+          "views": 2804,
+          "likes": 80,
+          "comments": 4
+        },
+        {
+          "ts": "2026-10-23",
+          "views": 2816,
+          "likes": 80,
+          "comments": 4
+        }
+      ],
+      "gaps": []
+    }
+  ],
+  "limitations": [
+    "Snapshot lifetime views of 2026 uploads, not unique viewers or the full viral audience.",
+    "Five selected live Shorts gained 1026 views between 29 September and 23 October: most views predate the observed window.",
+    "The 96% denominator is 18 short uploads published 1 Jan\u201321 Oct 2026; excludes the 23 Oct Clair De Lune upload.",
+    "Cross-platform viral scale and conversion to new music are not measured."
+  ]
+}
