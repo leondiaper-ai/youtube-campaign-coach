@@ -125,11 +125,11 @@ export default function OwnedChannelAnalysis({ analysis, canCollect, readFailed,
           : `Lifetime counter · the uploads read account for ${fmt(library.totalViews)}`} />
       <Metric label="Median upload" value={fmt(library.medianViews)}
         note={!row.current ? 'No reading yet'
-          : `Half do better, half worse · n=${library.withViews}${library.underTen ? ` · ${share(library.underTen / Math.max(library.withViews, 1))} under ten views` : ''}`} />
+          : `Half do better, half worse, across ${fmt(library.withViews)} uploads${library.underTen ? ` · ${share(library.underTen / Math.max(library.withViews, 1))} of them under ten views` : ''}`} />
       <Metric label="Carrying half the views" value={library.halfShareCount == null ? '—' : String(library.halfShareCount)}
         note={!row.current ? 'No reading yet'
           : library.halfShareCount == null ? 'No view counts recorded'
-          : `of ${library.withViews} uploads read · the best one holds ${share(library.topShare)}`} />
+          : `out of ${fmt(library.withViews)} uploads read · the best one holds ${share(library.topShare)}`} />
     </div>
 
     <div className="flex flex-wrap items-center justify-between gap-3 mb-5">
@@ -140,7 +140,7 @@ export default function OwnedChannelAnalysis({ analysis, canCollect, readFailed,
       <Metric label="Channel views" value={fmt(row.current?.views)} note={row.current ? observationNote(viewsMovement) : 'No reading yet'} />
       <Metric label="Subscribers" value={fmt(row.current?.subs)} note={row.current ? `${observationNote(subsMovement)} · rounded public count` : 'No reading yet'} />
       <Metric label={`Uploads · ${days}d`} value={row.current ? `${covered ? '' : '≥'}${windowCount}` : '—'} note={row.current ? `${fmt(windowCount / (days / 7))} per week${covered ? '' : ' · incomplete window'}` : 'No publication sample yet'} />
-      <Metric label="Typical track views" value={fmt(row.medianTrack)} note={`Median · ${row.trackSample} tracks aged 7–30d${row.trackSample && row.trackSample < 5 ? ' · small sample' : ''}`} />
+      <Metric label="Typical track views" value={fmt(row.medianTrack)} note={row.trackSample ? `Middle of ${row.trackSample} track${row.trackSample === 1 ? '' : 's'} aged 7–30 days${row.trackSample < 5 ? ' · too few to lean on' : ''}` : 'No tracks old enough to judge yet'} />
     </div>
 
     <div className="grid lg:grid-cols-[minmax(0,1.7fr)_minmax(280px,1fr)] gap-5 mb-5">

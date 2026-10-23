@@ -84,7 +84,7 @@ export function LengthChart({ breakdown }: { breakdown: ReturnType<typeof length
     {breakdown.map((g, i) => <div key={g.label}>
       <div className="flex justify-between text-meta mb-2 gap-3"><span className="text-secondary font-semibold">{g.label} <span className="text-muted font-normal">· {g.count} uploads</span></span><strong className="tabular-nums">{g.views == null ? '—' : compact(g.views)}</strong></div>
       <div className="h-1.5 rounded-full bg-raised overflow-hidden" role="img" aria-label={`${g.label}: ${g.views == null ? 'views unavailable' : exact(g.views) + ' lifetime views'}`}><div className={`h-full rounded-full ${colors[i]}`} style={{ width: `${g.views == null ? 0 : g.views / max * 100}%` }} /></div>
-      <p className="text-micro text-muted mt-1.5">{g.median == null ? 'No view-count sample' : `${compact(g.median)} median views · n=${g.known}`}{g.known < g.count ? ' · some counts unavailable' : ''}</p>
+      <p className="text-micro text-muted mt-1.5">{g.median == null ? 'No view-count sample' : `${compact(g.median)} median views, across ${g.known} upload${g.known === 1 ? '' : 's'}`}{g.known < g.count ? ' · some counts unavailable' : ''}</p>
     </div>)}
     <p className="text-micro text-muted pt-2">Views to date on uploads in this publication window. Length groups do not identify YouTube Shorts. Different upload ages affect totals.</p>
   </div>;
