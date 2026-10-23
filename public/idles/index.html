@@ -586,8 +586,8 @@ body.present .reveal,body.present .stagger>*{opacity:1;transform:none}
 .hero-discovery{font-size:1rem;line-height:1.6;max-width:90ch;margin-top:1rem;color:var(--smoke)}.hero-discovery b{color:var(--bone)}
 
 /* Larger YouTube stills and editorial variation, keeping the IDLES palette and type. */
-.band-cover .bleed{left:32%}.band-cover .bleed img{object-position:58% 45%;filter:saturate(.8)}
-.band-cover .bleed::after{background:linear-gradient(90deg,var(--ink) 0%,rgba(10,10,10,.72) 25%,rgba(10,10,10,.12) 100%),linear-gradient(0deg,var(--ink),transparent 45%)}
+.band-cover .bleed{left:0}.band-cover .bleed img{object-position:60% 44%;filter:saturate(.8)}
+.band-cover .bleed::after{background:linear-gradient(90deg,rgba(10,10,10,.96) 0%,rgba(10,10,10,.78) 35%,rgba(10,10,10,.14) 100%),linear-gradient(0deg,var(--ink),transparent 50%)}
 .band-cover .cover-title{font-size:clamp(2.8rem,7.8vw,6.4rem);max-width:1000px;text-shadow:0 2px 22px rgba(0,0,0,.25)}
 .band-cover .sub{color:var(--bone);max-width:48ch}.band-cover .review-source{max-width:60%;color:#b9b3ab}
 .cover-credit{position:absolute;right:1.6rem;bottom:2rem;z-index:3;color:var(--bone);font-family:'Barlow Condensed',sans-serif;text-transform:uppercase;font-size:.72rem;letter-spacing:.08em;text-decoration:none;border-bottom:1px solid var(--red);padding-bottom:.35rem}
@@ -616,12 +616,12 @@ const activityTimeline = () => {
   return `<figure class="activity-figure" aria-labelledby="activity-caption"><div class="activity-key"><span><i class="lf"></i>Full-length</span><span><i class="sh"></i>Shorts</span><small>Uploads per month</small></div><div class="activity-scroll"><div class="activity-chart"><div class="activity-axis" aria-hidden="true"><span>20</span><span>10</span><span>0</span></div><ol class="activity-months">${A.tangk.monthlyActivity.map(m=>{const [year,month]=m.month.split('-');const label=names[Number(month)-1];return `<li class="activity-month" aria-label="${label} ${year}: ${m.longForm} full-length uploads, ${m.shorts} Shorts"><div class="activity-plot" aria-hidden="true"><div class="activity-stack"><b>${m.longForm+m.shorts}</b><span class="activity-sh" style="height:${m.shorts*8}px"></span><span class="activity-lf" style="height:${m.longForm*8}px"></span></div></div><div class="activity-date" aria-hidden="true">${label}<small>${year}</small></div><div class="activity-event" aria-hidden="true">${events[m.month]||''}</div></li>`}).join('')}</ol></div></div><figcaption id="activity-caption">TANGK upload activity · August 2023–December 2024. Bar height shows uploads, not views.</figcaption></figure>`;
 };
 const slides = () => [
-`<section class="slide band-cover" data-t="IDLES channel review"><div class="bleed"><img src="${thumb(A.liveSong.id)}" alt="IDLES performing Mother live at Le Bataclan" onerror="this.style.visibility='hidden'"></div><div class="inner">
+`<section class="slide band-cover" data-t="IDLES channel review"><div class="bleed"><img src="https://i.ytimg.com/vi/wMehItNQKAA/maxresdefault.jpg" alt="IDLES performing together at NPR Tiny Desk" onerror="this.onerror=null;this.src='https://i.ytimg.com/vi/wMehItNQKAA/hqdefault.jpg'"></div><div class="inner">
 <div class="label reveal">IDLES × YouTube · Partisan Records</div>
 <h1 class="display review-title cover-title reveal">The channel<br>today.<br><span style="color:var(--red)">The next album<br>on YouTube.</span></h1>
 <p class="sub reveal">What works on the IDLES channel, what past campaigns tell us, and how to approach the next album on YouTube.</p>
 ${source('Public channel research · 22 October 2026 · No release date or campaign timetable assumed')}
-</div><a class="cover-credit" href="https://www.youtube.com/watch?v=${A.liveSong.id}" target="_blank" rel="noopener">Mother · Live at Le Bataclan ↗</a></section>`,
+</div><a class="cover-credit" href="https://www.youtube.com/watch?v=wMehItNQKAA" target="_blank" rel="noopener">IDLES · NPR Music Tiny Desk ↗</a></section>`,
 `<section class="slide bone" data-t="Channel overview"><div class="inner">
 <div class="label reveal">IDLES × YouTube · the starting point</div><h2 class="display review-title reveal">The channel today.</h2>
 <div class="overview-stats stagger">
