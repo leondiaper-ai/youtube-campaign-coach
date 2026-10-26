@@ -1,8 +1,6 @@
 import { notFound } from 'next/navigation';
 import { AppHeader } from '@/components/ui/AppHeader';
 import { OWNED_CHANNELS, validChannelId } from '@/lib/ownedChannels/channels';
-import { ownedAuthorised } from '@/lib/ownedChannels/auth';
-import AccessPrompt from '@/app/growth/owned/AccessPrompt';
 import { ownedChannelsEnabled } from '@/lib/ownedChannels/gate';
 import { readOwnedHistory, ownedStore } from '@/lib/ownedChannels/store';
 import { analyseOwnedChannel } from '@/lib/ownedChannels/analysis';
@@ -17,7 +15,6 @@ export default async function OwnedChannelPage({ params, searchParams }: {
   searchParams?: Record<string, string | string[] | undefined>;
 }) {
   if (!ownedChannelsEnabled()) notFound();
-  if (!(await ownedAuthorised())) return <AccessPrompt />;
   const { slug } = await params;
   const channel = OWNED_CHANNELS.find(c => c.slug === slug || c.id === slug);
   if (!channel) notFound();

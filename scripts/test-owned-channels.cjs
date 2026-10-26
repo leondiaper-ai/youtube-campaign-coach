@@ -85,33 +85,15 @@ try {
   }
 } finally { console.error = originalError; }
 assert.deepEqual(renderWarnings, [], 'Channel charts must render without hydration warnings');
-process.env.NODE_ENV = 'production'; process.env.VERCEL_ENV = 'production'; assert.equal(ownedChannelsEnabled(), false);
+process.env.NODE_ENV = 'production'; process.env.VERCEL_ENV = 'production'; assert.equal(ownedChannelsEnabled(), true);
 process.env.VERCEL_ENV = 'preview'; assert.equal(ownedChannelsEnabled(), true);
 delete process.env.VERCEL_ENV; process.env.NODE_ENV = 'development'; assert.equal(ownedChannelsEnabled(), true);
 console.log('Owned Channels checks passed: roster, cohorts, observation spans, video gains, missing counters, publishing coverage and production gate.');
 
-// Production authentication: missing key fails closed, tampered/expired sessions fail.
-const auth = load('src/lib/ownedChannels/auth.ts');
-process.env.VERCEL_ENV = 'production'; process.env.NODE_ENV = 'production';
-delete process.env.OWNED_CHANNELS_SECRET;
-assert.equal(auth.verifyOwnedSecret('anything'), false);
-assert.equal(auth.validOwnedSession('123.fake'), false);
-process.env.OWNED_CHANNELS_SECRET = 'test-only-key-at-least-20-characters';
-assert.equal(ownedChannelsEnabled(), true);
-assert.equal(auth.verifyOwnedSecret('wrong'), false);
-assert.equal(auth.verifyOwnedSecret(null), false);
-assert.equal(auth.verifyOwnedSecret(process.env.OWNED_CHANNELS_SECRET), true);
-const cookie = auth.ownedSessionCookie();
-assert.equal(auth.validOwnedSession(cookie.value), true);
-assert.equal(auth.validOwnedSession(cookie.value + 'x'), false);
-assert.equal(auth.validOwnedSession(cookie.value, Date.now() + 13 * 3600000), false);
-assert.equal(cookie.httpOnly, true); assert.equal(cookie.secure, true);
-process.env.OWNED_CHANNELS_SECRET = 'a-different-test-only-key-at-least-20';
-assert.equal(auth.validOwnedSession(cookie.value), false);
-delete process.env.OWNED_CHANNELS_SECRET;
+// UK-only navigation remains unchanged when access is public.
 const { AppHeader } = load('src/components/ui/AppHeader.tsx');
 const nav = [{ href: '/growth', label: 'Channel Health' }];
 const renderNav = workspace => renderToStaticMarkup(React.createElement(AppHeader, { workspace, nav }));
 assert(renderNav('Virgin Music UK').includes('Owned Channels'));
 for (const workspace of ['Virgin Music Australia', 'Virgin Music Nordics', 'Virgin Music US']) assert(!renderNav(workspace).includes('Owned Channels'));
-console.log('Production auth and UK-only navigation checks passed.');
+console.log('Public access and UK-only navigation checks passed.');

@@ -2,8 +2,6 @@ import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { AppHeader, PageTitle } from '@/components/ui/AppHeader';
 import { OWNED_CHANNELS } from '@/lib/ownedChannels/channels';
-import { ownedAuthorised } from '@/lib/ownedChannels/auth';
-import AccessPrompt from '@/app/growth/owned/AccessPrompt';
 import { ownedChannelsEnabled } from '@/lib/ownedChannels/gate';
 import { readOwnedHistory, ownedStore } from '@/lib/ownedChannels/store';
 import { summariseChannel } from '@/lib/ownedChannels/metrics';
@@ -17,7 +15,6 @@ export default async function OwnedChannelsPage({ searchParams }: {
   searchParams?: Record<string, string | string[] | undefined>;
 }) {
   if (!ownedChannelsEnabled()) notFound();
-  if (!(await ownedAuthorised())) return <AccessPrompt />;
   const market = await getMarketFromRequest(searchParams);
   if (market.id !== 'uk') notFound();
   const mq = '';

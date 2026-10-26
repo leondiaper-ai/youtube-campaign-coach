@@ -1,4 +1,3 @@
-import { ownedAuthorised } from '@/lib/ownedChannels/auth';
 import { OWNED_CHANNELS, validChannelId } from '@/lib/ownedChannels/channels';
 import { ownedChannelsEnabled } from '@/lib/ownedChannels/gate';
 import { collectOwnedChannel } from '@/lib/ownedChannels/collect';
@@ -7,7 +6,7 @@ import { ownedStore, readOwnedHistory, saveOwnedSnapshot } from '@/lib/ownedChan
 export const dynamic = 'force-dynamic';
 export const maxDuration = 180;
 export async function POST(req: Request) {
-  if (!ownedChannelsEnabled() || !(await ownedAuthorised())) return new Response(null, { status: 404 });
+  if (!ownedChannelsEnabled()) return new Response(null, { status: 404 });
   // Preview relies on the project's existing Vercel Deployment Protection.
   // Reject cross-origin browser writes; never accept arbitrary channel IDs.
   const origin = req.headers.get('origin');
