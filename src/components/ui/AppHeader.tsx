@@ -43,6 +43,10 @@ export function AppHeader({
   actions?: React.ReactNode;
 }) {
   const pathname = usePathname();
+  const ownedNav = workspace === 'Virgin Music UK' || workspace === 'VMG · Owned network';
+  const items = ownedNav && !nav.some(item => item.href.split('?')[0] === '/growth/owned')
+    ? [...nav.slice(0, 1), { href: '/growth/owned', label: 'Owned Channels', match: '/growth/owned' }, ...nav.slice(1)]
+    : nav;
 
   return (
     <header className="border-b border-line bg-surface">
@@ -78,10 +82,10 @@ export function AppHeader({
         {/* Navigation rail. Active state is a weight and an underline that
             meets the header's bottom edge — a filled pill competes with
             the page's own cards for attention. */}
-        <nav className="flex items-center gap-1 -mb-px">
-          {nav.map((item) => {
+        <nav className="flex flex-wrap items-center gap-1 -mb-px">
+          {items.map((item) => {
             const target = item.match ?? item.href.split('?')[0];
-            const isActive = pathname === target;
+            const isActive = pathname === target || (target === '/growth/owned' && pathname.startsWith('/growth/owned/'));
             return (
               <Link
                 key={item.href}
