@@ -269,6 +269,23 @@ body.present .ph{display:none!important}
 .goal-cards .card-title{font-size:1.25rem;line-height:1.25;margin-bottom:.75rem}
 .goal-check{font-size:.8rem;line-height:1.5;color:rgba(255,255,255,.7);border-top:1px solid var(--line-d);padding-top:.75rem;margin-top:1rem}
 @media(max-width:760px){.progress-strip{gap:.75rem}.progress-strip span{font-size:.72rem}}
+.roadmap-note{font-size:.85rem;color:rgba(255,255,255,.6);margin:-.75rem 0 1.75rem}
+.stage-roadmap{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:1rem;scroll-margin-top:5rem}
+.stage-card{padding:1.4rem}
+.stage-label{display:flex;gap:.65rem;align-items:center;font-size:.85rem;font-weight:800;text-transform:uppercase;letter-spacing:.08em;margin-bottom:1.3rem;color:var(--signal)}
+.stage-label span{font-size:.7rem;opacity:.65}
+.stage-card .card-title{font-size:1.3rem;line-height:1.2;margin-bottom:1.1rem}
+.stage-fact{display:flex;align-items:baseline;gap:.65rem;margin:.6rem 0}
+.stage-fact strong{font-size:1.75rem;line-height:1.1;letter-spacing:-.04em;min-width:2.5rem}
+.stage-fact span,.stage-list{font-size:.88rem;line-height:1.55;color:rgba(255,255,255,.75)}
+.stage-list{padding-left:1.05rem;margin:0}
+.stage-list li{padding-left:.1rem;margin-bottom:.85rem}
+.stage-list li::marker{color:var(--signal)}
+.stage-small{font-size:.72rem;line-height:1.5;color:rgba(255,255,255,.5);margin-top:1rem}
+.stage-card .card-desc{font-size:.85rem;margin-top:1rem}
+.stage-outcome{border-color:var(--signal)}
+@media(max-width:1050px){.stage-roadmap{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:620px){.stage-roadmap{grid-template-columns:1fr}}
 .stat-unit{font-size:.38em;font-weight:600;color:rgba(255,255,255,.6)}
 .closing-question{font-size:clamp(1.1rem,2vw,1.5rem);line-height:1.3;letter-spacing:-.02em;margin-top:1.5rem}
 body.present .supporting{display:none}
@@ -565,13 +582,50 @@ body.present .supporting{display:none}
   <div class="container">
     <div class="section-label">Ideas for the group to shape</div>
     <h2 class="section-title">A possible next phase</h2>
-    <p class="section-subtitle">A few practical goals we could shape locally, learn from together and review each quarter.</p>
-    <div class="progress-strip reveal" aria-label="Progress so far, snapshot to 20 October 2026">
-      <div><strong>250+</strong><span>channels monitored</span></div>
-      <div><strong>23</strong><span>artist &amp; label reviews since August</span></div>
-      <div><strong>3</strong><span>teams using it: UK, Nordics &amp; Australia</span></div>
+    <p class="section-subtitle">Shared visibility. Better-informed support. More activity and consumption on YouTube.</p>
+    <p class="roadmap-note">Today is established work. The next steps are ideas for the group to shape.</p>
+    <div id="scale" class="stage-roadmap reveal">
+      <div class="card stage-card">
+        <div class="stage-label"><span>01</span> Today</div>
+        <div class="card-title">A working foundation</div>
+        <div class="stage-fact"><strong>250+</strong><span>channels monitored</span></div>
+        <div class="stage-fact"><strong>23</strong><span>artist &amp; label reviews</span></div>
+        <div class="stage-fact"><strong>3</strong><span>teams: UK, Nordics &amp; Australia</span></div>
+        <p class="card-desc">UK landscape built. Partisan using and requesting deep dives.</p>
+        <p class="stage-small">Snapshot to 20 Oct · reviews since August</p>
+      </div>
+      <div class="card stage-card">
+        <div class="stage-label"><span>02</span> Build</div>
+        <div class="card-title">Extend what exists</div>
+        <ul class="stage-list">
+          <li>Bring US &amp; LATAM teams further in.</li>
+          <li>Map the <strong>top 100 music channels by local consumption</strong> per key territory; identify relevant VMG repertoire.</li>
+          <li>Connect <strong>12 months of consumption</strong> with dashboard data, working with Data/Insights.</li>
+        </ul>
+      </div>
+      <div class="card stage-card">
+        <div class="stage-label"><span>03</span> Test &amp; learn</div>
+        <div class="card-title">Find out what helps</div>
+        <ul class="stage-list">
+          <li>Ask key territories: is the dashboard useful, and what is missing?</li>
+          <li>Get label feedback on deep dives and ideas taken forward.</li>
+          <li>Explore a <strong>label-only dashboard with Partisan</strong>, who have asked for one.</li>
+        </ul>
+      </div>
+      <div class="card stage-card stage-outcome">
+        <div class="stage-label"><span>04</span> Goal</div>
+        <div class="card-title">Focus support.<br>Grow YouTube.</div>
+        <ul class="stage-list">
+          <li>Agree priority local artists and channels with each team.</li>
+          <li>Help artists use YouTube more consistently.</li>
+          <li>Review growth in <strong>views and consumption</strong> each quarter.</li>
+        </ul>
+        <p class="stage-small">One shared direction, shaped locally.</p>
+      </div>
     </div>
-    <div id="scale" class="roadmap goal-cards reveal">
+    <h3 class="closing-question">What would be most useful to build and test together first?</h3>
+<details class="supporting"><summary>Possible goals, measures and territory scope</summary><div class="supporting-body">
+    <div class="roadmap goal-cards reveal">
       <div class="card">
         <div class="eyebrow">Teams · possible goal</div>
         <div class="card-title">Bring more teams in</div>
@@ -591,9 +645,9 @@ body.present .supporting{display:none}
         <p class="goal-check"><strong>Track:</strong> partner feedback, repeat requests and ideas taken forward.</p>
       </div>
     </div>
-    <p class="small muted" style="margin-top:1rem">Data foundation: work with Data/Insights on 12 months of territory consumption alongside dashboard data, building on the annual UK mapping requested by YouTube.</p>
-    <div class="callout reveal"><div class="callout-label">Shared outcome to review each quarter</div><div class="callout-text">More consistent artist activity. Growth in views and consumption.</div></div>
-    <h3 class="closing-question">Which of these would be most useful for your territory or labels?</h3>
+
+<p class="small muted" style="margin-top:1rem">The top 100 is a proposed market-mapping scope, not a list of 100 artists to support. Local teams would select a smaller focus list based on repertoire, relationships and ability to act. Build on YouTube’s annual UK mapping request; agree data coverage and definitions with Data/Insights before extending it.</p>
+</div></details>
 <details class="supporting"><summary>Coverage and review scenarios · illustrations for discussion</summary><div class="supporting-body"><div class="cards two reveal" style="grid-template-columns:1.3fr 1fr">
       <div class="card">
         <div class="eyebrow">Coverage · artist channels on the YouTube dashboard</div>
