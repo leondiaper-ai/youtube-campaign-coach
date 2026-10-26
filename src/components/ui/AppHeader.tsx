@@ -44,8 +44,10 @@ export function AppHeader({
 }) {
   const pathname = usePathname();
   const ownedNav = workspace === 'Virgin Music UK' || workspace === 'VMG · Owned network';
+  const resourcesIndex = nav.findIndex(item => item.href.split('?')[0] === '/resources');
+  const ownedIndex = resourcesIndex < 0 ? nav.length : resourcesIndex;
   const items = ownedNav && !nav.some(item => item.href.split('?')[0] === '/growth/owned')
-    ? [...nav.slice(0, 1), { href: '/growth/owned', label: 'Owned Channels', match: '/growth/owned' }, ...nav.slice(1)]
+    ? [...nav.slice(0, ownedIndex), { href: '/growth/owned', label: 'Owned Channels', match: '/growth/owned' }, ...nav.slice(ownedIndex)]
     : nav;
 
   return (
