@@ -263,6 +263,12 @@ body.present .ph{display:none!important}
 .section-dark .supporting{border-color:var(--line-d)}
 .section-dark .supporting summary{color:rgba(255,255,255,.7)}
 .roadmap{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1.25rem;scroll-margin-top:5rem}
+.progress-strip{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1.25rem;margin:0 0 1.5rem;padding:1rem 0 1.25rem;border-bottom:1px solid var(--line-d)}
+.progress-strip strong{display:block;font-size:clamp(1.8rem,3vw,2.5rem);line-height:1.1;letter-spacing:-.04em;margin-bottom:.25rem}
+.progress-strip span{font-size:.8rem;color:rgba(255,255,255,.65);line-height:1.4;display:block}
+.goal-cards .card-title{font-size:1.25rem;line-height:1.25;margin-bottom:.75rem}
+.goal-check{font-size:.8rem;line-height:1.5;color:rgba(255,255,255,.7);border-top:1px solid var(--line-d);padding-top:.75rem;margin-top:1rem}
+@media(max-width:760px){.progress-strip{gap:.75rem}.progress-strip span{font-size:.72rem}}
 .stat-unit{font-size:.38em;font-weight:600;color:rgba(255,255,255,.6)}
 .closing-question{font-size:clamp(1.1rem,2vw,1.5rem);line-height:1.3;letter-spacing:-.02em;margin-top:1.5rem}
 body.present .supporting{display:none}
@@ -559,15 +565,35 @@ body.present .supporting{display:none}
   <div class="container">
     <div class="section-label">Ideas for the group to shape</div>
     <h2 class="section-title">A possible next phase</h2>
-    <p class="section-subtitle">Build on the work with interested teams, then review artist activity, views and consumption each quarter.</p>
-    <div id="scale" class="roadmap reveal">
-      <div class="card"><div class="eyebrow">Today</div><div class="card-stat">250+</div><div class="card-title">Channels monitored</div><p class="card-desc">23 artist and label reviews completed. UK territory analysis available to explore.</p></div>
-      <div class="card"><div class="eyebrow">Next · proposed</div><div class="card-stat">100<span class="stat-unit"> / territory</span></div><div class="card-title">Map priority channels</div><p class="card-desc">Agree the shortlist with local teams and use it to guide support.</p></div>
-      <div class="card"><div class="eyebrow">Build towards · proposed</div><div class="card-stat">12<span class="stat-unit"> months</span></div><div class="card-title">Connect consumption data</div><p class="card-desc">Work with Data/Insights on artist and territory reporting alongside channel data.</p></div>
+    <p class="section-subtitle">A few practical goals we could shape locally, learn from together and review each quarter.</p>
+    <div class="progress-strip reveal" aria-label="Progress so far, snapshot to 20 October 2026">
+      <div><strong>250+</strong><span>channels monitored</span></div>
+      <div><strong>23</strong><span>artist &amp; label reviews since August</span></div>
+      <div><strong>3</strong><span>teams using it: UK, Nordics &amp; Australia</span></div>
     </div>
-    <p class="small muted" style="margin-top:1rem">The bank of insights and examples can grow as more teams contribute. Dedicated label views are another opportunity to explore.</p>
-    <div class="callout reveal"><div class="callout-label">What we want to understand</div><div class="callout-text">Are priority artists using YouTube more consistently, and are views and consumption growing?</div></div>
-    <h3 class="closing-question">Which territories and artists would be useful to start with?</h3>
+    <div id="scale" class="roadmap goal-cards reveal">
+      <div class="card">
+        <div class="eyebrow">Teams · possible goal</div>
+        <div class="card-title">Bring more teams in</div>
+        <p class="card-desc">Build on US and LATAM interest. Ask every key territory: does the dashboard help, how is it used, and what is missing?</p>
+        <p class="goal-check"><strong>Track:</strong> teams actively using it, feedback and examples of decisions it helped.</p>
+      </div>
+      <div class="card">
+        <div class="eyebrow">Territories · possible goal</div>
+        <div class="card-title">Know the biggest local channels</div>
+        <p class="card-desc">Proposed scope: map the <strong>top 100 music channels by local YouTube consumption</strong> in each key territory. Identify relevant VMG repertoire, then agree a smaller support list locally.</p>
+        <p class="goal-check"><strong>Track:</strong> territories mapped and priority channels agreed.</p>
+      </div>
+      <div class="card">
+        <div class="eyebrow">Labels · possible goal</div>
+        <div class="card-title">Test what partners find useful</div>
+        <p class="card-desc">Partisan already uses and requests deep dives, and wants a dashboard view. Gather feedback with them and other interested labels on reviews and label-only views.</p>
+        <p class="goal-check"><strong>Track:</strong> partner feedback, repeat requests and ideas taken forward.</p>
+      </div>
+    </div>
+    <p class="small muted" style="margin-top:1rem">Data foundation: work with Data/Insights on 12 months of territory consumption alongside dashboard data, building on the annual UK mapping requested by YouTube.</p>
+    <div class="callout reveal"><div class="callout-label">Shared outcome to review each quarter</div><div class="callout-text">More consistent artist activity. Growth in views and consumption.</div></div>
+    <h3 class="closing-question">Which of these would be most useful for your territory or labels?</h3>
 <details class="supporting"><summary>Coverage and review scenarios · illustrations for discussion</summary><div class="supporting-body"><div class="cards two reveal" style="grid-template-columns:1.3fr 1fr">
       <div class="card">
         <div class="eyebrow">Coverage · artist channels on the YouTube dashboard</div>
