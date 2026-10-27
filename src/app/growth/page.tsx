@@ -284,7 +284,7 @@ export default async function ControlPage({
         />
 
         {/* Client-side board with toggle */}
-        <ChannelHealthBoard singleTab={!!label} labelRoster={!!label} linkSuffix={mq} behaviourBase={`/campaigns${mq}`} rows={rows} topVideos={topVideos} marketFormatStats={marketFormatStats} pinnedSlugs={pinnedSlugs} />
+        <ChannelHealthBoard singleTab={!!label} labelRoster={!!label} linkSuffix={mq} behaviourBase={label ? `/labels/${label.slug}/behaviour` : `/campaigns${mq}`} rows={rows} topVideos={topVideos} marketFormatStats={marketFormatStats} pinnedSlugs={pinnedSlugs} />
 
         <div className="mt-14 pt-5 pb-10 border-t border-line flex items-center gap-2 text-micro text-faint">
           <span className="font-semibold text-muted">Channel Health</span>
