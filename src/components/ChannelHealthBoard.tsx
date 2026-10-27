@@ -7,6 +7,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { fmtNum, trustedViewDelta, type ChannelState, type ArtistClassification, CLASSIFICATION_STYLE, CLASSIFICATION_LABEL } from '@/lib/artists';
 import Sparkline from './Sparkline';
+import ChannelAuditButton from './ChannelAuditButton';
 import { SectionHead } from './ui';
 // WeeklySpotlight has moved to its own page at /weekly-pulse/channel-spotlight
 
@@ -1155,6 +1156,7 @@ export default function ChannelHealthBoard({
                       </Link>
                     )}
                     <QuickCopyButton row={r} />
+                    <ChannelAuditButton slug={r.slug} name={r.name} />
                     {pinnedChannelIds && r.channelId && (
                       <button
                         onClick={(e) => { e.stopPropagation(); handlePin(r.channelId!, pinnedSet.has(r.channelId!)); }}

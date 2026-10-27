@@ -22,6 +22,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import ChannelAuditButton from '@/components/ChannelAuditButton';
 import { useCopyUpdate, type ReportProps } from '@/components/WatcherReport';
 import type { DeepDiveLink } from '@/lib/deepDiveLink';
 import { INK, PAPER, RULE } from './primitives';
@@ -185,6 +186,8 @@ export default function ArtistActionBar({
           )}
         </Link>
       )}
+
+      <ChannelAuditButton slug={slug} name={reportProps.artistName} />
 
       {/* Pushed to the right edge, away from the navigation.
           Everything to the left of this takes you somewhere or changes

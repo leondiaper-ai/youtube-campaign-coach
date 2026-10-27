@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import CampaignBehaviour from '@/components/CampaignBehaviour';
+import ChannelAuditButton from '@/components/ChannelAuditButton';
 import { getLabelWorkspace } from '@/lib/labels';
 import { getArtistsForMarket } from '@/lib/marketScope';
 import { readAllLiveSnaps } from '@/lib/kvCache';
@@ -24,6 +25,7 @@ export default async function LabelBehaviourPage({ params }: { params: { label: 
       </Link>
       <span className="text-muted" aria-hidden>│</span>
       <Link href={home} className="text-[11px] font-bold uppercase tracking-wide text-muted">← Channel Health</Link>
+      <div className="ml-auto"><ChannelAuditButton slug={artist.slug} name={artist.name} /></div>
     </header>
     <div className="flex items-start">
       <nav aria-label="Label artists" className="sticky top-0 flex flex-col items-center gap-3 py-4 shrink-0 overflow-y-auto" style={{ width: 72, height: 'calc(100dvh - 57px)', background: '#1A1A1A' }}>
