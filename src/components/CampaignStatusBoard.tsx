@@ -12,7 +12,7 @@ import {
 } from '@/lib/youtubeGrowthOS';
 import CampaignBehaviour from './CampaignBehaviour';
 import {
-  DecisionCard, DecisionSectionHeader, DormantBlock,
+  DecisionCard, DecisionSectionHeader,
   SectionIssueNote, classifyCard, whatHappening, getGrowthRead,
   type CardData, type AvailableArtist, type CardApi,
 } from './CampaignDecisionCard';
@@ -129,11 +129,11 @@ export default function CampaignStatusBoard({
   const fixCards: CardData[] = [];
   const buildCards: CardData[] = [];
   const holdCards: CardData[] = [];
-  const dormant: CardData[] = [];
 
   for (const card of cards) {
+    // Following a campaign is a team decision, independent of channel activity.
     if (card.boardStatus === 'COLD') {
-      dormant.push(card);
+      holdCards.push(card);
       continue;
     }
     const read = getGrowthRead(card);
@@ -157,9 +157,8 @@ export default function CampaignStatusBoard({
   // ─── Behaviour view with Spotify-style sidebar ──────────────────
   const behaviourCard = behaviourSlug ? cards.find((c) => c.slug === behaviourSlug) : null;
   if (behaviourSlug && behaviourCard) {
-    // All active (non-COLD, non-dormant) campaigns for sidebar
-    const sidebarCampaigns = cards
-      .filter((c) => c.boardStatus !== 'COLD' && c.lastUploadDaysAgo !== null && (c.lastUploadDaysAgo ?? 999) < 60)
+    // Every followed campaign stays accessible, including pre-release and quiet channels.
+    const sidebarCampaigns = [...cards]
       .sort((a, b) => a.name.localeCompare(b.name));
 
     const statusDot = (status: string) => {
@@ -435,7 +434,7 @@ export default function CampaignStatusBoard({
           {/* ─── HOLD — No clear signal or inactive ─────────────────── */}
           {holdCards.length > 0 && (
             <div>
-              <DecisionSectionHeader decision="HOLD" subtitle="No clear signal — waiting" count={holdCards.length} />
+              <DecisionSectionHeader decision="HOLD" subtitle="Planning, quiet channels or no clear signal yet" count={holdCards.length} />
               <div className="space-y-4">
                 {holdCards.map((card) => (
                   <DecisionCard
@@ -451,10 +450,6 @@ export default function CampaignStatusBoard({
             </div>
           )}
 
-          {/* ─── Dormant / Cold (collapsed) ─────────────────────────── */}
-          {dormant.length > 0 && (
-            <DormantBlock cards={dormant} />
-          )}
         </div>
       )}
     </>
