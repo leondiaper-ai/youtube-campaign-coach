@@ -283,10 +283,6 @@ export default async function ControlPage({
           lede="Which channels are growing, which are converting attention into audience, and which need feeding."
         />
 
-        {label && <p className="text-meta text-muted mb-6">
-          {rows.length} tracked artists from the current {label.name} roster. <a className="underline" href={label.rosterSource} target="_blank" rel="noreferrer">Roster reference</a> · checked {label.rosterCheckedAt}.
-          {label.roster.length > rows.length && ` Other roster artists are not yet added to monitoring.`}
-        </p>}
         {/* Client-side board with toggle */}
         <ChannelHealthBoard singleTab={!!label} labelRoster={!!label} linkSuffix={mq} behaviourBase={`/campaigns${mq}`} rows={rows} topVideos={topVideos} marketFormatStats={marketFormatStats} pinnedSlugs={pinnedSlugs} />
 
