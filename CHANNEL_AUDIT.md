@@ -21,3 +21,11 @@ PNG is rendered locally on a 1600×1000 canvas, with source dates, coverage and 
 Artist actions are reduced to text navigation, Follow, the audit button and a More menu. Caption checks offer a copyable review task and Studio link, not fabricated subtitle text. Removed unsupported caption reach percentages from the existing missed-reach copy.
 
 Checks: test-channel-audit.cjs, test-channel-audit-catalogue.cjs, test-label-workspaces.cjs, TypeScript and Next build.
+
+## Complete catalogue by default
+
+Opening Channel Audit now calls the collector when the playlist cache is absent, partial or seven days old. This is still user-triggered, not cron work. The GET route remains cache-only. Incomplete recent samples no longer show final visual verdicts or allow audit exports while collection runs; progress and retry controls are shown instead. Complete caches remove the redundant check-cache button.
+
+The format inventory now includes audio, documentaries, interviews and tour uploads, ensuring every classified upload appears in exactly one row. Empty secondary categories stay out of the main cards. Bracketed “Live for…” / “Live on…” titles are recognised. PNG row spacing adapts to the number of displayed formats.
+
+Live validation: IDLES playlist returned 372 IDs / 371 published uploads, reaching 2011, and revealed 37 official-video-labelled uploads that were absent from the latest 100-upload sample. No artist metadata, campaign pins or daily sync were changed.

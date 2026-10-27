@@ -77,3 +77,14 @@ assert(bare.visuals.actions[0].includes('unlabelled'));
 const notBts=buildChannelAudit({...base,uploads:[upload('years','A show ten years in the making',100)]});
 assert.equal(notBts.visuals.formats.find(f=>f.key==='bts').count,0);
 console.log('Audit regression checks passed: unknown formats cannot create a false winner or BTS finding.');
+
+const {auditNeedsCatalogue}=load('src/lib/channelAudit.ts');
+assert(auditNeedsCatalogue(empty,now));
+assert(!auditNeedsCatalogue(full,now));
+assert(auditNeedsCatalogue({...full,catalogue:{...full.catalogue,fetchedAt:'2026-10-01'}},now));
+assert(auditNeedsCatalogue({...full,catalogue:{...full.catalogue,complete:false}},now));
+const allFormats=buildChannelAudit({...base,uploads:[upload('audio','Song (Official Audio)',100),upload('doc','The Documentary',200),upload('interview','Artist Interview',300),upload('tour','On Tour',400),upload('livefor','Song (Live for Independent Venue Week)',500)]});
+assert.equal(allFormats.visuals.formats.reduce((s,f)=>s+f.views,0),1500);
+assert.equal(allFormats.visuals.formats.reduce((s,f)=>s+f.count,0),5);
+assert.equal(allFormats.visuals.formats.find(f=>f.key==='live').count,1);
+console.log('Full-audit guards passed: first use, stale/partial cache, all format totals and live-for titles.');

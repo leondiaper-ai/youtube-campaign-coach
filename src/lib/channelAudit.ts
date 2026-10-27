@@ -32,6 +32,7 @@ export function buildChannelAudit(input: {
   const uploads = Array.from(new Map(input.uploads.filter(u => !u.isCollab && u.live !== 'upcoming' && Date.parse(u.publishedAt) <= now).map(u=>[u.id,u])).values());
   const classified = uploads.map(u=>{
     let format=classifyUploadFormat({...u,description:''});
+    if(format!=='short' && /[\[(]\s*(?:official\s+)?live\s+(?:for|on)\b/i.test(u.title)) format='live';
     // A phrase such as 'ten years in the making' is not a BTS label.
     if(format==='bts' && !/behind\s+the\s+scenes|making\s+of|\bbts\b|^the\s+making|in\s+the\s+studio|studio\s+session|recording\s+session/i.test(u.title)) format='longform';
     return {u,format};
@@ -85,7 +86,7 @@ export function buildChannelAudit(input: {
   const summary = input.stats.views7d != null ? `${input.name} recorded ${auditNumber(input.stats.views7d)} channel views over the available 7-day comparison${input.stats.subs7d!=null ? ' and '+auditNumber(input.stats.subs7d)+' net subscribers' : ''}. ${leaders[0] ? 'The leading tracked upload is “'+leaders[0].title+'” ('+auditNumber(leaders[0].views)+' lifetime views).' : ''}` : `${input.name}: ${auditNumber(input.stats.lifetimeViews)} lifetime channel views and ${auditNumber(input.stats.subs)} subscribers. A reliable 7-day movement reading is not available yet.`;
   const longformViews = classified.filter(x=>x.format!=='short').reduce((s,x)=>s+x.u.viewCount,0);
   const shortsViews = classified.filter(x=>x.format==='short').reduce((s,x)=>s+x.u.viewCount,0);
-  const formatOrder: UploadFormat[] = ['omv','live','lyric','visualiser','bts','acoustic','short','longform'];
+  const formatOrder: UploadFormat[] = ['omv','live','lyric','visualiser','bts','acoustic','audio','documentary','interview','tour','short','longform'];
   const formatReads = formatOrder.map(f=>{
     const items=groups.get(f)??[];
     const views=items.reduce((s,x)=>s+x.u.viewCount,0);
@@ -109,4 +110,10 @@ export function buildChannelAudit(input: {
 }
 export function channelAuditText(a: ChannelAudit): string {
   return [`${a.name} — CHANNEL AUDIT`, `Prepared ${a.generatedAt.slice(0,10)} · Channel data ${a.dataAt?.slice(0,10) ?? 'date unavailable'}`,a.visuals.takeaway,'',`FORMAT READ\n${a.visuals.formats.map(f=>f.name+': '+f.verdict+' · '+f.count+' uploads · '+auditNumber(f.views)+' lifetime views · '+(f.count?auditNumber(f.median):'Unavailable')+' median').join('\n')}`,`VIEWING SPLIT (analysed uploads, lifetime)\nLong-form: ${auditNumber(a.visuals.split.longform)} · Shorts: ${auditNumber(a.visuals.split.shorts)}`,`PUBLISHING\n${a.visuals.activeWeeks} of ${a.visuals.coveredWeeks} covered weeks had an upload; last 13 calendar weeks, current week incomplete.`,a.summary,'',`SCALE & MOVEMENT\nSubscribers: ${auditNumber(a.stats.subs)} · Lifetime channel views: ${auditNumber(a.stats.lifetimeViews)}\n7-day views: ${auditNumber(a.stats.views7d)} · 30-day views: ${auditNumber(a.stats.views30d)} · 7-day net subscribers: ${auditNumber(a.stats.subs7d)}`,'',...a.findings.map(f=>`${f.title}\n${f.evidence}${f.videos?.map(v=>'\n• '+v.title+' — '+auditNumber(v.views)+' lifetime views — https://www.youtube.com/watch?v='+v.id).join('') ?? ''}`),'',`MISSED OPPORTUNITIES & ASSET CHECKS\n${a.gaps.length ? a.gaps.map(g=>g.title+'\n'+g.evidence+'\n'+(g.action??'')+(g.videos?.map(v=>'\n• '+v.title+' — '+auditNumber(v.views)+' lifetime views — https://www.youtube.com/watch?v='+v.id).join('') ?? '')).join('\n\n') : 'No specific asset gap identified in this sample; this is not a full-catalogue clearance.'}`,'',...(a.reference ? [`PAST CAMPAIGN REFERENCE — ${a.reference.title} (data ${a.reference.date ?? 'date not recorded'})`,...a.reference.points.map(p=>p.point+'\n'+p.basis),a.reference.note,a.reference.href ? 'https://youtube-campaign-coach.vercel.app'+a.reference.href : ''] : []),'',`KEY MARKETS\n${a.territories.map(t=>t.name+': '+auditNumber(t.views)+' monthly views'+(t.estimated?' (estimated)':'')).join('\n')}\n${a.territoryNote}`,'',`PRIORITIES\n${a.priorities.map((p,i)=>(i+1)+'. '+p).join('\n')}`,'',`COVERAGE & SOURCES\n${a.coverage}\n${a.limitations.join('\n')}\nSource: Watcher cached YouTube Data API readings; Chartmetric for markets where stated.`].join('\n\n');
+}
+
+/** A click on Channel Audit requests the complete playlist; warm audits remain cache-only. */
+export function auditNeedsCatalogue(a: Pick<ChannelAudit,'catalogue'>, now=Date.now()): boolean {
+  const date=Date.parse(a.catalogue?.fetchedAt??'');
+  return !a.catalogue?.complete || !Number.isFinite(date) || now-date>=7*86400000;
 }

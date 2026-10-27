@@ -2,7 +2,7 @@
 import VideoCaptionActions from './VideoCaptionActions';
 import ChannelAuditVisuals from './ChannelAuditVisuals';
 import { useEffect, useRef, useState } from 'react';
-import { auditNumber, channelAuditText, type ChannelAudit, type AuditFinding } from '@/lib/channelAudit';
+import { auditNumber, channelAuditText, auditNeedsCatalogue, type ChannelAudit, type AuditFinding } from '@/lib/channelAudit';
 
 export default function ChannelAuditButton({ slug, name }: { slug: string; name: string }) {
   const dialog = useRef<HTMLDialogElement>(null);
@@ -19,8 +19,8 @@ export default function ChannelAuditButton({ slug, name }: { slug: string; name:
     dialog.current?.showModal();
     const previous = document.body.style.overflow;
     document.body.style.overflow='hidden';
-    setAudit(null); setError(''); setCopied('');
-    fetch('/api/channel-audit/'+encodeURIComponent(slug),{signal:controller.signal}).then(async r=>{const data=await r.json();if(!r.ok)throw Error(data.error ?? 'Could not load the audit.');return data;}).then(setAudit).catch(e=>{if(e.name!=='AbortError')setError(e.message);});
+    setAudit(null); setError(''); setCopied(''); setScanStatus('');
+    fetch('/api/channel-audit/'+encodeURIComponent(slug),{signal:controller.signal}).then(async r=>{const data=await r.json();if(!r.ok)throw Error(data.error ?? 'Could not load the audit.');return data;}).then(d=>{if(controller.signal.aborted)return;setAudit(d);if(auditNeedsCatalogue(d))void scan();}).catch(e=>{if(e.name!=='AbortError')setError(e.message);});
     return ()=>{controller.abort();activeScan.current?.abort();setScanning(false);document.body.style.overflow=previous;dialog.current?.close();};
   },[open,slug]);
   async function scan() {
@@ -54,6 +54,7 @@ export default function ChannelAuditButton({ slug, name }: { slug: string; name:
     const url=URL.createObjectURL(new Blob([channelAuditText(audit)],{type:'text/plain;charset=utf-8'}));
     const a=document.createElement('a');a.href=url;a.download=`${slug}-channel-audit-${audit.generatedAt.slice(0,10)}.txt`;a.click();URL.revokeObjectURL(url);
   }
+  const ready=!!audit?.catalogue?.complete && !scanning;
   return <>
     <button type="button" onClick={e=>{e.stopPropagation();setOpen(true);}} className="px-3.5 py-2 rounded-md text-xs font-semibold cursor-pointer" style={{background:'#2C25FF',color:'#fff'}}>Channel audit</button>
     {open && <dialog ref={dialog} onCancel={()=>setOpen(false)} onClose={()=>setOpen(false)} onClick={e=>{e.stopPropagation();if(e.target===dialog.current)setOpen(false);}} aria-labelledby={`audit-title-${slug}`} className="p-0 rounded-xl border border-line bg-paper text-ink shadow-2xl backdrop:bg-black/50" style={{width:'min(1100px, calc(100vw - 24px))',maxHeight:'90dvh'}}>
@@ -65,23 +66,23 @@ export default function ChannelAuditButton({ slug, name }: { slug: string; name:
       {error && <div role="alert" className="p-8"><p>{error}</p><button className="underline mt-4" onClick={()=>setOpen(false)}>Close</button></div>}
       {audit && <div className="px-6 sm:px-8 py-6 space-y-7">
         <div className="flex flex-wrap gap-2 items-center">
-          <button onClick={()=>copy()} className="bg-ink text-white rounded px-4 py-2 text-xs font-bold">Copy audit</button>
-          <details className="relative"><summary className="border border-line rounded px-4 py-2 text-xs font-bold cursor-pointer list-none">Export ▾</summary><div className="absolute left-0 top-full mt-2 z-20 bg-white border border-line rounded-lg shadow-lg p-1 min-w-[180px]">
+          <button disabled={!ready} onClick={()=>copy()} className="disabled:opacity-40 bg-ink text-white rounded px-4 py-2 text-xs font-bold">Copy audit</button>
+          {ready && <details className="relative"><summary className="border border-line rounded px-4 py-2 text-xs font-bold cursor-pointer list-none">Export ▾</summary><div className="absolute left-0 top-full mt-2 z-20 bg-white border border-line rounded-lg shadow-lg p-1 min-w-[180px]">
             <button onClick={png} className="block w-full text-left px-3 py-2 text-xs hover:bg-black/5 rounded">Download slide PNG</button>
             <button onClick={()=>copy(true)} className="block w-full text-left px-3 py-2 text-xs hover:bg-black/5 rounded">Copy short brief</button>
             <button onClick={download} className="block w-full text-left px-3 py-2 text-xs hover:bg-black/5 rounded">Download text</button>
-          </div></details>
+          </div></details>}
           <span aria-live="polite" className="text-xs text-muted">{copied}</span>
         </div>
-        <div className="rounded-lg border border-line p-4 text-xs flex flex-wrap items-center justify-between gap-3"><div className="flex-1 min-w-[220px]"><p className="font-bold">{audit.catalogue?.complete?'Full playlist scanned':audit.catalogue?'Catalogue scan in progress':'Recent-upload sample'}</p><p className="text-muted mt-1 leading-relaxed">{audit.coverage}</p><p aria-live="polite" className="mt-1 text-muted">{scanStatus}</p></div><button disabled={scanning} onClick={scan} className="border border-line rounded px-3 py-2 font-bold disabled:opacity-50">{scanning?'Scanning…':audit.catalogue?.complete?'Check catalogue cache':audit.catalogue?'Continue scan':'Scan full catalogue'}</button><p className="w-full text-[10px] text-muted">Catalogue collection runs only on request, in saved batches. Complete scans are reused for 7 days.</p></div>
+        <div className="rounded-lg border border-line p-4 text-xs flex flex-wrap items-center justify-between gap-3"><div className="flex-1 min-w-[220px]"><p className="font-bold">{audit.catalogue?.complete?'Full playlist scanned':audit.catalogue?'Catalogue scan in progress':'Recent-upload sample'}</p><p className="text-muted mt-1 leading-relaxed">{audit.coverage}</p><p aria-live="polite" className="mt-1 text-muted">{scanStatus}</p></div>{(!audit.catalogue?.complete || scanning) && <button disabled={scanning} onClick={scan} className="border border-line rounded px-3 py-2 font-bold disabled:opacity-50">{scanning?'Scanning…':audit.catalogue?.complete?'Check catalogue cache':audit.catalogue?'Continue scan':'Scan full catalogue'}</button>}<p className="w-full text-[10px] text-muted">Opening an audit collects the full public uploads playlist if needed. Completed scans are reused for 7 days.</p></div>
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 border-b border-line pb-5">{[['Subscribers',audit.stats.subs],['Lifetime channel views',audit.stats.lifetimeViews],['Channel views · 30d',audit.stats.views30d],['Channel views · 7d',audit.stats.views7d]].map(([label,value])=><div key={String(label)}><div className="text-2xl font-black">{auditNumber(value as number|null)}</div><p className="text-[10px] text-muted mt-1">{label}</p></div>)}</div>
-        <ChannelAuditVisuals audit={audit}/>
+        {audit.catalogue?.complete ? <ChannelAuditVisuals audit={audit}/> : <section className="border border-line rounded-lg p-6"><h3 className="font-black text-lg">Building the full-channel read</h3><p className="text-sm text-muted mt-2">Recent uploads alone can miss the videos that built this channel. Format verdicts and exports appear once the playlist scan finishes.</p><p role="status" className="text-xs font-semibold mt-3">{scanStatus||'Preparing catalogue scan…'}</p></section>}
         <details className="border-t border-line pt-4"><summary className="text-sm font-bold cursor-pointer">Video evidence, asset checks & past campaigns</summary><div className="space-y-6 mt-5">
         <section><h3 className="text-lg font-black mb-4">What is working</h3><div className="space-y-5">{audit.findings.map(f=><Finding key={f.title} finding={f}/>)}</div></section>
         <section className="rounded-lg p-5" style={{background:'#F6F1E7'}}><h3 className="text-lg font-black mb-4">Missed opportunities & asset checks</h3>{audit.gaps.length ? <div className="space-y-5">{audit.gaps.map(f=><Finding key={f.title} finding={f}/>)}</div> : <p className="text-sm">No specific gap identified in the tracked sample. This does not confirm that the channel has every asset it needs.</p>}</section>
         {audit.reference && <section className="border-t border-line pt-6"><h3 className="text-lg font-black mb-2">Past campaign reference</h3><p className="text-xs text-muted mb-4">{audit.reference.title} · Data captured {audit.reference.date ?? 'date not recorded'}</p><div className="space-y-4">{audit.reference.points.map(p=><Finding key={p.point} finding={{title:p.point,evidence:p.basis}}/>)}</div><p className="text-xs text-muted leading-relaxed mt-4">{audit.reference.note}</p>{audit.reference.href && <a href={audit.reference.href} target="_blank" rel="noreferrer" className="text-xs font-bold underline inline-block mt-3">Open the full deep dive ↗</a>}</section>}
         </div></details>
-        <details className="border-t border-line pt-4 text-xs text-muted"><summary className="cursor-pointer font-bold">Evidence, format breakdown & coverage</summary><p className="mt-3">{audit.coverage}</p><div className="overflow-x-auto mt-4"><table className="w-full text-left"><thead><tr><th className="py-2">Format</th><th>Uploads</th><th>Lifetime views in sample</th><th>Median lifetime views</th></tr></thead><tbody>{audit.formats.map(f=><tr key={f.name} className="border-t border-line"><td className="py-2">{f.name}</td><td>{f.count}</td><td>{auditNumber(f.views)}</td><td>{f.count?auditNumber(f.median):'—'}</td></tr>)}</tbody></table></div><ul className="list-disc pl-4 mt-4 space-y-2">{audit.limitations.map(l=><li key={l}>{l}</li>)}</ul><p className="mt-4">Source: cached YouTube Data API channel totals, history and uploads; Chartmetric for the stated market figures. No extra vendor calls are made by this audit.</p></details>
+        <details className="border-t border-line pt-4 text-xs text-muted"><summary className="cursor-pointer font-bold">Evidence, format breakdown & coverage</summary><p className="mt-3">{audit.coverage}</p><div className="overflow-x-auto mt-4"><table className="w-full text-left"><thead><tr><th className="py-2">Format</th><th>Uploads</th><th>Lifetime views in sample</th><th>Median lifetime views</th></tr></thead><tbody>{audit.formats.map(f=><tr key={f.name} className="border-t border-line"><td className="py-2">{f.name}</td><td>{f.count}</td><td>{auditNumber(f.views)}</td><td>{f.count?auditNumber(f.median):'—'}</td></tr>)}</tbody></table></div><ul className="list-disc pl-4 mt-4 space-y-2">{audit.limitations.map(l=><li key={l}>{l}</li>)}</ul><p className="mt-4">Source: cached YouTube Data API channel totals, history and uploads; Chartmetric for the stated market figures. Full-catalogue scans collect YouTube data on first use or after seven days; other readings are reused from the cache.</p></details>
       </div>}
     </dialog>}
   </>;
