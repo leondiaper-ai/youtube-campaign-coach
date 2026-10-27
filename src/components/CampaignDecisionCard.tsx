@@ -764,15 +764,16 @@ export function DecisionCard({
       }}
     >
       <div className="p-5">
-      {/* Remove — hover only */}
+      {/* Keep the remove control visible for mouse, touch and keyboard users. */}
       {/* On a bannered card this sits over the image, where the decision
           chip is; on a plain one it keeps its old corner. Hiding it
           outright would have removed a working action rather than moved
           it. */}
       <button
         onClick={() => onUnpin(card.slug)}
-        className="absolute top-3 right-3 w-6 h-6 rounded-full flex items-center justify-center text-[14px] text-ink/0 group-hover:text-ink/40 hover:!text-ink/70 hover:bg-black/5 transition-all"
-        title="Remove"
+        className="absolute top-3 right-3 w-6 h-6 rounded-full flex items-center justify-center text-[14px] text-ink/40 hover:text-ink/70 hover:bg-black/5 transition-all"
+        title="Remove from followed campaigns"
+        aria-label={`Remove ${card.name} from followed campaigns`}
       >
         &times;
       </button>
