@@ -29,7 +29,7 @@ export async function downloadAuditPng(a:ChannelAudit) {
   text('Lifetime views across '+(s.longformCount+s.shortsCount)+' analysed uploads · not a split of the channel lifetime counter',48,375,13,muted);
   text('WHAT WORKS HERE?',48,424,18,ink,true);
   const max=Math.max(...a.visuals.formats.map(f=>f.views),1);
-  a.visuals.formats.forEach((f,i)=>{const y=466+i*43;text(f.name,48,y,16,ink,true);c.fillStyle=rule;c.fillRect(260,y-14,280,12);c.fillStyle=f.key==='short'?blue:orange;c.fillRect(260,y-14,280*f.views/max,12);text(f.count?n(f.views):'—',558,y,18,ink,true);text(`${f.count} uploads · ${n(f.median)} median · ${f.verdict}`,655,y,13,muted);});
+  a.visuals.formats.forEach((f,i)=>{const y=466+i*43;text(f.name,48,y,16,ink,true);c.fillStyle=rule;c.fillRect(260,y-14,280,12);c.fillStyle=f.key==='short'?blue:orange;c.fillRect(260,y-14,280*f.views/max,12);text(f.count?n(f.views):'—',558,y,18,ink,true);text(f.count?`${f.count} uploads · ${n(f.median)} median · ${f.verdict}`:'0 uploads · Not identified',655,y,13,muted);});
   text('Lifetime counts; ages differ. Format labels are inferred. 3+ examples = repeat evidence, not proven uplift.',48,783,12,muted);
   text('PRIORITIES',1035,424,18,ink,true);
   (a.visuals.actions.length?a.visuals.actions:a.priorities).slice(0,3).forEach((p,i)=>{text('0'+(i+1),1035,466+i*89,17,orange,true);wrap(p,1077,466+i*89,460,17,3);});
@@ -43,6 +43,7 @@ export async function downloadAuditPng(a:ChannelAudit) {
   const qr=document.createElement('canvas');await toCanvas(qr,url,{width:112,margin:1,color:{dark:ink,light:'#FAF7F2'}});c.drawImage(qr,1438,838,112,112);
   const marketDate=a.territoryNote.match(/reported (\d{4}-\d{2}-\d{2})/)?.[1];
   if(marketDate)text('Chartmetric reported '+marketDate,1035,857,11,muted);
+  wrap(url.replace('https://',''),1035,885,380,10,2,muted);
   text('Open channel & source links →',1140,926,13,muted);
   text('Watcher · YouTube cached data / Chartmetric markets · Partial/complete coverage shown above · Current week incomplete',48,983,11,muted);
   const blob=await new Promise<Blob|null>(resolve=>canvas.toBlob(resolve,'image/png'));if(!blob)throw Error('Export failed');
