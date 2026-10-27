@@ -245,6 +245,8 @@ export async function buildCampaignTimeline(
       return { ...e, eventType: 'ANNOUNCEMENT' as CampaignEvent['eventType'], title: remaining };
     })
     .filter((e): e is CampaignEvent => e !== null)
+    // The team confirmed that the CHVRCHES album announcement landed on 27 October.
+    .filter(e => !(slug === 'chvrches' && e.eventDate === '2026-10-30' && /announce album and pre-order/i.test(e.title)))
     .filter(e => {
       if (e.eventDate !== new Date(now).toISOString().slice(0,10)) return true;
       const name = splitTitle(e.title).title.toLowerCase();
