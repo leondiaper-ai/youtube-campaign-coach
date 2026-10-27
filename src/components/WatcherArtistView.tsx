@@ -1016,7 +1016,7 @@ function humanizeSubtype(o: Opportunity): string {
     'Channel has gone cold': 'Channel has gone quiet — not posting',
     'Quiet before next moment': 'Quiet ahead of a release — missing warm-up',
     'No Shorts in the last 30 days': 'No Shorts — missing reach on the fastest-growing format',
-    'No published caption track on recent uploads': 'Missing captions — limiting international reach',
+    'No published caption track on recent uploads': 'Caption tracks to review',
     'Top recent upload has no Short companion': 'Top video not reaching new audiences',
   };
   return map[o.subtype] ?? o.subtype;
@@ -1027,7 +1027,7 @@ function oppTypeLabel(o: Opportunity): string {
   if (o.subtype.includes('lyric')) return 'No lyric video detected';
   if (o.subtype.includes('Short')) return 'No Short detected';
   if (o.subtype.includes('visualizer')) return 'No visualizer detected';
-  if (o.subtype.includes('caption')) return 'Captions missing';
+  if (o.subtype.includes('caption')) return 'Caption check';
   if (o.subtype.includes('demand')) return 'Fan demand unmet';
   return 'Format gap';
 }
@@ -1037,7 +1037,7 @@ function oppConsequence(o: Opportunity): string {
   if (o.subtype.includes('lyric')) return 'no long-tail search capture';
   if (o.subtype.includes('Short')) return 'missing discovery layer';
   if (o.subtype.includes('visualizer')) return 'no passive-listen capture';
-  if (o.subtype.includes('caption')) return 'no international / search reach';
+  if (o.subtype.includes('caption')) return 'no caption track reported — check suitability';
   if (o.subtype.includes('demand')) return 'verified demand unmet';
   return 'missing support format';
 }
@@ -1072,6 +1072,7 @@ function impactBullets(
   const bullets: string[] = [];
   const fName = formatName(primarySubtype);
   const isStructural = structuralGapNames.includes(fName);
+  if (primarySubtype.includes('caption')) return ['No caption track was reported in the public reading; this is not a full accessibility check.', 'Use approved words and check timing. Instrumental videos may not need lyric captions.'];
 
   // Bullet 1: what you are losing
   if (primarySubtype.includes('Short')) {
@@ -1081,7 +1082,7 @@ function impactBullets(
   } else if (primarySubtype.includes('visualizer')) {
     bullets.push('Passive listeners are going to auto-generated topics instead of your channel.');
   } else if (primarySubtype.includes('caption')) {
-    bullets.push('15-25% of watch-time comes from non-native regions. You are locked out of it.');
+    bullets.push('Check speech and sung lyrics against an approved transcript; review any automatic captions for accuracy.');
   } else if (primarySubtype.includes('demand')) {
     bullets.push('Your most engaged viewers are asking for this. Ignoring it costs repeat views.');
   } else {

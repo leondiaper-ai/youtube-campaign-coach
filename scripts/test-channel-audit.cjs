@@ -38,7 +38,7 @@ const future={...upload('future','Example - Song (Lyric Video)'),publishedAt:'20
 const a=buildChannelAudit({...base,uploads:[hero,hero,external,future]});
 assert.equal(a.leaders.length,1,'Exclude duplicate, external and future uploads');
 assert(a.gaps.some(g=>g.title.includes('no matched support')));
-assert(a.findings[0].evidence.includes('sample share'));
+assert(a.findings[0].evidence.includes('share of analysed uploads'));
 const paired=buildChannelAudit({...base,uploads:[hero,upload('lyric','Example - Song (Lyric Video)',3000,10)]});
 assert(!paired.gaps.some(g=>g.title.includes('no matched support')),'A matching lyric prevents a false gap');
 const other=buildChannelAudit({...base,uploads:[hero,upload('other','Example - Other Song (Lyric Video)')]});
@@ -53,3 +53,15 @@ assert(captions.gaps.some(g=>g.title==='Caption tracks to review' && g.evidence.
 assert(!buildChannelAudit({...base,uploads:[{...hero,captions:true}]}).gaps.some(g=>g.title==='Caption tracks to review'));
 assert(!buildChannelAudit({...base,uploads:[hero]}).gaps.some(g=>g.title==='Caption tracks to review'),'Unknown caption flag must not mean missing');
 console.log('Caption audit guards passed.');
+
+const full=buildChannelAudit({...base,uploads:[{...hero,captions:false},upload('short2','Example - Song #shorts',5000)],catalogue:{complete:true,fetchedAt:'2026-10-27',publicVideoCount:2,scannedIds:2}});
+assert(full.coverage.includes('playlist fully scanned'));
+assert.equal(full.visuals.split.longform,50000);
+assert.equal(full.visuals.split.shorts,5000);
+assert.equal(full.visuals.coveredWeeks,13);
+assert(full.visuals.formats.find(f=>f.key==='live').verdict==='Not found');
+assert(a.visuals.formats.find(f=>f.key==='live').verdict==='Not in sample');
+assert.equal(a.visuals.weeks.length,13);
+assert(a.visuals.coveredWeeks<13,'Do not claim empty weeks before sample coverage');
+assert(channelAuditText(full).includes('VIEWING SPLIT'));
+console.log('Visual audit checks passed: split, format evidence, cadence coverage and full scan labels.');

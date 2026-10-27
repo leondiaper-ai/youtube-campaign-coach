@@ -132,12 +132,10 @@ export function detectOpportunities(
       artistName: artist.name,
       type: 'Missing support',
       subtype: 'No published caption track on recent uploads',
-      signal: `${captionsMissing} of the last ${uploads30d} uploads rely on auto-ASR only — no reviewed/published caption track.`,
+      signal: `${captionsMissing} of the last ${uploads30d} uploads have no caption track reported in the public reading; automatic-caption availability and accuracy need a Studio check.`,
       impact: 'MEDIUM',
-      impactRange:
-        'A published caption track gets indexed by YouTube search (auto-ASR doesn\'t), and YouTube can auto-translate it into 100+ languages. For music in particular, roughly 15–25% of a channel\'s watch-time comes from non-native-language regions — captions unlock that audience.',
-      action:
-        'Open YT Studio → Subtitles, review the auto-generated transcript for accuracy (especially lyrics + artist names), and hit publish.',
+      impactRange: 'Caption tracks can make speech and lyrics accessible. The public flag does not measure international reach, caption quality or the effect on views.',
+      action: 'Open YouTube Studio → Subtitles. Check approved lyrics/transcript, language and timing before publishing. For instrumentals, first decide whether captions are appropriate.',
       source: 'live',
       relatedVideos: missingList.slice(0, 8),
     });

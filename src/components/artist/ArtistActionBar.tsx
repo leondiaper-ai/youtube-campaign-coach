@@ -122,88 +122,16 @@ export default function ArtistActionBar({
     }
   }
 
-  const chip =
-    'px-3 py-1.5 rounded text-[10px] font-black uppercase tracking-[0.1em] no-underline ' +
-    'transition-colors whitespace-nowrap';
-
-  return (
-    <div
-      className="flex flex-wrap items-center gap-2 mb-10 pb-5"
-      style={{ borderBottom: `1px solid ${RULE}` }}
-    >
-      <Link
-        href={ctx.backHref}
-        className={chip + ' text-ink/50 hover:text-ink'}
-        style={{ border: `1px solid ${RULE}` }}
-      >
-        {ctx.backLabel}
-      </Link>
-
-      {/* The behaviour timeline is the single most-used destination from
-          this page, so it is the filled button and it is always present.
-          It used to appear only for pinned artists, which hid the most
-          useful view precisely when you were deciding whether to pin. */}
-      <Link
-        href={ctx.behaviourHref}
-        className={chip}
-        style={{ background: INK, color: PAPER }}
-      >
-        Channel behaviour
-      </Link>
-
-      <button
-        type="button"
-        onClick={togglePin}
-        disabled={busy}
-        aria-pressed={pinned}
-        className={chip}
-        style={
-          pinned
-            ? { background: PIN_ON, color: '#fff', border: `1px solid ${PIN_ON}` }
-            : { border: `1px solid ${RULE}`, color: INK, background: 'transparent' }
-        }
-      >
-        {pinned ? '★ Tracked project' : '☆ Track project'}
-      </button>
-
-      {deepDive && (
-        <Link
-          href={deepDive.href}
-          title={deepDive.title}
-          className={chip + ' text-ink/70 hover:text-ink'}
-          style={{ border: `1px solid ${RULE}` }}
-        >
-          Deep dive
-          {deepDive.updated && (
-            <span className="font-bold normal-case tracking-normal text-ink/35 ml-1.5">
-              {deepDive.updated}
-            </span>
-          )}
-          {deepDive.publicLink && (
-            <span className="font-bold normal-case tracking-normal text-ink/35 ml-1.5">
-              · public link
-            </span>
-          )}
-        </Link>
-      )}
-
+  const chip = 'px-2 py-2 rounded text-xs font-semibold no-underline transition-colors whitespace-nowrap';
+  return <div className="flex flex-wrap items-center gap-3 mb-8 pb-4 border-b" style={{borderColor:RULE}}>
+    <Link href={ctx.backHref} className={chip+' text-ink/45 hover:text-ink'}>{ctx.backLabel}</Link>
+    <span className="h-4 w-px bg-black/10" aria-hidden />
+    <Link href={ctx.behaviourHref} className={chip+' text-ink hover:underline'}>Channel behaviour ↗</Link>
+    {deepDive && <Link href={deepDive.href} title={deepDive.title+(deepDive.updated?' · '+deepDive.updated:'')} className={chip+' text-ink/60 hover:text-ink hover:underline'}>Deep dive ↗</Link>}
+    <div className="ml-auto flex items-center gap-3">
+      <button type="button" onClick={togglePin} disabled={busy} aria-pressed={pinned} className={chip+' text-ink/55 hover:text-ink'} title={pinned?'Stop following this campaign':'Follow this campaign'}>{pinned?'★ Following':'☆ Follow'}</button>
       <ChannelAuditButton slug={slug} name={reportProps.artistName} />
-
-      {/* Pushed to the right edge, away from the navigation.
-          Everything to the left of this takes you somewhere or changes
-          what the roster tracks; this one takes the page away with you.
-          Grouping it with the links implied it was another destination.
-          `ml-auto` only bites while the row fits on one line — once it
-          wraps on a narrow screen the button simply starts the next row,
-          which is the right outcome. */}
-      <button
-        type="button"
-        onClick={() => copy('report')}
-        className={chip + ' ml-auto'}
-        style={{ border: `1px solid ${RULE}`, color: INK, background: 'transparent' }}
-      >
-        {copied === 'report' ? '✓ Copied' : 'Channel report'}
-      </button>
+      <details className="relative"><summary className="list-none cursor-pointer text-xl px-2 py-1 rounded hover:bg-black/5" aria-label="More channel actions" title="More actions">⋯</summary><div className="absolute right-0 top-full mt-2 z-30 bg-white border rounded-lg p-1 shadow-lg min-w-[180px]" style={{borderColor:RULE}}><button type="button" onClick={()=>copy('report')} className="text-xs text-left w-full px-3 py-2 rounded hover:bg-black/5">{copied==='report'?'✓ Report copied':'Copy channel report'}</button></div></details>
     </div>
-  );
+  </div>;
 }

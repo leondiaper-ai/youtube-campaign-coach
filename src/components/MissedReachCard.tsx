@@ -1,5 +1,6 @@
 'use client';
 
+import VideoCaptionActions from './VideoCaptionActions';
 import { useState } from 'react';
 
 const PAPER = '#FAF7F2';
@@ -80,6 +81,8 @@ export default function MissedReachCard({ video }: { video: MissedReachVideo }) 
           </span>
         )}
       </div>
+
+      {/caption/i.test(video.primaryLabel) && <VideoCaptionActions id={video.id} title={video.title} />}
 
       {/* ── Expandable detail (impact bullets + secondary formats) ── */}
       {hasDetail && (
