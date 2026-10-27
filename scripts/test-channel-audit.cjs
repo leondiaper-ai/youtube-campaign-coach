@@ -65,3 +65,8 @@ assert.equal(a.visuals.weeks.length,13);
 assert(a.visuals.coveredWeeks<13,'Do not claim empty weeks before sample coverage');
 assert(channelAuditText(full).includes('VIEWING SPLIT'));
 console.log('Visual audit checks passed: split, format evidence, cadence coverage and full scan labels.');
+
+const lyricWithBtsLink=buildChannelAudit({...base,uploads:[{...upload('lyric-bts','Example - Song (Lyric Video)'),description:'Watch our behind the scenes film here'}]});
+assert.equal(lyricWithBtsLink.visuals.formats.find(f=>f.key==='lyric').count,1);
+assert.equal(lyricWithBtsLink.visuals.formats.find(f=>f.key==='bts').count,0);
+console.log('Title classification guard passed: unrelated description links cannot override lyric format.');
