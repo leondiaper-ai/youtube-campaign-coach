@@ -59,8 +59,8 @@ assert(full.coverage.includes('playlist fully scanned'));
 assert.equal(full.visuals.split.longform,50000);
 assert.equal(full.visuals.split.shorts,5000);
 assert.equal(full.visuals.coveredWeeks,13);
-assert(full.visuals.formats.find(f=>f.key==='live').verdict==='Not found');
-assert(a.visuals.formats.find(f=>f.key==='live').verdict==='Not in sample');
+assert(full.visuals.formats.find(f=>f.key==='live').verdict==='Not identified');
+assert(a.visuals.formats.find(f=>f.key==='live').verdict==='Not identified');
 assert.equal(a.visuals.weeks.length,13);
 assert(a.visuals.coveredWeeks<13,'Do not claim empty weeks before sample coverage');
 assert(channelAuditText(full).includes('VIEWING SPLIT'));
@@ -70,3 +70,10 @@ const lyricWithBtsLink=buildChannelAudit({...base,uploads:[{...upload('lyric-bts
 assert.equal(lyricWithBtsLink.visuals.formats.find(f=>f.key==='lyric').count,1);
 assert.equal(lyricWithBtsLink.visuals.formats.find(f=>f.key==='bts').count,0);
 console.log('Title classification guard passed: unrelated description links cannot override lyric format.');
+
+const bare=buildChannelAudit({...base,uploads:[upload('bare','Example - Song',90000),{...upload('s','a short',100),durationSec:30}]});
+assert(bare.visuals.takeaway.startsWith('Long-form carries 100%'),'Do not announce Shorts as a winner while unknown long-form dominates');
+assert(bare.visuals.actions[0].includes('unlabelled'));
+const notBts=buildChannelAudit({...base,uploads:[upload('years','A show ten years in the making',100)]});
+assert.equal(notBts.visuals.formats.find(f=>f.key==='bts').count,0);
+console.log('Audit regression checks passed: unknown formats cannot create a false winner or BTS finding.');
