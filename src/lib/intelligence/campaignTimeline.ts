@@ -153,7 +153,7 @@ export async function nextConfirmedRelease(
       e.status === 'CONFIRMED'
       && isMajor(e.eventType)
       && e.eventDate
-      && new Date(e.eventDate + 'T00:00:00Z').getTime() >= now - DAY)
+      && e.eventDate >= new Date(now).toISOString().slice(0,10))
     .sort((a, b) => (a.eventDate ?? '').localeCompare(b.eventDate ?? ''))[0];
 
   if (!candidate) return null;
@@ -231,7 +231,16 @@ export async function buildCampaignTimeline(
   /* ── The Coach plan ───────────────────────────────────────────────── */
   const events = await listMergedEvents(slug, now).catch(() => [] as CampaignEvent[]);
   const upcoming = events
-    .filter(e => e.eventDate && new Date(e.eventDate + 'T00:00:00Z').getTime() >= now - DAY)
+    .filter(e => e.eventDate && e.eventDate >= new Date(now).toISOString().slice(0,10))
+    .filter(e => {
+      if (e.eventDate !== new Date(now).toISOString().slice(0,10)) return true;
+      const name = splitTitle(e.title).title.toLowerCase();
+      if (name.length < 4 || !['SINGLE_RELEASE','OMV','LYRIC_VIDEO','VISUALISER'].includes(e.eventType)) return true;
+      return !assets.some(a => a.publishedAt.slice(0,10) >= e.eventDate! && a.title.toLowerCase().includes(name)
+        && (e.eventType === 'SINGLE_RELEASE' || (e.eventType === 'OMV' && /official video/i.test(a.formatLabel))
+          || (e.eventType === 'LYRIC_VIDEO' && /lyric/i.test(a.formatLabel))
+          || (e.eventType === 'VISUALISER' && /visuali[sz]er/i.test(a.formatLabel))));
+    })
     .sort((a, b) => (a.eventDate ?? '').localeCompare(b.eventDate ?? ''));
 
   if (!upcoming.length) {
@@ -314,7 +323,7 @@ export async function buildCampaignTimeline(
       daysAway: daysTo(planned.eventDate!),
       stage: secondDestination?.title ?? 'Second destination', title: s.title, detail: s.detail, asset: null,
     });
-  } else if (secondDestination && !['LIVE', 'COMPLETE'].includes(secondDestination.status) && followUp) {
+  } else if (secondDestination && !['LIVE', 'COMPLETE'].includes(secondDestination.status) && followUp && followUp.state !== 'CLOSED') {
     /* The hero has already landed, so the window has real dates. "+7-14
        DAYS" is the right label for a campaign still walking towards its
        hero and the wrong one for a campaign four days past it — at that

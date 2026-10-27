@@ -35,6 +35,8 @@ import { listResearchRuns } from '@/lib/intelligence/researchRuns';
 import { overrideFor } from '@/lib/intelligence/formatOverrides';
 import { deepDiveFor, resolveArtist } from '@/lib/intelligence/needs';
 import { readLiveSnapByHandle } from '@/lib/kvCache';
+import { refreshCampaignCoverSnapshot } from '@/lib/intelligence/campaignCoverRefresh';
+import { isCoverLongForm, selectCoverHeroes } from '@/lib/intelligence/campaignCoverSelection';
 import { readHistory, deltaOver } from '@/lib/snapshots';
 import {
   resolveCampaignStart, campaignMetrics, followUpAnchorFor, toCampaignUploads,
@@ -42,6 +44,7 @@ import {
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
+export const maxDuration = 60;
 
 /* The deck is served from the same origin today, but it is a standalone
    document and may be opened from a file or another host. */
@@ -86,6 +89,7 @@ interface CoverAsset {
   /** yyyy-mm-dd → "9 SEP" for the deck. Formatting stays here, not there. */
   dateLabel: string;
   kind: string;
+  durationSec?: number | null;
   formatLabel: string;
   /**
    * How the deck should frame it. Observed from duration, NOT from kind —
@@ -152,7 +156,7 @@ function cleanAssetTitle(title: string, artistName: string): string {
      Only safe because this function is not used for display — asset cards
      render the raw title, so the live version is still labelled as one
      everywhere a reader sees it. */
-  return out.replace(/\s*\((official|lyric|visuali[sz]er|live)[^)]*\)\s*$/i, '').trim() || t;
+  return out.replace(/\s*[\[(](official|lyric|visuali[sz]er|live|audio)[^\])]*[\])]\s*$/i, '').trim() || t;
 }
 
 /**
@@ -252,7 +256,8 @@ function formatOf(v: any, artistName?: string | null): { kind: string; label: st
   const title = String(v.title ?? '');
   const desc = String(v.description ?? '');
 
-  if (dur > 0 && dur <= 62) return { kind: 'short', label: 'SHORT' };
+  if ((dur > 0 && dur <= 62) || /#shorts?\b/i.test(title)) return { kind: 'short', label: 'SHORT' };
+  if (/\b(trailer|teaser|snippet|preview|countdown)\b/i.test(title)) return { kind: 'trailer', label: 'TRAILER' };
 
   /* The title, where it says. Strongest evidence, and it beats the
      premiere check below: an "(Official Video)" that premiered is still an
@@ -288,9 +293,9 @@ function formatOf(v: any, artistName?: string | null): { kind: string; label: st
     return { kind: 'live', label: 'LIVE' };
   }
 
-  /* The description, for the two formats that name themselves in it. */
-  if (/\blyric(?:s)?\s+video\b/i.test(desc)) return { kind: 'lyric', label: 'LYRIC VIDEO' };
-  if (/\bvisuali[sz]er\b/i.test(desc)) return { kind: 'visualiser', label: 'VISUALISER' };
+  // Descriptions often link to another asset; don't relabel this upload from that link.
+  if (/\b(?:official\s+)?audio\b/i.test(title)) return { kind: 'audio', label: 'AUDIO' };
+  if (/behind[-\s]+the[-\s]+scenes|\bmaking\s+of\b|\bbts\b/i.test(title)) return { kind: 'bts', label: 'BEHIND THE SCENES' };
 
   /* Long enough to have been a show rather than a scheduled drop. */
   if ((v.wasLive || v.actualStart) && dur > PREMIERE_IS_A_PERFORMANCE_SEC) {
@@ -311,7 +316,7 @@ function formatOf(v: any, artistName?: string | null): { kind: string; label: st
  * distinction drives both which asset leads the page and what the read
  * says is out, so it lives here rather than being declared twice.
  */
-const RELEASE_KINDS = new Set(['omv', 'lyric', 'visualiser', 'live', 'music']);
+const RELEASE_KINDS = new Set(['omv', 'lyric', 'visualiser', 'live', 'music', 'audio', 'bts', 'long']);
 
 /**
  * How to name an asset that is the SECOND thing out for a song that is
@@ -326,7 +331,7 @@ const FOLLOWUP_PHRASE: Record<string, string> = {
   /* An untagged "Artist - Song" upload. "Video" rather than "Official
      video", because the artist did not call it one and we are inferring
      the format from the naming pattern. */
-  music: 'Video',
+  music: 'Video', audio: 'Audio', bts: 'Behind-the-scenes video', long: 'Long-form video',
 };
 
 /** What a release is called in a sentence, as opposed to on a label. */
@@ -335,7 +340,7 @@ const FORMAT_NOUN: Record<string, string> = {
   lyric: 'lyric video',
   visualiser: 'visualiser',
   live: 'live video',
-  music: 'video',
+  music: 'video', audio: 'audio', bts: 'behind-the-scenes video', long: 'long-form video',
 };
 
 /** ['a','b','c'] -> "a, b and c". */
@@ -375,7 +380,7 @@ const FORMAT_WEIGHT: Record<string, number> = {
   /* `music` sits just under `omv`: it is the same thing, inferred from the
      naming pattern rather than stated in the title, so an upload that calls
      itself an official video still outranks it on a tie. */
-  omv: 100, music: 90, live: 80, lyric: 70, visualiser: 65, long: 50, trailer: 30, short: 20, unknown: 10,
+  omv: 100, music: 90, live: 80, lyric: 70, visualiser: 65, audio: 60, bts: 55, long: 50, trailer: 30, short: 20, unknown: 10,
 };
 
 function rankAssets(assets: CoverAsset[]): CoverAsset[] {
@@ -425,9 +430,13 @@ export async function GET(req: NextRequest) {
     );
 
     /* ── Live channel + assets ─────────────────────────────────────── */
-    const snap = who.artist?.channelHandle
+    let snap = who.artist?.channelHandle
       ? await readLiveSnapByHandle(who.artist.channelHandle).catch(() => null)
       : null;
+    if (who.artist?.channelHandle) {
+      snap = await refreshCampaignCoverSnapshot({ slug: who.slug, handle: who.artist.channelHandle,
+        campaignStartDate: who.artist.campaignStartDate ?? capturedAt?.slice(0,10), collabs: who.artist.collabs }, snap);
+    }
 
     if (!snap) coverage.push('No cached channel snapshot — asset list and movement are unavailable, not empty.');
 
@@ -466,7 +475,7 @@ export async function GET(req: NextRequest) {
       /* Inclusive. The upload that opens an era IS the campaign's first
          asset, and excluding it by a strict `>` was half of the reason
          one surface counted 13 assets and this one counted 10. */
-      if (!startAt || !Number.isFinite(at.getTime()) || at < startAt) continue;
+      if (!startAt || !Number.isFinite(at.getTime()) || at < startAt || at.getTime() > Date.now() || v.live === 'upcoming') continue;
       const observed = formatOf(v, who.name);
       /* A person who knows what the asset is beats a duration check. The
          shape stays observed; only the name changes. */
@@ -478,6 +487,7 @@ export async function GET(req: NextRequest) {
         publishedAt: v.publishedAt,
         dateLabel: dateLabel(v.publishedAt),
         kind: f.kind,
+        durationSec: v.durationSec ?? null,
         formatLabel: f.label,
         aspect: human?.frame ?? (observed.kind === 'short' ? 'portrait' : 'landscape'),
         sourceAspect: observed.kind === 'short' ? 'portrait' : 'landscape',
@@ -503,7 +513,7 @@ export async function GET(req: NextRequest) {
       const known = new Set(postBaseline.map(a => a.videoId));
       for (const u of labelUploads) {
         /* Same id from both channels is one upload, not two. */
-        if (known.has(u.id)) continue;
+        if (known.has(u.id) || u.live === 'upcoming' || Date.parse(u.publishedAt) > Date.now()) continue;
         const observed = formatOf(u, who.name);
         const human = overrideFor(u.id);
         const f = human ? { kind: human.kind, label: human.label } : observed;
@@ -513,6 +523,7 @@ export async function GET(req: NextRequest) {
           publishedAt: u.publishedAt,
           dateLabel: dateLabel(u.publishedAt),
           kind: f.kind,
+          durationSec: u.durationSec ?? null,
           formatLabel: f.label,
           aspect: human?.frame ?? (observed.kind === 'short' ? 'portrait' : 'landscape'),
           sourceAspect: observed.kind === 'short' ? 'portrait' : 'landscape',
@@ -603,43 +614,16 @@ export async function GET(req: NextRequest) {
     const landed = planEvents
       .filter(e =>
         e.eventDate
+        && e.status === 'CONFIRMED'
         && RELEASE_MOMENTS.has(e.eventType)
-        && new Date(e.eventDate + 'T00:00:00Z').getTime() <= Date.now()
+        && e.eventDate < new Date().toISOString().slice(0, 10)
         && (!startAt || new Date(e.eventDate + 'T00:00:00Z').getTime() >= startAt.getTime()))
       .sort((a, b) => (b.eventDate ?? '').localeCompare(a.eventDate ?? ''));
 
-    const ranked = rankAssets(postBaseline);
-    const releases = rankAssets(postBaseline.filter(a => RELEASE_KINDS.has(a.kind)))
-      .sort((x, y) => y.publishedAt.slice(0, 10).localeCompare(x.publishedAt.slice(0, 10)));
-
-    /* ── WHEN THE SONG IS OUT AND HAS NO VIDEO ────────────────────────
-       rankAssets answers "what is the biggest thing here", which is the
-       right question only when nothing has been released. Once a single
-       is out, the hero is the asset about that single — and if the only
-       assets are Shorts, it is the biggest Short about it, not the most
-       recent unrelated post.
-
-       Palaye Royale is the case: Lost In Translation came out on 2
-       October with no video of any kind on the channel, four Shorts name
-       it, and the page was leading on a wordless clip captioned
-       "October 4, 2026". A campaign page whose hero is not about the
-       thing the campaign just released is showing the wrong picture.
-
-       Matched on the song name appearing in the title, which is how
-       these Shorts are actually captioned ("Lost In Translation out
-       now. x"). No match leaves the existing behaviour untouched. */
-    const landedSong = landed[0] ? splitPlanTitle(landed[0].title).toLowerCase() : null;
-    const aboutRelease = landedSong && landedSong.length >= 4
-      ? rankAssets(postBaseline.filter(a => a.title.toLowerCase().includes(landedSong)))
-      : [];
-
-    const lead = releases[0] ?? aboutRelease[0] ?? ranked[0] ?? null;
-    const latest = [...postBaseline]
-      .filter(a => a.videoId !== lead?.videoId)
-      .sort((x, y) => y.publishedAt.localeCompare(x.publishedAt))[0] ?? null;
-
-    const heroIds = new Set([lead?.videoId, latest?.videoId].filter(Boolean));
-    const heroes = [lead, latest].filter(Boolean) as CoverAsset[];
+    // Feature the newest two actual long-form destinations. Subsequent Shorts
+    // stay in the activity strip and cannot replace a release or follow-up.
+    const heroes = selectCoverHeroes(postBaseline);
+    const heroIds = new Set(heroes.map(a=>a.videoId));
     heroes.forEach(a => { a.role = 'hero'; });
 
     /* The strip is everything else, in campaign order. */
@@ -843,18 +827,16 @@ export async function GET(req: NextRequest) {
        recommendation about when a follow-up lands best; a follow-up on day
        fifteen is late, not absent, and telling somebody to make a thing
        they have already made is the worse error. */
-    const FOLLOW_UP_KINDS = new Set(['omv', 'lyric', 'visualiser', 'live', 'premiere']);
-    const leadHero = heroes.find(h => FOLLOW_UP_KINDS.has(h.kind)) ?? null;
-    const heroFollowUp = leadHero
-      ? postBaseline.find(a =>
-          a.videoId !== leadHero.videoId
-          && FOLLOW_UP_KINDS.has(a.kind)
-          && a.publishedAt > leadHero.publishedAt)
-      : null;
+    const FOLLOW_UP_KINDS = new Set(['omv', 'lyric', 'visualiser', 'live', 'music', 'audio']);
+    const leadHero = heroes.find(h => isCoverLongForm(h) && FOLLOW_UP_KINDS.has(h.kind)) ?? null;
+    const sameSong = leadHero ? postBaseline.filter(a => isCoverLongForm(a) && FOLLOW_UP_KINDS.has(a.kind)
+      && cleanAssetTitle(a.title, who.name).toLowerCase() === cleanAssetTitle(leadHero.title, who.name).toLowerCase())
+      .sort((a,b)=>a.publishedAt.localeCompare(b.publishedAt)) : [];
+    const heroFollowUp = sameSong.length > 1 && sameSong[0].publishedAt.slice(0,10) < sameSong[sameSong.length-1].publishedAt.slice(0,10) ? sameSong[sameSong.length-1] : null;
     if (leadHero && heroFollowUp) {
       coverage.push(
-        `Follow-through is met for this campaign: ${heroFollowUp.formatLabel.toLowerCase()} `
-        + `"${heroFollowUp.title}" followed the hero on ${heroFollowUp.dateLabel}.`,
+        `A later long-form asset for this track was published on ${heroFollowUp.dateLabel}: `
+        + `${heroFollowUp.formatLabel.toLowerCase()} "${heroFollowUp.title}".`,
       );
     }
 
@@ -891,14 +873,14 @@ export async function GET(req: NextRequest) {
        every field is read from something that already existed. */
     const timeline = await buildCampaignTimeline(
       who.slug,
-      ranked.map(a => ({
+      postBaseline.filter(isCoverLongForm).map(a => ({
         videoId: a.videoId, title: a.title, publishedAt: a.publishedAt,
         dateLabel: a.dateLabel, formatLabel: a.formatLabel, aspect: a.aspect,
         thumb: a.thumb, url: a.url, views: a.views,
       })),
       rollout,
       Date.now(),
-      followUpWindow,
+      heroFollowUp ? null : followUpWindow,
     ).catch(() => null);
     if (timeline) coverage.push(...timeline.coverage);
 
@@ -927,9 +909,10 @@ export async function GET(req: NextRequest) {
        Assembled from observed facts and an explicitly hedged forward
        clause. No causal claim: the channel woke and the campaign started,
        and those are two statements sitting next to each other. */
-    const read = buildRead(state, heroes.length + supporting.length, baselineDormantDays,
-      daysSinceUpload, stages, firstNewUploadAt, [...heroes, ...supporting], who.name,
-      landed[0] ? { title: splitPlanTitle(landed[0].title), date: landed[0].eventDate! } : null);
+    const read = buildRead(state, postBaseline.length, baselineDormantDays,
+      daysSinceUpload, stages, firstNewUploadAt, postBaseline.filter(isCoverLongForm), who.name,
+      landed[0] ? { title: splitPlanTitle(landed[0].title), date: landed[0].eventDate! } : null,
+      timeline?.moments.find(m => m.kind === 'NEXT') ?? null);
 
     /* ── Fan response ──────────────────────────────────────────────────
        What the audience is positively responding to, in about eight words,
@@ -1061,6 +1044,7 @@ export async function GET(req: NextRequest) {
          must exist, because a failed join and a quiet channel look
          identical otherwise. */
       coverage,
+      channelDataAt: snap?.cachedAt ?? null,
       generatedAt: new Date().toISOString(),
     }, { headers: CORS });
   } catch (e) {
@@ -1102,160 +1086,37 @@ function buildRead(
   daysSinceUpload: number | null,
   stages: { label: string; status: string; action?: string | null }[],
   firstNewUploadAt: string | null,
-  campaignAssets: CoverAsset[] = [],
-  artistName = '',
-  /* The newest release from the Coach plan whose date has passed. The
-     song can be out on every DSP with no video on the channel yet, which
-     is exactly Palaye Royale's position, so the page has to be able to
-     name a release it cannot see a thumbnail for. */
+  campaignAssets: CoverAsset[] = [], artistName = '',
   landedRelease: { title: string; date: string } | null = null,
+  nextMoment: { title: string; date: string | null; provenance: string } | null = null,
 ): { kicker: string | null; headline: string; line: string } | null {
   if (state === 'BASELINE') return null;
-
-  /* The dormancy figure was a statistic sitting beside two others, which
-     made 340 days of silence look like a metric rather than the thing that
-     just changed. As a line of commentary above the read it does the job
-     it was always doing: it is the before, and the headline is the after. */
-  /* agoPhrase returns either a bare phrase ("yesterday", "6 days ago") or
-     a dated one that already carries its preposition ("on 9 September"),
-     and "until" in front of the second produced "340 days quiet until on
-     9 September". The preposition belongs to whichever form needs it. */
   const woken = firstNewUploadAt ? agoPhrase(firstNewUploadAt) : '';
   const kicker = dormantDays != null && firstNewUploadAt
-    ? `${dormantDays} days quiet until ${woken.replace(/^on /, '')}`
-    : null;
-
-  const next = stages.find(s => s.status === 'NEXT');
-  const woke = dormantDays != null && daysSinceUpload != null && daysSinceUpload < dormantDays;
-
-  if (state === 'NEW_ACTIVITY') {
-    return {
-      kicker,
-      headline: 'New activity on the channel.',
-      line: `${assetCount} upload${assetCount === 1 ? '' : 's'} since the analysis. Nobody has confirmed `
-        + 'whether this is the campaign starting, so the deck is not claiming that it is.',
-    };
+    ? `${dormantDays} days quiet until ${woken.replace(/^on /, '')}` : null;
+  const newest = [...campaignAssets].filter(isCoverLongForm)
+    .sort((a,b) => b.publishedAt.localeCompare(a.publishedAt))[0] ?? null;
+  const date = (iso: string) => new Date(iso.length === 10 ? iso + 'T00:00:00Z' : iso)
+    .toLocaleDateString('en-GB', { day: 'numeric', month: 'long', timeZone: 'UTC' });
+  const next = nextMoment?.date
+    ? `Next: ${nextMoment.title}, ${date(nextMoment.date)}${nextMoment.provenance === 'TENTATIVE' ? ' (tentative)' : ''}.`
+    : 'No upcoming release date is held in the plan.';
+  if (landedRelease && (!newest || landedRelease.date > newest.publishedAt.slice(0,10))
+      && !campaignAssets.some(a => a.publishedAt.slice(0,10) >= landedRelease.date
+        && cleanAssetTitle(a.title, artistName).toLowerCase().includes(landedRelease.title.toLowerCase()))) {
+    return { kicker, headline: `${landedRelease.title}: planned release date passed.`,
+      line: `Planned for ${date(landedRelease.date)}; no matching long-form upload is visible in the latest channel data. ${next}` };
   }
-
-  /* ── THE HEADLINE HAS TO AGE ───────────────────────────────────────
-     "The channel is awake." was the right sentence on day one and stayed
-     on the page through day fourteen, by which point CHVRCHES had put out
-     a single and a lyric video with 100,820 views on it. A live campaign
-     page whose headline is stuck on the first thing that happened is a
-     screenshot, not a live page.
-
-     So the read follows the campaign's own evidence. Waking up is the
-     story only until something is RELEASED: an official video, a lyric
-     video, a visualiser, a premiere. Shorts and trailers are the build —
-     they point at a release rather than being one — which is the same
-     distinction the hero ranking makes, and it is made from the observed
-     formats rather than from anybody updating a string. */
-  const released = campaignAssets.filter(a => RELEASE_KINDS.has(a.kind));
-
-  /* ── AND THE HEADLINE HAS TO NAME WHAT IS OUT ──────────────────────
-     "The single is out." was a constant, so it could not tell one single
-     from the next. It was true on 10 September for My Whole World and was
-     still the sentence on 2 October, by which point the single it referred
-     to was two singles old and Cold Blue Dawn had been out for two days.
-
-     So it is built from the newest release and whatever else went out for
-     the same song: "New track and lyric video out." The song goes on the
-     line below — the headline is the event, the name is the detail. When
-     the next single lands this sentence changes by itself, and so does
-     the list of formats, because both are read off the uploads. */
-  const newest = [...released]
-    .sort((a, b) => b.publishedAt.localeCompare(a.publishedAt))[0] ?? null;
-  const song = newest ? cleanAssetTitle(newest.title, artistName) : null;
-
-  /* Everything released for that song, not just the newest asset: a
-     lyric video and a visualiser for one track are one event. Matched on
-     the cleaned title, which already strips the artist and the
-     "(Visualizer)" packaging, so the two forms land on the same key. */
-  const forSong = song
-    ? released.filter(a => cleanAssetTitle(a.title, artistName).toLowerCase() === song.toLowerCase())
-    : [];
-  const nouns = Array.from(new Set(forSong.map(a => a.kind)))
-    .sort((a, b) => (FORMAT_WEIGHT[b] ?? 0) - (FORMAT_WEIGHT[a] ?? 0))
-    .map(k => FORMAT_NOUN[k])
-    .filter(Boolean);
-
-  /* ── IS THIS A NEW TRACK, OR A SECOND ASSET FOR AN OLD ONE? ────────
-     The headline said "New track and ..." for anything released. That is
-     right for the first video a song gets and wrong for every one after
-     it: Kings of Leon put a live version of My Whole World up on 8 Oct,
-     three weeks after the track already had a visualiser here, and the
-     page announced it as a new track.
-
-     A follow-up is simply a release asset for a song that already had
-     one. Decided by comparing the newest release against the EARLIEST
-     release for the same song, so it needs nobody to tag anything. */
-  const forSongByDate = [...forSong].sort((a, b) => a.publishedAt.localeCompare(b.publishedAt));
-  const firstForSong = forSongByDate[0] ?? null;
-  const isFollowUp = !!(newest && firstForSong && firstForSong.videoId !== newest.videoId);
-
-  const headline = isFollowUp && newest && song
-    ? `${FOLLOWUP_PHRASE[newest.kind] ?? 'New asset'} of “${song}” landed.`
-    : nouns.length
-    /* "New track AND ..." because two things went out: the song, on every
-       platform, and the asset that carries it here. */
-    ? `New track and ${listPhrase(nouns)} out.`
-    : released.length ? 'The single is out.'
-      /* No release asset on the channel, but a release in the plan has
-         landed. The song is out; YouTube just has not been given it
-         yet, which is a finding rather than a gap in our knowledge. */
-      : landedRelease ? 'The campaign has started.'
-        : woke ? 'The channel is awake.' : 'The campaign is live.';
-
-  /* The song, dated, ahead of the forward instruction. Without it the
-     headline announces a release the reader cannot name. */
-  /* `dateLabel` is "30 SEP" — right on a card, shouting in a sentence. */
-  const subjectDate = newest
-    ? new Date(newest.publishedAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', timeZone: 'UTC' })
-    : '';
-  let subject = song && subjectDate ? `“${song}”, ${subjectDate}. ` : '';
-
-  /* The headline already names the song for a follow-up, so repeating it
-     here is just the same words twice. The useful fact instead is WHEN
-     the track first had a video, because that is the evidence for calling
-     this a follow-up at all. */
-  if (isFollowUp && firstForSong) {
-    const firstDate = new Date(firstForSong.publishedAt)
-      .toLocaleDateString('en-GB', { day: 'numeric', month: 'long', timeZone: 'UTC' });
-    subject = `Uploaded ${subjectDate}. First video for this track went up ${firstDate}. `;
+  if (newest) {
+    const labels: Record<string,string> = { lyric:'Lyric video', visualiser:'Visualiser', live:'Live video',
+      omv:'Official video', music:'Video', audio:'Audio', bts:'Behind-the-scenes video', long:'Long-form video' };
+    const label = labels[newest.kind] ?? 'Long-form video';
+    const title = cleanAssetTitle(newest.title, artistName);
+    const recent = Date.now() - Date.parse(newest.publishedAt) <= 14 * 86_400_000;
+    const headline = `${recent ? 'New' : 'Latest'} ${label.toLowerCase()}: “${title}”.`;
+    const status = state === 'NEW_ACTIVITY' ? ' Campaign status is not confirmed.' : '';
+    return { kicker, headline, line: `Uploaded ${date(newest.publishedAt)}.${status} ${next}` };
   }
-
-  /* Nothing on the channel carries the release, so the subject comes from
-     the plan instead — and says plainly that YouTube has not had the
-     asset. "Out on 2 October" with six Shorts on the page and no video
-     is the single most actionable sentence this read can print. */
-  if (!subject && landedRelease) {
-    const d = new Date(landedRelease.date + 'T00:00:00Z')
-      .toLocaleDateString('en-GB', { day: 'numeric', month: 'long', timeZone: 'UTC' });
-    subject = `“${landedRelease.title}” out ${d}, with no video on the channel yet. `;
-  }
-
-  return {
-    kicker,
-    headline,
-    /* Forward, and concrete.
-
-       This line used to print the stage's TITLE — "Next: Don't leave the hero
-       alone." That is the name of an argument, and a reader who has not read
-       the argument learns nothing from it except that somebody is worried.
-       The plan now carries an instruction alongside the title, resolved
-       against the hero or release where it names one, and that instruction is
-       what belongs after the word "Next".
-
-       The title remains the fallback, lowercased as before so it reads as a
-       clause rather than a heading. An item with no stated action is a gap in
-       the plan, not a reason to print nothing. */
-    /* A follow-up asset gets no forward instruction. The plan's next move
-       is written against the HERO of a release — "give it a second
-       destination" — and printing that under an asset which IS the second
-       destination argues with itself. The follow-up window in What's next
-       still carries the forward view, where it belongs. */
-    line: isFollowUp ? subject.trim() : subject + (next
-      ? `Next: ${next.action ?? next.label.charAt(0).toLowerCase() + next.label.slice(1)}.`
-      : 'Now we\'re watching what follows it.'),
-  };
+  return { kicker, headline: state === 'NEW_ACTIVITY' ? 'New activity on the channel.' : 'Campaign activity on the channel.',
+    line: `${assetCount} upload${assetCount === 1 ? '' : 's'} observed. No qualifying long-form release is visible yet. ${next}` };
 }

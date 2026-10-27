@@ -365,6 +365,7 @@ function buildLiveCover(d){
     <div class="livehead">
       <div class="livestate"><span class="livedot"></span>${
         live ? 'Live campaign update' : 'New activity observed'} · ${fmtDate(d.generatedAt)}</div>
+      ${d.channelDataAt ? `<div class="livesince">Channel data checked ${fmtDate(d.channelDataAt)}</div>` : ''}
       ${d.deepDive && d.deepDive.capturedAt
         ? `<div class="livesince">Deep Dive captured ${fmtDate(d.deepDive.capturedAt)}</div>` : ''}
     </div>
@@ -774,7 +775,7 @@ function switchTab(name){
 /* ── Fetch and mount ──────────────────────────────────────────────── */
 async function loadLiveCampaign(){
   const ctrl = new AbortController();
-  const t = setTimeout(()=>ctrl.abort(), 8000);
+  const t = setTimeout(()=>ctrl.abort(), 15000);
   const r = await fetch(`${COVER_API}?slug=${CFG.slug}`, {cache:'no-store', signal:ctrl.signal});
   clearTimeout(t);
   if(!r.ok) throw new Error('status '+r.status);
