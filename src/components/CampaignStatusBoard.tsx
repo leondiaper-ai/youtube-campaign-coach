@@ -155,11 +155,17 @@ export default function CampaignStatusBoard({
   holdCards.sort(sortByPriorityAndViews);
 
   // ─── Behaviour view with Spotify-style sidebar ──────────────────
-  const behaviourCard = behaviourSlug ? cards.find((c) => c.slug === behaviourSlug) : null;
+  const behaviourCard = behaviourSlug
+    ? cards.find((c) => c.slug === behaviourSlug) ?? available.find((a) => a.slug === behaviourSlug)
+    : null;
   if (behaviourSlug && behaviourCard) {
     // Every followed campaign stays accessible, including pre-release and quiet channels.
-    const sidebarCampaigns = [...cards]
-      .sort((a, b) => a.name.localeCompare(b.name));
+    const sidebarCampaigns: { slug: string; name: string; thumbnail?: string | null; boardStatus?: string }[] = [...cards];
+    // Viewing a channel does not create a followed campaign or a synthetic campaign card.
+    if (!sidebarCampaigns.some(c => c.slug === behaviourSlug)) {
+      sidebarCampaigns.push({ slug: behaviourSlug, name: behaviourCard.name });
+    }
+    sidebarCampaigns.sort((a, b) => a.name.localeCompare(b.name));
 
     const statusDot = (status: string) => {
       if (status === 'PUSH') return '#1FBE7A';
@@ -305,7 +311,7 @@ export default function CampaignStatusBoard({
                     width: 10,
                     height: 10,
                     borderRadius: '50%',
-                    background: statusDot(c.boardStatus),
+                    background: statusDot(c.boardStatus ?? ''),
                     border: '2px solid #1A1A1A',
                   }}
                 />

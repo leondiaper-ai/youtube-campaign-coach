@@ -563,13 +563,13 @@ export default async function CampaignsPage({
 
      So the shell is suppressed when the behaviour view is the one on
      screen. The condition has to match the board's own exactly —
-     a slug that is present but does NOT resolve to a pinned card falls
+     a slug that is present but does NOT resolve to this workspace's roster falls
      through to the normal list, and hiding the header on that would
      leave the page with no navigation at all. */
   const sp = (await searchParams) ?? {};
   const rawBehaviour = sp.behaviour;
   const behaviourSlug = typeof rawBehaviour === 'string' ? rawBehaviour : null;
-  const behaviourOpen = !!behaviourSlug && cards.some((c) => c.slug === behaviourSlug);
+  const behaviourOpen = !!behaviourSlug && allArtists.some((a) => a.slug === behaviourSlug);
 
   return (
     <div className="min-h-screen bg-paper text-ink">
