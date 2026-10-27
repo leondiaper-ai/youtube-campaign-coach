@@ -236,8 +236,8 @@ export async function buildCampaignTimeline(
       // A published video establishes that this song is already on YouTube,
       // even when the plan's intended single date has not yet arrived. Keep
       // any separately stated announcement; don't call the song forthcoming.
-      if (e.eventType !== 'SINGLE_RELEASE') return e;
       const planned = splitTitle(e.title);
+      if (e.eventType !== 'SINGLE_RELEASE' && !(e.eventType === 'ANNOUNCEMENT' && /^single release\s*\+/i.test(planned.detail ?? ''))) return e;
       const name = planned.title.toLowerCase();
       if (name.length < 4 || !assets.some(a => a.title.toLowerCase().includes(name))) return e;
       const remaining = planned.detail?.replace(/^single release\s*\+\s*/i, '').trim();

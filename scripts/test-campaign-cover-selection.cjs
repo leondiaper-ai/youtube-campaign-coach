@@ -45,6 +45,7 @@ vm.runInNewContext(ts.transpileModule(timelineSource,{compilerOptions:{module:ts
   const withWindow=await buildCampaignTimeline('artist',assets,rollout,now,open);
   assert.equal(withWindow.moments.some(m=>m.kind==='WINDOW'),true);
   events[1].title='Overthinker - Single release + announce album and pre-order';
+  events[1].eventType='ANNOUNCEMENT';
   assets.push({...assets[0],videoId:'2',title:'Artist - Overthinker (Lyric Video)'});
   const published=await buildCampaignTimeline('artist',assets,rollout,now,closed);
   assert.equal(published.moments.find(m=>m.kind==='NEXT').title,'announce album and pre-order');
