@@ -29,3 +29,7 @@ Opening Channel Audit now calls the collector when the playlist cache is absent,
 The format inventory now includes audio, documentaries, interviews and tour uploads, ensuring every classified upload appears in exactly one row. Empty secondary categories stay out of the main cards. Bracketed “Live for…” / “Live on…” titles are recognised. PNG row spacing adapts to the number of displayed formats.
 
 Live validation: IDLES playlist returned 372 IDs / 371 published uploads, reaching 2011, and revealed 37 official-video-labelled uploads that were absent from the latest 100-upload sample. No artist metadata, campaign pins or daily sync were changed.
+
+## Linked artist-channel uploads
+
+The uploads playlist can return linked videos whose original uploader channel ID differs from the current artist channel. The collector now retains every video explicitly requested from that playlist, recording uploaderChannelId for provenance, rather than dropping those linked uploads. It does not discover arbitrary third-party videos. Old completed caches lacking includesLinkedUploads are marked incomplete by the audit API and automatically recollected on next use. This repaired Tom Odell's missing legacy uploads, including Another Love, found during the cross-channel QA.
