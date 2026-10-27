@@ -1,3 +1,4 @@
+import { getLabelWorkspace } from '@/lib/labels';
 import type { ReactNode } from 'react';
 import { notFound } from 'next/navigation';
 import { ARTISTS, mergeArtistLists, deriveFromLive, fmtNum, daysSince, type Artist, type RecentUpload } from '@/lib/artists';
@@ -401,6 +402,7 @@ export default async function WatcherArtistView({
 
         {/* ─── THE OVERVIEW — identical on every artist page ──────────── */}
         <ArtistOverview
+          workspaceName={getLabelWorkspace(market)?.name}
           slug={slug}
           artist={artist}
           snap={live}

@@ -55,6 +55,7 @@ function sharePct(x: number): string {
 
 
 export interface ArtistOverviewProps {
+  workspaceName?: string;
   slug: string;
   artist: Artist;
   snap: { channelId?: string; views?: number | null; lastUploadAt?: string | null; recentUploads?: RecentUpload[] } | null;
@@ -98,7 +99,7 @@ export interface ArtistOverviewProps {
 
 export default async function ArtistOverview({
   slug, artist, snap, nc, derived, status, uploads, subs7, views7, moves: _moves, pinned: _pinned,
-  topLongform, topShorts, launchSlot,
+  topLongform, topShorts, launchSlot, workspaceName = 'Virgin Music Group',
 }: ArtistOverviewProps) {
   const days = snap?.channelId ? await readFormatDays(snap.channelId) : [];
   const split = resolveRowFormatSplit(uploads, days, snap?.views ?? null);
@@ -144,7 +145,7 @@ export default async function ArtistOverview({
         {/* No "Tracked project" badge and no second Watcher mark here: the
             action bar directly above already carries both, and on the live
             page they read as a stutter rather than as emphasis. */}
-        <Eyebrow>Virgin Music Group</Eyebrow>
+        <Eyebrow>{workspaceName}</Eyebrow>
         <h1
           className="font-black tracking-[-0.045em] leading-[0.9] mt-4"
           style={{ fontSize: 'clamp(2.8rem,8vw,6rem)' }}
