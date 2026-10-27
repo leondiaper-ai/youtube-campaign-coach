@@ -1,3 +1,7 @@
+import { getLabelWorkspace } from '@/lib/labels';
+import { getArtistsForMarket } from '@/lib/marketScope';
+import { notFound } from 'next/navigation';
+import { AppHeader } from '@/components/ui/AppHeader';
 import WatcherArtistView from '@/components/WatcherArtistView';
 import { getMarketFromRequest } from '@/lib/marketServer';
 
@@ -34,11 +38,19 @@ export default async function WatcherPage({
      their workspace. */
   const market = await getMarketFromRequest(searchParams);
 
-  return (
+  const label = getLabelWorkspace(market.id);
+  if (label && !(await getArtistsForMarket(market.id)).some(a => a.slug === slug)) notFound();
+  const q = market.id === 'uk' ? '' : `?market=${market.id}`;
+  return <>
+    {label && <AppHeader workspace={label.name} nav={[
+      { href: `/growth${q}`, label: 'Channel Health' },
+      { href: `/campaigns${q}`, label: 'Active Campaigns' },
+      { href: `/coach${q}`, label: 'Coach' },
+    ]} />}
     <WatcherArtistView
       slug={slug}
       market={market.id}
       signature="Watcher watches · Coach plans · You decide"
     />
-  );
+  </>;
 }

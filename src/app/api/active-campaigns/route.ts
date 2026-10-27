@@ -1,3 +1,4 @@
+import { getLabelWorkspace } from '@/lib/labels';
 import { NextRequest, NextResponse } from 'next/server';
 import { listPinned, pinCampaign, unpinCampaign, saveBaseline, type CampaignBaseline } from '@/lib/campaignStore';
 import { ARTISTS, mergeArtistLists } from '@/lib/artists';
@@ -41,6 +42,10 @@ export async function POST(req: NextRequest) {
   const market = marketOf(req, body);
   const priority = body?.priority === 'high' ? 'high' : 'normal';
   const pinned = await pinCampaign(slug, priority, market);
+
+  // Label pins are independent working records. Do not overwrite the UK's
+  // shared artist campaign date or baseline when a label pins the same artist.
+  if (getLabelWorkspace(market)) return NextResponse.json({ pinned, market });
 
   // Auto-set campaignStartDate if not already set
   try {

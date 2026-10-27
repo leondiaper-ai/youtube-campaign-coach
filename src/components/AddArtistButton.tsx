@@ -1,6 +1,8 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { getLabelWorkspace } from '@/lib/labels';
 
 const INK = '#0E0E0E';
 const PAPER = '#FAF7F2';
@@ -9,7 +11,9 @@ const SOFT = '#F6F1E7';
 
 const PHASES = ['PRE', 'START', 'RELEASE', 'PUSH', 'PEAK', 'SUSTAIN'] as const;
 
-export default function AddArtistButton({ onAdded }: { onAdded?: () => void }) {
+export default function AddArtistButton({ onAdded, market = 'uk' }: { onAdded?: () => void; market?: string }) {
+  const router = useRouter();
+  const labelWorkspace = getLabelWorkspace(market);
   const [open, setOpen] = useState(false);
   const [input, setInput] = useState('');
   const [phase, setPhase] = useState<(typeof PHASES)[number]>('PRE');
@@ -25,13 +29,14 @@ export default function AddArtistButton({ onAdded }: { onAdded?: () => void }) {
       const r = await fetch('/api/artists', {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ input: input.trim(), phase, ownership }),
+        body: JSON.stringify({ input: input.trim(), phase, ownership, ...(labelWorkspace ? { market: labelWorkspace.workspaceId } : {}) }),
       });
       const j = await r.json();
       if (!r.ok) throw new Error(j.error ?? `Failed (${r.status})`);
       setInput('');
       setOpen(false);
       onAdded?.();
+      if (labelWorkspace) router.refresh();
     } catch (e: any) {
       setErr(String(e?.message ?? e));
     } finally {
@@ -105,7 +110,7 @@ export default function AddArtistButton({ onAdded }: { onAdded?: () => void }) {
               ))}
             </div>
 
-            <label className="block mt-4 text-[10px] uppercase tracking-[0.18em] text-ink/45">
+            {!labelWorkspace && <><label className="block mt-4 text-[10px] uppercase tracking-[0.18em] text-ink/45">
               Category
             </label>
             <div className="flex gap-1.5 mt-1.5">
@@ -127,6 +132,7 @@ export default function AddArtistButton({ onAdded }: { onAdded?: () => void }) {
               ))}
             </div>
 
+            </>}
             {err && (
               <div
                 className="mt-4 rounded-md p-3 text-[12px]"

@@ -1,3 +1,4 @@
+import { getLabelWorkspace } from '@/lib/labels';
 import Link from 'next/link';
 import {
   ARTISTS, mergeArtistLists, daysSince, deriveFromLive,
@@ -37,6 +38,7 @@ export default async function ControlPage({
     | Promise<Record<string, string | string[] | undefined>>;
 }) {
   const market = await getMarketFromRequest(searchParams);
+  const label = getLabelWorkspace(market.id);
   /* Every internal link on this page carries the market. The page resolved it
      and then discarded it, which is the most common way a workspace leaks. */
   const mq = market.id === 'uk' ? '' : `?market=${market.id}`;
@@ -51,7 +53,7 @@ export default async function ControlPage({
 
      So each row picks up the tag of the team that added it. Read-only,
      and keyed on channel id so a rename on their side cannot break it. */
-  const teamEntries = await listAllTeamEntries(TEAM_SLUGS);
+  const teamEntries = label ? [] : await listAllTeamEntries(TEAM_SLUGS);
   const teamTagByChannel = new Map(
     teamEntries.map(e => [e.channelId, TEAMS[e.team]?.regionTag ?? e.regionTag]),
   );
@@ -174,7 +176,7 @@ export default async function ControlPage({
     const videos: TopVideo[] = [];
 
     for (const a of allArtists) {
-      if (!isVirginOwned(a)) continue;
+      if (!label && !isVirginOwned(a)) continue;
       const snap = a.channelHandle ? (snapMap.get(a.channelHandle) ?? null) : null;
       if (!snap?.recentUploads) continue;
 
@@ -256,7 +258,7 @@ export default async function ControlPage({
       <AppHeader
         nav={nav}
         workspace={market.orgName}
-        actions={<AddArtistButton />}
+        actions={<AddArtistButton market={market.id} />}
         meta={
           syncMeta ? (
             <>
@@ -266,7 +268,7 @@ export default async function ControlPage({
                 })}
               </div>
               <div className="tabular-nums">
-                {syncMeta.artistsSuccess}/{syncMeta.artistsTotal} artists
+                {label ? `${rows.filter(r => r.subs != null).length}/${rows.length} tracked channels with data` : `${syncMeta.artistsSuccess}/${syncMeta.artistsTotal} artists`}
               </div>
             </>
           ) : (
@@ -281,8 +283,12 @@ export default async function ControlPage({
           lede="Which channels are growing, which are converting attention into audience, and which need feeding."
         />
 
+        {label && <p className="text-meta text-muted mb-6">
+          {rows.length} tracked artists from the current {label.name} roster. <a className="underline" href={label.rosterSource} target="_blank" rel="noreferrer">Roster reference</a> · checked {label.rosterCheckedAt}.
+          {label.roster.length > rows.length && ` Other roster artists are not yet added to monitoring.`}
+        </p>}
         {/* Client-side board with toggle */}
-        <ChannelHealthBoard linkSuffix={mq} behaviourBase={`/campaigns${mq}`} rows={rows} topVideos={topVideos} marketFormatStats={marketFormatStats} pinnedSlugs={pinnedSlugs} />
+        <ChannelHealthBoard singleTab={!!label} labelRoster={!!label} linkSuffix={mq} behaviourBase={`/campaigns${mq}`} rows={rows} topVideos={topVideos} marketFormatStats={marketFormatStats} pinnedSlugs={pinnedSlugs} />
 
         <div className="mt-14 pt-5 pb-10 border-t border-line flex items-center gap-2 text-micro text-faint">
           <span className="font-semibold text-muted">Channel Health</span>

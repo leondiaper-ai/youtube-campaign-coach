@@ -1,3 +1,4 @@
+import { getLabelWorkspace, isLabelArtist } from './labels';
 /**
  * Market-scoped accessors.
  *
@@ -52,6 +53,16 @@ export async function getAllArtists(): Promise<Artist[]> {
 export async function getArtistsForMarket(marketId: string): Promise<Artist[]> {
   const all = await getAllArtists();
   const m = resolveMarket(marketId);
+  const label = getLabelWorkspace(m.id);
+  if (label) {
+    const seen = new Set<string>();
+    return all.filter(a => {
+      if (!isLabelArtist(label, a)) return false;
+      const key = (a.channelHandle ?? a.slug).toLowerCase();
+      if (seen.has(key)) return false;
+      seen.add(key); return true;
+    });
+  }
 
   // Artists explicitly tagged into this market.
   const tagged = all.filter((a) => isInMarket(a, m.id));

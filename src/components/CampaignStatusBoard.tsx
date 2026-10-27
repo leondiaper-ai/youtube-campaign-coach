@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useSearchParams, useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
+import { getLabelWorkspace } from '@/lib/labels';
 import { fmtNum, type ChannelState } from '@/lib/artists';
 import type { CampaignNote } from '@/lib/campaignStore';
 import {
@@ -33,6 +34,7 @@ export default function CampaignStatusBoard({
   market?: string;
 }) {
   const mq = market === 'uk' ? '' : `?market=${market}`;
+  const labelWorkspace = getLabelWorkspace(market);
   const [cards, setCards] = useState<CardData[]>(initialCards);
   const [available, setAvailable] = useState<AvailableArtist[]>(availableArtists);
   const [showAdd, setShowAdd] = useState(false);
@@ -178,8 +180,11 @@ export default function CampaignStatusBoard({
               header so the behaviour view reads as the same product
               rather than a document that arrived from elsewhere. */}
           <Link href={`/growth${mq}`} className="no-underline shrink-0">
-            <span className="text-[13px] font-black tracking-[0.1em] text-ink">VMG</span>
-            <span className="text-[13px] font-black tracking-[0.1em] text-signal ml-1.5">YOUTUBE</span>
+            {labelWorkspace ? <span className="flex items-center gap-3">
+              <img src={labelWorkspace.logo} width={32} height={32} alt="" />
+              <span className="text-[13px] font-black">{labelWorkspace.name}</span>
+            </span> : <><span className="text-[13px] font-black tracking-[0.1em] text-ink">VMG</span>
+            <span className="text-[13px] font-black tracking-[0.1em] text-signal ml-1.5">YOUTUBE</span></>}
           </Link>
           <span className="w-px h-3.5 bg-line-strong shrink-0" aria-hidden />
           <Link href={`/campaigns${mq}`} className="text-[11px] font-bold uppercase tracking-label text-muted hover:text-ink no-underline">

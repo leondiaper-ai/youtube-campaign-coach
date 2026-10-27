@@ -1,3 +1,5 @@
+import { getLabelWorkspace, joinLabelRoster } from '@/lib/labels';
+import { getAllArtists } from '@/lib/marketScope';
 import { NextRequest, NextResponse } from 'next/server';
 import { fetchChannelSnapLite, resolveChannelIdWithSearch } from '@/lib/youtube';
 import { writeLiveSnap, writeChannelMapping, readLiveSnap } from '@/lib/kvCache';
@@ -62,7 +64,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Could not derive a slug from the channel.' }, { status: 400 });
   }
 
-  const artist: Artist = {
+  let artist: Artist = {
     slug,
     name: snap.title,
     channelHandle: snap.handle || channelId,
@@ -71,6 +73,13 @@ export async function POST(req: NextRequest) {
     artistType: ownership === 'virgin' ? 'managed' : 'observed',
     ownership: ownership ?? 'observed',
   };
+  const labelWorkspace = getLabelWorkspace(body?.market);
+  if (labelWorkspace) {
+    const all = await getAllArtists();
+    const handle = (artist.channelHandle ?? '').toLowerCase();
+    const existing = all.find(a => a.channelHandle?.toLowerCase() === handle);
+    artist = joinLabelRoster(labelWorkspace, artist, existing);
+  }
   const list = await addCustomArtist(artist);
   // Return channelId at the top level too — callers (e.g. the Team Board modal)
   // need it to register the channel for tracking.

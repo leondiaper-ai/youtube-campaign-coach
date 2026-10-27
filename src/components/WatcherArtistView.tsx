@@ -346,7 +346,7 @@ export default async function WatcherArtistView({
   /* Only read OUR pin store when the pin actually writes there. A team
      board supplies its own state, because ours would be the wrong star. */
   const campaignPinned = initiallyPinned
-    ?? (ownActions && !actionContext ? await isPinned(slug) : false);
+    ?? (ownActions && !actionContext ? await isPinned(slug, market) : false);
   const deepDive = ownActions ? deepDiveFor(artist.name) : null;
 
   return (

@@ -107,9 +107,9 @@ export default function ArtistActionBar({
           ? await fetch('/api/active-campaigns', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ slug }),
+              body: JSON.stringify({ slug, market }),
             })
-          : await fetch(`/api/active-campaigns?slug=${encodeURIComponent(slug)}`, {
+          : await fetch(`/api/active-campaigns?slug=${encodeURIComponent(slug)}&market=${encodeURIComponent(market)}`, {
               method: 'DELETE',
             });
       }

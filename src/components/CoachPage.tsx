@@ -1,5 +1,8 @@
 'use client';
 
+import { getLabelWorkspace } from '@/lib/labels';
+import { AppHeader } from '@/components/ui/AppHeader';
+
 import { useState, useCallback } from 'react';
 import Link from 'next/link';
 import {
@@ -655,6 +658,12 @@ function deriveMomentum(data: ChannelData): 'rising' | 'flat' | 'falling' {
  * exactly what it was.
  */
 function Nav({ market = 'uk' }: { market?: string }) {
+  const labelWorkspace = getLabelWorkspace(market);
+  if (labelWorkspace) return <AppHeader workspace={labelWorkspace.name} nav={[
+    { href: `/growth?market=${market}`, label: 'Channel Health' },
+    { href: `/campaigns?market=${market}`, label: 'Active Campaigns' },
+    { href: `/coach?market=${market}`, label: 'Coach' },
+  ]} />;
   const m = getMarket(market);
   const q = !m || m.id === 'uk' ? '' : `?market=${m.id}`;
   const team = m?.teamSlug ? getTeam(m.teamSlug) : null;

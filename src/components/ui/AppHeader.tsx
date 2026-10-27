@@ -23,6 +23,7 @@
    ═══════════════════════════════════════════════════════════════════════ */
 
 import Link from 'next/link';
+import { getLabelWorkspace } from '@/lib/labels';
 import { usePathname } from 'next/navigation';
 
 export interface NavItem {
@@ -43,12 +44,16 @@ export function AppHeader({
   actions?: React.ReactNode;
 }) {
   const pathname = usePathname();
+  const label = getLabelWorkspace(workspace);
   const ownedNav = workspace === 'Virgin Music UK' || workspace === 'VMG · Owned network';
   const resourcesIndex = nav.findIndex(item => item.href.split('?')[0] === '/resources');
   const ownedIndex = resourcesIndex < 0 ? nav.length : resourcesIndex;
-  const items = ownedNav && !nav.some(item => item.href.split('?')[0] === '/growth/owned')
+  const baseItems = ownedNav && !nav.some(item => item.href.split('?')[0] === '/growth/owned')
     ? [...nav.slice(0, ownedIndex), { href: '/growth/owned', label: 'Owned Channels', match: '/growth/owned' }, ...nav.slice(ownedIndex)]
     : nav;
+  const items = label ? baseItems.filter(item => ['/growth', '/campaigns', '/coach'].includes(item.href.split('?')[0]))
+    .map(item => item.href.split('?')[0] === '/growth' ? { ...item, href: `/labels/${label.slug}`, match: `/labels/${label.slug}` } : item)
+    : baseItems;
 
   return (
     <header className="border-b border-line bg-surface">
@@ -62,11 +67,15 @@ export function AppHeader({
                 a separate landing page that is not where anybody working
                 wants to end up — and every destination that matters is
                 already one click away in the nav directly below it. */}
-            <span className="shrink-0">
+            {label ? <span className="flex items-center gap-3 shrink-0">
+              <img src={label.logo} width={36} height={36} alt="" className="h-9 w-9 object-contain" />
+              <span className="text-[14px] font-black tracking-[0.03em]">{label.name}</span>
+              <span className="text-[10px] font-bold tracking-[0.12em] text-muted">YOUTUBE</span>
+            </span> : <span className="shrink-0">
               <span className="text-[13px] font-black tracking-[0.1em] text-ink">VMG</span>
               <span className="text-[13px] font-black tracking-[0.1em] text-signal ml-1.5">YOUTUBE</span>
-            </span>
-            {workspace && (
+            </span>}
+            {workspace && !label && (
               <>
                 <span className="w-px h-3.5 bg-line-strong shrink-0" aria-hidden />
                 <span className="text-[11px] font-bold uppercase tracking-label text-muted truncate">
@@ -87,7 +96,7 @@ export function AppHeader({
         <nav className="flex flex-wrap items-center gap-1 -mb-px">
           {items.map((item) => {
             const target = item.match ?? item.href.split('?')[0];
-            const isActive = pathname === target || (target === '/growth/owned' && pathname.startsWith('/growth/owned/'));
+            const isActive = pathname === target || (label && pathname === '/growth' && target === `/labels/${label.slug}`) || (target === '/growth/owned' && pathname.startsWith('/growth/owned/'));
             return (
               <Link
                 key={item.href}

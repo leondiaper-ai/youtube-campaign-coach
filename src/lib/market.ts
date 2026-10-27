@@ -42,6 +42,7 @@
  * it exists only to grandfather the UK.
  */
 
+import { getLabelWorkspace } from './labels';
 import type { Artist } from './artists';
 
 export interface MarketDef {
@@ -227,6 +228,12 @@ export const MARKET_PARAM = 'market';
 
 export function getMarket(id: string | null | undefined): MarketDef | null {
   if (!id) return null;
+  const label = getLabelWorkspace(String(id).toLowerCase());
+  if (label) return {
+    id: label.workspaceId, name: label.name, short: label.name, orgName: label.name,
+    territories: ['GB', 'IE'], timeZone: 'Europe/London', locale: 'en-GB',
+    currency: { code: 'GBP', symbol: '£' },
+  };
   return MARKETS[String(id).toLowerCase()] ?? null;
 }
 

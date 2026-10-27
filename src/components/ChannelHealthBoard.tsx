@@ -558,6 +558,7 @@ export default function ChannelHealthBoard({
   topVideos,
   marketFormatStats,
   singleTab = false,
+  labelRoster = false,
   removable = false,
   /* Which board's entries these rows belong to. Without it, a write from
      the Australia board lands on the Nordics board — the API defaults to
@@ -576,6 +577,8 @@ export default function ChannelHealthBoard({
   marketFormatStats?: MarketFormatStats;
   /** Hide the managed/market toggle and show only the managed view */
   singleTab?: boolean;
+  /** A label roster is one audience view, independent of revenue ownership. */
+  labelRoster?: boolean;
   /** Show ✕ remove button on each row (team watcher mode) */
   removable?: boolean;
   team?: string;
@@ -656,8 +659,8 @@ export default function ChannelHealthBoard({
     }
   }, [router, team]);
 
-  const managedRows = rows.filter((r) => r.isVirgin);
-  const marketRows = rows.filter((r) => !r.isVirgin);
+  const managedRows = labelRoster ? rows : rows.filter((r) => r.isVirgin);
+  const marketRows = labelRoster ? [] : rows.filter((r) => !r.isVirgin);
 
   // Compute benchmarks from all channels (used for Market Watch + managed context)
   const allBenchmarks = rows.length > 0 ? computeMarketBenchmarks(rows) : null;
