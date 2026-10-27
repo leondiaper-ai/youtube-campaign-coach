@@ -1,3 +1,4 @@
+import { getLabelWorkspace, labelRecordKey } from '@/lib/labels';
 import { Suspense } from 'react';
 import { ARTISTS, mergeArtistLists, fmtNum, daysSince, deriveFromLive, STATUS_COLOR, type Artist, type ChannelState } from '@/lib/artists';
 import { listCustomArtists } from '@/lib/artistStore';
@@ -175,9 +176,12 @@ function getISOWeekId(date: Date): string {
 async function loadCard(
   pin: PinnedCampaign,
   allArtists: Artist[],
+  workspace = 'uk',
 ): Promise<StatusCardData | null> {
   const artist = allArtists.find((a) => a.slug === pin.slug);
   if (!artist) return null;
+  const label = getLabelWorkspace(workspace);
+  const recordKey = labelRecordKey(label, artist.slug);
 
   const base: StatusCardData = {
     slug: artist.slug,
@@ -199,7 +203,7 @@ async function loadCard(
     subs: null,
     views: null,
     lastUploadDaysAgo: null,
-    notes: await listNotes(artist.slug),
+    notes: await listNotes(recordKey),
     impact: null,
     campaignWindow: null,
     campaignTrend: null,
@@ -218,7 +222,7 @@ async function loadCard(
   const history = snap.channelId ? await readHistory(snap.channelId) : [];
 
   // ── Normalized data layer — single source of truth for metrics ────────
-  const campaignStart = artist.campaignStartDate ?? pin.pinnedAt ?? null;
+  const campaignStart = (label ? pin.pinnedAt : artist.campaignStartDate ?? pin.pinnedAt) ?? null;
   const nc = normalizeChannelData(snap, history, campaignStart ? {
     campaignName: artist.campaign ?? 'Tracking',
     campaignStartDate: campaignStart,
@@ -247,7 +251,7 @@ async function loadCard(
   // ── Impact from baseline ──────────────────────────────────────────────
   let impact: ImpactData | null = null;
   try {
-    const baseline = await getBaseline(artist.slug);
+    const baseline = await getBaseline(recordKey);
     if (baseline && snap.subs != null) {
       const daysSinceTakeover = Math.max(
         1,
@@ -370,7 +374,7 @@ async function loadCard(
     const weeklyWindows = computeWeeklyWindows(history, campaignStart);
 
     // Load existing weekly snapshots
-    const existingSnapshots = await listWeeklySnapshots(artist.slug);
+    const existingSnapshots = await listWeeklySnapshots(recordKey);
     const existingById = new Map(existingSnapshots.map((s) => [s.id, s]));
 
     // Build weekly progress from windows + existing snapshots
@@ -440,7 +444,7 @@ async function loadCard(
         notes: '',
       };
       // Fire-and-forget — don't block render
-      saveWeeklySnapshot(artist.slug, weeklySnap).catch(() => {});
+      saveWeeklySnapshot(recordKey, weeklySnap).catch(() => {});
     }
   }
 
@@ -528,7 +532,7 @@ export default async function CampaignsPage({
   const allArtists = await getArtistsForMarket(market.id);
 
   const cards = (
-    await Promise.all(pinned.map((p) => loadCard(p, allArtists)))
+    await Promise.all(pinned.map((p) => loadCard(p, allArtists, market.id)))
   ).filter((c): c is StatusCardData => c !== null);
 
   cards.sort((a, b) => {

@@ -32,3 +32,11 @@ export function joinLabelRoster<T extends { markets?: string[] }>(label: LabelWo
   const record = existing ?? incoming;
   return { ...record, markets: Array.from(new Set([...(existing ? existing.markets ?? ['uk'] : []), label.workspaceId])) };
 }
+
+export function labelRecordKey(label: LabelWorkspace | null, slug: string) {
+  return label ? `${label.workspaceId}:${slug}` : slug;
+}
+export function labelPlanSlug(label: LabelWorkspace | null, slug: string) {
+  const suffix = label ? `--${label.workspaceId}` : '';
+  return suffix && !slug.endsWith(suffix) ? `${slug}${suffix}` : slug;
+}

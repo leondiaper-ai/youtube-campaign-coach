@@ -23,7 +23,7 @@ function load(file) {
   new Function('require','module','exports',code)(req,mod,mod.exports);
   cache.set(file,mod.exports); return mod.exports;
 }
-const { getLabelWorkspace, isLabelArtist, joinLabelRoster } = load('src/lib/labels.ts');
+const { getLabelWorkspace, isLabelArtist, joinLabelRoster, labelRecordKey, labelPlanSlug } = load('src/lib/labels.ts');
 const { resolveMarket, MARKET_IDS, marketKey } = load('src/lib/market.ts');
 const { AppHeader } = load('src/components/ui/AppHeader.tsx');
 const label = getLabelWorkspace('partisan');
@@ -57,3 +57,9 @@ const joined = joinLabelRoster(label, incoming, existing);
 assert.equal(joined.phase, 'SUSTAIN'); assert.equal(joined.ownership, 'virgin');
 assert.deepEqual(joined.markets, ['uk','label-partisan']);
 assert.deepEqual(joinLabelRoster(label, incoming).markets, ['label-partisan']);
+
+assert.equal(labelRecordKey(label,'idles'), 'label-partisan:idles');
+assert.equal(labelRecordKey(null,'idles'), 'idles');
+assert.equal(labelPlanSlug(label,'idles-album'), 'idles-album--label-partisan');
+assert.equal(labelPlanSlug(label,'idles-album--label-partisan'), 'idles-album--label-partisan');
+assert.equal(labelPlanSlug(null,'idles-album'), 'idles-album');

@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useSearchParams, useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
-import { getLabelWorkspace } from '@/lib/labels';
+import { getLabelWorkspace, labelRecordKey } from '@/lib/labels';
 import { fmtNum, type ChannelState } from '@/lib/artists';
 import type { CampaignNote } from '@/lib/campaignStore';
 import {
@@ -14,7 +14,7 @@ import CampaignBehaviour from './CampaignBehaviour';
 import {
   DecisionCard, DecisionSectionHeader, DormantBlock,
   SectionIssueNote, classifyCard, whatHappening, getGrowthRead,
-  type CardData, type AvailableArtist,
+  type CardData, type AvailableArtist, type CardApi,
 } from './CampaignDecisionCard';
 
 const INK = '#0E0E0E';
@@ -35,6 +35,16 @@ export default function CampaignStatusBoard({
 }) {
   const mq = market === 'uk' ? '' : `?market=${market}`;
   const labelWorkspace = getLabelWorkspace(market);
+  const labelApi: CardApi | undefined = labelWorkspace ? {
+    addNote: async (slug, text) => {
+      const res = await fetch('/api/campaign-notes', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ slug: labelRecordKey(labelWorkspace, slug), text }) });
+      return res.ok ? (await res.json()).notes ?? null : null;
+    },
+    deleteNote: async (slug, noteId) => {
+      const res = await fetch(`/api/campaign-notes?slug=${encodeURIComponent(labelRecordKey(labelWorkspace, slug))}&noteId=${encodeURIComponent(noteId)}`, { method: 'DELETE' });
+      return res.ok ? (await res.json()).notes ?? null : null;
+    },
+  } : undefined;
   const [cards, setCards] = useState<CardData[]>(initialCards);
   const [available, setAvailable] = useState<AvailableArtist[]>(availableArtists);
   const [showAdd, setShowAdd] = useState(false);
@@ -74,7 +84,7 @@ export default function CampaignStatusBoard({
       await fetch('/api/active-campaigns', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ slug }),
+        body: JSON.stringify({ slug, market }),
       });
       window.location.reload();
     } finally {
@@ -83,7 +93,7 @@ export default function CampaignStatusBoard({
   }
 
   async function handleUnpin(slug: string) {
-    await fetch(`/api/active-campaigns?slug=${slug}`, { method: 'DELETE' });
+    await fetch(`/api/active-campaigns?slug=${encodeURIComponent(slug)}&market=${encodeURIComponent(market)}`, { method: 'DELETE' });
     const removed = cards.find((c) => c.slug === slug);
     setCards((prev) => prev.filter((c) => c.slug !== slug));
     if (removed) setAvailable((prev) => [...prev, { slug: removed.slug, name: removed.name }]);
@@ -372,6 +382,7 @@ export default function CampaignStatusBoard({
                   <DecisionCard
                     key={card.slug}
                     card={card}
+                    api={labelApi}
                     onUnpin={handleUnpin}
                     onNotesChange={handleNotesChange}
                     onViewBehaviour={openBehaviour}
@@ -391,6 +402,7 @@ export default function CampaignStatusBoard({
                   <DecisionCard
                     key={card.slug}
                     card={card}
+                    api={labelApi}
                     onUnpin={handleUnpin}
                     onNotesChange={handleNotesChange}
                     onViewBehaviour={openBehaviour}
@@ -410,6 +422,7 @@ export default function CampaignStatusBoard({
                   <DecisionCard
                     key={card.slug}
                     card={card}
+                    api={labelApi}
                     onUnpin={handleUnpin}
                     onNotesChange={handleNotesChange}
                     onViewBehaviour={openBehaviour}
@@ -428,6 +441,7 @@ export default function CampaignStatusBoard({
                   <DecisionCard
                     key={card.slug}
                     card={card}
+                    api={labelApi}
                     onUnpin={handleUnpin}
                     onNotesChange={handleNotesChange}
                     onViewBehaviour={openBehaviour}

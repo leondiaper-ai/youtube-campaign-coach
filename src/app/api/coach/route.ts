@@ -1,3 +1,4 @@
+import { getLabelWorkspace, labelPlanSlug } from '@/lib/labels';
 import { NextRequest, NextResponse } from 'next/server';
 import { savePlan, listPlans, generateSlug, updateSavedPlan, loadPlan } from '@/lib/planStore';
 import { generatePlan, type ChannelContext, type GeneratedPlan } from '@/lib/planEngine';
@@ -65,7 +66,8 @@ export async function POST(req: NextRequest) {
       campaignName?: string | null;
       market?: string | null;
     };
-    const marketId = resolveMarket(market).id;
+    const existingPlan = customSlug ? await loadPlan(customSlug) : null;
+    const marketId = resolveMarket(market ?? existingPlan?.market).id;
 
     if (!artist || !timeline) {
       return NextResponse.json(
@@ -82,7 +84,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const slug = customSlug || generateSlug(artist, plan.campaignName);
+    const slug = labelPlanSlug(getLabelWorkspace(marketId), customSlug || generateSlug(artist, plan.campaignName));
     const isNew = !(await loadPlan(slug));
     const saved = await savePlan(slug, artist, plan, channelCtx ?? null, timeline, marketId);
 
