@@ -1,3 +1,4 @@
+import { redirect } from 'next/navigation';
 import { getLabelWorkspace, labelRecordKey } from '@/lib/labels';
 import { Suspense } from 'react';
 import { ARTISTS, mergeArtistLists, fmtNum, daysSince, deriveFromLive, STATUS_COLOR, type Artist, type ChannelState } from '@/lib/artists';
@@ -528,6 +529,14 @@ export default async function CampaignsPage({
      link that carries the market but lands on UK data is worse than no link
      at all — it looks like the market switch silently failed. */
   const market = await getMarketFromRequest(searchParams);
+  const labelWorkspace = getLabelWorkspace(market.id);
+  const requested = (await searchParams)?.behaviour;
+  if (labelWorkspace && typeof requested === 'string') {
+    const roster = await getArtistsForMarket(market.id);
+    if (roster.some(a => a.slug === requested)) {
+      redirect('/labels/' + labelWorkspace.slug + '/behaviour/' + encodeURIComponent(requested));
+    }
+  }
   const pinned = await listPinned(market.id);
   const allArtists = await getArtistsForMarket(market.id);
 
