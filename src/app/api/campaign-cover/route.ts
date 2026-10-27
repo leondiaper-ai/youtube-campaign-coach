@@ -156,7 +156,7 @@ function cleanAssetTitle(title: string, artistName: string): string {
      Only safe because this function is not used for display — asset cards
      render the raw title, so the live version is still labelled as one
      everywhere a reader sees it. */
-  return out.replace(/\s*[\[(](official|lyric|visuali[sz]er|live|audio)[^\])]*[\])]\s*$/i, '').trim() || t;
+  return out.replace(/(?:\s*[\[(](?:official|lyric|visuali[sz]er|live|audio)[^\])]*[\])])+\s*$/i, '').trim() || t;
 }
 
 /**

@@ -107,7 +107,7 @@ function listPhrase(items: string[]): string {
 }
 
 function splitTitle(raw: string): { title: string; detail: string | null } {
-  const m = /^(.+?)\s*[-–—]\s*(.+)$/.exec(raw.trim());
+  const m = /^(.+?)\s+[-–—]\s+(.+)$/.exec(raw.trim());
   if (!m) return { title: raw.trim(), detail: null };
   const detail = m[2]
     .replace(/\bpre-order\/add\b/i, 'pre-order')
@@ -232,6 +232,19 @@ export async function buildCampaignTimeline(
   const events = await listMergedEvents(slug, now).catch(() => [] as CampaignEvent[]);
   const upcoming = events
     .filter(e => e.eventDate && e.eventDate >= new Date(now).toISOString().slice(0,10))
+    .map(e => {
+      // A published video establishes that this song is already on YouTube,
+      // even when the plan's intended single date has not yet arrived. Keep
+      // any separately stated announcement; don't call the song forthcoming.
+      if (e.eventType !== 'SINGLE_RELEASE') return e;
+      const planned = splitTitle(e.title);
+      const name = planned.title.toLowerCase();
+      if (name.length < 4 || !assets.some(a => a.title.toLowerCase().includes(name))) return e;
+      const remaining = planned.detail?.replace(/^single release\s*\+\s*/i, '').trim();
+      if (!remaining || remaining === planned.detail) return null;
+      return { ...e, eventType: 'ANNOUNCEMENT' as CampaignEvent['eventType'], title: remaining };
+    })
+    .filter((e): e is CampaignEvent => e !== null)
     .filter(e => {
       if (e.eventDate !== new Date(now).toISOString().slice(0,10)) return true;
       const name = splitTitle(e.title).title.toLowerCase();
@@ -260,8 +273,7 @@ export async function buildCampaignTimeline(
      can already see at the end of the line. */
   const album0 = upcoming.find(e => e.eventType === 'ALBUM_RELEASE');
   const beforeAlbum = upcoming.filter(e => e.eventId !== album0?.eventId);
-  const next = beforeAlbum.find(e => isMajor(e.eventType) || isLongForm(e.eventType))
-    ?? beforeAlbum[0]
+  const next = beforeAlbum[0]
     ?? upcoming.find(e => isMajor(e.eventType))
     ?? upcoming[0];
   const nextSplit = splitTitle(next.title);

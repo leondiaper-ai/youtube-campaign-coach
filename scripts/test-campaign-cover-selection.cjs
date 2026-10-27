@@ -44,5 +44,9 @@ vm.runInNewContext(ts.transpileModule(timelineSource,{compilerOptions:{module:ts
   const open={...closed,state:'OPEN',from:'2026-10-27',to:'2026-11-03',fromLabel:'27 OCT',toLabel:'3 NOV'};
   const withWindow=await buildCampaignTimeline('artist',assets,rollout,now,open);
   assert.equal(withWindow.moments.some(m=>m.kind==='WINDOW'),true);
+  events[1].title='Overthinker - Single release + announce album and pre-order';
+  assets.push({...assets[0],videoId:'2',title:'Artist - Overthinker (Lyric Video)'});
+  const published=await buildCampaignTimeline('artist',assets,rollout,now,closed);
+  assert.equal(published.moments.find(m=>m.kind==='NEXT').title,'announce album and pre-order');
   console.log('Campaign timeline tests passed');
 })().catch(e=>{console.error(e);process.exitCode=1});
