@@ -1139,7 +1139,7 @@ export default function ChannelHealthBoard({
               {/* ── Expanded: Actions + Strategy Profile + Fix This Week ───────── */}
               {isExpanded && (
                 <div
-                  className={`py-3.5 ${i === paged.length - 1 ? '' : 'border-b'}`}
+                  className={`px-4 sm:px-5 py-4 ${i === paged.length - 1 ? '' : 'border-b'}`}
                   style={{ borderColor: MUTED, background: SOFT }}
                 >
                   {/* Action buttons row */}
