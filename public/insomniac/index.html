@@ -187,11 +187,11 @@ h3.display{font-size:clamp(1.25rem,2.2vw,1.9rem);font-weight:800}
 /* ── Slide 5 · the set wall ─────────────────────────────────────────*/
 .wall{display:grid;grid-template-columns:repeat(4,1fr);gap:5px}
 @media(max-width:560px){.wall{grid-template-columns:repeat(2,1fr)}}
-.facts{display:grid;grid-template-columns:repeat(2,1fr);gap:1.2rem 1.6rem}
-.facts .big-num{font-size:clamp(2rem,3.6vw,3.2rem)}
+.facts{display:grid;grid-template-columns:repeat(2,1fr);gap:.9rem 1.6rem}
+.facts .big-num{font-size:clamp(1.8rem,3vw,2.6rem)}
 .facts .label{margin-top:.35rem;color:var(--warm)}
-.vs{display:grid;grid-template-columns:1fr 1fr;gap:.8rem;margin-top:1.3rem}
-.vs div{background:var(--ink-3);border-radius:3px;padding:.75rem .85rem}
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:.8rem;margin-top:1rem}
+.vs div{background:var(--ink-3);border-radius:3px;padding:.6rem .8rem}
 .vs .big-num{font-size:clamp(1.6rem,2.6vw,2.2rem)}
 .vs p{font-size:.74rem;color:var(--warm);line-height:1.4;margin-top:.3rem}
 
@@ -202,7 +202,7 @@ h3.display{font-size:clamp(1.25rem,2.2vw,1.9rem);font-weight:800}
 .host h3{margin:.35rem 0 .5rem}
 .host p{font-size:.84rem;color:var(--warm);line-height:1.45}
 .host p b{color:var(--cream);font-weight:600}
-.host .mini{display:grid;grid-template-columns:repeat(2,1fr);gap:4px;margin-top:.7rem}
+.host .mini{display:grid;grid-template-columns:repeat(2,1fr);gap:4px;margin-top:.6rem}
 .who{font-family:'DM Mono',monospace;font-size:.6rem;letter-spacing:.06em;color:var(--warm);margin-top:.25rem;line-height:1.3}
 .who b{color:var(--cream);font-weight:500}
 
@@ -214,7 +214,8 @@ h3.display{font-size:clamp(1.25rem,2.2vw,1.9rem);font-weight:800}
 .stg .bar{height:14px;background:rgba(244,240,232,.07);border-radius:2px;overflow:hidden}
 .stg .bar i{display:block;height:100%;width:var(--w);background:var(--c)}
 .stg .v{font-family:'Big Shoulders Display',sans-serif;font-weight:800;font-size:1.2rem;text-align:right}
-.over{display:flex;flex-direction:column;gap:.3rem}
+.over{display:grid;grid-template-columns:1fr 1fr;gap:.3rem}
+@media(max-width:560px){.over{grid-template-columns:1fr}}
 .ov{display:grid;grid-template-columns:1.6rem 1fr auto;gap:.6rem;align-items:center;padding:.22rem .5rem;border-radius:2px;background:rgba(244,240,232,.04)}
 .ov .d{width:10px;height:10px;border-radius:50%;background:var(--c)}
 .ov .a{font-size:.86rem;color:var(--cream)}
@@ -499,7 +500,7 @@ body.sheet-open .chrome,body.sheet-open #pbar{display:none}
         </div>
       </div>
     </div>
-    <p class="statement reveal" style="margin-top:1.6rem;max-width:58ch;font-size:clamp(1rem,1.5vw,1.3rem)">Who hosts a set is a business decision, not a YouTube one. The point is that <span style="color:var(--amber)">Insomniac now has a model that credits both sides</span> — and a decision to make, set by set, about where each one lives.</p>
+    <p class="statement reveal" style="margin-top:1.1rem;max-width:64ch;font-size:clamp(.95rem,1.35vw,1.2rem)">Who hosts a set is a business decision, not a YouTube one. The point is that <span style="color:var(--amber)">Insomniac now has a model that credits both sides</span> — and a decision to make, set by set, about where each one lives.</p>
   </div>
 </section>
 
