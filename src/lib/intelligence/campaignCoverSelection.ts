@@ -11,7 +11,7 @@ export function isCoverLongForm(a: CoverSelectionAsset): boolean {
     && !['short','trailer','teaser','announcement','clip','unknown'].includes(a.kind)
     && !/#shorts?\b/i.test(a.title) && !PROMO.test(a.title);
 }
-/** Latest published destinations first. With only short-form material, keep
+/** Latest published destination first. With only short-form material, keep
  * the earliest observed asset stable; subsequent Shorts do not rotate it. */
 export function selectCoverHeroes<T extends CoverSelectionAsset>(assets:T[], now=Date.now()): T[] {
   const seen=new Set<string>();
@@ -22,6 +22,6 @@ export function selectCoverHeroes<T extends CoverSelectionAsset>(assets:T[], now
   });
   const long=published.filter(isCoverLongForm).sort((a,b)=>
     b.publishedAt.localeCompare(a.publishedAt) || a.videoId.localeCompare(b.videoId));
-  if(long.length)return long.slice(0,2);
+  if(long.length)return long.slice(0,1);
   return published.sort((a,b)=>a.publishedAt.localeCompare(b.publishedAt) || a.videoId.localeCompare(b.videoId)).slice(0,1);
 }
