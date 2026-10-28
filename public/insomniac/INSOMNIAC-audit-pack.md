@@ -968,6 +968,32 @@ the artist's channel. "Collab ✓" means the YouTube Collaboration credit.
 - **No slide claims** that missing Shorts, chapters or playlist slots cost views, or that adding
   them will add views.
 
+### 10.8b Clarity pass (v5, 28 Oct 2026)
+
+No new analysis and no new figures. Every slide headline now states a conclusion. The slide
+order changed so the deck runs what works → gaps → what to do next.
+
+| # | Slide (v5) | Was |
+|---|---|---|
+| 1 | Cover | 1 |
+| 2 | 195 million views, built in three very different eras | 2 |
+| 3 | Trailers built the channel. Today, full sets do the heavy lifting | 3 |
+| 4 | Full sets now drive most of the viewing on recent uploads | 4 |
+| 5 | EDC 2026 turned the channel into the festival's replay | 5 |
+| 6 | Insomniac's reach extends well beyond its own channel | 6 |
+| 7 | Big names lead — but some sets drew four to five times their stage's norm | 7 |
+| 8 | Shorts keep Insomniac in the feed every week — and a few break out | 8 |
+| 9 | Five things Insomniac already does well | 11 |
+| 10 | Publishing was highly consistent — then slowed sharply this autumn | 9 |
+| 11 | The sets are working. The connections around them can do more | 10 |
+| 12 | The live tools are in place. Next: programme them year-round | 12 |
+| 13 | Fix the quick wins. Keep what works. Test the rest | 13 |
+| 14 | The opportunity | 14 |
+
+Slide numbers in §5 and §10.8–10.8a refer to the v2/v4 order. The 2026 event-by-event
+calendar left the deck: the "twelve other events, trailer or aftermovie only" line moved to
+slide 5, and the full table stays in the Analysis sheet and §4.8.
+
 ### 10.9 Studio-only checks raised by this pass
 
 - Do the Shorts carry a related-video link, and to what?
