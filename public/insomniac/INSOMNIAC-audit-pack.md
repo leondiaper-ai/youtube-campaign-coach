@@ -11,6 +11,59 @@ well-run channel for a business review. If a finding reads as a manufactured pro
 
 Method and evidence standards follow the Defected audit pack (`/defected/AUDIT.md`).
 
+**Version 2 (refinement pass, 28 October 2026).** The deck was restructured for a business
+review (14 slides), a native-tools slide was added, and every disputed figure was re-derived
+from the stored rows. What changed, and why, is in §0. Nothing in v1's evidence was deleted;
+superseded figures are marked.
+
+---
+
+## 0. Changes in version 2
+
+### 0.1 Data corrections
+
+| Item | v1 | v2 | Why |
+|---|---|---|---|
+| kineticFIELD sets / median | 16 / 282,627 | **15 / 291,036** | The six stage counts in v1 summed to 79 *plus* one unnamed set = 80. Re-reading each description: kineticFIELD has 15 sets (listed in §4.5). The v1 "16" was a counting error. 10 ≥ 100K unchanged; no other stage changes; the over-performer ratios (§4.6) involve no kineticFIELD set and are unaffected |
+| Publication lag | 48 / 17 / 9 / 6, "over 80" | **50 / 14 / 9 / 6, over 79** | v1's 80-set base could not be reproduced: all EDC-titled long-form uploads of 2026 are the 79 sets plus the lineup reveal, two Afters streams and one Inside The Drop episode. v2 counts the 79 by Pacific calendar date after 17 May (day 0 = 17 May; ≤ 7 days = published by 24 May). Counting in UTC hours instead gives 43 / 21 / 9 / 6; the deck uses calendar days |
+| 4,169 vs 4,171 | "two uploads landed between the statistic and the pull" | **Unexplained two-video gap in YouTube's public counter** | The counter and the uploads list were read in the same request; the newest upload is 27 Oct 17:47 UTC; no duplicate IDs. The v1 explanation was wrong. YouTube's `videoCount` is known to lag and may exclude live-now items (two live stations sit in the uploads list), but which two is unknown. The deck now leads with **4,171 uploads read** |
+| Live / Premiere items | "195 carry `wasLive`; 189 scheduled" | **73; 72 scheduled** | Recounted from the stored rows by year: 2019 1 · 2020 2 · 2021 7 · 2022 13 · 2023 16 · 2024 22 · 2025 4 · 2026 8. The v1 figure could not be reproduced |
+| Zombie Apocalypse views | Skull Machine 22,143 · YDG 21,851 · Avello 24,148 · Sullivan King 91,876 | 22,142 · 21,849 · 24,145 · 91,880 in the stored API rows | v1's figures came from the watch pages read minutes apart; differences of 1–4 views. Deck rounds both to the same K |
+
+### 0.2 Reframed claims
+
+- **Trailers (slide 3).** v1: "Trailer audiences have most likely moved to other platforms."
+  v2: a change in the trailer's role on the channel, not a verdict on the marketing; public
+  data can't show where trailer audiences watch now. Age-aware wording kept.
+- **Genre (slide 7).** v1 headline: "Techno, house and trance sets travel further than their
+  billing." v2: "The headliners lead — but some sets beat their stage by four or five times";
+  genre is "a pattern worth investigating, not a reason to favour a genre".
+- **Shorts (slides 4, 8).** v1 headline: "Shorts kept the channel busy. Few of them
+  travelled." v2: "Shorts keep the festival in the feed, every week of the year", with the
+  reach role stated and Studio named as the judge.
+- **Autumn (slide 9).** v1 posed "planned rest, or a resourcing change?" v2 adds the
+  like-for-like comparison (§4.11): the drop is the end of a year-long high-volume Shorts run;
+  output is back near 2023–24 levels; upload counts are not demand.
+- **Other events (slides 9, 13).** v1: "One festival got the full treatment. The rest of the
+  calendar got a trailer." v2: "EDC gets the full cycle. The rest of the calendar is the
+  opportunity", with "whether they were filmed, and on what terms, isn't visible from
+  outside" and the experiment limited to "two or three more events, where filming and rights
+  allow".
+- **Artist-channel model (slide 6).** Promoted to its own slide. Playlist views are stated as
+  separate from, and never added to, the channel's 195.2M; the playlist is described as a
+  curated selection, so no host-vs-host comparison is made.
+
+### 0.3 Slide order, v1 → v2
+
+1 Cover · 2 At a glance · 3 How the channel has evolved (was "Where the audience is") ·
+4 What is driving viewing today (was "The content engine") · 5 EDC 2026 · 6 The distributed
+artist-channel model (was "Who hosts the sets") · 7 Which performances are connecting (was
+"Artists and genres") · 8 Shorts · 9 Festival content across the calendar · 10 Channel
+organisation · 11 What Insomniac already does well · **12 Beyond the festival: YouTube's
+native tools (new)** · 13 Double down / optimise / experiment (rewritten) · 14 The opportunity
+(rewritten). The four "questions for the team" moved from the slide to the Analysis sheet and
+§9.
+
 ---
 
 ## 1. Provenance
@@ -21,8 +74,8 @@ Method and evidence standards follow the Defected audit pack (`/defected/AUDIT.m
 | Source | YouTube Data API v3, one pull, 28 October 2026, 11:12–11:23 UTC, through the project's own routes: `/api/full-catalogue?handle=@insomniac&cap=5000` (uploads), `/api/channel-shelf?channelId=…` (playlists, Home sections), `/api/channel?q=@Insomniac` (cached channel record) |
 | Lifetime view counter | **195,160,777** |
 | Subscribers | **722,000** (YouTube's rounded public figure) |
-| Public videos | **4,169** (channel statistic) |
-| Uploads retrieved | **4,171** — the uploads playlist to exhaustion, not capped (two uploads landed between the statistic and the pull). 17 June 2006 → 27 October 2026. **This is the whole channel, not a sample.** |
+| Public videos | **4,169** (YouTube's public counter) |
+| Uploads retrieved | **4,171** — the uploads playlist to exhaustion, not capped. 17 June 2006 → 27 October 2026 (newest 27 Oct 17:47 UTC). No duplicate IDs. The two-video gap sits in YouTube's counter, not the pull (§0.1). **This is the whole channel, not a sample; every figure uses the 4,171.** |
 | Sum of views over the 4,171 | **194,196,683** — 99.51% of the lifetime counter. The 0.96M gap is deleted or private videos |
 | Fields used | `title`, `publishedAt`, `durationSec`, `views`, `likes`, `comments`, `wasLive`, `scheduledStart`, `actualStart`, first 300 characters of `description` |
 | Shorts | Verified individually (§2.1), not from the API's duration flag |
@@ -40,10 +93,10 @@ Method and evidence standards follow the Defected audit pack (`/defected/AUDIT.m
   which way the age difference cuts (§5).
 - The catalogue is complete, so shares of "all views" use the 194.2M observed sum and are
   within 0.5% of what they would be against the counter.
-- 195 uploads carry `wasLive`; 189 of those have a `scheduledStart` (Premieres or
-  scheduled streams). Four live items report **0 views** because the count is hidden
-  (the Insomniac TV station, two "EDC Afters Live" streams, a 2023 station); they are
-  classed separately and contribute nothing.
+- 73 uploads carry live-broadcast details (Premieres or streams); 72 of those have a
+  `scheduledStart` (§0.1 — v1 said 195/189). Four live items report **0 views** because the
+  count is hidden (the Insomniac TV station, two "EDC Afters Live" streams, a 2023
+  station); they are classed separately and contribute nothing.
 
 ---
 
@@ -108,10 +161,18 @@ bassPOD…"), which names the stage on 78 of 79 sets.
 
 ---
 
-## 3. Questions the brief asked, and where they are answered
+## 3. Questions the brief asked, and where they are answered (v2)
 
 | Brief | Slide(s) | Short answer |
 |---|---|---|
+| A. What is driving the channel? | 2, 3, 4 | Lifetime: trailers (38.7%), lockdown livestreams (24.3%), releases (17.9%). Uploads since Oct 2025: full sets (61.8% of views from 9% of uploads) |
+| B. Which content deserves more investment? | 4, 5, 13 | Full sets, on the EDC 2026 model; Shorts do a different (reach) job that public data can't value |
+| C. Are festival audiences becoming year-round audiences? | 9, 11, 12, 13 | EDC runs the full cycle (reveal stream → live → sets → Insomniac TV); other events appear as trailers/aftermovies. Insomniac TV is the always-on thread. Viewing momentum can't be measured (no snapshots) |
+| D. What is working at artist level? | 6, 7 | The artist-channel model (46.9M in the curated playlist; Collaborations both ways); within EDC 2026, sets beating their stage 3–5× — a pattern to investigate, not a genre rule |
+| E. How effectively is the channel organised? | 10 | Well: set-led Home, 108 playlists. Gaps: 18 sets outside the 2026 playlist, 2/63 with timestamps, no stage/sound/artist browsing |
+| F. What should Insomniac try next? | 12, 13, 14 | Double down (sets, Collaborations, the EDC cycle, Afterparties) · Optimise (finish and connect the library) · Experiment (2–3 more events, an Insomniac TV block, Shorts-to-set, Premiere + Afterparty) |
+
+---|---|---|
 | A. What is driving the channel? | 2, 3, 4 | Lifetime: trailers (38.7%), lockdown livestreams (24.3%), releases (17.9%). Since Oct 2025: full sets (61.8% of new views from 9% of uploads) |
 | B. Which content deserves more investment? | 4, 5, 12 | Full sets. Shorts are 82% of uploads and 24% of views |
 | C. Are festival audiences becoming year-round audiences? | 9, 10, 12 | Only around EDC LV. 12 other 2026 events got a trailer or aftermovie only; output fell to 19 uploads in Sep–Oct. Insomniac TV is the always-on thread. Momentum can't be measured (no snapshots) |
@@ -224,7 +285,7 @@ Rule: full set, published 2026, title contains "EDC Las Vegas 2026" or "EDC 2026
 the lineup-reveal stream and the two "EDC Afters" live streams. n = 79, total 10,072,480,
 median 69,407, p25 22,671, p75 164,314, 73 ≥ 10K, 28 ≥ 100K, 4 ≥ 500K.
 
-By stage (from the description): kineticFIELD 16, median 282,627, 10 ≥ 100K · circuitGROUNDS
+By stage (from the description): kineticFIELD **15, median 291,036** (v1: 16 / 282,627 — §0.1), 10 ≥ 100K · circuitGROUNDS
 5, 124,794, 4 · cosmicMEADOW 13, 100,661, 7 · quantumVALLEY 18, 75,236, 6 · bassPOD 18,
 37,239, 1 · bionicJUNGLE 9, 13,495, 0 · no stage named 1 (Sarah De Warren, 23,710).
 
@@ -252,8 +313,12 @@ Club Angel BJ 14,028 · KinAhau BJ 13,495 · BAUGRUPPE90 BJ 13,100 · Alves BJ 1
 Carry Nation BJ 9,112 · Stacy Christine BJ 8,744 · Nightstalker with MC Dino BP 8,070 ·
 Fallen with MC Dino BP 7,978 · Matty Ralph QV 4,698 · Trace KF 3,230.
 
-Publication lag after the festival's last day (17 May), counted over 80 (one more set
-titled "EDC 2026"): ≤ 7 days 48 · 8–14 days 17 · 15–30 days 9 · > 30 days 6.
+Publication lag after the festival's last day (17 May), by Pacific calendar date, over the
+79: ≤ 7 days **50** · 8–14 days 14 · 15–30 days 9 · > 30 days 6. By date: 17 May 1 · 19 May 6 ·
+20 May 12 · 21 May 8 · 22 May 13 · 23 May 7 · 24 May 3 · 25 May 6 · 26 May 4 · 27 May 2 ·
+28 May 2 · 1–4 Jun 9 · 17 Jun 3 · 2 Jul 1 · 21 Jul 1 · 9 Sep 1. (v1's 48/17/9/6 over 80 is
+withdrawn — §0.1.) Two of the 79 were Premieres (Alison Wonderland, 26 May; Mary Droppinz,
+3 Jun).
 
 **Comparison sets.** EDC LV 2025 on Insomniac's channel: 8 sets, median 20,792, total
 317,105 (ALOK 157,909 · Alignment 60,451 · Armand Van Helden 45,056 · Carlita 36,377 ·
@@ -327,8 +392,88 @@ out; the deck words this as "we found no official upload".
 | Dreamstate SoCal | trailer (6,678) |
 | Escape Psycho Circus | trailer (9,466) |
 
-Twelve events after EDC LV and Zombie Apocalypse; none with sets. Uploads per month 2026:
+Twelve events after EDC LV and Zombie Apocalypse; none with sets on Insomniac's channel.
+Whether they were filmed, and who holds the rights, is not visible publicly. Uploads per month 2026:
 Jan 87 · Feb 81 · Mar 87 · Apr 60 · May 147 · Jun 71 · Jul 66 · Aug 43 · Sep 12 · Oct 7.
+
+### 4.11 The autumn, like for like
+
+Uploads 1 September – 27 October:
+
+| Year | All | Shorts | Everything else |
+|---|---|---|---|
+| 2023 | 27 | 2 | 25 |
+| 2024 | 48 | 24 | 24 |
+| 2025 | 135 | 115 | 20 |
+| 2026 | **19** | 11 | 8 |
+
+Monthly uploads (Shorts in brackets): 2025 Jan 28 (12) · Feb 38 (16) · Mar 33 (22) · Apr 41 (30)
+· May 28 (18) · Jun 45 (23) · Jul 35 (22) · Aug 37 (20) · **Sep 53 (42) · Oct 94 (83) · Nov 95 (82) ·
+Dec 90 (85)**; 2026 Jan 87 (84) · Feb 81 (76) · Mar 87 (84) · Apr 60 (52) · May 147 (72) · Jun 71
+(50) · Jul 66 (53) · Aug 43 (42) · **Sep 12 (9) · Oct 7 (2)**. A high-volume Shorts run began in
+September 2025 and ended in August 2026; output is now near 2023–24 levels. Long-form in the
+autumn window is lower than any of the three prior years (8 vs 20–25). Upload counts describe
+publishing, not audience demand; no claim is made about what the drop means.
+
+### 4.12 YouTube's native tools — observed
+
+Read from the live pages, 28 October 2026 (watch-page player and initial data).
+
+**Insomniac TV** (`VJrd9doSRwA`). `isLiveNow: true` since 2026-05-20 01:21 UTC (created
+12 May); live chat rendered; viewer count hidden. Description: "Thanks for checking out our
+Station! Enjoy live sets from festivals like EDC Las Vegas, Zombie Apocalypse, and more!" No
+chapters or published schedule. First shelf on Home. An earlier station, "🔴InsomniacTV •
+Livestreams + Live Sets • Music 24/7" (`aKeSNC8Fmv8`, 2023), is offline ("This live event will
+begin in a few moments"). Playlist "Insomniac TV" (`PLtZ1Nsu2D5r2g4kFFU2ugcDTIGOAbOJ9f`): 842
+videos, 741 views, last updated 12 Oct 2025; the first items are 2021–22 Dreamstate Artist
+Series streams. What the current station plays, and how often it rotates, is **not public**.
+
+**Afterparties.** Live tab, top two items: "EDC Afters Live With Kaskade | Day One"
+(`kc9_A3goOAQ`, 17 May 00:50–01:54 UTC, 1:04:30) and "EDC Afters Live With Armin van Buuren |
+Day Two" (`V2aW4hTOqws`, 18 May 00:50–01:49 UTC, 59:25). Description of each: "Join the
+Afterparty!"; view counts hidden. The Premium tier itself isn't visible in the public page
+data; the identification as YouTube Premium afterparties rests on the Live-tab screenshot
+supplied with the brief and on YouTube Help, which defines afterparties as "Premium-exclusive
+live streams with artists", available wherever Premium is (support.google.com/youtube/answer/10184580).
+Hosting requirements are not published; the deck says to confirm per event with the partner team.
+
+**Live streams.** Live tab also holds the EDC LV lineup-reveal streams: 2024 (`7cKrdpErlwc`)
+240K · 2025 (`Rfect811u2c`) 170K · 2026 (`TzpqoarmmH4`) 226,601. The 15–17 May 2026 festival
+streams ran on Insomniac's channel (YouTube blog, 14 May 2026: six feeds a day, multiview) but
+are not among the public uploads today.
+
+**Premieres.** Since October 2025: EDC LV 2026 trailer (premiered 17 Feb), Odd Mob, Walker &
+Royce, Benni Ola – Can't Say Nah (`Gqtwmsrk0qw`, premiered 30 Jul, 666,861 — the largest 2026
+upload outside the sets), Alison Wonderland and Mary Droppinz EDC sets. 2 of 79 EDC sets; none
+of the 5 Zombie Apocalypse sets. Whether the Premiere helped the Odd Mob release is not
+knowable from public data and is not claimed.
+
+**Collaborations.** §4.7: 61 of 63 sets in the 2026 playlist; ≥ 11 artist-hosted 2026 sets
+credit Insomniac.
+
+**Live Redirect, end screens, cards, Shorts related-video links.** Not exposed publicly. Four
+Shorts were read (`ouihpBTPAUk`, `umrLzbs1POE`, `kzwSgzaB64k`, `aTEIaNNqGCM`): no linked video
+appears in the desktop page data (the only other video ID on one was its music attribution),
+but the desktop page does not reliably carry the related-video link, so **no feature is said to
+be unused**. Live Redirect rules (YouTube Help, answer 10359590): channels with more than 1,000
+subscribers and no Community Guidelines strikes; redirecting to another channel needs that
+channel's permission in Studio; Premieres can redirect too.
+
+**Reference — Metallica TV** (`1fz60gNnSdU`, Metallica's channel). Live since 6 Mar 2026
+22:31 UTC (created 2 Mar), live chat rendered, "108 watching now" at 11:5x UTC 28 Oct. Its
+description, verbatim in part: "Music videos. Live cuts. Full concerts… A continuous stream of
+Metallica across eras and tours… Live chat's open for anyone who wants to argue about setlists
+in real time." No chapters or schedule visible. Loaded in a browser from the UK (GL=GB), the
+player status was OK and the page named the item then playing — "Metallica: Devil's Dance
+(Tuktoyaktuk, Canada - September 3, 1995)" — a live cut, consistent with the description.
+Whether Insomniac TV shows a now-playing label could not be confirmed (the page didn't render
+it in our browser). The deck claims only these features. (A raw page-data request returned
+"Video unavailable"; the browser load played normally.)
+
+**What is already partly in place**, so the deck builds on it rather than proposing it:
+always-on station (Insomniac TV); Afterparties (two in 2026); Premieres (trailer, a release,
+two sets); Collaborations (61/63); lineup-reveal streams (three years); festival set playlists
+(EDC LV 2015–19, 2024, 2026; Zombie Apocalypse 2026, 5).
 
 ### 4.9 Shorts, 1 October 2025 → 27 October 2026
 
@@ -376,72 +521,85 @@ YouTube channel was found (`@insomniacrecords` 404; `@insomniacrecs` is an unrel
 
 ---
 
-## 5. Every claim on the deck, with its arithmetic
+## 5. Every claim on the deck (v2), with its arithmetic
 
-**5.1 Cover / slide 2 — "195.2M views · 722K subscribers · 4,169 videos · 1,125 Shorts, 774
-since October 2025"; "three eras"; "2026 alone is already the best year since 2020".** §1,
-§2.1, §4.1. 2026 uploads 15,156,857 vs 2023 15,037,286 and 2021 11,313,123. **Challenge:**
-"best year" ranks years by the lifetime views of that year's uploads; 2026's are the
-youngest, so if anything this understates 2026.
+**5.1 Cover / slide 2 — "195.2M views · 722K subscribers · 4,171 uploads, every one read ·
+1,125 Shorts, 774 since October 2025"; "three eras"; "2026 alone is already the best year
+since 2020".** §1, §2.1, §4.1. 2026 uploads 15,156,857 vs 2023 15,037,286. **Challenge:**
+"best year" ranks years by the lifetime views of that year's uploads; 2026's are the youngest,
+so if anything this understates 2026. YouTube's counter reads 4,169 (§0.1).
 
-**5.2 Slide 3 — "Trailers built the channel"; shares 38.7 / 24.3 / 17.9 / 7.9 / 3.3%; "the
-main EDC trailer drew 1.6–3.6M for every edition from 2010 to 2020; since 2022, 110–200K".**
-§4.2, §4.4. 2013 is 1.59M ("1.6M" rounded). **Challenge:** lifetime totals favour old
-trailers. The 2023 trailer has had 3.5 years and sits at 165K, against 1.6–3.6M for every
-pre-2021 edition; age can't explain a 10× gap, but "moved to other platforms" is a
-reading, not a finding.
+**5.2 Slide 3 — "Trailers built the channel. Today the sets do the heavy lifting"; shares
+38.7 / 24.3 / 17.9 / 7.9 / 3.3%; "1.6–3.6M for every edition to 2020; since 2022, 110–200K";
+"a change in the trailer's role on YouTube, not a verdict on the marketing".** §4.2, §4.4.
+2021 (896K) sits between and is not quoted. **Challenge:** lifetime totals favour old trailers;
+the 2023 trailer has had 3.5 years and sits at 165K, so age alone doesn't explain the gap — but
+nothing public says why. The slide doesn't say.
 
-**5.3 Slide 4 — "Since last October, the sets did most of the work": 940 uploads, Shorts
-82% / 24% of views; sets 9% / 62%; "typical Short 3.3K, typical set 69K"; "19 uploads in
-September and October".** §4.3: Sep 12 + Oct 7 = 19. **Challenge:** Shorts and sets do
-different jobs (reach vs depth). The deck says so and doesn't call Shorts a failure.
+**5.3 Slide 4 — "Full sets: 9% of the uploads, 62% of the views": 940 uploads since 1 Oct
+2025; Shorts 82% / 24%; sets 9% / 62%; typical Short 3.3K, typical set 69K; 30 sets past
+100K; "the two do different jobs".** §4.3. 85 sets / 940 = 9.0%; 10,473,978 / 16,936,030 =
+61.8%. 30 ≥ 100K = 28 EDC + Zomboy (117,128) + Kaskade at Sunsoaked 2025 (124,354, uploaded
+June 2026). Mean age: Shorts 7.9 months, sets 4.9 — the comparison favours Shorts.
 
-**5.4 Slide 5 — "79 sets · 10.1M views in five months · typical 69K · 28 over 100K · +7.2M
-on at least 11 artist-hosted sets · 48 within a week · EDC 2025 on the channel 8 sets,
-typical 21K after 16 months · Zombie Apocalypse 5 sets, 117K and 92K"; "YouTube carried the
-EDC livestream exclusively, 15–17 May, six feeds a day, multiview".** §4.5, §4.7; the
-livestream facts are from YouTube's own blog post (14 May 2026). **Challenge:** 2025 vs 2026
-isn't like for like: in 2025 the big names posted on their own channels (§4.7). The slide
-uses 2025 to show the change of model, not that 2026's sets were "better".
+**5.4 Slide 5 — "79 sets · 10.1M views in five months · typical 69K · 28 over 100K · 2/3 of
+all views on the channel's 2026 uploads · 50 within a week, 79 by September · EDC 2025 on the
+channel 8 sets, typical 21K after 16 months · Zombie Apocalypse 5 sets"; "the festival
+streamed live on Insomniac's channel, 15–17 May — six feeds a day, multiview for the first
+time"; "most of them credited jointly".** §4.5, §4.7, YouTube blog (14 May 2026). 10,072,480 /
+15,156,857 = 66.5%. "Most credited jointly": 61 of the 63 readable playlist items; the 16
+outside the playlist were not read for credits, so ≥ 61 of 79 (77%). **Challenge:** 2025 vs
+2026 isn't like for like (2025's big sets went to artist channels); the slide says so.
 
-**5.5 Slide 6 — "46.9M views on 83 sets … from 63 artist channels; typical 209K; twelve
-past a million; 2025 alone 55 sets on 52 channels, 18.7M"; "61 of 63 sets carry both
-names"; "Tiësto 2.2M, Charlotte de Witte 1.3M, Armin van Buuren 1.3M, Above & Beyond 993K";
-"for some headliners we found no official upload".** §4.7. **Challenge:** the curated
-playlist is a selection (the best-performing artist uploads Insomniac chose to feature);
-its median isn't comparable to Insomniac's own sets and the deck doesn't compare them.
+**5.5 Slide 6 — "46.9M views on the 83 performances in Insomniac's Insomniac Events Live
+playlist"; "75 on 63 artist channels · 45.6M; 8 on Insomniac's own · 1.3M"; "twelve past a
+million; 2025 alone 55 sets on 52 channels, 18.7M"; "61 of 63 sets carry both names"; "at
+least 11 more, 7.2M views"; "a curated selection … not a like-for-like comparison … separate
+from the channel's own 195.2M, never added to them".** §4.7. 45,618,255 + 1,294,461 =
+46,912,716. Bar: 45.6 / 46.9 = 97.2%. **Challenge:** the playlist is Insomniac's own selection;
+the 2026 artist-hosted count is a search floor. Neither is used as a scorecard. "Both routes
+now credit both sides" refers to 2026 only; whether 2025's artist uploads credited Insomniac
+wasn't checked.
 
-**5.6 Slide 7 — stage medians; "eight of the ten are techno, house or trance"; "the bass
-stage had joint-most sets (18) but only one past 100K".** §4.5, §4.6. **Challenge:** n = 79
-split six ways; stage mixes billing and sound; genre assigned by us. Framed as "a pattern
-worth testing, not a rule".
+**5.6 Slide 7 — stage medians (kineticFIELD 15 sets, 291K … bionicJUNGLE 13K); "some sets
+beat their stage by four or five times"; "Solomun, Underworld and Robert Hood each drew four
+to five times their stage's typical set"; "most of the ten lean techno, house or trance — a
+pattern worth investigating, not a reason to favour a genre".** §4.5, §4.6, §0.1. Ratios
+5.21 / 4.68 / 4.24.
 
-**5.7 Slide 8 — "774 Shorts, about 14 a week; half reach fewer than 3,300; 88 past 10K; one
-past 100K; the biggest by far was a moment from Gesaffelstein's set".** §4.9 (87 in
-10–100K plus 1 ≥ 100K = 88 ≥ 10K).
+**5.7 Slide 8 — "774 on-brand Shorts in thirteen months, a typical one reaching 3.3K and 88
+past 10K"; "the biggest by far was a moment from a set — Gesaffelstein, 284K".** §4.9.
 
-**5.8 Slide 9 — "One festival got the full treatment. The rest of the calendar got a
-trailer."; "Insomniac TV, live since 20 May"; "uploads fell away after August".** §4.8,
-§4.10. Zombie Apocalypse's five sets are named on the slide, so "one festival" is a
-headline simplification for the full livestream-to-sets cycle. **Challenge:** whether
-other events were filmed at all is unknown; the recommendation is selective for that
-reason.
+**5.8 Slide 9 — "EDC gets the full cycle. The rest of the calendar is the opportunity";
+"lineup-reveal stream in February (227K)"; "Twelve other 2026 events … a trailer or an
+aftermovie"; "19 uploads in September–October, against 135 a year earlier; nearly all of the
+difference is Shorts (115 then, 11 now); output back near 2023–24 levels; a publishing rhythm,
+not a measure of demand".** §4.8, §4.11. 135 − 19 = 116; Shorts 115 − 11 = 104 (90% of it).
 
-**5.9 Slide 10 — "18 of the 79 EDC 2026 sets aren't in the 2026 playlist"; "2 of 63 sets
-have a tracklist or timestamps"; "Night Owl Radio stops at episode 524 … still weekly
-elsewhere (#584)"; "108 public playlists".** §4.7, §4.10.
+**5.9 Slide 10 — "18 of the 79 EDC 2026 sets aren't in the 2026 full-set playlist"; "2 of 63
+sets have a tracklist or timestamps"; "Night Owl Radio stops at episode 524"; "108 public
+playlists — EDC set playlists by year …".** §4.7, §4.10, §4.12. Shorts link: "none visible on
+the ones we sampled, but the public page doesn't reliably show it" (§4.12).
 
-**5.10 Slide 11 — five strengths.** Each figure appears on an earlier slide. "Two-thirds of
-everything the channel has drawn in 2026": 10,072,480 / 15,156,857 = 66.5%.
+**5.10 Slide 11 — five strengths.** 01 sets (slide 5) · 02 "46.9M views on 83 curated
+performances, most on artists' channels" (slide 6) · 03 Insomniac TV live since 20 May (§4.12)
+· 04 "Lineup-reveal streams three years running (170–240K), the festival live on YouTube, and
+EDC Afters with Kaskade and Armin van Buuren" (§4.12) · 05 archive: 1,092 lockdown livestreams,
+47.1M (§4.2).
 
-**5.11 Slide 12 — three priorities and four questions.** Evidence lines repeat §5.3–5.9.
-"Twelve other events" §4.8. Releases 46 → 14, last 21 Aug §4.10. Night Owl Radio typical
-2.5K §4.10.
+**5.11 Slide 12 — native tools.** Every "Already" line is in §4.12. "An 842-video Insomniac TV
+playlist holds the archive": the playlist exists and holds livestream-era sets; what the live
+station actually plays is not public, and the slide quotes the station's own description for
+that. Odd Mob "667K, the year's biggest upload outside the sets": 666,861, the largest 2026
+non-set upload (§4.3 note). Metallica TV: only the features listed in §4.12. Afterparty and
+Live Redirect rules: YouTube Help, cited on the slide.
 
-**5.12 Slide 13 — "10.1M from 79 EDC sets in five months"; "46.9M on artist-hosted
-Insomniac sets"; "12 other events in 2026 with no sets".** As above.
+**5.12 Slide 13 — double down / optimise / experiment.** Evidence lines repeat 5.4–5.9.
+"Zombie Apocalypse's 5 sets: 22–117K" (§4.5). Each item carries a measure and a Studio check;
+nothing promises a number.
 
----
+**5.13 Slide 14 — "10.1M views on 79 EDC 2026 sets in five months"; "46.9M on the performances
+Insomniac curates from artists' channels"; "24/7 — Insomniac TV, live since 20 May".** As above.
 
 ## 6. Considered and dropped
 
@@ -468,6 +626,24 @@ Insomniac sets"; "12 other events in 2026 with no sets".** As above.
 9. **Engagement rate by format** (likes per 1,000 views). Not comparable across formats of
    very different lengths; kept only in §4.2.
 
+**Rejected or withdrawn in the v2 pass**
+
+10. **"Trailer audiences moved to other platforms."** Withdrawn from slide and Analysis; no
+    public evidence of where they went (§0.2).
+11. **"Techno, house and trance travel further than their billing"** as a headline. Ten sets,
+    genre assigned by us, confounded with artist profile and slot. Demoted to "a pattern worth
+    investigating" (§0.2).
+12. **"The autumn slowdown is a problem."** The like-for-like comparison (§4.11) shows the end of
+    a year-long Shorts push, with output back near 2023–24 levels. No claim about demand.
+13. **"Launch an always-on station."** Insomniac TV already exists (§4.12); the recommendation is
+    to programme it, not launch it.
+14. **"Start using Afterparties / Premieres / Collaborations."** All three are already in use
+    (§4.12); the recommendations build on them selectively.
+15. **"Insomniac doesn't use Live Redirect / end screens / Shorts links."** Not observable
+    publicly; left as Studio checks, never as gaps.
+16. **Premiere effect** ("the Odd Mob release did well because it premiered"). One example; no
+    comparison group. Kept only as a fact about usage.
+
 ---
 
 ## 7. Needs YouTube Studio
@@ -480,6 +656,14 @@ Insomniac sets"; "12 other events in 2026 with no sets".** As above.
 - Views per viewer within the 2026 set playlist.
 - How Collaboration views split between Insomniac and the artist's channel.
 - End screens and cards on the sets.
+- Insomniac TV: what it plays and in what order, concurrent viewers, watch time, chat activity,
+  and traffic from the station to uploads — the baseline for any programming test.
+- Afterparties: Premium viewers and watch time for the two EDC Afters; eligibility and
+  availability for future events (YouTube partner team).
+- Premieres vs uploads without one: first-week views and watch time for the two premiered
+  EDC sets against comparable same-stage sets.
+- Live Redirect history, if any, from the festival streams.
+- Collaboration split for the artist-hosted 2026 sets (views attributed to Insomniac).
 
 ## 8. The places I think this is weakest
 
@@ -492,14 +676,30 @@ Insomniac sets"; "12 other events in 2026 with no sets".** As above.
    comparison without snapshots of what was planned. October 2025 had 94 uploads, so it is
    at least unlike last year.
 5. **Classification edges:** the Wasteland misfire (§2.2); "Other" since 2022 (74 uploads).
+6. **v1 counting errors.** kineticFIELD (16 → 15), lag base (80 → 79), live count (195 → 73)
+   and the 4,169/4,171 explanation were wrong in v1 (§0.1). They didn't move a headline, but
+   they argue for re-deriving any figure before quoting it outside the deck.
+7. **Afterparty identification** rests on the Live-tab screenshot supplied with the brief and
+   YouTube's definition; the Premium gate isn't visible in public page data.
 
 ## 9. Questions for the reviewer, in priority order
 
-1. Trace 5.4 and 5.5. Does slide 5 or 6 imply Insomniac-hosted sets "beat" artist-hosted
-   ones? It shouldn't.
-2. Trace 5.2. Is "Today they reach a fraction of that" fair given lifetime totals?
-3. Trace 5.6. Should the genre slide be cut to a line in Analysis?
-4. Is "Take the EDC set model to a few more events" proportionate, given filming, rights and
-   artist approvals sit outside the YouTube team?
-5. Read slides 8 and 12 as Insomniac's social team would. Do they read as criticism of
+1. Trace 5.5. Does slide 6 imply Insomniac-hosted sets "beat" artist-hosted ones, or add the
+   playlist's 46.9M to the channel's 195.2M anywhere? It shouldn't.
+2. Trace 5.2. Is "a change in the trailer's role" fair given lifetime totals?
+3. Read slide 12 as Insomniac's team would. Does anything recommend launching something they
+   already run?
+4. Is "the full-set model at two or three more events, where filming and rights allow"
+   proportionate, given filming, rights and artist approvals may sit outside the YouTube team?
+5. Read slides 4, 8 and 13 as Insomniac's social team would. Do they read as criticism of
    their Shorts work?
+
+### Questions for the Insomniac team (from the Analysis sheet)
+
+- **Releases.** Insomniac Records uploads: 46 in 2025, 14 in 2026, none since 21 August. Has
+  release video moved elsewhere?
+- **Night Owl Radio.** Off the channel since #524 (September 2025), median 2.5K here; still
+  weekly on podcast platforms (#584). A deliberate call?
+- **Headliner sets.** No official 2026 upload found for some headliners (John Summit, Martin
+  Garrix). Rights, artist choice — or an opening?
+- **Other events.** Were 2026's other flagships filmed, and on what terms?
