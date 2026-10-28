@@ -307,13 +307,13 @@ export default function CampaignWarRoom(props: Props) {
       />}
       <CurrentYouTubeSurface recentUploads={recentUploads} campaignStart={campaignStartDate} knownTitles={knownTitles} nextLinkedEvent={nextMoment?.e.videoId ? nextMoment.e : undefined} />
       <ContentSupply events={events} library={lib} hasAssets={hasAssets} folderUrl={lib.folderUrl || driveFolderUrl} slug={props.slug} />
-      {props.coachEvidence && <CoachActionBoard mode="overview" tracks={props.coachRoadmap ?? []} slug={props.slug} evidence={props.coachEvidence} decisions={props.coachDecisions ?? {}} />}
       <MasterTimeline
         events={events} mappings={m.mappings} phases={m.phases} activeIdx={activeIdx}
         recentUploads={recentUploads} campaignStart={campaignStartDate} knownTitles={knownTitles} pool={pool}
         folderUrl={lib.folderUrl || driveFolderUrl} slug={props.slug} hasAssets={hasAssets}
         coach={props.coachEvidence ? {evidence:props.coachEvidence, tracks:props.coachRoadmap ?? [], decisions:props.coachDecisions ?? {}} : undefined}
       />
+      {props.coachEvidence && <CoachActionBoard mode="overview" tracks={props.coachRoadmap ?? []} slug={props.slug} evidence={props.coachEvidence} decisions={props.coachDecisions ?? {}} />}
       <RecentActivity recentUploads={recentUploads} liveChannel={liveChannel} campaignStart={campaignStartDate} />
       <EditTimelineFooter
         slug={props.slug} artistName={props.artistName} currentTimeline={props.timelineText ?? ''}
@@ -1147,15 +1147,15 @@ function MasterTimeline({ events, mappings, phases, activeIdx, recentUploads, ca
         recentUploads={recentUploads} campaignStart={campaignStart} knownTitles={knownTitles} pool={pool} folderUrl={folderUrl}
         live={liveInfo} titleOverride={titleOverride} includes={includes}
         gapDays={gapDays} nextLabel={nextLabel} slug={slug} hasAssets={hasAssets}
-      />
-      {coach && coach.tracks.filter(track => idxs.some(idx => events[idx].dateISO === track.releaseDate && events[idx].title.toLowerCase().includes(track.name.toLowerCase()))).map(track => <div className="coach-track-wrap" key={track.id}><CoachActionBoard mode="embedded" tracks={[track]} slug={slug} evidence={coach.evidence} decisions={coach.decisions} /></div>)}
+      >
+      {coach && coach.tracks.filter(track => idxs.some(idx => events[idx].dateISO === track.releaseDate && events[idx].title.toLowerCase().includes(track.name.toLowerCase()))).map(track => <div key={track.id}><CoachActionBoard mode="embedded" tracks={[track]} slug={slug} evidence={coach.evidence} decisions={coach.decisions} /></div>)}
+      </MilestoneCard>
       </div>
     );
   };
 
   return (
     <section style={{ maxWidth: 1180, margin: '0 auto', padding: '40px 40px 0' }}>
-      <style>{`.coach-track-wrap{margin:8px 0 0 108px}@media(max-width:700px){.coach-track-wrap{margin-left:0}}`}</style>
       <div style={{ fontSize: 10, fontWeight: 800, letterSpacing: '0.28em', textTransform: 'uppercase', color: INK, fontFamily: MONO, marginBottom: 10, display: 'flex', alignItems: 'center', gap: 8 }}><YTMark h={12} /> YouTube Campaign Timeline</div>
       {!coach && (() => {
         const sr = shortsRecommendation(events);
@@ -1535,7 +1535,8 @@ function LinkVideoButton({ slug, eventTitle }: { slug: string; eventTitle: strin
   );
 }
 
-function MilestoneCard({ ev, mapping, phase, active, showPhaseLabel, recentUploads, campaignStart, knownTitles, pool, folderUrl, live, titleOverride, includes, compact, gapDays, nextLabel, slug, hasAssets, intelligence = false }: {
+function MilestoneCard({ ev, mapping, phase, active, showPhaseLabel, recentUploads, campaignStart, knownTitles, pool, folderUrl, live, titleOverride, includes, compact, gapDays, nextLabel, slug, hasAssets, intelligence = false, children }: {
+  children?: React.ReactNode;
   intelligence?: boolean;
   ev: ParsedEvent; mapping?: MilestoneMapping; phase: PhaseName; active: boolean; showPhaseLabel: boolean;
   recentUploads: RecentUpload[]; campaignStart?: string; knownTitles: string[]; pool: Pool; folderUrl?: string;
@@ -1884,7 +1885,7 @@ function MilestoneCard({ ev, mapping, phase, active, showPhaseLabel, recentUploa
 
         {/* Live → amplification nudge. Compact support/live → cadence line.
             Otherwise (release/announce) → full sequenced Suggested Support. */}
-        {intelligence ? null : isLive ? (
+        {intelligence ? children : isLive ? (
           <div style={{ marginTop: 11, display: 'flex', flexDirection: 'column', gap: 3 }}>
             {shownActions.map((a, i) => (
               <div key={i} style={{ fontSize: 12.5, color: INK, lineHeight: 1.35, display: 'flex', gap: 8 }}>
