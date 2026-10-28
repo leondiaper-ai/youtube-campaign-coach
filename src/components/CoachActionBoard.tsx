@@ -34,6 +34,7 @@ export default function CoachActionBoard({
   const [error, setError] = useState("");
   const [scanning, setScanning] = useState(false);
   const today = new Date().toISOString().slice(0, 10);
+  const uploadGap = evidence.lastUploadAt ? Math.max(0,Math.floor((Date.now()-Date.parse(evidence.lastUploadAt))/86400000)) : null;
   const all = tracks.flatMap((t) =>
     t.actions.map((a) => ({ a, t, d: decisions[a.id] })),
   );
@@ -187,7 +188,7 @@ export default function CoachActionBoard({
         </button>
         <a href={"/watcher/" + evidence.artistSlug}>Open channel</a>
       </div>
-      {evidence.lastUploadAt && <p className="coach-muted" style={{marginTop:12}}>Cadence: latest tracked upload {fmt(evidence.lastUploadAt.slice(0,10))} · {Math.max(0,Math.floor((Date.now()-Date.parse(evidence.lastUploadAt))/86400000))} days ago. Check the reading date below before treating a gap as inactivity.</p>}
+      {evidence.lastUploadAt && <p className="coach-muted" style={{marginTop:12}}>Cadence: latest tracked upload {fmt(evidence.lastUploadAt.slice(0,10))} · {uploadGap} {uploadGap === 1 ? "day" : "days"} ago. Check the reading date below before treating a gap as inactivity.</p>}
       {error && (
         <p role="alert" style={{ color: "#b91c1c", marginTop: 12 }}>
           {error}
@@ -249,7 +250,7 @@ export default function CoachActionBoard({
           className="coach-track"
           key={track.id}
           open={
-            mode === "embedded" || track.releaseDate >=
+            track.releaseDate >=
             new Date(Date.now() - 28 * 86400000).toISOString().slice(0, 10)
           }
         >
@@ -374,11 +375,11 @@ export default function CoachActionBoard({
           })}
         </details>
       ))}
-      <p className="coach-muted" style={{ marginTop: 14 }}>
+      {mode !== "embedded" && <p className="coach-muted" style={{ marginTop: 14 }}>
         Checks update from cached channel data every two minutes while this page
         is open. Matched uploads show publication automatically; team statuses
         and dates are preserved.
-      </p>
+      </p>}
     </section>
   );
 }

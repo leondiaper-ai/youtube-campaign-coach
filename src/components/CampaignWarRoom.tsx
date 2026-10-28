@@ -1148,13 +1148,14 @@ function MasterTimeline({ events, mappings, phases, activeIdx, recentUploads, ca
         live={liveInfo} titleOverride={titleOverride} includes={includes}
         gapDays={gapDays} nextLabel={nextLabel} slug={slug} hasAssets={hasAssets}
       />
-      {coach && coach.tracks.filter(track => idxs.some(idx => events[idx].dateISO === track.releaseDate && events[idx].title.toLowerCase().includes(track.name.toLowerCase()))).map(track => <div key={track.id} style={{marginLeft:108,marginTop:8}}><CoachActionBoard mode="embedded" tracks={[track]} slug={slug} evidence={coach.evidence} decisions={coach.decisions} /></div>)}
+      {coach && coach.tracks.filter(track => idxs.some(idx => events[idx].dateISO === track.releaseDate && events[idx].title.toLowerCase().includes(track.name.toLowerCase()))).map(track => <div className="coach-track-wrap" key={track.id}><CoachActionBoard mode="embedded" tracks={[track]} slug={slug} evidence={coach.evidence} decisions={coach.decisions} /></div>)}
       </div>
     );
   };
 
   return (
     <section style={{ maxWidth: 1180, margin: '0 auto', padding: '40px 40px 0' }}>
+      <style>{`.coach-track-wrap{margin:8px 0 0 108px}@media(max-width:700px){.coach-track-wrap{margin-left:0}}`}</style>
       <div style={{ fontSize: 10, fontWeight: 800, letterSpacing: '0.28em', textTransform: 'uppercase', color: INK, fontFamily: MONO, marginBottom: 10, display: 'flex', alignItems: 'center', gap: 8 }}><YTMark h={12} /> YouTube Campaign Timeline</div>
       {!coach && (() => {
         const sr = shortsRecommendation(events);
@@ -1883,7 +1884,7 @@ function MilestoneCard({ ev, mapping, phase, active, showPhaseLabel, recentUploa
 
         {/* Live → amplification nudge. Compact support/live → cadence line.
             Otherwise (release/announce) → full sequenced Suggested Support. */}
-        {intelligence ? <p style={{fontSize:12,color:SMOKE,marginTop:12}}>Use the channel-informed asset checklist below the release moment to agree formats, status and dates. Tour and other campaign dates remain context for the plan.</p> : isLive ? (
+        {intelligence ? null : isLive ? (
           <div style={{ marginTop: 11, display: 'flex', flexDirection: 'column', gap: 3 }}>
             {shownActions.map((a, i) => (
               <div key={i} style={{ fontSize: 12.5, color: INK, lineHeight: 1.35, display: 'flex', gap: 8 }}>
