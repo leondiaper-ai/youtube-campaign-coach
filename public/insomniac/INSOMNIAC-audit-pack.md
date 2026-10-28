@@ -941,6 +941,33 @@ the artist's channel. "Collab ✓" means the YouTube Collaboration credit.
 - **Not for the deck:** metadata fixes (action 5) and the rejected pre-festival read. They
   stay here.
 
+### 10.8a Applied to the deck (v4, 28 Oct 2026)
+
+- **Slide 10** replaced by "Are the biggest performances getting the support they deserve?"
+  - Three numbers, each re-verified:
+    - **11+ artist-hosted 2026 sets, 7.2M views, in neither Insomniac Events Live nor the
+      2026 set playlist.** The four largest (5.79M) were also checked against all 108 public
+      playlists (first 100 items each) and appear in none.
+    - **18 sets / 1.03M views** outside the 2026 playlist.
+    - **2 of 79** with chapters (Zombie Apocalypse 3 of 5).
+  - Strong examples: Kaskade, Subtronics, Zomboy. Opportunities: Solomun, Meduza³, the four
+    artist-hosted headliners. All carry direct links.
+  - The Home rail and the Night Owl Radio line left the slide (Night Owl Radio remains a
+    question for the team in the Analysis sheet).
+- **Slide 9:** the cadence paragraph now describes the 26-week Shorts schedule, the 35-day
+  Shorts pause, three empty weeks and the 19.7-day silence. It is framed as a question of
+  intended between-event rhythm, not demand. The v2 phrase "back near 2023–24 levels" is
+  withdrawn.
+- **Slide 13:**
+  - Double down: Kaskade named as the template.
+  - Optimise: the three confirmed fixes (Events Live, the 2026 playlist including its unlisted
+    items, chapters on the top 20).
+  - Experiment: supporting Shorts for selected sets without an artist-named clip, a Studio
+    review of related-video links, a between-festival baseline sized to the team (explicitly
+    not a default return to 19 a week), and programmed Insomniac TV.
+- **No slide claims** that missing Shorts, chapters or playlist slots cost views, or that adding
+  them will add views.
+
 ### 10.9 Studio-only checks raised by this pass
 
 - Do the Shorts carry a related-video link, and to what?
