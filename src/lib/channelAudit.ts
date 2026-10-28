@@ -3,9 +3,21 @@ import { classifyUploadFormat, getFormatMeta, type UploadFormat } from './format
 import { songKey } from './formatStack';
 
 export type AuditVideo = { id: string; title: string; views: number; format: string; publishedAt: string };
+type AuditFormat = UploadFormat | 'likely_omv';
+const formatName = (f: AuditFormat) => f === 'likely_omv' ? 'Likely music video' : f === 'longform' ? 'Other long-form' : getFormatMeta(f).label;
+// Descriptions often promote OTHER videos. Only consider a production-credit pattern,
+// and keep the result provisional until someone reviews the actual upload.
+export function likelyMusicVideo(u: RecentUpload): boolean {
+  const d = (u.description ?? '').slice(0, 1200);
+  return /\b(?:directed by|director\s*:)\s*[^\n]{2,}/i.test(d)
+    && /\b(?:director of photography|cinematograph(?:er|y)|production company|director of photography|video credits|dop\s*:)/i.test(d)
+    && !/\b(?:official audio|audio only|lyric video|visuali[sz]er|live performance|behind the scenes)\b/i.test(u.title);
+}
+export type AuditReviewItem = AuditVideo & { key: AuditFormat; reason: string };
 export type AuditFinding = { title: string; evidence: string; action?: string; videos?: AuditVideo[] };
 export type ChannelAudit = {
   name: string; slug: string; generatedAt: string; dataAt: string | null;
+  formatReview: { total: number; videos: AuditReviewItem[] };
   catalogue?: { linkedUploads?: number; complete: boolean; fetchedAt: string; publicVideoCount: number | null; scannedIds: number };
   visuals: {
     split: { longform: number; shorts: number; longformCount: number; shortsCount: number };
@@ -25,26 +37,30 @@ const median = (a: number[]) => { const s = [...a].sort((x,y)=>x-y); return s.le
 export function buildChannelAudit(input: {
   name: string; slug: string; dataAt: string | null; now?: number; uploads: RecentUpload[];
   catalogue?: ChannelAudit['catalogue'];
+  formatOverrides?: Record<string, UploadFormat>;
   stats: ChannelAudit['stats']; territories?: ChannelAudit['territories']; territoryNote?: string;
 }): ChannelAudit {
   const now = input.now ?? Date.now();
   // Only uploads on this channel, already published. Never include external collaborations or future premieres.
   const uploads = Array.from(new Map(input.uploads.filter(u => !u.isCollab && u.live !== 'upcoming' && Date.parse(u.publishedAt) <= now).map(u=>[u.id,u])).values());
   const classified = uploads.map(u=>{
-    let format=classifyUploadFormat({...u,description:''});
+    let format: AuditFormat=classifyUploadFormat({...u,description:''});
     if(format!=='short' && /[\[(]\s*(?:official\s+)?live\s+(?:for|on)\b/i.test(u.title)) format='live';
     // A phrase such as 'ten years in the making' is not a BTS label.
     if(format==='bts' && !/behind\s+the\s+scenes|making\s+of|\bbts\b|^the\s+making|in\s+the\s+studio|studio\s+session|recording\s+session/i.test(u.title)) format='longform';
+    if (format === 'longform' && likelyMusicVideo(u)) format = 'likely_omv';
+    const override = input.formatOverrides?.[u.id];
+    if (override && ['short','omv','live','lyric','visualiser','bts','acoustic','audio','documentary','interview','tour','longform'].includes(override)) format = override;
     return {u,format};
   });
-  const video = (x: typeof classified[number]): AuditVideo => ({ id:x.u.id, title:x.u.title, views:x.u.viewCount, publishedAt:x.u.publishedAt, format:getFormatMeta(x.format).label });
+  const video = (x: typeof classified[number]): AuditVideo => ({ id:x.u.id, title:x.u.title, views:x.u.viewCount, publishedAt:x.u.publishedAt, format:formatName(x.format) });
   const ranked = [...classified].sort((a,b)=>b.u.viewCount-a.u.viewCount);
   const leaders = ranked.slice(0,3).map(video);
   const total = uploads.reduce((s,u)=>s+u.viewCount,0);
   const first = uploads.map(u=>u.publishedAt.slice(0,10)).sort()[0];
-  const groups = new Map<UploadFormat, typeof classified>();
+  const groups = new Map<AuditFormat, typeof classified>();
   for (const x of classified) groups.set(x.format,[...(groups.get(x.format) ?? []),x]);
-  const formats = Array.from(groups).map(([f,x])=>({name:f==='longform'?'Other long-form':getFormatMeta(f).label,count:x.length,views:x.reduce((s,i)=>s+i.u.viewCount,0),median:median(x.map(i=>i.u.viewCount))})).sort((a,b)=>b.views-a.views);
+  const formats = Array.from(groups).map(([f,x])=>({name:formatName(f),count:x.length,views:x.reduce((s,i)=>s+i.u.viewCount,0),median:median(x.map(i=>i.u.viewCount))})).sort((a,b)=>b.views-a.views);
   const recent = classified.filter(x=>now-Date.parse(x.u.publishedAt)<=30*day);
   const shorts = recent.filter(x=>x.format==='short').length;
   const findings: AuditFinding[] = [];
@@ -54,11 +70,11 @@ export function buildChannelAudit(input: {
     const share = Math.round(leaders.reduce((s,u)=>s+u.views,0)/total*100);
     findings.push({title:'Where the recorded views sit',evidence:`These ${leaders.length} uploads hold ${share}% of the ${auditNumber(total)} lifetime views across the ${uploads.length} tracked uploads. This is a share of analysed uploads, not the channel lifetime counter.`,videos:leaders});
   }
-  const support = Array.from(groups).filter(([f,x])=>!['omv','audio','short','longform'].includes(f) && x.length>=3).map(([f,x])=>({f,x,median:median(x.map(i=>i.u.viewCount))})).sort((a,b)=>b.median-a.median)[0];
+  const support = Array.from(groups).filter(([f,x])=>!['omv','audio','short','longform','likely_omv'].includes(f) && x.length>=3).map(([f,x])=>({f,x,median:median(x.map(i=>i.u.viewCount))})).sort((a,b)=>b.median-a.median)[0];
   if (support) {
     const examples = [...support.x].sort((a,b)=>b.u.viewCount-a.u.viewCount).slice(0,2).map(video);
-    findings.push({title:'A support format with repeat evidence',evidence:`${getFormatMeta(support.f).label}: ${support.x.length} tracked uploads, ${auditNumber(support.median)} median lifetime views. Highest median among support formats with at least three examples; upload ages differ.`,videos:examples});
-    priorities.push(`Use ${getFormatMeta(support.f).label.toLowerCase()} as a candidate support asset for the next priority single; review ${examples.map(v=>'“'+v.title+'”').join(' and ')} for the creative approach, then compare new assets at the same age.`);
+    findings.push({title:'A support format with repeat evidence',evidence:`${formatName(support.f)}: ${support.x.length} tracked uploads, ${auditNumber(support.median)} median lifetime views. Highest median among support formats with at least three examples; upload ages differ.`,videos:examples});
+    priorities.push(`Use ${formatName(support.f).toLowerCase()} as a candidate support asset for the next priority single; review ${examples.map(v=>'“'+v.title+'”').join(' and ')} for the creative approach, then compare new assets at the same age.`);
   }
   if (recent.length) findings.push({title:'What the channel is publishing now',evidence:`${recent.length} tracked uploads in the last 30 days: ${recent.length-shorts} long-form and ${shorts} Shorts. Upload counts describe output, not demand or incremental reach.`});
   // Match an identifiable official video to companions for that same song. Never call unrelated uploads support.
@@ -86,11 +102,11 @@ export function buildChannelAudit(input: {
   const summary = input.stats.views7d != null ? `${input.name} recorded ${auditNumber(input.stats.views7d)} channel views over the available 7-day comparison${input.stats.subs7d!=null ? ' and '+auditNumber(input.stats.subs7d)+' net subscribers' : ''}. ${leaders[0] ? 'The leading tracked upload is “'+leaders[0].title+'” ('+auditNumber(leaders[0].views)+' lifetime views).' : ''}` : `${input.name}: ${auditNumber(input.stats.lifetimeViews)} lifetime channel views and ${auditNumber(input.stats.subs)} subscribers. A reliable 7-day movement reading is not available yet.`;
   const longformViews = classified.filter(x=>x.format!=='short').reduce((s,x)=>s+x.u.viewCount,0);
   const shortsViews = classified.filter(x=>x.format==='short').reduce((s,x)=>s+x.u.viewCount,0);
-  const formatOrder: UploadFormat[] = ['omv','live','lyric','visualiser','bts','acoustic','audio','documentary','interview','tour','short','longform'];
+  const formatOrder: AuditFormat[] = ['omv','likely_omv','live','lyric','visualiser','bts','acoustic','audio','documentary','interview','tour','short','longform'];
   const formatReads = formatOrder.map(f=>{
     const items=groups.get(f)??[];
     const views=items.reduce((s,x)=>s+x.u.viewCount,0);
-    return {key:f,name:f==='longform'?'Other long-form':getFormatMeta(f).label,count:items.length,views,median:items.length?median(items.map(x=>x.u.viewCount)):0,share:total>0?views/total:0,verdict:f==='longform' && items.length ? 'Needs labelling' : !items.length ? 'Not identified' : items.length<3 ? 'Too few to judge' : views===0 ? 'No recorded views' : 'Repeat evidence',examples:[...items].sort((a,b)=>b.u.viewCount-a.u.viewCount).slice(0,2).map(video)};
+    return {key:f,name:formatName(f),count:items.length,views,median:items.length?median(items.map(x=>x.u.viewCount)):0,share:total>0?views/total:0,verdict:f==='likely_omv' && items.length ? 'Review suggested' : f==='longform' && items.length ? 'Needs labelling' : !items.length ? 'Not identified' : items.length<3 ? 'Too few to judge' : views===0 ? 'No recorded views' : 'Repeat evidence',examples:[...items].sort((a,b)=>b.u.viewCount-a.u.viewCount).slice(0,2).map(video)};
   });
   const monday = new Date(now); monday.setUTCHours(0,0,0,0); monday.setUTCDate(monday.getUTCDate()-((monday.getUTCDay()+6)%7));
   const weeks=Array.from({length:13},(_,i)=>{
@@ -98,15 +114,19 @@ export function buildChannelAudit(input: {
     const items=classified.filter(x=>Date.parse(x.u.publishedAt)>=from && Date.parse(x.u.publishedAt)<from+7*day);
     return {date:new Date(from).toISOString().slice(0,10),longform:items.filter(x=>x.format!=='short').length,shorts:items.filter(x=>x.format==='short').length,covered:!!input.catalogue?.complete || (!!first && Date.parse(first)<=from)};
   });
-  const leaderFormat=formats.find(f=>f.name!=='Other long-form');
-  const unlabelled = formatReads.find(f=>f.key==='longform')!;
+  const leaderFormat=formats.find(f=>!['Other long-form','Likely music video'].includes(f.name));
+  const unknown = formatReads.find(f=>f.key==='longform')!;
+  const likely = formatReads.find(f=>f.key==='likely_omv')!;
+  const unlabelled = {...unknown, count:unknown.count+likely.count, views:unknown.views+likely.views, share:unknown.share+likely.share};
   const takeaway=total<=0 ? 'Not enough upload evidence for a format verdict yet.' : unlabelled.views>(leaderFormat?.views??0)
     ? `${longformViews>=shortsViews?'Long-form':'Shorts'} carries ${Math.round(Math.max(longformViews,shortsViews)/total*100)}% of analysed upload views. ${unlabelled.count} long-form uploads still need a format check.`
     : leaderFormat ? `${leaderFormat.name} leads among labelled formats: ${auditNumber(leaderFormat.views)} lifetime views across ${leaderFormat.count} uploads (${Math.round(leaderFormat.views/total*100)}% of analysed upload views).` : 'Long-form formats need review before choosing a winner.';
-  const actions=[...(unlabelled.share>=0.5 ? [`Review the formats of ${unlabelled.count} unlabelled long-form uploads before choosing a support-format winner.`] : []),...(support ? [`Keep ${getFormatMeta(support.f).label.toLowerCase()} in the support mix: ${support.x.length} examples, ${auditNumber(support.median)} typical lifetime views.`] : []),...(gaps.find(g=>g.title==='A priority video with no matched support destination') ? [`Check a follow-up asset for “${hero!.u.title}” — none matched in this inventory.`] : []),...(captionChecks.length ? [`Review caption tracks on ${captionChecks.length} recent long-form uploads, starting with spoken and vocal content.`] : []),...(input.territories?.length ? [`Use ${input.territories.slice(0,3).map(t=>t.name).join(', ')} as the starting markets for a localisation review.`] : [])].slice(0,3);
+  const actions=[...(unlabelled.share>=0.5 ? [`Review the formats of ${unlabelled.count} unlabelled long-form uploads before choosing a support-format winner.`] : []),...(support ? [`Keep ${formatName(support.f).toLowerCase()} in the support mix: ${support.x.length} examples, ${auditNumber(support.median)} typical lifetime views.`] : []),...(gaps.find(g=>g.title==='A priority video with no matched support destination') ? [`Check a follow-up asset for “${hero!.u.title}” — none matched in this inventory.`] : []),...(captionChecks.length ? [`Review caption tracks on ${captionChecks.length} recent long-form uploads, starting with spoken and vocal content.`] : []),...(input.territories?.length ? [`Use ${input.territories.slice(0,3).map(t=>t.name).join(', ')} as the starting markets for a localisation review.`] : [])].slice(0,3);
   const coverage = input.catalogue ? `${uploads.length} published uploads analysed · ${input.catalogue.scannedIds} playlist IDs read${input.catalogue.publicVideoCount!=null ? ' · YouTube reports '+input.catalogue.publicVideoCount+' public videos' : ''} · ${input.catalogue.complete ? 'playlist fully scanned' : 'scan in progress'}${input.catalogue.linkedUploads ? ' · includes '+input.catalogue.linkedUploads+' linked uploads returned in the artist uploads playlist' : ''} · read ${input.catalogue.fetchedAt.slice(0,10)}${first ? ' · earliest '+first : ''}. Counts may differ because of unavailable, upcoming or removed videos.` : `${uploads.length} cached uploads${first ? ', back to '+first : ''}. Recent sample only — scan the catalogue to include older videos.`;
   const dataAge = input.dataAt ? Math.floor((now-Date.parse(input.dataAt))/day) : null;
-  return {catalogue:input.catalogue,visuals:{split:{longform:longformViews,shorts:shortsViews,longformCount:classified.filter(x=>x.format!=='short').length,shortsCount:classified.filter(x=>x.format==='short').length},formats:formatReads,weeks,activeWeeks:weeks.filter(w=>w.covered && w.longform+w.shorts>0).length,coveredWeeks:weeks.filter(w=>w.covered).length,takeaway,actions},name:input.name,slug:input.slug,generatedAt:new Date(now).toISOString(),dataAt:input.dataAt,stats:input.stats,summary,coverage,findings,gaps,priorities:priorities.slice(0,3),leaders,formats,territories:input.territories ?? [],territoryNote:input.territoryNote ?? 'No cached country breakdown available.',limitations:[...(dataAge!=null && dataAge>2 ? [`Channel reading is ${dataAge} days old; check freshness before using this in a current update.`] : []),'Format labels use titles and duration to avoid unrelated description keywords; song-family matches use titles; versions and inconsistent titles can be misclassified.','Lifetime views are not age-adjusted. These observations do not prove a format caused growth.','Watch time, retention, traffic sources, audience overlap and incremental paid impact require YouTube Studio. Channel packaging, playlists and end screens have not been inspected.']};
+  const reviewItems = ranked.filter(x=>x.format==='longform' || x.format==='likely_omv' || !!input.formatOverrides?.[x.u.id]);
+  const formatReview = {total:reviewItems.length,videos:reviewItems.slice(0,100).map(x=>({...video(x),key:x.format,reason:input.formatOverrides?.[x.u.id] ? 'Saved in this browser' : x.format==='likely_omv' ? 'Video production credits in description; check the upload' : 'No reliable format label found'}))};
+  return {formatReview,catalogue:input.catalogue,visuals:{split:{longform:longformViews,shorts:shortsViews,longformCount:classified.filter(x=>x.format!=='short').length,shortsCount:classified.filter(x=>x.format==='short').length},formats:formatReads,weeks,activeWeeks:weeks.filter(w=>w.covered && w.longform+w.shorts>0).length,coveredWeeks:weeks.filter(w=>w.covered).length,takeaway,actions},name:input.name,slug:input.slug,generatedAt:new Date(now).toISOString(),dataAt:input.dataAt,stats:input.stats,summary,coverage,findings,gaps,priorities:priorities.slice(0,3),leaders,formats,territories:input.territories ?? [],territoryNote:input.territoryNote ?? 'No cached country breakdown available.',limitations:[...(dataAge!=null && dataAge>2 ? [`Channel reading is ${dataAge} days old; check freshness before using this in a current update.`] : []),'Format labels use titles and duration; production credits can suggest a likely music video but require review. Manual corrections are saved only in the current browser. Song-family matches use titles; versions and inconsistent titles can be misclassified.','Lifetime views are not age-adjusted. These observations do not prove a format caused growth.','Watch time, retention, traffic sources, audience overlap and incremental paid impact require YouTube Studio. Channel packaging, playlists and end screens have not been inspected.']};
 }
 export function channelAuditText(a: ChannelAudit): string {
   return [`${a.name} — CHANNEL AUDIT`, `Prepared ${a.generatedAt.slice(0,10)} · Channel data ${a.dataAt?.slice(0,10) ?? 'date unavailable'}`,a.visuals.takeaway,'',`FORMAT READ\n${a.visuals.formats.map(f=>f.name+': '+f.verdict+' · '+f.count+' uploads · '+auditNumber(f.views)+' lifetime views · '+(f.count?auditNumber(f.median):'Unavailable')+' median').join('\n')}`,`VIEWING SPLIT (analysed uploads, lifetime)\nLong-form: ${auditNumber(a.visuals.split.longform)} · Shorts: ${auditNumber(a.visuals.split.shorts)}`,`PUBLISHING\n${a.visuals.activeWeeks} of ${a.visuals.coveredWeeks} covered weeks had an upload; last 13 calendar weeks, current week incomplete.`,a.summary,'',`SCALE & MOVEMENT\nSubscribers: ${auditNumber(a.stats.subs)} · Lifetime channel views: ${auditNumber(a.stats.lifetimeViews)}\n7-day views: ${auditNumber(a.stats.views7d)} · 30-day views: ${auditNumber(a.stats.views30d)} · 7-day net subscribers: ${auditNumber(a.stats.subs7d)}`,'',...a.findings.map(f=>`${f.title}\n${f.evidence}${f.videos?.map(v=>'\n• '+v.title+' — '+auditNumber(v.views)+' lifetime views — https://www.youtube.com/watch?v='+v.id).join('') ?? ''}`),'',`MISSED OPPORTUNITIES & ASSET CHECKS\n${a.gaps.length ? a.gaps.map(g=>g.title+'\n'+g.evidence+'\n'+(g.action??'')+(g.videos?.map(v=>'\n• '+v.title+' — '+auditNumber(v.views)+' lifetime views — https://www.youtube.com/watch?v='+v.id).join('') ?? '')).join('\n\n') : 'No specific asset gap identified in this sample; this is not a full-catalogue clearance.'}`,'',...(a.reference ? [`PAST CAMPAIGN REFERENCE — ${a.reference.title} (data ${a.reference.date ?? 'date not recorded'})`,...a.reference.points.map(p=>p.point+'\n'+p.basis),a.reference.note,a.reference.href ? 'https://youtube-campaign-coach.vercel.app'+a.reference.href : ''] : []),'',`KEY MARKETS\n${a.territories.map(t=>t.name+': '+auditNumber(t.views)+' monthly views'+(t.estimated?' (estimated)':'')).join('\n')}\n${a.territoryNote}`,'',`PRIORITIES\n${a.priorities.map((p,i)=>(i+1)+'. '+p).join('\n')}`,'',`COVERAGE & SOURCES\n${a.coverage}\n${a.limitations.join('\n')}\nSource: Watcher cached YouTube Data API readings; Chartmetric for markets where stated.`].join('\n\n');

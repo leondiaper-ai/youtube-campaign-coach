@@ -12,6 +12,31 @@ export default function ChannelAuditButton({ slug, name }: { slug: string; name:
   const [copied,setCopied] = useState('');
   const [scanning,setScanning] = useState(false);
   const [scanStatus,setScanStatus] = useState('');
+  const [reviewError,setReviewError] = useState('');
+  const [reviewBusy,setReviewBusy] = useState(false);
+  const storageKey = 'channel-audit:formats:v1:'+slug;
+  function readCorrections(): Record<string,string> {
+    try { const v=JSON.parse(localStorage.getItem(storageKey) ?? '{}'); return v && typeof v === 'object' && !Array.isArray(v) ? v : {}; } catch { return {}; }
+  }
+  async function applyCorrections(data: ChannelAudit, signal?: AbortSignal): Promise<ChannelAudit> {
+    const overrides=readCorrections();
+    if (!Object.keys(overrides).length) return data;
+    const response=await fetch('/api/channel-audit/'+encodeURIComponent(slug), {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'review',overrides}),signal});
+    const result=await response.json();
+    if (!response.ok) throw Error(result.error ?? 'Could not apply saved format corrections.');
+    return result;
+  }
+  async function updateFormat(id:string, value:string) {
+    setReviewError(''); setReviewBusy(true);
+    try {
+      const overrides=readCorrections();
+      if(value==='auto') delete overrides[id]; else overrides[id]=value;
+      // Store only after successfully recalculating the full audit.
+      const response=await fetch('/api/channel-audit/'+encodeURIComponent(slug),{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'review',overrides})});
+      const data=await response.json(); if(!response.ok) throw Error(data.error ?? 'Could not update the audit.');
+      localStorage.setItem(storageKey,JSON.stringify(overrides)); setAudit(data);
+    } catch(e) { setReviewError(e instanceof Error ? e.message : 'Could not save the correction.'); } finally {setReviewBusy(false);}
+  }
   const activeScan=useRef<AbortController|null>(null);
   useEffect(()=>{
     if (!open) return;
@@ -20,7 +45,7 @@ export default function ChannelAuditButton({ slug, name }: { slug: string; name:
     const previous = document.body.style.overflow;
     document.body.style.overflow='hidden';
     setAudit(null); setError(''); setCopied(''); setScanStatus('');
-    fetch('/api/channel-audit/'+encodeURIComponent(slug),{signal:controller.signal}).then(async r=>{const data=await r.json();if(!r.ok)throw Error(data.error ?? 'Could not load the audit.');return data;}).then(d=>{if(controller.signal.aborted)return;setAudit(d);if(auditNeedsCatalogue(d))void scan();}).catch(e=>{if(e.name!=='AbortError')setError(e.message);});
+    fetch('/api/channel-audit/'+encodeURIComponent(slug),{signal:controller.signal}).then(async r=>{const data=await r.json();if(!r.ok)throw Error(data.error ?? 'Could not load the audit.');return applyCorrections(data,controller.signal);}).then(d=>{if(controller.signal.aborted)return;setAudit(d);if(auditNeedsCatalogue(d))void scan();}).catch(e=>{if(e.name!=='AbortError')setError(e.message);});
     return ()=>{controller.abort();activeScan.current?.abort();setScanning(false);document.body.style.overflow=previous;dialog.current?.close();};
   },[open,slug]);
   async function scan() {
@@ -32,7 +57,7 @@ export default function ChannelAuditButton({ slug, name }: { slug: string; name:
         const response=await fetch('/api/channel-audit/'+encodeURIComponent(slug),{method:'POST',signal:controller.signal});
         const data=await response.json();
         if(!response.ok)throw Error(data.error??'Scan failed; saved progress is preserved.');
-        setAudit(data);setScanStatus(`${data.catalogue.scannedIds} playlist IDs read${data.catalogue.complete?' · scan complete':' · collecting older uploads…'}`);
+        setAudit(await applyCorrections(data,controller.signal));setScanStatus(`${data.catalogue.scannedIds} playlist IDs read${data.catalogue.complete?' · scan complete':' · collecting older uploads…'}`);
         if(data.catalogue.complete)break;
         if(batch===19)setScanStatus('Progress saved. Select Continue scan for the remaining uploads.');
       }
@@ -77,6 +102,7 @@ export default function ChannelAuditButton({ slug, name }: { slug: string; name:
         <div className="rounded-lg border border-line p-4 text-xs flex flex-wrap items-center justify-between gap-3"><div className="flex-1 min-w-[220px]"><p className="font-bold">{audit.catalogue?.complete?'Full playlist scanned':audit.catalogue?'Catalogue scan in progress':'Recent-upload sample'}</p><p className="text-muted mt-1 leading-relaxed">{audit.coverage}</p><p aria-live="polite" className="mt-1 text-muted">{scanStatus}</p></div>{(!audit.catalogue?.complete || scanning) && <button disabled={scanning} onClick={scan} className="border border-line rounded px-3 py-2 font-bold disabled:opacity-50">{scanning?'Scanning…':audit.catalogue?.complete?'Check catalogue cache':audit.catalogue?'Continue scan':'Scan full catalogue'}</button>}<p className="w-full text-[10px] text-muted">Opening an audit collects the full public uploads playlist if needed. Completed scans are reused for 7 days.</p></div>
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 border-b border-line pb-5">{[['Subscribers',audit.stats.subs],['Lifetime channel views',audit.stats.lifetimeViews],['Channel views · 30d',audit.stats.views30d],['Channel views · 7d',audit.stats.views7d]].map(([label,value])=><div key={String(label)}><div className="text-2xl font-black">{auditNumber(value as number|null)}</div><p className="text-[10px] text-muted mt-1">{label}</p></div>)}</div>
         {audit.catalogue?.complete ? <ChannelAuditVisuals audit={audit}/> : <section className="border border-line rounded-lg p-6"><h3 className="font-black text-lg">Building the full-channel read</h3><p className="text-sm text-muted mt-2">Recent uploads alone can miss the videos that built this channel. Format verdicts and exports appear once the playlist scan finishes.</p><p role="status" className="text-xs font-semibold mt-3">{scanStatus||'Preparing catalogue scan…'}</p></section>}
+        {!!audit.formatReview?.total && <details className="border border-line rounded-lg p-4"><summary className="text-sm font-bold cursor-pointer">Review video formats · {audit.formatReview.total}</summary><p className="text-xs text-muted mt-2">Highest-viewed videos first. Likely music videos are suggestions based on production credits; check the video before confirming. Corrections are saved in this browser only and update this audit and its exports.</p>{reviewError && <p role="alert" className="text-xs text-red-700 mt-2">{reviewError}</p>}<div className="mt-3 divide-y divide-line">{audit.formatReview.videos.map(v=><div key={v.id} className="py-3 flex flex-wrap gap-3 items-center justify-between"><div className="min-w-0 flex-1"><a className="text-xs font-bold underline" href={'https://www.youtube.com/watch?v='+v.id} target="_blank" rel="noreferrer">{v.title} ↗</a><p className="text-[11px] text-muted mt-1">{auditNumber(v.views)} views · {v.reason}</p></div><label className="text-xs text-muted">Format <select aria-label={'Format for '+v.title} disabled={reviewBusy} value={v.reason==='Saved in this browser'?v.key:'auto'} onChange={e=>void updateFormat(v.id,e.target.value)} className="ml-2 border border-line rounded p-2 bg-white"><option value="auto">Automatic · {v.format}</option><option value="omv">Official music video</option><option value="live">Live performance</option><option value="lyric">Lyric video</option><option value="visualiser">Visualiser</option><option value="audio">Audio</option><option value="acoustic">Acoustic</option><option value="bts">Behind the scenes</option><option value="documentary">Documentary</option><option value="interview">Interview</option><option value="tour">Tour / festival</option><option value="short">Short</option><option value="longform">Other long-form</option></select></label></div>)}</div>{audit.formatReview.total>audit.formatReview.videos.length && <p className="text-xs text-muted mt-2">Showing the {audit.formatReview.videos.length} highest-viewed videos needing review.</p>}</details>}
         <details className="border-t border-line pt-4"><summary className="text-sm font-bold cursor-pointer">Video evidence, asset checks & past campaigns</summary><div className="space-y-6 mt-5">
         <section><h3 className="text-lg font-black mb-4">What is working</h3><div className="space-y-5">{audit.findings.map(f=><Finding key={f.title} finding={f}/>)}</div></section>
         <section className="rounded-lg p-5" style={{background:'#F6F1E7'}}><h3 className="text-lg font-black mb-4">Missed opportunities & asset checks</h3>{audit.gaps.length ? <div className="space-y-5">{audit.gaps.map(f=><Finding key={f.title} finding={f}/>)}</div> : <p className="text-sm">No specific gap identified in the tracked sample. This does not confirm that the channel has every asset it needs.</p>}</section>

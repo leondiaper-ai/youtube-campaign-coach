@@ -10,7 +10,7 @@ import { buildChannelAudit } from '@/lib/channelAudit';
 import { readAuditCatalogue, scanAuditCatalogue } from '@/lib/channelAuditCatalogue';
 import type { TerritoriesResult } from '@/lib/chartmetric/territories';
 export const dynamic = 'force-dynamic';
-export async function GET(_req: NextRequest, { params }: { params: { slug: string } }) {
+async function readAudit(_req: NextRequest, { params }: { params: { slug: string } }, formatOverrides: Record<string, import('@/lib/formatClassifier').UploadFormat> = {}) {
   const artist = mergeArtistLists(ARTISTS, await listCustomArtists()).find(a=>a.slug===params.slug);
   if (!artist) return NextResponse.json({error:'Artist not found'}, {status:404});
   const snap = artist.channelHandle ? await readLiveSnapByHandle(artist.channelHandle) : null;
@@ -26,7 +26,7 @@ export async function GET(_req: NextRequest, { params }: { params: { slug: strin
   }
   const available = markets?.ok ? markets : null;
   const territories = available?.countries.slice().sort((a,b)=>b.monthlyViews-a.monthlyViews).slice(0,5).map(t=>({name:t.name,views:t.monthlyViews,estimated:t.isEstimate}));
-  const audit = buildChannelAudit({name:artist.name,slug:artist.slug,dataAt:snap.cachedAt ?? null,uploads:catalogue?.uploads ?? snap.recentUploads ?? [],catalogue:catalogue ? {complete:catalogue.complete && catalogue.includesLinkedUploads===true,linkedUploads:catalogue.uploads.filter(u=>u.uploaderChannelId && u.uploaderChannelId!==snap.channelId).length,fetchedAt:catalogue.fetchedAt,publicVideoCount:catalogue.publicVideoCount,scannedIds:catalogue.scannedIds} : undefined,stats:{subs:nc.subs,lifetimeViews:nc.views,views7d:rawDelta(nc.views7d),views30d:rawDelta(nc.views30d),subs7d:rawDelta(nc.subs7d)},territories,territoryNote:available ? `Chartmetric monthly YouTube views by country · reported ${available.reportingDate ?? 'date unavailable'} · cached ${available.fetchedAt.slice(0,10)}. Artist-level context, not recording-level demand; estimates are marked. No country trend is inferred.` : 'Country data is unavailable in the cache. Open the artist’s Markets section to check the existing territory integration; no market is assumed.'});
+  const audit = buildChannelAudit({formatOverrides,name:artist.name,slug:artist.slug,dataAt:snap.cachedAt ?? null,uploads:catalogue?.uploads ?? snap.recentUploads ?? [],catalogue:catalogue ? {complete:catalogue.complete && catalogue.includesLinkedUploads===true,linkedUploads:catalogue.uploads.filter(u=>u.uploaderChannelId && u.uploaderChannelId!==snap.channelId).length,fetchedAt:catalogue.fetchedAt,publicVideoCount:catalogue.publicVideoCount,scannedIds:catalogue.scannedIds} : undefined,stats:{subs:nc.subs,lifetimeViews:nc.views,views7d:rawDelta(nc.views7d),views30d:rawDelta(nc.views30d),subs7d:rawDelta(nc.subs7d)},territories,territoryNote:available ? `Chartmetric monthly YouTube views by country · reported ${available.reportingDate ?? 'date unavailable'} · cached ${available.fetchedAt.slice(0,10)}. Artist-level context, not recording-level demand; estimates are marked. No country trend is inferred.` : 'Country data is unavailable in the cache. Open the artist’s Markets section to check the existing territory integration; no market is assumed.'});
   const deck = SEEDED_DEEP_DIVES[DEEP_DIVE_BY_NAME[normaliseName(artist.name)]];
   const link = deepDiveFor(artist.name);
   if (deck || link) {
@@ -36,9 +36,18 @@ export async function GET(_req: NextRequest, { params }: { params: { slug: strin
   return NextResponse.json(audit,{headers:{'Cache-Control':'private, no-store'}});
 }
 
+export async function GET(req: NextRequest, ctx: { params: { slug: string } }) { return readAudit(req,ctx); }
 export const maxDuration = 60;
 export async function POST(req: NextRequest, ctx: { params: { slug: string } }) {
   if (req.headers.get('origin') !== req.nextUrl.origin) return NextResponse.json({error:'Same-origin request required'}, {status:403});
+  if (req.headers.get('content-type')?.includes('application/json')) {
+    const body = await req.json().catch(()=>null);
+    if (body?.action === 'review') {
+      const source = body.overrides;
+      if (!source || typeof source !== 'object' || Array.isArray(source) || Object.keys(source).length > 5000) return NextResponse.json({error:'Invalid format corrections'}, {status:400});
+      return readAudit(req,ctx,source);
+    }
+  }
   const artist = mergeArtistLists(ARTISTS, await listCustomArtists()).find(a=>a.slug===ctx.params.slug);
   if (!artist) return NextResponse.json({error:'Artist not found'},{status:404});
   const snap = artist.channelHandle ? await readLiveSnapByHandle(artist.channelHandle) : null;
