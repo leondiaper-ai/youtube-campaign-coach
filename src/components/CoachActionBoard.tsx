@@ -16,11 +16,13 @@ const fmt = (date: string) =>
     year: "numeric",
   });
 export default function CoachActionBoard({
+  mode = "full",
   tracks,
   slug,
   evidence,
   decisions: initial,
 }: {
+  mode?: "full" | "overview" | "embedded";
   tracks: TrackRoadmap[];
   slug: string;
   evidence: CoachSummary;
@@ -53,7 +55,7 @@ export default function CoachActionBoard({
   useEffect(() => {
     const timer = setInterval(() => {
       if (
-        !document.hidden &&
+        mode !== "embedded" && !document.hidden &&
         !["INPUT", "SELECT", "TEXTAREA"].includes(
           document.activeElement?.tagName ?? "",
         )
@@ -61,7 +63,7 @@ export default function CoachActionBoard({
         router.refresh();
     }, 120000);
     return () => clearInterval(timer);
-  }, [router]);
+  }, [router, mode]);
   async function save(id: string, decision: Decision) {
     setBusy(id);
     setError("");
@@ -74,6 +76,7 @@ export default function CoachActionBoard({
       if (!response.ok)
         throw new Error((await response.json()).error ?? "Save failed");
       setDecisions((old) => ({ ...old, [id]: decision }));
+      router.refresh();
     } catch (e) {
       setError(e instanceof Error ? e.message : "Could not save. Try again.");
     } finally {
@@ -98,8 +101,9 @@ export default function CoachActionBoard({
     }
   }
   return (
-    <section className="coach-board" aria-label="Campaign asset roadmap">
+    <section className="coach-board" style={mode === "embedded" ? {padding:0} : undefined} aria-label="Campaign asset roadmap">
       <style>{`.coach-board{max-width:1180px;margin:0 auto;padding:28px 40px;color:#0e0e0e}.coach-summary{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:20px 0}.coach-summary>div{background:white;border:1px solid #e7e2d8;border-radius:10px;padding:16px}.coach-summary strong{display:block;font-size:28px;line-height:1.15}.coach-summary span{font-size:12px;color:#615c53}.coach-track{background:white;border:1px solid #e7e2d8;border-radius:12px;margin-top:16px;overflow:hidden}.coach-track>summary{cursor:pointer;padding:20px;font-weight:750}.coach-action{display:grid;grid-template-columns:minmax(170px,1.4fr) minmax(130px,1fr) minmax(145px,1fr);gap:16px;padding:18px 20px;border-top:1px solid #eee9e1;align-items:start}.coach-action label{display:block;font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:#615c53;margin-bottom:5px}.coach-action select,.coach-action input{font:inherit;font-size:14px;border:1px solid #c9c2b6;border-radius:6px;padding:9px;max-width:100%;width:100%;background:white;color:#0e0e0e}.coach-action details{margin-top:8px;font-size:12px;line-height:1.6;color:#615c53}.coach-action details summary{cursor:pointer;text-decoration:underline}.coach-action a{color:#2d6a4f;text-decoration:underline}.coach-muted{font-size:12px;color:#615c53;line-height:1.6}.coach-tools{display:flex;gap:12px;align-items:center;flex-wrap:wrap}.coach-tools button{border:1px solid #c9c2b6;border-radius:6px;padding:8px 12px;background:white;font-weight:650;cursor:pointer}.coach-tools a{color:#2d6a4f;text-decoration:underline}.coach-action :focus-visible,.coach-track summary:focus-visible{outline:2px solid #2d6a4f;outline-offset:3px}@media(max-width:700px){.coach-board{padding:24px 18px}.coach-action{grid-template-columns:1fr;gap:12px}.coach-summary{gap:7px}.coach-summary>div{padding:12px}.coach-summary strong{font-size:24px}}`}</style>
+      {mode !== "embedded" && <>
       <div
         style={{
           fontSize: 11,
@@ -118,7 +122,7 @@ export default function CoachActionBoard({
           margin: "8px 0",
         }}
       >
-        What is live. What needs a decision. What happens next.
+        Channel intelligence for this campaign
       </h2>
       <p className="coach-muted">
         Suggestions use this channel’s automatic audit, campaign dates and
@@ -136,7 +140,7 @@ export default function CoachActionBoard({
           <strong>
             {pending.filter((x) => !x.d || x.d.status === "suggested").length}
           </strong>
-          <span>Suggestions to agree</span>
+          <span>Asset suggestions to agree below</span>
         </div>
         <div>
           <strong>
@@ -232,19 +236,20 @@ export default function CoachActionBoard({
           footage, rights and budget before adding production.
         </p>
       </details>
-      {!tracks.length && (
+      </>}
+      {mode !== "overview" && !tracks.length && (
         <p>
           No identifiable single-release moments yet. Add named focus tracks and
           release dates using Adjust timeline below; album and tour dates remain
           in the campaign timeline.
         </p>
       )}
-      {tracks.map((track) => (
+      {mode !== "overview" && tracks.map((track) => (
         <details
           className="coach-track"
           key={track.id}
           open={
-            track.releaseDate >=
+            mode === "embedded" || track.releaseDate >=
             new Date(Date.now() - 28 * 86400000).toISOString().slice(0, 10)
           }
         >
@@ -354,6 +359,7 @@ export default function CoachActionBoard({
                       }}
                     />
                   )}
+                  {!actual && <p className="coach-muted">{fmt(target)}</p>}
                   {!actual &&
                     target < today &&
                     d.status !== "done" &&
