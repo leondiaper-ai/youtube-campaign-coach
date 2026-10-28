@@ -12,11 +12,13 @@ import { loadDriveLibrary } from '@/lib/driveStore';
 import { reclassifyFromPlan } from '@/lib/driveAssets';
 import { mappingConfigFor, getCampaignConfig } from '@/lib/campaignConfig';
 import CampaignWarRoom from '@/components/CampaignWarRoom';
+import { loadCoachEvidence, readDecisions } from '@/lib/coach/evidence';
+import { buildRoadmap, type CoachSummary } from '@/lib/coach/roadmap';
 import type { RecentUpload } from '@/lib/artists';
 
-// Short window while the planner is in active development — drops stale HTML
-// fast on each deploy. Move back to 600 (or on-demand revalidation) once stable.
-export const revalidate = 60;
+// The roadmap reads saved team decisions and the latest cached uploads on every
+// request. Channel API collection still uses its own cache / explicit scan.
+export const dynamic = 'force-dynamic';
 
 type PageProps = {
   params: Promise<{ slug: string }>;
@@ -49,6 +51,8 @@ export default async function CampaignPage({ params }: PageProps) {
   } | null = null;
 
   let recentUploads: RecentUpload[] = [];
+  let evidenceChannelId: string | undefined;
+  let evidenceDataAt: string | null = null;
 
   // Find the artist's channel handle
   const custom = await listCustomArtists();
@@ -180,6 +184,8 @@ export default async function CampaignPage({ params }: PageProps) {
 
         // Pass recent uploads for execution matching
         recentUploads = snap.recentUploads ?? [];
+        evidenceChannelId = snap.channelId || channelId || undefined;
+        evidenceDataAt = snap.cachedAt ?? null;
       }
     } catch {
       // Live data is optional — page works without it
@@ -225,8 +231,23 @@ export default async function CampaignPage({ params }: PageProps) {
   // + future surfaces); the V4 war-room view leads with the master timeline.
   void matchResult; void nudges; void dataCoverage;
 
+  const [coachEvidence, coachDecisions] = await Promise.all([
+    loadCoachEvidence({slug:artistConfig?.slug ?? saved.artist.toLowerCase().replace(/\s+/g, "-"), name:saved.artist, channelId:evidenceChannelId, uploads:recentUploads, dataAt:evidenceDataAt}),
+    readDecisions(saved.slug),
+  ]);
+
+  const coachRoadmap = buildRoadmap(saved.plan, coachEvidence, Date.now(), driveLibrary);
+  const evidenceSummary: CoachSummary = {
+    artistSlug:coachEvidence.artistSlug,
+    audit:{catalogue:coachEvidence.audit.catalogue,coverage:coachEvidence.audit.coverage,dataAt:coachEvidence.audit.dataAt,visuals:{takeaway:coachEvidence.audit.visuals.takeaway}},
+    dive:coachEvidence.dive ? {dataCapturedAt:coachEvidence.dive.dataCapturedAt,deckUrl:coachEvidence.dive.deckUrl} : null,
+  };
+
   return (
     <CampaignWarRoom
+      coachEvidence={evidenceSummary}
+      coachRoadmap={coachRoadmap}
+      coachDecisions={coachDecisions}
       plan={saved.plan}
       slug={saved.slug}
       artistName={saved.artist}

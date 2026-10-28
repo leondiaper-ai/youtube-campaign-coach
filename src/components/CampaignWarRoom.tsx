@@ -20,6 +20,8 @@
 
 import { useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import CoachActionBoard from './CoachActionBoard';
+import type { CoachSummary, TrackRoadmap, Decisions } from '@/lib/coach/roadmap';
 import type { GeneratedPlan, ParsedEvent, PhaseName, TimelineKind, ChannelContext } from '@/lib/planEngine';
 import type { RecentUpload } from '@/lib/artists';
 import { fmtNum } from '@/lib/artists';
@@ -211,6 +213,9 @@ function phaseForDate(iso: string, firstRel?: string, lastRel?: string): PhaseNa
 
 // ── Props ──
 type Props = {
+  coachEvidence?: CoachSummary;
+  coachRoadmap?: TrackRoadmap[];
+  coachDecisions?: Decisions;
   plan: GeneratedPlan;
   slug: string;
   artistName: string;
@@ -290,24 +295,27 @@ export default function CampaignWarRoom(props: Props) {
     <div style={{ minHeight: '100vh', background: PAPER, color: INK }}>
       <CampaignRead
         artist={plan.artist} title={campaignTitle} phase={m.currentPhase}
-        headline={headline}
+        headline={props.coachEvidence ? (nextMoment ? `Next planned moment: ${cleanTitle(nextMoment.e.title)} — ${fmtDay(nextMoment.e.dateISO)}. Published assets and next steps below.` : "Review the published assets and agree the next campaign steps below.") : headline}
       />
-      <CampaignStatus
+      {!props.coachEvidence && <CampaignStatus
         rolloutActive={recentUploads.some((u) => daysAgoNum(u.publishedAt) <= 45)}
         datesMapped={events.length > 0}
         pipelineReady={hasAssets}
         nextTitle={nextMoment ? cleanTitle(nextMoment.e.title) : undefined}
         nextDate={nextMoment ? fmtDay(nextMoment.e.dateISO) : undefined}
         focus={focus}
-      />
+      />}
+      {props.coachEvidence && <CoachActionBoard tracks={props.coachRoadmap ?? []} slug={props.slug} evidence={props.coachEvidence} decisions={props.coachDecisions ?? {}} />}
+      <details open={!props.coachEvidence} style={{maxWidth:1180,margin:"12px auto",padding:"0 20px"}}><summary style={{cursor:"pointer",padding:"16px 20px",fontWeight:700,borderTop:`1px solid ${BONE}`}}>Channel activity, asset folders and campaign timeline</summary>
       <CurrentYouTubeSurface recentUploads={recentUploads} campaignStart={campaignStartDate} knownTitles={knownTitles} nextLinkedEvent={nextMoment?.e.videoId ? nextMoment.e : undefined} />
       <RecentActivity recentUploads={recentUploads} liveChannel={liveChannel} campaignStart={campaignStartDate} />
       <ContentSupply events={events} library={lib} hasAssets={hasAssets} folderUrl={lib.folderUrl || driveFolderUrl} slug={props.slug} />
-      <MasterTimeline
+      {props.coachEvidence ? <section style={{padding:"24px 20px"}}><h2 style={{fontSize:18,fontWeight:800,marginBottom:12}}>Campaign calendar</h2><p style={{fontSize:12,color:SMOKE,marginBottom:16}}>Team-supplied dates. Track-specific asset decisions are in the roadmap above.</p>{events.map((event,i)=><div key={event.dateISO+":"+i} style={{display:"flex",gap:16,padding:"12px 0",borderTop:`1px solid ${BONE}`,flexWrap:"wrap"}}><strong style={{minWidth:100}}>{fmtDay(event.dateISO)}</strong><span>{cleanTitle(event.title)}</span></div>)}</section> : <MasterTimeline
         events={events} mappings={m.mappings} phases={m.phases} activeIdx={activeIdx}
         recentUploads={recentUploads} campaignStart={campaignStartDate} knownTitles={knownTitles} pool={pool}
         folderUrl={lib.folderUrl || driveFolderUrl} slug={props.slug} hasAssets={hasAssets}
-      />
+      />}
+      </details>
       <EditTimelineFooter
         slug={props.slug} artistName={props.artistName} currentTimeline={props.timelineText ?? ''}
         channelCtx={props.channelCtx} campaignStartDate={props.campaignStartDate}
