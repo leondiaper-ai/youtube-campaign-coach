@@ -269,6 +269,27 @@ h3.display{font-size:clamp(1.25rem,2.2vw,1.9rem);font-weight:800}
 .fd p b{color:var(--cream);font-weight:600}
 @media(max-width:560px){.shelf{grid-template-columns:1.4rem 1fr}.shelf .k{grid-column:2}.fd{grid-template-columns:1fr}}
 
+/* ── Slide 10 · supporting the sets ─────────────────────────────────*/
+.fix3{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(.8rem,2.2vw,2rem)}
+@media(max-width:760px){.fix3{grid-template-columns:1fr}}
+.fix3>div{border-top:2px solid var(--c);padding-top:.55rem;display:grid;grid-template-columns:auto 1fr;gap:.8rem;align-items:center}
+.fix3 .big-num{font-size:clamp(1.9rem,3.4vw,3rem);color:var(--c);white-space:nowrap}
+.fix3 p{font-size:.8rem;color:var(--warm);line-height:1.35}
+.fix3 p b{color:var(--cream);font-weight:600}
+.sup{display:grid;grid-template-columns:1fr 1fr;gap:clamp(1rem,2.6vw,2.4rem)}
+@media(max-width:860px){.sup{grid-template-columns:1fr}}
+.sup-col{display:flex;flex-direction:column;gap:.55rem;min-width:0}
+.sup-h{font-family:'DM Mono',monospace;font-size:.62rem;letter-spacing:.16em;text-transform:uppercase;color:var(--c);border-bottom:1px solid var(--line);padding-bottom:.35rem}
+.sc{display:grid;grid-template-columns:clamp(88px,9.5vw,132px) 1fr;gap:.75rem;align-items:center;padding:.35rem .4rem;border-radius:3px;background:rgba(244,240,232,.035);border-left:2px solid var(--c)}
+.sc .thumb{border-radius:2px}
+.sc h4{font-family:'Big Shoulders Display',sans-serif;font-weight:800;text-transform:uppercase;font-size:clamp(1rem,1.4vw,1.25rem);line-height:1;color:var(--cream)}
+.sc h4 i{font-style:normal;color:var(--c);margin-left:.35rem}
+.sc p{font-size:.74rem;color:var(--warm);line-height:1.3;margin-top:.15rem}
+.chips{display:flex;flex-wrap:wrap;gap:.25rem;margin-top:.35rem}
+.chips a,.chips span{font-family:'DM Mono',monospace;font-size:.56rem;letter-spacing:.04em;padding:.16rem .4rem;border-radius:2px;border:1px solid rgba(244,240,232,.18);color:var(--cream);text-decoration:none;white-space:nowrap}
+.chips a:hover{border-color:var(--c);color:var(--c)}
+.chips .gap{border-style:dashed;border-color:var(--c);color:var(--c)}
+
 /* ── Slide 11 · strengths ───────────────────────────────────────────*/
 .lanes{display:grid;grid-template-columns:repeat(5,1fr);gap:clamp(.7rem,1.4vw,1.3rem)}
 @media(max-width:1100px){.lanes{grid-template-columns:repeat(3,1fr)}}
@@ -317,6 +338,11 @@ h3.display{font-size:clamp(1.25rem,2.2vw,1.9rem);font-weight:800}
 .asks p{font-size:.76rem;color:var(--warm);line-height:1.4}
 .asks p b{display:block;color:var(--cream);font-weight:600;margin-bottom:.15rem}
 
+.prio ol.steps{list-style:none;counter-reset:st;margin-top:.7rem;border-top:1px solid var(--line)}
+.prio ol.steps li{counter-increment:st;font-size:.74rem;color:var(--warm);line-height:1.38;padding:.32rem 0 .32rem 1.4rem;position:relative;border-bottom:1px solid var(--line)}
+.prio ol.steps li::before{content:counter(st);position:absolute;left:0;top:.32rem;font-family:'DM Mono',monospace;font-size:.62rem;color:var(--c)}
+.prio ol.steps li b{color:var(--cream);font-weight:600}
+.prio li a{color:var(--cream);text-decoration-color:var(--c);text-underline-offset:2px}
 .prio .pd{display:grid;grid-template-columns:5.2rem 1fr;gap:.28rem .6rem;margin-top:.7rem;font-size:.7rem;line-height:1.36}
 .prio .pd dt{font-family:'DM Mono',monospace;font-size:.56rem;letter-spacing:.12em;text-transform:uppercase;color:var(--c);padding-top:.12rem}
 .prio .pd dd{color:var(--warm)}
@@ -598,39 +624,39 @@ body.sheet-open .chrome,body.sheet-open #pbar{display:none}
     <div class="cal stagger" id="cal" style="margin-top:clamp(1.3rem,2.8vw,2.2rem)"></div>
     <div class="grid2 reveal" style="margin-top:1.4rem;grid-template-columns:1.1fr 1fr;align-items:start">
       <p class="body" style="font-size:.92rem">EDC Las Vegas ran the whole cycle on YouTube: a <b>lineup-reveal stream in February (227K)</b>, the trailer, the live festival, then 79 sets. Zombie Apocalypse added five. Twelve other 2026 events — EDC Mexico, Beyond Wonderland, Escape and more — appear as <b>a trailer or an aftermovie</b>. Whether they were filmed, and on what terms, isn't visible from outside.</p>
-      <p class="body" style="font-size:.92rem">The autumn is quieter: <b>19 uploads in September–October</b>, against 135 a year earlier. Nearly all of the difference is Shorts (115 then, 11 now); the year-long high-volume Shorts run has ended, and output is back near 2023–24 levels. That is a publishing rhythm, not a measure of demand — and <b>Insomniac TV</b> has kept the channel live throughout.</p>
+      <p class="body" style="font-size:.92rem">Between events, the channel ran a tightly scheduled Shorts programme — <b>19 a week for 26 consecutive weeks</b>, October to March. This autumn it went quiet: <b>no Shorts for 35 days</b>, three weeks with no uploads at all, and a <b>19.7-day silence — the longest since at least 2019</b>. That describes publishing, not audience demand, and it ended with the 30 Years of EDC documentary. The question is what between-event rhythm Insomniac <i>wants</i> — Insomniac TV has kept the channel live throughout.</p>
     </div>
   </div>
 </section>
 
-<!-- ═══ 10 · CHANNEL EXPERIENCE ═════════════════════════════════════ -->
-<section class="slide" data-t="Channel experience">
+<!-- ═══ 10 · SUPPORTING THE BIGGEST PERFORMANCES ══════════════════════
+     Evidence: audit pack §10.3–10.4 (watch pages and playlists read
+     28 Oct 2026). "No artist-named Short" = none naming the artist in
+     title or description since Oct 2025 — a lower bound, not proof. -->
+<section class="slide" data-t="Supporting the sets">
   <div class="inner">
-    <div class="label reveal">Channel organisation and discoverability</div>
-    <h2 class="display tight reveal" style="margin-top:.7rem;max-width:24ch">Home already leads with the sets. The library behind it needs finishing.</h2>
-    <div class="grid2" style="margin-top:clamp(1.3rem,2.8vw,2.2rem);align-items:start;grid-template-columns:.9fr 1.1fr">
-      <div class="reveal">
-        <div class="label" style="margin-bottom:.6rem">Home on 28 October, top to bottom</div>
-        <div class="homerail">
-          <div class="shelf"><span class="i">01</span><span class="t">Insomniac TV <i>the live station, playing now</i></span><span class="k">keep</span></div>
-          <div class="shelf"><span class="i">02</span><span class="t">EDC Las Vegas 2026 Full Sets</span><span class="k">keep</span></div>
-          <div class="shelf"><span class="i">03</span><span class="t">For You <i>YouTube's own pick</i></span><span class="k">keep</span></div>
-          <div class="shelf"><span class="i">04</span><span class="t">Electric Daisy Carnival</span><span class="k">keep</span></div>
-          <div class="shelf"><span class="i">05</span><span class="t">Shorts</span><span class="k">keep</span></div>
-          <div class="shelf"><span class="i">06</span><span class="t">Insomniac Events Live <i>sets on artists' channels</i></span><span class="k">keep</span></div>
-        </div>
-        <p class="body" style="margin-top:1rem;font-size:.88rem">A clear, set-led front page, and <b>108 public playlists</b> behind it — EDC set playlists by year, Zombie Apocalypse, label imprints, the lockdown archive, a 20-year EDC series. A well-kept channel.</p>
+    <div class="label reveal">Channel organisation · the biggest performances</div>
+    <h2 class="display tight reveal" style="margin-top:.7rem;max-width:32ch">Are the biggest performances getting the support they deserve?</h2>
+    <div class="fix3 stagger" style="margin-top:clamp(1rem,2.2vw,1.6rem)">
+      <div style="--c:var(--violet)"><div class="big-num">11+</div><p><b>artist-hosted 2026 sets, 7.2M views,</b> in neither Insomniac Events Live nor the 2026 set playlist</p></div>
+      <div style="--c:var(--amber)"><div class="big-num">18</div><p><b>EDC sets, 1.03M views,</b> outside the EDC Las Vegas 2026 Full Sets playlist</p></div>
+      <div style="--c:var(--cyan)"><div class="big-num">2 of 79</div><p><b>EDC 2026 sets with chapters</b> — against 3 of 5 at Zombie Apocalypse</p></div>
+    </div>
+    <div class="sup" style="margin-top:clamp(1rem,2.2vw,1.6rem)">
+      <div class="sup-col reveal">
+        <div class="sup-h" style="--c:var(--green)">Already working</div>
+        <div class="sc" style="--c:var(--green)"><a class="thumb" href="https://www.youtube.com/watch?v=l5wro3bMZWc" target="_blank" rel="noopener"><img data-vid="l5wro3bMZWc" alt="Kaskade at EDC Las Vegas 2026"></a><div><h4>Kaskade <i>442K</i></h4><p>One connected journey</p><div class="chips"><a href="https://www.youtube.com/watch?v=FK47T9W_cmM" target="_blank" rel="noopener">Short · 21K</a><a href="https://www.youtube.com/watch?v=kc9_A3goOAQ" target="_blank" rel="noopener">Afterparty live</a><a href="https://www.youtube.com/watch?v=l5wro3bMZWc" target="_blank" rel="noopener">Full set</a><a href="https://www.youtube.com/watch?v=J1yT2WhrrrA" target="_blank" rel="noopener">Live clip · 40K</a><a href="https://www.youtube.com/watch?v=Tft7mF8UsO4" target="_blank" rel="noopener">Inside The Drop</a><a href="https://www.youtube.com/watch?v=sBZc8aoUFhk" target="_blank" rel="noopener">2nd set · 124K</a></div></div></div>
+        <div class="sc" style="--c:var(--green)"><a class="thumb" href="https://www.youtube.com/watch?v=-A-XIBMDgj0" target="_blank" rel="noopener"><img data-vid="-A-XIBMDgj0" alt="Subtronics at EDC Las Vegas 2026"></a><div><h4>Subtronics <i>493K</i></h4><p>Editorial before, Shorts after</p><div class="chips"><a href="https://www.youtube.com/watch?v=-sncABS6AV8" target="_blank" rel="noopener">Inside The Drop · 29K</a><a href="https://www.youtube.com/watch?v=-A-XIBMDgj0" target="_blank" rel="noopener">Full set</a><a href="https://www.youtube.com/watch?v=ouihpBTPAUk" target="_blank" rel="noopener">Short · 26K</a><a href="https://www.youtube.com/watch?v=WAcOtBYL2UI" target="_blank" rel="noopener">Short · 20K</a></div></div></div>
+        <div class="sc" style="--c:var(--green)"><a class="thumb" href="https://www.youtube.com/watch?v=Jpei7G2j0EQ" target="_blank" rel="noopener"><img data-vid="Jpei7G2j0EQ" alt="Zomboy at Zombie Apocalypse 2026"></a><div><h4>Zomboy <i>117K</i></h4><p>The best-kept set page</p><div class="chips"><a href="https://www.youtube.com/watch?v=Jpei7G2j0EQ" target="_blank" rel="noopener">33 chapters</a><span>Artist links</span><span>Festival playlist</span></div></div></div>
       </div>
-      <div class="reveal">
-        <div class="label" style="margin-bottom:.4rem">What's confirmed, and what needs Studio</div>
-        <div class="find">
-          <div class="fd" style="--c:var(--amber)"><span class="tag">Confirmed</span><p><b>18 of the 79 EDC 2026 sets aren't in the 2026 full-set playlist</b> — including Meduza³ (262K), Whethan (126K) and Andrew Rayel (93K).</p></div>
-          <div class="fd" style="--c:var(--amber)"><span class="tag">Confirmed</span><p><b>2 of 63 sets have a tracklist or timestamps.</b> Every description names the stage, but there is no way to browse by stage, sound or artist.</p></div>
-          <div class="fd" style="--c:var(--amber)"><span class="tag">Confirmed</span><p><b>Night Owl Radio stops at episode 524</b> (September 2025) on the channel; the show is still weekly elsewhere (#584, 24 October).</p></div>
-          <div class="fd" style="--c:var(--cyan)"><span class="tag">Studio</span><p>Whether Shorts link to their full set (none visible on the ones we sampled, but the public page doesn't reliably show it); end screens and cards; how much set viewing comes from playlists, Home and suggested.</p></div>
-        </div>
+      <div class="sup-col reveal">
+        <div class="sup-h" style="--c:var(--magenta)">Room to connect</div>
+        <div class="sc" style="--c:var(--magenta)"><a class="thumb" href="https://www.youtube.com/watch?v=g1vH9C_o-vo" target="_blank" rel="noopener"><img data-vid="g1vH9C_o-vo" alt="Solomun at EDC Las Vegas 2026"></a><div><h4>Solomun <i>650K</i></h4><p>The channel's most-watched 2026 set</p><div class="chips"><span class="gap">No artist-named Short found</span><span class="gap">No chapters</span></div></div></div>
+        <div class="sc" style="--c:var(--magenta)"><a class="thumb" href="https://www.youtube.com/watch?v=W3VuzjQfWz4" target="_blank" rel="noopener"><img data-vid="W3VuzjQfWz4" alt="Meduza³ at EDC Las Vegas 2026"></a><div><h4>Meduza³ <i>262K</i></h4><p>Its end screen promotes a playlist it isn't in</p><div class="chips"><span class="gap">Missing from the 2026 playlist</span></div></div></div>
+        <div class="sc" style="--c:var(--magenta)"><a class="thumb" href="https://www.youtube.com/watch?v=kG0SVvz9e-g" target="_blank" rel="noopener"><img data-vid="kG0SVvz9e-g" alt="Tiësto at EDC Las Vegas 2026"></a><div><h4>On artists' channels <i>5.8M</i></h4><p>Credited to Insomniac; in none of its 108 playlists</p><div class="chips"><a href="https://www.youtube.com/watch?v=kG0SVvz9e-g" target="_blank" rel="noopener">Tiësto 2.2M</a><a href="https://www.youtube.com/watch?v=is834eCbUD4" target="_blank" rel="noopener">Charlotte de Witte 1.3M</a><a href="https://www.youtube.com/watch?v=n-MhD_TdzN4" target="_blank" rel="noopener">Armin van Buuren 1.3M</a><a href="https://www.youtube.com/watch?v=OI02QgEA1Zw" target="_blank" rel="noopener">Above &amp; Beyond 993K</a></div></div></div>
       </div>
     </div>
+    <p class="statement reveal" style="margin-top:clamp(.9rem,1.8vw,1.3rem);max-width:72ch;font-size:clamp(.92rem,1.25vw,1.1rem)">The content exists. <span style="color:var(--amber)">The quickest wins are linking it</span> — playlists, chapters and clear routes from Shorts to sets, applied where the strongest examples already show the way.</p>
   </div>
 </section>
 
@@ -709,58 +735,53 @@ body.sheet-open .chrome,body.sheet-open #pbar{display:none}
   </div>
 </section>
 
-<!-- ═══ 13 · DOUBLE DOWN, OPTIMISE, EXPERIMENT ═══════════════════════ -->
+<!-- ═══ 13 · DOUBLE DOWN, OPTIMISE, EXPERIMENT ═══════════════════════
+     Optimise actions and denominators: audit pack §10.4, §10.7. -->
 <section class="slide" data-t="Where to focus">
   <div class="inner">
     <div class="label reveal">Where to focus next</div>
     <h2 class="display tight reveal" style="margin-top:.7rem;max-width:24ch">Double down, optimise, experiment.</h2>
     <div class="prios stagger" style="margin-top:clamp(1.1rem,2.4vw,1.8rem)">
       <div class="prio" style="--c:var(--amber)">
-        <div class="d">Double down · strategic</div>
-        <h3 class="display">Extend what already works</h3>
+        <div class="d">Double down · proven</div>
+        <h3 class="display">Keep building the full-set and artist model</h3>
         <ul>
-          <li><b>Full festival sets</b>, on the EDC 2026 model</li>
-          <li><b>Artist-channel Collaborations</b>, agreed set by set</li>
-          <li><b>Live → sets → Insomniac TV</b>, the EDC cycle</li>
-          <li><b>Afterparties</b> and lineup-reveal streams</li>
+          <li><b>Full festival sets</b>, on the EDC 2026 model — 79 sets, 10.1M views</li>
+          <li><b>Artist Collaborations</b>, both directions — 46.9M across the artist-channel playlist</li>
+          <li><b>Live moments</b>: Afterparties, lineup-reveal streams, Insomniac TV</li>
+          <li><b>Kaskade as the template</b>: <a href="https://www.youtube.com/watch?v=FK47T9W_cmM" target="_blank" rel="noopener">Short</a> → <a href="https://www.youtube.com/watch?v=kc9_A3goOAQ" target="_blank" rel="noopener">Afterparty</a> → <a href="https://www.youtube.com/watch?v=l5wro3bMZWc" target="_blank" rel="noopener">set</a> → <a href="https://www.youtube.com/watch?v=J1yT2WhrrrA" target="_blank" rel="noopener">live clip</a> → <a href="https://www.youtube.com/watch?v=Tft7mF8UsO4" target="_blank" rel="noopener">Inside The Drop</a></li>
         </ul>
         <dl class="pd">
-          <dt>Evidence</dt><dd>79 sets, 10.1M, two-thirds of 2026's views; 46.9M across the artist-channel playlist</dd>
-          <dt>Next step</dt><dd>Plan EDC 2027's sets and credits on the 2026 model</dd>
-          <dt>Measure</dt><dd>Views at 30 and 90 days against 2026's stage medians</dd>
+          <dt>Measure</dt><dd>Set views at 30 and 90 days against 2026's stage medians</dd>
           <dt>Studio</dt><dd>Subscribers and returning viewers from sets; Collaboration split</dd>
         </dl>
       </div>
       <div class="prio" style="--c:var(--cyan)">
-        <div class="d">Optimise · quick</div>
+        <div class="d">Optimise · confirmed fixes</div>
         <h3 class="display">Connect what's already there</h3>
-        <ul>
-          <li><b>Add the 18 missing sets</b> to the 2026 playlist</li>
-          <li><b>Tracklists and chapters</b> on the most-watched sets</li>
-          <li><b>Browse by stage, sound and artist</b></li>
-          <li><b>Shorts linked to their full set</b>; Insomniac TV surfaced between events</li>
-        </ul>
+        <ol class="steps">
+          <li><b>Update Insomniac Events Live</b> with the 11+ artist-hosted 2026 sets — Tiësto, Charlotte de Witte, Armin van Buuren, Above &amp; Beyond first</li>
+          <li><b>Complete and tidy the EDC 2026 playlist</b>: add the 18 missing sets, review the two unlisted items</li>
+          <li><b>Chapters or tracklists on the top 20 sets</b> — 2 of 79 have them today</li>
+        </ol>
         <dl class="pd">
-          <dt>Evidence</dt><dd>18 sets outside the playlist, incl. Meduza³ 262K; 2 of 63 with timestamps</dd>
-          <dt>Next step</dt><dd>One pass on the 2026 library before the next flagship</dd>
+          <dt>Effort</dt><dd>Hours, not new content</dd>
           <dt>Measure</dt><dd>Playlist views; set views per viewer</dd>
-          <dt>Studio</dt><dd>Traffic from playlists, suggested and Shorts</dd>
+          <dt>Studio</dt><dd>Traffic from playlists, suggested and end screens</dd>
         </dl>
       </div>
       <div class="prio" style="--c:var(--magenta)">
-        <div class="d">Experiment · small tests</div>
-        <h3 class="display">Try, measure, then decide</h3>
+        <div class="d">Experiment · test, then decide</div>
+        <h3 class="display">Small tests with a baseline</h3>
         <ul>
-          <li><b>The full-set model at two or three more events</b>, where filming and rights allow</li>
-          <li><b>A themed block</b> on Insomniac TV</li>
-          <li><b>Shorts-to-set journeys</b> for six to eight weeks</li>
-          <li><b>A Premiere plus Afterparty</b> around one headline set</li>
+          <li><b>Supporting Shorts</b> for selected strong sets with no artist-named clip — Solomun, Hardwell, KREAM, Mathame</li>
+          <li><b>Review related-video links</b> on Shorts in Studio</li>
+          <li><b>A sustainable between-festival baseline</b>, sized to the team — not a return to 19 a week by default</li>
+          <li><b>Programmed Insomniac TV</b>: a themed block or countdown</li>
         </ul>
         <dl class="pd">
-          <dt>Evidence</dt><dd>Zombie Apocalypse's 5 sets: 22–117K; the biggest Short was a set moment</dd>
-          <dt>Next step</dt><dd>One test per quarter, each with a benchmark agreed up front</dd>
           <dt>Measure</dt><dd>Each test against its own baseline</dd>
-          <dt>Studio</dt><dd>Watch time; new vs returning viewers; related-link clicks</dd>
+          <dt>Studio</dt><dd>Shorts → set traffic; new vs returning viewers</dd>
         </dl>
       </div>
     </div>
@@ -892,7 +913,7 @@ body.sheet-open .chrome,body.sheet-open #pbar{display:none}
       <tr><th>Source</th><th>Sets</th><th>Views</th><th>Note</th></tr>
       <tr class="lead"><td>"Insomniac Events Live" playlist (on Home)</td><td class="n">83</td><td class="n">46,912,716</td><td>75 on 63 artist channels (45.6M), 8 on Insomniac's; median 209,099; 12 over 1M; 59 over 100K. By year: 2023 10, 2024 11, 2025 55, 2026 7</td></tr>
       <tr><td>…of which published in 2025</td><td class="n">55</td><td class="n">18,693,911</td><td>52 artist channels; median 165,113</td></tr>
-      <tr><td>2026 full-set playlist, read set by set</td><td class="n">63</td><td>—</td><td>61 carry a Collaboration credit ("Insomniac and …"); Fallen with MC Dino and Darude don't. 2 of 63 descriptions carry timestamps or a tracklist</td></tr>
+      <tr><td>2026 full-set playlist, read set by set</td><td class="n">63</td><td>—</td><td>61 carry a Collaboration credit ("Insomniac and …"); Fallen with MC Dino and Darude don't. 2 of 63 descriptions carry timestamps or a tracklist (2 of all 79 have chapters — slide 10)</td></tr>
       <tr><td>2026 sets hosted by the artist, credited to Insomniac</td><td class="n">≥ 11</td><td class="n">≥ 7,203,206</td><td>Found by search, so a floor: Tiësto 2.21M · Charlotte de Witte 1.30M · Armin van Buuren 1.28M · Above &amp; Beyond 0.99M · DABIN 389K · Lilly Palmer 371K · Sub Focus 249K · Levity 178K · 1991 140K · Black Tiger Sex Machine 72K · HEYZ 16K</td></tr>
     </table>
     <p>Largest artist-hosted sets in the playlist: Tiësto EDC LV 2023 (yU4yrbUQYlU) 6.63M · Tiësto 2025 3.40M · Armin van Buuren 2023 3.38M · Dom Dolla 2024 2.74M · FISHER EDC Orlando 2024 2.40M · Martin Garrix 2024 2.38M. John Summit's and Martin Garrix's EDC 2026 sets were found only as fan recordings (48K and 54K) on searches of 28 October; an official upload elsewhere can't be ruled out.</p>
@@ -933,6 +954,26 @@ body.sheet-open .chrome,body.sheet-open #pbar{display:none}
       <tr><td>Releases</td><td>2018 172 · 2019 66 · 2020 57 · 2021 25 · 2022 50 · 2023 58 · 2024 25 · 2025 46 · 2026 14 (last 21 Aug). 2024–25: 71 releases, median 59,753, 28 over 100K. Title format changed in November 2025 from "| Insomniac Records" to "(Official)"</td></tr>
     </table>
     <div class="an-note"><b>Claim boundary.</b> The public API exposes playlists and Home sections; it doesn't expose end screens, cards, related-video links on Shorts, or traffic sources. A playlist that is not public is invisible here. Insomniac TV's concurrent audience is not public.</div>
+
+    <h3>Slide 9 · weekly cadence</h3>
+    <table>
+      <tr><th>Year</th><th>Uploads</th><th>Weeks with no upload</th><th>Median uploads / week</th><th>Longest gap with no upload</th></tr>
+      <tr><td>2024</td><td class="n">232</td><td class="n">0 of 53</td><td class="n">4</td><td>8.9 days</td></tr>
+      <tr><td>2025</td><td class="n">617</td><td class="n">0 of 53</td><td class="n">9</td><td>7.9 days</td></tr>
+      <tr class="lead"><td>2026 to 27 Oct</td><td class="n">661</td><td class="n">3 of 44</td><td class="n">16</td><td>19.7 days (23 Sep → 13 Oct)</td></tr>
+    </table>
+    <p>Longest gap in earlier years: 2019 9.9 · 2020 8.5 · 2021 10.9 · 2022 13.0 · 2023 9.7 days. Shorts: 19 every week from the week of 6 Oct 2025 to the week of 30 Mar 2026 (26 weeks, fixed hourly slots); then ~10 a week; 29 in EDC week; 4–17 a week June–July; none from 22 Sep to 26 Oct 2026 (35 days). Monday-starting UTC weeks.</p>
+
+    <h3>Slide 10 · supporting the biggest performances</h3>
+    <table>
+      <tr><th>Check (watch pages and playlists, 28 Oct)</th><th>Result</th><th>Detail</th></tr>
+      <tr class="lead"><td>Artist-hosted 2026 sets in Insomniac playlists</td><td class="n">0 of ≥ 11</td><td>None in Insomniac Events Live (its 7 additions in 2026 are all Insomniac's own uploads) or the 2026 set playlist. The four largest — Tiësto 2.21M, Charlotte de Witte 1.31M, Armin van Buuren 1.28M, Above &amp; Beyond 0.99M (5.79M) — appear in none of the 108 public playlists (first 100 items of each read)</td></tr>
+      <tr><td>EDC 2026 sets outside "EDC Las Vegas 2026 Full Sets"</td><td class="n">18 of 79</td><td>1,025,208 views (10.2%). 16 of the 18 end on an end screen promoting that playlist. The playlist also holds 2 unlisted items: an earlier 38-min Funk Tribu cut beside the public set, and an Adventure Club set</td></tr>
+      <tr><td>EDC 2026 sets with chapters</td><td class="n">2 of 79</td><td>Getter, Laidback Luke B2B Chuckie. Zombie Apocalypse 2026: 3 of 5 (Zomboy, Sullivan King, Avello)</td></tr>
+      <tr><td>Top 16 Insomniac-hosted sets with no artist-named Short</td><td class="n">8 of 16</td><td>Solomun, Hardwell, KREAM, Korolova, Mathame, Funk Tribu, Meduza³, Whethan. Title and description search since Oct 2025 — a lower bound: unnamed Shorts may feature them</td></tr>
+      <tr><td>Strong support examples</td><td>—</td><td>Kaskade (Short, Afterparty, set, live clip, Inside The Drop, second set, follow-up Shorts) · Subtronics (Inside The Drop, three June Shorts at 7–26K) · Zomboy (33 chapters, artist links, festival playlist)</td></tr>
+    </table>
+    <div class="an-note"><b>Claim boundary.</b> Nothing here says a missing Short, chapter or playlist slot cost views, or that adding them will add views. They are discovery routes; their effect can only be read in Studio (traffic sources, end-screen and playlist starts). Full matrix: audit pack §10.</div>
 
     <h3>Slide 12 · YouTube's native tools, as observed</h3>
     <table>
