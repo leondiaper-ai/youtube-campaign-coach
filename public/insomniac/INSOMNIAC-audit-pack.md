@@ -11,6 +11,8 @@ well-run channel for a business review. If a finding reads as a manufactured pro
 
 Method and evidence standards follow the Defected audit pack (`/defected/AUDIT.md`).
 
+**Version 3 adds §10, the Content Support & Cadence Audit (investigation only; deck unchanged).**
+
 **Version 2 (refinement pass, 28 October 2026).** The deck was restructured for a business
 review (14 slides), a native-tools slide was added, and every disputed figure was re-derived
 from the stored rows. What changed, and why, is in §0. Nothing in v1's evidence was deleted;
@@ -703,3 +705,252 @@ Insomniac curates from artists' channels"; "24/7 — Insomniac TV, live since 20
 - **Headliner sets.** No official 2026 upload found for some headliners (John Summit, Martin
   Garrix). Rights, artist choice — or an opening?
 - **Other events.** Were 2026's other flagships filmed, and on what terms?
+
+---
+
+## 10. Content Support & Cadence Audit
+
+**Investigation only (28 October 2026, v3).** Nothing in the deck has changed yet. §10.8 says
+which findings deserve a place there.
+
+### 10.1 Method and limitations
+
+- **Cadence.** All 4,171 uploads, bucketed into Monday-starting UTC weeks. Classes: Shorts
+  (verified, §2.1); full performances (full sets, livestream archives, hidden-count live
+  streams); event marketing; releases; editorial and other long-form (Night Owl Radio
+  separated where it matters).
+- **Hero support.** 21 performances: the 16 most-watched Insomniac-hosted EDC 2026 sets
+  (Tinlicker excluded to make room), Whethan, Zomboy, and the four largest artist-hosted 2026
+  collaborations. For each one:
+  - the whole catalogue was searched from 1 Oct 2025 for the artist's name, alternate
+    spellings and @handle, in titles and the first 300 characters of descriptions;
+  - the watch page was read for the full description, chapters, end-screen elements, info
+    cards, Collaboration credit and owner;
+  - its membership was checked in the 2026 set playlist (64 items), Insomniac Events Live
+    (84) and Zombie Apocalypse Live Sets (5).
+- **All 79 EDC sets** were then read the same way for chapters, tracklists, end screens,
+  credits and title format.
+- **Limits.**
+  - A Short that features an artist without naming them is invisible to a title and
+    description search. "No named Short" means **none identifiable**, not none at all.
+  - Shorts related-video links, traffic, end-screen and card click-through, and watch time are
+    Studio-only. No feature is called absent because public data can't show it.
+  - End screens and info cards *are* in the public player data. The only card on every page
+    read (including the artist-hosted ones) is YouTube's generic "View corrections" element;
+    no creator-added info cards were observed.
+
+### 10.2 Weekly cadence
+
+| Calendar year | Uploads | Active weeks | Zero weeks | Median / week | Busiest week | Longest gap, any upload |
+|---|---|---|---|---|---|---|
+| 2024 | 232 | 53 / 53 | 0 | 4 | 12 | 8.9 days |
+| 2025 | 617 | 53 / 53 | 0 | 9 | 24 | 7.9 days |
+| 2026 to 27 Oct | 661 | 41 / 44 | **3** | 16 | 71 (EDC week + 1) | **19.7 days** (23 Sep → 13 Oct) |
+
+The longest gap in each earlier year: 2019 9.9 · 2020 8.5 · 2021 10.9 · 2022 13.0 · 2023 9.7 days.
+**The autumn 2026 gap is the longest on the channel since at least 2019.**
+
+By class (zero weeks / weeks in range; median per week):
+
+| Class | 2024 | 2025 | 2026 to 27 Oct |
+|---|---|---|---|
+| Shorts | 84 · 20/53 empty · median 1 | 455 · 2/53 · 6 | 524 · 4/44 · 13 |
+| Full performances | 1 · 52/53 empty | 8 · 49/53 | 88 · 34/44 (all in 10 weeks) |
+| Event marketing | 29 · 30/53 · 0 | 41 · 27/53 · 0 | 21 · 31/44 · 0 |
+| Releases | 25 · 32/53 · 0 | 46 · 19/53 · 1 | 14 · 30/44 · 0 |
+| Editorial and other long-form | 93 (49 Night Owl Radio) · 14/53 | 67 (40 NOR) · 3/53 · 1 | 14 (0 NOR) · 30/44 · 0 |
+
+**The Shorts programme.**
+- From the week of 6 Oct 2025 to the week of 30 Mar 2026: **19 Shorts every week, 26 weeks
+  running**, on fixed hourly slots (17:00, 19:00 and 21:00 UTC most often).
+- The weekly pattern was three a day Monday to Wednesday, four on Friday and Saturday, two on
+  Sunday, and none on Thursdays.
+- After that: 10 a week through April and early May; 29 in EDC week; 4–17 a week in
+  June–July; 3–14 in August; 1–4 in September.
+- Then **no Shorts at all from 22 Sep to 26 Oct (35 days)**.
+
+**Around EDC (5½ weeks before, the festival, 4 weeks after):**
+
+| | Before | During | After |
+|---|---|---|---|
+| 2025 (EDC 16–18 May) | 47 uploads · 34 Shorts · long-form: 6 NOR, 6 releases, 1 promo | 0 | 30 · 13 Shorts · 2 sets, 6 promo, 5 NOR, 3 releases |
+| 2026 (EDC 15–17 May) | 66 · 59 Shorts · 3 editorial, 3 releases | 33 · 28 Shorts · 2 Afters, 1 set, 2 promo | 118 · 38 Shorts · **72 sets**, 4 promo, 2 editorial |
+
+**Answer to the brief's question.**
+- The channel ran a **highly consistent, scheduled Shorts programme** from October 2025 to
+  March 2026, then a festival-driven summer.
+- Long-form has never had a year-round baseline outside events, apart from Night Owl Radio,
+  which ran weekly until September 2025.
+- In 2026, long-form outside the sets is 49 uploads in 43 weeks: event marketing 21, releases
+  14, editorial 14. Each class has 30–31 empty weeks.
+- The Sep–Oct 2026 slowdown **is exceptional** in continuity: three empty weeks, a 35-day Shorts
+  pause and the longest silence since 2019. In total volume it is only back near 2023–24
+  levels.
+- It ended with the *30 Years of EDC* documentary (26 Oct), so a planned pause around that
+  release is plausible. That is a question for the team, not a finding.
+
+### 10.3 Hero asset support matrix
+
+Views are lifetime to 28 Oct. "Named Shorts" are Shorts naming the artist since 1 Oct 2025,
+with dates. Abbreviations: KF kineticFIELD · CM cosmicMEADOW · CG circuitGROUNDS · QV
+quantumVALLEY · BP bassPOD. "End screen ✓" means channel + "EDC Las Vegas 2026 Full Sets" +
+the artist's channel. "Collab ✓" means the YouTube Collaboration credit.
+
+| Hero asset | Views | Supporting Shorts (named) | Other support assets | Playlist status | Metadata | Confirmed gaps | Studio checks | Recommended action |
+|---|---|---|---|---|---|---|---|---|
+| [Solomun · CG](https://youtu.be/g1vH9C_o-vo) | 650K | **None.** The set is the only upload on the channel that names Solomun | — | 2026 ✓ | Standard description, no @handle; no chapters; end screen ✓; collab ✓ | No identifiable Short for the channel's #1 set; no chapters | Shorts featuring him unnamed? Traffic sources | 2–3 set-moment Shorts linked to the set; chapters |
+| [The Chainsmokers · KF](https://youtu.be/3AQ_Srbe1lQ) | 610K | 17 May ([2.7K](https://youtu.be/WvZYjQkZMIk)); 23 May, **same day as the set** ([10.5K](https://youtu.be/MBxhSe7Y6yQ)) | — | 2026 ✓ | No chapters; end screen ✓; collab ✓ | Chapters | Shorts → set link | Chapters |
+| [Porter Robinson · KF](https://youtu.be/zkT8FjfBjYI) | 556K | 6 Shorts: Nov 2.5K · Mar 6.8K · 17 May [6.7K](https://youtu.be/RZ9tpIaJMR4) · 20 May [7.7K](https://youtu.be/DXVlge3WgkQ) · 18 Jun 3.7K · 13 Jul [5.1K](https://youtu.be/rMpUtBqEsNk) | — | 2026 ✓ | No chapters; end screen ✓; collab ✓ | Chapters | Shorts → set link | **Good practice**; chapters |
+| [Hardwell · KF](https://youtu.be/UNtEX3GB6jU) | 553K | **None**, ever, on the channel | Named headliner in YouTube's livestream announcement | 2026 ✓ | **Best EDC description:** @hardwell, 1001Tracklists link, artist links; end screen ✓; collab ✓ | No identifiable Short | As Solomun | Set-moment Shorts; turn the 1001Tracklists list into chapters |
+| [Subtronics · KF](https://youtu.be/-A-XIBMDgj0) | 493K | Dec: 2 ([1.7K](https://youtu.be/xtbhkN9OqJQ), [2.9K](https://youtu.be/IUGmdNPZRKs)); 23–25 Jun: 3 ([7.3K](https://youtu.be/dml_dpn4hfE), [25.5K](https://youtu.be/ouihpBTPAUk), [19.7K](https://youtu.be/WAcOtBYL2UI)) | [Inside The Drop ep. 2](https://youtu.be/-sncABS6AV8) (Dec, 29K) | 2026 ✓ | @handle; no chapters; end screen ✓; collab ✓ | Chapters | Shorts → set link | **Good practice** |
+| [Underworld · CM](https://youtu.be/4wzyC3J6-NU) | 471K | 1, before the set: 17 May ([1.5K](https://youtu.be/KLShnQr0Ofk)) | — | 2026 ✓ | No chapters; end screen ✓; collab ✓ | Nothing after the set, despite 4.7× its stage median | — | Set-moment Shorts; chapters |
+| [Kaskade · KF](https://youtu.be/l5wro3bMZWc) | 442K | 15 May [21.2K](https://youtu.be/FK47T9W_cmM) · 26 May [3.7K](https://youtu.be/WOHibVbTXYg) (ITD promo) · 30 Jun [2.3K](https://youtu.be/tuq3NKfcWVY) | [EDC Afters Live](https://youtu.be/kc9_A3goOAQ) (16 May) · ["Meet Again" live clip](https://youtu.be/J1yT2WhrrrA) (22 May, 40K) · [Inside The Drop ep. 8](https://youtu.be/Tft7mF8UsO4) (26 May, 11K) · [Sunsoaked 2025 set](https://youtu.be/sBZc8aoUFhk) (19 Jun, 124K) | 2026 ✓ | @handle; no chapters; end screen ✓; collab ✓ | Chapters | Which asset fed which | **Best practice: a full ecosystem** |
+| [KREAM · QV](https://youtu.be/kM7iuhXXaZg) | 310K | **None** | — | 2026 ✓ | Artist links; no chapters; end screen ✓; collab ✓ | No identifiable Short at 4.1× its stage median | — | Set-moment Shorts; chapters |
+| [Griz B2B Wooli · KF](https://youtu.be/xq-7nU66OmQ) | 299K | 10 (Wooli/GRiZ), incl. 17 May [5.9K](https://youtu.be/4B1ubYeI5Vk) · 1 Jun · 22 Jun [8.4K](https://youtu.be/QeiMzzdW2ww) · 5 Jul · 22 Aug | [Wooli solo set](https://youtu.be/PaBcY8VTZZI) (134K) | 2026 ✓ | Title off-standard: "Live at EDC 2026", without "Las Vegas" or "(Official Full Set)"; end screen ✓ (both artists) | Title | — | **Good practice**; fix the title |
+| [Steve Aoki · KF](https://youtu.be/kw_C3HE6VRY) | 296K | Oct 4.4K · Nov 6.5K · 2 Jun [9.3K](https://youtu.be/SnKKbfw-fys) | [Inside The Drop ep. 9](https://youtu.be/t9PxMIOFWJM) (2 Jun) | 2026 ✓ | @handle; no chapters; end screen ✓ | Chapters | — | Good practice |
+| [Korolova · KF](https://youtu.be/sl7ogG9pypM) | 291K | **None** | — | 2026 ✓ | No chapters; end screen ✓; collab ✓ | No identifiable Short | — | Set-moment Shorts |
+| [Seven Lions · CM](https://youtu.be/tpteTL5ycRo) | 285K | 3 before, ≤ 1.1K each; 26 Aug [4.2K](https://youtu.be/DdAEBooh2Rk) | — | 2026 ✓ | No chapters; end screen ✓ | Chapters | — | Chapters |
+| [Mathame · QV](https://youtu.be/i7PGl_PyHvI) | 281K | **None** | — | 2026 ✓ | No chapters; end screen ✓; collab ✓ | No identifiable Short at 3.7× its stage median | — | Set-moment Shorts |
+| [Funk Tribu · KF](https://youtu.be/APt5j9Abwo8) | 274K | **None** | — | 2026 ✓, **plus an unlisted 38-min earlier cut ([IkcYzXMqHwk](https://youtu.be/IkcYzXMqHwk), 5.4K) at the next position** | End screen ✓ | Duplicate in the playlist | — | Remove the unlisted cut from the playlist |
+| [Meduza³ · CM](https://youtu.be/W3VuzjQfWz4) | 262K | **None** since 2020 | — | **Not in the 2026 playlist**, yet its end screen promotes that playlist | End screen ✓ | Missing from the playlist | — | Add to the playlist |
+| [Whethan · BP](https://youtu.be/1Q-j11Nlm4k) | 126K | **None** | — | **Not in the 2026 playlist**; end screen promotes it | End screen ✓ | Missing from the playlist | — | Add to the playlist |
+| [Zomboy · Zombie Apocalypse](https://youtu.be/Jpei7G2j0EQ) | 117K | None named | — | Zombie Apocalypse Live Sets ✓ · Insomniac Events Live ✓ | **Chapters (33 timestamps)**, @handle, artist links; end screen points to the *Insomniac TV* playlist, not Zombie Apocalypse | End-screen target | — | **Good practice (metadata)**; point the end screen at the Zombie playlist |
+| [Tiësto (artist-hosted)](https://youtu.be/kG0SVvz9e-g) | 2.21M | 8 since Oct 2025, e.g. 7 May [4.0K](https://youtu.be/VrsWsQoKjl0) · 28 Jul [4.1K](https://youtu.be/bEa73dG8gSE) | — | **In no Insomniac playlist** | Chapters (set list) on Tiësto's upload; Collaboration "Tiësto and Insomniac" | Not gathered by Insomniac | Collab view split | Add to Insomniac Events Live |
+| [Charlotte de Witte (artist-hosted)](https://youtu.be/is834eCbUD4) | 1.31M | 19 Oct 2025 [21.5K](https://youtu.be/i7dMcPGPZJ4) · 4 Mar [11.6K](https://youtu.be/x4e57kubAvM) | — | **In no Insomniac playlist** | No chapters; collab ✓ | Not gathered | As Tiësto | Add to Events Live |
+| [Armin van Buuren (artist-hosted)](https://youtu.be/n-MhD_TdzN4) | 1.28M | None named | [EDC Afters Live with Armin](https://youtu.be/V2aW4hTOqws) (17 May) | **In no Insomniac playlist** | 1001Tracklists link; collab ✓ | Not gathered | As Tiësto | Add to Events Live |
+| [Above & Beyond (artist-hosted)](https://youtu.be/OI02QgEA1Zw) | 993K | Nov 2025 [1.7K](https://youtu.be/10iG_EblTWk) | — | **In no Insomniac playlist** | Chapters; "Video courtesy of Insomniac"; collab ✓ | Not gathered | As Tiësto | Add to Events Live |
+
+**Summary of the 16 Insomniac-hosted EDC heroes:**
+- **8 have no identifiable named Short**: Solomun, Hardwell, KREAM, Korolova, Mathame, Funk
+  Tribu, Meduza³ and Whethan. Together that is 2.75M of the heroes' views.
+- **5 have a strong support set**: Kaskade, Subtronics, Wooli/GRiZ, Porter Robinson and Steve
+  Aoki.
+- **0 have chapters.**
+- None of the 16 was a Premiere. Only 2 of the 79 sets were: Alison Wonderland and Mary
+  Droppinz.
+
+### 10.4 Catalogue-wide checks — all 79 EDC Las Vegas 2026 sets (watch pages, 28 Oct)
+
+| Check | Result | Detail |
+|---|---|---|
+| Title format "X Live at EDC Las Vegas 2026 (Official Full Set)" | **75 / 79** | Off-standard: [Griz B2B Wooli](https://youtu.be/xq-7nU66OmQ) 299K · [Cosmic Gate](https://youtu.be/EO8fj6FfCPk) 212K · [Sippy](https://youtu.be/CM80hrwF6io) 23K · [The Carry Nation](https://youtu.be/K0Qg0wqhCdY) 9K ("Live From") |
+| Collaboration credit | **74 / 79** | None observed: [Robert Hood](https://youtu.be/CHoqTHETVoY) 57K · [Darude](https://youtu.be/dXBoIY65P8s) 48K · [Sarah De Warren](https://youtu.be/KIb3psOt9hI) 24K · [Chris Metcalfe](https://youtu.be/nsLTs0KG0lA) 19K · [Fallen with MC Dino](https://youtu.be/o1Wly2tbJ1c) 8K. The credit needs the artist's channel and acceptance, so this may sit on the artist's side |
+| End screen with 3 elements | **71 / 79** | None: [Virtual Riot](https://youtu.be/t3UtUpatiWw) 74K · [Robert Hood](https://youtu.be/CHoqTHETVoY) 57K · [ÆON:MODE](https://youtu.be/I02YBw_-vw8) 49K · [AHEE B2B Liquid Stranger](https://youtu.be/yXHoHK_jQvc) 25K · [Stacy Christine](https://youtu.be/ROX9gE8LeIU) 9K · [Fallen with MC Dino](https://youtu.be/o1Wly2tbJ1c) 8K. Two elements: ALPHA 9, ISAbella. Three point to the Insomniac TV playlist instead of the 2026 set playlist (Laidback Luke B2B Chuckie, GHENGAR, Gareth Emery) |
+| In the 2026 set playlist | **61 / 79** | 18 missing, **1,025,208 views** (10.2% of the 79's views). **16 of the 18 end on an end screen that promotes the 2026 playlist**: Meduza³ 262K · Whethan 126K · Andrew Rayel 93K · VTSS 87K · Walker & Royce B2B VNSSA 85K · HOL! 73K · Pegassi 50K · Tiga 48K · Sarah De Warren 24K · Mary Droppinz 24K · Sippy 23K · Chris Metcalfe 19K · Club Angel 14K · Nightstalker 8K · Matty Ralph 5K · Trace 3K (Robert Hood and AHEE have no end screen) |
+| Playlist hygiene | 2 unlisted items in the public playlist | [IkcYzXMqHwk](https://youtu.be/IkcYzXMqHwk): a 38-min Funk Tribu cut uploaded the morning of the public 67-min set, sitting beside it · [NNKJh_xbAQs](https://youtu.be/NNKJh_xbAQs): Adventure Club, 57 min, 10.8K, unlisted, so it's not in the uploads, search or the 79 |
+| Chapters | **2 / 79** | Getter, Laidback Luke B2B Chuckie. Tracklist references: 3 (those two plus Hardwell's link). For comparison: Zombie Apocalypse **3 / 5** (Zomboy, Sullivan King, Avello) |
+| Artist @handle in the description's first line | 7 / 79 | e.g. Hardwell, Subtronics, Kaskade, Steve Aoki |
+| Shorts descriptions linking a video | **0 / 774** (first 300 characters, since Oct 2025) | The Shorts related-video link is separate and not public (Studio) |
+| Artist-hosted 2026 collaborations in an Insomniac playlist | **0 of the ≥ 11** | The 7 items Insomniac Events Live gained in 2026 are all Insomniac's own uploads (5 Zombie Apocalypse sets, Kaskade at Sunsoaked, Matty Ralph). In 2025 the same playlist gathered 55 artist-hosted sets |
+
+### 10.5 Existing good practice
+
+- **Consistent packaging at scale:** 75/79 standard titles, 74/79 Collaboration credits,
+  71/79 full end screens that send viewers to the artist, the channel and the set playlist.
+- **The Kaskade ecosystem.** Festival-day Short (21K), EDC Afters live, the set, a live
+  performance clip of the EDC anthem (40K), an Inside The Drop episode with its own promo
+  Short, a second full set and follow-up Shorts. This is the template.
+- **Inside The Drop as a supported series.** Each December episode (Chris Lake, Subtronics,
+  Sara Landry, Cloonee) was paired with an "out now" Short within a day. April's Loco Dice
+  and Cole Knight episodes each had 4–5 themed Shorts.
+- **Zombie Apocalypse metadata:** chapters on 3 of 5 sets, its own playlist, artist links, and
+  all five added to Insomniac Events Live.
+- **The Shorts schedule:** 26 consecutive weeks at 19 a week shows the team can run a
+  programme to a fixed slot plan.
+
+### 10.6 Findings, ranked (audience benefit × evidence × ease)
+
+1. **The 2026 artist-hosted collaborations aren't gathered anywhere on Insomniac's channel.**
+   - The four largest alone (Tiësto, Charlotte de Witte, Armin van Buuren, Above & Beyond)
+     hold 5.8M views.
+   - Insomniac Events Live, the Home shelf that gathered 55 artist-hosted sets in 2025, has
+     added none in 2026.
+   - *Evidence: strong · ease: minutes · benefit: high.*
+2. **The 2026 set playlist is incomplete, and the end screens point into it.**
+   - 18 sets (1.03M views) are missing; 16 of them end by sending viewers to the playlist they
+     aren't in.
+   - It also holds two unlisted items, one a shorter duplicate of Funk Tribu.
+   - *Strong · minutes · medium-high.*
+3. **Chapters are almost absent on EDC sets: 2 of 79**, against 3 of 5 for Zombie Apocalypse.
+   - Tiësto's and Above & Beyond's own uploads of their sets have them.
+   - None of the top 16 EDC sets does, although Hardwell's description already links a full
+     tracklist.
+   - *Strong · hours (top 20 first) · medium.*
+4. **Half the biggest sets have no identifiable supporting Short.**
+   - 8 of the 16 heroes, including the #1 (Solomun, 650K) and #4 (Hardwell, 553K, YouTube's
+     own featured headliner), have no Short naming the artist.
+   - Shorts ran at 4–17 a week through June–July at the same time.
+   - The over-performers KREAM, Mathame, Meduza³ and Whethan are among the eight.
+   - *Medium (title-based lower bound) · moderate · medium-high.*
+5. **No visible route from Shorts to sets.** 0 of 774 Shorts descriptions link a video. Whether
+   Shorts carry a related-video link is Studio-only. *Medium · easy to fix if absent.*
+6. **Cadence continuity broke in autumn.**
+   - A 35-day Shorts pause, a 19.7-day gap with no uploads at all (the longest since at least
+     2019) and three empty weeks, against none in 2024–25.
+   - It may be planned around the 30 Years of EDC documentary.
+   - *Strong as a fact; the cause is unknown.*
+7. **Small metadata fixes.**
+   - 4 off-standard titles (incl. Griz B2B Wooli 299K and Cosmic Gate 212K).
+   - 6 sets without end screens (incl. Virtual Riot 74K and Robert Hood 57K).
+   - 3 end screens pointing to the Insomniac TV playlist instead of the set playlist.
+   - 5 sets without Collaboration credit (possibly artist-side).
+   - *Strong · minutes · low-medium.*
+8. **No Premieres on headline sets** (2 of 79, neither a headliner). This was already noted in
+   v2; it remains an experiment, not a gap.
+
+**Considered and rejected in this pass**
+- **"Pre-festival Shorts didn't build EDC."** In the 5½ weeks before EDC 2026, only 2 of 59
+  Shorts named EDC, against 17 of 34 in 2025. But most of 2026's Shorts covered other Insomniac
+  properties (Beyond Wonderland, Factory Town, EDC Thailand) and titles are casual. The one
+  explicit livestream promo (8 May, [29K](https://youtu.be/umrLzbs1POE)) was among the
+  period's best. Too weak to keep.
+- **"Shorts views by artist predict set views."** Too few named Shorts per artist, with no
+  control for set date. Not kept.
+
+### 10.7 Exact actions
+
+| # | Action | Where | Effort |
+|---|---|---|---|
+| 1 | Add the ≥ 11 artist-hosted 2026 sets (start with Tiësto, Charlotte de Witte, Armin van Buuren, Above & Beyond, DABIN, Lilly Palmer) to Insomniac Events Live; consider a "EDC Las Vegas 2026 — on artists' channels" section | Playlists | < 30 min |
+| 2 | Add the 18 missing sets to "EDC Las Vegas 2026 Full Sets"; remove the unlisted Funk Tribu cut (IkcYzXMqHwk); decide on Adventure Club (publish or remove) | Playlists | < 30 min |
+| 3 | Chapters (or a timestamped tracklist) on the 20 most-watched EDC sets, Solomun to Wooli first; seed from 1001Tracklists where one exists | Descriptions | ~10 min per set |
+| 4 | For the 8 heroes with no identifiable Short: one or two set-moment Shorts each, linked to the full set via the related-video field — within the existing weekly volume | Shorts | Within current output |
+| 5 | Fix 4 titles; add end screens to 6 sets; repoint 3 end screens and Zomboy's to the right set playlist; check the 5 missing credits with the artists | Studio | < 1 hour |
+| 6 | Agree an autumn/winter baseline (e.g. the 19-a-week slot plan, or a lighter fixed one) so the channel never goes dark between events | Planning | Team decision |
+
+### 10.8 What deserves space in the deck
+
+- **Proposal: replace the content of slide 10 ("Channel organisation and discoverability")**
+  with one visual slide, **"Are the biggest performances getting the support they deserve?"**
+  - About six real performances in a strong-support vs opportunity layout:
+    - Kaskade: full ecosystem.
+    - Subtronics or Porter Robinson: Shorts before and after.
+    - Zomboy: chapters.
+    - Solomun: #1 set, no identifiable Short, no chapters.
+    - Meduza³: not in the playlist its end screen promotes.
+    - Tiësto: 2.2M, not gathered on Insomniac's channel.
+  - Then three numbers: **0 of ≥ 11** artist-hosted sets in a playlist · **18 sets / 1.03M
+    views** outside the 2026 playlist · **2 of 79** with chapters.
+  - Slide 10's Home rail compresses to one line; its two "confirmed" items (18 missing sets,
+    2/63 timestamps) are absorbed.
+- **Slide 9:** correct "output is back near 2023–24 levels" to state the continuity break (the
+  longest silence since 2019, three empty weeks), keeping "not a measure of demand" and the
+  documentary as a possible reason.
+- **Slide 13 (Optimise):** replace the generic bullets with actions 1–3 above, and add
+  "Shorts for the eight biggest sets without one" to Experiment.
+- **Not for the deck:** metadata fixes (action 5) and the rejected pre-festival read. They
+  stay here.
+
+### 10.9 Studio-only checks raised by this pass
+
+- Do the Shorts carry a related-video link, and to what?
+- Shorts → set traffic for the heroes with Shorts (Kaskade, Subtronics, Porter Robinson)
+  against those without.
+- End-screen element click-through, especially the playlist element on the 16 sets missing
+  from the playlist.
+- Playlist starts and views per viewer for the 2026 set playlist and Insomniac Events Live.
+- Chapter engagement on Getter, Laidback Luke and the Zombie sets against comparable sets
+  without chapters.
+- Collaboration view attribution on the artist-hosted sets.
+- Whether unnamed Shorts feature the eight heroes without a named Short (the team's own
+  asset log would answer this faster than Studio).
