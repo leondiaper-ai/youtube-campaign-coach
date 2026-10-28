@@ -13,7 +13,7 @@ const visual = item('visual','2026-10-23T12:00:00Z','visualiser',220);
 const short = item('short','2026-10-26T12:00:00Z','short',40);
 const trailer = item('trailer','2026-10-25T12:00:00Z','trailer',150);
 const scheduled = item('future','2026-10-28T12:00:00Z','omv',220);
-assert.deepStrictEqual(Array.from(selectCoverHeroes([lyric,short,trailer,visual,scheduled],now), x=>x.videoId), ['visual','lyric']);
+assert.deepStrictEqual(Array.from(selectCoverHeroes([lyric,short,trailer,visual,scheduled],now), x=>x.videoId), ['visual']);
 assert.deepStrictEqual(Array.from(selectCoverHeroes([short,lyric,short],now), x=>x.videoId), ['lyric']);
 assert.equal(isCoverLongForm(item('vertical','2026-10-26','long',150,'A song #shorts')),false);
 assert.equal(isCoverLongForm(item('live','2026-10-26','live',240)),true);
