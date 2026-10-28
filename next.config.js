@@ -28,6 +28,8 @@ const nextConfig = {
       { source: '/defected', destination: '/defected/index.html' },
       // Oden & Fatzo × YouTube: the Somehow It Flies album campaign deep dive.
       { source: '/odenfatzo', destination: '/odenfatzo/index.html' },
+      // Insomniac × YouTube: channel review for the business review, October 2026.
+      { source: '/insomniac', destination: '/insomniac/index.html' },
       { source: '/stevenwilson', destination: '/stevenwilson/index.html' },
       { source: '/tomasmith', destination: '/tomasmith/index.html' },
       { source: '/flightfacilities', destination: '/flightfacilities/index.html' },
