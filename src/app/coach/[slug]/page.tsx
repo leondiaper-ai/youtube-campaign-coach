@@ -239,6 +239,7 @@ export default async function CampaignPage({ params }: PageProps) {
   const coachRoadmap = buildRoadmap(saved.plan, coachEvidence, Date.now(), driveLibrary);
   const evidenceSummary: CoachSummary = {
     artistSlug:coachEvidence.artistSlug,
+    lastUploadAt:coachEvidence.uploads.filter(u=>!u.isCollab && u.live!=="upcoming" && Date.parse(u.publishedAt)<=Date.now()).map(u=>u.publishedAt).sort().pop(),
     audit:{catalogue:coachEvidence.audit.catalogue,coverage:coachEvidence.audit.coverage,dataAt:coachEvidence.audit.dataAt,visuals:{takeaway:coachEvidence.audit.visuals.takeaway}},
     dive:coachEvidence.dive ? {dataCapturedAt:coachEvidence.dive.dataCapturedAt,deckUrl:coachEvidence.dive.deckUrl} : null,
   };

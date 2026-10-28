@@ -33,6 +33,7 @@ export type TrackRoadmap = {
   actions: RoadmapAction[];
 };
 export type CoachSummary = {
+  lastUploadAt?: string;
   audit: Pick<ChannelAudit, "catalogue" | "coverage" | "dataAt"> & {
     visuals: Pick<ChannelAudit["visuals"], "takeaway">;
   };
@@ -210,9 +211,7 @@ export function buildRoadmap(
         );
         push(
           "hero",
-          lyric || historicLyric
-            ? "Confirm the main video / lyric video"
-            : "Confirm the main release video",
+          "Confirm the main release video",
           event.dateISO,
           lyric
             ? `Lyric videos have ${lyric.count} examples in this channel reading (${Math.round(lyric.median).toLocaleString("en-GB")} median lifetime views). Confirm the creative and production plan.`

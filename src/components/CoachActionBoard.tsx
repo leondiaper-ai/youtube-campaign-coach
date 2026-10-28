@@ -183,6 +183,7 @@ export default function CoachActionBoard({
         </button>
         <a href={"/watcher/" + evidence.artistSlug}>Open channel</a>
       </div>
+      {evidence.lastUploadAt && <p className="coach-muted" style={{marginTop:12}}>Cadence: latest tracked upload {fmt(evidence.lastUploadAt.slice(0,10))} · {Math.max(0,Math.floor((Date.now()-Date.parse(evidence.lastUploadAt))/86400000))} days ago. Check the reading date below before treating a gap as inactivity.</p>}
       {error && (
         <p role="alert" style={{ color: "#b91c1c", marginTop: 12 }}>
           {error}
