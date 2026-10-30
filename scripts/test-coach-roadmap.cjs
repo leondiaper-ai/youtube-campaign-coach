@@ -243,3 +243,6 @@ assert.equal(buildCoachStatus({plan:curvePlan,evidence:curveEvidence,tracks:buil
 assert.equal(curveStatus.audience,null,'No stored fan-response read means no sentiment claim');
 assert(!curveStatus.priorities.flatMap(t=>t.actions).some(a=>a.format==='shorts-test'),'A Shorts average is not a mandate to increase cadence');
 console.log('Matched-age launch checks passed: day 1 ahead/day 3 behind retained; missing curves and fan response omitted; no automatic Shorts quota.');
+
+const morningStatus=buildCoachStatus({plan:curvePlan,evidence:curveEvidence,tracks:buildRoadmap(curvePlan,curveEvidence,statusNow),now:Date.parse('2026-10-30T10:00:00Z'),series:curves});
+assert(morningStatus.launch.includes('recorded day 3'),'Use the latest actual daily reading rather than switching age at noon');

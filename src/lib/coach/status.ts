@@ -63,19 +63,22 @@ export function buildCoachStatus({plan,evidence,tracks,decisions={},campaignStar
   const shortWindow=inventory.filter(u=>Date.parse(u.publishedAt)>=now-28*DAY && classifyUploadFormat({...u,description:''})==='short');
   const shortsRead={weekly:Math.round(shortWindow.length/4*10)/10,mean:shortWindow.length?Math.round(shortWindow.reduce((s,u)=>s+u.viewCount,0)/shortWindow.length):null,count:shortWindow.length};
   let launch:string|null=null;
-  if(anchor&&u&&age!==null&&age>=1&&age<=28){
+  const currentSeries=u?series[u.id]:undefined;
+  const latestObservation=currentSeries?.observations.filter(o=>o.ts<=today).slice().sort((a,b)=>a.ts.localeCompare(b.ts)).pop();
+  const comparisonAge=latestObservation&&currentSeries?.publishedAt?Math.round((Date.parse(latestObservation.ts+'T12:00:00Z')-Date.parse(currentSeries.publishedAt))/DAY):null;
+  if(anchor&&u&&comparisonAge!==null&&comparisonAge>=1&&comparisonAge<=28&&latestObservation&&now-Date.parse(latestObservation.ts+'T12:00:00Z')<=3*DAY){
     const priorReleaseIds=new Set(tracks.filter(t=>t.id!==focus?.id).flatMap(t=>actual(t).map(a=>a.video!.id)));
     const priorSame=long.find(v=>priorReleaseIds.has(v.id)&&Date.parse(v.publishedAt)<Date.parse(u.publishedAt)&&classifyUploadFormat({...v,description:''})===classifyUploadFormat({...u,description:''}));
-    const currentDay=viewsAtAge(series[u.id]??null,age,0);
-    const priorDay=priorSame?viewsAtAge(series[priorSame.id]??null,age,0):null;
+    const currentDay=viewsAtAge(series[u.id]??null,comparisonAge,0);
+    const priorDay=priorSame?viewsAtAge(series[priorSame.id]??null,comparisonAge,0):null;
     if(currentDay&&priorDay&&priorDay.views>0){
       const change=Math.round((currentDay.views/priorDay.views-1)*100);
       const priorTrack=tracks.find(t=>t.actions.some(a=>a.video?.id===priorSame!.id))?.name??'previous video';
       const firstCurrent=viewsAtAge(series[u.id]??null,1,0);
       const firstPrior=priorSame?viewsAtAge(series[priorSame.id]??null,1,0):null;
       const firstChange=firstCurrent&&firstPrior&&firstPrior.views>0?Math.round((firstCurrent.views/firstPrior.views-1)*100):null;
-      const first=age>1&&firstChange!==null?`Day 1 ${firstChange>=0?'+':''}${firstChange}%; `:'';
-      launch=`${first}${change>=0?'+':''}${change}% vs ${priorTrack} at recorded day ${age} (${n(currentDay.views)} vs ${n(priorDay.views)} views). Watching, not a reason to add uploads.`;
+      const first=comparisonAge>1&&firstChange!==null?`Day 1 ${firstChange>=0?'+':''}${firstChange}%; `:'';
+      launch=`${first}${change>=0?'+':''}${change}% vs ${priorTrack} at recorded day ${comparisonAge} (${n(currentDay.views)} vs ${n(priorDay.views)} views). Watching, not a reason to add uploads.`;
     }
   }
   const fr=evidence.fanResponse;
