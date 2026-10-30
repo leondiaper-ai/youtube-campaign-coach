@@ -235,7 +235,21 @@ export function buildLandingModel({
       at:refs.filter(u=>u.shape==='long').map(u=>u.publishedAt.slice(0,10)).sort()[0]??t.releaseDate};
   });
   const momentDates=Array.from(new Set([...trackCounts.map(r=>r.at),...(status.albumReleaseDate?[status.albumReleaseDate]:[])]));
-  const next28Shorts=momentDates.reduce((n,atDate)=>n+[-3,0,7].filter(offset=>{const at=Date.parse(atDate)+offset*DAY;return at>=Date.parse(today)&&at<Date.parse(today)+28*DAY;}).length,0);
+  const weeklyTarget=decisions['campaign:shorts-target']?.shortsWeeklyTarget;
+  // Two ongoing Short moments each week; a crowded release week can add more.
+  // Release-linked moments occupy the baseline rather than being double-counted.
+  const shortsGuideForWindow=(start:number)=>Array.from({length:4},(_,week)=>{
+    const from=start+week*7*DAY,to=from+7*DAY;
+    const moments=momentDates.reduce((n,at)=>n+[-3,0,7].filter(d=>{const ts=Date.parse(at)+d*DAY;return ts>=from&&ts<to;}).length,0);
+    return Math.max(weeklyTarget??2,moments);
+  }).reduce((n,count)=>n+count,0);
+  const forecastStart=Date.parse(today),forecastEnd=forecastStart+28*DAY;
+  const next28Shorts=shortsGuideForWindow(forecastStart);
+  const inForecast=(at:number)=>at>=forecastStart&&at<forecastEnd;
+  const next28Videos=trackCounts.reduce((n,r)=>n+
+    (r.long===0&&inForecast(Date.parse(r.t.releaseDate))?1:0)+
+    (r.long<2&&inForecast(Date.parse(r.at)+10*DAY)?1:0),0)+
+    (status.albumReleaseDate&&inForecast(Date.parse(status.albumReleaseDate))&&status.albumReleaseDate>today?1:0);
   const todayMs=Date.parse(today);
   const heroDue=trackCounts.filter(r=>Date.parse(r.at)<todayMs);
   const followDue=trackCounts.filter(r=>Date.parse(r.at)+14*DAY<todayMs);
@@ -245,11 +259,9 @@ export function buildLandingModel({
   const assessment={heroes:assess(heroDue.length,heroDue.filter(r=>!r.long).length,'release video'),
     followUps:assess(followDue.length,followDue.filter(r=>r.long<2).length,'follow-up'),
     shorts:assess(shortDue.reduce((n,x)=>n+x.due,0),shortDue.reduce((n,x)=>n+Math.max(0,x.due-x.r.shorts),0),'Shorts')};
-  const recentGuideMoments=momentDates.reduce((n,at)=>n+[-3,0,7].filter(d=>{const day=Date.parse(at)+d*DAY;return day>=now-28*DAY&&day<=now;}).length,0);
-  const weeklyTarget=decisions['campaign:shorts-target']?.shortsWeeklyTarget;
   // Working campaign floor: two Shorts/week, with release moments able to
   // raise the guide. A deliberate saved team target still takes precedence.
-  const guideCount=weeklyTarget!=null?weeklyTarget*4:Math.max(8,recentGuideMoments);
+  const guideCount=shortsGuideForWindow(now-28*DAY);
   const cadenceFigure=figures.find(f=>f.label==='Shorts / week');
   if(cadenceFigure&&guideCount>0&&status.fresh){
     cadenceFigure.tone=status.shortsRead.count>=guideCount?'good':'behind';
@@ -257,7 +269,7 @@ export function buildLandingModel({
   }
   const framework={singles:tracks.length,heroes:trackCounts.filter(r=>r.long>0).length,
     followUps:trackCounts.filter(r=>r.long>1).length,shorts:trackCounts.reduce((n,r)=>n+r.shorts,0),
-    shortsTarget:tracks.length*3,next28Shorts,assessment,
+    shortsTarget:tracks.length*3,next28Shorts,next28Videos,assessment,
     upcomingMoments:momentDates.filter(at=>Date.parse(at)>=Date.parse(today)&&Date.parse(at)<Date.parse(today)+28*DAY).length};
   return {
     framework,

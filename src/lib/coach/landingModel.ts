@@ -99,7 +99,7 @@ export type LandingModel = {
   /** One explicit campaign reporting window, used by every campaign figure. */
   windowLabel: string;
   actions: LandingAction[];
-  framework?: { singles: number; heroes: number; followUps: number; shorts: number; shortsTarget: number; next28Shorts: number; upcomingMoments: number; assessment: {heroes: GuideAssessment; followUps: GuideAssessment; shorts: GuideAssessment} };
+  framework?: { singles: number; heroes: number; followUps: number; shorts: number; shortsTarget: number; next28Shorts: number; next28Videos?: number; upcomingMoments: number; assessment: {heroes: GuideAssessment; followUps: GuideAssessment; shorts: GuideAssessment} };
   coverage?: { name: string; date: string; guide?: string; cells: { label: string; count: number; planned: boolean; reported?: boolean }[] }[];
   shortsProgress?: { count: number; weekly: number; average: number | null; target: number | null };
   figures: { value: string; label: string; period: string; tone?: GuideAssessment['tone'] }[];

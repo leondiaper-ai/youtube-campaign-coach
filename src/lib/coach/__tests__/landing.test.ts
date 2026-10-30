@@ -268,7 +268,7 @@ test('timeline guide counts real matched assets and dates its suggested support 
   assert.equal(m.framework?.heroes,2); // lyric videos count as heroes
   assert.equal(m.framework?.followUps,0);
   assert.equal(m.framework?.shortsTarget,9);
-  assert.equal(m.framework?.next28Shorts,3); // current +7; next single -3/0; +7 falls outside 28-day window
+  assert.equal(m.framework?.next28Shorts,8); // weekly continuity includes the dated release support
   assert.equal(m.shortsProgress?.target,null); // no invented agreed quota
   assert.equal(m.coverage?.find(r=>r.name==='Overthinker')?.cells.find(c=>c.label==='Lyric')?.count,1);
   assert.match(m.actions[0].window??'',/7–14 days/);
@@ -287,7 +287,7 @@ test('a second matched long-form destination closes the support gap and saved Sh
 test('live upload dates override planned release dates in the support guide', () => {
   const m=model({uploads:RICH,events:[event('Overthinker - single release',0),event('Evil - single release',21)]}).model;
   assert.equal(m.framework?.upcomingMoments,1);
-  assert.equal(m.framework?.next28Shorts,3);
+  assert.equal(m.framework?.next28Shorts,8);
   assert.equal(m.coverage?.find(r=>r.name==='Overthinker')?.date,'27 Oct');
 });
 
@@ -295,7 +295,7 @@ test('live upload dates override planned release dates in the support guide', ()
 test('album week contributes support moments even when no single is due', () => {
   const m=model({uploads:RICH,events:[event('Album release',0,'albumRelease')]}).model;
   assert.equal(m.framework?.upcomingMoments,1);
-  assert.equal(m.framework?.next28Shorts,2); // album launch and +7 support
+  assert.equal(m.framework?.next28Shorts,8); // album moments sit inside weekly continuity
 });
 
 
@@ -394,4 +394,13 @@ test('launch comparison exposes exact matched-age figures with a partial-day lab
 
 test('a launch comparison is absent when matched-age history is unavailable', () => {
   assert.equal(model({uploads:RICH,events:RICH_EVENTS}).model.launchComparison,null);
+});
+
+
+test('the next 28-day outlook includes ongoing Shorts and launch/follow-up videos', () => {
+  const m=model({uploads:RICH,events:RICH_EVENTS}).model;
+  assert.equal(m.framework?.next28Shorts,8);
+  assert.equal(m.framework?.next28Videos,2);
+  const busy=model({uploads:[],events:[event('One - single release',1),event('Two - single release',2),event('Three - single release',3)]}).model;
+  assert.ok((busy.framework?.next28Shorts??0)>8);
 });
