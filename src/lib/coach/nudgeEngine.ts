@@ -95,7 +95,7 @@ export function generateNudges(ctx: NudgeContext): Nudge[] {
       id: 'channel-cold',
       urgency: 'critical',
       title: 'Channel has gone silent',
-      detail: `No uploads in ${lastUploadDays} days. The campaign plan is running but the channel isn't. Upload something — even a short — to restart momentum.`,
+      detail: `No uploads in ${lastUploadDays} days. Check data freshness and the artist’s release plans before agreeing the next upload.`,
     });
   }
 
@@ -161,7 +161,7 @@ export function generateNudges(ctx: NudgeContext): Nudge[] {
         id: 'no-shorts-build',
         urgency: 'suggestion',
         title: 'No shorts yet in BUILD phase',
-        detail: 'Shorts during BUILD create the audience warm-up that makes releases land harder. Start with behind-the-scenes clips or teasers.',
+        detail: 'No planned Shorts have been matched in this build period. Check recent uploads and available material before agreeing a pre-release Short.',
       });
     }
   }
@@ -182,7 +182,7 @@ export function generateNudges(ctx: NudgeContext): Nudge[] {
       id: 'cold-build',
       urgency: 'important',
       title: 'Channel is cold entering BUILD',
-      detail: 'Start with 2-3 low-effort shorts to signal the algorithm you\'re active before ramping up to larger content.',
+      detail: 'Review available material and agree a realistic return to publishing with the artist team.',
     });
   }
 

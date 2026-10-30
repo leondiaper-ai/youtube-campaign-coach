@@ -20,6 +20,9 @@
 
 import { useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import CoachActionBoard from './CoachActionBoard';
+import CoachCampaignStatus from './CoachCampaignStatus';
+import type { CoachSummary, TrackRoadmap, Decisions } from '@/lib/coach/roadmap';
 import type { GeneratedPlan, ParsedEvent, PhaseName, TimelineKind, ChannelContext } from '@/lib/planEngine';
 import type { RecentUpload } from '@/lib/artists';
 import { fmtNum } from '@/lib/artists';
@@ -211,6 +214,9 @@ function phaseForDate(iso: string, firstRel?: string, lastRel?: string): PhaseNa
 
 // ── Props ──
 type Props = {
+  coachEvidence?: CoachSummary;
+  coachRoadmap?: TrackRoadmap[];
+  coachDecisions?: Decisions;
   plan: GeneratedPlan;
   slug: string;
   artistName: string;
@@ -288,26 +294,30 @@ export default function CampaignWarRoom(props: Props) {
 
   return (
     <div style={{ minHeight: '100vh', background: PAPER, color: INK }}>
-      <CampaignRead
-        artist={plan.artist} title={campaignTitle} phase={m.currentPhase}
-        headline={headline}
-      />
-      <CampaignStatus
+      {!props.coachEvidence?.status && <CampaignRead
+        artist={plan.artist} title={campaignTitle} phase={props.coachEvidence?.status?.phase ?? m.currentPhase}
+        headline={props.coachEvidence?.status?.headline ?? (props.coachEvidence ? (nextMoment ? `Next planned moment: ${cleanTitle(nextMoment.e.title)} — ${fmtDay(nextMoment.e.dateISO)}. Published assets and next steps below.` : "Review the published assets and agree the next campaign steps below.") : headline)}
+      />}
+      {props.coachEvidence?.status && <CoachCampaignStatus slug={props.slug} artist={plan.artist} title={plan.events.find(e=>e.kind==='albumRelease')?.title.split(/\s+[–—-]\s+/)[0] ?? campaignTitle} uploads={recentUploads} evidence={props.coachEvidence} decisions={props.coachDecisions ?? {}} />}
+      {!props.coachEvidence && <CampaignStatus
         rolloutActive={recentUploads.some((u) => daysAgoNum(u.publishedAt) <= 45)}
         datesMapped={events.length > 0}
         pipelineReady={hasAssets}
         nextTitle={nextMoment ? cleanTitle(nextMoment.e.title) : undefined}
         nextDate={nextMoment ? fmtDay(nextMoment.e.dateISO) : undefined}
         focus={focus}
-      />
-      <CurrentYouTubeSurface recentUploads={recentUploads} campaignStart={campaignStartDate} knownTitles={knownTitles} nextLinkedEvent={nextMoment?.e.videoId ? nextMoment.e : undefined} />
-      <RecentActivity recentUploads={recentUploads} liveChannel={liveChannel} campaignStart={campaignStartDate} />
-      <ContentSupply events={events} library={lib} hasAssets={hasAssets} folderUrl={lib.folderUrl || driveFolderUrl} slug={props.slug} />
+      />}
+      {!props.coachEvidence?.status && <CurrentYouTubeSurface recentUploads={recentUploads} campaignStart={campaignStartDate} knownTitles={knownTitles} nextLinkedEvent={nextMoment?.e.videoId ? nextMoment.e : undefined} />}
+      {!props.coachEvidence?.status && <CoachShorts recentUploads={recentUploads} />}
+      <ContentSupply observedTracks={props.coachEvidence ? props.coachRoadmap ?? [] : undefined} events={events} library={lib} hasAssets={hasAssets} folderUrl={lib.folderUrl || driveFolderUrl} slug={props.slug} />
       <MasterTimeline
         events={events} mappings={m.mappings} phases={m.phases} activeIdx={activeIdx}
         recentUploads={recentUploads} campaignStart={campaignStartDate} knownTitles={knownTitles} pool={pool}
         folderUrl={lib.folderUrl || driveFolderUrl} slug={props.slug} hasAssets={hasAssets}
+        coach={props.coachEvidence ? {evidence:props.coachEvidence, tracks:props.coachRoadmap ?? [], decisions:props.coachDecisions ?? {}} : undefined}
       />
+      {props.coachEvidence && <CoachActionBoard mode="overview" tracks={props.coachRoadmap ?? []} slug={props.slug} evidence={props.coachEvidence} decisions={props.coachDecisions ?? {}} />}
+      {!props.coachEvidence && <RecentActivity recentUploads={recentUploads} liveChannel={liveChannel} campaignStart={campaignStartDate} />}
       <EditTimelineFooter
         slug={props.slug} artistName={props.artistName} currentTimeline={props.timelineText ?? ''}
         channelCtx={props.channelCtx} campaignStartDate={props.campaignStartDate}
@@ -395,7 +405,7 @@ function currentFocus(primaryGap: string, phase: PhaseName, heroIsLive = false, 
   // Hero asset is already live on YouTube — shift focus to Shorts + discovery.
   if (heroIsLive && milestoneTitle) {
     const tl = milestoneTitle.toLowerCase();
-    const isAlbum = /album/.test(tl);
+    const isAlbum = /album\s+(release|out|launch|drop)/.test(tl) && !/announce\s+album/.test(tl);
     const hasMV = /official\s*(music\s*)?video|music\s*video/i.test(tl);
     if (isAlbum && hasMV) return 'Album out — build Shorts around the official video to drive discovery.';
     if (isAlbum) return 'Album out — build Shorts and visual content to sustain momentum.';
@@ -557,9 +567,10 @@ function CurrentYouTubeSurface({ recentUploads, campaignStart, knownTitles, next
   // most-recently-published video — a 400-day-old upload is more representative
   // than an 8-year-old catalogue hit, regardless of view count.
   const allArchive = recentUploads.every((u) => uploadAge(u.publishedAt, campaignStart) === 'archive');
-  const hero = allArchive
+  const latestDestination = recentUploads.filter(u=>!u.isCollab&&u.live!=='upcoming'&&Date.parse(u.publishedAt)<=Date.now()&&!isShort(u)&&!isTeaser(u)).sort((a,b)=>b.publishedAt.localeCompare(a.publishedAt))[0];
+  const hero = latestDestination ?? (allArchive
     ? [...recentUploads].sort((a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime())[0]
-    : [...recentUploads].sort((a, b) => score(b) - score(a))[0];
+    : [...recentUploads].sort((a, b) => score(b) - score(a))[0]);
   const age = uploadAge(hero.publishedAt, campaignStart);
   const ab = ageBadge[age];
   const relevant = age !== 'archive' || shareTok(tok(hero.title), titleTokens);
@@ -723,7 +734,8 @@ function ConnectDriveFolder({ slug, folderUrl }: { slug: string; folderUrl?: str
 
 // One card — the single source of truth for campaign assets: what's in hand vs
 // the recommended volume for THIS timeline (merges the old Pipeline + Coverage).
-function ContentSupply({ events, library, hasAssets, folderUrl, slug }: {
+function ContentSupply({ events, library, hasAssets, folderUrl, slug, observedTracks }: {
+  observedTracks?:TrackRoadmap[];
   events: ParsedEvent[]; library: AssetLibrary; hasAssets: boolean; folderUrl?: string; slug: string;
 }) {
   // Count events with linked videos as banked Official Video assets
@@ -756,6 +768,12 @@ function ContentSupply({ events, library, hasAssets, folderUrl, slug }: {
   const totalNew = newIds.size;
   const totalRemoved = library.removedAssetIds?.length ?? 0;
 
+  if(observedTracks){
+    const published=Array.from(new Map(observedTracks.flatMap(t=>t.actions.filter(a=>a.video&&!a.scheduled)).map(a=>[a.video!.id,a])).values());
+    const formats=new Map<string,number>();
+    for(const a of published)formats.set(a.label,(formats.get(a.label)??0)+1);
+    return <section style={{maxWidth:1180,margin:'0 auto',padding:'20px 40px 0'}}><details style={{border:`1px solid ${BONE}`,borderRadius:10,background:WHITE,padding:'14px 18px'}}><summary style={{fontSize:12,fontWeight:700,cursor:'pointer'}}>Asset library · {folderUrl?`${library.assets.length} files indexed`:'folder not connected'}</summary><p style={{fontSize:12,color:SMOKE,margin:'12px 0'}}>Published track assets identified on YouTube: {Array.from(formats).map(([label,count])=>`${count} ${label}`).join(' · ')||'none identified in this reading'}. Folder files are counted separately and are not confirmed ready to upload.</p><ConnectDriveFolder slug={slug} folderUrl={folderUrl}/></details></section>;
+  }
   const Row = ({ r }: { r: SupplyRow }) => {
     const have = r.have;
     const pct = r.lo > 0 && have != null ? Math.min(100, Math.round((have / r.lo) * 100)) : 0;
@@ -984,7 +1002,8 @@ function ContentSupply({ events, library, hasAssets, folderUrl, slug }: {
 // 4. MASTER TIMELINE (type-aware cards)
 // ══════════════════════════════════════════════════════════════════════════
 
-function MasterTimeline({ events, mappings, phases, activeIdx, recentUploads, campaignStart, knownTitles, pool, folderUrl, slug, hasAssets }: {
+function MasterTimeline({ events, mappings, phases, activeIdx, recentUploads, campaignStart, knownTitles, pool, folderUrl, slug, hasAssets, coach }: {
+  coach?: {evidence:CoachSummary;tracks:TrackRoadmap[];decisions:Decisions};
   events: ParsedEvent[]; mappings: MilestoneMapping[]; phases: PhaseName[]; activeIdx: number;
   recentUploads: RecentUpload[]; campaignStart?: string; knownTitles: string[]; pool: Pool; folderUrl?: string; slug: string; hasAssets: boolean;
 }) {
@@ -1132,20 +1151,25 @@ function MasterTimeline({ events, mappings, phases, activeIdx, recentUploads, ca
     const gapDays = nextG ? Math.round((groupTs(nextG) - groupTs(g)) / 86400000) : undefined;
     const nextLabel = nextG ? fmtShort(events[nextG.idxs[0]].dateISO) : undefined;
     return (
+      <div key={`${ev.dateISO}-${i0}`}>
+      {ev.kind==='albumRelease' && coach?.evidence.status?.albumIdea && <div style={{display:'grid',gridTemplateColumns:'108px 1fr',gap:0,marginBottom:14}}><div style={{fontSize:12,fontWeight:750,textAlign:'right',paddingRight:22,paddingTop:16,color:SMOKE}}>{fmtDay(coach.evidence.status.albumIdea.date)}</div><div style={{padding:'16px 18px',background:'#f6f4ff',border:'1px solid #e7e2ef',borderLeft:'4px solid #2c25ff',borderRadius:9}}><div style={{fontSize:9,fontWeight:800,letterSpacing:'.12em',color:'#2c25ff',marginBottom:6}}>SUGGESTED · DEEP DIVE</div><div style={{fontSize:15,fontWeight:800}}>{coach.evidence.status.albumIdea.label}</div><p style={{fontSize:12,color:SMOKE,marginTop:6}}>Confirm suitable performance footage and agree the slot with the artist team.</p></div></div>}
       <MilestoneCard
-        key={`${ev.dateISO}-${i0}`} ev={ev} mapping={mapping} phase={phases[i0]} active={active}
+        intelligence={!!coach} ev={ev} mapping={mapping} phase={phases[i0]} active={active}
         showPhaseLabel={showPhaseLabel} compact={compact}
         recentUploads={recentUploads} campaignStart={campaignStart} knownTitles={knownTitles} pool={pool} folderUrl={folderUrl}
         live={liveInfo} titleOverride={titleOverride} includes={includes}
         gapDays={gapDays} nextLabel={nextLabel} slug={slug} hasAssets={hasAssets}
-      />
+      >
+      {coach && coach.tracks.filter(track => idxs.some(idx => events[idx].dateISO === track.releaseDate && events[idx].title.toLowerCase().includes(track.name.toLowerCase()))).map(track => <div key={track.id}><CoachActionBoard mode="embedded" tracks={[track]} slug={slug} evidence={coach.evidence} decisions={coach.decisions} /></div>)}
+      </MilestoneCard>
+      </div>
     );
   };
 
   return (
     <section style={{ maxWidth: 1180, margin: '0 auto', padding: '40px 40px 0' }}>
       <div style={{ fontSize: 10, fontWeight: 800, letterSpacing: '0.28em', textTransform: 'uppercase', color: INK, fontFamily: MONO, marginBottom: 10, display: 'flex', alignItems: 'center', gap: 8 }}><YTMark h={12} /> YouTube Campaign Timeline</div>
-      {(() => {
+      {!coach && (() => {
         const sr = shortsRecommendation(events);
         return (
           <div style={{ display: 'flex', alignItems: 'center', gap: 9, flexWrap: 'wrap', marginBottom: 24 }}>
@@ -1523,7 +1547,9 @@ function LinkVideoButton({ slug, eventTitle }: { slug: string; eventTitle: strin
   );
 }
 
-function MilestoneCard({ ev, mapping, phase, active, showPhaseLabel, recentUploads, campaignStart, knownTitles, pool, folderUrl, live, titleOverride, includes, compact, gapDays, nextLabel, slug, hasAssets }: {
+function MilestoneCard({ ev, mapping, phase, active, showPhaseLabel, recentUploads, campaignStart, knownTitles, pool, folderUrl, live, titleOverride, includes, compact, gapDays, nextLabel, slug, hasAssets, intelligence = false, children }: {
+  children?: React.ReactNode;
+  intelligence?: boolean;
   ev: ParsedEvent; mapping?: MilestoneMapping; phase: PhaseName; active: boolean; showPhaseLabel: boolean;
   recentUploads: RecentUpload[]; campaignStart?: string; knownTitles: string[]; pool: Pool; folderUrl?: string;
   live?: { primary?: RecentUpload; shorts: RecentUpload[] };
@@ -1744,7 +1770,7 @@ function MilestoneCard({ ev, mapping, phase, active, showPhaseLabel, recentUploa
         </div>
 
         {/* Shorts cue — where best to drop short-form for this moment */}
-        {shortsCue && (
+        {!intelligence && shortsCue && (
           <div style={{ marginTop: 10, display: 'flex', alignItems: 'center', gap: 9, flexWrap: 'wrap' }}>
             <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: 11, fontWeight: 800, letterSpacing: '0.04em', textTransform: 'uppercase', color: SHORTS_PURPLE, background: '#F0E8FE', border: `1px solid ${SHORTS_PURPLE}33`, padding: '3px 10px', borderRadius: 20 }}>
               <svg width="9" height="11" viewBox="0 0 10 12" aria-hidden><polygon points="0,0 10,6 0,12" fill={SHORTS_PURPLE} /></svg>
@@ -1871,7 +1897,7 @@ function MilestoneCard({ ev, mapping, phase, active, showPhaseLabel, recentUploa
 
         {/* Live → amplification nudge. Compact support/live → cadence line.
             Otherwise (release/announce) → full sequenced Suggested Support. */}
-        {isLive ? (
+        {intelligence ? children : isLive ? (
           <div style={{ marginTop: 11, display: 'flex', flexDirection: 'column', gap: 3 }}>
             {shownActions.map((a, i) => (
               <div key={i} style={{ fontSize: 12.5, color: INK, lineHeight: 1.35, display: 'flex', gap: 8 }}>
@@ -2018,4 +2044,10 @@ function EditTimelineFooter({ slug, artistName, currentTimeline, channelCtx, cam
       </div>
     </section>
   );
+}
+
+function CoachShorts({recentUploads}:{recentUploads:RecentUpload[]}) {
+  const shorts=recentUploads.filter(u=>isShort(u)&&!u.isCollab&&u.live!=='upcoming'&&Date.parse(u.publishedAt)<=Date.now()).sort((a,b)=>b.publishedAt.localeCompare(a.publishedAt)).slice(0,4);
+  if(!shorts.length)return null;
+  return <section style={{maxWidth:1180,margin:'0 auto',padding:'18px 40px 0'}}><div style={{fontSize:10,fontWeight:800,letterSpacing:'.14em',color:SMOKE,marginBottom:10}}>LATEST SHORTS</div><div style={{display:'grid',gridTemplateColumns:'repeat(4,minmax(0,1fr))',gap:12}}>{shorts.map(u=><a key={u.id} href={ytUrl(u)} target="_blank" rel="noreferrer" style={{textDecoration:'none',color:INK,minWidth:0}}><img src={ytThumb(u.id)} alt="" style={{width:'100%',aspectRatio:'16/9',objectFit:'cover',borderRadius:8}}/><div style={{fontSize:11,fontWeight:700,marginTop:6,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}} title={u.title}>{u.title}</div><div style={{fontSize:11,color:SMOKE,marginTop:3}}>{fmtNum(u.viewCount)} views · {relDays(u.publishedAt)}</div></a>)}</div></section>;
 }
