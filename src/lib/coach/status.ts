@@ -11,6 +11,7 @@ export type CoachStatus = {
   headline: string;
   current: string;
   next: string;
+  nextMoment?: {name:string;date:string} | null;
   cadence: string;
   fresh: boolean;
   campaign: string | null;
@@ -171,5 +172,5 @@ export function buildCoachStatus({plan,evidence,tracks,decisions={},campaignStar
     }
     if(!anchor&&focus){const a=focus.actions.find(a=>a.format==='hero'||a.scheduled);if(a)push(focus,{...a,label:'Check the release upload',date:today,reason:'The release date has arrived. Confirm whether the video is public, scheduled or still being prepared before planning another upload.'});}
   }
-  return {metrics:metrics?{views:metrics.views,assets:metrics.assets,shorts:metrics.shorts,longform:metrics.longForm,start:metrics.start.at}:null,shortsRead,launch,audience,albumIdea,phase,headline,current,next,cadence,fresh,campaign,priorities:priorities.slice(0,2)};
+  return {nextMoment:upcoming?{name:upcoming.name,date:upcoming.releaseDate}:albumFuture?{name:'Album release',date:album.dateISO}:null,metrics:metrics?{views:metrics.views,assets:metrics.assets,shorts:metrics.shorts,longform:metrics.longForm,start:metrics.start.at}:null,shortsRead,launch,audience,albumIdea,phase,headline,current,next,cadence,fresh,campaign,priorities:priorities.slice(0,2)};
 }

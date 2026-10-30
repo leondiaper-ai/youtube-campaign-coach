@@ -242,3 +242,13 @@ test('new campaigns with no channel reading get a planning check, not missing-as
   assert.match(result.model.actions[0].reason,/Refresh the channel reading/);
   assert.doesNotMatch(result.model.actions[0].reason,/missing|no video|no release video/i);
 });
+
+
+test('asset formats, upload dates and the next release stay explicit in the view model', () => {
+  const m=model({uploads:RICH,events:RICH_EVENTS,dive:true}).model;
+  assert.equal(m.latest?.format,'Lyric Video');
+  assert.ok(m.actions[0].observation?.includes('Lyric Video'));
+  assert.ok(m.assets.long.every(v=>!!v.format&&!!v.publishedAt));
+  assert.ok(m.rollout.flatMap(r=>r.assets).filter(a=>a.status==='published').every(a=>!!a.format));
+  assert.equal(m.nextMoment?.name,'Evil');
+});

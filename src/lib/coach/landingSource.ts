@@ -20,6 +20,7 @@
    produces nothing, the section is absent rather than filled.
    ═══════════════════════════════════════════════════════════════════════ */
 
+import { classifyUploadFormat, getFormatMeta } from '../formatClassifier';
 import { toCampaignUploads } from '../intelligence/campaignWindow';
 import type { RecentUpload } from '../artists';
 import type { CoachStatus } from './status';
@@ -46,12 +47,15 @@ function stateOf(a: RoadmapAction, d: Decisions): ReleaseAsset['status'] {
 
 function toUploadRef(u: RecentUpload): UploadRef {
   const f = toCampaignUploads([u])[0]?.kind;
+  const detected=classifyUploadFormat({...u,description:''});
+  const format=f==='short'?'Short':detected==='short'||detected==='longform'?'Video':getFormatMeta(detected).label;
   return {
     id: u.id,
     title: u.title,
     publishedAt: u.publishedAt,
     views: u.viewCount ?? null,
     shape: f === 'short' ? 'short' : 'long',
+    format,
   };
 }
 
@@ -82,10 +86,15 @@ export function buildLandingModel({
          a list. Here the eyebrow already carries it, so strip it rather
          than print "Overthinker" twice on one card. */
       const label = a.label.startsWith(`${t.name}: `) ? a.label.slice(t.name.length + 2) : a.label;
+      const track=tracks.find(r=>r.actions.some(item=>item.id===a.id));
+      const latestTrackVideo=track?.actions.filter(item=>item.video&&!item.scheduled&&!item.format.startsWith('short')).slice().sort((x,y)=>y.video!.date.localeCompare(x.video!.date))[0];
+      const observed=latestTrackVideo?evidence.uploads.find(u=>u.id===latestTrackVideo.video!.id):null;
+      const ref=observed?toUploadRef(observed):null;
       return {
         id: a.id,
         label: label.charAt(0).toUpperCase() + label.slice(1),
         context: t.name,
+        observation: ref ? `${ref.format} · ${ref.views==null?'Views unavailable':compact(ref.views)+' views'} · uploaded ${shortDate(ref.publishedAt)}` : undefined,
         due: due ? `by ${due}` : 'date to set',
         dueISO,
         dueTone: soon ? 'soon' : 'normal',
@@ -210,6 +219,7 @@ export function buildLandingModel({
             ? `${compact(evidence.uploads.find(u => u.id === a.video!.id)?.viewCount ?? 0)} · ${shortDate(a.video.date)}`
             : (decisions[a.id]?.targetDate ?? status.priorities.flatMap(t => t.actions).find(p => p.id === a.id)?.date ?? a.date) ? shortDate((decisions[a.id]?.targetDate ?? status.priorities.flatMap(t => t.actions).find(p => p.id === a.id)?.date ?? a.date)!) : actionStatus(a, decisions[a.id]),
           videoId: a.video?.id,
+          format: a.video&&!a.scheduled ? (()=>{const u=evidence.uploads.find(u=>u.id===a.video!.id);return u?toUploadRef(u).format:undefined;})() : undefined,
         })),
       };
     });
@@ -219,7 +229,7 @@ export function buildLandingModel({
       const upload=evidence.uploads.find(u => `observed:${u.id}:support` === action.id);
       if (!upload) continue;
       rollout.push({name:upload.title,dateLabel:shortDate(upload.publishedAt),stage:'live',badge:{label:'Observed on channel',tone:'ok'},assets:[
-        {label:upload.title,status:'published',videoId:upload.id,meta:compact(upload.viewCount ?? 0)},
+        {label:upload.title,status:'published',videoId:upload.id,format:toUploadRef(upload).format,meta:`${compact(upload.viewCount ?? 0)} views · ${shortDate(upload.publishedAt)}`} ,
         {label:action.label,note:action.reason,status:stateOf(action,decisions),meta:shortDate(decisions[action.id]?.targetDate ?? action.date ?? today)}
       ]});
     }
@@ -227,6 +237,7 @@ export function buildLandingModel({
 
   return {
     artist: artistName,
+    nextMoment: status.nextMoment,
     project: projectName,
     stageLine: [status.current, status.next ? `next ${status.next}` : null]
       .filter(Boolean).join(' · '),

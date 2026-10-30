@@ -51,7 +51,7 @@ function AssetRow({ title, items, shape }: { title: string; items: UploadRef[]; 
   return (
     <div className="min-w-0">
       <div className="flex items-baseline justify-between gap-3 mb-2">
-        <Eyebrow>{title}</Eyebrow>
+        <span className="flex items-center gap-2"><span className="w-1 h-3 rounded-sm" style={{background:shape==='short'?'#C77A16':'#2C6BFF'}} /><Eyebrow>{title}</Eyebrow></span>
         <span className="text-[11px] text-faint tabular-nums">
           {items.length}
           {items.length > limit && (
@@ -71,10 +71,12 @@ function AssetRow({ title, items, shape }: { title: string; items: UploadRef[]; 
             <a href={`https://youtube.com/watch?v=${v.id}`} target="_blank" rel="noopener noreferrer" className="no-underline block">
               <Thumb v={v} className={shape === 'long' ? 'aspect-video' : 'aspect-[9/16]'} />
               <span className="block text-[11px] font-bold tabular-nums text-ink mt-1.5">
-                {v.views == null ? '—' : compact(v.views)}
+                {v.views == null ? '—' : compact(v.views)} views
               </span>
               <span className="block text-[10.5px] text-muted leading-tight line-clamp-2">
-                {shape === 'long' ? v.title : shortDate(v.publishedAt)}
+                {v.format ?? (shape === 'short' ? 'Short' : 'Video')} · {shortDate(v.publishedAt)}
+              </span>
+              <span className="block text-[10.5px] text-muted leading-tight line-clamp-2 mt-0.5">{shape === 'long' ? v.title : ''}
               </span>
             </a>
           </li>
@@ -147,6 +149,7 @@ function ActionCard({ action, slug }: { action: LandingAction; slug?: string }) 
         <Eyebrow>{action.context}</Eyebrow>
       </div>
 
+      {action.observation && <p className="text-[13px] font-semibold text-ink bg-raised rounded-control px-2.5 py-2 m-0 mb-2.5">{action.observation}</p>}
       <h3 className="text-h4 font-extrabold text-ink leading-snug m-0 mb-1.5">{action.label}</h3>
       <p className="text-meta text-secondary leading-relaxed m-0">{action.reason}</p>
 
@@ -198,11 +201,16 @@ export default function CoachLanding({ model, slug, classicHref, timelineEditor 
       {/* 1 · header */}
       <header className="flex flex-wrap items-center justify-between gap-3 pt-5 pb-1">
         <div className="min-w-0">
-          <h1 className="text-h2 font-black tracking-tight text-ink m-0 leading-none">{model.artist}</h1>
-          <p className="text-meta text-secondary m-0 mt-1.5">{model.stageLine}</p>
+          <h1 className="text-[32px] sm:text-[40px] font-black tracking-tight text-ink m-0 leading-none">{model.artist}</h1>
+          <p className="text-body font-semibold text-secondary m-0 mt-2 leading-snug">{model.stageLine}</p>
         </div>
         <Badge fg={TONE.ok.fg} bg={TONE.ok.bg}>{model.project}</Badge>
       </header>
+
+      {model.nextMoment && <div className="mt-4 flex flex-wrap items-center gap-3 rounded-control border border-line bg-surface px-4 py-3">
+        <Eyebrow>Next release</Eyebrow><strong className="text-body text-ink">{model.nextMoment.name}</strong>
+        <span className="font-extrabold text-body text-electric">{shortDate(model.nextMoment.date)}</span>
+      </div>}
 
       {/* 2 · do next */}
       <Eyebrow className="mt-7 mb-2.5">Do next</Eyebrow>
@@ -230,10 +238,10 @@ export default function CoachLanding({ model, slug, classicHref, timelineEditor 
                   <Thumb v={model.latest} className="w-[148px] aspect-video" />
                 </a>
                 <div className="min-w-0">
-                  <Badge fg={TONE.ok.fg} bg={TONE.ok.bg}>Latest release</Badge>
+                  <Badge fg="#2458CC" bg="#EDF3FF">{model.latest.format ?? 'Video'} · Latest upload</Badge>
                   <h3 className="text-body font-extrabold text-ink m-0 mt-1.5 leading-snug">{model.latest.title}</h3>
-                  <p className="text-micro text-muted m-0 mt-0.5">
-                    {shortDate(model.latest.publishedAt)} · {model.latest.views == null ? '—' : exact(model.latest.views)} views
+                  <p className="text-meta font-semibold text-ink m-0 mt-1">
+                    Uploaded {shortDate(model.latest.publishedAt)} · {model.latest.views == null ? '—' : exact(model.latest.views)} views
                     {model.latest.likes != null && ` · ${exact(model.latest.likes)} likes`}
                   </p>
                   {model.paceLine && (
@@ -308,9 +316,10 @@ export default function CoachLanding({ model, slug, classicHref, timelineEditor 
                             {a.label}
                           </a>
                         ) : <span className="text-ink font-semibold">{a.label}</span>}
+                        {a.format && <small className="block text-micro font-semibold text-secondary mt-0.5">{a.format}</small>}
                         {a.note && <small className="block text-micro text-muted font-normal">{a.note}</small>}
                       </span>
-                      {a.meta && <span className="text-micro text-muted tabular-nums whitespace-nowrap">{a.meta}</span>}
+                      {a.meta && <span className="text-meta font-semibold text-ink tabular-nums whitespace-nowrap">{a.meta}</span>}
                     </li>
                   ))}
                 </ul>

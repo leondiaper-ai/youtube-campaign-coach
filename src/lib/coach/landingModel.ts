@@ -36,6 +36,7 @@ export type UploadRef = {
   views: number | null;
   /** 'long' or 'short'. Drives the thumbnail shape, so formats stay recognisable. */
   shape: 'long' | 'short';
+  format?: string;
 };
 
 /** A per-video daily reading we recorded ourselves. */
@@ -49,6 +50,7 @@ export type LandingAction = {
   label: string;
   /** Release or moment it belongs to. */
   context: string;
+  observation?: string;
   /** Suggested date or window. Always a planning date, never "optimal". */
   due: string;
   /** The same date as YYYY-MM-DD, so it can be edited and saved. */
@@ -68,6 +70,7 @@ export type ReleaseAsset = {
   status: 'published' | 'agreed' | 'suggested';
   meta?: string;
   videoId?: string;
+  format?: string;
 };
 
 export type ReleaseBlock = {
@@ -86,6 +89,7 @@ export type LandingModel = {
   artist: string;
   project: string;
   stageLine: string;
+  nextMoment?: {name:string; date:string} | null;
   /** One explicit campaign reporting window, used by every campaign figure. */
   windowLabel: string;
   actions: LandingAction[];
