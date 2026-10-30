@@ -14,7 +14,7 @@
    Decisions persist per campaign and refresh the shared rollout after saving.
    ═══════════════════════════════════════════════════════════════════════ */
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { Badge, Card, Eyebrow, Kpi } from '@/components/ui';
@@ -191,7 +191,7 @@ const STATUS_MARK: Record<ReleaseAsset['status'], { icon: string; cls: string }>
   suggested: { icon: '○', cls: 'text-faint' },
 };
 
-export default function CoachLanding({ model, slug, classicHref }: { model: LandingModel; slug?: string; classicHref?: string }) {
+export default function CoachLanding({ model, slug, classicHref, timelineEditor }: { model: LandingModel; slug?: string; classicHref?: string; timelineEditor?: ReactNode }) {
   return (
     <div className="max-w-[1060px] mx-auto px-5 pb-16">
 
@@ -319,6 +319,8 @@ export default function CoachLanding({ model, slug, classicHref }: { model: Land
           </li>
         ))}
       </ol>
+
+      {timelineEditor}
 
       <div className="mt-7 pt-3 border-t border-line text-micro text-muted leading-relaxed">
         {model.caveats.map(c => <p key={c} className="m-0 mb-1.5 last:mb-0">{c}</p>)}

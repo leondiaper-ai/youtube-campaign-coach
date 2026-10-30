@@ -13,6 +13,7 @@ import { reclassifyFromPlan } from '@/lib/driveAssets';
 import { mappingConfigFor, getCampaignConfig } from '@/lib/campaignConfig';
 import CampaignWarRoom from '@/components/CampaignWarRoom';
 import CoachLanding from '@/components/coach/CoachLanding';
+import CoachTimelineEditor from '@/components/coach/CoachTimelineEditor';
 import { loadCoachEvidence, readDecisions } from '@/lib/coach/evidence';
 import { buildRoadmap } from '@/lib/coach/roadmap';
 import { buildCoachStatus } from '@/lib/coach/status';
@@ -291,7 +292,11 @@ export default async function CampaignPage({ params, searchParams }: PageProps) 
     }
     const dates = new Map([...tracks.map(t => [t.name,t.releaseDate] as const), ...saved.plan.events.map(e => [e.title,e.dateISO] as const)]);
     model.rollout.sort((a,b) => (dates.get(a.name) ?? '').localeCompare(dates.get(b.name) ?? ''));
-    return <CoachLanding model={model} slug={saved.slug} classicHref={`/coach/${saved.slug}?view=classic`} />;
+    return <CoachLanding model={model} slug={saved.slug} timelineEditor={
+      <CoachTimelineEditor slug={saved.slug} artist={saved.artist} campaignName={saved.campaignName}
+        timeline={saved.timelineText || saved.plan.events.map(e => `${e.dateISO} - ${e.title}`).join('\n')}
+        channelCtx={saved.channelCtx} campaignStartDate={artistConfig?.campaignStartDate} market={saved.market} />
+    } classicHref={`/coach/${saved.slug}?view=classic`} />;
   }
 
   return (
