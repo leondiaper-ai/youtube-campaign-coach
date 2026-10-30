@@ -321,5 +321,6 @@ test('upcoming music video recommendation names its fallback and exposes channel
   const a=m.actions.find(a=>a.context==='Evil');
   assert.equal(a?.label,'Confirm music video');
   assert.match(a?.reason??'',/no music video.*lyric video/i);
-  assert.ok(a?.evidence.some(e=>/3 music videos/.test(e.body)));
+  assert.ok(a?.evidence.some(e=>/Lyric videos are reaching fans/.test(e.body)&&/views/.test(e.body)));
+  assert.ok(a?.evidence.every(e=>!/No upload matched|like-for-like/.test(e.body)));
 });

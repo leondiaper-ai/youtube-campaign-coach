@@ -20,6 +20,7 @@
    produces nothing, the section is absent rather than filled.
    ═══════════════════════════════════════════════════════════════════════ */
 
+import { songKey } from '../formatStack';
 import { coachUploadFormat } from './assetFormat';
 import { getFormatMeta } from '../formatClassifier';
 import { toCampaignUploads } from '../intelligence/campaignWindow';
@@ -96,6 +97,8 @@ export function buildLandingModel({
       const windowOpen = window && Date.parse(window.to) >= now;
       const musicHistory=evidence.audit.visuals.formats.find(f=>f.key==='omv');
       const lyricHistory=evidence.audit.visuals.formats.find(f=>f.key==='lyric');
+      const recentLyrics=evidence.uploads.filter(u=>!u.isCollab&&u.live!=='upcoming'&&Date.parse(u.publishedAt)<=now&&coachUploadFormat(u)==='lyric').sort((x,y)=>y.publishedAt.localeCompare(x.publishedAt)).slice(0,2);
+      const lyricExamples=recentLyrics.map(u=>`${songKey(u.title,artistName)}: ${compact(u.viewCount??0)} views`).join('; ');
       const heroLabel=(musicHistory?.count??0)>=3?'Confirm music video':(lyricHistory?.count??0)>=3?'Confirm lyric video':'Choose music video or lyric video';
       const conciseLabel = followUp ? 'Multi-format follow-up' : a.format === 'hero' ? heroLabel : label;
       const conciseReason = followUp && window && Date.parse(window.to)<now ? 'Follow-up window has passed · review available material.' : followUp
@@ -114,7 +117,7 @@ export function buildLandingModel({
         reason: conciseReason,
         evidence: [
           { heading: 'On the channel.', body: a.format.startsWith('campaign_') ? a.basis : a.format === 'hero'
-            ? `${musicHistory?.count??0} music videos and ${lyricHistory?.count??0} lyric videos identified in the channel history. No upload matched to this release yet. These are established formats, not a like-for-like performance test.`
+            ? lyricExamples ? `Lyric videos are reaching fans here — ${lyricExamples}. A practical fallback if no music video is planned.` : (musicHistory?.count??0)>0 ? `Music videos are an established format on this channel (${musicHistory!.count} published). Confirm the launch video with the team.` : 'Choose the launch video with the artist team. A lyric video is an option when a music video is not available.'
             : a.scheduled ? 'A linked video needs its visibility and release date checked.'
             : 'One release video identified; no further long-form video found for this track.' },
           ...(a.available
