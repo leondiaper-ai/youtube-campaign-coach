@@ -280,3 +280,11 @@ test('a second matched long-form destination closes the support gap and saved Sh
   assert.equal(m.shortsProgress?.target,3);
   assert.equal(m.coverage?.find(r=>r.name==='Overthinker')?.cells.find(c=>c.label==='Visualiser')?.count,1);
 });
+
+
+test('live upload dates override planned release dates in the support guide', () => {
+  const m=model({uploads:RICH,events:[event('Overthinker - single release',0),event('Evil - single release',21)]}).model;
+  assert.equal(m.framework?.upcomingMoments,1);
+  assert.equal(m.framework?.next28Shorts,3);
+  assert.equal(m.coverage?.find(r=>r.name==='Overthinker')?.date,'27 Oct');
+});

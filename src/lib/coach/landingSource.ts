@@ -241,13 +241,14 @@ export function buildLandingModel({
   const trackCounts=tracks.map(t=>{
     const ids=Array.from(new Set(t.actions.filter(a=>a.video&&!a.scheduled).map(a=>a.video!.id)));
     const refs=ids.flatMap(id=>{const u=evidence.uploads.find(u=>u.id===id);return u?[toUploadRef(u)]:[];});
-    return {t,long:refs.filter(u=>u.shape==='long').length,shorts:refs.filter(u=>u.shape==='short').length};
+    return {t,long:refs.filter(u=>u.shape==='long').length,shorts:refs.filter(u=>u.shape==='short').length,
+      at:refs.filter(u=>u.shape==='long').map(u=>u.publishedAt.slice(0,10)).sort()[0]??t.releaseDate};
   });
-  const next28Shorts=tracks.reduce((n,t)=>n+[-3,0,7].filter(offset=>{const at=Date.parse(t.releaseDate)+offset*DAY;return at>=Date.parse(today)&&at<Date.parse(today)+28*DAY;}).length,0);
+  const next28Shorts=trackCounts.reduce((n,r)=>n+[-3,0,7].filter(offset=>{const at=Date.parse(r.at)+offset*DAY;return at>=Date.parse(today)&&at<Date.parse(today)+28*DAY;}).length,0);
   const framework={singles:tracks.length,heroes:trackCounts.filter(r=>r.long>0).length,
     followUps:trackCounts.filter(r=>r.long>1).length,shorts:trackCounts.reduce((n,r)=>n+r.shorts,0),
     shortsTarget:tracks.length*3,next28Shorts,
-    upcomingMoments:tracks.filter(t=>Date.parse(t.releaseDate)>=Date.parse(today)&&Date.parse(t.releaseDate)<Date.parse(today)+28*DAY).length};
+    upcomingMoments:trackCounts.filter(r=>Date.parse(r.at)>=Date.parse(today)&&Date.parse(r.at)<Date.parse(today)+28*DAY).length};
   return {
     framework,
     artist: artistName,
@@ -260,9 +261,10 @@ export function buildLandingModel({
     coverage: tracks.map(t => {
       const uploads = Array.from(new Set(t.actions.filter(a=>a.video&&!a.scheduled).map(a=>a.video!.id)))
         .flatMap(id=>{const u=evidence.uploads.find(u=>u.id===id); return u?[toUploadRef(u)]:[];});
-      const age=Math.floor((Date.parse(today)-Date.parse(t.releaseDate))/DAY);
+      const actualDate=uploads.filter(u=>u.shape==='long').map(u=>u.publishedAt.slice(0,10)).sort()[0]??t.releaseDate;
+      const age=Math.floor((Date.parse(today)-Date.parse(actualDate))/DAY);
       const guide=age< -3?'Teaser before launch':age<0?'Teaser window':age<=6?'Launch support':age<=14?'Follow-up window':'Review support';
-      return {name:t.name,date:shortDate(t.releaseDate),guide,cells:[
+      return {name:t.name,date:shortDate(actualDate),guide,cells:[
         ['Music video','Official Music Video','omv'],['Lyric','Lyric Video','lyric'],
         ['Visualiser','Visualiser','visualiser'],['Live','Live Performance','live'],['Shorts','Short','short']
       ].map(([label,format,key])=>({label,count:uploads.filter(u=>u.format===format).length,
