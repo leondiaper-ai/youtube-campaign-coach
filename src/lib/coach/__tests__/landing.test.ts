@@ -197,3 +197,11 @@ test('all known campaign assets are listed, with or without daily history', () =
   const inWindow = RICH.filter(u => Date.parse(u.publishedAt) >= NOW - 65 * DAY).length;
   assert.equal(listed, inWindow, 'no asset is dropped for lacking a per-day series');
 });
+
+test('earlier releases keep a follow-up opportunity without becoming top priorities', () => {
+  const first = model({uploads:RICH, events:RICH_EVENTS, dive:true}).model;
+  assert.ok(first.rollout.find(r => r.name === 'Roses')?.opportunity);
+  assert.ok(first.actions.every(a => a.context !== 'Roses'));
+  const supported = model({uploads:[...RICH, upload('roses-live','Artist - Roses (Live)',25,42000)], events:RICH_EVENTS, dive:true}).model;
+  assert.equal(supported.rollout.find(r => r.name === 'Roses')?.opportunity, undefined);
+});

@@ -156,6 +156,12 @@ export function buildLandingModel({
       const live = t.actions.some(a => a.video && !a.scheduled);
       const isAnchor = anchor?.t.id === t.id;
       const future = t.releaseDate > today;
+      const publishedLong = t.actions.filter(a => a.video && !a.scheduled && !a.format.startsWith('short'));
+      const usedFormats = new Set(publishedLong.map(a => a.format.split(':')[0]));
+      const followUpOptions = [['live','live performance'],['visualiser','visualiser'],['lyric','lyric video'],['bts','behind-the-scenes video']].filter(([key]) => !usedFormats.has(key)).slice(0,2).map(([,label]) => label);
+      const opportunity = !isAnchor && !future && publishedLong.length === 1
+        ? `No further long-form video identified for ${t.name}. Explore a ${followUpOptions.join(' or ')} if suitable material is available.`
+        : undefined;
       const distant = future && Date.parse(t.releaseDate) - now > 45 * DAY && !live;
 
       if (distant) {
@@ -167,6 +173,7 @@ export function buildLandingModel({
       }
       return {
         name: t.name,
+        opportunity,
         dateLabel: shortDate(t.releaseDate),
         stage: isAnchor ? 'live' : live ? 'shipped' : 'upcoming',
         badge: isAnchor

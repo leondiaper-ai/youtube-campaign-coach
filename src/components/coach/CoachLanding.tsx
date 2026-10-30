@@ -315,6 +315,7 @@ export default function CoachLanding({ model, slug, classicHref, timelineEditor 
                   ))}
                 </ul>
               )}
+              {r.opportunity && <div className="mt-3 rounded-control bg-raised p-3 text-meta text-secondary"><span className="block text-micro font-bold text-ink mb-1">Opportunity to revisit</span>{r.opportunity}</div>}
             </Card>
           </li>
         ))}
