@@ -119,7 +119,8 @@ function ActionCard({ action, slug }: { action: LandingAction; slug?: string }) 
   }
   return (
     <Card className="flex flex-col">
-      <div className="flex items-center gap-2.5 mb-2">
+      <div className="flex flex-wrap items-center justify-between gap-2.5 mb-3">
+        <Eyebrow>{action.context}</Eyebrow>
         {editing ? (
           <form className="flex flex-wrap items-center gap-2" onSubmit={e => {
             e.preventDefault();
@@ -138,21 +139,19 @@ function ActionCard({ action, slug }: { action: LandingAction; slug?: string }) 
             type="button"
             onClick={() => setEditing(true)}
             title="Change the target date"
-            className="text-[12px] font-extrabold px-2 py-[3px] rounded border whitespace-nowrap"
-            style={action.dueTone === 'soon'
-              ? { color: '#8C2D11', background: '#FFE9E2', borderColor: '#F7CFC2' }
-              : { color: '#6F4617', background: '#FAF0E2', borderColor: '#EEDFC6' }}
+            className="text-[11px] font-semibold text-secondary px-2 py-[3px] rounded border border-line whitespace-nowrap hover:text-electric"
           >
             {date ? `by ${new Date(date + 'T12:00:00Z').toLocaleDateString('en-GB', { day: 'numeric', month: 'short', timeZone: 'UTC' })}` : action.due}
           </button>
         )}
-        <Eyebrow>{action.context}</Eyebrow>
       </div>
 
-      {action.window && <p className="text-[18px] font-extrabold text-electric m-0 mb-2">{action.window}</p>}
-      {action.observation && <p className="text-[13px] font-semibold text-ink bg-raised rounded-control px-2.5 py-2 m-0 mb-2.5">{action.observation}</p>}
-      <h3 className="text-h4 font-extrabold text-ink leading-snug m-0 mb-1.5">{action.label}</h3>
-      <p className="text-meta text-secondary leading-relaxed m-0">{action.reason}</p>
+      <div className="flex-1">
+        <h3 className="text-[18px] sm:text-[20px] font-extrabold text-ink leading-snug m-0">{action.label}</h3>
+        {action.window && <p className="text-[13px] font-semibold text-electric m-0 mt-1.5">{action.window}</p>}
+        <p className="text-meta text-secondary leading-relaxed m-0 mt-2">{action.reason}</p>
+        {action.observation && <p className="text-[11.5px] text-muted leading-snug m-0 mt-3">{action.observation}</p>}
+      </div>
 
       {/* Native disclosure: keyboard-operable and open-able without JS. */}
       <details className="group mt-3 pt-3 border-t border-line-faint">
