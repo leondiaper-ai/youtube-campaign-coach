@@ -138,7 +138,7 @@ test('limited history still produces an honest action, with no invented figure',
   assert.match(a.label, /follow-up/i);
   // No channel evidence exists, so no format is named and no count is claimed.
   assert.doesNotMatch(a.reason, /\d+ (lyric|live|visualiser|acoustic)/i);
-  assert.match(a.evidence.map(e => e.body).join(' '), /YouTube post-release guidance/i);
+  assert.ok(a.evidence.some(e => e.href === 'https://artists.youtube/resources/post-release-strategy/')); 
 });
 
 test('an expired follow-up window is described as past, not scheduled', () => {

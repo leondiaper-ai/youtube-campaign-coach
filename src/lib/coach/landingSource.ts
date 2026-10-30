@@ -91,10 +91,20 @@ export function buildLandingModel({
         dueTone: soon ? 'soon' : 'normal',
         reason: a.reason,
         evidence: [
-          { heading: 'Channel evidence.', body: a.basis },
-          { heading: 'YouTube guidance.', body: a.format === 'hero' || a.scheduled ? 'Prepare the release with teasers, clear presentation and a planned video launch.' : 'Keep supporting the release with visual storytelling and regular Shorts. Use audience response to shape what comes next.', href: a.format === 'hero' || a.scheduled ? 'https://artists.youtube/resources/pre-release-strategy/' : 'https://artists.youtube/resources/post-release-strategy/' },
-          ...(a.available ? [{ heading: 'Asset found.', body: `${a.available.name} — check readiness. A matching file does not confirm it is finished or cleared.` }] : []),
-          ...(evidence.audit.dataAt ? [{ heading: 'Channel read.', body: `Upload data as at ${shortDate(evidence.audit.dataAt)}. ${evidence.audit.coverage}` }] : []),
+          { heading: 'On the channel.', body: a.format === 'hero'
+            ? 'No release video identified yet. Confirm what is being prepared.'
+            : a.scheduled ? 'A linked video needs its visibility and release date checked.'
+            : 'One release video identified; no further long-form video found for this track.' },
+          ...(a.available
+            ? [{ heading: 'Available material.', body: `Matching file: ${a.available.name}. Confirm it is ready to use.` }]
+            : (() => {
+                const format = evidence.audit.visuals.formats.find(f => f.key === a.format && f.count >= 3);
+                return format ? [{ heading: 'Creative reference.', body: `${format.count} ${format.name.toLowerCase()} uploads on this channel. Check for suitable footage.` }] : [];
+              })()),
+          { heading: 'YouTube guidance.', body: a.format === 'hero' || a.scheduled
+              ? 'Prepare the video launch and supporting teasers.'
+              : 'Keep supporting the song with additional videos after release.',
+            href: a.format === 'hero' || a.scheduled ? 'https://artists.youtube/resources/pre-release-strategy/' : 'https://artists.youtube/resources/post-release-strategy/' },
         ],
         state: stateOf(a, decisions) === 'agreed' ? 'agreed' : 'suggested',
       };
