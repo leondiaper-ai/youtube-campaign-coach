@@ -305,6 +305,7 @@ test('live singles absent from the saved timeline are discovered only with launc
   const m=model({uploads,events:RICH_EVENTS}).model;
   assert.equal(m.framework?.singles,4); // three planned plus the evidenced live single
   assert.ok(m.rollout.some(r=>r.name==='Third Song'));
+  assert.equal(m.coverage?.find(r=>r.name==='Third Song')?.cells.find(c=>c.label==='Video')?.count,1);
   assert.ok(!m.rollout.some(r=>r.name==='Random Catalogue Video'));
 });
 

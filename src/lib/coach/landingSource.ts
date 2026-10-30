@@ -269,7 +269,8 @@ export function buildLandingModel({
       return {name:t.name,date:shortDate(actualDate),guide,cells:[
         ['Music video','Official Music Video','omv'],['Lyric','Lyric Video','lyric'],
         ['Visualiser','Visualiser','visualiser'],['Live / acoustic','Live Performance','live'],['Shorts','Short','short']
-      ].map(([label,format,key])=>({label,count:uploads.filter(u=>u.format===format||(key==='live'&&u.format==='Acoustic')).length,
+      ].map(([label,format,key])=>({label:key==='omv'&&!uploads.some(u=>u.format==='Official Music Video')&&uploads.some(u=>u.format==='Video')?'Video':label,
+        count:uploads.filter(u=>u.format===format||(key==='live'&&u.format==='Acoustic')||(key==='omv'&&!uploads.some(v=>v.format==='Official Music Video')&&u.format==='Video')).length,
         reported:key==='lyric'&&uploads.some(u=>u.shape==='short'&&/lyric video/i.test(u.title)),
         planned:t.actions.some(a=>!a.video&&(a.format===key||a.format.startsWith(key+':'))&&stateOf(a,decisions)==='agreed')}))};
     }),
