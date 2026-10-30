@@ -366,3 +366,12 @@ test('weekly cadence has a two-per-week floor instead of only counting release m
   assert.equal(eight?.tone,'good');
   assert.match(eight?.period??'',/8\/8/);
 });
+
+
+test('action headings distinguish published releases from upcoming preparation', () => {
+  const m=model({uploads:RICH,events:RICH_EVENTS}).model;
+  assert.equal(m.actions.find(a=>a.context==='Overthinker')?.stage,'Live now');
+  assert.equal(m.actions.find(a=>a.context==='Evil')?.stage,'Next single');
+  const noReading=model({uploads:[],events:[event('Upcoming - single release',14)],dataAt:null}).model;
+  assert.ok(noReading.actions.every(a=>a.stage!=='Live now'));
+});

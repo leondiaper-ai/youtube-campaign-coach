@@ -110,6 +110,7 @@ export function buildLandingModel({
         label: conciseLabel.charAt(0).toUpperCase() + conciseLabel.slice(1),
         window: windowOpen ? `${window!.label} · 7–14 days` : undefined,
         context: t.name,
+        stage: a.format==='campaign_album' ? (t.releaseDate>today?'Next album':'Album week') : ref ? 'Live now' : t.releaseDate>today ? 'Next single' : 'Review',
         observation: ref ? `${ref.format} · ${ref.views==null?'Views unavailable':compact(ref.views)+' views'} · uploaded ${shortDate(ref.publishedAt)}` : undefined,
         due: due ? `by ${due}` : 'date to set',
         dueISO,

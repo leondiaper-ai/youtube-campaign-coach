@@ -50,6 +50,7 @@ export type LandingAction = {
   label: string;
   /** Release or moment it belongs to. */
   context: string;
+  stage?: 'Live now' | 'Next single' | 'Album week' | 'Next album' | 'Review';
   observation?: string;
   window?: string;
   /** Suggested date or window. Always a planning date, never "optimal". */
@@ -93,7 +94,7 @@ export type LandingModel = {
   artist: string;
   project: string;
   stageLine: string;
-  nextMoment?: {name:string; date:string} | null;
+  nextMoment?: {name:string; date:string; kind?:'single'|'album'} | null;
   /** One explicit campaign reporting window, used by every campaign figure. */
   windowLabel: string;
   actions: LandingAction[];

@@ -120,7 +120,10 @@ function ActionCard({ action, slug }: { action: LandingAction; slug?: string }) 
   return (
     <Card className="flex flex-col">
       <div className="flex flex-wrap items-center justify-between gap-2.5 mb-3">
-        <Eyebrow>{action.context}</Eyebrow>
+        <div className="flex flex-wrap items-center gap-2">
+          {action.stage && <Badge fg={action.stage==='Live now'||action.stage==='Album week'?color.positive:'#2458CC'} bg={action.stage==='Live now'||action.stage==='Album week'?color.positiveSoft:'#EDF3FF'}>{action.stage}</Badge>}
+          <Eyebrow>{action.context}</Eyebrow>
+        </div>
         {editing ? (
           <form className="flex flex-wrap items-center gap-2" onSubmit={e => {
             e.preventDefault();
@@ -208,7 +211,7 @@ export default function CoachLanding({ model, slug, classicHref, timelineEditor 
       </header>
 
       {model.nextMoment && <div className="mt-4 flex flex-wrap items-center gap-3 rounded-control border border-line bg-surface px-4 py-3">
-        <Eyebrow>Next release</Eyebrow><strong className="text-body text-ink">{model.nextMoment.name}</strong>
+        <Eyebrow>{model.nextMoment.kind==='single'?'Next single':model.nextMoment.kind==='album'?'Next album':'Next release'}</Eyebrow><strong className="text-body text-ink">{model.nextMoment.name}</strong>
         <span className="font-extrabold text-body text-electric">{shortDate(model.nextMoment.date)}</span>
       </div>}
 
