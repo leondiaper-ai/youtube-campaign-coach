@@ -288,3 +288,10 @@ test('live upload dates override planned release dates in the support guide', ()
   assert.equal(m.framework?.next28Shorts,3);
   assert.equal(m.coverage?.find(r=>r.name==='Overthinker')?.date,'27 Oct');
 });
+
+
+test('album week contributes support moments even when no single is due', () => {
+  const m=model({uploads:RICH,events:[event('Album release',0,'albumRelease')]}).model;
+  assert.equal(m.framework?.upcomingMoments,1);
+  assert.equal(m.framework?.next28Shorts,2); // album launch and +7 support
+});

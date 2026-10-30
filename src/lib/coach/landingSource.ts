@@ -176,7 +176,7 @@ export function buildLandingModel({
       const live = t.actions.some(a => a.video && !a.scheduled);
       const isAnchor = anchor?.t.id === t.id;
       const future = t.releaseDate > today;
-      const publishedLong = t.actions.filter(a => a.video && !a.scheduled && !a.format.startsWith('short'));
+      const publishedLong = t.actions.filter(a => {if(!a.video||a.scheduled)return false;const u=evidence.uploads.find(u=>u.id===a.video!.id);return u?toUploadRef(u).shape==='long':!a.format.startsWith('short');});
       const usedFormats = new Set(publishedLong.map(a => a.format.split(':')[0]));
       const followUpOptions = [['live','live performance'],['visualiser','visualiser'],['lyric','lyric video'],['bts','behind-the-scenes video']].filter(([key]) => !usedFormats.has(key)).slice(0,2).map(([,label]) => label);
       const opportunity = (!isAnchor || (publishedLong[0]?.video?.date ?? today) < new Date(now-14*DAY).toISOString().slice(0,10)) && !future && publishedLong.length === 1
@@ -244,11 +244,12 @@ export function buildLandingModel({
     return {t,long:refs.filter(u=>u.shape==='long').length,shorts:refs.filter(u=>u.shape==='short').length,
       at:refs.filter(u=>u.shape==='long').map(u=>u.publishedAt.slice(0,10)).sort()[0]??t.releaseDate};
   });
-  const next28Shorts=trackCounts.reduce((n,r)=>n+[-3,0,7].filter(offset=>{const at=Date.parse(r.at)+offset*DAY;return at>=Date.parse(today)&&at<Date.parse(today)+28*DAY;}).length,0);
+  const momentDates=Array.from(new Set([...trackCounts.map(r=>r.at),...(status.albumReleaseDate?[status.albumReleaseDate]:[])]));
+  const next28Shorts=momentDates.reduce((n,atDate)=>n+[-3,0,7].filter(offset=>{const at=Date.parse(atDate)+offset*DAY;return at>=Date.parse(today)&&at<Date.parse(today)+28*DAY;}).length,0);
   const framework={singles:tracks.length,heroes:trackCounts.filter(r=>r.long>0).length,
     followUps:trackCounts.filter(r=>r.long>1).length,shorts:trackCounts.reduce((n,r)=>n+r.shorts,0),
     shortsTarget:tracks.length*3,next28Shorts,
-    upcomingMoments:trackCounts.filter(r=>Date.parse(r.at)>=Date.parse(today)&&Date.parse(r.at)<Date.parse(today)+28*DAY).length};
+    upcomingMoments:momentDates.filter(at=>Date.parse(at)>=Date.parse(today)&&Date.parse(at)<Date.parse(today)+28*DAY).length};
   return {
     framework,
     artist: artistName,
@@ -266,8 +267,8 @@ export function buildLandingModel({
       const guide=age< -3?'Teaser before launch':age<0?'Teaser window':age<=6?'Launch support':age<=14?'Follow-up window':'Review support';
       return {name:t.name,date:shortDate(actualDate),guide,cells:[
         ['Music video','Official Music Video','omv'],['Lyric','Lyric Video','lyric'],
-        ['Visualiser','Visualiser','visualiser'],['Live','Live Performance','live'],['Shorts','Short','short']
-      ].map(([label,format,key])=>({label,count:uploads.filter(u=>u.format===format).length,
+        ['Visualiser','Visualiser','visualiser'],['Live / acoustic','Live Performance','live'],['Shorts','Short','short']
+      ].map(([label,format,key])=>({label,count:uploads.filter(u=>u.format===format||(key==='live'&&u.format==='Acoustic')).length,
         planned:t.actions.some(a=>!a.video&&(a.format===key||a.format.startsWith(key+':'))&&stateOf(a,decisions)==='agreed')}))};
     }),
     shortsProgress: {count:status.shortsRead.count,weekly:status.shortsRead.weekly,average:status.shortsRead.mean,
