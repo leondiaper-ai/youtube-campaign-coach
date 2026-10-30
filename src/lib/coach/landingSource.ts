@@ -20,7 +20,7 @@
    produces nothing, the section is absent rather than filled.
    ═══════════════════════════════════════════════════════════════════════ */
 
-import { classifyUploadFormat } from '../formatClassifier';
+import { toCampaignUploads } from '../intelligence/campaignWindow';
 import type { RecentUpload } from '../artists';
 import type { CoachStatus } from './status';
 import type { CoachEvidence, Decisions, RoadmapAction, TrackRoadmap } from './roadmap';
@@ -45,7 +45,7 @@ function stateOf(a: RoadmapAction, d: Decisions): ReleaseAsset['status'] {
 }
 
 function toUploadRef(u: RecentUpload): UploadRef {
-  const f = classifyUploadFormat({ ...u, description: '' });
+  const f = toCampaignUploads([u])[0]?.kind;
   return {
     id: u.id,
     title: u.title,

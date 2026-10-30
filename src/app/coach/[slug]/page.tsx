@@ -260,7 +260,7 @@ export default async function CampaignPage({ params, searchParams }: PageProps) 
 
     /* Only the videos the roadmap matched. Nothing speculative. */
     const matchedIds = tracks.flatMap(t => t.actions.map(a => a.video?.id)).filter((x): x is string => !!x);
-    const series = matchedIds.length ? await readVideoSeriesMany(matchedIds).catch(() => ({})) : {};
+    const series = matchedIds.length ? Object.fromEntries(await readVideoSeriesMany([...new Set(matchedIds)]).catch(() => new Map())) : {};
 
     const status = buildCoachStatus({
       plan: saved.plan,

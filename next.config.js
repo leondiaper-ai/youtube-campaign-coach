@@ -1,5 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  images: {remotePatterns: [{protocol: 'https', hostname: 'i.ytimg.com', pathname: '/vi/**'}]},
   async rewrites() {
     return [
       // The Amyl signing deck is a self-contained static file in /public.

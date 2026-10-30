@@ -11,12 +11,11 @@
    `period`, which is the guarantee that no figure on this page appears
    without the window it was measured over.
 
-   Progress ticks are LOCAL in this prototype. They are labelled as such
-   rather than styled to look saved, because a control that looks
-   persistent and is not is worse than no control.
+   Decisions persist per campaign and refresh the shared rollout after saving.
    ═══════════════════════════════════════════════════════════════════════ */
 
 import { useEffect, useState } from 'react';
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { Badge, Card, Eyebrow, Kpi } from '@/components/ui';
 import { color } from '@/lib/design/tokens';
@@ -32,7 +31,9 @@ function Thumb({ v, className = '' }: { v: UploadRef; className?: string }) {
   return (
     <span className={`block relative overflow-hidden rounded bg-raised ${className}`}>
       {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img
+      <Image
+        fill
+        sizes="(max-width: 640px) 148px, 160px"
         src={`https://i.ytimg.com/vi/${v.id}/mqdefault.jpg`}
         alt=""
         loading="lazy"
