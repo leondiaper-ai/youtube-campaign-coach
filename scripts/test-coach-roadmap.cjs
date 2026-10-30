@@ -200,3 +200,36 @@ assert.equal(file.date, "2026-10-30");
 console.log(
   "Coach roadmap: combined releases, channel evidence, post-hero support, title matching, deduplication, future/external exclusions, missing history, linked videos and file readiness passed.",
 );
+
+const {buildCoachStatus}=load('src/lib/coach/status.ts');
+const statusNow=Date.parse('2026-10-30T12:00:00Z');
+const statusPlan={artist:'Example',events:[
+  {kind:'albumAnnounce',title:'Song - single release + announce album',dateISO:'2026-10-30'},
+  {kind:'singleRelease',title:'Next - single release',dateISO:'2026-11-20'},
+  {kind:'albumRelease',title:'New Album - album release',dateISO:'2027-01-22'},
+]};
+const statusUploads=[...lyrics,up('focus','Example - Song (Lyric Video)','2026-10-27',{commentCount:45,viewCount:150000})];
+const se=ctx(statusUploads);se.audit.dataAt='2026-10-30T08:00:00Z';
+const st=buildRoadmap(statusPlan,se,statusNow);
+const makeStatus=(extra={})=>buildCoachStatus({plan:statusPlan,evidence:se,tracks:st,now:statusNow,...extra});
+let status=makeStatus();
+assert(status.headline.includes('Song is live'));
+assert(!status.headline.includes('Album out'),'An album announcement must not become an album release');
+assert(status.headline.includes('22 Jan'));
+assert(status.next.startsWith('Next'),'Already-published single is not the next missing release');
+assert(status.priorities.length<=3);
+assert.equal(new Set(status.priorities.map(t=>t.id)).size,status.priorities.length);
+assert(status.priorities.flatMap(t=>t.actions).some(a=>a.format==='community'));
+assert(status.priorities.flatMap(t=>t.actions).every(a=>!a.video&&!a.scheduled||a.scheduled));
+const follow=status.priorities.flatMap(t=>t.actions).find(a=>a.id.startsWith('song:')&&a.format!=='community');
+assert.equal(follow.date,'2026-11-06','Follow-up anchors to actual publication, not the supplied music date');
+status=makeStatus({decisions:{[follow.id]:{status:'done'}}});
+assert(!status.priorities.flatMap(t=>t.actions).some(a=>a.id===follow.id),'Completed work leaves the priority list');
+const stale={...se,audit:{...se.audit,dataAt:'2026-10-20'}};
+assert.equal(makeStatus({evidence:stale}).priorities.length,0,'Stale data cannot generate missing-asset prompts');
+const two=ctx([...statusUploads,up('second','Example - Song (Official Video)','2026-10-29')]);two.audit.dataAt='2026-10-30';
+const twoStatus=makeStatus({evidence:two,tracks:buildRoadmap(statusPlan,two,statusNow)});
+assert(!twoStatus.priorities.flatMap(t=>t.actions).some(a=>a.id===follow.id),'A new supporting upload clears the extra-visual prompt');
+assert(twoStatus.current.includes('official'),'Current state follows the newest actual visual');
+assert(!makeStatus({gains:{}}).priorities.flatMap(t=>t.actions).some(a=>a.reason.includes('recorded days')),'No history must not become invented velocity');
+console.log('Coach status checks passed: real release stage, actual upload anchor, next single, bounded priorities, saved completion, stale suppression and new upload response.');

@@ -14,6 +14,9 @@ import { mappingConfigFor, getCampaignConfig } from '@/lib/campaignConfig';
 import CampaignWarRoom from '@/components/CampaignWarRoom';
 import { loadCoachEvidence, readDecisions } from '@/lib/coach/evidence';
 import { buildRoadmap, type CoachSummary } from '@/lib/coach/roadmap';
+import { buildCoachStatus } from '@/lib/coach/status';
+import { readVideoSeriesMany } from '@/lib/videoSnapshots';
+import { recentGain } from '@/lib/videoMomentum';
 import type { RecentUpload } from '@/lib/artists';
 
 // The roadmap reads saved team decisions and the latest cached uploads on every
@@ -237,7 +240,15 @@ export default async function CampaignPage({ params }: PageProps) {
   ]);
 
   const coachRoadmap = buildRoadmap(saved.plan, coachEvidence, Date.now(), driveLibrary);
+  const videoSeries = await readVideoSeriesMany(coachRoadmap.flatMap(t=>t.actions.filter(a=>a.video&&!a.scheduled).map(a=>a.video!.id)));
+  const gains: Record<string,{gain:number;spanDays:number}> = {};
+  for(const [id,series] of Array.from(videoSeries)){
+    const last=series.observations.map(o=>o.ts).sort().pop();
+    if(last && Date.now()-Date.parse(last+'T12:00:00Z')<=3*86400000){const gain=recentGain(series,7);if(gain)gains[id]=gain;}
+  }
+  const status = buildCoachStatus({plan:saved.plan,evidence:coachEvidence,tracks:coachRoadmap,decisions:coachDecisions,campaignStartDate:artistConfig?.campaignStartDate,gains});
   const evidenceSummary: CoachSummary = {
+    status,
     artistSlug:coachEvidence.artistSlug,
     lastUploadAt:coachEvidence.uploads.filter(u=>!u.isCollab && u.live!=="upcoming" && Date.parse(u.publishedAt)<=Date.now()).map(u=>u.publishedAt).sort().pop(),
     audit:{catalogue:coachEvidence.audit.catalogue,coverage:coachEvidence.audit.coverage,dataAt:coachEvidence.audit.dataAt,visuals:{takeaway:coachEvidence.audit.visuals.takeaway}},

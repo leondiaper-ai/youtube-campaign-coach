@@ -21,6 +21,7 @@
 import { useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import CoachActionBoard from './CoachActionBoard';
+import CoachCampaignStatus from './CoachCampaignStatus';
 import type { CoachSummary, TrackRoadmap, Decisions } from '@/lib/coach/roadmap';
 import type { GeneratedPlan, ParsedEvent, PhaseName, TimelineKind, ChannelContext } from '@/lib/planEngine';
 import type { RecentUpload } from '@/lib/artists';
@@ -294,9 +295,10 @@ export default function CampaignWarRoom(props: Props) {
   return (
     <div style={{ minHeight: '100vh', background: PAPER, color: INK }}>
       <CampaignRead
-        artist={plan.artist} title={campaignTitle} phase={m.currentPhase}
-        headline={props.coachEvidence ? (nextMoment ? `Next planned moment: ${cleanTitle(nextMoment.e.title)} — ${fmtDay(nextMoment.e.dateISO)}. Published assets and next steps below.` : "Review the published assets and agree the next campaign steps below.") : headline}
+        artist={plan.artist} title={campaignTitle} phase={props.coachEvidence?.status?.phase ?? m.currentPhase}
+        headline={props.coachEvidence?.status?.headline ?? (props.coachEvidence ? (nextMoment ? `Next planned moment: ${cleanTitle(nextMoment.e.title)} — ${fmtDay(nextMoment.e.dateISO)}. Published assets and next steps below.` : "Review the published assets and agree the next campaign steps below.") : headline)}
       />
+      {props.coachEvidence?.status && <CoachCampaignStatus slug={props.slug} evidence={props.coachEvidence} decisions={props.coachDecisions ?? {}} />}
       {!props.coachEvidence && <CampaignStatus
         rolloutActive={recentUploads.some((u) => daysAgoNum(u.publishedAt) <= 45)}
         datesMapped={events.length > 0}
@@ -402,7 +404,7 @@ function currentFocus(primaryGap: string, phase: PhaseName, heroIsLive = false, 
   // Hero asset is already live on YouTube — shift focus to Shorts + discovery.
   if (heroIsLive && milestoneTitle) {
     const tl = milestoneTitle.toLowerCase();
-    const isAlbum = /album/.test(tl);
+    const isAlbum = /album\s+(release|out|launch|drop)/.test(tl) && !/announce\s+album/.test(tl);
     const hasMV = /official\s*(music\s*)?video|music\s*video/i.test(tl);
     if (isAlbum && hasMV) return 'Album out — build Shorts around the official video to drive discovery.';
     if (isAlbum) return 'Album out — build Shorts and visual content to sustain momentum.';

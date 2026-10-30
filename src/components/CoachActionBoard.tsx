@@ -5,7 +5,7 @@ import { actionStatus, type CoachSummary, type TrackRoadmap, type Decision, type
 
 const fmt = (date: string) => new Date(date + "T12:00:00Z").toLocaleDateString("en-GB", {day:"numeric", month:"short"});
 export default function CoachActionBoard({mode="full",tracks,slug,evidence,decisions:initial}: {
-  mode?:"full"|"overview"|"embedded"; tracks:TrackRoadmap[]; slug:string; evidence:CoachSummary; decisions:Decisions;
+  mode?:"full"|"overview"|"embedded"|"priority"; tracks:TrackRoadmap[]; slug:string; evidence:CoachSummary; decisions:Decisions;
 }) {
   const router=useRouter();
   const [decisions,setDecisions]=useState(initial);
@@ -16,7 +16,7 @@ export default function CoachActionBoard({mode="full",tracks,slug,evidence,decis
   const [showEvidence,setShowEvidence]=useState(false);
   useEffect(()=>setDecisions(initial),[initial]);
   useEffect(()=>{
-    if(mode==="embedded") return;
+    if(mode==="embedded"||mode==="priority") return;
     const timer=setInterval(()=>{if(!document.hidden && !["INPUT","SELECT","TEXTAREA"].includes(document.activeElement?.tagName??"")) router.refresh();},120000);
     return ()=>clearInterval(timer);
   },[router,mode]);
@@ -42,9 +42,9 @@ export default function CoachActionBoard({mode="full",tracks,slug,evidence,decis
       const live=track.actions.filter(a=>a.video&&!a.scheduled);
       const next=track.actions.filter(a=>!a.video||a.scheduled);
       return <div key={track.id}>
-        {live.length>0 && <div className="coach-assets" aria-label="Published assets">{live.map(a=><a key={a.id} href={"https://www.youtube.com/watch?v="+a.video!.id} target="_blank" rel="noreferrer" title={a.video!.title}>✓ {a.label} · {fmt(a.video!.date)}</a>)}</div>}
+        {mode!=="priority" && live.length>0 && <div className="coach-assets" aria-label="Published assets">{live.map(a=><a key={a.id} href={"https://www.youtube.com/watch?v="+a.video!.id} target="_blank" rel="noreferrer" title={a.video!.title}>✓ {a.label} · {fmt(a.video!.date)}</a>)}</div>}
         {next.length>0 && <div className="coach-next">
-          <div style={{fontSize:9,fontWeight:800,letterSpacing:".12em",color:"#777168",textTransform:"uppercase"}}>Next steps · suggested from this channel</div>
+          <div style={{fontSize:9,fontWeight:800,letterSpacing:".12em",color:"#777168",textTransform:"uppercase"}}>{mode==="priority"?"Do next":"Next steps · suggested from this channel"}</div>
           {next.map(a=>{
             const d=decisions[a.id]??{status:"suggested" as const};
             const target=d.targetDate??a.date;
@@ -54,7 +54,7 @@ export default function CoachActionBoard({mode="full",tracks,slug,evidence,decis
               <input type="checkbox" aria-label={"Mark "+a.label+" done for "+track.name} checked={done} disabled={busy!==null||!!a.scheduled} onChange={e=>save(a.id,{...d,status:e.target.checked?"done":"suggested"})}/>
               <div className="coach-next-copy">
                 <div className="coach-next-label" style={{textDecoration:done||skipped?"line-through":undefined,opacity:skipped?.5:1}}>{a.label}</div>
-                {!done&&!skipped && <div className="coach-next-reason">{a.scheduled?"Linked video — check publication":a.available?"Matching file available — confirm approval":a.reason.split(". ")[0]+"."}</div>}
+                {!done&&!skipped && <div className="coach-next-reason">{a.scheduled?"Linked video — check publication":a.available?"Matching file available — confirm approval":mode==="priority"?a.reason:a.reason.split(". ")[0]+"."}</div>}
                 {(done||skipped||d.status==="planned"||d.status==="ready")&&<div className="coach-next-reason">{actionStatus(a,d)}</div>}
                 {editing===a.id && <form className="coach-edit" onSubmit={e=>{e.preventDefault();const date=new FormData(e.currentTarget).get("date") as string;save(a.id,{...d,targetDate:date});}}>
                   <input aria-label={"Target date for "+a.label+" — "+track.name} name="date" type="date" defaultValue={target} required/>
@@ -69,7 +69,7 @@ export default function CoachActionBoard({mode="full",tracks,slug,evidence,decis
         </div>}
       </div>;
     })}
-    {mode!=="embedded" && <div className="coach-tools">
+    {mode!=="embedded" && mode!=="priority" && <div className="coach-tools">
       <div className="coach-tools-line">
         <span>Channel reading {evidence.audit.dataAt?fmt(evidence.audit.dataAt.slice(0,10)):"unavailable"}</span>
         <button onClick={()=>router.refresh()}>Refresh</button>

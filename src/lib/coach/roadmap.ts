@@ -33,6 +33,7 @@ export type TrackRoadmap = {
   actions: RoadmapAction[];
 };
 export type CoachSummary = {
+  status?: import("./status").CoachStatus;
   lastUploadAt?: string;
   audit: Pick<ChannelAudit, "catalogue" | "coverage" | "dataAt"> & {
     visuals: Pick<ChannelAudit["visuals"], "takeaway">;
@@ -237,10 +238,11 @@ export function buildRoadmap(
             e.dateISO >= event.dateISO &&
             e.dateISO <= addDays(event.dateISO, 28),
         );
+        const anchorDate = destinations.filter(x=>["omv","lyric","visualiser","live","acoustic"].includes(x.f)).map(x=>x.u.publishedAt.slice(0,10)).sort()[0] ?? event.dateISO;
         const nominal =
           candidate.key === "live" && tour
             ? addDays(tour.dateISO, 3)
-            : addDays(event.dateISO, 10);
+            : addDays(anchorDate, 10);
         const nextRelease = plan.events
           .filter(
             (e) => e.kind === "singleRelease" && e.dateISO > event.dateISO,
