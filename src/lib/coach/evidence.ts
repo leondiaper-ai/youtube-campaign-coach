@@ -1,3 +1,5 @@
+import { readFanResponse } from "../kvCache";
+import type { FanResponse } from "../intelligence/fanResponse";
 import { buildChannelAudit } from "../channelAudit";
 import { readAuditCatalogue } from "../channelAuditCatalogue";
 import { getDeepDive } from "../intelligence/deepDiveStore";
@@ -33,7 +35,7 @@ export async function loadCoachEvidence(input: {
   uploads: RecentUpload[];
   dataAt?: string | null;
 }): Promise<CoachEvidence> {
-  const [catalogue, deep] = await Promise.all([
+  const [catalogue, deep, fanResponse] = await Promise.all([
     input.channelId
       ? readAuditCatalogue(input.channelId)
       : Promise.resolve(null),
@@ -44,6 +46,7 @@ export async function loadCoachEvidence(input: {
             DEEP_DIVE_BY_NAME[normaliseName(input.name)] ?? input.slug,
           ),
     ),
+    readFanResponse<FanResponse>(input.slug).catch(()=>null),
   ]);
   // A catalogue read must include newly cached uploads too, even between full scans.
   const uploads = Array.from(
@@ -73,5 +76,5 @@ export async function loadCoachEvidence(input: {
         }
       : undefined,
   });
-  return { audit, dive: deep.dive, artistSlug: input.slug, uploads };
+  return { fanResponse, audit, dive: deep.dive, artistSlug: input.slug, uploads };
 }

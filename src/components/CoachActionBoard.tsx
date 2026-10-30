@@ -38,13 +38,14 @@ export default function CoachActionBoard({mode="full",tracks,slug,evidence,decis
   }
   return <div className="coach-inline" aria-label={mode==="overview"?"Channel reading":"Release next steps"}>
     <style>{`.coach-inline{color:#0e0e0e;font-size:13px}.coach-inline button{font:inherit;cursor:pointer;background:none;border:0;padding:0;color:#615c53;text-decoration:underline;text-underline-offset:3px}.coach-inline button:disabled{opacity:.5;cursor:wait}.coach-inline button:focus-visible,.coach-inline input:focus-visible{outline:2px solid #2d6a4f;outline-offset:4px}.coach-next{border-top:1px solid #e9e2d3;margin-top:14px;padding-top:12px}.coach-next-row{display:flex;align-items:start;gap:12px;padding:9px 0}.coach-next-row input[type=checkbox]{width:17px;height:17px;margin-top:2px;accent-color:#2d6a4f;flex-shrink:0}.coach-next-copy{flex:1;min-width:0}.coach-next-label{font-weight:700;font-size:13px}.coach-next-reason{font-size:11px;line-height:1.45;color:#777168;margin-top:3px}.coach-next-date{font-size:11px;white-space:nowrap}.coach-assets{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}.coach-assets a{font-size:10px;color:#2d6a4f;background:#edf3ee;padding:4px 7px;border-radius:4px;text-decoration:none}.coach-tools{max-width:1100px;margin:24px auto 0;padding:0 40px;font-size:11px;color:#777168}.coach-tools-line{display:flex;gap:16px;align-items:center;flex-wrap:wrap}.coach-edit{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:8px}.coach-edit input{font:inherit;padding:6px;border:1px solid #d8d0c1;border-radius:4px}.coach-evidence{padding-top:12px;line-height:1.6;max-width:720px}.coach-evidence a{color:#2d6a4f}@media(max-width:700px){.coach-tools{padding:0 20px}.coach-next-row{gap:9px}.coach-next-date{font-size:10px}}`}</style>
+    {mode==="priority" && <div style={{fontSize:10,fontWeight:800,letterSpacing:".12em",color:"#777168",textTransform:"uppercase",borderTop:"1px solid #e9e2d3",marginTop:14,paddingTop:12}}>Do next</div>}
     {mode!=="overview" && tracks.map(track=>{
       const live=track.actions.filter(a=>a.video&&!a.scheduled);
       const next=track.actions.filter(a=>!a.video||a.scheduled);
       return <div key={track.id}>
         {mode!=="priority" && live.length>0 && <div className="coach-assets" aria-label="Published assets">{live.map(a=><a key={a.id} href={"https://www.youtube.com/watch?v="+a.video!.id} target="_blank" rel="noreferrer" title={a.video!.title}>✓ {a.label} · {fmt(a.video!.date)}</a>)}</div>}
-        {next.length>0 && <div className="coach-next">
-          <div style={{fontSize:9,fontWeight:800,letterSpacing:".12em",color:"#777168",textTransform:"uppercase"}}>{mode==="priority"?"Do next":"Next steps · suggested from this channel"}</div>
+        {next.length>0 && <div className={mode==="priority"?"coach-priority-item":"coach-next"}>
+          {mode!=="priority" && <div style={{fontSize:9,fontWeight:800,letterSpacing:".12em",color:"#777168",textTransform:"uppercase"}}>Next steps · suggested from this channel</div>}
           {next.map(a=>{
             const d=decisions[a.id]??{status:"suggested" as const};
             const target=d.targetDate??a.date;

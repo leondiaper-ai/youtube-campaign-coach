@@ -308,7 +308,8 @@ export default function CampaignWarRoom(props: Props) {
         focus={focus}
       />}
       <CurrentYouTubeSurface recentUploads={recentUploads} campaignStart={campaignStartDate} knownTitles={knownTitles} nextLinkedEvent={nextMoment?.e.videoId ? nextMoment.e : undefined} />
-      <ContentSupply events={events} library={lib} hasAssets={hasAssets} folderUrl={lib.folderUrl || driveFolderUrl} slug={props.slug} />
+      <CoachShorts recentUploads={recentUploads} />
+      <ContentSupply observedTracks={props.coachEvidence ? props.coachRoadmap ?? [] : undefined} events={events} library={lib} hasAssets={hasAssets} folderUrl={lib.folderUrl || driveFolderUrl} slug={props.slug} />
       <MasterTimeline
         events={events} mappings={m.mappings} phases={m.phases} activeIdx={activeIdx}
         recentUploads={recentUploads} campaignStart={campaignStartDate} knownTitles={knownTitles} pool={pool}
@@ -316,7 +317,7 @@ export default function CampaignWarRoom(props: Props) {
         coach={props.coachEvidence ? {evidence:props.coachEvidence, tracks:props.coachRoadmap ?? [], decisions:props.coachDecisions ?? {}} : undefined}
       />
       {props.coachEvidence && <CoachActionBoard mode="overview" tracks={props.coachRoadmap ?? []} slug={props.slug} evidence={props.coachEvidence} decisions={props.coachDecisions ?? {}} />}
-      <RecentActivity recentUploads={recentUploads} liveChannel={liveChannel} campaignStart={campaignStartDate} />
+      {!props.coachEvidence && <RecentActivity recentUploads={recentUploads} liveChannel={liveChannel} campaignStart={campaignStartDate} />}
       <EditTimelineFooter
         slug={props.slug} artistName={props.artistName} currentTimeline={props.timelineText ?? ''}
         channelCtx={props.channelCtx} campaignStartDate={props.campaignStartDate}
@@ -566,9 +567,10 @@ function CurrentYouTubeSurface({ recentUploads, campaignStart, knownTitles, next
   // most-recently-published video — a 400-day-old upload is more representative
   // than an 8-year-old catalogue hit, regardless of view count.
   const allArchive = recentUploads.every((u) => uploadAge(u.publishedAt, campaignStart) === 'archive');
-  const hero = allArchive
+  const latestDestination = recentUploads.filter(u=>!u.isCollab&&u.live!=='upcoming'&&Date.parse(u.publishedAt)<=Date.now()&&!isShort(u)&&!isTeaser(u)).sort((a,b)=>b.publishedAt.localeCompare(a.publishedAt))[0];
+  const hero = latestDestination ?? (allArchive
     ? [...recentUploads].sort((a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime())[0]
-    : [...recentUploads].sort((a, b) => score(b) - score(a))[0];
+    : [...recentUploads].sort((a, b) => score(b) - score(a))[0]);
   const age = uploadAge(hero.publishedAt, campaignStart);
   const ab = ageBadge[age];
   const relevant = age !== 'archive' || shareTok(tok(hero.title), titleTokens);
@@ -732,7 +734,8 @@ function ConnectDriveFolder({ slug, folderUrl }: { slug: string; folderUrl?: str
 
 // One card — the single source of truth for campaign assets: what's in hand vs
 // the recommended volume for THIS timeline (merges the old Pipeline + Coverage).
-function ContentSupply({ events, library, hasAssets, folderUrl, slug }: {
+function ContentSupply({ events, library, hasAssets, folderUrl, slug, observedTracks }: {
+  observedTracks?:TrackRoadmap[];
   events: ParsedEvent[]; library: AssetLibrary; hasAssets: boolean; folderUrl?: string; slug: string;
 }) {
   // Count events with linked videos as banked Official Video assets
@@ -765,6 +768,12 @@ function ContentSupply({ events, library, hasAssets, folderUrl, slug }: {
   const totalNew = newIds.size;
   const totalRemoved = library.removedAssetIds?.length ?? 0;
 
+  if(observedTracks){
+    const published=Array.from(new Map(observedTracks.flatMap(t=>t.actions.filter(a=>a.video&&!a.scheduled)).map(a=>[a.video!.id,a])).values());
+    const formats=new Map<string,number>();
+    for(const a of published)formats.set(a.label,(formats.get(a.label)??0)+1);
+    return <section style={{maxWidth:1180,margin:'0 auto',padding:'20px 40px 0'}}><details style={{border:`1px solid ${BONE}`,borderRadius:10,background:WHITE,padding:'14px 18px'}}><summary style={{fontSize:12,fontWeight:700,cursor:'pointer'}}>Asset library · {folderUrl?`${library.assets.length} files indexed`:'folder not connected'}</summary><p style={{fontSize:12,color:SMOKE,margin:'12px 0'}}>Published track assets identified on YouTube: {Array.from(formats).map(([label,count])=>`${count} ${label}`).join(' · ')||'none identified in this reading'}. Folder files are counted separately and are not confirmed ready to upload.</p><ConnectDriveFolder slug={slug} folderUrl={folderUrl}/></details></section>;
+  }
   const Row = ({ r }: { r: SupplyRow }) => {
     const have = r.have;
     const pct = r.lo > 0 && have != null ? Math.min(100, Math.round((have / r.lo) * 100)) : 0;
@@ -2034,4 +2043,10 @@ function EditTimelineFooter({ slug, artistName, currentTimeline, channelCtx, cam
       </div>
     </section>
   );
+}
+
+function CoachShorts({recentUploads}:{recentUploads:RecentUpload[]}) {
+  const shorts=recentUploads.filter(u=>isShort(u)&&!u.isCollab&&u.live!=='upcoming'&&Date.parse(u.publishedAt)<=Date.now()).sort((a,b)=>b.publishedAt.localeCompare(a.publishedAt)).slice(0,4);
+  if(!shorts.length)return null;
+  return <section style={{maxWidth:1180,margin:'0 auto',padding:'18px 40px 0'}}><div style={{fontSize:10,fontWeight:800,letterSpacing:'.14em',color:SMOKE,marginBottom:10}}>LATEST SHORTS</div><div style={{display:'grid',gridTemplateColumns:'repeat(4,minmax(0,1fr))',gap:12}}>{shorts.map(u=><a key={u.id} href={ytUrl(u)} target="_blank" rel="noreferrer" style={{textDecoration:'none',color:INK,minWidth:0}}><img src={ytThumb(u.id)} alt="" style={{width:'100%',aspectRatio:'16/9',objectFit:'cover',borderRadius:8}}/><div style={{fontSize:11,fontWeight:700,marginTop:6,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}} title={u.title}>{u.title}</div><div style={{fontSize:11,color:SMOKE,marginTop:3}}>{fmtNum(u.viewCount)} views · {relDays(u.publishedAt)}</div></a>)}</div></section>;
 }

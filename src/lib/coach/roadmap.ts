@@ -42,6 +42,7 @@ export type CoachSummary = {
   artistSlug: string;
 };
 export type CoachEvidence = {
+  fanResponse?: import("../intelligence/fanResponse").FanResponse | null;
   audit: ChannelAudit;
   dive: DeepDiveContext | null;
   artistSlug: string;
@@ -227,7 +228,9 @@ export function buildRoadmap(
         );
       }
       // Recommend ONE evidence-supported follow-up, rather than six generic assets.
-      const candidate = repeat.find(
+      const preferredLive = points.some(p=>p.needTags.includes("archive_live")&&p.needTags.includes("follow_up_7_14"));
+      const ranked = preferredLive ? [...repeat.filter(f=>f.key==="live"),...repeat.filter(f=>f.key!=="live")] : repeat;
+      const candidate = ranked.find(
         (f) => !classified.some((x) => x.f === f.key),
       );
       if (candidate) {

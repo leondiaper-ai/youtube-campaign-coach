@@ -246,7 +246,7 @@ export default async function CampaignPage({ params }: PageProps) {
     const last=series.observations.map(o=>o.ts).sort().pop();
     if(last && Date.now()-Date.parse(last+'T12:00:00Z')<=3*86400000){const gain=recentGain(series,7);if(gain)gains[id]=gain;}
   }
-  const status = buildCoachStatus({plan:saved.plan,evidence:coachEvidence,tracks:coachRoadmap,decisions:coachDecisions,campaignStartDate:artistConfig?.campaignStartDate,gains});
+  const status = buildCoachStatus({plan:saved.plan,evidence:coachEvidence,tracks:coachRoadmap,decisions:coachDecisions,campaignStartDate:artistConfig?.campaignStartDate,gains,series:Object.fromEntries(videoSeries)});
   const evidenceSummary: CoachSummary = {
     status,
     artistSlug:coachEvidence.artistSlug,
