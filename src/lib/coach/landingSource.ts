@@ -161,13 +161,10 @@ export function buildLandingModel({
       period: `${status.metrics.shorts} Shorts · ${status.metrics.longform} long-form`,
     });
   }
-  if (anchorUpload) {
-    figures.push({
-      value: compact(anchorUpload.viewCount ?? 0),
-      label: `${anchor!.t.name} views`,
-      period: `since ${shortDate(anchorUpload.publishedAt)}`,
-    });
-  }
+  if (status.shortsRead.count > 0) figures.push({
+    value: String(status.shortsRead.weekly), label:'Shorts / week',
+    period:`last 28 days${status.shortsRead.mean!=null?' · '+compact(status.shortsRead.mean)+' avg views':''}`,
+  });
 
   /* ── rollout, from the same tracks and decisions ─────────────────── */
   const rollout: ReleaseBlock[] = [...tracks]
