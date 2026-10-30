@@ -119,15 +119,18 @@ function ActionCard({ action, slug }: { action: LandingAction; slug?: string }) 
     <Card className="flex flex-col">
       <div className="flex items-center gap-2.5 mb-2">
         {editing ? (
-          <input
-            type="date"
-            value={date}
-            autoFocus
-            onChange={e => setDate(e.target.value)}
-            onBlur={() => { setEditing(false); if (date && date !== action.dueISO) void save({ targetDate: date }); }}
-            className="text-[12px] font-semibold px-2 py-[2px] rounded border border-line-strong bg-surface"
-            aria-label="Target date"
-          />
+          <form className="flex flex-wrap items-center gap-2" onSubmit={e => {
+            e.preventDefault();
+            const value = String(new FormData(e.currentTarget).get('targetDate') ?? '');
+            if (!value) return;
+            setDate(value); setEditing(false); void save({targetDate:value});
+          }}>
+            <input type="date" name="targetDate" defaultValue={date} required autoFocus
+              className="text-[12px] font-semibold px-2 py-1 rounded border border-line-strong bg-surface"
+              aria-label="Target date" />
+            <button type="submit" className="text-[12px] font-semibold text-electric">Save date</button>
+            <button type="button" onClick={() => setEditing(false)} className="text-[12px] text-muted">Cancel</button>
+          </form>
         ) : (
           <button
             type="button"
