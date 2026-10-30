@@ -277,9 +277,20 @@ export default async function CampaignPage({ params, searchParams }: PageProps) 
       projectName: saved.campaignName || saved.plan.campaignName || 'Campaign',
     });
 
-    for (const event of saved.plan.events.filter(e => e.kind === 'albumRelease')) {
-      model.rollout.push({name:event.title, dateLabel:new Date(event.dateISO+'T12:00:00Z').toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}),stage:'distant',badge:{label:event.dateISO > new Date().toISOString().slice(0,10)?'Planned':'Released',tone:'ghost'},assets:status.albumIdea?[{label:status.albumIdea.label,note:status.albumIdea.reason,status:'suggested',meta:new Date(status.albumIdea.date+'T12:00:00Z').toLocaleDateString('en-GB',{day:'numeric',month:'short'})}]:[],holding:status.albumIdea?undefined:'Album milestone. Confirm release assets with the artist team.'});
+    // Preserve explicit support uploads, tour dates and album milestones too.
+    // They are planning entries, never evidence that an asset is published.
+    for (const event of saved.plan.events.filter(e => !tracks.some(t => t.releaseDate === e.dateISO))) {
+      const idea = event.kind === 'albumRelease' ? status.albumIdea : null;
+      model.rollout.push({
+        name:event.title,
+        dateLabel:new Date(event.dateISO+'T12:00:00Z').toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}),
+        stage:'distant',badge:{label:event.dateISO > new Date().toISOString().slice(0,10)?'Planned':'Date passed',tone:'ghost'},
+        assets:idea?[{label:idea.label,note:idea.reason,status:'suggested',meta:new Date(idea.date+'T12:00:00Z').toLocaleDateString('en-GB',{day:'numeric',month:'short'})}]:[],
+        holding:idea?undefined:'Campaign milestone. Confirm assets and arrangements with the team.'
+      });
     }
+    const dates = new Map([...tracks.map(t => [t.name,t.releaseDate] as const), ...saved.plan.events.map(e => [e.title,e.dateISO] as const)]);
+    model.rollout.sort((a,b) => (dates.get(a.name) ?? '').localeCompare(dates.get(b.name) ?? ''));
     return <CoachLanding model={model} slug={saved.slug} classicHref={`/coach/${saved.slug}?view=classic`} />;
   }
 
