@@ -259,8 +259,8 @@ export default function CoachLanding({ model, slug, classicHref }: { model: Land
         </div>
 
         <div className="border-t border-line-faint p-4">
-          <AssetRow title="Campaign videos" items={model.assets.long} shape="long" />
-          <AssetRow title="Campaign Shorts" items={model.assets.shorts} shape="short" />
+          <AssetRow title={model.windowLabel === 'window not set' ? 'Channel videos · reference' : 'Campaign videos'} items={model.assets.long} shape="long" />
+          <AssetRow title={model.windowLabel === 'window not set' ? 'Channel Shorts · reference' : 'Campaign Shorts'} items={model.assets.shorts} shape="short" />
         </div>
       </Card>
 
