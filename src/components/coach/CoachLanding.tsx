@@ -263,9 +263,21 @@ export default function CoachLanding({ model, slug, classicHref, timelineEditor 
                     Uploaded {shortDate(model.latest.publishedAt)} · {model.latest.views == null ? '—' : exact(model.latest.views)} views
                     {model.latest.likes != null && ` · ${exact(model.latest.likes)} likes`}
                   </p>
-                  {model.paceLine && (
-                    <p className="text-[12.5px] text-secondary leading-relaxed m-0 mt-2">{model.paceLine}</p>
-                  )}
+                  {model.launchComparison ? <div className="mt-3 pt-2 border-t border-line-faint">
+                    <Eyebrow>Launch vs {model.launchComparison.priorTrack}</Eyebrow>
+                    <div className="flex flex-wrap gap-x-8 gap-y-2 mt-1.5">
+                      {model.launchComparison.ageDays>1&&model.launchComparison.firstDayChangePct!==null&&<div>
+                        <span className="block text-micro font-semibold text-secondary">Day 1</span>
+                        <strong className="text-[24px] tabular-nums leading-tight" style={{color:model.launchComparison.firstDayChangePct>0?color.positive:model.launchComparison.firstDayChangePct<0?color.negative:color.ink}}>{model.launchComparison.firstDayChangePct>0?'+':''}{model.launchComparison.firstDayChangePct}%</strong>
+                      </div>}
+                      <div>
+                        <span className="block text-micro font-semibold text-secondary">Day {model.launchComparison.ageDays}{model.launchComparison.partial?' · so far':''}</span>
+                        <strong className="text-[24px] tabular-nums leading-tight" style={{color:model.launchComparison.changePct>0?color.positive:model.launchComparison.changePct<0?color.negative:color.ink}}>{model.launchComparison.changePct>0?'+':''}{model.launchComparison.changePct}%</strong>
+                      </div>
+                    </div>
+                    <p className="text-[12px] font-semibold text-secondary m-0 mt-1">{compact(model.launchComparison.currentViews)} vs {compact(model.launchComparison.priorViews)} views at day {model.launchComparison.ageDays}</p>
+                    {model.launchComparison.partial&&<p className="text-micro text-muted m-0 mt-0.5">Today’s reading is still updating.</p>}
+                  </div> : model.paceLine ? <p className="text-[12.5px] text-secondary leading-relaxed m-0 mt-2">{model.paceLine}</p> : null}
                 </div>
               </>
             )}

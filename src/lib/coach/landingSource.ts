@@ -286,6 +286,7 @@ export function buildLandingModel({
       target:decisions['campaign:shorts-target']?.shortsWeeklyTarget ?? null},
     figures,
     latest: campaignUploads.find(u => u.shape === 'long') ? {...campaignUploads.find(u => u.shape === 'long')!, likes:null} : null,
+    launchComparison: campaignUploads.find(u=>u.shape==='long')?.id===anchorUpload?.id ? status.launchComparison??null : null,
     paceLine: campaignUploads.find(u => u.shape === 'long')?.id === anchorUpload?.id ? status.launch : null,
     fan: status.audience
       ? {

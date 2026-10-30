@@ -7,6 +7,12 @@ import { viewsAtAge, type VideoSeries } from '../videoSnapshots';
 import { RULES_VERSION } from '../intelligence/fanResponse';
 import { campaignPerformanceFor } from '../intelligence/campaignWindow';
 
+export type LaunchComparison = {
+  priorTrack:string; ageDays:number; changePct:number;
+  currentViews:number; priorViews:number; firstDayChangePct:number|null;
+  partial:boolean;
+};
+
 export type CoachStatus = {
   albumReleaseDate?: string | null;
   phase: PhaseName;
@@ -21,6 +27,7 @@ export type CoachStatus = {
   metrics: {views:number|null;assets:number;shorts:number;longform:number;start:string}|null;
   shortsRead: {weekly:number;mean:number|null;count:number};
   launch: string|null;
+  launchComparison?: LaunchComparison|null;
   audience: {tone:string;theme:string|null;comments:number;assets:number;date:string}|null;
   albumIdea: {label:string;reason:string;date:string}|null;
 };
@@ -70,6 +77,7 @@ export function buildCoachStatus({plan,evidence,tracks,decisions={},campaignStar
   const shortWindow=inventory.filter(u=>Date.parse(u.publishedAt)>=now-28*DAY && coachUploadFormat(u)==='short');
   const shortsRead={weekly:Math.round(shortWindow.length/4*10)/10,mean:shortWindow.length?Math.round(shortWindow.reduce((s,u)=>s+u.viewCount,0)/shortWindow.length):null,count:shortWindow.length};
   let launch:string|null=null;
+  let launchComparison:LaunchComparison|null=null;
   const currentSeries=u?series[u.id]:undefined;
   const latestObservation=currentSeries?.observations.filter(o=>o.ts<=today).slice().sort((a,b)=>a.ts.localeCompare(b.ts)).pop();
   const comparisonAge=latestObservation&&currentSeries?.publishedAt?Math.round((Date.parse(latestObservation.ts+'T12:00:00Z')-Date.parse(currentSeries.publishedAt))/DAY):null;
@@ -84,6 +92,7 @@ export function buildCoachStatus({plan,evidence,tracks,decisions={},campaignStar
       const firstCurrent=viewsAtAge(series[u.id]??null,1,0);
       const firstPrior=priorSame?viewsAtAge(series[priorSame.id]??null,1,0):null;
       const firstChange=firstCurrent&&firstPrior&&firstPrior.views>0?Math.round((firstCurrent.views/firstPrior.views-1)*100):null;
+      launchComparison={priorTrack,ageDays:comparisonAge,changePct:change,currentViews:currentDay.views,priorViews:priorDay.views,firstDayChangePct:firstChange,partial:latestObservation.ts===today};
       const first=comparisonAge>1&&firstChange!==null?`Day 1 ${firstChange>=0?'+':''}${firstChange}%; `:'';
       launch=`${first}${change>=0?'+':''}${change}% vs ${priorTrack} at recorded day ${comparisonAge} (${n(currentDay.views)} vs ${n(priorDay.views)} views). Watching, not a reason to add uploads.`;
     }
@@ -174,5 +183,5 @@ export function buildCoachStatus({plan,evidence,tracks,decisions={},campaignStar
     }
     if(!anchor&&focus){const a=focus.actions.find(a=>a.format==='hero'||a.scheduled);if(a)push(focus,{...a,label:'Check the release upload',date:today,reason:'The release date has arrived. Confirm whether the video is public, scheduled or still being prepared before planning another upload.'});}
   }
-  return {albumReleaseDate:album?.dateISO??null,nextMoment:upcoming?{name:upcoming.name,date:upcoming.releaseDate,kind:'single'}:albumFuture?{name:'Album release',date:album.dateISO,kind:'album'}:null,metrics:metrics?{views:metrics.views,assets:metrics.assets,shorts:metrics.shorts,longform:metrics.longForm,start:metrics.start.at}:null,shortsRead,launch,audience,albumIdea,phase,headline,current,next,cadence,fresh,campaign,priorities:priorities.slice(0,2)};
+  return {albumReleaseDate:album?.dateISO??null,nextMoment:upcoming?{name:upcoming.name,date:upcoming.releaseDate,kind:'single'}:albumFuture?{name:'Album release',date:album.dateISO,kind:'album'}:null,metrics:metrics?{views:metrics.views,assets:metrics.assets,shorts:metrics.shorts,longform:metrics.longForm,start:metrics.start.at}:null,shortsRead,launch,launchComparison,audience,albumIdea,phase,headline,current,next,cadence,fresh,campaign,priorities:priorities.slice(0,2)};
 }

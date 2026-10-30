@@ -375,3 +375,23 @@ test('action headings distinguish published releases from upcoming preparation',
   const noReading=model({uploads:[],events:[event('Upcoming - single release',14)],dataAt:null}).model;
   assert.ok(noReading.actions.every(a=>a.stage!=='Live now'));
 });
+
+
+test('launch comparison exposes exact matched-age figures with a partial-day label', () => {
+  const readings=(id:string,publishedAt:string,counts:number[])=>({videoId:id,publishedAt,observations:counts.map((views,i)=>({ts:new Date(Date.parse(publishedAt)+(i+1)*DAY).toISOString().slice(0,10),views,likes:null,comments:null}))});
+  const m=model({uploads:RICH,events:RICH_EVENTS,series:{
+    hero2:readings('hero2',iso(-3),[134578,169306,218407]),
+    hero1:readings('hero1',iso(-38),[100820,183275,242352])
+  }}).model;
+  assert.equal(m.launchComparison?.priorTrack,'Roses');
+  assert.equal(m.launchComparison?.firstDayChangePct,33);
+  assert.equal(m.launchComparison?.ageDays,3);
+  assert.equal(m.launchComparison?.changePct,-10);
+  assert.equal(m.launchComparison?.currentViews,218407);
+  assert.equal(m.launchComparison?.priorViews,242352);
+  assert.equal(m.launchComparison?.partial,true);
+});
+
+test('a launch comparison is absent when matched-age history is unavailable', () => {
+  assert.equal(model({uploads:RICH,events:RICH_EVENTS}).model.launchComparison,null);
+});

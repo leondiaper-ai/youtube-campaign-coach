@@ -1,3 +1,4 @@
+import type { LaunchComparison } from './status';
 /* ═══════════════════════════════════════════════════════════════════════
    COACH LANDING — one view model for the whole page
 
@@ -106,6 +107,7 @@ export type LandingModel = {
   /** Matched-age comparison sentence, produced by buildCoachStatus. Null when
    *  there is no comparable prior release or the readings are too stale. */
   paceLine: string | null;
+  launchComparison?: LaunchComparison | null;
   /** Sampled fan read. Scope always travels with it; never the audience. */
   fan: {
     quote: string; likes: number;
