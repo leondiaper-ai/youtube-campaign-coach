@@ -246,11 +246,13 @@ export function buildLandingModel({
     shorts:assess(shortDue.reduce((n,x)=>n+x.due,0),shortDue.reduce((n,x)=>n+Math.max(0,x.due-x.r.shorts),0),'Shorts')};
   const recentGuideMoments=momentDates.reduce((n,at)=>n+[-3,0,7].filter(d=>{const day=Date.parse(at)+d*DAY;return day>=now-28*DAY&&day<=now;}).length,0);
   const weeklyTarget=decisions['campaign:shorts-target']?.shortsWeeklyTarget;
-  const guideCount=weeklyTarget!=null?weeklyTarget*4:recentGuideMoments;
+  // Working campaign floor: two Shorts/week, with release moments able to
+  // raise the guide. A deliberate saved team target still takes precedence.
+  const guideCount=weeklyTarget!=null?weeklyTarget*4:Math.max(8,recentGuideMoments);
   const cadenceFigure=figures.find(f=>f.label==='Shorts / week');
   if(cadenceFigure&&guideCount>0&&status.fresh){
     cadenceFigure.tone=status.shortsRead.count>=guideCount?'good':'behind';
-    cadenceFigure.period=`${weeklyTarget!=null?'Team target':'Rollout guide'} ≥${Math.round(guideCount/4*10)/10}/wk · last 28 days`;
+    cadenceFigure.period=`${weeklyTarget!=null?'Team target':'Campaign guide'} ≥${Math.round(guideCount/4*10)/10}/wk · ${status.shortsRead.count}/${guideCount} in last 28 days`;
   }
   const framework={singles:tracks.length,heroes:trackCounts.filter(r=>r.long>0).length,
     followUps:trackCounts.filter(r=>r.long>1).length,shorts:trackCounts.reduce((n,r)=>n+r.shorts,0),

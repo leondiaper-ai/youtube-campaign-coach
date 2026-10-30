@@ -353,3 +353,16 @@ test('future-only campaigns are neutral and a saved cadence target colours actua
   assert.equal(active.figures.find(f=>f.label==='Shorts / week')?.tone,'behind');
   assert.match(active.figures.find(f=>f.label==='Shorts / week')?.period??'',/Team target/);
 });
+
+
+test('weekly cadence has a two-per-week floor instead of only counting release moments', () => {
+  const long=RICH.filter(u=>u.durationSec>90);
+  const shorts=Array.from({length:8},(_,i)=>upload('cadence'+i,'Campaign clip '+i,1+i,1000,30));
+  const seven=model({uploads:[...long,...shorts.slice(0,7)],events:RICH_EVENTS}).model.figures.find(f=>f.label==='Shorts / week');
+  assert.equal(seven?.value,'1.8');
+  assert.equal(seven?.tone,'behind');
+  assert.match(seven?.period??'',/≥2\/wk.*7\/8/);
+  const eight=model({uploads:[...long,...shorts],events:RICH_EVENTS}).model.figures.find(f=>f.label==='Shorts / week');
+  assert.equal(eight?.tone,'good');
+  assert.match(eight?.period??'',/8\/8/);
+});
