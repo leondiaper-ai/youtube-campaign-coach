@@ -225,24 +225,25 @@ export default function CoachLanding({ model, slug, classicHref, timelineEditor 
         <div className="grid grid-cols-2 md:grid-cols-3 divide-x divide-line-faint">
           {model.figures.map(f => (
             <div key={f.label} className="p-4">
-              <Kpi value={f.value} label={f.label} period={f.period} />
+              <Kpi value={f.value} label={f.label} period={f.period} tone={f.tone==='good'?color.positive:f.tone==='behind'?color.negative:undefined} />
             </div>
           ))}
         </div>
 
         {model.framework && model.framework.singles>0 && <div className="border-t border-line-faint p-4">
-          <div className="flex flex-wrap justify-between gap-2 items-baseline mb-3"><Eyebrow>Rollout guide · {model.framework.singles} singles</Eyebrow><span className="text-micro text-muted">Suggested starting plan</span></div>
+          <div className="flex flex-wrap justify-between gap-2 items-baseline mb-3"><Eyebrow>Rollout guide · {model.framework.singles} singles</Eyebrow><span className="text-micro text-muted">Status against guide due today</span></div>
           <div className="grid grid-cols-3 gap-3">
-            {[{label:'Release videos',value:model.framework.heroes,target:model.framework.singles},
-              {label:'Follow-up videos',value:model.framework.followUps,target:model.framework.singles},
-              {label:'Release-linked Shorts',value:model.framework.shorts,target:model.framework.shortsTarget}].map(f=><div key={f.label}>
-                <p className="m-0 text-[24px] font-extrabold text-ink tabular-nums">{f.value}<span className="text-muted font-normal"> / {f.target}</span></p>
+            {[{label:'Release videos',value:model.framework.heroes,target:model.framework.singles,status:model.framework.assessment.heroes},
+              {label:'Follow-up videos',value:model.framework.followUps,target:model.framework.singles,status:model.framework.assessment.followUps},
+              {label:'Release-linked Shorts',value:model.framework.shorts,target:model.framework.shortsTarget,status:model.framework.assessment.shorts}].map(f=><div key={f.label}>
+                <p className="m-0 text-[24px] font-extrabold tabular-nums" style={{color:f.status.tone==='good'?color.positive:f.status.tone==='behind'?color.negative:color.ink}}>{f.value}<span className="text-muted font-normal"> / {f.target}</span></p>
                 <span className="text-meta font-semibold text-secondary">{f.label}</span>
-                <div className="h-1 mt-2 rounded bg-raised overflow-hidden"><div className="h-full rounded bg-electric" style={{width:`${Math.min(100,f.target?f.value/f.target*100:0)}%`}} /></div>
+                <div className="h-1 mt-2 rounded bg-raised overflow-hidden"><div className="h-full rounded" style={{background:f.status.tone==='good'?color.positive:f.status.tone==='behind'?color.negative:'#B7B1A8',width:`${Math.min(100,f.target?f.value/f.target*100:0)}%`}} /></div>
+                <p className="text-micro text-muted m-0 mt-1">{f.status.label}</p>
               </div>)}
           </div>
           <p className="m-0 mt-3 text-meta font-semibold text-ink">Next 28 days: {model.framework.upcomingMoments} release moment{model.framework.upcomingMoments===1?'':'s'} · {model.framework.next28Shorts} suggested Short moments</p>
-          <details className="mt-2 text-micro text-muted"><summary className="cursor-pointer text-electric font-semibold">How the guide works</summary><p className="m-0 mt-2">Per single: one release video, one distinct follow-up around days 7–14, and three Shorts across teaser, launch and follow-up. Totals include future singles. The next 28 days includes single and album support moments, using actual upload dates where available. These are starting suggestions, not YouTube quotas. Only track-matched public uploads count toward the bars.</p></details>
+          <details className="mt-2 text-micro text-muted"><summary className="cursor-pointer text-electric font-semibold">How the guide works</summary><p className="m-0 mt-2">Per single: one release video, one distinct follow-up around days 7–14, and three Shorts across teaser, launch and follow-up. Totals include future singles; colours assess only support due by today. Cadence compares the last 28 days with the dated Short moments in this guide, or a saved team target. The next 28 days includes single and album support moments, using actual upload dates where available. These are starting suggestions, not YouTube quotas. Only track-matched public uploads count toward the bars.</p></details>
         </div>}
 
         <div className="border-t border-line-faint grid md:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)]">

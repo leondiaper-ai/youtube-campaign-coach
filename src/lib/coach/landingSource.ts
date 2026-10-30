@@ -186,15 +186,6 @@ export function buildLandingModel({
       const opportunity = (!isAnchor || (publishedLong[0]?.video?.date ?? today) < new Date(now-14*DAY).toISOString().slice(0,10)) && !future && publishedLong.length === 1
         ? `No further long-form video identified for ${t.name}. Explore a ${followUpOptions.join(' or ')} if suitable material is available.`
         : undefined;
-      const distant = future && Date.parse(t.releaseDate) - now > 45 * DAY && !live;
-
-      if (distant) {
-        return {
-          name: t.name, dateLabel: shortDate(t.releaseDate), stage: 'distant',
-          badge: { label: 'Planned', tone: 'ghost' }, assets: [],
-          holding: 'Too far out to plan assets. Revisited once the current release has been read.',
-        };
-      }
       return {
         name: t.name,
         opportunity,
@@ -203,22 +194,16 @@ export function buildLandingModel({
         badge: isAnchor
           ? { label: 'Live', tone: 'ok' }
           : live ? { label: 'Shipped', tone: 'ghost' } : { label: 'In preparation', tone: 'warn' },
-        /* ── why a suggestion is dropped here ──────────────────────
-           buildRoadmap proposes a follow-up per track, independently.
-           Rendered as-is that becomes the same row under every release:
-           a follow-up for a single that shipped five weeks ago, and one
-           for a single that has not come out. Neither is actionable.
-           A follow-up is kept only on the release currently carrying the
-           campaign — or anywhere the team has already agreed it, because
-           a decision outranks our timing rule. */
+        // Future releases keep provisional preparation rows at any distance.
+        // Old unagreed follow-ups become review notes; saved team decisions stay.
         assets: t.actions.filter(a => {
           if (a.video && !a.scheduled) return true;
           if (stateOf(a, decisions) === 'agreed') return true;
           const kind = a.format.split(':')[0];
-          return !FOLLOW_UP.includes(kind) || (isAnchor && !!a.date && a.date >= today && publishedLong.length < 2);
+          return future || !FOLLOW_UP.includes(kind) || (isAnchor && !!a.date && a.date >= today && publishedLong.length < 2);
         }).map((a): ReleaseAsset => ({
-          label: a.video && !a.scheduled ? a.video.title : (actions.find(p => p.id === a.id)?.label ?? a.label),
-          note: a.video && !a.scheduled ? undefined : actions.find(p => p.id === a.id)?.reason ?? a.reason,
+          label: a.video && !a.scheduled ? a.video.title : actions.find(p=>p.id===a.id)?.label ?? (future&&a.format==='hero' ? (evidence.audit.visuals.formats.find(f=>f.key==='omv'&&f.count>=3)?'Confirm music video':'Plan launch video') : future&&a.format==='short'?'Plan Shorts support':a.label),
+          note: a.video && !a.scheduled ? undefined : actions.find(p=>p.id===a.id)?.reason ?? (future&&a.format==='hero'?'Music video, or lyric video if unavailable.':future&&a.format==='short'?`Teaser ${shortDate(new Date(Date.parse(t.releaseDate)-3*DAY).toISOString())} · launch ${shortDate(t.releaseDate)} · follow-up ${shortDate(new Date(Date.parse(t.releaseDate)+7*DAY).toISOString())}`:future&&FOLLOW_UP.includes(a.format)?`Provisional · ${followUpWindow(t.releaseDate).label} (days 7–14). Confirm suitable material.`:a.reason),
           status: stateOf(a, decisions),
           meta: a.video && !a.scheduled
             ? `${compact(evidence.uploads.find(u => u.id === a.video!.id)?.viewCount ?? 0)} · ${shortDate(a.video.date)}`
@@ -250,9 +235,26 @@ export function buildLandingModel({
   });
   const momentDates=Array.from(new Set([...trackCounts.map(r=>r.at),...(status.albumReleaseDate?[status.albumReleaseDate]:[])]));
   const next28Shorts=momentDates.reduce((n,atDate)=>n+[-3,0,7].filter(offset=>{const at=Date.parse(atDate)+offset*DAY;return at>=Date.parse(today)&&at<Date.parse(today)+28*DAY;}).length,0);
+  const todayMs=Date.parse(today);
+  const heroDue=trackCounts.filter(r=>Date.parse(r.at)<todayMs);
+  const followDue=trackCounts.filter(r=>Date.parse(r.at)+14*DAY<todayMs);
+  const shortDue=trackCounts.map(r=>({r,due:[-3,0,7].filter(d=>Date.parse(r.at)+d*DAY<todayMs).length}));
+  const assess=(due:number,missing:number,noun:string):NonNullable<LandingModel['framework']>['assessment']['heroes']=>
+    !status.fresh?{tone:'neutral',label:'Refresh channel data'}:missing>0?{tone:'behind',label:`${missing} ${noun} to review`}:due>0?{tone:'good',label:'On track to date'}:{tone:'neutral',label:'Not due yet'};
+  const assessment={heroes:assess(heroDue.length,heroDue.filter(r=>!r.long).length,'release video'),
+    followUps:assess(followDue.length,followDue.filter(r=>r.long<2).length,'follow-up'),
+    shorts:assess(shortDue.reduce((n,x)=>n+x.due,0),shortDue.reduce((n,x)=>n+Math.max(0,x.due-x.r.shorts),0),'Shorts')};
+  const recentGuideMoments=momentDates.reduce((n,at)=>n+[-3,0,7].filter(d=>{const day=Date.parse(at)+d*DAY;return day>=now-28*DAY&&day<=now;}).length,0);
+  const weeklyTarget=decisions['campaign:shorts-target']?.shortsWeeklyTarget;
+  const guideCount=weeklyTarget!=null?weeklyTarget*4:recentGuideMoments;
+  const cadenceFigure=figures.find(f=>f.label==='Shorts / week');
+  if(cadenceFigure&&guideCount>0&&status.fresh){
+    cadenceFigure.tone=status.shortsRead.count>=guideCount?'good':'behind';
+    cadenceFigure.period=`${weeklyTarget!=null?'Team target':'Rollout guide'} ≥${Math.round(guideCount/4*10)/10}/wk · last 28 days`;
+  }
   const framework={singles:tracks.length,heroes:trackCounts.filter(r=>r.long>0).length,
     followUps:trackCounts.filter(r=>r.long>1).length,shorts:trackCounts.reduce((n,r)=>n+r.shorts,0),
-    shortsTarget:tracks.length*3,next28Shorts,
+    shortsTarget:tracks.length*3,next28Shorts,assessment,
     upcomingMoments:momentDates.filter(at=>Date.parse(at)>=Date.parse(today)&&Date.parse(at)<Date.parse(today)+28*DAY).length};
   return {
     framework,

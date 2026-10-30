@@ -109,12 +109,13 @@ test('never more than two actions, and never padded to reach two', () => {
   assert.equal(upcoming.model.actions.length, 1);
 });
 
-test('a follow-up is suggested only on the release carrying the campaign', () => {
+test('current follow-ups and provisional future preparation stay distinct', () => {
   const { model: m } = model({ uploads: RICH, events: RICH_EVENTS, dive: true });
   const followUps = m.rollout.flatMap(r =>
     r.assets.filter(a => a.status !== 'published' && /follow-up/i.test(a.label)).map(() => r.name));
-  assert.deepEqual(followUps, ['Overthinker'],
-    'a shipped single and an unreleased single must not both carry a follow-up row');
+  assert.deepEqual(followUps, ['Overthinker','Evil']);
+  assert.ok(m.rollout.find(r=>r.name==='Evil')?.assets.some(a=>/Provisional/.test(a.note??'')));
+  assert.ok(!m.rollout.find(r=>r.name==='Roses')?.assets.some(a=>a.status==='suggested'&&/follow-up/.test(a.label))); 
 });
 
 test('a deep dive sharpens the suggestion but is never required', () => {
@@ -323,4 +324,32 @@ test('upcoming music video recommendation names its fallback and exposes channel
   assert.match(a?.reason??'',/no music video.*lyric video/i);
   assert.ok(a?.evidence.some(e=>/Lyric videos are reaching fans/.test(e.body)&&/views/.test(e.body)));
   assert.ok(a?.evidence.every(e=>!/No upload matched|like-for-like/.test(e.body)));
+});
+
+
+test('guide colours judge due work rather than the full future campaign', () => {
+  const m=model({uploads:RICH,events:[...RICH_EVENTS,event('Royal Blue - single release',70)]}).model;
+  assert.equal(m.framework?.assessment.heroes.tone,'good');
+  assert.equal(m.framework?.assessment.followUps.tone,'behind'); // Roses, not future singles
+  assert.match(m.framework?.assessment.followUps.label??'',/1 follow-up/);
+  assert.equal(m.figures.find(f=>f.label==='Campaign views')?.tone,undefined);
+});
+
+test('far-future releases have concrete provisional plans instead of a cutoff', () => {
+  const m=model({uploads:RICH,events:[...RICH_EVENTS,event('Royal Blue - single release',70)]}).model;
+  const r=m.rollout.find(r=>r.name==='Royal Blue');
+  assert.ok(r&&r.assets.length>=3);
+  assert.equal(r.holding,undefined);
+  assert.ok(r.assets.some(a=>/Shorts support/.test(a.label)&&/Teaser.*launch.*follow-up/.test(a.note??'')));
+  assert.ok(r.assets.some(a=>/Provisional/.test(a.note??'')));
+});
+
+test('future-only campaigns are neutral and a saved cadence target colours actual pace', () => {
+  const future=model({uploads:[],events:[event('New Song - single release',70)]}).model;
+  assert.equal(future.framework?.assessment.heroes.tone,'neutral');
+  assert.equal(future.framework?.assessment.followUps.tone,'neutral');
+  assert.equal(future.framework?.assessment.shorts.tone,'neutral');
+  const active=model({uploads:RICH,events:RICH_EVENTS,decisions:{'campaign:shorts-target':{status:'planned',shortsWeeklyTarget:3}}}).model;
+  assert.equal(active.figures.find(f=>f.label==='Shorts / week')?.tone,'behind');
+  assert.match(active.figures.find(f=>f.label==='Shorts / week')?.period??'',/Team target/);
 });

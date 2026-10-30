@@ -87,6 +87,8 @@ export type ReleaseBlock = {
   supportSummary?: string;
 };
 
+export type GuideAssessment = { tone: 'good' | 'behind' | 'neutral'; label: string };
+
 export type LandingModel = {
   artist: string;
   project: string;
@@ -95,10 +97,10 @@ export type LandingModel = {
   /** One explicit campaign reporting window, used by every campaign figure. */
   windowLabel: string;
   actions: LandingAction[];
-  framework?: { singles: number; heroes: number; followUps: number; shorts: number; shortsTarget: number; next28Shorts: number; upcomingMoments: number };
+  framework?: { singles: number; heroes: number; followUps: number; shorts: number; shortsTarget: number; next28Shorts: number; upcomingMoments: number; assessment: {heroes: GuideAssessment; followUps: GuideAssessment; shorts: GuideAssessment} };
   coverage?: { name: string; date: string; guide?: string; cells: { label: string; count: number; planned: boolean; reported?: boolean }[] }[];
   shortsProgress?: { count: number; weekly: number; average: number | null; target: number | null };
-  figures: { value: string; label: string; period: string }[];
+  figures: { value: string; label: string; period: string; tone?: GuideAssessment['tone'] }[];
   latest: (UploadRef & { likes: number | null }) | null;
   /** Matched-age comparison sentence, produced by buildCoachStatus. Null when
    *  there is no comparable prior release or the readings are too stale. */
