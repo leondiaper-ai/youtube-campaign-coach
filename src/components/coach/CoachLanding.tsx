@@ -1,0 +1,331 @@
+'use client';
+
+/* ═══════════════════════════════════════════════════════════════════════
+   COACH LANDING
+
+   Header · Do next · one campaign card · rollout. Nothing else.
+
+   Reuses the shared primitives (Card, Kpi, Badge, Eyebrow, SectionHead)
+   so this reads as the same product as the campaign board and the
+   watcher. `Kpi` is used deliberately: it refuses to render without a
+   `period`, which is the guarantee that no figure on this page appears
+   without the window it was measured over.
+
+   Progress ticks are LOCAL in this prototype. They are labelled as such
+   rather than styled to look saved, because a control that looks
+   persistent and is not is worse than no control.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { Badge, Card, Eyebrow, Kpi } from '@/components/ui';
+import { color } from '@/lib/design/tokens';
+import { compact, exact, shortDate, type LandingAction, type LandingModel, type ReleaseAsset, type UploadRef } from '@/lib/coach/landingModel';
+
+const TONE = {
+  ok: { fg: color.positive, bg: color.positiveSoft },
+  warn: { fg: '#9A6324', bg: '#FAF0E2' },
+  ghost: { fg: color.inkMuted, bg: '#F4F2EC' },
+} as const;
+
+function Thumb({ v, className = '' }: { v: UploadRef; className?: string }) {
+  return (
+    <span className={`block relative overflow-hidden rounded bg-raised ${className}`}>
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src={`https://i.ytimg.com/vi/${v.id}/mqdefault.jpg`}
+        alt=""
+        loading="lazy"
+        className="w-full h-full object-cover"
+      />
+    </span>
+  );
+}
+
+function AssetRow({ title, items, shape }: { title: string; items: UploadRef[]; shape: 'long' | 'short' }) {
+  const [all, setAll] = useState(false);
+  const limit = shape === 'long' ? 3 : 6;
+  const shown = all ? items : items.slice(0, limit);
+  if (!items.length) return null;
+  return (
+    <div className="mt-4 first:mt-0">
+      <div className="flex items-baseline justify-between gap-3 mb-2">
+        <Eyebrow>{title}</Eyebrow>
+        <span className="text-[11px] text-faint tabular-nums">
+          {items.length}
+          {items.length > limit && (
+            <button
+              type="button"
+              onClick={() => setAll(!all)}
+              className="ml-2 font-semibold text-electric hover:underline"
+            >
+              {all ? 'Show fewer' : 'View all'}
+            </button>
+          )}
+        </span>
+      </div>
+      <ul className="flex gap-2 overflow-x-auto pb-1 list-none m-0 p-0">
+        {shown.map(v => (
+          <li key={v.id} className={shape === 'long' ? 'w-[132px] shrink-0' : 'w-[62px] shrink-0'}>
+            <a href={`https://youtube.com/watch?v=${v.id}`} target="_blank" rel="noopener noreferrer" className="no-underline block">
+              <Thumb v={v} className={shape === 'long' ? 'aspect-video' : 'aspect-[9/16]'} />
+              <span className="block text-[11px] font-bold tabular-nums text-ink mt-1.5">
+                {v.views == null ? '—' : compact(v.views)}
+              </span>
+              <span className="block text-[10.5px] text-muted leading-tight line-clamp-2">
+                {shape === 'long' ? v.title : shortDate(v.publishedAt)}
+              </span>
+            </a>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+function ActionCard({ action, slug }: { action: LandingAction; slug?: string }) {
+  const router = useRouter();
+  const [ticked, setTicked] = useState(action.state === 'agreed');
+  const [saving, setSaving] = useState<'idle' | 'saving' | 'error'>('idle');
+
+  const [date, setDate] = useState(action.dueISO ?? '');
+  const [editing, setEditing] = useState(false);
+  useEffect(() => { setTicked(action.state === 'agreed'); setDate(action.dueISO ?? ''); }, [action.state, action.dueISO]);
+
+  /* One write path for both controls. The route merges per field, so a
+     date change never clears someone else's agreed status and a status
+     change never clears a date. */
+  async function save(patch: { status?: string; targetDate?: string }) {
+    if (!slug) { setSaving('error'); return; }
+    setSaving('saving');
+    try {
+      const r = await fetch('/api/coach/decisions', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ slug, actionId: action.id, ...patch }),
+      });
+      if (!r.ok) { setTicked(action.state === 'agreed'); setDate(action.dueISO ?? ''); setSaving('error'); return; }
+      setSaving('idle');
+      router.refresh();
+    } catch { setTicked(action.state === 'agreed'); setDate(action.dueISO ?? ''); setSaving('error'); }
+  }
+
+  function toggle(nextValue: boolean) {
+    setTicked(nextValue);
+    void save({ status: nextValue ? 'planned' : 'suggested' });
+  }
+  return (
+    <Card className="flex flex-col">
+      <div className="flex items-center gap-2.5 mb-2">
+        {editing ? (
+          <input
+            type="date"
+            value={date}
+            autoFocus
+            onChange={e => setDate(e.target.value)}
+            onBlur={() => { setEditing(false); if (date && date !== action.dueISO) void save({ targetDate: date }); }}
+            className="text-[12px] font-semibold px-2 py-[2px] rounded border border-line-strong bg-surface"
+            aria-label="Target date"
+          />
+        ) : (
+          <button
+            type="button"
+            onClick={() => setEditing(true)}
+            title="Change the target date"
+            className="text-[12px] font-extrabold px-2 py-[3px] rounded border whitespace-nowrap"
+            style={action.dueTone === 'soon'
+              ? { color: '#8C2D11', background: '#FFE9E2', borderColor: '#F7CFC2' }
+              : { color: '#6F4617', background: '#FAF0E2', borderColor: '#EEDFC6' }}
+          >
+            {date ? `by ${new Date(date + 'T12:00:00Z').toLocaleDateString('en-GB', { day: 'numeric', month: 'short', timeZone: 'UTC' })}` : action.due}
+          </button>
+        )}
+        <Eyebrow>{action.context}</Eyebrow>
+      </div>
+
+      <h3 className="text-h4 font-extrabold text-ink leading-snug m-0 mb-1.5">{action.label}</h3>
+      <p className="text-meta text-secondary leading-relaxed m-0">{action.reason}</p>
+
+      {/* Native disclosure: keyboard-operable and open-able without JS. */}
+      <details className="group mt-3 pt-3 border-t border-line-faint">
+        <summary className="flex items-center gap-4 cursor-pointer list-none marker:hidden">
+          <span
+            role="checkbox"
+            aria-checked={ticked}
+            tabIndex={0}
+            onClick={e => { e.preventDefault(); e.stopPropagation(); void toggle(!ticked); }}
+            onKeyDown={e => { if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); void toggle(!ticked); } }}
+            className="inline-flex items-center gap-2 text-[12.5px] font-semibold text-secondary select-none"
+          >
+            <span
+              aria-hidden
+              className="w-4 h-4 rounded-[4px] border-[1.5px] border-line-strong bg-surface grid place-content-center text-[10px] font-black text-white"
+              style={ticked ? { background: color.positive, borderColor: color.positive } : undefined}
+            >{ticked ? '✓' : ''}</span>
+            <span className={ticked ? 'line-through text-faint' : ''}>Agreed by team</span>
+            {saving === 'saving' && <span className="text-[11px] text-faint font-normal">saving…</span>}
+            {saving === 'error' && <span className="text-[11px] text-negative font-normal">not saved</span>}
+          </span>
+          <span className="ml-auto text-[12.5px] font-semibold text-electric group-open:hidden">Evidence</span>
+          <span className="ml-auto text-[12.5px] font-semibold text-electric hidden group-open:inline">Hide evidence</span>
+        </summary>
+        <div className="mt-2.5 p-3 bg-raised rounded-control text-[12.5px] text-secondary leading-relaxed">
+          {action.evidence.map(e => (
+            <p key={e.heading} className="m-0 mb-1.5 last:mb-0">
+              <strong className="text-ink">{e.heading}</strong> {e.body}
+            </p>
+          ))}
+        </div>
+      </details>
+    </Card>
+  );
+}
+
+const STATUS_MARK: Record<ReleaseAsset['status'], { icon: string; cls: string }> = {
+  published: { icon: '✓', cls: 'text-positive' },
+  agreed: { icon: '◆', cls: 'text-longform' },
+  suggested: { icon: '○', cls: 'text-faint' },
+};
+
+export default function CoachLanding({ model, slug, classicHref }: { model: LandingModel; slug?: string; classicHref?: string }) {
+  return (
+    <div className="max-w-[1060px] mx-auto px-5 pb-16">
+
+      {/* 1 · header */}
+      <header className="flex flex-wrap items-center justify-between gap-3 pt-5 pb-1">
+        <div className="min-w-0">
+          <h1 className="text-h2 font-black tracking-tight text-ink m-0 leading-none">{model.artist}</h1>
+          <p className="text-meta text-secondary m-0 mt-1.5">{model.stageLine}</p>
+        </div>
+        <Badge fg={TONE.ok.fg} bg={TONE.ok.bg}>{model.project}</Badge>
+      </header>
+
+      {/* 2 · do next */}
+      <Eyebrow className="mt-7 mb-2.5">Do next</Eyebrow>
+      <div className="grid gap-3 md:grid-cols-2">
+        {model.actions.map(a => <ActionCard key={a.id} action={a} slug={slug} />)}
+        {!model.actions.length && <p className="text-meta text-muted">No immediate action identified. Review the rollout below.</p>}
+      </div>
+
+      {/* 3 · one campaign card */}
+      <Eyebrow className="mt-7 mb-2.5">Campaign · {model.windowLabel}</Eyebrow>
+      <Card pad={false}>
+        <div className="grid grid-cols-2 md:grid-cols-4 divide-x divide-line-faint">
+          {model.figures.map(f => (
+            <div key={f.label} className="p-4">
+              <Kpi value={f.value} label={f.label} period={f.period} />
+            </div>
+          ))}
+        </div>
+
+        <div className="border-t border-line-faint grid md:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)]">
+          <div className="p-4 flex flex-col sm:flex-row gap-3.5">
+            {model.latest && (
+              <>
+                <a href={`https://youtube.com/watch?v=${model.latest.id}`} target="_blank" rel="noopener noreferrer" className="shrink-0 no-underline">
+                  <Thumb v={model.latest} className="w-[148px] aspect-video" />
+                </a>
+                <div className="min-w-0">
+                  <Badge fg={TONE.ok.fg} bg={TONE.ok.bg}>Latest release</Badge>
+                  <h3 className="text-body font-extrabold text-ink m-0 mt-1.5 leading-snug">{model.latest.title}</h3>
+                  <p className="text-micro text-muted m-0 mt-0.5">
+                    {shortDate(model.latest.publishedAt)} · {model.latest.views == null ? '—' : exact(model.latest.views)} views
+                    {model.latest.likes != null && ` · ${exact(model.latest.likes)} likes`}
+                  </p>
+                  {model.paceLine && (
+                    <p className="text-[12.5px] text-secondary leading-relaxed m-0 mt-2">{model.paceLine}</p>
+                  )}
+                </div>
+              </>
+            )}
+          </div>
+
+          {model.fan && (
+            <div className="p-4 border-t md:border-t-0 md:border-l border-line-faint">
+              <Eyebrow>Fan response</Eyebrow>
+              <p className="text-body font-extrabold text-ink m-0 mt-1 leading-snug">
+                {model.fan.tone}{model.fan.theme ? ` · ${model.fan.theme}` : ''}
+              </p>
+              <p className="text-micro text-muted m-0 mt-1.5 leading-relaxed">
+                Sampled from {exact(model.fan.commentsOnAsset)} comments across {model.fan.assetLabel},
+                read {shortDate(model.fan.at)}. A sample, not the view of the audience.
+              </p>
+            </div>
+          )}
+        </div>
+
+        <div className="border-t border-line-faint p-4">
+          <AssetRow title="Campaign videos" items={model.assets.long} shape="long" />
+          <AssetRow title="Campaign Shorts" items={model.assets.shorts} shape="short" />
+        </div>
+      </Card>
+
+      {/* 4 · rollout */}
+      <Eyebrow className="mt-7 mb-2.5">Rollout</Eyebrow>
+      <p className="flex flex-wrap gap-4 text-micro text-muted m-0 mb-3">
+        <span><strong className="text-positive">✓</strong> Published on the channel</span>
+        <span><strong className="text-longform">◆</strong> Agreed by the team</span>
+        <span><strong className="text-faint">○</strong> Suggested — reason shown</span>
+      </p>
+
+      <ol className="relative list-none m-0 p-0 pl-6 before:content-[''] before:absolute before:left-[5px] before:top-3 before:bottom-3 before:w-[2px] before:bg-line">
+        {model.rollout.map(r => (
+          <li key={r.name} className="relative mb-3">
+            <span
+              className="absolute -left-[21px] top-5 w-3 h-3 rounded-full border-[2.5px] bg-surface"
+              style={{
+                borderColor: r.stage === 'shipped' ? color.positive : r.stage === 'live' ? color.signal : '#D9D2C6',
+                background: r.stage === 'shipped' ? color.positive : r.stage === 'live' ? color.signal : '#fff',
+              }}
+              aria-hidden
+            />
+            <Card className={r.stage === 'live' ? 'border-line-strong' : ''}>
+              <div className="flex flex-wrap items-baseline gap-2.5">
+                <Eyebrow>{r.dateLabel}</Eyebrow>
+                <h3 className="text-h4 font-extrabold text-ink m-0">{r.name}</h3>
+                {r.badge && <Badge fg={TONE[r.badge.tone].fg} bg={TONE[r.badge.tone].bg}>{r.badge.label}</Badge>}
+              </div>
+
+              {r.holding ? (
+                <p className="text-meta text-muted m-0 mt-2.5">{r.holding}</p>
+              ) : (
+                <ul className="mt-3 list-none m-0 p-0 rounded-control overflow-hidden border border-line-faint divide-y divide-line-faint">
+                  {r.assets.map(a => (
+                    <li
+                      key={a.label}
+                      className={`flex gap-2.5 items-center px-3 py-2 text-meta ${a.status === 'suggested' ? 'bg-raised/40' : 'bg-surface'}`}
+                    >
+                      <span className={`w-4 text-center font-extrabold shrink-0 ${STATUS_MARK[a.status].cls}`} aria-hidden>
+                        {STATUS_MARK[a.status].icon}
+                      </span>
+                      <span className="flex-1 min-w-0">
+                        {a.videoId ? (
+                          <a href={`https://youtube.com/watch?v=${a.videoId}`} target="_blank" rel="noopener noreferrer" className="no-underline text-ink font-semibold hover:text-electric">
+                            {a.label}
+                          </a>
+                        ) : <span className="text-ink font-semibold">{a.label}</span>}
+                        {a.note && <small className="block text-micro text-muted font-normal">{a.note}</small>}
+                      </span>
+                      {a.meta && <span className="text-micro text-muted tabular-nums whitespace-nowrap">{a.meta}</span>}
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </Card>
+          </li>
+        ))}
+      </ol>
+
+      <div className="mt-7 pt-3 border-t border-line text-micro text-muted leading-relaxed">
+        {model.caveats.map(c => <p key={c} className="m-0 mb-1.5 last:mb-0">{c}</p>)}
+        {classicHref && (
+          <p className="m-0 mt-2">
+            <a href={classicHref} className="text-electric font-semibold no-underline hover:underline">
+              Open the previous timeline view
+            </a>
+          </p>
+        )}
+      </div>
+    </div>
+  );
+}

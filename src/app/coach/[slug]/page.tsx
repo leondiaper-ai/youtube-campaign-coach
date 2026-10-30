@@ -12,14 +12,21 @@ import { loadDriveLibrary } from '@/lib/driveStore';
 import { reclassifyFromPlan } from '@/lib/driveAssets';
 import { mappingConfigFor, getCampaignConfig } from '@/lib/campaignConfig';
 import CampaignWarRoom from '@/components/CampaignWarRoom';
+import CoachLanding from '@/components/coach/CoachLanding';
+import { loadCoachEvidence, readDecisions } from '@/lib/coach/evidence';
+import { buildRoadmap } from '@/lib/coach/roadmap';
+import { buildCoachStatus } from '@/lib/coach/status';
+import { buildLandingModel } from '@/lib/coach/landingSource';
+import { readVideoSeriesMany } from '@/lib/videoSnapshots';
 import type { RecentUpload } from '@/lib/artists';
 
 // Short window while the planner is in active development — drops stale HTML
 // fast on each deploy. Move back to 600 (or on-demand revalidation) once stable.
-export const revalidate = 60;
+export const dynamic = 'force-dynamic';
 
 type PageProps = {
   params: Promise<{ slug: string }>;
+  searchParams?: Promise<Record<string, string | string[] | undefined>>;
 };
 
 export async function generateMetadata({ params }: PageProps) {
@@ -32,8 +39,14 @@ export async function generateMetadata({ params }: PageProps) {
   };
 }
 
-export default async function CampaignPage({ params }: PageProps) {
+export default async function CampaignPage({ params, searchParams }: PageProps) {
   const { slug } = await params;
+  /* ── rollback without a redeploy ──────────────────────────────────
+     The previous war-room view stays reachable at ?view=classic. If the
+     new layout misbehaves on a live campaign, the fix is a URL, not a
+     revert — and the old view keeps working from the same data. */
+  const sp = (await searchParams) ?? {};
+  const classic = (Array.isArray(sp.view) ? sp.view[0] : sp.view) === 'classic';
   const saved = await loadPlan(slug);
   if (!saved) notFound();
 
@@ -49,6 +62,10 @@ export default async function CampaignPage({ params }: PageProps) {
   } | null = null;
 
   let recentUploads: RecentUpload[] = [];
+  /* Hoisted so the channel audit can use the same reading the war room
+     does, rather than taking a second, possibly different one. */
+  let channelIdForAudit: string | null = null;
+  let dataAtForAudit: string | null = null;
 
   // Find the artist's channel handle
   const custom = await listCustomArtists();
@@ -165,6 +182,8 @@ export default async function CampaignPage({ params }: PageProps) {
 
       if (snap) {
         const channelId = await readChannelMapping(artistConfig.channelHandle);
+        channelIdForAudit = channelId ?? snap.channelId ?? null;
+        dataAtForAudit = snap.cachedAt ?? null;
         const history = channelId ? await readHistory(channelId) : [];
         const nc = normalizeChannelData(snap, history);
 
@@ -224,6 +243,45 @@ export default async function CampaignPage({ params }: PageProps) {
   // Keep computing matchResult/nudges/dataCoverage above (used for auto-regen
   // + future surfaces); the V4 war-room view leads with the master timeline.
   void matchResult; void nudges; void dataCoverage;
+
+  if (!classic) {
+    const [evidence, decisions] = await Promise.all([
+      loadCoachEvidence({
+        slug: artistConfig?.slug ?? saved.slug,
+        name: saved.artist,
+        channelId: channelIdForAudit ?? undefined,
+        uploads: recentUploads,
+        dataAt: dataAtForAudit,
+      }),
+      readDecisions(saved.slug),
+    ]);
+
+    const tracks = buildRoadmap(saved.plan, evidence, Date.now(), driveLibrary);
+
+    /* Only the videos the roadmap matched. Nothing speculative. */
+    const matchedIds = tracks.flatMap(t => t.actions.map(a => a.video?.id)).filter((x): x is string => !!x);
+    const series = matchedIds.length ? await readVideoSeriesMany(matchedIds).catch(() => ({})) : {};
+
+    const status = buildCoachStatus({
+      plan: saved.plan,
+      evidence,
+      tracks,
+      decisions,
+      campaignStartDate: artistConfig?.campaignStartDate,
+      series,
+    });
+
+    const model = buildLandingModel({
+      status, tracks, evidence, decisions,
+      artistName: saved.artist,
+      projectName: saved.campaignName || saved.plan.campaignName || 'Campaign',
+    });
+
+    for (const event of saved.plan.events.filter(e => e.kind === 'albumRelease')) {
+      model.rollout.push({name:event.title, dateLabel:new Date(event.dateISO+'T12:00:00Z').toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}),stage:'distant',badge:{label:event.dateISO > new Date().toISOString().slice(0,10)?'Planned':'Released',tone:'ghost'},assets:status.albumIdea?[{label:status.albumIdea.label,note:status.albumIdea.reason,status:'suggested',meta:new Date(status.albumIdea.date+'T12:00:00Z').toLocaleDateString('en-GB',{day:'numeric',month:'short'})}]:[],holding:status.albumIdea?undefined:'Album milestone. Confirm release assets with the artist team.'});
+    }
+    return <CoachLanding model={model} slug={saved.slug} classicHref={`/coach/${saved.slug}?view=classic`} />;
+  }
 
   return (
     <CampaignWarRoom
