@@ -41,7 +41,8 @@ export default function CoachActionBoard({mode="full",tracks,slug,evidence,decis
     {mode==="priority" && <div style={{fontSize:10,fontWeight:800,letterSpacing:".12em",color:"#777168",textTransform:"uppercase",borderTop:"1px solid #e9e2d3",marginTop:14,paddingTop:12}}>Do next</div>}
     {mode!=="overview" && tracks.map(track=>{
       const live=track.actions.filter(a=>a.video&&!a.scheduled);
-      const next=track.actions.filter(a=>!a.video||a.scheduled);
+      const hasPublishedVisual=track.actions.some(a=>a.video&&!a.scheduled&&!['short','audio'].includes(a.format.split(':')[0]));
+      const next=track.actions.filter(a=>(hasPublishedVisual||a.format==='hero'||a.scheduled||!!decisions[a.id])&&(!a.video||a.scheduled)&&(mode!=="embedded"||track.releaseDate>=new Date(Date.now()-35*86400000).toISOString().slice(0,10)||(decisions[a.id]?.targetDate??a.date)>=new Date().toISOString().slice(0,10)||decisions[a.id]?.status==="done"));
       return <div key={track.id}>
         {mode!=="priority" && live.length>0 && <div className="coach-assets" aria-label="Published assets">{live.map(a=><a key={a.id} href={"https://www.youtube.com/watch?v="+a.video!.id} target="_blank" rel="noreferrer" title={a.video!.title}>✓ {a.label} · {fmt(a.video!.date)}</a>)}</div>}
         {next.length>0 && <div className={mode==="priority"?"coach-priority-item":"coach-next"}>
@@ -55,7 +56,7 @@ export default function CoachActionBoard({mode="full",tracks,slug,evidence,decis
               <input type="checkbox" aria-label={"Mark "+a.label+" done for "+track.name} checked={done} disabled={busy!==null||!!a.scheduled} onChange={e=>save(a.id,{...d,status:e.target.checked?"done":"suggested"})}/>
               <div className="coach-next-copy">
                 <div className="coach-next-label" style={{textDecoration:done||skipped?"line-through":undefined,opacity:skipped?.5:1}}>{a.label}</div>
-                {!done&&!skipped && <div className="coach-next-reason">{a.scheduled?"Linked video — check publication":a.available?"Matching file available — confirm approval":mode==="priority"?a.reason:a.reason.split(". ")[0]+"."}</div>}
+                {!done&&!skipped && <div className="coach-next-reason">{a.scheduled?"Linked video — check publication":a.available?"Matching file available — confirm approval":a.reason.split(". ")[0]+"."}</div>}
                 {(done||skipped||d.status==="planned"||d.status==="ready")&&<div className="coach-next-reason">{actionStatus(a,d)}</div>}
                 {editing===a.id && <form className="coach-edit" onSubmit={e=>{e.preventDefault();const date=new FormData(e.currentTarget).get("date") as string;save(a.id,{...d,targetDate:date});}}>
                   <input aria-label={"Target date for "+a.label+" — "+track.name} name="date" type="date" defaultValue={target} required/>

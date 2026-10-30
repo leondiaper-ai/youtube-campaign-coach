@@ -14,6 +14,7 @@ import { mappingConfigFor, getCampaignConfig } from '@/lib/campaignConfig';
 import CampaignWarRoom from '@/components/CampaignWarRoom';
 import { loadCoachEvidence, readDecisions } from '@/lib/coach/evidence';
 import { buildRoadmap, type CoachSummary } from '@/lib/coach/roadmap';
+import { classifyUploadFormat } from '@/lib/formatClassifier';
 import { buildCoachStatus } from '@/lib/coach/status';
 import { readVideoSeriesMany } from '@/lib/videoSnapshots';
 import { recentGain } from '@/lib/videoMomentum';
@@ -249,6 +250,7 @@ export default async function CampaignPage({ params }: PageProps) {
   const status = buildCoachStatus({plan:saved.plan,evidence:coachEvidence,tracks:coachRoadmap,decisions:coachDecisions,campaignStartDate:artistConfig?.campaignStartDate,gains,series:Object.fromEntries(videoSeries)});
   const evidenceSummary: CoachSummary = {
     status,
+    assets: coachEvidence.uploads.filter(u=>status.metrics&&!u.isCollab&&u.live!=="upcoming"&&Date.parse(u.publishedAt)<=Date.now()&&Date.parse(u.publishedAt)>=Date.parse(status.metrics.start)).map(u=>({id:u.id,title:u.title,publishedAt:u.publishedAt,viewCount:u.viewCount,durationSec:u.durationSec,live:u.live,isCollab:u.isCollab,format:classifyUploadFormat({...u,description:""})})),
     artistSlug:coachEvidence.artistSlug,
     lastUploadAt:coachEvidence.uploads.filter(u=>!u.isCollab && u.live!=="upcoming" && Date.parse(u.publishedAt)<=Date.now()).map(u=>u.publishedAt).sort().pop(),
     audit:{catalogue:coachEvidence.audit.catalogue,coverage:coachEvidence.audit.coverage,dataAt:coachEvidence.audit.dataAt,visuals:{takeaway:coachEvidence.audit.visuals.takeaway}},

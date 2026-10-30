@@ -294,11 +294,11 @@ export default function CampaignWarRoom(props: Props) {
 
   return (
     <div style={{ minHeight: '100vh', background: PAPER, color: INK }}>
-      <CampaignRead
+      {!props.coachEvidence?.status && <CampaignRead
         artist={plan.artist} title={campaignTitle} phase={props.coachEvidence?.status?.phase ?? m.currentPhase}
         headline={props.coachEvidence?.status?.headline ?? (props.coachEvidence ? (nextMoment ? `Next planned moment: ${cleanTitle(nextMoment.e.title)} — ${fmtDay(nextMoment.e.dateISO)}. Published assets and next steps below.` : "Review the published assets and agree the next campaign steps below.") : headline)}
-      />
-      {props.coachEvidence?.status && <CoachCampaignStatus slug={props.slug} evidence={props.coachEvidence} decisions={props.coachDecisions ?? {}} />}
+      />}
+      {props.coachEvidence?.status && <CoachCampaignStatus slug={props.slug} artist={plan.artist} title={plan.events.find(e=>e.kind==='albumRelease')?.title.split(/\s+[–—-]\s+/)[0] ?? campaignTitle} uploads={recentUploads} evidence={props.coachEvidence} decisions={props.coachDecisions ?? {}} />}
       {!props.coachEvidence && <CampaignStatus
         rolloutActive={recentUploads.some((u) => daysAgoNum(u.publishedAt) <= 45)}
         datesMapped={events.length > 0}
@@ -307,8 +307,8 @@ export default function CampaignWarRoom(props: Props) {
         nextDate={nextMoment ? fmtDay(nextMoment.e.dateISO) : undefined}
         focus={focus}
       />}
-      <CurrentYouTubeSurface recentUploads={recentUploads} campaignStart={campaignStartDate} knownTitles={knownTitles} nextLinkedEvent={nextMoment?.e.videoId ? nextMoment.e : undefined} />
-      <CoachShorts recentUploads={recentUploads} />
+      {!props.coachEvidence?.status && <CurrentYouTubeSurface recentUploads={recentUploads} campaignStart={campaignStartDate} knownTitles={knownTitles} nextLinkedEvent={nextMoment?.e.videoId ? nextMoment.e : undefined} />}
+      {!props.coachEvidence?.status && <CoachShorts recentUploads={recentUploads} />}
       <ContentSupply observedTracks={props.coachEvidence ? props.coachRoadmap ?? [] : undefined} events={events} library={lib} hasAssets={hasAssets} folderUrl={lib.folderUrl || driveFolderUrl} slug={props.slug} />
       <MasterTimeline
         events={events} mappings={m.mappings} phases={m.phases} activeIdx={activeIdx}
@@ -1152,6 +1152,7 @@ function MasterTimeline({ events, mappings, phases, activeIdx, recentUploads, ca
     const nextLabel = nextG ? fmtShort(events[nextG.idxs[0]].dateISO) : undefined;
     return (
       <div key={`${ev.dateISO}-${i0}`}>
+      {ev.kind==='albumRelease' && coach?.evidence.status?.albumIdea && <div style={{display:'grid',gridTemplateColumns:'108px 1fr',gap:0,marginBottom:14}}><div style={{fontSize:12,fontWeight:750,textAlign:'right',paddingRight:22,paddingTop:16,color:SMOKE}}>{fmtDay(coach.evidence.status.albumIdea.date)}</div><div style={{padding:'16px 18px',background:'#f6f4ff',border:'1px solid #e7e2ef',borderLeft:'4px solid #2c25ff',borderRadius:9}}><div style={{fontSize:9,fontWeight:800,letterSpacing:'.12em',color:'#2c25ff',marginBottom:6}}>SUGGESTED · DEEP DIVE</div><div style={{fontSize:15,fontWeight:800}}>{coach.evidence.status.albumIdea.label}</div><p style={{fontSize:12,color:SMOKE,marginTop:6}}>Confirm suitable performance footage and agree the slot with the artist team.</p></div></div>}
       <MilestoneCard
         intelligence={!!coach} ev={ev} mapping={mapping} phase={phases[i0]} active={active}
         showPhaseLabel={showPhaseLabel} compact={compact}

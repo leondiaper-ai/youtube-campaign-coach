@@ -33,6 +33,7 @@ export type TrackRoadmap = {
   actions: RoadmapAction[];
 };
 export type CoachSummary = {
+  assets?: (Pick<RecentUpload,"id"|"title"|"publishedAt"|"viewCount"|"durationSec"|"live"|"isCollab"> & {format:UploadFormat})[];
   status?: import("./status").CoachStatus;
   lastUploadAt?: string;
   audit: Pick<ChannelAudit, "catalogue" | "coverage" | "dataAt"> & {
