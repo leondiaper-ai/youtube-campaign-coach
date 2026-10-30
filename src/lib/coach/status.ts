@@ -114,7 +114,7 @@ export function buildCoachStatus({plan,evidence,tracks,decisions={},campaignStar
         if(upcoming&&target>=upcoming.releaseDate)target=add(upcoming.releaseDate,-3)<today?today:add(upcoming.releaseDate,-3);
         const format=evidence.audit.visuals.formats.find(f=>f.key===a.format);
         const testFormat=format&&format.count>=3;
-        push(focus,{...a,label:testFormat?`Plan a ${format.name.toLowerCase()} follow-up`:'Choose a follow-up video',date:target,
+        push(focus,{...a,label:a.format==='live'&&!focusLive.some(v=>v.format.split(':')[0]==='visualiser')?'Plan a live version or visualiser follow-up':testFormat?`Plan a ${format.name.toLowerCase()} follow-up`:'Choose a follow-up video',date:target,
           /* ── expired windows ──────────────────────────────────────
              The nominal window is day 7–14 from the release. When that
              has already passed, `target` is clamped to today above — so
@@ -122,7 +122,9 @@ export function buildCoachStatus({plan,evidence,tracks,decisions={},campaignStar
              produced a card that contradicted itself ("by 30 Oct ·
              suggested window 2–9 Oct"). Past windows are now described
              as past, and the date is the only instruction. */
-          reason:`${windowPassed?'The suggested follow-up window has passed. Review whether a new video still fits the campaign.':a.format==='live'?'The release video is live. Check for existing performance footage to give fans another way to experience the song.':a.format==='lyric'?'The release video is live. A lyric video could give fans another way to connect with the words. Check what is already made.':a.format==='bts'?'The release video is live. Look for making-of footage that adds a new story around the song.':a.format==='acoustic'?'The release video is live. Explore an acoustic performance if it suits the song and available material.':a.format==='visualiser'?'The release video is live. Explore a distinct visualiser that develops the song’s visual world.':'The release video is live. Choose a performance, behind-the-scenes or another supporting video that suits the song.'}`,
+          reason:windowPassed
+            ? 'The suggested follow-up window has passed. Review whether a new video still fits the campaign.'
+            : `${a.format==='live'&&!focusLive.some(v=>v.format.split(':')[0]==='visualiser')?'Build the multi-format rollout with a live version or visualiser, using available material.':a.format==='lyric'?'Build the multi-format rollout with a lyric video that gives fans another way into the words.':a.format==='bts'?'Build the multi-format rollout with a behind-the-scenes video that adds to the song’s story.':a.format==='acoustic'?'Build the multi-format rollout with an acoustic performance if suitable material is available.':a.format==='visualiser'?'Build the multi-format rollout with a visualiser that develops the song’s visual world.':'Build the multi-format rollout with a supporting video that fits the song and available material.'} Suggested follow-up: 7–14 days after release (${date(windowFrom)}–${date(windowTo)}).`,
           basis:`Channel observation: one release video identified for this track. ${a.reason} ${a.basis} YouTube recommends continuing supporting visuals after release and using audience response to shape the format and cadence. Our ${date(windowFrom)}–${date(windowTo)} window is a campaign planning suggestion, not a YouTube requirement.`});
       }
     }
