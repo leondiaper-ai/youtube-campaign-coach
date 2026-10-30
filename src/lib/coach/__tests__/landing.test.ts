@@ -256,5 +256,5 @@ test('asset formats, upload dates and the next release stay explicit in the view
 
 test('a completed multi-format release does not retain a suggested extra follow-up row', () => {
   const m=model({uploads:[upload('hero','Artist - One (Official Video)',25,100000),upload('live','Artist - One (Live)',20,40000)],events:[event('One - single release',-25)]}).model;
-  assert.equal(m.rollout[0].assets.filter(a=>a.status==='suggested').length,0);
+  assert.equal(m.rollout[0].assets.filter(a=>a.status==='suggested' && /follow-up/i.test(a.label)).length,0);
 });

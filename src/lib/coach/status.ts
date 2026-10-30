@@ -133,7 +133,7 @@ export function buildCoachStatus({plan,evidence,tracks,decisions={},campaignStar
     if (unplanned) {
       const context:TrackRoadmap={id:`observed:${unplanned.id}`,name:unplanned.title,releaseDate:unplanned.publishedAt.slice(0,10),actions:[]};
       push(context,{id:`observed:${unplanned.id}:support`,format:'campaign_support',label:'Review support for the latest video',
-        date:now-Date.parse(unplanned.publishedAt)<=14*DAY?add(unplanned.publishedAt.slice(0,10),10):undefined,
+        date:now-Date.parse(unplanned.publishedAt)<=14*DAY?add(unplanned.publishedAt.slice(0,10),10):'',
         reason:`${n(unplanned.viewCount)} views on this upload. Review a supporting video or Short that adds to it, using available material.`,
         basis:'Recent upload found on the channel but not matched to a release in the saved timeline. Check the campaign association before adding support.'});
     }
