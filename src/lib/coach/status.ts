@@ -1,4 +1,5 @@
 import type { GeneratedPlan, PhaseName } from '../planEngine';
+import { isAlbumRelease } from './roadmap';
 import type { CoachEvidence, Decisions, RoadmapAction, TrackRoadmap } from './roadmap';
 import { classifyUploadFormat, getFormatMeta } from '../formatClassifier';
 import { viewsAtAge, type VideoSeries } from '../videoSnapshots';
@@ -23,7 +24,7 @@ export type CoachStatus = {
 const DAY=86400000;
 const date=(s:string)=>new Date(s+'T12:00:00Z').toLocaleDateString('en-GB',{day:'numeric',month:'short'});
 const n=(v:number)=>new Intl.NumberFormat('en-GB',{notation:'compact',maximumFractionDigits:1}).format(v);
-const visual=(f:string)=>['omv','lyric','visualiser','live','acoustic'].includes(f.split(':')[0]);
+const visual=(f:string)=>['omv','lyric','visualiser','live','acoustic','longform'].includes(f.split(':')[0]);
 const add=(s:string,d:number)=>new Date(Date.parse(s+'T12:00:00Z')+d*DAY).toISOString().slice(0,10);
 
 /** One small decision layer; only observed signals become facts. */
@@ -44,15 +45,18 @@ export function buildCoachStatus({plan,evidence,tracks,decisions={},campaignStar
   const focusLive=focus?actual(focus):[];
   const anchor=focusLive.slice().sort((a,b)=>b.video!.date.localeCompare(a.video!.date))[0];
   const upcoming=tracks.filter(t=>t.releaseDate>today&&!actual(t).length).sort((a,b)=>a.releaseDate.localeCompare(b.releaseDate))[0];
-  const album=plan.events.filter(e=>e.kind==='albumRelease').sort((a,b)=>a.dateISO.localeCompare(b.dateISO))[0];
+  const album=plan.events.filter(isAlbumRelease).sort((a,b)=>a.dateISO.localeCompare(b.dateISO))[0];
   const albumFuture=album&&album.dateISO>today;
   const age=anchor?Math.floor((now-Date.parse(anchor.video!.date+'T12:00:00Z'))/DAY):null;
-  const phase:PhaseName=anchor?(age!<=7?'RELEASE':'SCALE'):focus?'RELEASE':'BUILD';
+  let phase:PhaseName=anchor?(age!<=7?'RELEASE':'SCALE'):focus?'RELEASE':'BUILD';
   const u=anchor?inventory.find(u=>u.id===anchor.video!.id):undefined;
-  const current=anchor?`${focus!.name}: ${anchor.label.toLowerCase()} live · ${n(u?.viewCount??0)} views since ${date(anchor.video!.date)}`:focus?`${focus.name}: release reached; main video not identified`:'No release video identified yet';
+  let current=anchor?`${focus!.name}: ${anchor.label.toLowerCase()} live · ${n(u?.viewCount??0)} views since ${date(anchor.video!.date)}`:focus?`${focus.name}: release reached; main video not identified`:'No release video identified yet';
   const next=upcoming?`${upcoming.name} · ${date(upcoming.releaseDate)}`:albumFuture?`Album · ${date(album.dateISO)}`:'No further release date mapped';
   const headline=anchor?`${focus!.name} is live${albumFuture?` · album due ${date(album.dateISO)}`:''}.`:upcoming?`Preparing ${upcoming.name} · ${date(upcoming.releaseDate)}.`:'Confirm the release assets and dates.';
   const latest=long[0];
+  if (!anchor && latest) current=`Latest video: ${latest.title}`;
+  const albumAge=album ? Math.floor((now-Date.parse(album.dateISO+'T00:00:00Z'))/DAY) : null;
+  if (album && albumAge!==null && albumAge>=0) { phase=albumAge<=7?'RELEASE':'SCALE'; current=`Album released ${date(album.dateISO)}${latest?` · latest video: ${latest.title}`:''}`; }
   const recent=inventory.filter(u=>Date.parse(u.publishedAt)>=now-30*DAY);
   const shorts=recent.filter(u=>classifyUploadFormat({...u,description:''})==='short').length;
   const prior=anchor?long.find(u=>u.publishedAt.slice(0,10)<anchor.video!.date):undefined;
@@ -99,7 +103,40 @@ export function buildCoachStatus({plan,evidence,tracks,decisions={},campaignStar
   const priorities:TrackRoadmap[]=[];
   const pending=(a:RoadmapAction)=>!['done','dismissed'].includes(decisions[a.id]?.status??'suggested');
   const push=(t:TrackRoadmap,a:RoadmapAction)=>{if(pending(a))priorities.push({...t,id:t.id+":"+a.format,actions:[{...a,label:`${t.name}: ${a.label}`} ]});};
+  if (!fresh) {
+    const context=upcoming ?? focus ?? (album?{id:`album:${album.dateISO}`,name:'Campaign',releaseDate:album.dateISO,actions:[]}:null);
+    if (context) push(context,{id:`${context.id}:review-data`,format:'campaign_data',label:'Review the release plan',date:context.releaseDate,
+      reason:'The dates are saved. Refresh the channel reading before checking published assets and choosing the next uploads.',basis:'Planning dates are available; the channel reading is missing or more than three days old.'});
+  }
   if(fresh){
+    // Album preparation and launch are campaign-level moments, even when every
+    // single already has several videos. They do not depend on a deep dive.
+    if (album && albumAge!==null && albumAge>=-14 && albumAge<=14) {
+      const released=albumAge>=0;
+      const context:TrackRoadmap={id:`album:${album.dateISO}`,name:'Album rollout',releaseDate:album.dateISO,actions:[]};
+      const count=metrics?.longForm ?? 0;
+      push(context,{
+        id:`album:${album.dateISO}:${released?'connect':'prepare'}`,format:'campaign_album',
+        label:released?'Connect the album rollout':'Prepare the album-week video',
+        date:released?today:album.dateISO,
+        reason:released
+          ? `${count} campaign videos are live. Check the album playlist, featured video and links from new Shorts.`
+          : `Album due ${date(album.dateISO)}. Confirm the release-week video and bring the ${count} existing campaign videos together in an album playlist.`,
+        basis:released?'Album date reached; campaign upload inventory. Check playlist and related-video settings in Studio.':'Album release within two weeks; campaign dates and published uploads. Confirm the creative plan with the team.'
+      });
+    }
+
+    const unplanned=long.find(v => !tracks.some(t=>t.actions.some(a=>a.video?.id===v.id))
+      && now-Date.parse(v.publishedAt)<=14*DAY
+      && plan.events.some(e=>e.dateISO<=v.publishedAt.slice(0,10)));
+    if (unplanned) {
+      const context:TrackRoadmap={id:`observed:${unplanned.id}`,name:unplanned.title,releaseDate:unplanned.publishedAt.slice(0,10),actions:[]};
+      push(context,{id:`observed:${unplanned.id}:support`,format:'campaign_support',label:'Plan support for the latest video',
+        date:add(unplanned.publishedAt.slice(0,10),10),
+        reason:`${n(unplanned.viewCount)} views on this upload. Review a supporting video or Short that adds to it, using available material.`,
+        basis:'Recent upload found on the channel but not matched to a release in the saved timeline. Check the campaign association before adding support.'});
+    }
+
     // Current focus first, never old campaign backlog. Once a second visual exists,
     // do not keep commissioning another merely because another format is absent.
     if(focus&&anchor&&age!<=35&&focusLive.length<2){

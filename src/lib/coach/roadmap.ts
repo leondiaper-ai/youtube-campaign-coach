@@ -66,11 +66,23 @@ const addDays = (iso: string, n: number) =>
   new Date(Date.parse(iso + "T12:00:00Z") + n * DAY).toISOString().slice(0, 10);
 
 /** Timeline descriptions are not YouTube titles. Extract identity before matching. */
+export function isAlbumRelease(event: {kind: string; title: string}): boolean {
+  return event.kind === 'albumRelease' || /\balbum\s*(?:release|launch|out)\b/i.test(event.title);
+}
+
+export function isSingleRelease(event: {kind: string; title: string}): boolean {
+  if (isAlbumRelease(event)) return false;
+  return event.kind === 'singleRelease'
+    || /^\s*(?:new\s+)?single\s*\d*\s*:/i.test(event.title)
+    || /\s[–—-]\s+(?:new\s+)?single\b/i.test(event.title)
+    || /\bsingle\s+release\b/i.test(event.title);
+}
+
 export function trackName(title: string): string {
-  return title
-    .split(/\s+[–—-]\s+/)[0]
-    .trim()
-    .replace(/^["'“‘]|["'”’]$/g, "");
+  const clean = title.trim().replace(/^(?:new\s+)?single\s*\d*\s*:\s*/i, '');
+  const quoted = clean.match(/^["“‘'](.+?)["”’'](?:\s+[–—-]|\s*\+|$)/);
+  return (quoted ? quoted[1] : clean.split(/\s+[–—-]\s+|\s*\+\s*/)[0])
+    .trim().replace(/^["'“‘]|["'”’]$/g, '');
 }
 export function uploadTrack(title: string, artist: string): string {
   let out = songKey(title, artist);
@@ -125,12 +137,11 @@ export function buildRoadmap(
         ...evidence.dive.recommendedContentDirections,
       ]
     : [];
+  const identities = new Set<string>();
   return plan.events
-    .filter(
-      (e) =>
-        e.kind === "singleRelease" ||
-        (/\bsingle\b/i.test(e.title) && /release|\bout\b|drop/i.test(e.title)),
-    )
+    .filter(isSingleRelease)
+    .slice().sort((a,b) => a.dateISO.localeCompare(b.dateISO))
+    .filter(event => { const id = key(trackName(event.title)); if (!id || identities.has(id)) return false; identities.add(id); return true; })
     .map((event) => {
       const name = trackName(event.title),
         identity = key(name);
@@ -205,7 +216,7 @@ export function buildRoadmap(
           true,
         );
       const visualDestination = classified.some((x) =>
-        ["omv", "lyric", "visualiser", "live", "acoustic"].includes(x.f),
+        ["omv", "lyric", "visualiser", "live", "acoustic", "longform"].includes(x.f),
       );
       if (!visualDestination && !linked) {
         const lyric = repeat.find((f) => f.key === "lyric");

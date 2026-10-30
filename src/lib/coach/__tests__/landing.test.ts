@@ -59,13 +59,13 @@ const DIVE = {
 
 function model(opts: {
   uploads: RecentUpload[]; events: ParsedEvent[]; dive?: boolean;
-  decisions?: Decisions; series?: Record<string, unknown>; start?: string;
+  dataAt?: string | null; decisions?: Decisions; series?: Record<string, unknown>; start?: string;
 }) {
   const p = plan('Artist', opts.events);
   const evidence = {
     fanResponse: null,
     audit: buildChannelAudit({
-      name: 'Artist', slug: 'artist', dataAt: iso(-0.4), now: NOW, uploads: opts.uploads,
+      name: 'Artist', slug: 'artist', dataAt: opts.dataAt === undefined ? iso(-0.4) : opts.dataAt, now: NOW, uploads: opts.uploads,
       stats: { subs: null, lifetimeViews: null, views7d: null, views30d: null, subs7d: null },
     }),
     dive: opts.dive ? DIVE : null,
@@ -204,4 +204,41 @@ test('earlier releases keep a follow-up opportunity without becoming top priorit
   assert.ok(first.actions.every(a => a.context !== 'Roses'));
   const supported = model({uploads:[...RICH, upload('roses-live','Artist - Roses (Live)',25,42000)], events:RICH_EVENTS, dive:true}).model;
   assert.equal(supported.rollout.find(r => r.name === 'Roses')?.opportunity, undefined);
+});
+
+test('legacy numbered singles and quoted single-plus-video descriptions match uploads', () => {
+  const result=model({uploads:[upload('pts','Artist - PTS (Official Video)',12,200000),upload('mww','Artist - My Whole World',20,4600000)],events:[
+    event('SINGLE 5: PTS',-12,'other'),event("'My Whole World' — Single + Music Video",-20,'other'),event("'My Whole World' — Lyric Video",-6,'other')
+  ]});
+  assert.equal(result.tracks.length,2);
+  assert.ok(result.tracks.find(t=>t.name==='PTS')?.actions.some(a=>a.video?.id==='pts'));
+  assert.ok(result.tracks.find(t=>t.name==='My Whole World')?.actions.some(a=>a.video?.id==='mww'));
+});
+
+test('combined album announcement does not hide an explicitly named single', () => {
+  const result=model({uploads:[upload('hero','Artist - Overthinker (Official Lyric Video)',3,200000)],events:[event('Overthinker - single release + announce album',-3,'albumAnnounce')]});
+  assert.ok(result.tracks[0]?.actions.some(a=>a.video?.id==='hero'));
+});
+
+test('album release week remains actionable with no deep dive', () => {
+  const result=model({uploads:[upload('pts','Artist - PTS (Official Video)',35,200000),upload('album','Artist - Joy In Short Moments (Official)',0,100)],events:[event('SINGLE 5: PTS',-35,'other'),event('ALBUM RELEASE: Joy In Short Moments',0,'other')]});
+  assert.ok(result.model.actions.some(a=>a.context==='Album rollout'));
+  assert.equal(result.model.latest?.id,'album');
+  assert.match(result.model.stageLine,/Album released/);
+});
+
+test('upcoming album and recent unplanned upload both inform the campaign', () => {
+  const result=model({uploads:[upload('old','Artist - My Whole World',50,4600000),upload('new','Artist - KOYSAR',7,3100000)],events:[event("'My Whole World' — Single + Music Video",-50,'other'),event("'O My Beloved' — Album Release",7,'other')]});
+  assert.equal(result.model.actions.length,2);
+  assert.ok(result.model.actions.some(a=>a.context==='Album rollout'));
+  assert.ok(result.model.rollout.some(r=>r.assets.some(a=>a.videoId==='new')));
+  assert.equal(result.model.latest?.id,'new');
+});
+
+
+test('new campaigns with no channel reading get a planning check, not missing-asset claims', () => {
+  const result=model({uploads:[],events:[event('First single - single release',14)],dataAt:null});
+  assert.equal(result.model.actions.length,1);
+  assert.match(result.model.actions[0].reason,/Refresh the channel reading/);
+  assert.doesNotMatch(result.model.actions[0].reason,/missing|no video|no release video/i);
 });

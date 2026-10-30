@@ -96,6 +96,8 @@ const COLLAB_RE = /\b(?:feat\.?|ft\.?|featuring|with|x)\s+(.+)/i;
 
 function classifyEvent(title: string): TimelineKind {
   const t = title.toLowerCase();
+  // Explicit single releases take precedence over a combined announcement.
+  if (/^\s*(?:new\s+)?single\s*\d*\s*:|\bsingle\s+release\b|\s[–—-]\s+(?:new\s+)?single\b/.test(t)) return 'singleRelease';
   if (/\bpodcast|interview\b/.test(t)) return 'podcast';
   if (/\bsnippet|sound\b/.test(t)) return 'snippet';
   if (/\btour\b/.test(t) && /\b(announce|tickets?|on\s*sale)\b/.test(t)) return 'tourAnnounce';

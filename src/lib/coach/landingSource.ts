@@ -31,7 +31,7 @@ import {
 } from './landingModel';
 
 const DAY = 86_400_000;
-const VISUAL = ['omv', 'lyric', 'visualiser', 'live', 'acoustic'];
+const VISUAL = ['omv', 'lyric', 'visualiser', 'live', 'acoustic', 'longform'];
 /* Formats that only make sense once a release is out and its moment is
    still open. Everything else (hero, linked, short) belongs to the
    release itself and is legitimate to show before it lands. */
@@ -91,7 +91,7 @@ export function buildLandingModel({
         dueTone: soon ? 'soon' : 'normal',
         reason: a.reason,
         evidence: [
-          { heading: 'On the channel.', body: a.format === 'hero'
+          { heading: 'On the channel.', body: a.format.startsWith('campaign_') ? a.basis : a.format === 'hero'
             ? 'No release video identified yet. Confirm what is being prepared.'
             : a.scheduled ? 'A linked video needs its visibility and release date checked.'
             : 'One release video identified; no further long-form video found for this track.' },
@@ -101,10 +101,10 @@ export function buildLandingModel({
                 const format = evidence.audit.visuals.formats.find(f => f.key === a.format && f.count >= 3);
                 return format ? [{ heading: 'Creative reference.', body: `${format.count} ${format.name.toLowerCase()} uploads on this channel. Check for suitable footage.` }] : [];
               })()),
-          { heading: 'YouTube guidance.', body: a.format === 'hero' || a.scheduled
+          { heading: 'YouTube guidance.', body: a.format === 'hero' || a.scheduled || (a.format.startsWith('campaign_') && t.releaseDate > today)
               ? 'Prepare the video launch and supporting teasers.'
               : 'Keep supporting the song with additional videos after release.',
-            href: a.format === 'hero' || a.scheduled ? 'https://artists.youtube/resources/pre-release-strategy/' : 'https://artists.youtube/resources/post-release-strategy/' },
+            href: a.format === 'hero' || a.scheduled || (a.format.startsWith('campaign_') && t.releaseDate > today) ? 'https://artists.youtube/resources/pre-release-strategy/' : 'https://artists.youtube/resources/post-release-strategy/' },
         ],
         state: stateOf(a, decisions) === 'agreed' ? 'agreed' : 'suggested',
       };
@@ -214,6 +214,17 @@ export function buildLandingModel({
       };
     });
 
+  for (const priority of status.priorities) {
+    for (const action of priority.actions.filter(a => a.format === 'campaign_support')) {
+      const upload=evidence.uploads.find(u => `observed:${u.id}:support` === action.id);
+      if (!upload) continue;
+      rollout.push({name:upload.title,dateLabel:shortDate(upload.publishedAt),stage:'live',badge:{label:'Observed on channel',tone:'ok'},assets:[
+        {label:upload.title,status:'published',videoId:upload.id,meta:compact(upload.viewCount ?? 0)},
+        {label:action.label,note:action.reason,status:stateOf(action,decisions),meta:shortDate(decisions[action.id]?.targetDate ?? action.date ?? today)}
+      ]});
+    }
+  }
+
   return {
     artist: artistName,
     project: projectName,
@@ -222,10 +233,8 @@ export function buildLandingModel({
     windowLabel,
     actions,
     figures,
-    latest: anchorUpload
-      ? { ...toUploadRef(anchorUpload), likes: null }
-      : null,
-    paceLine: status.launch,
+    latest: campaignUploads.find(u => u.shape === 'long') ? {...campaignUploads.find(u => u.shape === 'long')!, likes:null} : null,
+    paceLine: campaignUploads.find(u => u.shape === 'long')?.id === anchorUpload?.id ? status.launch : null,
     fan: status.audience
       ? {
           quote: '', likes: 0,

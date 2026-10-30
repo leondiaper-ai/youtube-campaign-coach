@@ -15,7 +15,7 @@ import CampaignWarRoom from '@/components/CampaignWarRoom';
 import CoachLanding from '@/components/coach/CoachLanding';
 import CoachTimelineEditor from '@/components/coach/CoachTimelineEditor';
 import { loadCoachEvidence, readDecisions } from '@/lib/coach/evidence';
-import { buildRoadmap } from '@/lib/coach/roadmap';
+import { buildRoadmap, isAlbumRelease } from '@/lib/coach/roadmap';
 import { buildCoachStatus } from '@/lib/coach/status';
 import { buildLandingModel } from '@/lib/coach/landingSource';
 import { readVideoSeriesMany } from '@/lib/videoSnapshots';
@@ -281,16 +281,24 @@ export default async function CampaignPage({ params, searchParams }: PageProps) 
     // Preserve explicit support uploads, tour dates and album milestones too.
     // They are planning entries, never evidence that an asset is published.
     for (const event of saved.plan.events.filter(e => !tracks.some(t => t.releaseDate === e.dateISO))) {
-      const idea = event.kind === 'albumRelease' ? status.albumIdea : null;
+      const idea = isAlbumRelease(event) ? status.albumIdea : null;
+      const albumActions = isAlbumRelease(event) ? status.priorities.flatMap(t => t.releaseDate === event.dateISO ? t.actions.filter(a=>a.format==='campaign_album') : []) : [];
+      const milestoneAssets = [
+        ...(idea?[{label:idea.label,note:idea.reason,status:'suggested' as const,meta:new Date(idea.date+'T12:00:00Z').toLocaleDateString('en-GB',{day:'numeric',month:'short'})}]:[]),
+        ...albumActions.map(a=>({label:a.label.replace('Album rollout: ',''),note:a.reason,
+          status: (['planned','ready','done'].includes(decisions[a.id]?.status ?? '')?'agreed':'suggested') as 'agreed'|'suggested',
+          meta:new Date((decisions[a.id]?.targetDate ?? a.date ?? event.dateISO)+'T12:00:00Z').toLocaleDateString('en-GB',{day:'numeric',month:'short'})}))
+      ];
+      const today=new Date().toISOString().slice(0,10);
       model.rollout.push({
         name:event.title,
         dateLabel:new Date(event.dateISO+'T12:00:00Z').toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}),
-        stage:'distant',badge:{label:event.dateISO > new Date().toISOString().slice(0,10)?'Planned':'Date passed',tone:'ghost'},
-        assets:idea?[{label:idea.label,note:idea.reason,status:'suggested',meta:new Date(idea.date+'T12:00:00Z').toLocaleDateString('en-GB',{day:'numeric',month:'short'})}]:[],
-        holding:idea?undefined:'Campaign milestone. Confirm assets and arrangements with the team.'
+        stage:'distant',badge:{label:event.dateISO > today?'Planned':event.dateISO===today?'Today':'Date passed',tone:'ghost'},
+        assets:milestoneAssets,
+        holding:milestoneAssets.length?undefined:'Campaign milestone. Confirm assets and arrangements with the team.'
       });
     }
-    const dates = new Map([...tracks.map(t => [t.name,t.releaseDate] as const), ...saved.plan.events.map(e => [e.title,e.dateISO] as const)]);
+    const dates = new Map([...tracks.map(t => [t.name,t.releaseDate] as const), ...saved.plan.events.map(e => [e.title,e.dateISO] as const), ...evidence.uploads.map(u => [u.title,u.publishedAt.slice(0,10)] as const)]);
     model.rollout.sort((a,b) => (dates.get(a.name) ?? '').localeCompare(dates.get(b.name) ?? ''));
     return <CoachLanding model={model} slug={saved.slug} timelineEditor={
       <CoachTimelineEditor slug={saved.slug} artist={saved.artist} campaignName={saved.campaignName}
