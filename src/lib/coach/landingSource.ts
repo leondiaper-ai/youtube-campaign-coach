@@ -213,8 +213,8 @@ export function buildLandingModel({
           const kind = a.format.split(':')[0];
           return !FOLLOW_UP.includes(kind) || (isAnchor && !!a.date && a.date >= today && publishedLong.length < 2);
         }).map((a): ReleaseAsset => ({
-          label: a.video && !a.scheduled ? a.video.title : (status.priorities.flatMap(t => t.actions).find(p => p.id === a.id)?.label.replace(`${t.name}: `, '') ?? a.label),
-          note: a.video && !a.scheduled ? undefined : status.priorities.flatMap(t => t.actions).find(p => p.id === a.id)?.reason ?? a.reason,
+          label: a.video && !a.scheduled ? a.video.title : (actions.find(p => p.id === a.id)?.label ?? a.label),
+          note: a.video && !a.scheduled ? undefined : actions.find(p => p.id === a.id)?.reason ?? a.reason,
           status: stateOf(a, decisions),
           meta: a.video && !a.scheduled
             ? `${compact(evidence.uploads.find(u => u.id === a.video!.id)?.viewCount ?? 0)} · ${shortDate(a.video.date)}`
@@ -287,7 +287,8 @@ export function buildLandingModel({
       long: campaignUploads.filter(u => u.shape === 'long'),
       shorts: campaignUploads.filter(u => u.shape === 'short'),
     },
-    rollout,
+    rollout:rollout.map(r=>{const counts=trackCounts.find(c=>c.t.name===r.name);return counts?{...r,
+      supportSummary:`Release video ${counts.long?'✓':'—'} · Follow-up ${counts.long>1?'✓':'—'} · Shorts ${counts.shorts}/3 guide`}:r;}),
     caveats: [
       status.metrics
         ? `Campaign figures are measured over ${windowLabel}. Whole-channel growth includes the back catalogue and is not shown here.`

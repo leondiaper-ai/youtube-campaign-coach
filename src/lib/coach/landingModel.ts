@@ -84,6 +84,7 @@ export type ReleaseBlock = {
   /** Shown instead of assets when it is too early to plan. */
   holding?: string;
   opportunity?: string;
+  supportSummary?: string;
 };
 
 export type LandingModel = {

@@ -346,6 +346,7 @@ export default function CoachLanding({ model, slug, classicHref, timelineEditor 
                 {r.badge && <Badge fg={TONE[r.badge.tone].fg} bg={TONE[r.badge.tone].bg}>{r.badge.label}</Badge>}
               </div>
 
+              {r.supportSummary && <p className="text-meta font-semibold text-secondary m-0 mt-2">{r.supportSummary}</p>}
               {r.holding ? (
                 <p className="text-meta text-muted m-0 mt-2.5">{r.holding}</p>
               ) : (
