@@ -55,7 +55,7 @@ export function buildCoachStatus({plan,evidence,tracks,decisions={},campaignStar
   const next=upcoming?`${upcoming.name} · ${date(upcoming.releaseDate)}`:albumFuture?`Album · ${date(album.dateISO)}`:'No further release date mapped';
   const headline=anchor?`${focus!.name} is live${albumFuture?` · album due ${date(album.dateISO)}`:''}.`:upcoming?`Preparing ${upcoming.name} · ${date(upcoming.releaseDate)}.`:'Confirm the release assets and dates.';
   const latest=long[0];
-  if (!anchor && latest) current=`Latest video: ${latest.title}`;
+  if (latest && (!anchor || latest.publishedAt.slice(0,10)>anchor.video!.date)) current=`Latest video: ${latest.title} · ${n(latest.viewCount)} views since ${date(latest.publishedAt.slice(0,10))}`;
   const albumAge=album ? Math.floor((now-Date.parse(album.dateISO+'T00:00:00Z'))/DAY) : null;
   if (album && albumAge!==null && albumAge>=0) { phase=albumAge<=7?'RELEASE':'SCALE'; current=`Album released ${date(album.dateISO)}${latest?` · latest video: ${latest.title}`:''}`; }
   const recent=inventory.filter(u=>Date.parse(u.publishedAt)>=now-30*DAY);
@@ -128,12 +128,12 @@ export function buildCoachStatus({plan,evidence,tracks,decisions={},campaignStar
     }
 
     const unplanned=long.find(v => !tracks.some(t=>t.actions.some(a=>a.video?.id===v.id))
-      && now-Date.parse(v.publishedAt)<=14*DAY
+      && now-Date.parse(v.publishedAt)<=28*DAY
       && plan.events.some(e=>e.dateISO<=v.publishedAt.slice(0,10)));
     if (unplanned) {
       const context:TrackRoadmap={id:`observed:${unplanned.id}`,name:unplanned.title,releaseDate:unplanned.publishedAt.slice(0,10),actions:[]};
-      push(context,{id:`observed:${unplanned.id}:support`,format:'campaign_support',label:'Plan support for the latest video',
-        date:add(unplanned.publishedAt.slice(0,10),10),
+      push(context,{id:`observed:${unplanned.id}:support`,format:'campaign_support',label:'Review support for the latest video',
+        date:now-Date.parse(unplanned.publishedAt)<=14*DAY?add(unplanned.publishedAt.slice(0,10),10):undefined,
         reason:`${n(unplanned.viewCount)} views on this upload. Review a supporting video or Short that adds to it, using available material.`,
         basis:'Recent upload found on the channel but not matched to a release in the saved timeline. Check the campaign association before adding support.'});
     }
@@ -152,7 +152,7 @@ export function buildCoachStatus({plan,evidence,tracks,decisions={},campaignStar
         if(upcoming&&target>=upcoming.releaseDate)target=add(upcoming.releaseDate,-3)<today?today:add(upcoming.releaseDate,-3);
         const format=evidence.audit.visuals.formats.find(f=>f.key===a.format);
         const testFormat=format&&format.count>=3;
-        push(focus,{...a,label:a.format==='live'&&!focusLive.some(v=>v.format.split(':')[0]==='visualiser')?'Plan a live version or visualiser follow-up':testFormat?`Plan a ${format.name.toLowerCase()} follow-up`:'Choose a follow-up video',date:target,
+        push(focus,{...a,label:a.format==='live'&&!focusLive.some(v=>v.format.split(':')[0]==='visualiser')?'Plan a live version or visualiser follow-up':testFormat?`Plan ${/^[aeiou]/i.test(format.name)?'an':'a'} ${format.name.toLowerCase()} follow-up`:'Choose a follow-up video',date:target,
           /* ── expired windows ──────────────────────────────────────
              The nominal window is day 7–14 from the release. When that
              has already passed, `target` is clamped to today above — so

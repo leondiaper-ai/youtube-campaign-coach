@@ -88,7 +88,7 @@ export function buildLandingModel({
       const label = a.label.startsWith(`${t.name}: `) ? a.label.slice(t.name.length + 2) : a.label;
       const track=tracks.find(r=>r.actions.some(item=>item.id===a.id));
       const latestTrackVideo=track?.actions.filter(item=>item.video&&!item.scheduled&&!item.format.startsWith('short')).slice().sort((x,y)=>y.video!.date.localeCompare(x.video!.date))[0];
-      const observed=latestTrackVideo?evidence.uploads.find(u=>u.id===latestTrackVideo.video!.id):null;
+      const observed=latestTrackVideo?evidence.uploads.find(u=>u.id===latestTrackVideo.video!.id):evidence.uploads.find(u=>a.id===`observed:${u.id}:support`) ?? null;
       const ref=observed?toUploadRef(observed):null;
       return {
         id: a.id,
@@ -178,7 +178,7 @@ export function buildLandingModel({
       const publishedLong = t.actions.filter(a => a.video && !a.scheduled && !a.format.startsWith('short'));
       const usedFormats = new Set(publishedLong.map(a => a.format.split(':')[0]));
       const followUpOptions = [['live','live performance'],['visualiser','visualiser'],['lyric','lyric video'],['bts','behind-the-scenes video']].filter(([key]) => !usedFormats.has(key)).slice(0,2).map(([,label]) => label);
-      const opportunity = !isAnchor && !future && publishedLong.length === 1
+      const opportunity = (!isAnchor || (publishedLong[0]?.video?.date ?? today) < new Date(now-14*DAY).toISOString().slice(0,10)) && !future && publishedLong.length === 1
         ? `No further long-form video identified for ${t.name}. Explore a ${followUpOptions.join(' or ')} if suitable material is available.`
         : undefined;
       const distant = future && Date.parse(t.releaseDate) - now > 45 * DAY && !live;
@@ -210,7 +210,7 @@ export function buildLandingModel({
           if (a.video && !a.scheduled) return true;
           if (stateOf(a, decisions) === 'agreed') return true;
           const kind = a.format.split(':')[0];
-          return !FOLLOW_UP.includes(kind) || isAnchor;
+          return !FOLLOW_UP.includes(kind) || (isAnchor && !!a.date && a.date >= today && publishedLong.length < 2);
         }).map((a): ReleaseAsset => ({
           label: a.video && !a.scheduled ? a.video.title : (status.priorities.flatMap(t => t.actions).find(p => p.id === a.id)?.label.replace(`${t.name}: `, '') ?? a.label),
           note: a.video && !a.scheduled ? undefined : status.priorities.flatMap(t => t.actions).find(p => p.id === a.id)?.reason ?? a.reason,
@@ -230,7 +230,7 @@ export function buildLandingModel({
       if (!upload) continue;
       rollout.push({name:upload.title,dateLabel:shortDate(upload.publishedAt),stage:'live',badge:{label:'Observed on channel',tone:'ok'},assets:[
         {label:upload.title,status:'published',videoId:upload.id,format:toUploadRef(upload).format,meta:`${compact(upload.viewCount ?? 0)} views · ${shortDate(upload.publishedAt)}`} ,
-        {label:action.label,note:action.reason,status:stateOf(action,decisions),meta:shortDate(decisions[action.id]?.targetDate ?? action.date ?? today)}
+        {label:action.label,note:action.reason,status:stateOf(action,decisions),meta:(decisions[action.id]?.targetDate ?? action.date) ? shortDate((decisions[action.id]?.targetDate ?? action.date)!) : 'To review'}
       ]});
     }
   }

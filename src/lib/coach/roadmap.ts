@@ -269,7 +269,7 @@ export function buildRoadmap(
             : nominal;
         push(
           candidate.key,
-          `Plan a ${candidate.name.toLowerCase()} follow-up`,
+          `Plan ${/^[aeiou]/i.test(candidate.name)?'an':'a'} ${candidate.name.toLowerCase()} follow-up`,
           date,
           `${candidate.count} channel examples; ${Math.round(candidate.median).toLocaleString("en-GB")} median lifetime views.${example ? ` Review “${example.title}” for the creative approach.` : ""}${tour && candidate.key === "live" ? ` Check capture availability around ${tour.title}.` : " Confirm existing footage and rights before commissioning."}`,
           "Channel audit. Lifetime views are not age-adjusted. Target is a planning suggestion, not an optimal interval or a promise of growth.",

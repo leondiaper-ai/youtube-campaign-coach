@@ -252,3 +252,9 @@ test('asset formats, upload dates and the next release stay explicit in the view
   assert.ok(m.rollout.flatMap(r=>r.assets).filter(a=>a.status==='published').every(a=>!!a.format));
   assert.equal(m.nextMoment?.name,'Evil');
 });
+
+
+test('a completed multi-format release does not retain a suggested extra follow-up row', () => {
+  const m=model({uploads:[upload('hero','Artist - One (Official Video)',25,100000),upload('live','Artist - One (Live)',20,40000)],events:[event('One - single release',-25)]}).model;
+  assert.equal(m.rollout[0].assets.filter(a=>a.status==='suggested').length,0);
+});
