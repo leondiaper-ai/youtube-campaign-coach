@@ -113,6 +113,7 @@ export type LandingModel = {
     quote: string; likes: number;
     commentsOnAsset: number; assetLabel: string; at: string;
     tone: string; theme: string | null;
+    quotes?: {text:string;likes:number;videoId:string;source:string|null}[];
   } | null;
   assets: { long: UploadRef[]; shorts: UploadRef[] };
   rollout: ReleaseBlock[];

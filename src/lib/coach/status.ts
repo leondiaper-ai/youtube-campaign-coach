@@ -4,7 +4,7 @@ import { isAlbumRelease } from './roadmap';
 import type { CoachEvidence, Decisions, RoadmapAction, TrackRoadmap } from './roadmap';
 import { getFormatMeta } from '../formatClassifier';
 import { viewsAtAge, type VideoSeries } from '../videoSnapshots';
-import { RULES_VERSION } from '../intelligence/fanResponse';
+import { RULES_VERSION, type FanQuote } from '../intelligence/fanResponse';
 import { campaignPerformanceFor } from '../intelligence/campaignWindow';
 
 export type LaunchComparison = {
@@ -28,7 +28,7 @@ export type CoachStatus = {
   shortsRead: {weekly:number;mean:number|null;count:number};
   launch: string|null;
   launchComparison?: LaunchComparison|null;
-  audience: {tone:string;theme:string|null;comments:number;assets:number;date:string}|null;
+  audience: {tone:string;theme:string|null;comments:number;assets:number;date:string;quotes:Pick<FanQuote,'text'|'likes'|'videoId'|'source'>[]}|null;
   albumIdea: {label:string;reason:string;date:string}|null;
 };
 const DAY=86400000;
@@ -103,6 +103,7 @@ export function buildCoachStatus({plan,evidence,tracks,decisions={},campaignStar
   const audience=fr&&fr.rulesVersion===RULES_VERSION&&Date.parse(fr.computedAt)<=now&&now-Date.parse(fr.computedAt)<=7*DAY&&fr.confidence!=='low'&&fr.gates?.volume&&fr.gates?.freshness&&sampledIds.some(id=>focusIds.has(id))?{
     tone:({overwhelmingly_positive:'Very positive',mostly_positive:'Mostly positive',mixed:'Mixed',negative:'Negative'} as const)[fr.tone],
     theme:fr.dominantTheme?({return:'The return',song:'The song',visual:'The visuals',live:'Live performance',nostalgia:'Catalogue memories',anticipation:'What comes next',surprise:'Surprise',member:'Band members'} as const)[fr.dominantTheme]:null,
+    quotes:fr.display ? Array.from(new Map([...(fr.quote?[fr.quote]:[]),...(fr.candidateQuotes??[])].filter(q=>focusIds.has(q.videoId)&&sampledIds.includes(q.videoId)).map(q=>[q.videoId+q.text,q])).values()).slice(0,2).map(q=>({text:q.text,likes:q.likes,videoId:q.videoId,source:fr.evidence.assetsSampled.find(a=>a.videoId===q.videoId)?.title??q.source})) : [],
     comments:fr.evidence.commentsRetrieved,assets:sampledIds.length,date:fr.computedAt.slice(0,10)
   }:null;
   const livePoint=evidence.dive?.recommendedContentDirections.find(p=>p.needTags.some(tag=>['archive_live','performance_as_hero'].includes(tag)));

@@ -289,7 +289,13 @@ export default function CoachLanding({ model, slug, classicHref, timelineEditor 
               <p className="text-body font-extrabold text-ink m-0 mt-1 leading-snug">
                 {model.fan.tone}{model.fan.theme ? ` · ${model.fan.theme}` : ''}
               </p>
-              <p className="text-micro text-muted m-0 mt-1.5 leading-relaxed">
+              {!!model.fan.quotes?.length && <div className="mt-3 space-y-3">
+                {model.fan.quotes.map(q=><blockquote key={q.videoId+q.text} className="m-0 pl-3 border-l-2 border-line-strong">
+                  <p className="text-[16px] font-semibold text-ink leading-snug m-0">“{q.text}”</p>
+                  <a href={`https://www.youtube.com/watch?v=${q.videoId}`} target="_blank" rel="noopener noreferrer" className="block mt-1 text-micro text-muted hover:text-electric">{compact(q.likes)} likes · {q.source??'Source video'} ↗</a>
+                </blockquote>)}
+              </div>}
+              <p className="text-micro text-muted m-0 mt-3 leading-relaxed">
                 Sampled from {exact(model.fan.commentsOnAsset)} comments across {model.fan.assetLabel},
                 read {shortDate(model.fan.at)}. A sample, not the view of the audience.
               </p>

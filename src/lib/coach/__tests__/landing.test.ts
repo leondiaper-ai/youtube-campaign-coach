@@ -60,11 +60,12 @@ const DIVE = {
 
 function model(opts: {
   uploads: RecentUpload[]; events: ParsedEvent[]; dive?: boolean;
+  fan?: import('../../intelligence/fanResponse').FanResponse;
   dataAt?: string | null; decisions?: Decisions; series?: Record<string, unknown>; start?: string;
 }) {
   const p = plan('Artist', opts.events);
   const evidence = {
-    fanResponse: null,
+    fanResponse: opts.fan??null,
     audit: buildChannelAudit({
       name: 'Artist', slug: 'artist', dataAt: opts.dataAt === undefined ? iso(-0.4) : opts.dataAt, now: NOW, uploads: opts.uploads,
       stats: { subs: null, lifetimeViews: null, views7d: null, views30d: null, subs7d: null },
@@ -403,4 +404,17 @@ test('the next 28-day outlook includes ongoing Shorts and launch/follow-up video
   assert.equal(m.framework?.next28Videos,2);
   const busy=model({uploads:[],events:[event('One - single release',1),event('Two - single release',2),event('Three - single release',3)]}).model;
   assert.ok((busy.framework?.next28Shorts??0)>8);
+});
+
+
+test('fan quotes come from fresh sampled comments on the current track only', () => {
+  const q=(text:string,videoId:string)=>({text,videoId,likes:10,theme:'song',source:'lyric video',why:{engagement:1,echo:1,themeShare:1,recency:1,score:1}});
+  const fan={display:true,quote:q('Love this song','hero2'),candidateQuotes:[q('Old campaign comment','hero1'),q('That chorus!','hero2')],
+    tone:'overwhelmingly_positive',dominantTheme:'song',themes:[],recurringPhrases:[],
+    evidence:{assetsSampled:[{videoId:'hero2',title:'Overthinker',publishedAt:iso(-3),retrieved:100},{videoId:'hero1',title:'Roses',publishedAt:iso(-38),retrieved:50}],commentsRetrieved:150,commentsClassified:100,positiveCount:90,negativeCount:0,neutralCount:10,samplingNote:'sample'},
+    confidence:'high',gates:{volume:true,concentration:true,spread:true,freshness:true,positive:true},withheldReason:null,computedAt:iso(-0.2),rulesVersion:5,quotaUnitsUsed:2} as import('../../intelligence/fanResponse').FanResponse;
+  const m=model({uploads:RICH,events:RICH_EVENTS,fan}).model;
+  assert.deepEqual(m.fan?.quotes?.map(q=>q.text),['Love this song','That chorus!']);
+  assert.equal(m.fan?.quotes?.[0].source,'Overthinker');
+  assert.equal(model({uploads:RICH,events:RICH_EVENTS,fan:{...fan,computedAt:iso(-9)}}).model.fan,null);
 });

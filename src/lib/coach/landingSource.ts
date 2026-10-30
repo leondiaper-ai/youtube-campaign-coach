@@ -303,6 +303,7 @@ export function buildLandingModel({
     fan: status.audience
       ? {
           quote: '', likes: 0,
+          quotes: status.audience.quotes,
           commentsOnAsset: status.audience.comments,
           assetLabel: `${status.audience.assets} campaign asset${status.audience.assets === 1 ? '' : 's'}`,
           at: status.audience.date,
