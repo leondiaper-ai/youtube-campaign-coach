@@ -21,6 +21,7 @@ import { test } from 'node:test';
 import { buildChannelAudit } from '../../channelAudit';
 import { buildRoadmap, type Decisions } from '../roadmap';
 import { buildCoachStatus } from '../status';
+import { coachUploadFormat } from '../assetFormat';
 import { buildLandingModel } from '../landingSource';
 import type { RecentUpload } from '../../artists';
 import type { GeneratedPlan, ParsedEvent } from '../../planEngine';
@@ -294,4 +295,30 @@ test('album week contributes support moments even when no single is due', () => 
   const m=model({uploads:RICH,events:[event('Album release',0,'albumRelease')]}).model;
   assert.equal(m.framework?.upcomingMoments,1);
   assert.equal(m.framework?.next28Shorts,2); // album launch and +7 support
+});
+
+
+test('live singles absent from the saved timeline are discovered only with launch promotion', () => {
+  const uploads=[...RICH,upload('third','Artist - Third Song',14,300000),
+    upload('third-short','Third Song is out everywhere now and the full video is on our channel',14,1000,30),
+    upload('stray','Artist - Random Catalogue Video',12,4000)];
+  const m=model({uploads,events:RICH_EVENTS}).model;
+  assert.equal(m.framework?.singles,4); // three planned plus the evidenced live single
+  assert.ok(m.rollout.some(r=>r.name==='Third Song'));
+  assert.ok(!m.rollout.some(r=>r.name==='Random Catalogue Video'));
+});
+
+test('plain video titles retain format intelligence from their own descriptions', () => {
+  assert.equal(coachUploadFormat({...upload('m','Artist - My Whole World',50,100000),description:'Production Company - Creative Team Studios\nDirector - Casey McGrath\nDirector of Photography Josh Goleman'}),'omv');
+  assert.equal(coachUploadFormat({...upload('c','Artist - Cold Blue Dawn',30,100000),description:'The band have teamed up to create a lyric video built entirely from Earth itself.'}),'lyric');
+  assert.equal(coachUploadFormat({...upload('short','Lyric video out now',3,1000,30),description:'Official lyric video'}),'short');
+});
+
+test('upcoming music video recommendation names its fallback and exposes channel evidence', () => {
+  const uploads=[...RICH,...[1,2,3].map(n=>upload('mv'+n,'Artist - Catalogue '+n+' (Official Music Video)',100+n,100000))];
+  const m=model({uploads,events:RICH_EVENTS}).model;
+  const a=m.actions.find(a=>a.context==='Evil');
+  assert.equal(a?.label,'Confirm music video');
+  assert.match(a?.reason??'',/no music video.*lyric video/i);
+  assert.ok(a?.evidence.some(e=>/3 music videos/.test(e.body)));
 });

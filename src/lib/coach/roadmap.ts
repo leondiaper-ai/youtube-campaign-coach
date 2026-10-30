@@ -1,10 +1,10 @@
+import { coachUploadFormat } from "./assetFormat";
 import type { RecentUpload } from "../artists";
 import type { GeneratedPlan } from "../planEngine";
 import type { AssetLibrary } from "../driveAssets";
 import type { ChannelAudit } from "../channelAudit";
 import type { DeepDiveContext } from "../intelligence/types";
 import {
-  classifyUploadFormat,
   getFormatMeta,
   type UploadFormat,
 } from "../formatClassifier";
@@ -138,8 +138,30 @@ export function buildRoadmap(
         ...evidence.dive.recommendedContentDirections,
       ]
     : [];
+  // Discover a release absent from the saved plan only when its canonical
+  // artist–song upload is backed by a same-track launch promotion nearby.
+  // Do not turn every catalogue video or performance into a new single.
+  const firstPlanDate=plan.events.map(e=>e.dateISO).filter(Boolean).sort()[0];
+  const recorded=new Set(plan.events.filter(isSingleRelease).map(e=>key(trackName(e.title))));
+  const observed: GeneratedPlan['events']=[];
+  for (const u of inventory) {
+    const f=coachUploadFormat(u);
+    if (!['omv','longform'].includes(f) || !firstPlanDate || u.publishedAt.slice(0,10)<firstPlanDate) continue;
+    if (now-Date.parse(u.publishedAt)>180*DAY) continue;
+    const esc=plan.artist.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
+    const match=new RegExp('^'+esc+'\\s*[-–—:]\\s*(.+)$','i').exec(u.title);
+    if (!match || /\b(?:live|remaster|remix|trailer|acoustic|interview|behind|audio|lyric|visuali[sz]er)\b/i.test(match[1])) continue;
+    const name=songKey(u.title,plan.artist), identity=key(name);
+    if (recorded.has(identity)) continue;
+    const launch=inventory.some(v=>coachUploadFormat(v)==='short'&&trackMention(v.title,name)
+      && /out now|out everywhere|full (?:music )?video|new single/i.test(v.title)
+      && Math.abs(Date.parse(v.publishedAt)-Date.parse(u.publishedAt))<=14*DAY);
+    if (!launch) continue;
+    recorded.add(identity);
+    observed.push({dateISO:u.publishedAt.slice(0,10),title:name+' — single release',kind:'singleRelease',scale:'major'});
+  }
   const identities = new Set<string>();
-  return plan.events
+  return [...plan.events,...observed]
     .filter(isSingleRelease)
     .slice().sort((a,b) => a.dateISO.localeCompare(b.dateISO))
     .filter(event => { const id = key(trackName(event.title)); if (!id || identities.has(id)) return false; identities.add(id); return true; })
@@ -150,14 +172,14 @@ export function buildRoadmap(
         (u) =>
           identity.length >= 3 &&
           (uploadTrack(u.title, plan.artist) === identity ||
-            (classifyUploadFormat({ ...u, description: "" }) === "short" &&
+            (coachUploadFormat(u) === "short" &&
               trackMention(u.title, name))) &&
           Math.abs(Date.parse(u.publishedAt) - Date.parse(event.dateISO)) <=
             120 * DAY,
       );
       const classified = family.map((u) => ({
         u,
-        f: classifyUploadFormat({ ...u, description: "" }),
+        f: coachUploadFormat(u),
       }));
       const trackId = identity + ":" + event.dateISO;
       const actions: RoadmapAction[] = [];

@@ -20,7 +20,8 @@
    produces nothing, the section is absent rather than filled.
    ═══════════════════════════════════════════════════════════════════════ */
 
-import { classifyUploadFormat, getFormatMeta } from '../formatClassifier';
+import { coachUploadFormat } from './assetFormat';
+import { getFormatMeta } from '../formatClassifier';
 import { toCampaignUploads } from '../intelligence/campaignWindow';
 import type { RecentUpload } from '../artists';
 import type { CoachStatus } from './status';
@@ -47,7 +48,7 @@ function stateOf(a: RoadmapAction, d: Decisions): ReleaseAsset['status'] {
 
 function toUploadRef(u: RecentUpload): UploadRef {
   const f = toCampaignUploads([u])[0]?.kind;
-  const detected=classifyUploadFormat({...u,description:''});
+  const detected=coachUploadFormat(u);
   const format=f==='short'?'Short':detected==='short'||detected==='longform'?'Video':getFormatMeta(detected).label;
   return {
     id: u.id,
@@ -93,11 +94,14 @@ export function buildLandingModel({
       const followUp = FOLLOW_UP.includes(a.format) && !!observed;
       const window = followUp ? followUpWindow(observed!.publishedAt) : null;
       const windowOpen = window && Date.parse(window.to) >= now;
-      const conciseLabel = followUp ? 'Multi-format follow-up' : a.format === 'hero' ? 'Confirm release video' : label;
+      const musicHistory=evidence.audit.visuals.formats.find(f=>f.key==='omv');
+      const lyricHistory=evidence.audit.visuals.formats.find(f=>f.key==='lyric');
+      const heroLabel=(musicHistory?.count??0)>=3?'Confirm music video':(lyricHistory?.count??0)>=3?'Confirm lyric video':'Choose music video or lyric video';
+      const conciseLabel = followUp ? 'Multi-format follow-up' : a.format === 'hero' ? heroLabel : label;
       const conciseReason = followUp && window && Date.parse(window.to)<now ? 'Follow-up window has passed · review available material.' : followUp
         ? a.format === 'live' ? 'Live version or visualiser · check available footage.'
           : `${a.format === 'lyric' ? 'Lyric video' : a.format === 'visualiser' ? 'Visualiser' : a.format === 'acoustic' ? 'Acoustic performance' : 'Another video'} · check available material.`
-        : a.format === 'hero' ? 'Confirm format, thumbnail and upload.' : a.reason;
+        : a.format === 'hero' ? (heroLabel==='Confirm lyric video'?'Prepare a lyric video; confirm the thumbnail and upload.':'If no music video is planned, prepare a lyric video.') : a.reason;
       return {
         id: a.id,
         label: conciseLabel.charAt(0).toUpperCase() + conciseLabel.slice(1),
@@ -110,7 +114,7 @@ export function buildLandingModel({
         reason: conciseReason,
         evidence: [
           { heading: 'On the channel.', body: a.format.startsWith('campaign_') ? a.basis : a.format === 'hero'
-            ? 'No release video identified yet. Confirm what is being prepared.'
+            ? `${musicHistory?.count??0} music videos and ${lyricHistory?.count??0} lyric videos identified in the channel history. No upload matched to this release yet. These are established formats, not a like-for-like performance test.`
             : a.scheduled ? 'A linked video needs its visibility and release date checked.'
             : 'One release video identified; no further long-form video found for this track.' },
           ...(a.available
@@ -266,6 +270,7 @@ export function buildLandingModel({
         ['Music video','Official Music Video','omv'],['Lyric','Lyric Video','lyric'],
         ['Visualiser','Visualiser','visualiser'],['Live / acoustic','Live Performance','live'],['Shorts','Short','short']
       ].map(([label,format,key])=>({label,count:uploads.filter(u=>u.format===format||(key==='live'&&u.format==='Acoustic')).length,
+        reported:key==='lyric'&&uploads.some(u=>u.shape==='short'&&/lyric video/i.test(u.title)),
         planned:t.actions.some(a=>!a.video&&(a.format===key||a.format.startsWith(key+':'))&&stateOf(a,decisions)==='agreed')}))};
     }),
     shortsProgress: {count:status.shortsRead.count,weekly:status.shortsRead.weekly,average:status.shortsRead.mean,

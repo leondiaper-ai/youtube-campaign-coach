@@ -96,7 +96,7 @@ export type LandingModel = {
   windowLabel: string;
   actions: LandingAction[];
   framework?: { singles: number; heroes: number; followUps: number; shorts: number; shortsTarget: number; next28Shorts: number; upcomingMoments: number };
-  coverage?: { name: string; date: string; guide?: string; cells: { label: string; count: number; planned: boolean }[] }[];
+  coverage?: { name: string; date: string; guide?: string; cells: { label: string; count: number; planned: boolean; reported?: boolean }[] }[];
   shortsProgress?: { count: number; weekly: number; average: number | null; target: number | null };
   figures: { value: string; label: string; period: string }[];
   latest: (UploadRef & { likes: number | null }) | null;

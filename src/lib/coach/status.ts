@@ -1,7 +1,8 @@
+import { coachUploadFormat } from './assetFormat';
 import type { GeneratedPlan, PhaseName } from '../planEngine';
 import { isAlbumRelease } from './roadmap';
 import type { CoachEvidence, Decisions, RoadmapAction, TrackRoadmap } from './roadmap';
-import { classifyUploadFormat, getFormatMeta } from '../formatClassifier';
+import { getFormatMeta } from '../formatClassifier';
 import { viewsAtAge, type VideoSeries } from '../videoSnapshots';
 import { RULES_VERSION } from '../intelligence/fanResponse';
 import { campaignPerformanceFor } from '../intelligence/campaignWindow';
@@ -37,7 +38,7 @@ export function buildCoachStatus({plan,evidence,tracks,decisions={},campaignStar
   const today=new Date(now).toISOString().slice(0,10);
   const fresh=!!evidence.audit.dataAt && now-Date.parse(evidence.audit.dataAt)<=3*DAY && Date.parse(evidence.audit.dataAt)<=now+DAY;
   const inventory=evidence.uploads.filter(u=>!u.isCollab&&u.live!=='upcoming'&&Date.parse(u.publishedAt)<=now);
-  const long=inventory.filter(u=>visual(classifyUploadFormat({...u,description:''}))).sort((a,b)=>b.publishedAt.localeCompare(a.publishedAt));
+  const long=inventory.filter(u=>visual(coachUploadFormat(u))).sort((a,b)=>b.publishedAt.localeCompare(a.publishedAt));
   const actual=(t:TrackRoadmap)=>t.actions.filter(a=>a.video&&!a.scheduled&&visual(a.format));
   const started=tracks.filter(t=>t.releaseDate<=today||actual(t).length>0).sort((a,b)=>{
     const last=(t:TrackRoadmap)=>actual(t).map(a=>a.video!.date).sort().pop()??t.releaseDate;
@@ -60,13 +61,13 @@ export function buildCoachStatus({plan,evidence,tracks,decisions={},campaignStar
   const albumAge=album ? Math.floor((now-Date.parse(album.dateISO+'T00:00:00Z'))/DAY) : null;
   if (album && albumAge!==null && albumAge>=0) { phase=albumAge<=7?'RELEASE':'SCALE'; current=`Album released ${date(album.dateISO)}${latest?` · latest video: ${latest.title}`:''}`; }
   const recent=inventory.filter(u=>Date.parse(u.publishedAt)>=now-30*DAY);
-  const shorts=recent.filter(u=>classifyUploadFormat({...u,description:''})==='short').length;
+  const shorts=recent.filter(u=>coachUploadFormat(u)==='short').length;
   const prior=anchor?long.find(u=>u.publishedAt.slice(0,10)<anchor.video!.date):undefined;
   const gap=prior&&anchor?Math.round((Date.parse(anchor.video!.date)-Date.parse(prior.publishedAt.slice(0,10)))/DAY):null;
   const cadence=`Last 30 days: ${recent.length-shorts} long-form · ${shorts} Shorts${gap&&gap>=14?` · ${gap} days between the latest tracked release videos`:latest?` · last long-form ${date(latest.publishedAt.slice(0,10))}`:''}`;
   const metrics=campaignPerformanceFor({uploads:inventory,statedAt:campaignStartDate,statedBy:campaignStartDate?'Artist campaign setup':undefined,now});
   const campaign=metrics?`${metrics.views==null?'—':n(metrics.views)} tracked campaign views · ${metrics.assets} assets`:null;
-  const shortWindow=inventory.filter(u=>Date.parse(u.publishedAt)>=now-28*DAY && classifyUploadFormat({...u,description:''})==='short');
+  const shortWindow=inventory.filter(u=>Date.parse(u.publishedAt)>=now-28*DAY && coachUploadFormat(u)==='short');
   const shortsRead={weekly:Math.round(shortWindow.length/4*10)/10,mean:shortWindow.length?Math.round(shortWindow.reduce((s,u)=>s+u.viewCount,0)/shortWindow.length):null,count:shortWindow.length};
   let launch:string|null=null;
   const currentSeries=u?series[u.id]:undefined;
@@ -74,7 +75,7 @@ export function buildCoachStatus({plan,evidence,tracks,decisions={},campaignStar
   const comparisonAge=latestObservation&&currentSeries?.publishedAt?Math.round((Date.parse(latestObservation.ts+'T12:00:00Z')-Date.parse(currentSeries.publishedAt))/DAY):null;
   if(anchor&&u&&comparisonAge!==null&&comparisonAge>=1&&comparisonAge<=28&&latestObservation&&now-Date.parse(latestObservation.ts+'T12:00:00Z')<=3*DAY){
     const priorReleaseIds=new Set(tracks.filter(t=>t.id!==focus?.id).flatMap(t=>actual(t).map(a=>a.video!.id)));
-    const priorSame=long.find(v=>priorReleaseIds.has(v.id)&&Date.parse(v.publishedAt)<Date.parse(u.publishedAt)&&classifyUploadFormat({...v,description:''})===classifyUploadFormat({...u,description:''}));
+    const priorSame=long.find(v=>priorReleaseIds.has(v.id)&&Date.parse(v.publishedAt)<Date.parse(u.publishedAt)&&coachUploadFormat(v)===coachUploadFormat(u));
     const currentDay=viewsAtAge(series[u.id]??null,comparisonAge,0);
     const priorDay=priorSame?viewsAtAge(series[priorSame.id]??null,comparisonAge,0):null;
     if(currentDay&&priorDay&&priorDay.views>0){

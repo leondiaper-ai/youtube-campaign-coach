@@ -316,7 +316,7 @@ export default function CoachLanding({ model, slug, classicHref, timelineEditor 
               </div>
 
               {model.coverage?.find(c=>c.name===r.name) && <div className="flex flex-wrap gap-x-4 gap-y-1 mt-2 text-micro" aria-label={`${r.name} format status`}>
-                {model.coverage.find(c=>c.name===r.name)!.cells.map(c=><span key={c.label} className={c.count?'text-positive font-semibold':c.planned?'text-electric font-semibold':'text-muted'}>{c.label} {c.count?`✓${c.count>1?' '+c.count:''}`:c.planned?'◆':'—'}</span>)}
+                {model.coverage.find(c=>c.name===r.name)!.cells.map(c=><span key={c.label} className={c.count?'text-positive font-semibold':c.planned?'text-electric font-semibold':c.reported?'text-secondary font-semibold':'text-muted'}>{c.label} {c.count?`✓${c.count>1?' '+c.count:''}`:c.planned?'◆':c.reported?'· promoted':'—'}</span>)}
               </div>}
               {r.holding ? (
                 <p className="text-meta text-muted m-0 mt-2.5">{r.holding}</p>

@@ -49,11 +49,9 @@ export async function loadCoachEvidence(input: {
     readFanResponse<FanResponse>(input.slug).catch(()=>null),
   ]);
   // A catalogue read must include newly cached uploads too, even between full scans.
-  const uploads = Array.from(
-    new Map(
-      [...(catalogue?.uploads ?? []), ...input.uploads].map((u) => [u.id, u]),
-    ).values(),
-  );
+  const byId=new Map((catalogue?.uploads??[]).map(u=>[u.id,u]));
+  for(const u of input.uploads) byId.set(u.id,{...byId.get(u.id),...u,description:u.description||byId.get(u.id)?.description||''});
+  const uploads=Array.from(byId.values());
   const audit = buildChannelAudit({
     name: input.name,
     slug: input.slug,
