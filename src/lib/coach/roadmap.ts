@@ -214,7 +214,7 @@ export function buildRoadmap(
         );
         push(
           "hero",
-          "Confirm the main release video",
+          "Prepare the release video",
           event.dateISO,
           lyric
             ? `Lyric videos have ${lyric.count} examples in this channel reading (${Math.round(lyric.median).toLocaleString("en-GB")} median lifetime views). Confirm the creative and production plan.`
@@ -258,7 +258,7 @@ export function buildRoadmap(
             : nominal;
         push(
           candidate.key,
-          `Consider ${candidate.name.toLowerCase()} follow-up`,
+          `Plan a ${candidate.name.toLowerCase()} follow-up`,
           date,
           `${candidate.count} channel examples; ${Math.round(candidate.median).toLocaleString("en-GB")} median lifetime views.${example ? ` Review “${example.title}” for the creative approach.` : ""}${tour && candidate.key === "live" ? ` Check capture availability around ${tour.title}.` : " Confirm existing footage and rights before commissioning."}`,
           "Channel audit. Lifetime views are not age-adjusted. Target is a planning suggestion, not an optimal interval or a promise of growth.",
@@ -282,10 +282,10 @@ export function buildRoadmap(
         else if (destinations.length < 2)
           push(
             "followup",
-            "Choose one distinct follow-up",
+            "Choose a follow-up video",
             addDays(event.dateISO, 10),
-            "No repeatable support-format winner was established in this reading. Check available performances, lyrics or making-of material with the team.",
-            "YouTube multi-format guidance; exploratory until channel evidence or team input supports a format.",
+            "Continue the release with a supporting video. Choose a performance, lyric video or making-of idea that fits the artist and available material.",
+            "YouTube post-release guidance recommends continued visual storytelling. The format should be chosen using channel evidence and team input.",
           );
       }
       const shorts = classified.filter((x) => x.f === "short");
@@ -303,11 +303,11 @@ export function buildRoadmap(
       else
         push(
           "short",
-          "Short linking to the release video",
+          "Share a Short linked to the release video",
           destinations.length
             ? addDays(destinations[0].u.publishedAt.slice(0, 10), 2)
             : event.dateISO,
-          "Use a distinct moment from the release, with its official audio and a related-video link. Check existing Shorts whose captions do not name the track.",
+          "Choose a performance, behind-the-scenes or song moment. Use the track’s official audio and add the release video as the related video in Studio.",
           "YouTube release strategy. No fixed campaign-wide Shorts quota.",
         );
       const classes: Record<string, string[]> = {

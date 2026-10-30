@@ -91,7 +91,8 @@ export function buildLandingModel({
         dueTone: soon ? 'soon' : 'normal',
         reason: a.reason,
         evidence: [
-          { heading: 'Basis.', body: a.basis },
+          { heading: 'Channel evidence.', body: a.basis },
+          { heading: 'YouTube guidance.', body: a.format === 'hero' || a.scheduled ? 'Prepare the release with teasers, clear presentation and a planned video launch.' : 'Keep supporting the release with visual storytelling and regular Shorts. Use audience response to shape what comes next.', href: a.format === 'hero' || a.scheduled ? 'https://artists.youtube/resources/pre-release-strategy/' : 'https://artists.youtube/resources/post-release-strategy/' },
           ...(a.available ? [{ heading: 'Asset found.', body: `${a.available.name} — check readiness. A matching file does not confirm it is finished or cleared.` }] : []),
           ...(evidence.audit.dataAt ? [{ heading: 'Channel read.', body: `Upload data as at ${shortDate(evidence.audit.dataAt)}. ${evidence.audit.coverage}` }] : []),
         ],
@@ -185,8 +186,8 @@ export function buildLandingModel({
           const kind = a.format.split(':')[0];
           return !FOLLOW_UP.includes(kind) || isAnchor;
         }).map((a): ReleaseAsset => ({
-          label: a.video && !a.scheduled ? a.video.title : a.label,
-          note: a.video && !a.scheduled ? undefined : a.reason,
+          label: a.video && !a.scheduled ? a.video.title : (status.priorities.flatMap(t => t.actions).find(p => p.id === a.id)?.label.replace(`${t.name}: `, '') ?? a.label),
+          note: a.video && !a.scheduled ? undefined : status.priorities.flatMap(t => t.actions).find(p => p.id === a.id)?.reason ?? a.reason,
           status: stateOf(a, decisions),
           meta: a.video && !a.scheduled
             ? `${compact(evidence.uploads.find(u => u.id === a.video!.id)?.viewCount ?? 0)} · ${shortDate(a.video.date)}`

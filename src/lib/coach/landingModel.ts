@@ -57,7 +57,7 @@ export type LandingAction = {
   /** One sentence. */
   reason: string;
   /** Opens in place, closed by default. */
-  evidence: { heading: string; body: string }[];
+  evidence: { heading: string; body: string; href?: string }[];
   state: ActionState;
 };
 

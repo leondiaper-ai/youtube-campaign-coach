@@ -114,7 +114,7 @@ export function buildCoachStatus({plan,evidence,tracks,decisions={},campaignStar
         if(upcoming&&target>=upcoming.releaseDate)target=add(upcoming.releaseDate,-3)<today?today:add(upcoming.releaseDate,-3);
         const format=evidence.audit.visuals.formats.find(f=>f.key===a.format);
         const testFormat=format&&format.count>=3;
-        push(focus,{...a,label:testFormat?`Test a ${format.name.toLowerCase()} follow-up`:'Agree one distinct follow-up video',date:target,
+        push(focus,{...a,label:testFormat?`Plan a ${format.name.toLowerCase()} follow-up`:'Choose a follow-up video',date:target,
           /* ── expired windows ──────────────────────────────────────
              The nominal window is day 7–14 from the release. When that
              has already passed, `target` is clamped to today above — so
@@ -122,15 +122,15 @@ export function buildCoachStatus({plan,evidence,tracks,decisions={},campaignStar
              produced a card that contradicted itself ("by 30 Oct ·
              suggested window 2–9 Oct"). Past windows are now described
              as past, and the date is the only instruction. */
-          reason:`No second visual identified for this track. ${windowPassed?`The day 7–14 window (${date(windowFrom)}–${date(windowTo)}) has passed; treat this as overdue rather than scheduled.`:`Suggested window ${date(windowFrom)}–${date(windowTo)}.`} ${testFormat?`${format.count} ${format.name.toLowerCase()} examples in the channel history; check available material.`:"Check available performance or visual material."}`,
-          basis:`Current release inventory + upload history. ${a.reason} ${a.basis} A second destination is a suggestion, not a required format count.`});
+          reason:`${windowPassed?'The suggested follow-up window has passed. Review whether a new video still fits the campaign.':a.format==='live'?'The release video is live. Check for existing performance footage to give fans another way to experience the song.':a.format==='lyric'?'The release video is live. A lyric video could give fans another way to connect with the words. Check what is already made.':a.format==='bts'?'The release video is live. Look for making-of footage that adds a new story around the song.':a.format==='acoustic'?'The release video is live. Explore an acoustic performance if it suits the song and available material.':a.format==='visualiser'?'The release video is live. Explore a distinct visualiser that develops the song’s visual world.':'The release video is live. Choose a performance, behind-the-scenes or another supporting video that suits the song.'}`,
+          basis:`Channel observation: one release video identified for this track. ${a.reason} ${a.basis} YouTube recommends continuing supporting visuals after release and using audience response to shape the format and cadence. Our ${date(windowFrom)}–${date(windowTo)} window is a campaign planning suggestion, not a YouTube requirement.`});
       }
     }
     if(upcoming){
       const a=upcoming.actions.find(a=>a.format==='hero'||a.scheduled);
-      if(a)push(upcoming,{...a,label:a.scheduled?'Verify the linked release video':'Confirm the release video',reason:`Next single ${date(upcoming.releaseDate)}; ${a.scheduled?'the linked video is not yet confirmed public':'no main visual identified in the channel reading'}. ${a.available?'A matching asset file is available.':'Confirm the asset with the artist team.'}`});
+      if(a)push(upcoming,{...a,label:a.scheduled?'Check the scheduled release video':'Prepare the release video',reason:a.scheduled?`Check the linked video’s visibility and scheduled date for ${date(upcoming.releaseDate)}.`:`Choose the video format and confirm the upload for ${date(upcoming.releaseDate)}. Check the title, thumbnail and release settings with the team.`});
     }
-    if(!anchor&&focus){const a=focus.actions.find(a=>a.format==='hero'||a.scheduled);if(a)push(focus,{...a,label:'Check the release video',date:today,reason:'Release date reached; a public main video has not been identified. Check visibility and matching before creating another asset.'});}
+    if(!anchor&&focus){const a=focus.actions.find(a=>a.format==='hero'||a.scheduled);if(a)push(focus,{...a,label:'Check the release upload',date:today,reason:'The release date has arrived. Confirm whether the video is public, scheduled or still being prepared before planning another upload.'});}
   }
   return {metrics:metrics?{views:metrics.views,assets:metrics.assets,shorts:metrics.shorts,longform:metrics.longForm,start:metrics.start.at}:null,shortsRead,launch,audience,albumIdea,phase,headline,current,next,cadence,fresh,campaign,priorities:priorities.slice(0,2)};
 }

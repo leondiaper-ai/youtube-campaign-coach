@@ -49,7 +49,7 @@ function AssetRow({ title, items, shape }: { title: string; items: UploadRef[]; 
   const shown = all ? items : items.slice(0, limit);
   if (!items.length) return null;
   return (
-    <div className="mt-4 first:mt-0">
+    <div className="min-w-0">
       <div className="flex items-baseline justify-between gap-3 mb-2">
         <Eyebrow>{title}</Eyebrow>
         <span className="text-[11px] text-faint tabular-nums">
@@ -65,9 +65,9 @@ function AssetRow({ title, items, shape }: { title: string; items: UploadRef[]; 
           )}
         </span>
       </div>
-      <ul className="flex gap-2 overflow-x-auto pb-1 list-none m-0 p-0">
+      <ul className={shape === 'long' ? `grid ${shown.length >= 3 ? 'grid-cols-3' : 'grid-cols-2'} gap-3 list-none m-0 p-0` : 'grid grid-cols-3 sm:grid-cols-6 gap-2 list-none m-0 p-0'}>
         {shown.map(v => (
-          <li key={v.id} className={shape === 'long' ? 'w-[132px] shrink-0' : 'w-[62px] shrink-0'}>
+          <li key={v.id} className="min-w-0">
             <a href={`https://youtube.com/watch?v=${v.id}`} target="_blank" rel="noopener noreferrer" className="no-underline block">
               <Thumb v={v} className={shape === 'long' ? 'aspect-video' : 'aspect-[9/16]'} />
               <span className="block text-[11px] font-bold tabular-nums text-ink mt-1.5">
@@ -166,17 +166,17 @@ function ActionCard({ action, slug }: { action: LandingAction; slug?: string }) 
               className="w-4 h-4 rounded-[4px] border-[1.5px] border-line-strong bg-surface grid place-content-center text-[10px] font-black text-white"
               style={ticked ? { background: color.positive, borderColor: color.positive } : undefined}
             >{ticked ? '✓' : ''}</span>
-            <span className={ticked ? 'line-through text-faint' : ''}>Agreed by team</span>
+            <span className={ticked ? 'text-positive' : ''}>{ticked ? 'In plan' : 'Add to plan'}</span>
             {saving === 'saving' && <span className="text-[11px] text-faint font-normal">saving…</span>}
             {saving === 'error' && <span className="text-[11px] text-negative font-normal">not saved</span>}
           </span>
-          <span className="ml-auto text-[12.5px] font-semibold text-electric group-open:hidden">Evidence</span>
-          <span className="ml-auto text-[12.5px] font-semibold text-electric hidden group-open:inline">Hide evidence</span>
+          <span className="ml-auto text-[12.5px] font-semibold text-electric group-open:hidden">Why this?</span>
+          <span className="ml-auto text-[12.5px] font-semibold text-electric hidden group-open:inline">Hide details</span>
         </summary>
         <div className="mt-2.5 p-3 bg-raised rounded-control text-[12.5px] text-secondary leading-relaxed">
           {action.evidence.map(e => (
             <p key={e.heading} className="m-0 mb-1.5 last:mb-0">
-              <strong className="text-ink">{e.heading}</strong> {e.body}
+              <strong className="text-ink">{e.heading}</strong> {e.body}{e.href && <> <a href={e.href} target="_blank" rel="noopener noreferrer" className="text-electric underline">Read YouTube’s guide ↗</a></>}
             </p>
           ))}
         </div>
@@ -258,7 +258,7 @@ export default function CoachLanding({ model, slug, classicHref, timelineEditor 
           )}
         </div>
 
-        <div className="border-t border-line-faint p-4">
+        <div className="border-t border-line-faint p-4 grid gap-5 lg:grid-cols-[minmax(0,2fr)_minmax(0,3fr)]">
           <AssetRow title={model.windowLabel === 'window not set' ? 'Channel videos · reference' : 'Campaign videos'} items={model.assets.long} shape="long" />
           <AssetRow title={model.windowLabel === 'window not set' ? 'Channel Shorts · reference' : 'Campaign Shorts'} items={model.assets.shorts} shape="short" />
         </div>
