@@ -27,7 +27,7 @@ import type { CoachStatus } from './status';
 import type { CoachEvidence, Decisions, RoadmapAction, TrackRoadmap } from './roadmap';
 import { actionStatus } from './roadmap';
 import {
-  compact, exact, shortDate,
+  compact, exact, shortDate, followUpWindow,
   type LandingAction, type LandingModel, type ReleaseAsset, type ReleaseBlock, type UploadRef,
 } from './landingModel';
 
@@ -90,15 +90,24 @@ export function buildLandingModel({
       const latestTrackVideo=track?.actions.filter(item=>item.video&&!item.scheduled&&!item.format.startsWith('short')).slice().sort((x,y)=>y.video!.date.localeCompare(x.video!.date))[0];
       const observed=latestTrackVideo?evidence.uploads.find(u=>u.id===latestTrackVideo.video!.id):evidence.uploads.find(u=>a.id===`observed:${u.id}:support`) ?? null;
       const ref=observed?toUploadRef(observed):null;
+      const followUp = FOLLOW_UP.includes(a.format) && !!observed;
+      const window = followUp ? followUpWindow(observed!.publishedAt) : null;
+      const windowOpen = window && Date.parse(window.to) >= now;
+      const conciseLabel = followUp ? 'Multi-format follow-up' : a.format === 'hero' ? 'Confirm release video' : label;
+      const conciseReason = followUp && window && Date.parse(window.to)<now ? 'Follow-up window has passed · review available material.' : followUp
+        ? a.format === 'live' ? 'Live version or visualiser · check available footage.'
+          : `${a.format === 'lyric' ? 'Lyric video' : a.format === 'visualiser' ? 'Visualiser' : a.format === 'acoustic' ? 'Acoustic performance' : 'Another video'} · check available material.`
+        : a.format === 'hero' ? 'Confirm format, thumbnail and upload.' : a.reason;
       return {
         id: a.id,
-        label: label.charAt(0).toUpperCase() + label.slice(1),
+        label: conciseLabel.charAt(0).toUpperCase() + conciseLabel.slice(1),
+        window: windowOpen ? `${window!.label} · 7–14 days` : undefined,
         context: t.name,
         observation: ref ? `${ref.format} · ${ref.views==null?'Views unavailable':compact(ref.views)+' views'} · uploaded ${shortDate(ref.publishedAt)}` : undefined,
         due: due ? `by ${due}` : 'date to set',
         dueISO,
         dueTone: soon ? 'soon' : 'normal',
-        reason: a.reason,
+        reason: conciseReason,
         evidence: [
           { heading: 'On the channel.', body: a.format.startsWith('campaign_') ? a.basis : a.format === 'hero'
             ? 'No release video identified yet. Confirm what is being prepared.'
@@ -150,14 +159,6 @@ export function buildLandingModel({
     figures.push({
       value: String(status.metrics.assets), label: 'Campaign assets',
       period: `${status.metrics.shorts} Shorts · ${status.metrics.longform} long-form`,
-    });
-  }
-  if (status.shortsRead.count > 0) {
-    figures.push({
-      value: `~${status.shortsRead.weekly}`, label: 'Shorts a week',
-      period: status.shortsRead.mean != null
-        ? `${compact(status.shortsRead.mean)} average · last 28 days · context only`
-        : 'last 28 days · context only',
     });
   }
   if (anchorUpload) {
@@ -235,7 +236,20 @@ export function buildLandingModel({
     }
   }
 
+  // A transparent planning scaffold, not a performance-derived quota.
+  // One teaser (-3d), launch Short (day 0), follow-up Short (+7d) per single.
+  const trackCounts=tracks.map(t=>{
+    const ids=Array.from(new Set(t.actions.filter(a=>a.video&&!a.scheduled).map(a=>a.video!.id)));
+    const refs=ids.flatMap(id=>{const u=evidence.uploads.find(u=>u.id===id);return u?[toUploadRef(u)]:[];});
+    return {t,long:refs.filter(u=>u.shape==='long').length,shorts:refs.filter(u=>u.shape==='short').length};
+  });
+  const next28Shorts=tracks.reduce((n,t)=>n+[-3,0,7].filter(offset=>{const at=Date.parse(t.releaseDate)+offset*DAY;return at>=Date.parse(today)&&at<Date.parse(today)+28*DAY;}).length,0);
+  const framework={singles:tracks.length,heroes:trackCounts.filter(r=>r.long>0).length,
+    followUps:trackCounts.filter(r=>r.long>1).length,shorts:trackCounts.reduce((n,r)=>n+r.shorts,0),
+    shortsTarget:tracks.length*3,next28Shorts,
+    upcomingMoments:tracks.filter(t=>Date.parse(t.releaseDate)>=Date.parse(today)&&Date.parse(t.releaseDate)<Date.parse(today)+28*DAY).length};
   return {
+    framework,
     artist: artistName,
     nextMoment: status.nextMoment,
     project: projectName,
@@ -243,6 +257,19 @@ export function buildLandingModel({
       .filter(Boolean).join(' · '),
     windowLabel,
     actions,
+    coverage: tracks.map(t => {
+      const uploads = Array.from(new Set(t.actions.filter(a=>a.video&&!a.scheduled).map(a=>a.video!.id)))
+        .flatMap(id=>{const u=evidence.uploads.find(u=>u.id===id); return u?[toUploadRef(u)]:[];});
+      const age=Math.floor((Date.parse(today)-Date.parse(t.releaseDate))/DAY);
+      const guide=age< -3?'Teaser before launch':age<0?'Teaser window':age<=6?'Launch support':age<=14?'Follow-up window':'Review support';
+      return {name:t.name,date:shortDate(t.releaseDate),guide,cells:[
+        ['Music video','Official Music Video','omv'],['Lyric','Lyric Video','lyric'],
+        ['Visualiser','Visualiser','visualiser'],['Live','Live Performance','live'],['Shorts','Short','short']
+      ].map(([label,format,key])=>({label,count:uploads.filter(u=>u.format===format).length,
+        planned:t.actions.some(a=>!a.video&&(a.format===key||a.format.startsWith(key+':'))&&stateOf(a,decisions)==='agreed')}))};
+    }),
+    shortsProgress: {count:status.shortsRead.count,weekly:status.shortsRead.weekly,average:status.shortsRead.mean,
+      target:decisions['campaign:shorts-target']?.shortsWeeklyTarget ?? null},
     figures,
     latest: campaignUploads.find(u => u.shape === 'long') ? {...campaignUploads.find(u => u.shape === 'long')!, likes:null} : null,
     paceLine: campaignUploads.find(u => u.shape === 'long')?.id === anchorUpload?.id ? status.launch : null,

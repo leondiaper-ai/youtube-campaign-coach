@@ -51,6 +51,7 @@ export type LandingAction = {
   /** Release or moment it belongs to. */
   context: string;
   observation?: string;
+  window?: string;
   /** Suggested date or window. Always a planning date, never "optimal". */
   due: string;
   /** The same date as YYYY-MM-DD, so it can be edited and saved. */
@@ -93,6 +94,9 @@ export type LandingModel = {
   /** One explicit campaign reporting window, used by every campaign figure. */
   windowLabel: string;
   actions: LandingAction[];
+  framework?: { singles: number; heroes: number; followUps: number; shorts: number; shortsTarget: number; next28Shorts: number; upcomingMoments: number };
+  coverage?: { name: string; date: string; guide?: string; cells: { label: string; count: number; planned: boolean }[] }[];
+  shortsProgress?: { count: number; weekly: number; average: number | null; target: number | null };
   figures: { value: string; label: string; period: string }[];
   latest: (UploadRef & { likes: number | null }) | null;
   /** Matched-age comparison sentence, produced by buildCoachStatus. Null when

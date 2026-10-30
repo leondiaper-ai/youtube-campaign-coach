@@ -86,6 +86,34 @@ function AssetRow({ title, items, shape }: { title: string; items: UploadRef[]; 
   );
 }
 
+function ShortsProgress({data,slug}:{data:NonNullable<LandingModel['shortsProgress']>;slug?:string}) {
+  const router=useRouter();
+  const [editing,setEditing]=useState(false);
+  const [error,setError]=useState(false);
+  const [saving,setSaving]=useState(false);
+  const target=data.target;
+  async function save(value:number|null) {
+    setSaving(true); setError(false);
+    try {
+      const r=await fetch('/api/coach/decisions',{method:'POST',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({slug,actionId:'campaign:shorts-target',shortsWeeklyTarget:value})});
+      if(!r.ok) throw new Error();
+      setEditing(false); router.refresh();
+    } catch {setError(true);} finally {setSaving(false);}
+  }
+  return <div className="border-t border-line-faint px-4 py-3 flex flex-wrap items-center gap-x-6 gap-y-2">
+    <div><Eyebrow>Shorts · last 28 days</Eyebrow><p className="m-0 mt-1 text-body font-bold text-ink">{data.count}{target!==null?` / ${target*4}`:''} published <span className="font-normal text-muted">· {data.weekly} / week</span></p></div>
+    <div className="text-meta text-secondary">{target!==null?<><strong className="text-ink">Team target: {target} / week</strong><span className="block">{data.weekly<target?`${Math.round((target-data.weekly)*10)/10} more / week to reach target`:'At or above target'} · rolling 4 weeks</span></>:<span>Set a weekly trial target to track pace.</span>}</div>
+    {editing?<form className="flex items-center gap-2" onSubmit={e=>{e.preventDefault();void save(Number(new FormData(e.currentTarget).get('weekly')));}}>
+      <input className="w-16 border border-line rounded p-1" type="number" name="weekly" aria-label="Weekly Shorts target" min="1" max="14" required defaultValue={target??Math.max(1,Math.ceil(data.weekly))}/>
+      <button disabled={saving} className="text-electric text-meta font-semibold">{saving?'Saving…':'Save target'}</button>
+      <button type="button" onClick={()=>setEditing(false)} className="text-meta text-muted">Cancel</button>
+      {target!==null&&<button type="button" onClick={()=>void save(null)} className="text-meta text-muted">Clear</button>}
+    </form>:<button onClick={()=>setEditing(true)} className="ml-auto text-meta text-electric font-semibold">{target!==null?'Edit target':'Set target'}</button>}
+    {error&&<span role="alert" className="text-meta text-negative">Target not saved. Try again.</span>}
+  </div>;
+}
+
 function ActionCard({ action, slug }: { action: LandingAction; slug?: string }) {
   const router = useRouter();
   const [ticked, setTicked] = useState(action.state === 'agreed');
@@ -149,6 +177,7 @@ function ActionCard({ action, slug }: { action: LandingAction; slug?: string }) 
         <Eyebrow>{action.context}</Eyebrow>
       </div>
 
+      {action.window && <p className="text-[18px] font-extrabold text-electric m-0 mb-2">{action.window}</p>}
       {action.observation && <p className="text-[13px] font-semibold text-ink bg-raised rounded-control px-2.5 py-2 m-0 mb-2.5">{action.observation}</p>}
       <h3 className="text-h4 font-extrabold text-ink leading-snug m-0 mb-1.5">{action.label}</h3>
       <p className="text-meta text-secondary leading-relaxed m-0">{action.reason}</p>
@@ -222,13 +251,32 @@ export default function CoachLanding({ model, slug, classicHref, timelineEditor 
       {/* 3 · one campaign card */}
       <Eyebrow className="mt-7 mb-2.5">Campaign · {model.windowLabel}</Eyebrow>
       <Card pad={false}>
-        <div className="grid grid-cols-2 md:grid-cols-4 divide-x divide-line-faint">
+        <div className="grid grid-cols-2 md:grid-cols-3 divide-x divide-line-faint">
           {model.figures.map(f => (
             <div key={f.label} className="p-4">
               <Kpi value={f.value} label={f.label} period={f.period} />
             </div>
           ))}
         </div>
+
+        {model.framework && model.framework.singles>0 && <div className="border-t border-line-faint p-4">
+          <div className="flex flex-wrap justify-between gap-2 items-baseline mb-3"><Eyebrow>Rollout guide · {model.framework.singles} singles</Eyebrow><span className="text-micro text-muted">Suggested starting plan</span></div>
+          <div className="grid grid-cols-3 gap-3">
+            {[{label:'Release videos',value:model.framework.heroes,target:model.framework.singles},
+              {label:'Follow-up videos',value:model.framework.followUps,target:model.framework.singles},
+              {label:'Release-linked Shorts',value:model.framework.shorts,target:model.framework.shortsTarget}].map(f=><div key={f.label}><p className="m-0 text-[24px] font-extrabold text-ink tabular-nums">{f.value}<span className="text-muted font-normal"> / {f.target}</span></p><span className="text-meta font-semibold text-secondary">{f.label}</span><div className="h-1 mt-2 rounded bg-raised overflow-hidden"><div className="h-full rounded bg-electric" style={{width:`${Math.min(100,f.target?f.value/f.target*100:0)}%`}} /></div></div>)}
+          </div>
+          <p className="m-0 mt-3 text-meta font-semibold text-ink">Next 28 days: {model.framework.upcomingMoments} single{model.framework.upcomingMoments===1?'':'s'} · {model.framework.next28Shorts} suggested Short moments</p>
+          <details className="mt-2 text-micro text-muted"><summary className="cursor-pointer text-electric font-semibold">How the guide works</summary><p className="m-0 mt-2">Per single: a release video, one distinct follow-up around days 7–14, and three Shorts: teaser (day −3), launch, follow-up (day +7). Counts cover the whole saved single timeline, including future releases; “Next 28 days” counts only suggested moments in that window. Shorts between release moments are tracked separately against the weekly team target. These are trial planning defaults, not YouTube quotas. Adjust for material, artist and audience response. Only track-matched public uploads count here.</p></details>
+        </div>}
+        {model.shortsProgress && <ShortsProgress data={model.shortsProgress} slug={slug} />}
+        {!!model.coverage?.length && <div className="border-t border-line-faint px-4 py-3">
+          <div className="flex flex-wrap items-center justify-between gap-2 mb-2"><Eyebrow>Per-song format check</Eyebrow><span className="text-micro text-muted">✓ Live · ◆ In plan · — Not found in channel scan</span></div>
+          <div className="overflow-x-auto"><table className="w-full text-meta text-left border-collapse">
+            <thead><tr className="text-micro text-muted"><th className="py-2 pr-3 font-semibold">Single</th>{model.coverage[0].cells.map(c=><th key={c.label} className="px-2 py-2 text-center font-semibold">{c.label}</th>)}</tr></thead>
+            <tbody>{model.coverage.map(r=><tr key={r.name} className="border-t border-line-faint"><th className="py-2 pr-3 font-semibold text-ink">{r.name}<span className="block text-micro font-normal text-muted">{r.date} · {r.guide}</span></th>{r.cells.map(c=><td key={c.label} className={`px-2 py-2 text-center font-bold ${c.count?'text-positive':c.planned?'text-electric':'text-muted'}`} aria-label={`${r.name}, ${c.label}: ${c.count?c.count+' published':c.planned?'in plan':'not found'}`}>{c.count?`✓ ${c.count}`:c.planned?'◆':'—'}</td>)}</tr>)}</tbody>
+          </table></div><p className="text-micro text-muted m-0 mt-2">Format options, not a requirement to make every type. Unmatched or private uploads may not appear.</p>
+        </div>}
 
         <div className="border-t border-line-faint grid md:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)]">
           <div className="p-4 flex flex-col sm:flex-row gap-3.5">

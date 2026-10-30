@@ -35,7 +35,7 @@ export async function POST(req: NextRequest) {
   }
 
   const body = await req.json().catch(() => null) as
-    { slug?: string; actionId?: string; status?: string; targetDate?: string | null } | null;
+    { slug?: string; actionId?: string; status?: string; targetDate?: string | null; shortsWeeklyTarget?: number | null } | null;
 
   const slug = (body?.slug ?? '').trim();
   const actionId = (body?.actionId ?? '').trim();
@@ -43,6 +43,10 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'slug and actionId are required.' }, { status: 400 });
   }
 
+  const weeklyTarget = body?.shortsWeeklyTarget;
+  if (weeklyTarget !== undefined && (actionId !== 'campaign:shorts-target' || (weeklyTarget !== null && (!Number.isInteger(weeklyTarget) || weeklyTarget < 1 || weeklyTarget > 14)))) {
+    return NextResponse.json({error:'Weekly Shorts target must be a whole number from 1 to 14.'}, {status:400});
+  }
   const status = body?.status as Decision['status'] | undefined;
   if (status !== undefined && !STATUSES.has(status)) {
     return NextResponse.json({ error: 'Unknown status.' }, { status: 400 });
@@ -61,6 +65,7 @@ export async function POST(req: NextRequest) {
     const existing = (await store.hget<Decision>(decisionsKey(slug), actionId)) ?? null;
     const next: Decision = {
       status: status ?? existing?.status ?? 'suggested',
+      ...(weeklyTarget !== undefined ? {shortsWeeklyTarget:weeklyTarget} : existing?.shortsWeeklyTarget != null ? {shortsWeeklyTarget:existing.shortsWeeklyTarget} : {}),
       ...(body?.targetDate === null || body?.targetDate === ''
         ? {}
         : body?.targetDate

@@ -13,6 +13,7 @@ import { songKey } from "../formatStack";
 export type Decision = {
   status: "suggested" | "planned" | "ready" | "done" | "dismissed";
   targetDate?: string;
+  shortsWeeklyTarget?: number | null;
 };
 export type Decisions = Record<string, Decision>;
 export type RoadmapAction = {

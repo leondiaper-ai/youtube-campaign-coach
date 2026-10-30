@@ -258,3 +258,25 @@ test('a completed multi-format release does not retain a suggested extra follow-
   const m=model({uploads:[upload('hero','Artist - One (Official Video)',25,100000),upload('live','Artist - One (Live)',20,40000)],events:[event('One - single release',-25)]}).model;
   assert.equal(m.rollout[0].assets.filter(a=>a.status==='suggested' && /follow-up/i.test(a.label)).length,0);
 });
+
+
+test('timeline guide counts real matched assets and dates its suggested support moments', () => {
+  const m=model({uploads:RICH,events:RICH_EVENTS,start:day(-60)}).model;
+  assert.equal(m.framework?.singles,3);
+  assert.equal(m.framework?.heroes,2); // lyric videos count as heroes
+  assert.equal(m.framework?.followUps,0);
+  assert.equal(m.framework?.shortsTarget,9);
+  assert.equal(m.framework?.next28Shorts,3); // current +7; next single -3/0; +7 falls outside 28-day window
+  assert.equal(m.shortsProgress?.target,null); // no invented agreed quota
+  assert.equal(m.coverage?.find(r=>r.name==='Overthinker')?.cells.find(c=>c.label==='Lyric')?.count,1);
+  assert.match(m.actions[0].window??'',/7–14 days/);
+  assert.ok(m.actions[0].reason.length<100);
+});
+
+test('a second matched long-form destination closes the support gap and saved Shorts targets survive', () => {
+  const m=model({uploads:[...RICH,upload('v','Artist - Overthinker (Visualiser)',1,1000)],events:RICH_EVENTS,
+    decisions:{'campaign:shorts-target':{status:'planned',shortsWeeklyTarget:3}}}).model;
+  assert.equal(m.framework?.followUps,1);
+  assert.equal(m.shortsProgress?.target,3);
+  assert.equal(m.coverage?.find(r=>r.name==='Overthinker')?.cells.find(c=>c.label==='Visualiser')?.count,1);
+});
