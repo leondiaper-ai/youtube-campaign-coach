@@ -8,6 +8,8 @@ const nextConfig = {
       { source: '/amyl', destination: '/amyl/index.html' },
       { source: '/kol',  destination: '/kol/index.html' },
       { source: '/chvrches', destination: '/chvrches/index.html' },
+      { source: '/vaccines', destination: '/vaccines/index.html' },
+      { source: '/vaccines/station', destination: '/vaccines/station.html' },
       { source: '/ktrap', destination: '/ktrap/index.html' },
       { source: '/palaye', destination: '/palaye/index.html' },
       { source: '/idles', destination: '/idles/index.html' },

@@ -60,6 +60,14 @@ export const RESOURCE_GROUPS: ResourceGroup[] = [
     note: 'Built from public YouTube API data. Each one opens in the browser.',
     items: [
       {
+        title: 'The Vaccines',
+        blurb: 'Pink Carnations reconstructed: the visualisers that carried the album, the post-release gap, a live-content test and a proposed six-week programme. Includes a separate Station proposal and exact Watcher source rows.',
+        href: '/vaccines',
+        kind: 'Deck',
+        updated: 'November 2026',
+        external: true,
+      },
+      {
         title: 'D-Block Europe',
         blurb:
           'Channel deep dive for the management conversation — the release-day playbook they already run, the Worldwide Wave window that is still open, and the catalogue sitting on other people’s channels. Public API data only, with the method under Analysis.',

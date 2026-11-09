@@ -17,6 +17,7 @@
  */
 
 import type { DeepDiveContext } from '../types';
+import { VACCINES_DEEP_DIVE } from './vaccines';
 import { CHVRCHES_DEEP_DIVE } from './chvrches';
 import { IDLES_DEEP_DIVE } from './idles';
 import { KOL_DEEP_DIVE } from './kol';
@@ -25,6 +26,7 @@ import { AMYL_DEEP_DIVE } from './amyl';
 import { PALAYE_DEEP_DIVE } from './palaye';
 
 const ALL: DeepDiveContext[] = [
+  VACCINES_DEEP_DIVE,
   CHVRCHES_DEEP_DIVE,
   IDLES_DEEP_DIVE,
   KOL_DEEP_DIVE,
