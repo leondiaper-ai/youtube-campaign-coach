@@ -228,7 +228,7 @@ export async function updateSavedPlan(
 
 export async function deletePlan(slug: string): Promise<void> {
   const store = await kv();
-  if (!store) return;
+  if (!store) throw new Error('Campaign storage is unavailable');
   await store.del(planKey(slug));
   const index = ((await store.get(INDEX_KEY)) as PlanIndexEntry[] | null) ?? [];
   await store.set(INDEX_KEY, index.filter((e) => e.slug !== slug));

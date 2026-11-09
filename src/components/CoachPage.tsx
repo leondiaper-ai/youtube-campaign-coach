@@ -5,6 +5,8 @@ import { AppHeader } from '@/components/ui/AppHeader';
 
 import { useState, useCallback } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import DeleteCampaignButton from './coach/DeleteCampaignButton';
 import {
   deriveFromLive,
   daysSince,
@@ -60,6 +62,9 @@ export default function CoachPage({
   market?: string;
   marketName?: string;
 }) {
+  const router = useRouter();
+  const [deletedSlugs, setDeletedSlugs] = useState<string[]>([]);
+  const visiblePlans = savedPlans.filter(p => !deletedSlugs.includes(p.slug));
   const [selectedSlug, setSelectedSlug] = useState('');
   const [artistName, setArtistName] = useState('');
   const [campaignName, setCampaignName] = useState('');
@@ -485,7 +490,7 @@ export default function CoachPage({
         )}
 
         {/* ── Saved Campaigns ─────────────────────────────────────── */}
-        {savedPlans.length > 0 && !plan && (
+        {visiblePlans.length > 0 && !plan && (
           <div style={{ marginBottom: 32 }}>
             <Label text="Saved Campaigns" />
             <div
@@ -495,11 +500,12 @@ export default function CoachPage({
                 gap: 4,
               }}
             >
-              {savedPlans.map((p) => (
+              {visiblePlans.map((p) => (
+                <div key={p.slug} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                 <Link
-                  key={p.slug}
                   href={`/coach/${p.slug}${q}`}
                   style={{
+                    flex: 1, minWidth: 0,
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'space-between',
@@ -542,6 +548,10 @@ export default function CoachPage({
                     <span style={{ fontSize: 11, color: MUTED }}>→</span>
                   </div>
                 </Link>
+                <DeleteCampaignButton slug={p.slug} name={p.campaignName} onDeleted={() => {
+                  setDeletedSlugs(prev => [...prev, p.slug]); router.refresh();
+                }} />
+                </div>
               ))}
             </div>
           </div>

@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import DeleteCampaignButton from './DeleteCampaignButton';
 import type { ChannelContext } from '@/lib/planEngine';
 
 type Props = {
@@ -49,6 +50,8 @@ export default function CoachTimelineEditor(props: Props) {
 
   return (
     <section className="mt-7 pt-4 border-t border-line">
+      <div className="mb-3"><DeleteCampaignButton slug={props.slug} name={props.campaignName} labelled
+        onDeleted={() => { router.push(`/coach${props.market && props.market !== 'uk' ? `?market=${props.market}` : ''}`); router.refresh(); }} /></div>
       <button type="button" aria-expanded={open} aria-controls="coach-timeline-editor"
         onClick={() => { setError(null); setDraft(props.timeline); setOpen(!open); }}
         className="text-micro font-bold uppercase tracking-widest text-muted hover:text-ink">

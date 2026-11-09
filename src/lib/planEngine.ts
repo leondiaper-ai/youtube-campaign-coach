@@ -161,8 +161,14 @@ export function parseTimeline(text: string): ParsedEvent[] {
     const yearMatch = line.match(/\b(20\d{2})\b/);
     if (yearMatch) year = parseInt(yearMatch[1], 10);
 
+    // ISO dates are also used when the timeline editor reconstructs saved events.
+    const iso = line.match(/^(20\d{2})-(\d{2})-(\d{2})\b/);
+    if (iso) {
+      year = Number(iso[1]); month = Number(iso[2]) - 1; day = Number(iso[3]); consumed = iso[0].length;
+    }
+
     const dayFirst = line.match(/^(?:w\/c\s+)?(\d{1,2})(?:st|nd|rd|th)?(?:\s*[-–—]\s*\d{1,2}(?:st|nd|rd|th)?)?\s+([A-Za-z]+)/);
-    if (dayFirst) {
+    if (month == null && dayFirst) {
       const d = parseInt(dayFirst[1], 10);
       const mo = MONTH_MAP[dayFirst[2].toLowerCase()];
       if (mo != null && d >= 1 && d <= 31) { day = d; month = mo; consumed = dayFirst[0].length; }
@@ -192,6 +198,7 @@ export function parseTimeline(text: string): ParsedEvent[] {
     if (month == null || day == null) continue;
 
     const dt = new Date(Date.UTC(year, month, day, 12, 0, 0));
+    if (dt.getUTCFullYear() !== year || dt.getUTCMonth() !== month || dt.getUTCDate() !== day) continue;
     const dateISO = dt.toISOString().split('T')[0];
 
     let rest = line.slice(consumed)

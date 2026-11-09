@@ -809,7 +809,7 @@ export async function GET(request: Request) {
 
         // Helper to format date
         const fmtEvtDate = (iso: string) =>
-          new Date(iso + 'T00:00:00').toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+          new Date(iso + 'T00:00:00').toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
 
         if (evt0) {
           currentMoment = evt0.title;
@@ -1057,7 +1057,7 @@ export async function GET(request: Request) {
       const d = new Date(iso + (iso.length === 10 ? 'T00:00:00' : ''));
       if (isNaN(d.getTime())) return iso;
       const diffDays = Math.round((d.getTime() - now) / 86400000);
-      const dateStr = d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+      const dateStr = d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
       if (diffDays === 0) return `${dateStr} (today)`;
       if (diffDays === 1) return `${dateStr} (tomorrow)`;
       if (diffDays > 0 && diffDays <= 14) return `${dateStr} (in ${diffDays}d)`;
@@ -1121,7 +1121,7 @@ export async function GET(request: Request) {
             // Forward-looking only. The client drops past-dated moments when it
             // renders, so including them here would let stale events eat the
             // 4-per-artist cap and silently empty an artist's Release Radar.
-            return diff >= 0 && diff <= 35; // today + next ~5 weeks
+            return diff >= 0 && d.getFullYear() <= new Date(now).getFullYear() + 1; // include confirmed dates through next year
           })
           .map((e: ParsedEvent) => {
             const title = cleanTitle(e.title);

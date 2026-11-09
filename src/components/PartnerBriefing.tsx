@@ -1,5 +1,6 @@
 'use client';
 
+import { parseBriefingDate, daysUntilBriefingDate } from '@/lib/briefingDates';
 import { useState, useEffect, useCallback, type CSSProperties, type ReactNode } from 'react';
 import PulseNav from './PulseNav';
 
@@ -468,24 +469,8 @@ const ST_MONITORING:   CampaignStatus = { label: 'Monitoring',   color: '#7D776E
 
 const RELEASE_RE = /release|album|single|drop|official\s*video|visuali|lyric|\bep\b|mixtape|deluxe|premiere/i;
 
-/** Parse a "12 Jun" style label into days-from-now (assumes nearest occurrence). */
-function daysUntilLabel(d: string | null): number | null {
-  if (!d) return null;
-  const m = d.match(/(\d{1,2})\s+([A-Za-z]{3})/);
-  if (!m) return null;
-  const months = ['jan','feb','mar','apr','may','jun','jul','aug','sep','oct','nov','dec'];
-  const mon = months.indexOf(m[2].toLowerCase());
-  if (mon < 0) return null;
-  const day = parseInt(m[1], 10);
-  const now = new Date();
-  let dt = new Date(now.getFullYear(), mon, day);
-  const diff = Math.round((dt.getTime() - now.getTime()) / 86400000);
-  if (diff < -120) dt = new Date(now.getFullYear() + 1, mon, day); // wrapped into next year
-  return Math.round((dt.getTime() - Date.now()) / 86400000);
-}
-
 function deriveStatus(fc: FocusCampaign): CampaignStatus {
-  const du = daysUntilLabel(fc.nextDate);
+  const du = daysUntilBriefingDate(fc.nextDate);
   const isRelease = RELEASE_RE.test(fc.nextLabel || '') || RELEASE_RE.test(fc.afterLabel || '');
   if (du != null && du >= -3 && du <= 10 && isRelease) return ST_RELEASE_WEEK;
   if (du != null && du >= -3 && du <= 45 && isRelease) return ST_NEXT_RELEASE;
@@ -1013,7 +998,7 @@ export default function PartnerBriefing({
                 fontFamily: "Georgia, 'Times New Roman', serif",
                 fontStyle: 'italic',
               }}>
-                What&apos;s coming next — the key release moments and campaign activity across the roster.
+                What&apos;s coming next — the key release moments and campaign activity across the roster, including confirmed dates through next year.
               </p>
             </div>
 
@@ -1028,7 +1013,7 @@ export default function PartnerBriefing({
                     fontSize: 24, fontWeight: 900, lineHeight: 1,
                     fontFamily: "Georgia, 'Times New Roman', serif",
                   }}>
-                    {new Date(bigDay[0] + 'T00:00:00').toLocaleDateString('en-GB', { day: 'numeric', month: 'long' })}
+                    {new Date(bigDay[0] + 'T00:00:00').toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}
                   </span>
                   <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase' as const, color: 'rgba(255,255,255,0.4)' }}>
                     Major Release Day
@@ -1083,7 +1068,7 @@ export default function PartnerBriefing({
                 const isPast = diffDays < 0;
                 const isHot = hotDates.has(dateStr);
                 const isBigDay = bigDay && bigDay[0] === dateStr;
-                const fmtDate = dateObj.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }).toUpperCase();
+                const fmtDate = dateObj.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }).toUpperCase();
 
                 // Skip if it's the big day (already shown above)
                 if (isBigDay) return null;
@@ -1233,12 +1218,7 @@ export default function PartnerBriefing({
                           {/* ── NEXT / AFTER dates — front and centre ── */}
                           {(() => {
                             // Determine if "next" date is actually in the past
-                            const parseShortDate = (d: string | null) => {
-                              if (!d) return null;
-                              const p = new Date(d + ' ' + new Date().getFullYear());
-                              return isNaN(p.getTime()) ? null : p;
-                            };
-                            const nextDateObj = parseShortDate(fc.nextDate);
+                            const nextDateObj = parseBriefingDate(fc.nextDate);
                             const isNextPast = nextDateObj != null && nextDateObj.getTime() < Date.now() - 86400000;
 
                             // If the "next" event already happened, shift labels:
@@ -1421,8 +1401,8 @@ export default function PartnerBriefing({
                         </div>
                         {/* Next date badge on hero */}
                         {fc.nextDate && (() => {
-                          const p = new Date(fc.nextDate + ' ' + new Date().getFullYear());
-                          const isPast = !isNaN(p.getTime()) && p.getTime() < Date.now() - 86400000;
+                          const p = parseBriefingDate(fc.nextDate);
+                          const isPast = p != null && !isNaN(p.getTime()) && p.getTime() < Date.now() - 86400000;
                           return (
                             <div style={{ position: 'absolute', top: 10, right: 10, padding: '4px 10px', borderRadius: 6, background: 'rgba(255,255,255,0.92)', backdropFilter: 'blur(6px)' }}>
                               <div style={{ fontSize: 10, fontWeight: 800, letterSpacing: '0.08em', textTransform: 'uppercase' as const, color: SMOKE }}>{isPast ? 'Last' : 'Next'}</div>
@@ -1441,7 +1421,7 @@ export default function PartnerBriefing({
                         </div>
                         {/* NEXT + AFTER — date-aware labels */}
                         {(() => {
-                          const p = fc.nextDate ? new Date(fc.nextDate + ' ' + new Date().getFullYear()) : null;
+                          const p = fc.nextDate ? parseBriefingDate(fc.nextDate) : null;
                           const isPast = p != null && !isNaN(p.getTime()) && p.getTime() < Date.now() - 86400000;
                           return (
                             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 8 }}>
@@ -1506,8 +1486,8 @@ export default function PartnerBriefing({
                         </div>
                         <div style={{ fontSize: 11, color: SMOKE }}>{fc.nowDetail}</div>
                         {fc.nextDate && (() => {
-                          const p = new Date(fc.nextDate + ' ' + new Date().getFullYear());
-                          const isPast = !isNaN(p.getTime()) && p.getTime() < Date.now() - 86400000;
+                          const p = parseBriefingDate(fc.nextDate);
+                          const isPast = p != null && !isNaN(p.getTime()) && p.getTime() < Date.now() - 86400000;
                           return (
                           <div style={{ fontSize: 11, color: isPast ? SMOKE : ACCENT.green, fontWeight: 700, marginTop: 4 }}>
                             {isPast ? 'Last' : 'Next'}: {fc.nextDate}

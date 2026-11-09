@@ -1,6 +1,7 @@
 import { getLabelWorkspace, labelPlanSlug } from '@/lib/labels';
 import { NextRequest, NextResponse } from 'next/server';
-import { savePlan, listPlans, generateSlug, updateSavedPlan, loadPlan } from '@/lib/planStore';
+import { revalidatePath } from 'next/cache';
+import { savePlan, listPlans, generateSlug, updateSavedPlan, loadPlan, deletePlan } from '@/lib/planStore';
 import { generatePlan, type ChannelContext, type GeneratedPlan } from '@/lib/planEngine';
 import { invalidateBriefingCache } from '@/lib/briefingCache';
 import { resolveMarket, DEFAULT_MARKET } from '@/lib/market';
@@ -158,4 +159,25 @@ export async function GET(req: NextRequest) {
     ? await getPlansForMarket(marketParam)
     : await listPlans();
   return NextResponse.json({ plans, market: marketParam ?? null });
+}
+
+/** Delete only the saved rollout; the artist and channel remain available. */
+export async function DELETE(req: NextRequest) {
+  try {
+    const { slug } = await req.json();
+    if (typeof slug !== 'string' || !/^[a-z0-9-]+$/.test(slug)) {
+      return NextResponse.json({ error: 'A valid campaign slug is required' }, { status: 400 });
+    }
+    const saved = await loadPlan(slug);
+    if (!saved) return NextResponse.json({ error: 'Campaign not found' }, { status: 404 });
+    await deletePlan(slug);
+    await invalidateBriefingCache(saved.market ?? DEFAULT_MARKET);
+    revalidatePath('/coach');
+    revalidatePath(`/coach/${slug}`);
+    revalidatePath('/weekly-pulse/campaign-briefing');
+    return NextResponse.json({ ok: true, slug });
+  } catch (err) {
+    console.error('DELETE /api/coach error:', err);
+    return NextResponse.json({ error: 'Could not delete campaign' }, { status: 500 });
+  }
 }
