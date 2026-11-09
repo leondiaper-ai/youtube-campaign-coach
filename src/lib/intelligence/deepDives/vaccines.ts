@@ -62,8 +62,9 @@ export const VACCINES_DEEP_DIVE: DeepDiveContext = {
   ],
   knownCampaignPlans: ['2026 fifteenth-anniversary touring is publicly announced by promoters. The new album calendar, asset plan and proposed YouTube programme remain unconfirmed.'],
   youtubePlatformOpportunities: [
-    { point: 'Pursue Weekly Release Support first with a six-week deliverable plan.', basis: 'Priority judgement from the supplied brief, not confirmed access or support.', needTags: ['album_campaign'] },
-    { point: 'Explore Top Fans, London OOH and Station; treat Music Night / Release Party as a stretch ask.', basis: 'Screenshot-origin opportunities. Eligibility, mechanics, inventory, rights, artist availability and the brief’s six-week requirement assumption all need confirmation with YouTube.', needTags: ['community_activation', 'long_form_event', 'named_series'] },
+    { point: 'Pitch release support with album week and the six-week follow-through as one package.', basis: 'VMG pitch intent. Artist participation, regular full-song uploads, Shorts and Community activity support a stronger case for higher-tier partner backing; no placement or universal eligibility threshold is confirmed.', needTags: ['album_campaign', 'hero_continuity', 'shorts_programme'] },
+    { point: 'Pitch Top Fans, London OOH, Music Night / release party and Stations.', basis: 'VMG pitch targets supported by active artist involvement, strong creative assets and a deliverable editorial/channel programme. Station scope combines catalogue, live, lyric and future music. Approval, inventory, lead times and rights apply.', needTags: ['community_activation', 'long_form_event', 'named_series'] },
+    { point: 'Pitch Sky TV support for a suitable marquee-asset launch.', basis: 'User-supplied VMG pitch route when a documentary, full show or other marquee film is ready for a bigger launch. Separate from YouTube programme support; subject to asset readiness, rights, timing and partner approval.', needTags: ['long_form_event'] },
   ],
   openQuestions: [
     'What are the confirmed release dates, new artwork and primary asset?',
