@@ -1,0 +1,286 @@
+{
+  "capturedAt": "2026-11-09T15:25:28.549Z",
+  "source": "/vaccines/research-2026-11-09.json",
+  "matchBasis": "Conservative normalized song title matching in retrieved metadata; duration and title keywords distinguish support types. Not a manual viewing census.",
+  "scope": {
+    "catalogue": "Ten largest retrieved upload videos, with all matched support through capture.",
+    "album": "Five primary Pink Carnations song uploads; support limited to 20 Sep 2023–12 Apr 2024."
+  },
+  "catalogue": [
+    {
+      "song": "If You Wanna",
+      "leadId": "uQKjI6395iU",
+      "leadViews": 12335543,
+      "support": {
+        "live": [
+          "-snRMht5m4Y",
+          "Bush4gqBCio",
+          "y1RfEqZvrJI",
+          "QJI90478MTE",
+          "P-I5oiJOOi8",
+          "yoFqrC-3Wjw",
+          "w9p916QH-nI",
+          "te6Yo5DP42A"
+        ],
+        "lyric": [],
+        "story": [],
+        "alternate": [
+          "8RSjF6wCy_U",
+          "sjrWDgomffE"
+        ],
+        "short": [
+          "DnqvIA-pQL4"
+        ]
+      },
+      "nextMove": "Re-surface the strongest existing performance for the anniversary."
+    },
+    {
+      "song": "Post Break-Up Sex",
+      "leadId": "dU9hrd35Dsg",
+      "leadViews": 9324875,
+      "support": {
+        "live": [
+          "OndiJ_Vxw7w",
+          "GHL8YnYwics"
+        ],
+        "lyric": [],
+        "story": [
+          "G_arRbyqmJU",
+          "kXZ8E4VR-tc"
+        ],
+        "alternate": [
+          "FKbRgdU4kks"
+        ],
+        "short": [
+          "G_arRbyqmJU"
+        ]
+      },
+      "nextMove": "Pair the existing making-of with a new band reflection."
+    },
+    {
+      "song": "I Always Knew",
+      "leadId": "84no_HITKFo",
+      "leadViews": 8495921,
+      "support": {
+        "live": [
+          "d1rWjWEZp2I"
+        ],
+        "lyric": [],
+        "story": [],
+        "alternate": [],
+        "short": []
+      },
+      "nextMove": "Test one lyric-led catalogue entry; check rights first."
+    },
+    {
+      "song": "Teenage Icon",
+      "leadId": "bFUKrsDDChE",
+      "leadViews": 4377908,
+      "support": {
+        "live": [
+          "dEgVwKkU3R0"
+        ],
+        "lyric": [],
+        "story": [],
+        "alternate": [],
+        "short": []
+      },
+      "nextMove": "Test a chorus clip from cleared performance footage."
+    },
+    {
+      "song": "Norgaard",
+      "leadId": "8VI3q4T-1Jc",
+      "leadViews": 3940750,
+      "support": {
+        "live": [
+          "kZwjZiJsM5g",
+          "SbLMWoAnPiQ",
+          "4QbR_Rj-0xo"
+        ],
+        "lyric": [],
+        "story": [],
+        "alternate": [],
+        "short": []
+      },
+      "nextMove": "Curate existing performances before filming another."
+    },
+    {
+      "song": "Wetsuit",
+      "leadId": "5tr5ptnUoDE",
+      "leadViews": 3625838,
+      "support": {
+        "live": [
+          "sc8WMBwZUNA",
+          "ekE7A6ayFz8"
+        ],
+        "lyric": [],
+        "story": [],
+        "alternate": [],
+        "short": [
+          "CJcyg1gxfKs"
+        ]
+      },
+      "nextMove": "Invite new fan memories around its existing fan-video story."
+    },
+    {
+      "song": "No Hope",
+      "leadId": "S_3eEPpmKwE",
+      "leadViews": 3326853,
+      "support": {
+        "live": [],
+        "lyric": [],
+        "story": [],
+        "alternate": [],
+        "short": []
+      },
+      "nextMove": "Check live / lyric availability beyond this channel first."
+    },
+    {
+      "song": "Handsome",
+      "leadId": "gV6eODKYHXI",
+      "leadViews": 2728174,
+      "support": {
+        "live": [
+          "XLom7WwwA2A",
+          "3hgM5Hv90FE",
+          "dZizzTY4oYw",
+          "SaxLhGllJf4"
+        ],
+        "lyric": [],
+        "story": [],
+        "alternate": [
+          "mYTymm8_YLM"
+        ],
+        "short": []
+      },
+      "nextMove": "Pick the strongest existing live cut; avoid duplication."
+    },
+    {
+      "song": "Wreckin’ Bar",
+      "leadId": "0sOq6Rrre7c",
+      "leadViews": 2217259,
+      "support": {
+        "live": [
+          "Xkz1e2-Hdic",
+          "FjhK7FJOkbg"
+        ],
+        "lyric": [],
+        "story": [],
+        "alternate": [
+          "y_5JbZV9HiM"
+        ],
+        "short": [
+          "REQ3Jk3BHnU"
+        ]
+      },
+      "nextMove": "Use a chorus clip to point into an existing full performance."
+    },
+    {
+      "song": "I Can’t Quit",
+      "leadId": "6z6wMZAYaxE",
+      "leadViews": 2001794,
+      "support": {
+        "live": [],
+        "lyric": [],
+        "story": [],
+        "alternate": [],
+        "short": [
+          "8RrNLkucpCo"
+        ]
+      },
+      "nextMove": "Check clearance for a fresh lyric or live-song test."
+    }
+  ],
+  "lastAlbum": [
+    {
+      "song": "Heartbreak Kid",
+      "leadId": "nIplJnJLre0",
+      "leadViews": 299342,
+      "support": {
+        "live": [],
+        "lyric": [
+          "aoQ0KVHNNgg"
+        ],
+        "story": [],
+        "alternate": [],
+        "short": [
+          "hzefTClaJWE"
+        ]
+      },
+      "nextFullVersionDays": 83
+    },
+    {
+      "song": "Sometimes, I Swear",
+      "leadId": "R4VTfu95HHc",
+      "leadViews": 205071,
+      "support": {
+        "live": [],
+        "lyric": [
+          "G336e0fn_6s"
+        ],
+        "story": [],
+        "alternate": [],
+        "short": [
+          "rlJQASQVWTg",
+          "lWPYJ-s-oXc"
+        ]
+      },
+      "nextFullVersionDays": 65
+    },
+    {
+      "song": "Lunar Eclipse",
+      "leadId": "KPCzMoANomA",
+      "leadViews": 157088,
+      "support": {
+        "live": [],
+        "lyric": [
+          "0tG2LZWE91E"
+        ],
+        "story": [],
+        "alternate": [],
+        "short": [
+          "C2jVmdYnX0k",
+          "l_ml_7FkcHI",
+          "LmvgDMhhKn4"
+        ]
+      },
+      "nextFullVersionDays": 33
+    },
+    {
+      "song": "Love To Walk Away",
+      "leadId": "U-AgIXURXwI",
+      "leadViews": 166996,
+      "support": {
+        "live": [],
+        "lyric": [],
+        "story": [],
+        "alternate": [],
+        "short": [
+          "GOvoK2jPKc0"
+        ]
+      },
+      "nextFullVersionDays": null
+    },
+    {
+      "song": "Discount De Kooning",
+      "leadId": "ncS6WWSWguI",
+      "leadViews": 193859,
+      "support": {
+        "live": [],
+        "lyric": [],
+        "story": [],
+        "alternate": [],
+        "short": [
+          "TM9qsKYAOkQ"
+        ]
+      },
+      "nextFullVersionDays": null
+    }
+  ],
+  "limitations": [
+    "Not found means not matched in the retrieved uploads, not never made.",
+    "Topic, partner channels, untitled clips and unlabelled versions may be missed.",
+    "Story includes short Behind The Song clips; Shorts use a duration proxy, not verified feed placement.",
+    "Support presence is an inventory check, not evidence of useful sequencing, conversion or a reason to fill every box."
+  ]
+}
