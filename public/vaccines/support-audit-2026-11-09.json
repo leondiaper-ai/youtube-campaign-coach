@@ -12,6 +12,9 @@
       "leadId": "uQKjI6395iU",
       "leadViews": 12335543,
       "support": {
+        "audio": [
+          "4jRG840_LMs"
+        ],
         "live": [
           "-snRMht5m4Y",
           "Bush4gqBCio",
@@ -39,6 +42,9 @@
       "leadId": "dU9hrd35Dsg",
       "leadViews": 9324875,
       "support": {
+        "audio": [
+          "rMq4ePoaZrc"
+        ],
         "live": [
           "OndiJ_Vxw7w",
           "GHL8YnYwics"
@@ -62,6 +68,7 @@
       "leadId": "84no_HITKFo",
       "leadViews": 8495921,
       "support": {
+        "audio": [],
         "live": [
           "d1rWjWEZp2I"
         ],
@@ -77,6 +84,7 @@
       "leadId": "bFUKrsDDChE",
       "leadViews": 4377908,
       "support": {
+        "audio": [],
         "live": [
           "dEgVwKkU3R0"
         ],
@@ -92,6 +100,7 @@
       "leadId": "8VI3q4T-1Jc",
       "leadViews": 3940750,
       "support": {
+        "audio": [],
         "live": [
           "kZwjZiJsM5g",
           "SbLMWoAnPiQ",
@@ -109,6 +118,9 @@
       "leadId": "5tr5ptnUoDE",
       "leadViews": 3625838,
       "support": {
+        "audio": [
+          "386_wksHZg0"
+        ],
         "live": [
           "sc8WMBwZUNA",
           "ekE7A6ayFz8"
@@ -127,6 +139,9 @@
       "leadId": "S_3eEPpmKwE",
       "leadViews": 3326853,
       "support": {
+        "audio": [
+          "7Wt5QSXcQ_Y"
+        ],
         "live": [],
         "lyric": [],
         "story": [],
@@ -140,6 +155,7 @@
       "leadId": "gV6eODKYHXI",
       "leadViews": 2728174,
       "support": {
+        "audio": [],
         "live": [
           "XLom7WwwA2A",
           "3hgM5Hv90FE",
@@ -160,6 +176,9 @@
       "leadId": "0sOq6Rrre7c",
       "leadViews": 2217259,
       "support": {
+        "audio": [
+          "voTvpsLNk9A"
+        ],
         "live": [
           "Xkz1e2-Hdic",
           "FjhK7FJOkbg"
@@ -180,6 +199,7 @@
       "leadId": "6z6wMZAYaxE",
       "leadViews": 2001794,
       "support": {
+        "audio": [],
         "live": [],
         "lyric": [],
         "story": [],
@@ -197,6 +217,7 @@
       "leadId": "nIplJnJLre0",
       "leadViews": 299342,
       "support": {
+        "audio": [],
         "live": [],
         "lyric": [
           "aoQ0KVHNNgg"
@@ -214,6 +235,7 @@
       "leadId": "R4VTfu95HHc",
       "leadViews": 205071,
       "support": {
+        "audio": [],
         "live": [],
         "lyric": [
           "G336e0fn_6s"
@@ -232,6 +254,7 @@
       "leadId": "KPCzMoANomA",
       "leadViews": 157088,
       "support": {
+        "audio": [],
         "live": [],
         "lyric": [
           "0tG2LZWE91E"
@@ -251,6 +274,7 @@
       "leadId": "U-AgIXURXwI",
       "leadViews": 166996,
       "support": {
+        "audio": [],
         "live": [],
         "lyric": [],
         "story": [],
@@ -266,6 +290,7 @@
       "leadId": "ncS6WWSWguI",
       "leadViews": 193859,
       "support": {
+        "audio": [],
         "live": [],
         "lyric": [],
         "story": [],
@@ -281,6 +306,7 @@
     "Not found means not matched in the retrieved uploads, not never made.",
     "Topic, partner channels, untitled clips and unlabelled versions may be missed.",
     "Story includes short Behind The Song clips; Shorts use a duration proxy, not verified feed placement.",
-    "Support presence is an inventory check, not evidence of useful sequencing, conversion or a reason to fill every box."
+    "Support presence is an inventory check, not evidence of useful sequencing, conversion or a reason to fill every box.",
+    "Official audio here means a matched upload explicitly titled Official Audio, excluding demos/remixes; Topic/OAC delivery must be checked before proposing duplicates."
   ]
 }
