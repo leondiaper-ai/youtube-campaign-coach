@@ -4,11 +4,11 @@ import type { DeepDiveContext } from '../types';
 export const VACCINES_DEEP_DIVE: DeepDiveContext = {
   artistSlug: 'thevaccinesuk',
   artistName: 'The Vaccines',
-  title: 'The Vaccines × YouTube — Fifteen years in. What comes next?',
+  title: 'The Vaccines × YouTube — The next album campaign',
   deckUpdated: '2026-11-09',
   deckUrl: '/vaccines',
   dataCapturedAt: '2026-11-09',
-  coreThesis: 'Use the debut’s 2026 fifteenth-anniversary story to reconnect fans, then carry attention into the next album. Six selected debut-era videos total 32,671,448 lifetime views. Keep what worked on Pink Carnations: four primary visualisers hold 66.3% of eight identified album video assets’ views. Change what was missing: no identified same-song long-form follow-up at +7–14 days, and zero new album long-form / seven clips in the 13 weeks after release. Propose four full-video slots in six weeks plus two Shorts and one Community post per week, with one coherent visual identity. Proposed cadence and viewer pathways are not established uplift.',
+  coreThesis: 'Begin with the channel: 141,000 public subscribers, 91,649,008 lifetime views and 60 days since the latest upload at capture. Review Pink Carnations through its eight identified album video assets: visualisers contributed 66.3% of lifetime viewing, but same-song follow-ups were late and no new album long-form appears in the thirteen weeks after release. Build the next campaign around a coherent visual world, a fuller multi-format rhythm and clear post-release support. Catalogue strength and the existing fifteenth-anniversary story support the warm-up rather than lead the whole review. Station programming is integrated into the deck. All rollout, creative and partner opportunities remain proposals.',
   channelStrengths: [
     { point: 'The debut offers a substantial catalogue foundation.', basis: 'Six selected debut-era videos total 32,671,448 lifetime views; fifteenth-anniversary touring is already happening in 2026. Use it as a bridge to new music, not a current-traffic forecast.', needTags: ['catalogue_activation'] },
     { point: 'Primary visualisers already have a substantial role.', basis: 'Four primary visualisers: 723,014 lifetime views at 9 Nov 2026. Sometimes, I Swear leads the album non-MV assets at 205,071.', needTags: ['visualiser'] },
@@ -26,7 +26,7 @@ export const VACCINES_DEEP_DIVE: DeepDiveContext = {
   ],
   strategicOpportunities: [
     { point: 'Reserve a distinct follow-up while commissioning the primary.', basis: 'Proposed 7–14 day test; not a proven optimum. Performance, lyric treatment or band story should have a separate reason to watch.', needTags: ['follow_up_7_14'] },
-    { point: 'Connect catalogue to the new record through programming.', basis: 'Proposed homepage, playlist and Station run. Rights and Station access need confirming.', needTags: ['catalogue_activation', 'named_series'] },
+    { point: 'Connect catalogue to the new record through programming.', basis: 'Proposed homepage, playlist and Station run shown inside the campaign deck, not as a separate page. Rights and Station access need confirming.', needTags: ['catalogue_activation', 'named_series'] },
   ],
   recommendedContentDirections: [
     { point: 'Three-week anniversary warm-up: the song, the band, the next chapter.', basis: 'Proposed two Shorts and one Community conversation per week, one longer retrospective if existing footage supports it. Fan memories and band reflections should lead into later records and the priority new song.', needTags: ['catalogue_activation', 'shorts_programme'] },

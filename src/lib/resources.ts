@@ -61,7 +61,7 @@ export const RESOURCE_GROUPS: ResourceGroup[] = [
     items: [
       {
         title: 'The Vaccines',
-        blurb: 'Fifteen years of the debut as a way into the next record. A clear keep/change review of Pink Carnations, its publishing cadence, and a six-week multi-format plan, with a Station proposal and Watcher evidence.',
+        blurb: 'The channel today, the Pink Carnations campaign, and a fuller multi-format plan for the next record. Includes campaign ideas, YouTube opportunities and Station programming inside the deck; catalogue and the fifteenth anniversary support the warm-up.',
         href: '/vaccines',
         kind: 'Deck',
         updated: 'November 2026',

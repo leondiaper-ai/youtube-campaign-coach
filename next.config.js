@@ -1,6 +1,9 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   images: {remotePatterns: [{protocol: 'https', hostname: 'i.ytimg.com', pathname: '/vi/**'}]},
+  async redirects() {
+    return [{ source: '/vaccines/station', destination: '/vaccines#station', permanent: false }];
+  },
   async rewrites() {
     return [
       // The Amyl signing deck is a self-contained static file in /public.
@@ -9,7 +12,6 @@ const nextConfig = {
       { source: '/kol',  destination: '/kol/index.html' },
       { source: '/chvrches', destination: '/chvrches/index.html' },
       { source: '/vaccines', destination: '/vaccines/index.html' },
-      { source: '/vaccines/station', destination: '/vaccines/station.html' },
       { source: '/ktrap', destination: '/ktrap/index.html' },
       { source: '/palaye', destination: '/palaye/index.html' },
       { source: '/idles', destination: '/idles/index.html' },
