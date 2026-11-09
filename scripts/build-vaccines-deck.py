@@ -57,7 +57,7 @@ slide('cadence','Album day and the thirteen weeks after',f'''
 <p class="timeline-legend"><i class="full-key"></i>Full-song video <i class="clip-key"></i>Short clip · upload order; dates exact, spacing schematic</p>
 <p class="lead"><b>Seven short clips in the next 13 weeks.</b><br>Tour and TV moments continued. The album had no further full-song video in this retrieved period.</p>
 <p class="takeaway"><b>Next time:</b> protect album week and six weeks of full-video follow-through. <a href="#rollout">See the album-week plan →</a></p>
-{source('YouTube upload metadata. Bars distinguish formats; heights do not encode views. View labels are lifetime totals at 9 Nov 2026. “Short clip” uses duration, not verified Shorts-feed placement. Proposed rhythm: full videos in weeks 1, 2, 4 and 6, supported by two Shorts and one Community post per week.')}
+{source('YouTube upload metadata. Bars distinguish formats; heights do not encode views. View labels are lifetime totals at 9 Nov 2026. “Short clip” uses duration, not verified Shorts-feed placement. Proposed full-video slots: album day, +7–14 days, week 4 and week 6. Album week gets its own launch package; the follow-up run uses two Shorts and one Community conversation per week.')}
 ''')
 slide('assets','What to double down on',f'''
 {label('The assets · evidence → action')}<h2>Three useful formats.<br><span class="serif">Give each a clear job.</span></h2>
