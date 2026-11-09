@@ -4,12 +4,13 @@ import type { DeepDiveContext } from '../types';
 export const VACCINES_DEEP_DIVE: DeepDiveContext = {
   artistSlug: 'thevaccinesuk',
   artistName: 'The Vaccines',
-  title: 'The Vaccines × YouTube — Make the next record last longer',
+  title: 'The Vaccines × YouTube — Fifteen years in. What comes next?',
   deckUpdated: '2026-11-09',
   deckUrl: '/vaccines',
   dataCapturedAt: '2026-11-09',
-  coreThesis: 'Keep the Pink Carnations visual language and plan its second chapter. Four primary visualisers hold 723,014 of the eight identified album video assets’ 1,090,830 lifetime views (66.3%). No further album long-form appears after 12 January through 12 April 2024 in the retrieved list. Prioritise a primary visual plus one distinct follow-up; test a current new-song performance before commissioning a live series. These are working proposals, not confirmed campaign plans.',
+  coreThesis: 'Use the debut’s 2026 fifteenth-anniversary story to reconnect fans, then carry attention into the next album. Six selected debut-era videos total 32,671,448 lifetime views. Keep what worked on Pink Carnations: four primary visualisers hold 66.3% of eight identified album video assets’ views. Change what was missing: no identified same-song long-form follow-up at +7–14 days, and zero new album long-form / seven clips in the 13 weeks after release. Propose four full-video slots in six weeks plus two Shorts and one Community post per week, with one coherent visual identity. Proposed cadence and viewer pathways are not established uplift.',
   channelStrengths: [
+    { point: 'The debut offers a substantial catalogue foundation.', basis: 'Six selected debut-era videos total 32,671,448 lifetime views; fifteenth-anniversary touring is already happening in 2026. Use it as a bridge to new music, not a current-traffic forecast.', needTags: ['catalogue_activation'] },
     { point: 'Primary visualisers already have a substantial role.', basis: 'Four primary visualisers: 723,014 lifetime views at 9 Nov 2026. Sometimes, I Swear leads the album non-MV assets at 205,071.', needTags: ['visualiser'] },
     { point: 'Catalogue lyrics and live sessions offer creative precedent.', basis: 'All My Friends Are Falling In Love lyric video: 1,688,915. Your Love Is My Favourite Band live session: 552,488. Both from 2018; not matched-age benchmarks.', needTags: ['lyric_video', 'performance_as_hero'] },
     { point: 'Several substantial catalogue entry points exist.', basis: 'If You Wanna, Post Break-Up Sex and I Always Knew total 30,156,339 lifetime views: 40.5% of retrieved-upload viewing, not today’s traffic share.', needTags: ['catalogue_activation'] },
@@ -28,18 +29,19 @@ export const VACCINES_DEEP_DIVE: DeepDiveContext = {
     { point: 'Connect catalogue to the new record through programming.', basis: 'Proposed homepage, playlist and Station run. Rights and Station access need confirming.', needTags: ['catalogue_activation', 'named_series'] },
   ],
   recommendedContentDirections: [
+    { point: 'Three-week anniversary warm-up: the song, the band, the next chapter.', basis: 'Proposed two Shorts and one Community conversation per week, one longer retrospective if existing footage supports it. Fan memories and band reflections should lead into later records and the priority new song.', needTags: ['catalogue_activation', 'shorts_programme'] },
     { point: 'Postcards from the next record.', basis: 'Working idea: related real-world visualisers with one place, one action and one song. Rooted in the last campaign’s four visualisers; new artwork and branding not agreed.', needTags: ['visualiser'] },
     { point: 'The small room, the big chorus.', basis: 'Working idea: one new song and one fan favourite, two full songs, 4–6 clips and one short conversation. Budget, availability and rights not confirmed.', needTags: ['performance_as_hero', 'low_band_time'] },
   ],
   recommendedCampaignArchitecture: [
-    { point: 'A six-week pilot with two long-form destinations and twelve distinct Shorts.', basis: 'Proposed primary in week one; follow-up in week two; two Shorts plus one Community conversation per week. Further long-form conditional on response and cost. Dates follow the confirmed release calendar.', needTags: ['release_sequencing', 'shorts_programme', 'hero_continuity'] },
+    { point: 'Four full-video slots across six weeks, twelve distinct Shorts and six Community conversations.', basis: 'Proposed primary in week 1, same-song performance in week 2 (+7–14 days), lyric treatment in week 4, then a second captured song or next confirmed release in week 6. Budget, rights and availability must support the programme; adjust to response.', needTags: ['release_sequencing', 'shorts_programme', 'hero_continuity'] },
     { point: 'Make every album track findable, then sustain the record.', basis: 'Audit existing Topic/audio delivery before adding anything. A new performance/film or song treatment after release addresses the observed 2024 gap.', needTags: ['album_campaign'] },
   ],
   existingSuccesses: [
     { point: 'Sometimes, I Swear is the highest-view identified album asset outside the music video.', basis: 'R4VTfu95HHc: primary visualiser, 205,071 lifetime views as at 9 Nov 2026.', needTags: ['visualiser'] },
   ],
   relevantHistoricalExamples: [
-    { point: 'Use all four reference decks for structure and questions, not transferred benchmarks.', basis: 'CHVRCHES: continuity; Ezra: counted publishing rhythm; IDLES: live as a destination; Amyl: existing-footage programming. The Vaccines’ data and identity determine this review.', needTags: ['hero_continuity', 'archive_live'] },
+    { point: 'The fifteenth-anniversary year is an existing catalogue story to continue.', basis: 'The debut was released in March 2011. The promoter lists 2026 anniversary shows, including November dates; the channel already carries 2026 anniversary material. Six selected original debut-era videos total 32,671,448 lifetime views, not current demand.', needTags: ['catalogue_activation', 'channel_reactivation'] },
   ],
   keyEvidence: [
     { claim: '241 upload entries retrieved; channel lifetime 91,649,008; subscribers 141,000.', evidenceClass: 'OBSERVED', trust: 'TRUSTED', sourceRef: '/vaccines/research-2026-11-09.json', observedAt: '2026-11-09' },
@@ -50,7 +52,7 @@ export const VACCINES_DEEP_DIVE: DeepDiveContext = {
     'No confirmed new album title, dates, budget, footage rights or artist availability supplied.',
     'Public API data only; no Studio retention, viewer journeys, paid/organic split or historical asset-level subscriber attribution.',
   ],
-  knownCampaignPlans: [],
+  knownCampaignPlans: ['2026 fifteenth-anniversary touring is publicly announced by promoters. The new album calendar, asset plan and proposed YouTube programme remain unconfirmed.'],
   youtubePlatformOpportunities: [
     { point: 'Pursue Weekly Release Support first with a six-week deliverable plan.', basis: 'Priority judgement from the supplied brief, not confirmed access or support.', needTags: ['album_campaign'] },
     { point: 'Explore Top Fans, London OOH and Station; treat Music Night / Release Party as a stretch ask.', basis: 'Screenshot-origin opportunities. Eligibility, mechanics, inventory, rights, artist availability and the brief’s six-week requirement assumption all need confirmation with YouTube.', needTags: ['community_activation', 'long_form_event', 'named_series'] },

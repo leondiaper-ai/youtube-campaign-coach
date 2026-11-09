@@ -31,6 +31,9 @@ for row in rows:
 window = [v for v in rows if '2023-09-20' <= v['publishedAt'][:10] <= '2024-04-12']
 assets = [v for v in window if v['id'] in overrides]
 clips = [v for v in window if 0 < v['durationSec'] <= 62]
+pre = [v for v in window if v['publishedAt'][:10] <= '2024-01-12']
+post = [v for v in window if v['publishedAt'][:10] > '2024-01-12']
+debut_ids = ['uQKjI6395iU', 'dU9hrd35Dsg', '8VI3q4T-1Jc', '5tr5ptnUoDE', '0sOq6Rrre7c', '_PfE9iLBvkU']
 assert len(assets) == 8 and len(clips) == 20 and len(window) == 28
 groups = []
 for name in ['Music video', 'Primary visualiser', 'Lyric visualiser']:
@@ -43,6 +46,8 @@ out = {
     'historySource': '/api/debug/snapshots?handle=%40thevaccinesuk',
     'releaseSource': 'https://shop.thevaccines.com/product/pick-up-full-of-pink-carnations',
     'releaseDate': '2024-01-12',
+    'anniversary': {'debutReleaseMonth': '2011-03', 'anniversaryYear': 2026, 'years': 15, 'selectedDebutVideoIds': debut_ids, 'selectedDebutVideoViews': sum(v['views'] for v in rows if v['id'] in debut_ids), 'source': 'https://www.destroyalllines.com/tours/the-vaccines', 'note': 'Anniversary touring is already underway; the proposed warm-up continues the story. Selected lifetime video totals are not current demand or all album consumption.'},
+    'cadence': {'throughAlbumDay': {'start': '2023-09-20', 'end': '2024-01-12', 'fullSongVideos': sum(v['id'] in overrides for v in pre), 'shortClips': sum(0 < v['durationSec'] <= 62 for v in pre)}, 'afterAlbumDay': {'start': '2024-01-13', 'end': '2024-04-12', 'weeks': 13, 'fullSongVideos': sum(v['id'] in overrides for v in post), 'shortClips': sum(0 < v['durationSec'] <= 62 for v in post)}, 'note': 'Retrieved public uploads, not a complete Topic/partner census. Proposed four full-video slots in six weeks are a future operating plan, not measured optimal cadence.'},
     'window': {'start': '2023-09-20', 'end': '2024-04-12', 'basis': 'Observed teaser through last retrieved 2024 clip; an analytical boundary, not an official campaign end.'},
     'coverage': {'retrieved': len(rows), 'playlistIds': catalogue['playlistIds'], 'capped': catalogue['capped'], 'visibleViews': sum(v['views'] for v in rows), 'note': 'Uploads playlist exhausted. OAC/linked uploads may exceed the channel publicVideoCount. Not a census of Topic, partner or fan channels.'},
     'campaign': {'assets': len(assets), 'views': sum(v['views'] for v in assets), 'formats': groups, 'clipCount': len(clips), 'clipViews': sum(v['views'] for v in clips), 'clipMedian': median(v['views'] for v in clips), 'lastLongform': '2024-01-12', 'representedTracks': 5, 'albumTracks': 10},

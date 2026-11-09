@@ -61,7 +61,7 @@ export const RESOURCE_GROUPS: ResourceGroup[] = [
     items: [
       {
         title: 'The Vaccines',
-        blurb: 'Pink Carnations reconstructed: the visualisers that carried the album, the post-release gap, a live-content test and a proposed six-week programme. Includes a separate Station proposal and exact Watcher source rows.',
+        blurb: 'Fifteen years of the debut as a way into the next record. A clear keep/change review of Pink Carnations, its publishing cadence, and a six-week multi-format plan, with a Station proposal and Watcher evidence.',
         href: '/vaccines',
         kind: 'Deck',
         updated: 'November 2026',

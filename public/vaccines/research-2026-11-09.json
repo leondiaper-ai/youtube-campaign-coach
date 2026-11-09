@@ -13,6 +13,38 @@
   "historySource": "/api/debug/snapshots?handle=%40thevaccinesuk",
   "releaseSource": "https://shop.thevaccines.com/product/pick-up-full-of-pink-carnations",
   "releaseDate": "2024-01-12",
+  "anniversary": {
+    "debutReleaseMonth": "2011-03",
+    "anniversaryYear": 2026,
+    "years": 15,
+    "selectedDebutVideoIds": [
+      "uQKjI6395iU",
+      "dU9hrd35Dsg",
+      "8VI3q4T-1Jc",
+      "5tr5ptnUoDE",
+      "0sOq6Rrre7c",
+      "_PfE9iLBvkU"
+    ],
+    "selectedDebutVideoViews": 32671448,
+    "source": "https://www.destroyalllines.com/tours/the-vaccines",
+    "note": "Anniversary touring is already underway; the proposed warm-up continues the story. Selected lifetime video totals are not current demand or all album consumption."
+  },
+  "cadence": {
+    "throughAlbumDay": {
+      "start": "2023-09-20",
+      "end": "2024-01-12",
+      "fullSongVideos": 8,
+      "shortClips": 13
+    },
+    "afterAlbumDay": {
+      "start": "2024-01-13",
+      "end": "2024-04-12",
+      "weeks": 13,
+      "fullSongVideos": 0,
+      "shortClips": 7
+    },
+    "note": "Retrieved public uploads, not a complete Topic/partner census. Proposed four full-video slots in six weeks are a future operating plan, not measured optimal cadence."
+  },
   "window": {
     "start": "2023-09-20",
     "end": "2024-04-12",
