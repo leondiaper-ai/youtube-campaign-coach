@@ -170,7 +170,9 @@ export async function GET(req: NextRequest) {
 
   const PROBES: Record<string, (id: number) => string> = {
     'spotify-stat':   (id) => `/api/artist/${id}/stat/spotify${q}`,
-    'youtube-stat':   (id) => `/api/artist/${id}/stat/youtube${q}`,
+    'youtube-stat':   (id) => `/api/artist/${id}/stat/youtube_channel${q}`,
+    'youtube-channel-views': (id) => `/api/artist/${id}/stat/youtube_channel?field=views${range}`,
+    'youtube-daily-views': (id) => `/api/artist/${id}/stat/youtube_artist?field=daily_views${range}`,
     'cm-stat':        (id) => `/api/artist/${id}/stat/cm${q}`,
     /* The platforms an intervention shows up on fastest. Shazam in
        particular is the closest thing to a pure "I just heard this and
