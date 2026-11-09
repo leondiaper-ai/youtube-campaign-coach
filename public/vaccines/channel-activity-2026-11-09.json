@@ -1,0 +1,755 @@
+{
+  "capturedAt": "2026-11-09T16:49:27.445Z",
+  "source": "Chartmetric YouTube artist daily_views time series",
+  "sourceEndpoint": "/api/chartmetric/inspect?artist=thevaccinesuk&probe=youtube-daily-views&since=2026-05-09&until=2026-11-09",
+  "artistName": "The Vaccines",
+  "chartmetricArtistId": 3751,
+  "matchedChannelId": "UCWLY9PpOMnI3Q66zwZdyzyA",
+  "upstreamSeriesLink": "https://charts.youtube.com/artist/%2Fm%2F0g54lp_",
+  "period": {
+    "start": "2026-05-09",
+    "end": "2026-11-05",
+    "days": 180,
+    "uniqueDays": 180,
+    "missingDays": [
+      "2026-06-21"
+    ],
+    "calendarDays": 181
+  },
+  "metric": {
+    "field": "youtube_artist.daily_views",
+    "totalViews": 2835749,
+    "averageDailyViews": null,
+    "scope": "Artist YouTube viewing (channel plus featured videos); not restricted to owned-channel uploads",
+    "averagePerReportedDay": 15754.16111111111
+  },
+  "dailyViews": [
+    {
+      "date": "2026-05-09",
+      "views": 14241
+    },
+    {
+      "date": "2026-05-10",
+      "views": 12925
+    },
+    {
+      "date": "2026-05-11",
+      "views": 15455
+    },
+    {
+      "date": "2026-05-12",
+      "views": 15980
+    },
+    {
+      "date": "2026-05-13",
+      "views": 15025
+    },
+    {
+      "date": "2026-05-14",
+      "views": 15468
+    },
+    {
+      "date": "2026-05-15",
+      "views": 15748
+    },
+    {
+      "date": "2026-05-16",
+      "views": 13287
+    },
+    {
+      "date": "2026-05-17",
+      "views": 12015
+    },
+    {
+      "date": "2026-05-18",
+      "views": 14004
+    },
+    {
+      "date": "2026-05-19",
+      "views": 14661
+    },
+    {
+      "date": "2026-05-20",
+      "views": 14948
+    },
+    {
+      "date": "2026-05-21",
+      "views": 15279
+    },
+    {
+      "date": "2026-05-22",
+      "views": 16000
+    },
+    {
+      "date": "2026-05-23",
+      "views": 14931
+    },
+    {
+      "date": "2026-05-24",
+      "views": 12920
+    },
+    {
+      "date": "2026-05-25",
+      "views": 14072
+    },
+    {
+      "date": "2026-05-26",
+      "views": 14364
+    },
+    {
+      "date": "2026-05-27",
+      "views": 15255
+    },
+    {
+      "date": "2026-05-28",
+      "views": 15457
+    },
+    {
+      "date": "2026-05-29",
+      "views": 15632
+    },
+    {
+      "date": "2026-05-30",
+      "views": 13708
+    },
+    {
+      "date": "2026-05-31",
+      "views": 12374
+    },
+    {
+      "date": "2026-06-01",
+      "views": 14234
+    },
+    {
+      "date": "2026-06-02",
+      "views": 14605
+    },
+    {
+      "date": "2026-06-03",
+      "views": 14715
+    },
+    {
+      "date": "2026-06-04",
+      "views": 14884
+    },
+    {
+      "date": "2026-06-05",
+      "views": 15222
+    },
+    {
+      "date": "2026-06-06",
+      "views": 13564
+    },
+    {
+      "date": "2026-06-07",
+      "views": 12800
+    },
+    {
+      "date": "2026-06-08",
+      "views": 14351
+    },
+    {
+      "date": "2026-06-09",
+      "views": 15139
+    },
+    {
+      "date": "2026-06-10",
+      "views": 15145
+    },
+    {
+      "date": "2026-06-11",
+      "views": 13812
+    },
+    {
+      "date": "2026-06-12",
+      "views": 14622
+    },
+    {
+      "date": "2026-06-13",
+      "views": 13236
+    },
+    {
+      "date": "2026-06-14",
+      "views": 11310
+    },
+    {
+      "date": "2026-06-15",
+      "views": 13247
+    },
+    {
+      "date": "2026-06-16",
+      "views": 14377
+    },
+    {
+      "date": "2026-06-17",
+      "views": 14249
+    },
+    {
+      "date": "2026-06-18",
+      "views": 14973
+    },
+    {
+      "date": "2026-06-19",
+      "views": 15958
+    },
+    {
+      "date": "2026-06-20",
+      "views": 14938
+    },
+    {
+      "date": "2026-06-22",
+      "views": 14693
+    },
+    {
+      "date": "2026-06-23",
+      "views": 15099
+    },
+    {
+      "date": "2026-06-24",
+      "views": 14711
+    },
+    {
+      "date": "2026-06-25",
+      "views": 15463
+    },
+    {
+      "date": "2026-06-26",
+      "views": 16093
+    },
+    {
+      "date": "2026-06-27",
+      "views": 14147
+    },
+    {
+      "date": "2026-06-28",
+      "views": 12605
+    },
+    {
+      "date": "2026-06-29",
+      "views": 13568
+    },
+    {
+      "date": "2026-06-30",
+      "views": 15141
+    },
+    {
+      "date": "2026-07-01",
+      "views": 15303
+    },
+    {
+      "date": "2026-07-02",
+      "views": 16495
+    },
+    {
+      "date": "2026-07-03",
+      "views": 16073
+    },
+    {
+      "date": "2026-07-04",
+      "views": 13961
+    },
+    {
+      "date": "2026-07-05",
+      "views": 13290
+    },
+    {
+      "date": "2026-07-06",
+      "views": 15235
+    },
+    {
+      "date": "2026-07-07",
+      "views": 15873
+    },
+    {
+      "date": "2026-07-08",
+      "views": 17138
+    },
+    {
+      "date": "2026-07-09",
+      "views": 16371
+    },
+    {
+      "date": "2026-07-10",
+      "views": 17271
+    },
+    {
+      "date": "2026-07-11",
+      "views": 15586
+    },
+    {
+      "date": "2026-07-12",
+      "views": 13360
+    },
+    {
+      "date": "2026-07-13",
+      "views": 15655
+    },
+    {
+      "date": "2026-07-14",
+      "views": 15092
+    },
+    {
+      "date": "2026-07-15",
+      "views": 14894
+    },
+    {
+      "date": "2026-07-16",
+      "views": 15734
+    },
+    {
+      "date": "2026-07-17",
+      "views": 16600
+    },
+    {
+      "date": "2026-07-18",
+      "views": 13860
+    },
+    {
+      "date": "2026-07-19",
+      "views": 12299
+    },
+    {
+      "date": "2026-07-20",
+      "views": 14853
+    },
+    {
+      "date": "2026-07-21",
+      "views": 14961
+    },
+    {
+      "date": "2026-07-22",
+      "views": 15782
+    },
+    {
+      "date": "2026-07-23",
+      "views": 16615
+    },
+    {
+      "date": "2026-07-24",
+      "views": 16518
+    },
+    {
+      "date": "2026-07-25",
+      "views": 14642
+    },
+    {
+      "date": "2026-07-26",
+      "views": 12544
+    },
+    {
+      "date": "2026-07-27",
+      "views": 15030
+    },
+    {
+      "date": "2026-07-28",
+      "views": 15428
+    },
+    {
+      "date": "2026-07-29",
+      "views": 15499
+    },
+    {
+      "date": "2026-07-30",
+      "views": 15540
+    },
+    {
+      "date": "2026-07-31",
+      "views": 16030
+    },
+    {
+      "date": "2026-08-01",
+      "views": 15146
+    },
+    {
+      "date": "2026-08-02",
+      "views": 13028
+    },
+    {
+      "date": "2026-08-03",
+      "views": 16740
+    },
+    {
+      "date": "2026-08-04",
+      "views": 17191
+    },
+    {
+      "date": "2026-08-05",
+      "views": 16753
+    },
+    {
+      "date": "2026-08-06",
+      "views": 16384
+    },
+    {
+      "date": "2026-08-07",
+      "views": 16773
+    },
+    {
+      "date": "2026-08-08",
+      "views": 14750
+    },
+    {
+      "date": "2026-08-09",
+      "views": 13547
+    },
+    {
+      "date": "2026-08-10",
+      "views": 16324
+    },
+    {
+      "date": "2026-08-11",
+      "views": 17585
+    },
+    {
+      "date": "2026-08-12",
+      "views": 16863
+    },
+    {
+      "date": "2026-08-13",
+      "views": 17407
+    },
+    {
+      "date": "2026-08-14",
+      "views": 17294
+    },
+    {
+      "date": "2026-08-15",
+      "views": 15039
+    },
+    {
+      "date": "2026-08-16",
+      "views": 13864
+    },
+    {
+      "date": "2026-08-17",
+      "views": 15819
+    },
+    {
+      "date": "2026-08-18",
+      "views": 16830
+    },
+    {
+      "date": "2026-08-19",
+      "views": 16525
+    },
+    {
+      "date": "2026-08-20",
+      "views": 16913
+    },
+    {
+      "date": "2026-08-21",
+      "views": 17314
+    },
+    {
+      "date": "2026-08-22",
+      "views": 15556
+    },
+    {
+      "date": "2026-08-23",
+      "views": 13942
+    },
+    {
+      "date": "2026-08-24",
+      "views": 16651
+    },
+    {
+      "date": "2026-08-25",
+      "views": 17107
+    },
+    {
+      "date": "2026-08-26",
+      "views": 17551
+    },
+    {
+      "date": "2026-08-27",
+      "views": 19383
+    },
+    {
+      "date": "2026-08-28",
+      "views": 20000
+    },
+    {
+      "date": "2026-08-29",
+      "views": 19825
+    },
+    {
+      "date": "2026-08-30",
+      "views": 17682
+    },
+    {
+      "date": "2026-08-31",
+      "views": 18615
+    },
+    {
+      "date": "2026-09-01",
+      "views": 19213
+    },
+    {
+      "date": "2026-09-02",
+      "views": 18851
+    },
+    {
+      "date": "2026-09-03",
+      "views": 19299
+    },
+    {
+      "date": "2026-09-04",
+      "views": 19466
+    },
+    {
+      "date": "2026-09-05",
+      "views": 16843
+    },
+    {
+      "date": "2026-09-06",
+      "views": 15141
+    },
+    {
+      "date": "2026-09-07",
+      "views": 16665
+    },
+    {
+      "date": "2026-09-08",
+      "views": 16891
+    },
+    {
+      "date": "2026-09-09",
+      "views": 17952
+    },
+    {
+      "date": "2026-09-10",
+      "views": 17975
+    },
+    {
+      "date": "2026-09-11",
+      "views": 18934
+    },
+    {
+      "date": "2026-09-12",
+      "views": 16243
+    },
+    {
+      "date": "2026-09-13",
+      "views": 14541
+    },
+    {
+      "date": "2026-09-14",
+      "views": 16335
+    },
+    {
+      "date": "2026-09-15",
+      "views": 16592
+    },
+    {
+      "date": "2026-09-16",
+      "views": 17088
+    },
+    {
+      "date": "2026-09-17",
+      "views": 17214
+    },
+    {
+      "date": "2026-09-18",
+      "views": 17620
+    },
+    {
+      "date": "2026-09-19",
+      "views": 15633
+    },
+    {
+      "date": "2026-09-20",
+      "views": 13987
+    },
+    {
+      "date": "2026-09-21",
+      "views": 16580
+    },
+    {
+      "date": "2026-09-22",
+      "views": 17165
+    },
+    {
+      "date": "2026-09-23",
+      "views": 17303
+    },
+    {
+      "date": "2026-09-24",
+      "views": 17091
+    },
+    {
+      "date": "2026-09-25",
+      "views": 18224
+    },
+    {
+      "date": "2026-09-26",
+      "views": 15575
+    },
+    {
+      "date": "2026-09-27",
+      "views": 13778
+    },
+    {
+      "date": "2026-09-28",
+      "views": 16281
+    },
+    {
+      "date": "2026-09-29",
+      "views": 16998
+    },
+    {
+      "date": "2026-09-30",
+      "views": 16463
+    },
+    {
+      "date": "2026-10-01",
+      "views": 16878
+    },
+    {
+      "date": "2026-10-02",
+      "views": 17554
+    },
+    {
+      "date": "2026-10-03",
+      "views": 15596
+    },
+    {
+      "date": "2026-10-04",
+      "views": 13264
+    },
+    {
+      "date": "2026-10-05",
+      "views": 15586
+    },
+    {
+      "date": "2026-10-06",
+      "views": 16947
+    },
+    {
+      "date": "2026-10-07",
+      "views": 16958
+    },
+    {
+      "date": "2026-10-08",
+      "views": 17851
+    },
+    {
+      "date": "2026-10-09",
+      "views": 17976
+    },
+    {
+      "date": "2026-10-10",
+      "views": 16132
+    },
+    {
+      "date": "2026-10-11",
+      "views": 14473
+    },
+    {
+      "date": "2026-10-12",
+      "views": 16341
+    },
+    {
+      "date": "2026-10-13",
+      "views": 16922
+    },
+    {
+      "date": "2026-10-14",
+      "views": 17261
+    },
+    {
+      "date": "2026-10-15",
+      "views": 17834
+    },
+    {
+      "date": "2026-10-16",
+      "views": 17814
+    },
+    {
+      "date": "2026-10-17",
+      "views": 15972
+    },
+    {
+      "date": "2026-10-18",
+      "views": 14243
+    },
+    {
+      "date": "2026-10-19",
+      "views": 17137
+    },
+    {
+      "date": "2026-10-20",
+      "views": 18352
+    },
+    {
+      "date": "2026-10-21",
+      "views": 18461
+    },
+    {
+      "date": "2026-10-22",
+      "views": 21131
+    },
+    {
+      "date": "2026-10-23",
+      "views": 19815
+    },
+    {
+      "date": "2026-10-24",
+      "views": 15442
+    },
+    {
+      "date": "2026-10-25",
+      "views": 13995
+    },
+    {
+      "date": "2026-10-26",
+      "views": 15727
+    },
+    {
+      "date": "2026-10-27",
+      "views": 16675
+    },
+    {
+      "date": "2026-10-28",
+      "views": 16005
+    },
+    {
+      "date": "2026-10-29",
+      "views": 15976
+    },
+    {
+      "date": "2026-10-30",
+      "views": 16221
+    },
+    {
+      "date": "2026-10-31",
+      "views": 14526
+    },
+    {
+      "date": "2026-11-01",
+      "views": 12814
+    },
+    {
+      "date": "2026-11-02",
+      "views": 14766
+    },
+    {
+      "date": "2026-11-03",
+      "views": 15307
+    },
+    {
+      "date": "2026-11-04",
+      "views": 15480
+    },
+    {
+      "date": "2026-11-05",
+      "views": 15793
+    }
+  ],
+  "limitations": [
+    "Source is Chartmetric's YouTube artist series, not the authenticated YouTube Analytics API.",
+    "Do not interpret artist-level views as owned-channel-only views, returning viewers or unique fans.",
+    "Six-month total sums non-overlapping daily values; it does not sum overlapping monthly counters.",
+    "Channel-only history was checked separately and remains flat from 12 September through 8 November; it is excluded from daily pace conclusions.",
+    "One date is missing from the requested window; total covers 180 reported days, not an exact complete six-month total. No missing-day value is imputed."
+  ]
+}
