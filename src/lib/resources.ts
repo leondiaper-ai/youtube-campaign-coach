@@ -61,7 +61,7 @@ export const RESOURCE_GROUPS: ResourceGroup[] = [
     items: [
       {
         title: 'The Vaccines',
-        blurb: 'The channel today, the Pink Carnations campaign, and a fuller multi-format plan for the next record. Includes campaign ideas, YouTube opportunities and Station programming inside the deck; catalogue and the fifteenth anniversary support the warm-up.',
+        blurb: 'The channel today and the 2023–24 Pink Carnations campaign, with recommendations for future releases. No new album campaign is assessed. Includes campaign ideas, YouTube opportunities and Station programming inside the deck; catalogue and the fifteenth anniversary support the warm-up.',
         href: '/vaccines',
         kind: 'Deck',
         updated: 'November 2026',

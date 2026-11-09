@@ -4,11 +4,11 @@ import type { DeepDiveContext } from '../types';
 export const VACCINES_DEEP_DIVE: DeepDiveContext = {
   artistSlug: 'thevaccinesuk',
   artistName: 'The Vaccines',
-  title: 'The Vaccines × YouTube — The next album campaign',
+  title: 'The Vaccines × YouTube — Channel review and future recommendations',
   deckUpdated: '2026-11-09',
   deckUrl: '/vaccines',
   dataCapturedAt: '2026-11-09',
-  coreThesis: 'Begin with the channel: 141,000 public subscribers, 91,649,008 lifetime views and 60 days since the latest upload at capture. Review Pink Carnations through its eight identified album video assets: visualisers contributed 66.3% of lifetime viewing, but same-song follow-ups were late and no new album long-form appears in the thirteen weeks after release. Build the next campaign around a coherent visual world, a fuller multi-format rhythm and clear post-release support. Catalogue strength and the existing fifteenth-anniversary story support the warm-up rather than lead the whole review. Station programming is integrated into the deck. All rollout, creative and partner opportunities remain proposals.',
+  coreThesis: 'Begin with the channel: 141,000 public subscribers, 91,649,008 lifetime views and 60 days since the latest upload at capture. Review Pink Carnations through its eight identified album video assets: visualisers contributed 66.3% of lifetime viewing, but same-song follow-ups were late and no additional Pink Carnations full-song video appears in the thirteen weeks after release. Build the next campaign around a coherent visual world, a fuller multi-format rhythm and clear post-release support. Catalogue strength and the existing fifteenth-anniversary story support the warm-up rather than lead the whole review. Station programming is integrated into the deck. All rollout, creative and partner opportunities remain proposals.',
   channelStrengths: [
     { point: 'The debut offers a substantial catalogue foundation.', basis: 'Six selected debut-era videos total 32,671,448 lifetime views; fifteenth-anniversary touring is already happening in 2026. Use it as a bridge to new music, not a current-traffic forecast.', needTags: ['catalogue_activation'] },
     { point: 'Primary visualisers already have a substantial role.', basis: 'Four primary visualisers: 723,014 lifetime views at 9 Nov 2026. Sometimes, I Swear leads the album non-MV assets at 205,071.', needTags: ['visualiser'] },
@@ -16,7 +16,7 @@ export const VACCINES_DEEP_DIVE: DeepDiveContext = {
     { point: 'Several substantial catalogue entry points exist.', basis: 'If You Wanna, Post Break-Up Sex and I Always Knew total 30,156,339 lifetime views: 40.5% of retrieved-upload viewing, not today’s traffic share.', needTags: ['catalogue_activation'] },
   ],
   channelGaps: [
-    { point: 'The long-form run stopped on album day.', basis: 'Eight song videos across five album tracks; the last is 12 Jan 2024. Seven short clips appear after release through 12 Apr, with no new album long-form in that retrieved period. Topic and partner coverage are not comprehensive.', needTags: ['album_campaign', 'hero_continuity'] },
+    { point: 'The long-form run stopped on album day.', basis: 'Eight song videos across five album tracks; the last is 12 Jan 2024. Seven short clips appear after release through 12 Apr, with no additional Pink Carnations full-song video in that retrieved period. Topic and partner coverage are not comprehensive.', needTags: ['album_campaign', 'hero_continuity'] },
     { point: 'Lyric follow-ups clustered late in the pre-release run.', basis: 'All three published 20 Dec 2023, 83/65/33 days after the primary uploads. Timing effects were not measured.', needTags: ['follow_up_7_14', 'release_sequencing'] },
   ],
   campaignRisks: [
@@ -49,6 +49,7 @@ export const VACCINES_DEEP_DIVE: DeepDiveContext = {
     { claim: 'Displayed 910,965 seven-day delta is unsuitable as a consumption-pace measurement because history repeats cached totals.', evidenceClass: 'DERIVED', trust: 'PARTIAL', sourceRef: '/api/debug/snapshots?handle=%40thevaccinesuk', observedAt: '2026-11-09' },
   ],
   knownConstraints: [
+    'There is no new album campaign to assess. All measured album evidence concerns Pink Carnations and its 2023–24 uploads; future rollout, creative and asset suggestions are recommendations only.',
     'No confirmed new album title, dates, budget, footage rights or artist availability supplied.',
     'Public API data only; no Studio retention, viewer journeys, paid/organic split or historical asset-level subscriber attribution.',
   ],
