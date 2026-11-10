@@ -61,11 +61,11 @@ slide('assets','What to double down on',f'''
 {source('Lifetime totals at capture, not matched-age benchmarks. The three 2018 sessions total 1.19m; seven Reading archive songs uploaded in 2026 total 40.2k. Live is a focused test, not a promise of catalogue-scale results.')}
 ''','pink')
 slide('live','Live: capture the songs, plan the packaging',f'''
-{label('Live · a production priority to test')}<h2>Capture the performance.<br><span class="serif">Release the songs.</span></h2>
-<div class="live-proof mt"><div><b>305k–552k</b><span>each · three 2018 live sessions</span></div><div><b>2.3k–10.2k</b><span>each · seven Reading archive songs uploaded in 2026</span></div></div>
-<p class="lead">Give live a job: <b>extend the song’s story</b>. The sessions show precedent; recent archive results say be selective about the moment.</p>
-<div class="live-plan mt"><div><span class="tag">First choice · proposed</span><h3>One future single.<br>One fan favourite.</h3><p>Capture two full songs in one session. Link the new chapter to the anniversary story.</p></div><div><span class="tag">Package the moment</span><h3>Song first.<br>Place and year clear.</h3><p>A recognisable performer or setting in the thumbnail. Keep the performance identity consistent across song cuts.</p></div><div><span class="tag">Full set · optional</span><h3>A deeper fan watch,<br>if the show earns it.</h3><p>Audit clearable footage first. Release individual songs separately; a full set should have its own role.</p></div></div>
-<p class="takeaway"><b>Commission:</b> a focused two-song capture when the music is ready. Plan the edits and release dates before filming.</p>
+{label('Live · proposed two-song session')}<h2>One session.<br><span class="serif">Two songs to release.</span></h2>
+<div class="live-proof mt"><div><b>305k–552k</b><span>lifetime views each · three 2018 sessions</span></div><div><b>2.3k–10.2k</b><span>lifetime views each · Reading archive uploaded in 2026</span></div></div>
+<p class="lead"><b>Live has worked here.</b> Start with a focused session, then test the response.</p>
+<div class="live-plan mt"><div><span class="tag">01 · Film</span><h3>The key single.<br>A fan favourite.</h3><p>Two complete performances in one session.</p></div><div><span class="tag">02 · Package</span><h3>Make each song<br>easy to find.</h3><p>Song-led title. Clear venue and year. Consistent thumbnails.</p></div><div><span class="tag">03 · Release</span><h3>Two separate<br>full-song uploads.</h3><p>Key single at +7–14 days after its main video. Fan favourite later.</p></div></div>
+<p class="takeaway"><b>Full show:</b> optional. Prioritise the individual songs first.</p>
 {source('2018 sessions total 1,193,533 lifetime views. Seven Reading 2018 archive songs uploaded in 2026 total 40,243. Different ages, songs and context; no efficiency comparison or forecast. No full-set comparison is available in the retrieved channel list, so song cuts are a proposed strategy, not proven superior. Thumbnail/title changes need CTR and retention data to evaluate. Background: Your Love Is My Favourite Band live-session video imagery.')}
 ''')
 slide('versions','BTS, acoustic and alternative versions',f'''
