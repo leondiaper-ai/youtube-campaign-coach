@@ -45,7 +45,12 @@ export function buildCoachStatus({plan,evidence,tracks,decisions={},campaignStar
   const today=new Date(now).toISOString().slice(0,10);
   const fresh=!!evidence.audit.dataAt && now-Date.parse(evidence.audit.dataAt)<=3*DAY && Date.parse(evidence.audit.dataAt)<=now+DAY;
   const inventory=evidence.uploads.filter(u=>!u.isCollab&&u.live!=='upcoming'&&Date.parse(u.publishedAt)<=now);
-  const long=inventory.filter(u=>visual(coachUploadFormat(u))).sort((a,b)=>b.publishedAt.localeCompare(a.publishedAt));
+  // A saved Coach timeline defines this campaign, not the channel's previous era.
+  const timelineDates=plan.events.map(e=>e.dateISO).filter(d=>/^\d{4}-\d{2}-\d{2}$/.test(d)&&Number.isFinite(Date.parse(d)));
+  const matchedDates=tracks.flatMap(t=>t.actions.filter(a=>a.video&&!a.scheduled&&inventory.some(u=>u.id===a.video!.id)).map(a=>a.video!.date));
+  const start=[...timelineDates,...matchedDates].sort()[0]??campaignStartDate;
+  const campaignInventory=start?inventory.filter(u=>u.publishedAt.slice(0,10)>=start):[];
+  const long=campaignInventory.filter(u=>visual(coachUploadFormat(u))).sort((a,b)=>b.publishedAt.localeCompare(a.publishedAt));
   const actual=(t:TrackRoadmap)=>t.actions.filter(a=>a.video&&!a.scheduled&&visual(a.format));
   const started=tracks.filter(t=>t.releaseDate<=today||actual(t).length>0).sort((a,b)=>{
     const last=(t:TrackRoadmap)=>actual(t).map(a=>a.video!.date).sort().pop()??t.releaseDate;
@@ -72,7 +77,7 @@ export function buildCoachStatus({plan,evidence,tracks,decisions={},campaignStar
   const prior=anchor?long.find(u=>u.publishedAt.slice(0,10)<anchor.video!.date):undefined;
   const gap=prior&&anchor?Math.round((Date.parse(anchor.video!.date)-Date.parse(prior.publishedAt.slice(0,10)))/DAY):null;
   const cadence=`Last 30 days: ${recent.length-shorts} long-form · ${shorts} Shorts${gap&&gap>=14?` · ${gap} days between the latest tracked release videos`:latest?` · last long-form ${date(latest.publishedAt.slice(0,10))}`:''}`;
-  const metrics=campaignPerformanceFor({uploads:inventory,statedAt:campaignStartDate,statedBy:campaignStartDate?'Artist campaign setup':undefined,now});
+  const metrics=start?campaignPerformanceFor({uploads:campaignInventory,statedAt:start,statedBy:'Coach timeline and matched campaign uploads',now}):null;
   const campaign=metrics?`${metrics.views==null?'—':n(metrics.views)} tracked campaign views · ${metrics.assets} assets`:null;
   const shortWindow=inventory.filter(u=>Date.parse(u.publishedAt)>=now-28*DAY && coachUploadFormat(u)==='short');
   const shortsRead={weekly:Math.round(shortWindow.length/4*10)/10,mean:shortWindow.length?Math.round(shortWindow.reduce((s,u)=>s+u.viewCount,0)/shortWindow.length):null,count:shortWindow.length};

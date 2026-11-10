@@ -150,12 +150,12 @@ export function buildLandingModel({
   const campaignFrom = status.metrics?.start ? Date.parse(status.metrics.start) : null;
   const campaignUploads = evidence.uploads
     .filter(u => !u.isCollab && u.live !== 'upcoming' && Date.parse(u.publishedAt) <= now)
-    .filter(u => campaignFrom == null || Date.parse(u.publishedAt) >= campaignFrom)
+    .filter(u => campaignFrom != null && Date.parse(u.publishedAt) >= campaignFrom)
     .sort((a, b) => b.publishedAt.localeCompare(a.publishedAt))
     .map(toUploadRef);
 
   const windowLabel = status.metrics?.start
-    ? `${shortDate(status.metrics.start)} – ${shortDate(new Date(now).toISOString())}`
+    ? Date.parse(status.metrics.start)>now ? `Starts ${shortDate(status.metrics.start)}` : `${shortDate(status.metrics.start)} – ${shortDate(new Date(now).toISOString())}`
     : 'window not set';
 
   /* ── figures: each once, each with the window it was measured over ── */
@@ -163,6 +163,8 @@ export function buildLandingModel({
   if (status.metrics) {
     if (status.metrics.views != null) {
       figures.push({ value: exact(status.metrics.views), label: 'Campaign views', period: `campaign uploads · ${windowLabel}` });
+    } else {
+      figures.push({value:'—',label:'Campaign views',period:'No campaign uploads yet'});
     }
     figures.push({
       value: String(status.metrics.assets), label: 'Campaign assets',

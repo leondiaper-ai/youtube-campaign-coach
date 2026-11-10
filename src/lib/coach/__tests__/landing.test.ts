@@ -418,3 +418,20 @@ test('fan quotes come from fresh sampled comments on the current track only', ()
   assert.equal(m.fan?.quotes?.[0].source,'Overthinker');
   assert.equal(model({uploads:RICH,events:RICH_EVENTS,fan:{...fan,computedAt:iso(-9)}}).model.fan,null);
 });
+
+ test('new campaign excludes the previous era from metrics, latest video and gallery',()=>{
+  const result=model({events:[event('New Song',20)],uploads:[upload('old','Artist - Old Song (Official Video)',40,1200000)]}).model;
+  assert.equal(result.latest,null);
+  assert.equal(result.assets.long.length,0);
+  assert.equal(result.assets.shorts.length,0);
+  assert.equal(result.figures.find(f=>f.label==='Campaign assets')?.value,'0');
+  assert.equal(result.figures.find(f=>f.label==='Campaign views')?.value,'—');
+  assert.match(result.windowLabel,/Starts/);
+  assert.doesNotMatch(result.stageLine,/Old Song/);
+ });
+ test('timeline starts campaign at its first release, including an earlier matched video',()=>{
+  const result=model({events:[event('New Song',-5)],uploads:[upload('new','Artist - New Song (Official Video)',7,1000),upload('old','Artist - Old Song (Official Video)',40,1200000)]}).model;
+  assert.equal(result.figures.find(f=>f.label==='Campaign views')?.value,'1,000');
+  assert.equal(result.assets.long.length,1);
+  assert.equal(result.latest?.id,'new');
+ });
