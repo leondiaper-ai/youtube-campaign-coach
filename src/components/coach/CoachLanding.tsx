@@ -201,6 +201,11 @@ export default function CoachLanding({ model, slug, classicHref, timelineEditor 
   return (
     <div className="max-w-[1060px] mx-auto px-5 pb-16">
 
+      <nav aria-label="Coach navigation" className="flex flex-wrap items-center gap-5 pt-5 pb-1 text-meta font-semibold">
+        <a href="/growth" className="text-secondary no-underline hover:text-electric hover:underline">← Back to Watcher</a>
+        <a href="/coach" className="text-muted no-underline hover:text-electric hover:underline">All campaigns</a>
+      </nav>
+
       {/* 1 · header */}
       <header className="flex flex-wrap items-center justify-between gap-3 pt-5 pb-1">
         <div className="min-w-0">
