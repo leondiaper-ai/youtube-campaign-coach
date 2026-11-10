@@ -5,7 +5,7 @@ import json,html,re,unicodedata
 from datetime import date, timedelta
 from pathlib import Path
 R=Path(__file__).resolve().parents[1]
-D=json.loads((R/'public/vaccines/research-2026-11-09.json').read_text());V={v['id']:v for v in D['videos']};S=[]
+D=json.loads((R/'public/vaccines/research-2026-11-09.json').read_text());V={v['id']:v for v in D['videos']};S=[];SOURCE_NOTES=[];PENDING_SOURCES=[]
 A=json.loads((R/'public/vaccines/channel-activity-2026-11-09.json').read_text())
 daily_views=A['metric']['averagePerReportedDay']
 period_views=A['metric']['totalViews']
@@ -14,10 +14,15 @@ def k(x):return f'{x/1000:.1f}k' if x<1000000 else f'{x/1000000:.2f}m'
 def img(i):return f'/vaccines/images/{i}.jpg' if (R/f'public/vaccines/images/{i}.jpg').exists() else f'https://i.ytimg.com/vi/{i}/hqdefault.jpg'
 def photo(i,title=None,note='',frame=False):
  v=V[i];return f'<a class="photo {"frame" if frame else ""}" href="https://www.youtube.com/watch?v={i}" target="_blank" rel="noopener"><figure><img src="{img(i)}" alt="{esc(title or v["title"])}" loading="lazy" width="480" height="270"><figcaption><div class="value">{k(v["views"])} <span class="small">lifetime views ↗</span></div><div class="title">{esc(title or v["title"].replace("The Vaccines - ",""))}</div><div class="meta">{esc(note)}</div></figcaption></figure></a>'
-def source(s):return '<p class="source">'+s+' · <a href="#analysis">Analysis</a></p>'
+def source(s):
+ PENDING_SOURCES.append(s)
+ return ''
 def label(s):return '<span class="label">'+s+'</span>'
 FILM_SCENES={'live':'JHJt6dBBtlQ','shorts':'ek4nMPNwvdw','rollout':'0Vpq3TSQmpw','station':'ncS6WWSWguI','decisions':'KPCzMoANomA'}
 def slide(id,title,body,theme=''):
+ if PENDING_SOURCES:
+  SOURCE_NOTES.extend((id,title,note) for note in PENDING_SOURCES)
+  PENDING_SOURCES.clear()
  if id=='analysis':
   body=body.replace('<h2>Channel audit.', '<h2 id="analysis-heading">Channel audit.')
   S.append((id,'<section class="analysis-sheet" id="analysis" role="dialog" aria-modal="true" aria-labelledby="analysis-heading" tabindex="-1" hidden><div class="analysis-toolbar"><span>The Vaccines × YouTube <b>Analysis</b></span><button id="close-analysis" type="button">Back to deck ×</button></div><div class="analysis-sheet-inner">'+body+'</div></section>'))
@@ -168,7 +173,7 @@ audit_intro=f'''<div class="audit-intro"><div><p class="lead">The channel’s as
 <div class="audit-block" id="album-audit"><span class="tag">Pink Carnations · 20 Sep 2023–12 Apr 2024</span><h3>The clearest gap: a full-song follow-up programme.</h3><p class="small">Official audio and full live songs are not matched for these five leads in this retrieved window. Check Topic/OAC delivery separately. Heartbreak Kid has a short TV-performance promo; that is not a full owned-channel performance. Three lyric versions exist, but arrived late.</p><div class="table-wrap"><table class="audit-table"><thead><tr><th>Lead song</th><th>Official audio</th><th>Full live song</th><th>Lyric version</th><th>BTS / story</th><th>Short clips</th><th>Next full version</th></tr></thead><tbody>{album_rows}</tbody></table></div><p class="audit-verdict"><b>0/5</b> lead song videos followed by another identified full version at +7–14 days. For a future campaign, reserve the follow-up before the first upload.</p></div>
 <div class="audit-block" id="audit-priorities"><span class="tag">What the gaps mean</span><div class="grid3 mt"><div><h3>Reuse first.</h3><p>Catalogue live assets already exist. Select and repackage before commissioning replacements.</p></div><div><h3>Book the next angle.</h3><p>A focused future-song performance is a stronger first production test than filling every BTS or acoustic box.</p></div><div><h3>Measure packaging.</h3><p>No CTR, impressions or retention supplied. Test titles and thumbnails; do not present a packaging fault as established.</p></div></div></div>'''
 slide('analysis','Channel audit and support gaps',f'''
-{label('Analysis · detail when you need it')}<h2>Channel audit.<br><span class="serif">What exists. Where to build.</span></h2>{audit_intro}<h3 class="audit-method-title">Method, source rows and limitations</h3><div class="appendix mt">
+{label('Analysis · detail when you need it')}<h2>Channel audit.<br><span class="serif">What exists. Where to build.</span></h2>{audit_intro}<h3 class="audit-method-title">Method, source rows and limitations</h3><div class="appendix mt"><details><summary>Slide notes and sources</summary>__SLIDE_NOTES__</details>
 <details><summary>Source, scope and dates</summary><p>Found cells link to the highest-view matched example. Not found is an inventory gap in the retrieved data, not proof a format was never made. Missing boxes are not a production checklist; check Topic/OAC delivery and partner channels before adding duplicate uploads.</p><p>Existing Campaign Coach / Watcher YouTube Data API catalogue, captured 9 Nov 2026 at 15:25 UTC. @thevaccinesuk · UCWLY9PpOMnI3Q66zwZdyzyA. The uploads playlist was exhausted: 241 unique entries, uncapped. Views are lifetime at capture, not campaign-period or age-matched results.</p><p>Observed last-album window: 20 Sep 2023 teaser to 12 Apr 2024 last retrieved clip. The official release was 12 Jan 2024. These are analytical boundaries. Eight identified song assets cover five of ten album tracks in this list; Topic/audio, partner and fan coverage is not comprehensive.</p></details>
 <details><summary>The last album: format, cadence and follow-up</summary><p>One music video: 299,342. Four primary visualisers: 723,014. Three lyric visualisers: 68,474. Total 1,090,830; primary visualisers hold 66.3%. Titles and description first lines were reviewed: Lunar Eclipse and Discount De Kooning are visualisers; Heartbreak Kid is the music video.</p><p>Through album day: 8 full-song videos and 13 short clips. The three lyric versions all landed on 20 Dec 2023: 83, 65 and 33 days after their corresponding primary videos. No identified same-song long-form follow-up at +7–14 days across the five primary song videos. After Pink Carnations’ release, 13 Jan–12 Apr 2024: 7 clips and 0 additional Pink Carnations full-song videos in the retrieved list.</p><p>Proposed album-week package: one focus-song visual, three to four distinct Shorts, one to two Community posts and a complete official album playlist after checking Topic/OAC delivery. Then reserve full-song follow-ups at +7–14 days, week 4 and week 6; week 3 is light story/Community support. Use two distinct Shorts and one Community conversation per week through the follow-up run. Pre-book edits and rights, then review day-7/day-28 response. A 7–14 day follow-up is an operating test, not a measured optimum. Different songs, ages, spend and contexts prevent causal conclusions about formats or timing.</p></details>
 <details><summary>Catalogue: the 32.7m denominator</summary><p>Six selected debut-era videos: If You Wanna 12,335,543; Post Break-Up Sex 9,324,875; Norgaard 3,940,750; Wetsuit 3,625,838; Wreckin’ Bar 2,217,259; All In White [Censored] 1,227,183. Total 32,671,448. It is selected-video lifetime viewing, not total album consumption, current traffic share, unique fans or a conversion forecast.</p><p>The debut was released in March 2011. The 2026 anniversary is already being used in touring and channel uploads. <a href="https://www.destroyalllines.com/tours/the-vaccines" target="_blank" rel="noopener">The promoter’s 15th-anniversary listing</a> includes November shows. The proposed warm-up continues this existing story; it does not present the March anniversary as a future event.</p></details>
@@ -186,5 +191,7 @@ tail='''</main>__ANALYSIS_VIEW__<div class="present-controls" aria-label="Presen
 order=['intro','channel','history','campaign','cadence','assets','live','versions','shorts','world','catalogue','rollout','post-release','ideas','station','youtube','decisions']
 by_id=dict(S)
 ordered=[by_id[id].replace('__FOLIO__',f'{n+1:02d}') for n,id in enumerate(order)]
-(R/'public/vaccines/index.html').write_text(head+''.join(ordered)+tail.replace('__ANALYSIS_VIEW__',by_id['analysis']))
+notes_html=''.join(f'<article class="audit-slide-note"><h4>{esc(title)}</h4><p>{note}</p></article>' for target in order for id,title,note in SOURCE_NOTES if id==target)
+analysis_view=by_id['analysis'].replace('__SLIDE_NOTES__',notes_html)
+(R/'public/vaccines/index.html').write_text(head+''.join(ordered)+tail.replace('__ANALYSIS_VIEW__',analysis_view))
 print(f'Rendered {len(ordered)} presentation slides + separate Analysis view')
