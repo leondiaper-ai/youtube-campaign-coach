@@ -16,12 +16,34 @@ function show(i){
  document.getElementById('next').disabled=index===slides.length-1;
  if(presenting)window.scrollTo({top:0,behavior:'instant'});
 }
-function setPresent(on){
+function isFullscreen(){return Boolean(document.fullscreenElement||document.webkitFullscreenElement);}
+function updatePresentButton(){
+ toggle.textContent=presenting?(isFullscreen()?'Exit full screen':'Exit present'):'Present';
+ toggle.title=presenting?'Exit presentation':'Present in full screen';
+ toggle.setAttribute('aria-pressed',String(presenting));
+}
+async function setPresent(on){
  if(on){const current=slides.findIndex(s=>s.getBoundingClientRect().bottom>100);index=Math.max(0,current);}
  presenting=on;document.body.classList.toggle('present',on);
- toggle.textContent=on?'Exit present':'Present';toggle.setAttribute('aria-pressed',String(on));show(index);
+ updatePresentButton();show(index);
  if(!on)slides[index].scrollIntoView({behavior:'instant',block:'start'});
+ if(on&&!isFullscreen()){
+  const root=document.documentElement;
+  const request=root.requestFullscreen||root.webkitRequestFullscreen;
+  if(request){try{await request.call(root);}catch{/* Keep presentation usable if the browser blocks fullscreen. */}}
+ }else if(!on&&isFullscreen()){
+  const exit=document.exitFullscreen||document.webkitExitFullscreen;
+  if(exit){try{await exit.call(document);}catch{/* The slide view has already returned to normal. */}}
+ }
+ updatePresentButton();
 }
+function syncFullscreen(){
+ if(!isFullscreen()&&presenting){
+  if(analysisOpen)closeAnalysis();
+  setPresent(false);
+ }else updatePresentButton();
+}
+
 function openAnalysis(target='analysis',writeHistory=true){
  if(!analysisOpen){
   returnHash=presenting?'#'+slides[index].id:(auditHashes.has(location.hash.slice(1))?'#intro':location.hash||'#intro');
@@ -68,6 +90,8 @@ document.querySelectorAll('a[href^="#"]').forEach(a=>a.addEventListener('click',
  if(auditHashes.has(target)){e.preventDefault();openAnalysis(target);return;}
  const n=slides.findIndex(s=>s.id===target);if(presenting&&n>=0)show(n);
 }));
+document.addEventListener('fullscreenchange',syncFullscreen);
+document.addEventListener('webkitfullscreenchange',syncFullscreen);
 window.addEventListener('popstate',syncLocation);
 window.addEventListener('hashchange',syncLocation);
 show(0);syncLocation();
