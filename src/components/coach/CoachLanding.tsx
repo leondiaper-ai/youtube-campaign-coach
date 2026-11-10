@@ -207,7 +207,7 @@ export default function CoachLanding({ model, slug, classicHref, timelineEditor 
           <h1 className="text-[32px] sm:text-[40px] font-black tracking-tight text-ink m-0 leading-none">{model.artist}</h1>
           <p className="text-body font-semibold text-secondary m-0 mt-2 leading-snug">{model.stageLine}</p>
         </div>
-        <Badge fg={TONE.ok.fg} bg={TONE.ok.bg}>{model.project}</Badge>
+        <Badge fg={TONE.ok.fg} bg={TONE.ok.bg}>{model.completed?'Rollout complete':model.project}</Badge>
       </header>
 
       {model.nextMoment && <div className="mt-4 flex flex-wrap items-center gap-3 rounded-control border border-line bg-surface px-4 py-3">
@@ -216,11 +216,11 @@ export default function CoachLanding({ model, slug, classicHref, timelineEditor 
       </div>}
 
       {/* 2 · do next */}
-      <Eyebrow className="mt-7 mb-2.5">Do next</Eyebrow>
+      {!model.completed && <><Eyebrow className="mt-7 mb-2.5">Do next</Eyebrow>
       <div className="grid gap-3 md:grid-cols-2">
         {model.actions.map(a => <ActionCard key={a.id} action={a} slug={slug} />)}
         {!model.actions.length && <p className="text-meta text-muted">No immediate action identified. Review the rollout below.</p>}
-      </div>
+      </div></>}
 
       {/* 3 · one campaign card */}
       <Eyebrow className="mt-7 mb-2.5">Campaign · {model.windowLabel}</Eyebrow>
@@ -310,13 +310,13 @@ export default function CoachLanding({ model, slug, classicHref, timelineEditor 
       </Card>
 
       {/* 4 · rollout */}
-      <Eyebrow className="mt-7 mb-2.5">Rollout</Eyebrow>
-      <p className="flex flex-wrap gap-4 text-micro text-muted m-0 mb-3">
+      <Eyebrow className="mt-7 mb-2.5">{model.completed?'Release history':'Rollout'}</Eyebrow>
+      {!model.completed && <p className="flex flex-wrap gap-4 text-micro text-muted m-0 mb-3">
         <span><strong className="text-positive">✓</strong> Published on the channel</span>
         <span><strong className="text-longform">◆</strong> Agreed by the team</span>
         <span><strong className="text-faint">○</strong> Suggested</span>
         <span>— Format not identified</span>
-      </p>
+      </p>}
 
       <ol className="relative list-none m-0 p-0 pl-6 before:content-[''] before:absolute before:left-[5px] before:top-3 before:bottom-3 before:w-[2px] before:bg-line">
         {model.rollout.map(r => (

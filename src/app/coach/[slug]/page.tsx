@@ -281,8 +281,8 @@ export default async function CampaignPage({ params, searchParams }: PageProps) 
     // Preserve explicit support uploads, tour dates and album milestones too.
     // They are planning entries, never evidence that an asset is published.
     for (const event of saved.plan.events.filter(e => !tracks.some(t => t.releaseDate === e.dateISO))) {
-      const idea = isAlbumRelease(event) ? status.albumIdea : null;
-      const albumActions = isAlbumRelease(event) ? status.priorities.flatMap(t => t.releaseDate === event.dateISO ? t.actions.filter(a=>a.format==='campaign_album') : []) : [];
+      const idea = !model.completed && isAlbumRelease(event) ? status.albumIdea : null;
+      const albumActions = !model.completed && isAlbumRelease(event) ? status.priorities.flatMap(t => t.releaseDate === event.dateISO ? t.actions.filter(a=>a.format==='campaign_album') : []) : [];
       const milestoneAssets = [
         ...(idea?[{label:idea.label,note:idea.reason,status:'suggested' as const,meta:new Date(idea.date+'T12:00:00Z').toLocaleDateString('en-GB',{day:'numeric',month:'short'})}]:[]),
         ...albumActions.map(a=>({label:a.label.replace('Album rollout: ',''),note:a.reason,
@@ -295,7 +295,7 @@ export default async function CampaignPage({ params, searchParams }: PageProps) 
         dateLabel:new Date(event.dateISO+'T12:00:00Z').toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}),
         stage:'distant',badge:{label:event.dateISO > today?'Planned':event.dateISO===today?'Today':'Date passed',tone:'ghost'},
         assets:milestoneAssets,
-        holding:milestoneAssets.length?undefined:'Campaign milestone. Confirm assets and arrangements with the team.'
+        holding:milestoneAssets.length?undefined:model.completed?'Timeline moment.':'Campaign milestone. Confirm assets and arrangements with the team.'
       });
     }
     const dates = new Map([...tracks.map(t => [t.name,t.releaseDate] as const), ...saved.plan.events.map(e => [e.title,e.dateISO] as const), ...evidence.uploads.map(u => [u.title,u.publishedAt.slice(0,10)] as const)]);

@@ -92,6 +92,7 @@ export type ReleaseBlock = {
 export type GuideAssessment = { tone: 'good' | 'behind' | 'neutral'; label: string };
 
 export type LandingModel = {
+  completed?: boolean;
   artist: string;
   project: string;
   stageLine: string;

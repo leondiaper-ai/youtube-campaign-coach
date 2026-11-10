@@ -273,7 +273,8 @@ export function buildLandingModel({
     followUps:trackCounts.filter(r=>r.long>1).length,shorts:trackCounts.reduce((n,r)=>n+r.shorts,0),
     shortsTarget:tracks.length*3,next28Shorts,next28Videos,assessment,
     upcomingMoments:momentDates.filter(at=>Date.parse(at)>=Date.parse(today)&&Date.parse(at)<Date.parse(today)+28*DAY).length};
-  return {
+  const result:LandingModel = {
+    completed:status.completed,
     framework,
     artist: artistName,
     nextMoment: status.nextMoment,
@@ -330,4 +331,24 @@ export function buildLandingModel({
       'Progress ticks are stored against this campaign when saved.',
     ].filter(Boolean),
   };
+  if(status.completed){
+    result.nextMoment=null;
+    result.stageLine=`Rollout complete · final timeline moment ${shortDate(status.lastTimelineDate!)}. Results updated as views grow.`;
+    result.actions=[];
+    result.framework=undefined;
+    result.coverage=undefined;
+    result.shortsProgress=undefined;
+    result.launchComparison=null;
+    result.paceLine=null;
+    result.figures=result.figures.filter(f=>f.label!=='Shorts / week').map(f=>({...f,tone:undefined}));
+    result.figures.push({value:String(tracks.length),label:'Singles in timeline',period:'Completed rollout'});
+    result.rollout=result.rollout.map(r=>{
+      const published=r.assets.filter(a=>a.status==='published');
+      return {...r,stage:published.length?'shipped':'distant',badge:{label:'Past release',tone:'ghost'},assets:published,
+        opportunity:undefined,supportSummary:undefined,
+        holding:published.length?undefined:'Timeline moment · published assets not matched.'};
+    });
+    result.caveats=[result.caveats[0],`Results view starts 28 days after the final timeline moment. Add future dates to the timeline to resume planning. Upload view totals continue updating.`];
+  }
+  return result;
 }

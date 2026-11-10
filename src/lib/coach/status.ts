@@ -14,6 +14,8 @@ export type LaunchComparison = {
 };
 
 export type CoachStatus = {
+  completed?: boolean;
+  lastTimelineDate?: string | null;
   albumReleaseDate?: string | null;
   phase: PhaseName;
   headline: string;
@@ -47,6 +49,10 @@ export function buildCoachStatus({plan,evidence,tracks,decisions={},campaignStar
   const inventory=evidence.uploads.filter(u=>!u.isCollab&&u.live!=='upcoming'&&Date.parse(u.publishedAt)<=now);
   // A saved Coach timeline defines this campaign, not the channel's previous era.
   const timelineDates=plan.events.map(e=>e.dateISO).filter(d=>/^\d{4}-\d{2}-\d{2}$/.test(d)&&Number.isFinite(Date.parse(d)));
+  const lastTimelineDate=timelineDates.slice().sort().pop()??null;
+  // A transparent 28-day wrap-up after the final saved moment. New channel
+  // uploads do not extend a campaign; editing the timeline reopens it.
+  const completed=!!lastTimelineDate&&now>=Date.parse(lastTimelineDate)+29*DAY;
   const matchedDates=tracks.flatMap(t=>t.actions.filter(a=>a.video&&!a.scheduled&&inventory.some(u=>u.id===a.video!.id)).map(a=>a.video!.date));
   const start=[...timelineDates,...matchedDates].sort()[0]??campaignStartDate;
   const campaignInventory=start?inventory.filter(u=>u.publishedAt.slice(0,10)>=start):[];
@@ -189,5 +195,5 @@ export function buildCoachStatus({plan,evidence,tracks,decisions={},campaignStar
     }
     if(!anchor&&focus){const a=focus.actions.find(a=>a.format==='hero'||a.scheduled);if(a)push(focus,{...a,label:'Check the release upload',date:today,reason:'The release date has arrived. Confirm whether the video is public, scheduled or still being prepared before planning another upload.'});}
   }
-  return {albumReleaseDate:album?.dateISO??null,nextMoment:upcoming?{name:upcoming.name,date:upcoming.releaseDate,kind:'single'}:albumFuture?{name:'Album release',date:album.dateISO,kind:'album'}:null,metrics:metrics?{views:metrics.views,assets:metrics.assets,shorts:metrics.shorts,longform:metrics.longForm,start:metrics.start.at}:null,shortsRead,launch,launchComparison,audience,albumIdea,phase,headline,current,next,cadence,fresh,campaign,priorities:priorities.slice(0,2)};
+  return {completed,lastTimelineDate,albumReleaseDate:album?.dateISO??null,nextMoment:upcoming?{name:upcoming.name,date:upcoming.releaseDate,kind:'single'}:albumFuture?{name:'Album release',date:album.dateISO,kind:'album'}:null,metrics:metrics?{views:metrics.views,assets:metrics.assets,shorts:metrics.shorts,longform:metrics.longForm,start:metrics.start.at}:null,shortsRead,launch,launchComparison,audience,albumIdea,phase,headline,current,next,cadence,fresh,campaign,priorities:completed?[]:priorities.slice(0,2)};
 }

@@ -153,7 +153,7 @@ test('an expired follow-up window is described as past, not scheduled', () => {
       upload('l2', 'Artist - B (Official Lyric Video)', 500, 65_000),
       upload('l3', 'Artist - C (Official Lyric Video)', 98, 5_200),
     ],
-    events: [event('PTS - single release', -35)],
+    events: [event('PTS - single release', -35),event('Next single',40)],
   });
   const a = m.actions[0];
   assert.match(a.reason, /has passed/i, 'a closed window must say so');
@@ -434,4 +434,20 @@ test('fan quotes come from fresh sampled comments on the current track only', ()
   assert.equal(result.figures.find(f=>f.label==='Campaign views')?.value,'1,000');
   assert.equal(result.assets.long.length,1);
   assert.equal(result.latest?.id,'new');
+ });
+
+ test('finished timelines show results without ongoing support or cadence judgements',()=>{
+  const result=model({events:[event('Old Song',-90),event('Album release',-60,'albumRelease')],uploads:[upload('song','Artist - Old Song (Official Video)',90,1000),upload('new','Artist - Unrelated (Official Video)',2,2000)]}).model;
+  assert.equal(result.completed,true);
+  assert.equal(result.actions.length,0);
+  assert.equal(result.framework,undefined);
+  assert.equal(result.coverage,undefined);
+  assert.equal(result.figures.some(f=>f.label==='Shorts / week'||f.tone==='behind'),false);
+  assert.equal(result.figures.find(f=>f.label==='Campaign views')?.value,'3,000');
+  assert.ok(result.rollout.every(r=>r.assets.every(a=>a.status==='published')));
+ });
+ test('future timeline dates keep planning active and the wrap-up period remains active',()=>{
+  for(const events of [[event('Song',-40),event('Next Song',20)],[event('Song',-20)]]){
+    assert.equal(model({events,uploads:[]}).model.completed,false);
+  }
  });
