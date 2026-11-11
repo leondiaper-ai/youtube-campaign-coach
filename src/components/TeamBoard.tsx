@@ -457,6 +457,8 @@ export default async function TeamBoard({ team, linkPrefix, linkSuffix = '' }: {
      board the reader has stopped looking at. */
   return (
     <TeamBoardShell
+      teamName={team.name}
+      marketId={boardMarket?.id ?? "uk"}
       header={header}
       /* ─── TOOLS ──────────────────────────────────────────────────────
          These two were unlabelled buttons in the header, sitting beside
