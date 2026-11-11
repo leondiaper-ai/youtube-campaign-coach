@@ -23,6 +23,7 @@ import { listEntries, type TeamWatcherEntry } from '@/lib/teamWatcherStore';
 import ChannelHealthBoard, { type RowData } from '@/components/ChannelHealthBoard';
 import TeamCampaignCards from '@/components/TeamCampaignCards';
 import TeamBoardShell from '@/components/TeamBoardShell';
+import { AppHeader } from '@/components/ui/AppHeader';
 import type { CardData } from '@/components/CampaignDecisionCard';
 import type { TeamCardData } from '@/components/TeamCampaignCards';
 import { computeWeeklyWindows } from '@/lib/campaignWeeks';
@@ -434,8 +435,16 @@ export default async function TeamBoard({ team, linkPrefix, linkSuffix = '' }: {
 
   if (!hasEntries) {
     return (
-      <main className="min-h-screen" style={{ background: PAPER, color: INK }}>
-        <div className="max-w-[1080px] mx-auto px-6 py-10">
+      <main className="min-h-screen bg-paper text-ink">
+        <AppHeader workspace={team.name} nav={[
+          { href: `/growth?market=${boardMarket?.id ?? 'uk'}`, label: 'Channel Health' },
+          { href: `/campaigns?market=${boardMarket?.id ?? 'uk'}`, label: 'Active Campaigns' },
+          { href: `/coach?market=${boardMarket?.id ?? 'uk'}`, label: 'Coach' },
+          { href: '/teams', label: 'Workspaces' },
+          { href: '/labels', label: 'Labels' },
+          { href: '/resources', label: 'Resources' },
+        ]} />
+        <div className="max-w-[1180px] mx-auto px-6 py-8">
           {header}
           <div className="text-center py-20">
             <h2 className="text-[24px] font-black mb-2">No artists yet</h2>
