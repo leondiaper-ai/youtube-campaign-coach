@@ -299,9 +299,9 @@ export default function TeamBoardShell({
               {tab === t && <span className="absolute left-0 right-0 bottom-0 h-[2px] bg-signal rounded-full" />}
             </button>
           ))}
-          <Link href="/teams" className="py-4 text-[14px] font-semibold text-muted hover:text-ink">Workspaces</Link>
-          <Link href="/labels" className="py-4 text-[14px] font-semibold text-muted hover:text-ink">Labels</Link>
-          <Link href="/resources" className="py-4 text-[14px] font-semibold text-muted hover:text-ink">Resources</Link>
+          <Link href={`/teams?market=${marketId}`} className="py-4 text-[14px] font-semibold text-muted hover:text-ink">Workspaces</Link>
+          <Link href={`/labels?market=${marketId}`} className="py-4 text-[14px] font-semibold text-muted hover:text-ink">Labels</Link>
+          <Link href={`/resources?market=${marketId}`} className="py-4 text-[14px] font-semibold text-muted hover:text-ink">Resources</Link>
         </nav>
       </div>
     </div>
