@@ -60,7 +60,7 @@ export function AppHeader({
     ...baseItems.filter(item => ['/growth', '/campaigns', '/coach'].includes(item.href.split('?')[0]))
       .map(item => item.href.split('?')[0] === '/growth' ? { ...item, href: `/labels/${label.slug}`, match: `/labels/${label.slug}` } : item),
     { href: `/labels/${label.slug}/deep-dives`, label: 'Deep Dives', match: `/labels/${label.slug}/deep-dives` },
-    { href: '/labels', label: 'All Labels', match: '/labels' },
+
   ] : baseItems.some(item => item.href.split('?')[0] === '/labels') ? baseItems : [
     ...baseItems.slice(0, baseItems.findIndex(item => item.href.split('?')[0] === '/resources') >= 0 ? baseItems.findIndex(item => item.href.split('?')[0] === '/resources') : baseItems.length),
     { href: '/labels', label: 'Labels', match: '/labels' },
