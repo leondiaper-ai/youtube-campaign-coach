@@ -41,6 +41,7 @@ import {
   createContext, useContext, useState, useEffect, type ReactNode,
 } from 'react';
 import dynamic from 'next/dynamic';
+import { AppHeader } from '@/components/ui/AppHeader';
 
 const CampaignBehaviour = dynamic(() => import('./CampaignBehaviour'), {
   ssr: false,
@@ -97,10 +98,12 @@ const STATUS_DOT: Record<string, string> = {
 };
 
 export default function TeamBoardShell({
-  header, allTab, priorityTab, allCount, priorityCount, rail, emptyPriority, toolsTab,
+  header, allTab, priorityTab, allCount, priorityCount, rail, emptyPriority, toolsTab, teamName, marketId,
 }: {
   /** The board's title block. */
   header: ReactNode;
+  teamName: string;
+  marketId: string;
   allTab: ReactNode;
   priorityTab: ReactNode;
   allCount: number;
@@ -279,24 +282,32 @@ export default function TeamBoardShell({
 
   /* ─── THE BOARD ─────────────────────────────────────────────────── */
   return (
-    <main className="min-h-screen" style={{ background: PAPER, color: INK }}>
-    <div className="max-w-[1080px] mx-auto px-6 py-10">
+    <main className="min-h-screen bg-paper text-ink">
+    <AppHeader workspace={teamName} nav={[
+      { href: `/growth?market=${marketId}`, label: "Channel Health" },
+      { href: `/campaigns?market=${marketId}`, label: "Active Campaigns" },
+      { href: `/coach?market=${marketId}`, label: "Coach" },
+      { href: "/teams", label: "Workspaces" },
+      { href: "/labels", label: "Labels" },
+      { href: "/resources", label: "Resources" },
+    ]} />
+    <div className="max-w-[1180px] mx-auto px-6 py-8">
     <OpenBehaviourContext.Provider value={open}>
       {header}
 
-      <div className="flex items-center gap-1 rounded-lg p-1 mb-2" style={{ background: SOFT }}>
+      <div className="flex flex-wrap items-center gap-1 border-b border-line mb-2">
         {TABS.map((t) => (
           <button
             key={t}
             onClick={() => (t === 'behaviour' ? setTab(t) : leaveBehaviour(t))}
-            className="px-4 py-2 rounded-md text-[12px] font-black uppercase tracking-[0.1em] transition-all"
+            className="relative px-3 py-3 text-body transition-colors"
             style={{
-              background: tab === t ? '#FFFFFF' : 'transparent',
-              color: tab === t ? INK : 'rgba(14,14,14,0.4)',
-              boxShadow: tab === t ? '0 1px 3px rgba(0,0,0,0.08)' : 'none',
+              color: tab === t ? INK : '#817C74',
+              fontWeight: tab === t ? 700 : 600,
             }}
           >
             {TAB_LABEL[t]({ all: allCount, priority: priorityCount })}
+            {tab === t && <span className="absolute left-3 right-3 -bottom-px h-[2px] bg-signal rounded-full" />}
           </button>
         ))}
       </div>
