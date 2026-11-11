@@ -449,6 +449,16 @@ body.present{overflow:hidden}
 .rate .c.hot b{color:var(--gold)}
 .rate-l{display:flex;gap:clamp(.6rem,1.6vw,1.2rem);margin-top:.45rem}
 .rate-l span{flex:1;font-size:.66rem;line-height:1.3;color:var(--dim)}
+
+/* Post-album continuation: evidence beside the next action. */
+.continue-table{width:100%;border-collapse:collapse;table-layout:fixed;margin-top:clamp(1.2rem,2.5vw,2rem)}
+.continue-table th{text-align:left;font:700 .65rem 'Inter',sans-serif;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);padding:0 1rem .8rem 0}
+.continue-table th+th{color:var(--teal)}
+.continue-table td{vertical-align:top;border-top:1px solid var(--line);padding:1rem 1.5rem 1rem 0}
+.continue-table h3{font-family:'Oswald',sans-serif;font-weight:600;text-transform:uppercase;font-size:clamp(1.1rem,1.8vw,1.5rem);line-height:1.15;margin:0 0 .4rem}
+.continue-table td+td h3{color:var(--teal)}
+.continue-table p{font-size:clamp(.82rem,1.1vw,.98rem);line-height:1.4;color:var(--warm)}
+@media(max-width:600px){.continue-table td{padding:.8rem .7rem .8rem 0}.continue-table h3{font-size:1rem}.continue-table p{font-size:.78rem}}
 </style>
 </head>
 <body>
@@ -891,36 +901,19 @@ body.present{overflow:hidden}
      Practical, proportionate, nothing that tells the band what to make. -->
 <section class="slide" data-t="What next">
   <div class="inner">
-    <div class="label reveal">Post-album · what to continue</div>
+    <div class="label reveal">Post-album · build on what worked</div>
     <h2 class="display reveal" style="margin-top:.7rem;font-size:clamp(1.9rem,4.4vw,3.8rem)">Keep the world going.</h2>
-    <div class="fix stagger" style="margin-top:clamp(1rem,2.5vw,1.7rem)">
-      <div class="fx">
-        <div class="t">Continue · the live room</div>
-        <h3>Make the room a series.</h3>
-        <p><b>Working:</b> My Whole World and Rose show promising early live viewing in a recognisable setting.</p>
-        <p style="margin-top:.5rem"><b>Next:</b> if more songs were filmed, release them individually, with performance Shorts around each one. Rose is already the first post-album beat.</p>
-      </div>
-      <div class="fx">
-        <div class="t">Continue · one song across formats</div>
-        <h3>Give the next song another moment.</h3>
-        <p><b>Working:</b> My Whole World had a film, six Shorts, a visualiser and a live session.</p>
-        <p style="margin-top:.5rem"><b>Next:</b> shortlist <b>Rose and Feel The Love</b> from early visualiser viewing. Choose one focus; use an available performance or song story plus Shorts.</p>
-      </div>
-      <div class="fx q">
-        <div class="t">Develop · the band&rsquo;s world</div>
-        <h3>Keep the people and place visible.</h3>
-        <p><b>Working:</b> home, family and the live room give the campaign warmth; sampled comments echo these themes.</p>
-        <p style="margin-top:.5rem"><b>Test:</b> available behind-the-scenes footage, rehearsal moments and band stories. Tie each piece to a song or longer video.</p>
-      </div>
-      <div class="fx q">
-        <div class="t">Suggested rhythm · next few weeks</div>
-        <h3>One focus, then a follow-up.</h3>
-        <p>Aim for a meaningful follow-up every <b>7–14 days</b> where assets allow, with Shorts between bigger moments. This is a rhythm to test, not a proven optimum.</p>
-        <p style="margin-top:.5rem"><b>First:</b> check the footage available, choose the next song and map its supporting assets.</p>
-      </div>
-    </div>
-    <p class="body reveal" style="margin-top:1rem;font-size:.82rem;max-width:none"><b style="color:var(--gold)">Connect every release:</b> complete and feature the album playlist; add My Whole World&rsquo;s missing description links; check relevant pinned comments and end screens. Fix the &ldquo;Kins&rdquo; title typo.</p>
-    <div class="src reveal" style="margin-top:.65rem">Based on public data, 11 Nov 2026. Early views include any paid support; they do not prove organic demand or movement between formats. Song choices are provisional. New behind-the-scenes formats are tests; footage availability is unconfirmed.</div>
+    <table class="continue-table reveal">
+      <thead><tr><th>What worked</th><th>What could work next</th></tr></thead>
+      <tbody>
+        <tr><td><h3>The live room</h3><p>My Whole World + Rose: promising early viewing.</p></td><td><h3>Make it a series</h3><p>More filmed sessions, if available, with performance Shorts.</p></td></tr>
+        <tr><td><h3>One song, several formats</h3><p>My Whole World: film, six Shorts, visualiser, live.</p></td><td><h3>Give another song a moment</h3><p>Consider Rose or Feel The Love: a performance or song story + Shorts.</p></td></tr>
+        <tr><td><h3>A recognisable world</h3><p>Home, family and Southern roots echoed in comments.</p></td><td><h3>Show more of that world</h3><p>Test behind-the-scenes footage, rehearsals and band stories.</p></td></tr>
+      </tbody>
+    </table>
+    <p class="statement reveal" style="margin-top:1.3rem;max-width:none;color:var(--gold)">One song at a time. A follow-up every 7–14 days, where assets allow.</p>
+    <p class="body reveal" style="margin-top:.65rem;font-size:.82rem;max-width:none">Support each release with the album playlist, links and end screens.</p>
+    <div class="src reveal" style="margin-top:.65rem">Public data · 11 Nov 2026 · views include paid support. Next steps and cadence are proposals; song choices are early signals and footage is unconfirmed. Housekeeping details under Analysis.</div>
   </div>
 </section>
 
