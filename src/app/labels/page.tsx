@@ -1,19 +1,23 @@
 import Link from 'next/link';
 import { LABELS } from '@/lib/labels';
 import { AppHeader, PageTitle } from '@/components/ui/AppHeader';
+import { MARKETS } from '@/lib/market';
 
 export const metadata = { title: 'Label Workspaces — VMG YouTube' };
 
-export default function LabelsPage() {
+export default async function LabelsPage({ searchParams }: { searchParams: Promise<{ market?: string }> }) {
+  const query = await searchParams;
+  const market = query.market && MARKETS[query.market] ? query.market : 'uk';
+  const suffix = `?market=${encodeURIComponent(market)}`;
   const labels = Object.values(LABELS).sort((a, b) => a.name.localeCompare(b.name));
   return (
     <main className="min-h-screen bg-paper text-ink">
-      <AppHeader workspace="VMG · Label workspaces" nav={[
-        { href: '/growth', label: 'Channel Health' },
-        { href: '/campaigns', label: 'Active Campaigns' },
-        { href: '/coach', label: 'Coach' },
-        { href: '/labels', label: 'Labels' },
-        { href: '/resources', label: 'Resources' },
+      <AppHeader workspace={MARKETS[market].orgName} nav={[
+        { href: `/growth${suffix}`, label: 'Channel Health' },
+        { href: `/campaigns${suffix}`, label: 'Active Campaigns' },
+        { href: `/coach${suffix}`, label: 'Coach' },
+        { href: `/labels${suffix}`, label: 'Labels' },
+        { href: `/resources${suffix}`, label: 'Resources' },
       ]} />
       <div className="max-w-[1180px] mx-auto px-6 pb-16">
         <PageTitle title="Labels" lede="Dedicated YouTube workspaces for label partners. Choose a label to view its roster, campaigns, plans and deep dives." />
