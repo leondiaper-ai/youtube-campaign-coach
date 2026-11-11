@@ -1,22 +1,26 @@
 import { AppHeader, PageTitle } from '@/components/ui/AppHeader';
+import { MARKETS } from '@/lib/market';
 
 export const metadata = {
   title: 'Resources — YouTube Campaign System',
   description: 'Campaigns and artist intelligence for Virgin Music on YouTube.',
 };
 
-export default function ResourcesPage() {
+export default async function ResourcesPage({ searchParams }: { searchParams: Promise<{ market?: string }> }) {
+  const query = await searchParams;
+  const market = query.market && MARKETS[query.market] ? query.market : 'uk';
+  const suffix = `?market=${market}`;
   return (
     <main className="min-h-screen bg-paper text-ink">
       <AppHeader
         nav={[
-          { href: '/growth', label: 'Channel Health' },
-          { href: '/campaigns', label: 'Active Campaigns' },
-          { href: '/coach', label: 'Coach' },
-          { href: '/teams', label: 'Workspaces' },
-          { href: '/resources', label: 'Resources' },
+          { href: `/growth${suffix}`, label: 'Channel Health' },
+          { href: `/campaigns${suffix}`, label: 'Active Campaigns' },
+          { href: `/coach${suffix}`, label: 'Coach' },
+          { href: `/teams${suffix}`, label: 'Workspaces' },
+          { href: `/resources${suffix}`, label: 'Resources' },
         ]}
-        workspace="Virgin Music UK"
+        workspace={MARKETS[market].orgName}
       />
 
       <div className="max-w-[1180px] mx-auto px-6">
