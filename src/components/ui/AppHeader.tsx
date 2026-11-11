@@ -44,6 +44,11 @@ export function AppHeader({
   actions?: React.ReactNode;
 }) {
   const pathname = usePathname();
+  // Derive regional context from the caller's existing market-scoped links.
+  // Do not persist globally: switching territories must not leak into another workspace.
+  const scopedMarket = nav.map(item => item.href.match(/[?&]market=([^&]+)/)?.[1]).find(Boolean);
+  const withMarket = (href: string) => scopedMarket && ['/labels', '/teams', '/resources'].includes(href.split('?')[0]) && !href.includes('market=')
+    ? `${href}${href.includes('?') ? '&' : '?'}market=${scopedMarket}` : href;
   const label = getLabelWorkspace(workspace);
   const ownedNav = workspace === 'Virgin Music UK' || workspace === 'VMG · Owned network';
   const resourcesIndex = nav.findIndex(item => item.href.split('?')[0] === '/resources');
@@ -106,7 +111,7 @@ export function AppHeader({
             return (
               <Link
                 key={item.href}
-                href={item.href}
+                href={withMarket(item.href)}
                 aria-current={isActive ? 'page' : undefined}
                 className={[
                   'relative px-3 py-3 text-body no-underline transition-colors',
