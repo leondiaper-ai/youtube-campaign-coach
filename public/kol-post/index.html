@@ -1,0 +1,1233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Kings of Leon × YouTube — O My Beloved, post-album</title>
+
+<!--
+  KINGS OF LEON × YOUTUBE — post-album deep dive, O My Beloved
+  Virgin Music Group · November 2026
+
+  This closes the loop on the pre-album deck at /kol (September 2026). That
+  deck set a plan (Build → Hero → Extend, Always On underneath, a second
+  destination inside 7–14 days, a release week with a centre of gravity).
+  This one checks the plan against what the channel actually did, then
+  compares the campaign with Can We Please Have Fun (2024).
+
+  WHERE THE NUMBERS COME FROM
+  Public YouTube Data API via the Watcher (/api/full-catalogue,
+  /api/video-series, /api/debug/snapshots, /api/comment-scan,
+  /api/channel-shelf), retrieved 11 November 2026. No YouTube Studio
+  metrics: no impressions, CTR, retention, traffic sources or uniques.
+
+  RULES THIS FILE OBEYS
+   1. Like-for-like windows: lead single → album + 5 days.
+      2024: 22 Feb → 15 May 2024 (84 days). 2026: 10 Sep → 11 Nov 2026 (63 days).
+   2. Views are PUBLIC viewing totals. The music videos had paid support,
+      and public views cannot separate paid from organic. Cross-year view
+      comparisons describe public totals only; they say nothing about
+      organic performance or efficiency (no comparable spend data).
+   3. "Window" = uploads released during the campaign window, measured
+      at their current lifetime views on 11 Nov 2026.
+   4. Sample sizes are shown. Observed and hypothesis are labelled apart.
+   5. No causal claims. Channel movement co-occurs with releases; it is
+      not credited to any upload. Comments are qualitative.
+   6. We don't tell the band what music to make or when to play live.
+
+  Visual identity follows /kol: warm near-black, aged gold, Oswald.
+-->
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@300;400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+:root{
+  --gold:#C8963E;      /* aged gold — the /kol signal colour */
+  --gold-lt:#DDB062;
+  --red:#D0644A;       /* ember, lifted for legibility on near-black */
+  --red-dp:#7A2F1F;
+  --green:#7FA88C;     /* mint, from /kol */
+  --green-dp:#3E5A47;
+  --teal:#8FB0C4;      /* Cold Blue Dawn — the Earth-from-orbit blue */
+
+  --ink:#0B0B0C;
+  --ink-2:#141416;
+  --ink-3:#1C1C1F;
+  --cream:#EFEAE3;
+  --warm:#BDB4A8;
+  --dim:#8A8580;
+  --line:rgba(239,234,227,.14);
+
+  --pad:clamp(1.6rem,5vw,5.5rem);
+}
+
+/*ROOT*/
+
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{
+  background:var(--ink);color:var(--cream);
+  font-family:'Inter',system-ui,sans-serif;
+  font-size:clamp(15px,1.05vw,18px);line-height:1.55;
+  -webkit-font-smoothing:antialiased;
+}
+
+/* ── Type scale ─────────────────────────────────────────────────────
+   Archivo at wide widths reads like gig-poster and sound-system
+   signage, which is the register this campaign actually lives in. */
+.display{
+  font-family:'Oswald',sans-serif;
+  font-weight:700;
+  text-transform:uppercase;line-height:.92;letter-spacing:-.005em;
+}
+h1.display{font-size:clamp(2.6rem,7.4vw,6.6rem)}
+h2.display{font-size:clamp(2rem,5.2vw,4.5rem)}
+h3.display{font-size:clamp(1.3rem,2.4vw,2.1rem);font-variation-settings:'wdth' 110,'wght' 750}
+
+.label{
+  font-family:'Inter',sans-serif;font-size:.68rem;font-weight:400;
+  letter-spacing:.16em;text-transform:uppercase;color:var(--dim);
+}
+.statement{font-size:clamp(1.05rem,1.7vw,1.5rem);line-height:1.4;color:var(--cream);max-width:34ch}
+.body{color:var(--warm);max-width:60ch}
+.big-num{
+  font-family:'Oswald',sans-serif;font-weight:700;
+  line-height:.86;letter-spacing:-.02em;
+}
+
+/* ── Slides ─────────────────────────────────────────────────────────
+   A scrolling deck by default; Present mode swaps to one-at-a-time. */
+.deck{width:100%}
+.slide{
+  position:relative;min-height:100vh;width:100%;
+  display:flex;flex-direction:column;justify-content:center;
+  padding:5.5rem var(--pad) 4rem;overflow:hidden;
+  border-bottom:1px solid var(--line);
+}
+.inner{position:relative;z-index:3;width:100%;max-width:1400px;margin:0 auto}
+
+.bleed{position:absolute;inset:0;z-index:0}
+.bleed img{width:100%;height:100%;object-fit:cover;display:block}
+/* Scrims are separate elements rather than a filter on the image, so the
+   image keeps its own contrast and only the type side is darkened. */
+.scrim-b::after{content:'';position:absolute;inset:0;
+  background:linear-gradient(to top,rgba(11,11,12,.96) 4%,rgba(11,11,12,.72) 38%,rgba(11,11,12,.18) 78%)}
+.scrim-l::after{content:'';position:absolute;inset:0;
+  background:linear-gradient(to right,rgba(11,11,12,.95) 30%,rgba(11,11,12,.62) 58%,rgba(11,11,12,.12) 100%)}
+.scrim-f::after{content:'';position:absolute;inset:0;background:rgba(11,11,12,.78)}
+
+/* ── THE MOTIF: the rhythm strip ────────────────────────────────────
+   One tick per day of the campaign window. Lit = an upload landed.
+   This is the deck's whole argument rendered as a repeating mark. */
+.rhythm{display:flex;gap:2px;align-items:flex-end;width:100%;height:var(--rh,54px)}
+.tick{flex:1 1 0;min-width:1px;border-radius:1px;background:rgba(239,234,227,.10);height:26%}
+.tick.on{height:100%;background:var(--gold)}
+.tick.on.g{background:var(--green)}
+.tick.on.r{background:var(--red)}
+.rhythm.mini{--rh:16px;gap:1.5px}
+.rhythm.mini .tick{height:34%}
+
+.step-city{
+  font-family:'Inter',sans-serif;font-size:.74rem;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--cream);border:1px solid var(--green);border-radius:2px;
+  padding:.45rem .7rem;display:inline-flex;flex-direction:column;gap:.15rem;white-space:nowrap;
+}
+.step-city i{font-style:normal;font-size:.62rem;color:var(--green);letter-spacing:.08em}
+
+.gapmark{
+  position:relative;font-family:'Inter',sans-serif;font-size:.72rem;
+  letter-spacing:.1em;color:var(--red);text-transform:uppercase;
+}
+
+/* ── Components ─────────────────────────────────────────────────────*/
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:clamp(1.5rem,4vw,4.5rem)}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(1.2rem,2.5vw,2.4rem)}
+@media(max-width:860px){.grid2,.grid3{grid-template-columns:1fr}}
+
+.era{border-top:2px solid var(--line);padding-top:1.1rem}
+.era.now{border-top-color:var(--gold)}
+.era-y{font-family:'Inter',sans-serif;font-size:.8rem;letter-spacing:.18em;color:var(--dim)}
+.era.now .era-y{color:var(--gold)}
+
+/* One line of provenance per slide. The full audit trail is in Analysis —
+   the point of this deck is the insight, not the apparatus. */
+.src{
+  font-family:'Inter',sans-serif;font-size:.64rem;line-height:1.45;
+  color:var(--dim);border-left:2px solid var(--line);padding-left:.7rem;
+  max-width:74ch;margin-top:1.4rem;
+}
+.src b{color:var(--warm);font-weight:400}
+
+.flag{
+  display:inline-block;font-family:'Inter',sans-serif;font-size:.6rem;
+  letter-spacing:.14em;text-transform:uppercase;padding:.25rem .5rem;
+  border:1px solid var(--red);color:var(--red);border-radius:2px;
+  vertical-align:middle;
+}
+.flag.n{border-color:var(--line);color:var(--dim)}
+
+.thumb{position:relative;display:block;border-radius:3px;overflow:hidden;background:var(--ink-3);aspect-ratio:16/9}
+.thumb img{width:100%;height:100%;object-fit:cover;display:block}
+.thumb.v{aspect-ratio:9/16}
+.strip .thumb{border-radius:2px}
+/* ── The release-week rail ─────────────────────────────────────────
+   Four beats left to right on a single line. Each station draws one tick
+   per upload that day, so 10 September reads as a wall next to the twos
+   and ones either side — the shape of the week, not a bar chart of it. */
+.rail{display:grid;grid-template-columns:repeat(4,1fr);gap:clamp(.9rem,2.2vw,2rem);position:relative}
+.rail::before{
+  content:'';position:absolute;left:0;right:0;top:calc(1.05rem + 5px);height:1px;
+  background:linear-gradient(to right,var(--line),var(--line) 62%,var(--gold) 62%,var(--gold) 88%,var(--line) 88%);
+}
+.stop{position:relative;padding-right:.4rem}
+.stop-d{font-family:'Inter',sans-serif;font-size:.68rem;letter-spacing:.14em;text-transform:uppercase;color:var(--dim)}
+.stop.album .stop-d{color:var(--gold)}
+.node{width:11px;height:11px;border-radius:50%;background:var(--ink);border:2px solid var(--line);margin:.35rem 0 0}
+.stop.surge .node{border-color:var(--cream)}
+.stop.album .node{border-color:var(--gold);background:var(--gold);box-shadow:0 0 0 4px rgba(200,150,62,.18)}
+.ticks{display:flex;gap:2px;align-items:flex-end;height:30px;margin:.9rem 0 .8rem}
+.ticks i{width:4px;background:var(--warm);border-radius:1px;height:52%;display:block}
+.stop.surge .ticks i{background:var(--cream);height:100%}
+.stop.album .ticks i{background:var(--gold);height:78%}
+.stop-h{
+  font-family:'Oswald',sans-serif;font-weight:600;
+  font-size:clamp(1rem,1.6vw,1.3rem);text-transform:uppercase;color:var(--cream);
+  line-height:1.1;margin-bottom:.45rem;
+}
+.stop.album .stop-h{color:var(--gold)}
+.stop p{font-size:.87rem;line-height:1.45;color:var(--warm)}
+.stop p b{color:var(--cream);font-weight:600}
+@media(max-width:860px){
+  .rail{grid-template-columns:1fr 1fr;row-gap:1.6rem}
+  .rail::before{display:none}
+}
+
+/* ── The contact sheet ──────────────────────────────────────────────
+   A full-bleed grid of real campaign frames sitting behind the type.
+   The wash is a gradient rather than a flat scrim so the top of the
+   sheet stays legible as imagery while the lower half carries copy. */
+.sheet-grid{
+  position:absolute;inset:0;z-index:0;display:grid;
+  grid-template-columns:repeat(6,1fr);grid-auto-rows:1fr;gap:3px;padding:3px;
+}
+.sheet-grid a{position:relative;overflow:hidden;display:block;background:var(--ink-3)}
+.sheet-grid img{width:100%;height:100%;object-fit:cover;display:block}
+.sheet-wash{
+  position:absolute;inset:0;z-index:1;pointer-events:none;
+  background:linear-gradient(to top,rgba(11,11,12,.985) 34%,rgba(11,11,12,.92) 50%,rgba(11,11,12,.55) 74%,rgba(11,11,12,.28) 100%);
+}
+.sheet-type{
+  position:relative;z-index:3;margin-top:auto;
+  padding:0 var(--pad) clamp(1.8rem,4vw,3.2rem);
+}
+@media(max-width:860px){.sheet-grid{grid-template-columns:repeat(4,1fr)}}
+@media(max-width:560px){.sheet-grid{grid-template-columns:repeat(3,1fr)}}
+.thumb-c{
+  position:absolute;left:0;right:0;bottom:0;padding:.5rem .55rem .45rem;
+  background:linear-gradient(to top,rgba(11,11,12,.94),rgba(11,11,12,0));
+  font-family:'Inter',sans-serif;font-size:.6rem;line-height:1.3;color:var(--cream);
+}
+
+.quote{
+  border-left:3px solid var(--gold);padding:.1rem 0 .1rem 1.1rem;
+  font-size:clamp(1rem,1.35vw,1.2rem);line-height:1.42;color:var(--cream);
+}
+.quote cite{display:block;margin-top:.5rem;font-style:normal;
+  font-family:'Inter',sans-serif;font-size:.65rem;letter-spacing:.1em;color:var(--dim)}
+
+.verdict{border-top:2px solid;padding-top:1.2rem}
+.verdict.can{border-color:var(--green)}
+.verdict.cant{border-color:var(--red)}
+.verdict h3{margin-bottom:1rem}
+.verdict.can h3{color:var(--green)}
+.verdict.cant h3{color:var(--red)}
+.verdict li{list-style:none;padding:.5rem 0 .5rem 1.3rem;position:relative;color:var(--warm);border-bottom:1px solid var(--line)}
+.verdict li:last-child{border-bottom:0}
+.verdict li::before{content:'';position:absolute;left:0;top:1.12rem;width:6px;height:6px;border-radius:50%}
+.verdict.can li::before{background:var(--green)}
+.verdict.cant li::before{background:var(--red)}
+
+.lesson{border-top:2px solid var(--gold);padding-top:1.2rem}
+.lessons4{display:grid;grid-template-columns:repeat(4,1fr);gap:clamp(1rem,2.2vw,2rem)}
+@media(max-width:980px){.lessons4{grid-template-columns:1fr 1fr}}
+@media(max-width:560px){.lessons4{grid-template-columns:1fr}}
+.worked{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(1rem,2.2vw,2rem)}
+@media(max-width:860px){.worked{grid-template-columns:1fr 1fr}}
+@media(max-width:560px){.worked{grid-template-columns:1fr}}
+.wk{
+  font-family:'Oswald',sans-serif;font-weight:600;
+  font-size:clamp(.95rem,1.45vw,1.15rem);line-height:1.12;text-transform:uppercase;
+  color:var(--cream);margin:.55rem 0 .45rem;letter-spacing:-.003em;
+}
+.worked p{font-size:.88rem;color:var(--warm);line-height:1.45}
+.worked p b{color:var(--cream);font-weight:600}
+.lesson .n{font-family:'Inter',sans-serif;font-size:.75rem;color:var(--gold);letter-spacing:.18em}
+
+.step{display:flex;align-items:center;gap:.9rem;flex-wrap:wrap;margin-top:1.4rem}
+.step span{
+  font-family:'Inter',sans-serif;font-size:.7rem;letter-spacing:.12em;text-transform:uppercase;
+  padding:.5rem .8rem;border:1px solid var(--line);border-radius:2px;color:var(--warm);
+}
+.step span.now{border-color:var(--gold);color:var(--gold)}
+.step span.next{border-color:var(--teal);color:var(--teal)}
+.step i{color:var(--dim);font-style:normal}
+
+/* ── Chrome ─────────────────────────────────────────────────────────*/
+.chrome{
+  position:fixed;top:0;left:0;right:0;z-index:60;
+  display:flex;justify-content:space-between;align-items:center;gap:1rem;
+  padding:.7rem var(--pad);background:rgba(11,11,12,.9);
+  backdrop-filter:blur(14px);border-bottom:1px solid var(--line);
+  font-family:'Inter',sans-serif;font-size:.66rem;letter-spacing:.13em;text-transform:uppercase;
+}
+.chrome-l{display:flex;gap:1.1rem;align-items:baseline;color:var(--dim);min-width:0}
+.chrome-l span:first-child{white-space:nowrap}
+@media(max-width:760px){.chrome-l span:nth-child(2){display:none}}
+.btn{
+  font:inherit;text-transform:uppercase;letter-spacing:.13em;cursor:pointer;
+  background:transparent;color:var(--warm);border:1px solid var(--line);
+  padding:.45rem .8rem;border-radius:2px;white-space:nowrap;
+}
+.btn:hover{border-color:var(--gold);color:var(--gold)}
+.btn.primary{border-color:var(--gold);color:var(--ink);background:var(--gold);font-weight:500}
+.btn.primary:hover{background:var(--gold-lt);border-color:var(--gold-lt);color:var(--ink)}
+#pbar{position:fixed;top:0;left:0;height:2px;background:var(--gold);width:0;z-index:70;transition:width .3s ease}
+
+/* ── Analysis sheet — where every caveat actually lives ─────────────*/
+.sheet{
+  position:fixed;inset:0;z-index:80;background:rgba(6,6,7,.97);
+  overflow-y:auto;padding:5rem var(--pad) 6rem;display:none;
+}
+.sheet.open{display:block}
+.sheet-in{max-width:880px;margin:0 auto}
+.sheet h2{margin-bottom:.4rem}
+.sheet h4{
+  font-family:'Inter',sans-serif;font-size:.72rem;letter-spacing:.16em;text-transform:uppercase;
+  color:var(--gold);margin:2.4rem 0 .7rem;
+}
+.sheet p,.sheet li{color:var(--warm);margin-bottom:.7rem;max-width:74ch}
+.sheet li{margin-left:1.1rem}
+.sheet .warn{border-left:3px solid var(--red);padding-left:1rem;color:var(--cream)}
+.sheet table{border-collapse:collapse;width:100%;margin:.8rem 0 1.4rem;font-size:.82rem}
+.sheet th,.sheet td{text-align:left;padding:.45rem .7rem;border-bottom:1px solid var(--line);color:var(--warm)}
+.sheet th{font-family:'Inter',sans-serif;font-size:.65rem;letter-spacing:.12em;text-transform:uppercase;color:var(--dim)}
+.sheet td b{color:var(--cream);font-weight:600}
+.close{position:fixed;top:1rem;right:var(--pad);z-index:90}
+/* ── Analysis: built to be read in 30 seconds, not defended line by line.
+   The forensic version lives in the internal audit; this page answers
+   where the data came from, what we can see, what we can't, and whether
+   the 2024 comparison is fair. ─────────────────────────────────────── */
+.sheet .big-p{font-size:clamp(1rem,1.5vw,1.2rem);color:var(--warm);max-width:60ch;margin:.2rem 0 0;line-height:1.5}
+.album{
+  display:flex;justify-content:space-between;align-items:center;gap:1.5rem;flex-wrap:wrap;
+  border-left:3px solid var(--gold);padding:.1rem 0 .1rem 1rem;margin:.4rem 0 1.4rem;
+}
+.album p{margin:0}
+/* Small print: present so the method can be checked, sized so it never
+   competes with the findings it supports. */
+.notes{margin-top:3.2rem;padding-top:1.1rem;border-top:1px solid var(--line)}
+.mn{margin-top:.9rem;display:grid;grid-template-columns:auto 1fr;gap:.5rem 1.4rem;align-items:baseline}
+@media(max-width:700px){.mn{grid-template-columns:1fr;gap:.1rem .5rem}.mn dt{margin-top:.7rem}}
+.mn dt{
+  font-family:'Inter',sans-serif;font-size:.66rem;letter-spacing:.12em;text-transform:uppercase;
+  color:var(--warm);white-space:nowrap;
+}
+.mn dd{margin:0;font-size:.78rem;line-height:1.55;color:var(--dim);max-width:70ch}
+.notes p{font-size:.78rem;line-height:1.65;color:var(--dim);max-width:88ch;margin:.6rem 0 0}
+.notes code{font-size:.76rem;color:var(--warm)}
+.sheet h3.sec{
+  font-size:clamp(1.05rem,1.9vw,1.5rem);color:var(--gold);
+  margin:2.8rem 0 .8rem;padding-top:1.1rem;border-top:1px solid var(--line);
+}
+.mgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin:1.2rem 0 .4rem}
+.mgrid.two{grid-template-columns:repeat(2,1fr)}
+@media(max-width:760px){.mgrid,.mgrid.two{grid-template-columns:1fr}}
+.mcard{border-top:2px solid var(--line);padding-top:.9rem}
+.mcard.ok{border-top-color:var(--green)}
+.mcard p{font-size:.9rem;margin:.45rem 0 0;color:var(--warm)}
+.mbig{font-family:'Oswald',sans-serif;font-weight:700;
+  font-size:clamp(1.8rem,3vw,2.4rem);line-height:.9;color:var(--gold);margin-top:.5rem}
+.ct{font-family:'Inter',sans-serif;font-size:.7rem;letter-spacing:.14em;text-transform:uppercase;color:var(--cream)}
+.fair{display:flex;flex-wrap:wrap;gap:.5rem;margin-top:.9rem}
+.fair span{
+  font-family:'Inter',sans-serif;font-size:.72rem;letter-spacing:.08em;
+  border:1px solid var(--green);color:var(--green);border-radius:2px;padding:.4rem .7rem;
+}
+.sheet .foot{
+  margin-top:3rem;padding-top:1.1rem;border-top:1px solid var(--line);
+  font-size:.84rem;color:var(--dim);
+}
+
+/* ── Present mode ───────────────────────────────────────────────────
+   Tighter chrome clearance than the scrolling deck, and overflow-y:auto
+   as a safety net: a slide that outgrows the viewport on an unusual
+   screen should scroll rather than have its headline cut off by the
+   chrome bar, which is what happened to slide 2 at 1440×900. */
+body.present .deck .slide{
+  display:none;height:100vh;min-height:100vh;border-bottom:0;
+  padding-top:4.4rem;padding-bottom:2.4rem;overflow-y:auto;
+}
+body.present .deck .slide.active{display:flex}
+body.present{overflow:hidden}
+
+/* ── Motion ─────────────────────────────────────────────────────────*/
+.reveal{opacity:0;transform:translateY(16px);transition:opacity .6s ease,transform .6s ease}
+.reveal.visible{opacity:1;transform:none}
+.stagger>*{opacity:0;transform:translateY(14px);transition:opacity .5s ease,transform .5s ease}
+.stagger.visible>*{opacity:1;transform:none}
+.tick{transition:height .5s cubic-bezier(.2,.7,.3,1),background .4s ease}
+@media(prefers-reduced-motion:reduce){
+  .reveal,.stagger>*{opacity:1!important;transform:none!important;transition:none!important}
+  .tick{transition:none!important}
+  html{scroll-behavior:auto}
+}
+
+/* ── KOL additions ──────────────────────────────────────────────────── */
+.display{letter-spacing:.005em}
+.label{font-weight:600;font-size:.64rem}
+.loop{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(.9rem,2vw,1.6rem)}
+@media(max-width:980px){.loop{grid-template-columns:1fr 1fr}}
+@media(max-width:560px){.loop{grid-template-columns:1fr}}
+.lp{border-top:2px solid var(--line);padding-top:.85rem}
+.lp .plan{font-family:'Inter',sans-serif;font-size:.62rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--dim)}
+.lp h3{font-family:'Oswald',sans-serif;font-weight:600;text-transform:uppercase;font-size:clamp(1rem,1.5vw,1.25rem);line-height:1.1;margin:.35rem 0 .45rem;color:var(--cream)}
+.lp p{font-size:.86rem;line-height:1.45;color:var(--warm)}
+.lp p b{color:var(--cream);font-weight:600}
+.st{display:inline-block;font-family:'Inter',sans-serif;font-size:.58rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;padding:.2rem .45rem;border-radius:2px;margin-left:.4rem;vertical-align:middle}
+.lp.done{border-top-color:var(--green)} .lp.done .st{background:var(--green);color:var(--ink)}
+.lp.part{border-top-color:var(--gold)} .lp.part .st{background:var(--gold);color:var(--ink)}
+.lp.not{border-top-color:var(--red)} .lp.not .st{border:1px solid var(--red);color:var(--red)}
+
+.pairs{display:flex;flex-direction:column;gap:1.3rem}
+.pair .pn{display:flex;justify-content:space-between;gap:1rem;font-size:.86rem;color:var(--warm);margin-bottom:.35rem}
+.pair .pn b{color:var(--cream);font-weight:600}
+.bar{height:16px;border-radius:2px;background:rgba(239,234,227,.06);overflow:hidden;margin-top:.25rem}
+.bar i{display:block;height:100%;width:0;border-radius:2px;transition:width .9s cubic-bezier(.2,.7,.3,1)}
+.bar.old i{background:rgba(239,234,227,.30)}
+.bar.new i{background:var(--gold)}
+.bl{display:flex;justify-content:space-between;font-size:.72rem;color:var(--dim);margin-top:.2rem}
+.bl.n{color:var(--gold)}
+
+.films{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(.8rem,1.8vw,1.4rem)}
+@media(max-width:860px){.films{grid-template-columns:1fr}}
+.films.four{grid-template-columns:repeat(4,1fr)}
+.films.four .thumb{margin-bottom:.55rem}
+.films.four p{font-size:.82rem}
+.films.four .meta{margin:.1rem 0 .3rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;font-size:.64rem}
+@media(max-width:980px){.films.four{grid-template-columns:1fr 1fr}}
+@media(max-width:560px){.films.four{grid-template-columns:1fr}}
+.seq{display:flex;flex-direction:column;gap:.15rem;border-left:2px solid var(--line);margin-left:.3rem}
+.sq{display:grid;grid-template-columns:7.2rem 1fr;gap:1rem;padding:.55rem 0 .55rem 1.1rem;position:relative}
+.sq::before{content:'';position:absolute;left:-6px;top:1rem;width:10px;height:10px;border-radius:50%;background:var(--gold)}
+.sq.sh::before{background:var(--ink);border:2px solid var(--gold);width:6px;height:6px}
+.sq .sd{font-family:'Inter',sans-serif;font-size:.66rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--gold);padding-top:.2rem}
+.sq h3{font-family:'Oswald',sans-serif;font-weight:600;text-transform:uppercase;font-size:clamp(.98rem,1.4vw,1.18rem);line-height:1.1;color:var(--cream)}
+.sq p{font-size:.84rem;color:var(--warm);line-height:1.4;margin-top:.15rem}
+.sq p b{color:var(--cream);font-weight:600}
+@media(max-width:560px){.sq{grid-template-columns:1fr;gap:.2rem}}
+.film .thumb{margin-bottom:.8rem}
+.film h3{font-family:'Oswald',sans-serif;font-weight:600;text-transform:uppercase;font-size:clamp(1.05rem,1.6vw,1.35rem);line-height:1.05}
+.film .meta{font-size:.72rem;color:var(--gold);letter-spacing:.06em;margin:.3rem 0 .45rem}
+.film p{font-size:.85rem;color:var(--warm);line-height:1.45}
+
+.fix{display:grid;grid-template-columns:repeat(2,1fr);gap:clamp(1rem,2.2vw,1.8rem)}
+@media(max-width:760px){.fix{grid-template-columns:1fr}}
+.fx{border-top:2px solid var(--gold);padding-top:.9rem}
+.fx .t{font-family:'Inter',sans-serif;font-size:.6rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--gold)}
+.fx.q{border-top-color:var(--teal)} .fx.q .t{color:var(--teal)}
+.fx h3{font-family:'Oswald',sans-serif;font-weight:600;text-transform:uppercase;font-size:clamp(1rem,1.5vw,1.25rem);line-height:1.1;margin:.4rem 0 .4rem}
+.fx p{font-size:.86rem;color:var(--warm);line-height:1.45}
+.fx p b{color:var(--cream);font-weight:600}
+.obs{font-family:'Inter',sans-serif;font-size:.58rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--dim);border:1px solid var(--line);padding:.15rem .4rem;border-radius:2px;margin-left:.35rem;vertical-align:middle}
+.rate{display:flex;align-items:flex-end;gap:clamp(.6rem,1.6vw,1.2rem);height:150px;margin-top:1.2rem}
+.rate .c{flex:1;display:flex;flex-direction:column;justify-content:flex-end;align-items:stretch;height:100%}
+.rate .c i{display:block;background:rgba(239,234,227,.28);border-radius:2px 2px 0 0;height:0;transition:height .9s cubic-bezier(.2,.7,.3,1)}
+.rate .c.hot i{background:var(--gold)}
+.rate .c b{font-family:'Oswald',sans-serif;font-weight:600;font-size:clamp(.95rem,1.5vw,1.2rem);color:var(--cream);margin-bottom:.3rem}
+.rate .c.hot b{color:var(--gold)}
+.rate-l{display:flex;gap:clamp(.6rem,1.6vw,1.2rem);margin-top:.45rem}
+.rate-l span{flex:1;font-size:.66rem;line-height:1.3;color:var(--dim)}
+
+/* Post-album continuation: evidence beside the next action. */
+.continue-table{width:100%;border-collapse:collapse;table-layout:fixed;margin-top:clamp(1.2rem,2.5vw,2rem)}
+.continue-table th{text-align:left;font:700 .65rem 'Inter',sans-serif;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);padding:0 1rem .8rem 0}
+.continue-table th+th{color:var(--teal)}
+.continue-table td{vertical-align:top;border-top:1px solid var(--line);padding:1rem 1.5rem 1rem 0}
+.continue-table h3{font-family:'Oswald',sans-serif;font-weight:600;text-transform:uppercase;font-size:clamp(1.1rem,1.8vw,1.5rem);line-height:1.15;margin:0 0 .4rem}
+.continue-table td+td h3{color:var(--teal)}
+.continue-table p{font-size:clamp(.82rem,1.1vw,.98rem);line-height:1.4;color:var(--warm)}
+@media(max-width:600px){.continue-table td{padding:.8rem .7rem .8rem 0}.continue-table h3{font-size:1rem}.continue-table p{font-size:.78rem}}
+</style>
+</head>
+<body>
+
+<div id="pbar"></div>
+
+<div class="chrome">
+  <div class="chrome-l">
+    <span style="color:var(--gold)">KINGS OF LEON × YOUTUBE</span>
+    <span id="chrome-sub">O My Beloved · post-album deep dive · November 2026</span>
+  </div>
+  <div class="chrome-r" style="display:flex;gap:.5rem">
+    <div class="seg" role="tablist" aria-label="Switch deck">
+      <button role="tab" id="tab-pre" onclick="setView('pre')">Pre-album</button>
+      <button role="tab" id="tab-post" class="on" aria-selected="true" onclick="setView('post')">Post-album</button>
+    </div>
+    <button class="btn" onclick="openSheet()">Analysis</button>
+    <button class="btn primary" onclick="presentNow()">Present</button>
+  </div>
+</div>
+
+<!-- The pre-album deck (/kol) opens in place, in this window, under this
+     page's bar. /kol itself is unchanged; only its own top bar is hidden
+     inside the frame, so there is one navigation for both decks. -->
+<iframe id="preframe" title="Kings of Leon × YouTube — pre-album deck" allow="fullscreen" allowfullscreen></iframe>
+
+<div class="deck" id="deck">
+
+<!-- ═══ 1 · COVER ═══════════════════════════════════════════════════ -->
+<section class="slide" data-t="Cover" style="justify-content:flex-end;padding-bottom:3.4rem">
+  <div class="bleed scrim-b">
+    <img src="https://i.ytimg.com/vi/Bb7YN5wQztk/maxresdefault.jpg" alt="My Whole World — official video"
+      style="object-position:50% 40%"
+      onerror="this.onerror=null;this.src='https://i.ytimg.com/vi/Bb7YN5wQztk/hqdefault.jpg'">
+  </div>
+  <div class="inner">
+    <div class="label reveal" style="color:var(--gold)">Kings of Leon × YouTube · Virgin Music Group · post-album deep dive</div>
+    <h1 class="display reveal" style="margin-top:1.1rem">O My Beloved</h1>
+    <p class="statement reveal" style="margin-top:1.4rem;font-size:clamp(1.15rem,2vw,1.75rem);max-width:34ch">
+      The album is out. We planned it, followed it, and now we can read it.<br>
+      <span style="color:var(--gold)">What worked, and what was better than last time?</span>
+    </p>
+    <div class="reveal" style="margin-top:2.4rem;max-width:760px">
+      <div class="rhythm mini" id="cover-rhythm"></div>
+      <div class="label" style="margin-top:.6rem">Every upload day · lead single 10 Sep → album + 5 days, 11 Nov 2026</div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ 2 · CLOSING THE LOOP ════════════════════════════════════════
+     The pre-album deck's own plan, scored against the public record. -->
+<section class="slide" data-t="The loop">
+  <div class="inner">
+    <div class="label reveal">Closing the loop · the September plan, against what happened</div>
+    <h2 class="display reveal" style="margin-top:.7rem;font-size:clamp(1.9rem,4.4vw,3.8rem)">We set a plan.<br>Here&rsquo;s how it played out.</h2>
+
+    <div class="loop stagger" style="margin-top:clamp(1.4rem,3vw,2.2rem)">
+      <div class="lp done">
+        <div class="plan">Build · tease the story <span class="st">Done</span></div>
+        <h3>The countdown landed on the day.</h3>
+        <p>Dated countdown Shorts from <b>12 Aug</b> resolved on <b>10 Sep</b>. The same device ran again into the album: <b>12 Shorts in nine days</b>.</p>
+      </div>
+      <div class="lp done">
+        <div class="plan">Hero · define the moment <span class="st">Done</span></div>
+        <h3>Three singles, three films.</h3>
+        <p>My Whole World, Cold Blue Dawn and KOYSAR each got a distinct film. Together they hold <b>82.9%</b> of public views on campaign uploads.</p>
+      </div>
+      <div class="lp done">
+        <div class="plan">Extend · deepen the world <span class="st">Done</span></div>
+        <h3>One song in four formats; every track.</h3>
+        <p>My Whole World ran as film, Shorts, visualiser and live session. Then a second live-room video and <b>a video for every album track</b>.</p>
+      </div>
+      <div class="lp part">
+        <div class="plan">A second destination inside 7–14 days <span class="st">Partly</span></div>
+        <h3>2 of 4 had another long-form upload within 14 days.</h3>
+        <p>Cold Blue Dawn → My Whole World (Live), <b>8 days</b>. Album → Rose (Live), <b>3 days</b>. My Whole World → visualiser took <b>15</b>; KOYSAR → album <b>21</b>. This is timing, not breadth.</p>
+      </div>
+      <div class="lp part">
+        <div class="plan">Give release week a centre <span class="st">Partly</span></div>
+        <h3>Programmed across the week, with a focal point.</h3>
+        <p>The plan said don&rsquo;t publish everything at once. The album still landed in one day, but <b>Rose (Live)</b> three days later gave release week its focal point.</p>
+      </div>
+      <div class="lp part">
+        <div class="plan">Always on · connect the eras <span class="st">Partly</span></div>
+        <h3>Partly in place; connections need checking.</h3>
+        <p>The <b>O My Beloved</b> playlist holds 5 videos, not the album, and the lead single&rsquo;s description has <b>no links</b>. End screens, cards and Community posts weren&rsquo;t checked.</p>
+      </div>
+    </div>
+
+    <p class="statement reveal" style="margin-top:1.6rem;color:var(--gold);max-width:52ch">
+      The content plan happened. What&rsquo;s left is the programming around it.
+    </p>
+    <div class="src reveal">Plan: /kol, September 2026. Outcome: public YouTube API via the Watcher, 11 Nov 2026. “Within 14 days” counts any long-form upload, not necessarily the same song.</div>
+  </div>
+</section>
+
+<!-- ═══ 3 · THE SINGLES LANDED BIGGER ═══════════════════════════════
+     The one cross-campaign view comparison that is safe: it only runs in
+     the direction where the younger asset is already ahead. -->
+<section class="slide" data-t="Bigger singles">
+  <div class="inner">
+    <div class="grid2" style="align-items:center">
+      <div>
+        <div class="label reveal">The headline</div>
+        <h2 class="display reveal" style="margin-top:.7rem;font-size:clamp(1.9rem,4.4vw,3.8rem)">The singles reached further.</h2>
+        <p class="body reveal" style="margin-top:1.2rem;font-size:1.02rem">
+          The 2026 singles have already exceeded the 2024 singles&rsquo; lifetime public views.
+          <b style="color:var(--cream)">Paid support helped drive the larger viewing totals, with an estimated 60% paid / 40% organic split.</b>
+          The 2024 split is unknown, so a like-for-like organic comparison isn&rsquo;t available.
+        </p>
+        <div class="reveal" style="margin-top:1.6rem;display:flex;gap:2.2rem;flex-wrap:wrap">
+          <div><div class="big-num" style="font-size:clamp(2.2rem,4.4vw,3.6rem);color:var(--gold)">9.47M</div><div class="label" style="margin-top:.35rem">2026 · three singles · public views</div></div>
+          <div><div class="big-num" style="font-size:clamp(2.2rem,4.4vw,3.6rem);color:var(--warm)">4.10M</div><div class="label" style="margin-top:.35rem">2024 · three singles · lifetime public views</div></div>
+        </div>
+        <p class="statement reveal" style="margin-top:1.6rem;color:var(--gold);max-width:34ch">
+          Larger public totals. Not, on this evidence, organic growth or efficiency.
+        </p>
+      </div>
+
+      <div class="pairs stagger">
+        <div class="pair">
+          <div class="pn"><span><b>My Whole World</b> · 10 Sep 2026</span><span>vs Mustang · 22 Feb 2024</span></div>
+          <div class="bar new"><i data-w="100"></i></div><div class="bl n"><span>4.83M · 62 days</span></div>
+          <div class="bar old"><i data-w="36.2"></i></div><div class="bl"><span>1.75M · 2.7 years</span></div>
+        </div>
+        <div class="pair">
+          <div class="pn"><span><b>KOYSAR</b> · 16 Oct 2026</span><span>vs Nowhere to Run · 10 May 2024</span></div>
+          <div class="bar new"><i data-w="72.3"></i></div><div class="bl n"><span>3.49M · 26 days</span></div>
+          <div class="bar old"><i data-w="35.7"></i></div><div class="bl"><span>1.72M · 2.5 years</span></div>
+        </div>
+        <div class="pair">
+          <div class="pn"><span><b>Cold Blue Dawn</b> · 30 Sep 2026</span><span>vs Nothing To Do · 19 Apr 2024</span></div>
+          <div class="bar new"><i data-w="23.6"></i></div><div class="bl n"><span>1.14M · 42 days</span></div>
+          <div class="bar old"><i data-w="12.9"></i></div><div class="bl"><span>621K · 2.6 years</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="src reveal">Source: public YouTube API, 11 Nov 2026. Public view totals. Pairs matched by campaign position. 60/40 is an approximate split from the campaign team; which videos and period it covers is being confirmed.</div>
+  </div>
+</section>
+
+<!-- ═══ 4 · THE WORLD ═════════════════════════════════════════════
+     The central creative finding. Home, family, place and warmth link the
+     home film, the fairground and the live room; Cold Blue Dawn is allowed
+     its own identity rather than forced into the same theme. Comments are
+     qualitative examples only. Coherence is shown, not credited with views. -->
+<section class="slide" data-t="The world">
+  <div class="inner">
+    <div class="label reveal">The creative thread</div>
+    <h2 class="display reveal" style="margin-top:.7rem;font-size:clamp(1.9rem,4.4vw,3.8rem)">A recognisable world around the songs.</h2>
+
+    <div class="films four stagger" style="margin-top:clamp(1.2rem,2.6vw,1.9rem)">
+      <div class="film">
+        <a class="thumb" href="https://www.youtube.com/watch?v=Bb7YN5wQztk" target="_blank" rel="noopener"><img src="https://i.ytimg.com/vi/Bb7YN5wQztk/maxresdefault.jpg" alt="My Whole World" onerror="this.onerror=null;this.src='https://i.ytimg.com/vi/Bb7YN5wQztk/hqdefault.jpg'"></a>
+        <div class="meta">Home · My Whole World</div>
+        <p>A Southern house, family, and the band playing together in a living room.</p>
+      </div>
+      <div class="film">
+        <a class="thumb" href="https://www.youtube.com/watch?v=JY87mCYtYd8" target="_blank" rel="noopener"><img src="https://i.ytimg.com/vi/JY87mCYtYd8/maxresdefault.jpg" alt="KOYSAR" onerror="this.onerror=null;this.src='https://i.ytimg.com/vi/JY87mCYtYd8/hqdefault.jpg'"></a>
+        <div class="meta">Family · KOYSAR</div>
+        <p>A fairground, with the crew and their families in the frame.</p>
+      </div>
+      <div class="film">
+        <a class="thumb" href="https://www.youtube.com/watch?v=j9Z4JcsxXus" target="_blank" rel="noopener"><img src="https://i.ytimg.com/vi/j9Z4JcsxXus/maxresdefault.jpg" alt="My Whole World (Live)" onerror="this.onerror=null;this.src='https://i.ytimg.com/vi/j9Z4JcsxXus/hqdefault.jpg'"></a>
+        <div class="meta">Place · the live sessions</div>
+        <p>An intimate, wood-panelled room: the band up close, playing the record.</p>
+      </div>
+      <div class="film">
+        <a class="thumb" href="https://www.youtube.com/watch?v=UHqhzS3XS5s" target="_blank" rel="noopener"><img src="https://i.ytimg.com/vi/UHqhzS3XS5s/maxresdefault.jpg" alt="Cold Blue Dawn" onerror="this.onerror=null;this.src='https://i.ytimg.com/vi/UHqhzS3XS5s/hqdefault.jpg'"></a>
+        <div class="meta" style="color:var(--teal)">Its own identity · Cold Blue Dawn</div>
+        <p>Earth and weather imagery, made with The Weather Channel. A distinct look for one song.</p>
+      </div>
+    </div>
+
+    <p class="statement reveal" style="margin-top:1.3rem;color:var(--gold);max-width:56ch">
+      Familiarity, family, place and human warmth run through the home, fairground and live-room films.
+    </p>
+
+    <div class="reveal" style="margin-top:1.1rem">
+      <div class="label" style="color:var(--warm)">Echoed in the comments · qualitative examples, not representative research</div>
+      <div class="grid3 stagger" style="margin-top:.7rem;gap:clamp(.8rem,2vw,1.6rem)">
+        <div class="quote" style="font-size:.95rem">&ldquo;Loooooove KOL returning to their Southern roots.&rdquo;<cite>527 likes · 2026 single</cite></div>
+        <div class="quote" style="font-size:.95rem;border-left-color:var(--green)">&ldquo;&hellip;one of the most human videos uploaded to the internet in recent memory.&rdquo;<cite>199 likes · KOYSAR</cite></div>
+        <div class="quote" style="font-size:.95rem;border-left-color:var(--teal)">&ldquo;Most lyric videos pick a font. Kings of Leon picked Earth.&rdquo;<cite>132 likes · Cold Blue Dawn</cite></div>
+      </div>
+    </div>
+    <div class="src reveal">Source: the videos themselves and a relevance-ranked public comment sample. The coherence is visible in the assets and echoed in comments; we can&rsquo;t show it caused the viewing totals.</div>
+  </div>
+</section>
+
+<!-- ═══ 5 · CONCENTRATION — the honest flip ═════════════════════════
+     On Ezra the top-3 share fell. Here it rose. Said plainly. -->
+<section class="slide" data-t="Concentration">
+  <div class="inner">
+    <div class="label reveal">Where the attention went</div>
+    <h2 class="display reveal" style="margin-top:.8rem;max-width:22ch;font-size:clamp(1.9rem,4.4vw,3.8rem)">Public views concentrated<br>on the singles.</h2>
+    <p class="label reveal" style="margin-top:1.1rem;color:var(--warm);letter-spacing:.1em">Top-three share of current lifetime views on uploads released in each campaign window</p>
+
+    <div class="grid2 stagger" style="margin-top:1.8rem">
+      <div class="era">
+        <div class="era-y">2024 · Can We Please Have Fun · 66 uploads</div>
+        <div class="big-num" style="font-size:clamp(3.2rem,7.4vw,5.6rem);color:var(--warm);margin-top:.5rem">61.6<span style="font-size:.42em">%</span></div>
+        <div style="margin-top:1.2rem;display:flex;height:60px;gap:3px">
+          <div style="flex:25.4;background:rgba(239,234,227,.42);border-radius:2px"></div>
+          <div style="flex:25.0;background:rgba(239,234,227,.30);border-radius:2px"></div>
+          <div style="flex:11.2;background:rgba(239,234,227,.20);border-radius:2px"></div>
+          <div style="flex:38.4;background:rgba(239,234,227,.08);border-radius:2px"></div>
+        </div>
+        <p class="body" style="margin-top:1rem;font-size:.92rem">Mustang, Nowhere to Run and the Split Screen lyric video. Nine lyric videos on album day each built a lifetime of <b style="color:var(--cream)">46K–184K</b>.</p>
+      </div>
+      <div class="era now">
+        <div class="era-y" style="color:var(--gold)">2026 · O My Beloved · 53 uploads</div>
+        <div class="big-num" style="font-size:clamp(3.2rem,7.4vw,5.6rem);color:var(--gold);margin-top:.5rem">82.9<span style="font-size:.42em">%</span></div>
+        <div style="margin-top:1.2rem;display:flex;height:60px;gap:3px">
+          <div style="flex:42.3;background:var(--gold);border-radius:2px"></div>
+          <div style="flex:30.6;background:var(--gold-lt);border-radius:2px"></div>
+          <div style="flex:10.0;background:var(--teal);border-radius:2px"></div>
+          <div style="flex:17.1;background:rgba(239,234,227,.08);border-radius:2px"></div>
+        </div>
+        <p class="body" style="margin-top:1rem;font-size:.92rem">The three singles, all with paid support. The album&rsquo;s eleven long-form visualisers are five days old, at <b style="color:var(--cream)">9K–192K</b>.</p>
+      </div>
+    </div>
+
+    <p class="statement reveal" style="margin-top:1.8rem;color:var(--gold);max-width:50ch">
+      The opportunity now is moving that attention into the full album.
+    </p>
+    <div class="src reveal">Source: public YouTube API. Paid distribution and very young supporting uploads both shape this share, so it isn&rsquo;t a measure of effectiveness either way. Re-read at 30 days.</div>
+  </div>
+</section>
+
+<!-- ═══ 6 · RHYTHM ══════════════════════════════════════════════════
+     2024 was already active every week. The tightening is in the gaps. -->
+<section class="slide" data-t="Rhythm">
+  <div class="inner">
+    <div class="label reveal">Rhythm</div>
+    <h2 class="display reveal" style="margin-top:.7rem;max-width:22ch;font-size:clamp(1.9rem,4.4vw,3.8rem)">Same pace. Shorter gaps.</h2>
+
+    <div style="margin-top:clamp(1.3rem,3vw,2rem)" class="stagger">
+      <div class="era" style="margin-bottom:1rem">
+        <div style="display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:1rem;margin-bottom:.9rem">
+          <div>
+            <div class="era-y">2024 · 84 days · 66 uploads</div>
+            <div style="display:flex;gap:2.2rem;margin-top:.6rem;flex-wrap:wrap">
+              <div><div class="big-num" style="font-size:clamp(1.8rem,3vw,2.5rem);color:var(--warm)">12<span style="color:var(--dim)">/12</span></div><div class="label" style="margin-top:.3rem">Active weeks</div></div>
+              <div><div class="big-num" style="font-size:clamp(1.8rem,3vw,2.5rem);color:var(--red)">13</div><div class="label" style="margin-top:.3rem">Days, longest gap</div></div>
+              <div><div class="big-num" style="font-size:clamp(1.8rem,3vw,2.5rem);color:var(--warm)">6.2K</div><div class="label" style="margin-top:.3rem">Median Short · n=48</div></div>
+            </div>
+          </div>
+        </div>
+        <div class="rhythm" id="r24" style="--rh:24px"></div>
+      </div>
+      <div class="era now">
+        <div style="display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:1rem;margin-bottom:.9rem">
+          <div>
+            <div class="era-y" style="color:var(--gold)">2026 · 63 days · 53 uploads</div>
+            <div style="display:flex;gap:2.2rem;margin-top:.6rem;flex-wrap:wrap">
+              <div><div class="big-num" style="font-size:clamp(1.8rem,3vw,2.5rem);color:var(--gold)">9<span style="color:var(--dim)">/9</span></div><div class="label" style="margin-top:.3rem">Active weeks</div></div>
+              <div><div class="big-num" style="font-size:clamp(1.8rem,3vw,2.5rem);color:var(--gold)">6</div><div class="label" style="margin-top:.3rem">Days, longest gap</div></div>
+              <div><div class="big-num" style="font-size:clamp(1.8rem,3vw,2.5rem);color:var(--gold)">13.6K</div><div class="label" style="margin-top:.3rem">Median Short · n=35</div></div>
+            </div>
+          </div>
+        </div>
+        <div class="rhythm" id="r26" style="--rh:24px"></div>
+      </div>
+    </div>
+
+    <p class="body reveal" style="margin-top:1.2rem;max-width:72ch">
+      Upload days per week were similar (<b style="color:var(--cream)">~3.4</b> in 2024, <b style="color:var(--cream)">~3.6</b> now); the change is that the longest silence halved. Long-form still took <b style="color:var(--cream)">94.9%</b> of views (94.0% in 2024).
+      The Shorts kept the channel present; the countdowns were the best of them, with &ldquo;2 days&rdquo; at <b style="color:var(--cream)">75K</b>.
+      The one gap that didn&rsquo;t close: <b style="color:var(--cream)">21 days</b> without new long-form between KOYSAR and the album, the same as 2024&rsquo;s longest.
+    </p>
+    <div class="src reveal">Source: public YouTube API. Lead single → album + 5 days in each year. Shorts medians are directional: the 2024 Shorts are older.</div>
+  </div>
+</section>
+
+<!-- ═══ 7 · RELEASE WEEK ════════════════════════════════════════════ -->
+
+
+<!-- ═══ 8 · ONE SONG, SEVERAL WAYS IN ════════════════════════════════
+     My Whole World across formats. Breadth is credited separately from
+     timing (the 15-day gap to the first long-form follow-up). Shorts are
+     only those that name the song in title or description. No claim that
+     viewers moved between formats. -->
+<section class="slide" data-t="One song" style="padding:0">
+  <div style="display:grid;grid-template-columns:1fr 1.05fr;min-height:100vh;width:100%" class="split5">
+    <div class="bleed" style="position:relative;inset:auto">
+      <img src="https://i.ytimg.com/vi/j9Z4JcsxXus/maxresdefault.jpg" alt="My Whole World (Live) — the live room"
+        onerror="this.onerror=null;this.src='https://i.ytimg.com/vi/j9Z4JcsxXus/hqdefault.jpg'">
+    </div>
+    <div style="display:flex;flex-direction:column;justify-content:center;padding:5.5rem var(--pad) 3rem">
+      <div class="label reveal">Extend · My Whole World</div>
+      <h2 class="display reveal" style="margin-top:.7rem;font-size:clamp(1.7rem,3.3vw,2.9rem)">One song, several ways into its world.</h2>
+
+      <div class="seq stagger" style="margin-top:1.4rem">
+        <div class="sq"><div class="sd">10 Sep</div><div><h3>Official video</h3><p>Established the song&rsquo;s world: home, family, the band in a room. <b>4.83M</b></p></div></div>
+        <div class="sq sh"><div class="sd">8 Sep → 8 Oct</div><div><h3>Six Shorts</h3><p>Further entry points: two before release, two after it, then one each for the visualiser and the live session. <b>8K–15K</b> each</p></div></div>
+        <div class="sq"><div class="sd">25 Sep</div><div><h3>Visualiser</h3><p>An alternative way to sit with the song. <b>79K</b></p></div></div>
+        <div class="sq"><div class="sd">8 Oct</div><div><h3>Live session</h3><p>Brought the performance forward, in the wood-panelled room. <b>285K</b></p></div></div>
+      </div>
+
+      <p class="body reveal" style="margin-top:1.1rem;font-size:.92rem">
+        <b style="color:var(--cream)">Four formats in four weeks.</b> The breadth is the achievement; timing is separate &mdash; the first long-form follow-up came after 15 days.
+        The live room carried on: <b style="color:var(--cream)">Rose (Live)</b>, 264K in two days. The two sessions total 549K, against 460K lifetime for 2024&rsquo;s three live videos.
+      </p>
+      <p class="statement reveal" style="margin-top:.9rem;color:var(--gold);max-width:34ch;font-size:clamp(1rem,1.5vw,1.3rem)">A model for extending one song, and a live format worth continuing.</p>
+      <div class="src reveal" style="margin-top:.9rem">Source: public YouTube API, 11 Nov 2026. Shorts counted only where they name the song. Public views; we can see the formats, not whether viewers moved between them. Live-video ages differ and exposure isn&rsquo;t matched.</div>
+    </div>
+  </div>
+</section>
+
+<section class="slide" data-t="Release week">
+  <div class="inner">
+    <div class="label reveal">Release week</div>
+    <h2 class="display reveal" style="margin-top:.6rem;font-size:clamp(1.9rem,4.4vw,3.8rem)">A countdown, the album,<br>then a focal point.</h2>
+
+    <div class="rail stagger" style="margin-top:clamp(1.5rem,3.4vw,2.4rem)">
+      <div class="stop">
+        <div class="stop-d">28 Oct → 5 Nov</div>
+        <div class="node"></div>
+        <div class="ticks" data-n="12"></div>
+        <h3 class="stop-h">The countdown</h3>
+        <p><b>Twelve Shorts in nine days</b>: &ldquo;9 days&rdquo;, &ldquo;6 days&rdquo;, &ldquo;2 days&rdquo;, lyric lines, pre-order. The single&rsquo;s device, used again.</p>
+      </div>
+      <div class="stop album">
+        <div class="stop-d">Fri 6 Nov · album</div>
+        <div class="node"></div>
+        <div class="ticks" data-n="13"></div>
+        <h3 class="stop-h">Every track has a video</h3>
+        <p><b>Thirteen uploads in a day</b>: eleven long-form visualisers, an Intro visualiser Short and &ldquo;out now&rdquo;. One visual world: sky, clouds, a maroon bar.</p>
+      </div>
+      <div class="stop">
+        <div class="stop-d">7–8 Nov</div>
+        <div class="node"></div>
+        <div class="ticks" data-n="2"></div>
+        <h3 class="stop-h">Thank you</h3>
+        <p>Two Shorts thanking people for coming out, keeping the channel talking through the weekend.</p>
+      </div>
+      <div class="stop surge">
+        <div class="stop-d">Mon 9 Nov</div>
+        <div class="node"></div>
+        <div class="ticks" data-n="1"></div>
+        <h3 class="stop-h">Rose (Live)</h3>
+        <p>Back to the live room, three days after release: the week&rsquo;s focal point. <b>264K in two days.</b></p>
+      </div>
+    </div>
+
+    <div class="reveal" style="margin-top:1.5rem;display:flex;gap:clamp(1.4rem,4vw,3.4rem);align-items:flex-end;flex-wrap:wrap">
+      <div><div class="big-num" style="font-size:clamp(2rem,4vw,3.2rem);color:var(--gold)">192K</div><div class="label" style="margin-top:.3rem">Rose (Visualizer)<br>after five days</div></div>
+      <div><div class="big-num" style="font-size:clamp(2rem,4vw,3.2rem);color:var(--cream)">1.8<span style="font-size:.5em">×</span></div><div class="label" style="margin-top:.3rem">Rose against the next<br>visualiser, Feel The Love</div></div>
+      <p class="statement" style="margin-bottom:.2rem;color:var(--gold);max-width:32ch">Rose leads early visualiser viewing. Its live release may also have helped.</p>
+    </div>
+    <div class="src reveal">Source: public YouTube API · album released Fri 6 Nov 2026 (13 tracks, all now with a video) · read 11 Nov. 2024 comparison: ten long-form album assets on 10 May 2024, including the premiered Nowhere to Run video; the Ballerina Radio City Session followed four days later.</div>
+  </div>
+</section>
+
+<!-- ═══ 9 · THE AUDIENCE ════════════════════════════════════════════ -->
+<section class="slide" data-t="Audience">
+  <div class="bleed scrim-l">
+    <img src="https://i.ytimg.com/vi/JY87mCYtYd8/maxresdefault.jpg" alt="KOYSAR"
+      style="object-position:62% 40%"
+      onerror="this.onerror=null;this.src='https://i.ytimg.com/vi/JY87mCYtYd8/hqdefault.jpg'">
+  </div>
+  <div class="inner">
+    <div style="max-width:740px">
+      <div class="label reveal">What people actually say</div>
+      <h2 class="display reveal" style="margin-top:.8rem;font-size:clamp(1.8rem,4vw,3.4rem)">A lifelong audience,<br>growing up with the band.</h2>
+      <div class="stagger" style="margin-top:1.8rem;display:flex;flex-direction:column;gap:1.25rem">
+        <div class="quote">&ldquo;All of us middle agers are hitting the exact same moment and feels, it seems.&rdquo;<cite>936 likes · My Whole World</cite></div>
+        <div class="quote" style="border-left-color:var(--green)">&ldquo;Making music the old fashioned way, with heart and soul.&rdquo;<cite>218 likes · 2026 single</cite></div>
+        <div class="quote" style="border-left-color:var(--teal)">&ldquo;I&rsquo;ve been listening to Kings of Leon my entire adult life, since Youth and Young Manhood.&rdquo;<cite>422 likes · 2026 single</cite></div>
+      </div>
+      <div class="reveal" style="margin-top:1.6rem;border-top:1px solid var(--line);padding-top:1rem;display:flex;gap:1.6rem;align-items:flex-end;flex-wrap:wrap">
+        <div><div class="big-num" style="font-size:clamp(1.8rem,3.2vw,2.6rem);color:var(--gold)">6,830</div><div class="label" style="margin-top:.3rem">likes on &ldquo;Who&rsquo;s here in<br>November 2026?&rdquo; · Sex on Fire</div></div>
+        <p class="body" style="font-size:.93rem;max-width:34ch">The catalogue audience is active right now, in the same month as the album.</p>
+      </div>
+      <div class="src reveal">Source: public relevance-ranked comments across the 2026 singles, Rose (Live) and Sex on Fire, read 11 Nov. Themes are qualitative; likes show resonance, not reach.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ 10 · THE CHANNEL MOVED ══════════════════════════════════════ -->
+<section class="slide" data-t="Channel">
+  <div class="inner">
+    <div class="label reveal">The whole channel</div>
+    <h2 class="display reveal" style="margin-top:.8rem">And the channel moved.</h2>
+    <div class="grid2" style="margin-top:clamp(1.6rem,3.6vw,2.6rem);align-items:start">
+      <div class="reveal">
+        <div class="label" style="color:var(--warm)">Channel views per day, between Watcher readings</div>
+        <div class="rate" id="rate">
+          <div class="c"><b>879K</b><i data-h="65"></i></div>
+          <div class="c"><b>717K</b><i data-h="53"></i></div>
+          <div class="c"><b>940K</b><i data-h="69"></i></div>
+          <div class="c"><b>1.01M</b><i data-h="74"></i></div>
+          <div class="c hot"><b>1.36M</b><i data-h="100"></i></div>
+        </div>
+        <div class="rate-l">
+          <span>23 Jun → 16 Aug<br>summer</span><span>16 Aug → 9 Sep<br>the build</span><span>9 Sep → 16 Oct<br>three singles</span><span>16 Oct → 6 Nov<br>KOYSAR → album</span><span style="color:var(--gold)">6 → 9 Nov<br>release days</span>
+        </div>
+      </div>
+      <div class="reveal">
+        <div class="label" style="color:var(--warm)">What we can say</div>
+        <div style="display:flex;align-items:center;gap:.9rem;margin-top:1rem">
+          <div class="big-num" style="font-size:clamp(2.4rem,4.8vw,3.8rem);color:var(--gold)">~1.9×</div>
+          <div class="label" style="color:var(--warm);max-width:22ch;letter-spacing:.06em">Release days vs the build (717K/day)</div>
+          <div class="big-num" style="font-size:clamp(2rem,4vw,3rem);color:var(--warm);margin-left:.6rem">~1.5×</div>
+          <div class="label" style="color:var(--warm);max-width:16ch;letter-spacing:.06em">vs summer (879K/day)</div>
+        </div>
+        <p class="body" style="margin-top:1.1rem;font-size:.95rem">
+          Each campaign phase ran above the weeks before the lead single. The release reading covers <b style="color:var(--cream)">three days only</b>. The public subscriber count moved from <b style="color:var(--cream)">2.01M to 2.03M</b>.
+          Most of the channel&rsquo;s daily viewing is still catalogue, so this is the whole channel lifting, not the new videos alone.
+        </p>
+        <div class="flag n" style="margin-top:1rem">Co-occurrence, not attribution</div>
+      </div>
+    </div>
+    <div class="src reveal">Source: Watcher snapshots of the public channel total. Readings are irregular and the release-day read covers three days only. Subscriber counts are rounded by YouTube.</div>
+  </div>
+</section>
+
+<!-- ═══ 11 · WHAT WORKED ════════════════════════════════════════════ -->
+
+
+<!-- ═══ 12 · WHAT TO DO NOW ═════════════════════════════════════════
+     Practical, proportionate, nothing that tells the band what to make. -->
+<section class="slide" data-t="What next">
+  <div class="inner">
+    <div class="label reveal">Post-album · what worked and what next</div>
+    <h2 class="display reveal" style="margin-top:.7rem;font-size:clamp(1.9rem,4.4vw,3.8rem)">Keep the world going.</h2>
+    <table class="continue-table reveal">
+      <thead><tr><th>What worked</th><th>What next</th></tr></thead>
+      <tbody>
+        <tr><td><h3>The live room</h3><p>My Whole World + Rose: 285K and 264K early public views.</p></td><td><h3>Make it a series</h3><p>More filmed sessions, if available, with performance Shorts.</p></td></tr>
+        <tr><td><h3>One song, several formats</h3><p>My Whole World: film, six Shorts, visualiser, live.</p></td><td><h3>Give another song a moment</h3><p>Consider Rose or Feel The Love: a performance or song story + Shorts.</p></td></tr>
+        <tr><td><h3>A recognisable world</h3><p>Home, family and Southern roots echoed in comments.</p></td><td><h3>Show more of that world</h3><p>Test behind-the-scenes footage, rehearsals and band stories.</p></td></tr>
+      </tbody>
+    </table>
+    <p class="statement reveal" style="margin-top:1.3rem;max-width:none;color:var(--gold)">One song at a time. A follow-up every 7–14 days, where assets allow.</p>
+    <p class="body reveal" style="margin-top:.65rem;font-size:.82rem;max-width:none">Support each release with the album playlist, links and end screens.</p>
+    <div class="src reveal" style="margin-top:.65rem">Public data · 11 Nov 2026 · views include paid support. Next steps and cadence are proposals; song choices are early signals and footage is unconfirmed. Housekeeping details under Analysis.</div>
+  </div>
+</section>
+
+<!-- ═══ 13 · NEXT READ ══════════════════════════════════════════════ -->
+<section class="slide" data-t="Next read">
+  <div class="bleed scrim-f">
+    <img src="https://i.ytimg.com/vi/j9Z4JcsxXus/maxresdefault.jpg" alt="My Whole World (Live)"
+      onerror="this.onerror=null;this.src='https://i.ytimg.com/vi/j9Z4JcsxXus/hqdefault.jpg'">
+  </div>
+  <div class="inner">
+    <div class="label reveal">Next read</div>
+    <h2 class="display reveal" style="margin-top:.8rem">Read it again<br>in December.</h2>
+    <div class="grid2 reveal" style="margin-top:1.5rem;align-items:start">
+      <div>
+        <div class="label" style="color:var(--gold)">What we can say today</div>
+        <ul style="margin-top:.9rem;list-style:none">
+          <li style="padding:.4rem 0;color:var(--cream);border-bottom:1px solid var(--line)">Most of the plan was carried out</li>
+          <li style="padding:.4rem 0;color:var(--cream);border-bottom:1px solid var(--line)">The singles reached larger public totals, with paid support</li>
+          <li style="padding:.4rem 0;color:var(--cream)">Rose (Live) gave release week a focal point</li>
+        </ul>
+      </div>
+      <div>
+        <div class="label" style="color:var(--teal)">The 30-day read · public data</div>
+        <ul style="margin-top:.9rem;list-style:none">
+          <li style="padding:.4rem 0;color:var(--warm);border-bottom:1px solid var(--line)">How the visualisers and live sessions grew</li>
+          <li style="padding:.4rem 0;color:var(--warm);border-bottom:1px solid var(--line)">Daily channel views against both baselines</li>
+          <li style="padding:.4rem 0;color:var(--warm);border-bottom:1px solid var(--line)">Whether uploads kept coming</li>
+          <li style="padding:.4rem 0;color:var(--warm)">Which fixes were made, and how album viewing developed afterwards (not a causal read)</li>
+        </ul>
+        <div class="label" style="color:var(--dim);margin-top:.9rem">With Studio access: traffic from the singles to album tracks</div>
+      </div>
+    </div>
+    <div class="step reveal" style="margin-top:1.2rem">
+      <span>Pre-album deck · Sep</span><i>→</i>
+      <span>Live campaign</span><i>→</i>
+      <span class="now">Post-album read · today</span><i>→</i>
+      <span class="next">30-day read · 6 Dec</span>
+    </div>
+    <p class="statement reveal" style="margin-top:1.5rem;font-size:clamp(1.2rem,2.4vw,1.9rem);color:var(--gold);max-width:40ch">
+      Keep the live room, give selected songs another moment, and carry the world beyond release week.
+    </p>
+    <div class="src reveal">Kings of Leon × YouTube · Virgin Music Group · data pulled 11 November 2026 · method under Analysis.</div>
+  </div>
+</section>
+
+</div><!-- /deck -->
+
+<!-- ═══ ANALYSIS ═══════════════════════════════════════════════════ -->
+<div class="sheet" id="sheet">
+  <button class="btn close" onclick="closeSheet()">Close ✕</button>
+  <div class="sheet-in">
+    <div class="label">Analysis · both decks</div>
+    <div class="seg" role="tablist" aria-label="Analysis section" style="margin-top:.9rem">
+      <button role="tab" id="an-tab-pre" onclick="anShow('pre')">Pre-album · Sep 2026</button>
+      <button role="tab" id="an-tab-post" class="on" onclick="anShow('post')">Post-album · Nov 2026</button>
+    </div>
+    <div id="an-pre" class="pre-an" style="display:none"><p style="margin-top:2rem">Loading the pre-album analysis…</p></div>
+    <div id="an-post">
+    <h2 class="display" style="margin-top:1.6rem;font-size:clamp(1.7rem,3.6vw,2.8rem)">How this was measured</h2>
+
+    <h3 class="display sec">Sources</h3>
+    <div class="mgrid">
+      <div class="mcard"><div class="ct">Public YouTube Data API</div><p>Every upload on the channel (462), with publication date, duration, format and view counts, via the Watcher.</p></div>
+      <div class="mcard"><div class="ct">Watcher snapshots</div><p>Our own readings of the public channel totals and daily video series, from June 2026.</p></div>
+      <div class="mcard"><div class="ct">Public comments</div><p>Relevance-ranked samples from the singles, Rose (Live) and Sex on Fire. Read as audience signal.</p></div>
+    </div>
+
+    <h3 class="display sec">The study</h3>
+    <div class="album">
+      <div><div class="ct" style="color:var(--gold)">O My Beloved</div><p style="margin-top:.3rem">Released <b style="color:var(--cream)">6 November 2026</b> · lead single My Whole World, 10 September</p></div>
+      <div class="label">Data pulled 11 November 2026</div>
+    </div>
+    <table>
+      <tr><th></th><th>2024 · Can We Please Have Fun</th><th>2026 · O My Beloved</th></tr>
+      <tr><td>Window</td><td>22 Feb → 15 May 2024 · 84 days</td><td>10 Sep → 11 Nov 2026 · 63 days</td></tr>
+      <tr><td>Uploads</td><td>66 · 18 long-form, 48 Shorts</td><td><b>53</b> · 18 long-form, 35 Shorts</td></tr>
+      <tr><td>Upload days · active weeks</td><td>41 · 12/12</td><td>32 · 9/9</td></tr>
+      <tr><td>Longest gap · long-form gap</td><td>13 days · 21 days</td><td><b>6 days</b> · 21 days</td></tr>
+      <tr><td>Top-1 · top-3 share of window views†</td><td>25.4% · 61.6%</td><td>42.3% · 82.9%</td></tr>
+      <tr><td>Long-form share of views</td><td>94.0%</td><td>94.9%</td></tr>
+      <tr><td>Median Short · median long-form</td><td>6.2K · 129K</td><td>13.6K · 82K*</td></tr>
+      <tr><td>Premieres (API-confirmed)</td><td>3 in window · 7 across the campaign</td><td>1 (Cold Blue Dawn)</td></tr>
+      <tr><td>Upload days per week</td><td>~3.4</td><td>~3.6</td></tr>
+    </table>
+    <p style="font-size:.82rem">† Window views = current lifetime public views (11 Nov 2026) on uploads released during the campaign window. * Twelve of the 2026 long-form uploads arrived on release day (eleven visualisers and &ldquo;out now&rdquo;) and were five days old. Including the teaser phase, 2024 had 73 uploads (13/14 weeks active) and 2026 had 69 (13/14).</p>
+
+    <h3 class="display sec">A fair comparison</h3>
+    <p class="big-p">The 2024 videos have had about two and a half years to collect views, so most comparisons use <b style="color:var(--cream)">structural measures</b>. Where views are compared, they are described as public viewing totals only.</p>
+    <div class="fair"><span>Active weeks</span><span>Longest gap</span><span>Upload volume</span><span>Format mix</span><span>Within-window shares</span></div>
+    <p class="warn" style="margin-top:1.1rem">The music videos had paid support. The campaign team estimates the 2026 viewing split at roughly 60% paid / 40% organic; the videos and reporting period it covers are being confirmed, so it isn&rsquo;t applied to individual videos or used to calculate organic totals. The 2024 split is unknown. Every view figure here is a public total, so no claim is made about organic growth or efficiency.</p>
+
+    <div class="notes">
+      <div class="label">Methodology notes</div>
+      <dl class="mn">
+        <dt>Windows</dt><dd>Lead single to album + 5 days in each year, so release week is included in both. Album date: Friday 6 November 2026, per the band&rsquo;s announcement (Radio X, 10 Sep 2026) and the channel&rsquo;s release-day uploads. Tracklist: 13 tracks.</dd>
+        <dt>Follow-through</dt><dd>Days from a 2026 hero moment to the next long-form upload of any kind (not necessarily the same song). 2024 was not recalculated on this definition, so no cross-year rate is given. 2026 moments: My Whole World → visualiser 15; Cold Blue Dawn → My Whole World (Live) 8; KOYSAR → album 21; album → Rose (Live) 3.</dd>
+        <dt>Channel views</dt><dd>Daily rates are averaged between irregular Watcher readings of the public lifetime total. The release-day rate covers 6–9 November only. Release movement is not credited to any upload.</dd>
+        <dt>Subscribers</dt><dd>Public counts are rounded by YouTube, so movement is shown as readings, not a growth figure.</dd>
+        <dt>Comments</dt><dd>Qualitative, from relevance-ranked public samples. Personal stories in comments were read but are not quoted.</dd>
+        <dt>Observed vs recommended</dt><dd>Playlist contents, description links and the title typo were checked on 11 Nov. Slide 12&rsquo;s suggestions are recommendations; whether more live-room footage exists is a question for the team.</dd>
+        <dt>Paid support</dt><dd>Approximate 2026 split of 60% paid / 40% organic, supplied by the campaign team; coverage (videos, period) to be confirmed. Not applied to all campaign uploads. 2024 split unknown, so no like-for-like organic comparison.</dd>
+        <dt>Not visible to us</dt><dd>Impressions, click-through, retention, traffic sources, end screens, cards and Community posts. Studio access would sharpen the read.</dd>
+      </dl>
+    </div>
+    </div><!-- /an-post -->
+  </div>
+</div>
+
+<script>
+/* Upload-day offsets from the start of each window, computed from the
+   catalogue (not hand-entered). 2024 opens 22 Feb 2024 (84 days);
+   2026 opens 10 Sep 2026 (63 days). */
+var DAYS26 = [0,4,7,12,14,15,19,20,21,27,28,31,32,34,36,40,42,43,44,47,48,50,51,52,53,54,55,56,57,58,59,60];
+var DAYS24 = [0,5,6,8,12,14,15,16,17,19,21,22,26,28,33,34,35,36,42,55,57,60,61,62,67,68,69,70,71,72,73,74,75,76,77,78,79,80,81,82,83];
+
+function rhythm(el, days, span, cls){
+  if(!el) return;
+  var on = {}; days.forEach(function(d){ on[d] = 1; });
+  var html = '';
+  for(var d = 0; d < span; d++){
+    html += '<div class="tick' + (on[d] ? ' on ' + (cls || '') : '') + '"></div>';
+  }
+  el.innerHTML = html;
+}
+
+var io = null;
+function fill(slide){
+  slide.querySelectorAll('.bar i').forEach(function(f){ f.style.width = f.getAttribute('data-w') + '%'; });
+  slide.querySelectorAll('.rate i').forEach(function(f){ f.style.height = f.getAttribute('data-h') + '%'; });
+}
+function observeAll(){
+  if(!('IntersectionObserver' in window)){
+    document.querySelectorAll('.reveal,.stagger').forEach(function(e){ e.classList.add('visible'); });
+    document.querySelectorAll('.slide').forEach(fill);
+    return;
+  }
+  io = new IntersectionObserver(function(entries){
+    entries.forEach(function(en){
+      if(!en.isIntersecting) return;
+      en.target.classList.add('visible');
+      if(en.target.classList.contains('stagger')){
+        for(var i = 0; i < en.target.children.length; i++){
+          en.target.children[i].style.transitionDelay = (i * 45) + 'ms';
+        }
+      }
+      var sl = en.target.closest('.slide');
+      if(sl) fill(sl);
+      io.unobserve(en.target);
+    });
+  }, { threshold: .18, rootMargin: '0px 0px -8% 0px' });
+  document.querySelectorAll('.reveal,.stagger').forEach(function(e){ io.observe(e); });
+}
+
+var cur = 0;
+function startPresent(){ document.body.classList.add('present'); showSlide(0); }
+function exitPresent(){ document.body.classList.remove('present'); document.getElementById('pbar').style.width = '0'; }
+function showSlide(i){
+  var s = document.querySelectorAll('.deck .slide');
+  if(i < 0) i = 0;
+  if(i > s.length - 1) i = s.length - 1;
+  cur = i;
+  s.forEach(function(el, n){ el.classList.toggle('active', n === i); });
+  s[i].querySelectorAll('.reveal,.stagger').forEach(function(el){
+    el.classList.add('visible');
+    if(el.classList.contains('stagger')){
+      for(var k = 0; k < el.children.length; k++){
+        el.children[k].style.opacity = 1;
+        el.children[k].style.transform = 'none';
+      }
+    }
+  });
+  fill(s[i]);
+  document.getElementById('pbar').style.width = ((i + 1) / s.length * 100) + '%';
+}
+/* ── Pre / Post switch ────────────────────────────────────────────────
+   One bar for both decks. Pre-album shows /kol in a full-window frame
+   beneath this bar; /kol's own bar is hidden inside the frame (same origin),
+   and Analysis and Present act on whichever deck is showing. */
+var POST_TITLE = document.title;
+var VIEW = 'post';
+function frame(){ return document.getElementById('preframe'); }
+function loadPre(){ var f = frame(); if(!f.getAttribute('src')) f.setAttribute('src', '/kol'); }
+function setView(v){
+  var pre = v === 'pre';
+  VIEW = pre ? 'pre' : 'post';
+  if(pre){
+    if(document.body.classList.contains('present')) exitPresent();
+    loadPre();
+  }
+  closeSheet();
+  document.body.classList.toggle('pre', pre);
+  document.getElementById('tab-pre').classList.toggle('on', pre);
+  document.getElementById('tab-post').classList.toggle('on', !pre);
+  document.getElementById('chrome-sub').textContent = pre
+    ? 'Pre-album deep dive · September 2026'
+    : 'O My Beloved · post-album deep dive · November 2026';
+  document.title = pre ? 'Kings of Leon × YouTube — pre-album' : POST_TITLE;
+  try{ history.replaceState(null, '', pre ? '#pre' : location.pathname + location.search); }catch(e){}
+}
+function preparePre(){
+  var d; try{ d = frame().contentDocument; }catch(e){ return; }
+  if(!d || !d.head || d.getElementById('kolpost-style')) return;
+  var st = d.createElement('style');
+  st.id = 'kolpost-style';
+  st.textContent = '.chrome{display:none!important}' +
+    /* Hide the live campaign layer at once, before it is removed below. */
+    '[data-t="Campaign live"],[data-t="Channel Deep Dive"],#coverslot,#ideas{display:none!important}';
+  d.head.appendChild(st);
+  /* /kol carries a live campaign layer (a "Campaign live" cover and a
+     "Channel Deep Dive" divider) mounted over the September deck. Here we
+     want the pre-album deck as written, so those slides are taken out of
+     the frame's DOM whenever they arrive — removed, not just hidden, so
+     present mode doesn't count blank slides. /kol itself is unchanged. */
+  var strip = function(){
+    var gone = 0;
+    d.querySelectorAll('[data-t="Campaign live"],[data-t="Channel Deep Dive"]').forEach(function(n){ n.remove(); gone++; });
+    if(gone){
+      try{ frame().contentWindow.observeAll(); }catch(e){}
+      if(VIEW === 'pre') try{ frame().contentWindow.scrollTo(0, 0); }catch(e){}
+    }
+  };
+  strip();
+  try{ new MutationObserver(strip).observe(d.getElementById('deck') || d.body, { childList: true }); }catch(e){}
+  /* Hide this page's bar while /kol presents, so its slides get the screen. */
+  try{
+    new MutationObserver(function(){
+      document.body.classList.toggle('pp', d.body.classList.contains('present'));
+    }).observe(d.body, { attributes: true, attributeFilter: ['class'] });
+  }catch(e){}
+  fillPreAnalysis();
+}
+function fillPreAnalysis(){
+  var box = document.getElementById('an-pre');
+  if(box.getAttribute('data-filled')) return;
+  var d; try{ d = frame().contentDocument; }catch(e){ return; }
+  var src = d && d.getElementById('appendixBody');
+  if(!src || !src.innerHTML.trim()) return;
+  var tmp = document.createElement('div');
+  tmp.innerHTML = src.innerHTML;
+  tmp.querySelectorAll('button,script').forEach(function(b){ b.remove(); });
+  box.innerHTML = tmp.innerHTML;
+  box.setAttribute('data-filled', '1');
+}
+frame().addEventListener('load', preparePre);
+function anShow(which){
+  var pre = which === 'pre';
+  if(pre){ loadPre(); fillPreAnalysis(); }
+  document.getElementById('an-pre').style.display = pre ? '' : 'none';
+  document.getElementById('an-post').style.display = pre ? 'none' : '';
+  document.getElementById('an-tab-pre').classList.toggle('on', pre);
+  document.getElementById('an-tab-post').classList.toggle('on', !pre);
+  document.getElementById('sheet').scrollTop = 0;
+}
+function presentNow(){
+  if(VIEW === 'pre'){
+    var w = frame().contentWindow;
+    if(w && w.startPresent){ w.startPresent(); try{ w.focus(); }catch(e){} }
+    return;
+  }
+  startPresent();
+}
+/* Load the pre-album deck quietly once this one has settled, so switching
+   is instant and its analysis is ready. */
+window.addEventListener('load', function(){ setTimeout(loadPre, 1200); });
+
+function openSheet(){ anShow(VIEW); document.getElementById('sheet').classList.add('open'); }
+function closeSheet(){ document.getElementById('sheet').classList.remove('open'); }
+
+document.addEventListener('keydown', function(e){
+  if(e.key === 'Escape'){
+    closeSheet();
+    if(document.body.classList.contains('present')) exitPresent();
+    return;
+  }
+  if(!document.body.classList.contains('present') || document.body.classList.contains('pre')) return;
+  if(e.key === 'ArrowRight' || e.key === ' '){ e.preventDefault(); showSlide(cur + 1); }
+  if(e.key === 'ArrowLeft'){ e.preventDefault(); showSlide(cur - 1); }
+});
+
+document.addEventListener('DOMContentLoaded', function(){
+  rhythm(document.getElementById('cover-rhythm'), DAYS26, 63, '');
+  rhythm(document.getElementById('r26'), DAYS26, 63, '');
+  rhythm(document.getElementById('r24'), DAYS24, 84, 'r');
+  document.querySelectorAll('.ticks').forEach(function(t){
+    t.innerHTML = new Array(+t.getAttribute('data-n') || 0).fill('<i></i>').join('');
+  });
+  observeAll();
+  if(location.hash === '#pre') setView('pre');
+  document.querySelectorAll('.deck .slide')[0].querySelectorAll('.reveal').forEach(function(el){ el.classList.add('visible'); });
+});
+</script>
+
+<style>
+/* ── Pre / Post switch ─────────────────────────────────────────── */
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:2px;overflow:hidden}
+.seg button{font:inherit;font-family:'Inter',sans-serif;font-size:.66rem;font-weight:600;letter-spacing:.13em;text-transform:uppercase;
+  background:transparent;color:var(--warm);border:0;padding:.45rem .8rem;cursor:pointer;white-space:nowrap}
+.seg button+button{border-left:1px solid var(--line)}
+.seg button:hover{color:var(--gold)}
+.seg button.on{background:rgba(200,150,62,.16);color:var(--gold);cursor:default}
+#preframe{position:fixed;inset:0;width:100%;height:100%;border:0;z-index:50;display:none;background:var(--ink)}
+body.pp .chrome,body.pp #pbar{display:none}
+/* The pre-album analysis, restyled from /kol's light sheet into this one. */
+.pre-an h2{font-family:'Oswald',sans-serif;font-weight:600;text-transform:uppercase;font-size:clamp(1.7rem,3.6vw,2.8rem);line-height:.95;margin:1.6rem 0 .6rem;color:var(--cream)}
+.pre-an h3{font-family:'Oswald',sans-serif;font-weight:600;text-transform:uppercase;font-size:clamp(1.05rem,1.9vw,1.4rem);color:var(--gold);margin:2.4rem 0 .7rem;padding-top:1rem;border-top:1px solid var(--line)}
+.pre-an p{font-size:.9rem}
+.pre-an th.n,.pre-an td.n{text-align:right;font-variant-numeric:tabular-nums}
+.pre-an td.n{font-family:'Oswald',sans-serif;color:var(--cream)}
+.pre-an .note{border-left:3px solid var(--red);padding:.6rem 0 .6rem 1rem;margin:1rem 0;color:var(--warm);font-size:.86rem}
+body.pre #preframe{display:block}
+body.pre{overflow:hidden}
+@media(max-width:560px){.seg button{padding:.45rem .55rem;letter-spacing:.08em}.chrome-l{display:none}.chrome{justify-content:flex-end}.chrome .btn.primary{display:none}}
+@media(max-width:860px){
+  .split5{grid-template-columns:1fr!important}
+  .split5 > .bleed{height:44vh}
+}
+@media(max-height:800px){
+  body.present .deck .slide{padding-top:3.9rem;padding-bottom:1.3rem}
+  body.present .src{margin-top:.8rem}
+  body.present .split5 > div:last-child{padding-top:4.4rem!important;padding-bottom:1.6rem!important}
+  body.present [data-t="Concentration"] .big-num{font-size:clamp(2.6rem,6vw,4.4rem)!important}
+  body.present [data-t="Concentration"] .grid2{margin-top:1.1rem!important}
+  body.present .rail .ticks{margin:.6rem 0 .5rem}
+  body.present .seq{margin-top:.9rem!important}
+  body.present .sq{padding:.32rem 0 .32rem 1.1rem}
+  body.present .sq p{font-size:.8rem}
+  body.present [data-t="One song"] .body{font-size:.86rem!important;margin-top:.8rem!important}
+  body.present [data-t="One song"] .statement{margin-top:.6rem!important}
+  body.present [data-t="The world"] .films.four p{font-size:.78rem}
+}
+@media(max-width:1100px){body.present .split5 > div:last-child{padding-top:4.4rem!important;padding-bottom:1.6rem!important}}
+</style>
+</body>
+</html>
