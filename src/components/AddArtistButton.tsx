@@ -9,14 +9,16 @@ const PAPER = '#FAF7F2';
 const MUTED = '#E9E2D3';
 const SOFT = '#F6F1E7';
 
-const PHASES = ['PRE', 'START', 'RELEASE', 'PUSH', 'PEAK', 'SUSTAIN'] as const;
+/* Campaign phase used to be chosen here. It asked for a decision at the one
+   moment nobody can answer it — before the channel has even resolved — and it
+   is editable on the artist afterwards. /api/artists defaults it to PRE when
+   absent, so dropping it costs nothing but a click. */
 
 export default function AddArtistButton({ onAdded, market = 'uk' }: { onAdded?: () => void; market?: string }) {
   const router = useRouter();
   const labelWorkspace = getLabelWorkspace(market);
   const [open, setOpen] = useState(false);
   const [input, setInput] = useState('');
-  const [phase, setPhase] = useState<(typeof PHASES)[number]>('PRE');
   const [ownership, setOwnership] = useState<'virgin' | 'observed'>('observed');
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
@@ -29,7 +31,7 @@ export default function AddArtistButton({ onAdded, market = 'uk' }: { onAdded?: 
       const r = await fetch('/api/artists', {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ input: input.trim(), phase, ownership, ...(labelWorkspace ? { market: labelWorkspace.workspaceId } : {}) }),
+        body: JSON.stringify({ input: input.trim(), ownership, ...(labelWorkspace ? { market: labelWorkspace.workspaceId } : {}) }),
       });
       const j = await r.json();
       if (!r.ok) throw new Error(j.error ?? `Failed (${r.status})`);
@@ -72,7 +74,7 @@ export default function AddArtistButton({ onAdded, market = 'uk' }: { onAdded?: 
             <h3 className="font-black text-xl mt-1">Pull a channel into Watcher</h3>
             <p className="text-[12px] text-ink/60 mt-2">
               Paste a YouTube URL, handle (e.g. <span className="font-mono">@ktrap</span>),
-              channel ID, or just the artist name. We&rsquo;ll resolve it live.
+              channel ID, or just the artist name. We&rsquo;ll resolve it live — press Enter to add.
             </p>
 
             <label className="block mt-4 text-[10px] uppercase tracking-[0.18em] text-ink/45">
@@ -87,28 +89,6 @@ export default function AddArtistButton({ onAdded, market = 'uk' }: { onAdded?: 
               style={{ borderColor: MUTED, background: SOFT }}
               disabled={busy}
             />
-
-            <label className="block mt-4 text-[10px] uppercase tracking-[0.18em] text-ink/45">
-              Campaign phase
-            </label>
-            <div className="flex gap-1.5 mt-1.5 flex-wrap">
-              {PHASES.map((p) => (
-                <button
-                  key={p}
-                  type="button"
-                  onClick={() => setPhase(p)}
-                  className="px-3 py-1.5 rounded text-[10px] font-bold uppercase tracking-[0.14em] border"
-                  style={{
-                    borderColor: phase === p ? INK : MUTED,
-                    background: phase === p ? INK : 'transparent',
-                    color: phase === p ? PAPER : INK,
-                  }}
-                  disabled={busy}
-                >
-                  {p}
-                </button>
-              ))}
-            </div>
 
             {!labelWorkspace && <><label className="block mt-4 text-[10px] uppercase tracking-[0.18em] text-ink/45">
               Category
@@ -158,7 +138,7 @@ export default function AddArtistButton({ onAdded, market = 'uk' }: { onAdded?: 
                 className="px-4 py-2 rounded-lg text-[12px] font-bold uppercase tracking-[0.14em] disabled:opacity-40"
                 style={{ background: INK, color: PAPER }}
               >
-                {busy ? 'Resolving…' : 'Resolve + add'}
+                {busy ? 'Adding…' : 'Add artist'}
               </button>
             </div>
           </form>
