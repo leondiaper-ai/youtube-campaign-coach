@@ -204,8 +204,8 @@ export default function CoachPage({
 
   return (
     <div className="min-h-screen" style={{ background: PAPER, color: INK }}>
+      <Nav market={market} />
       <div className="max-w-[800px] mx-auto px-6 py-10">
-        <Nav market={market} />
 
         {/* Page Title */}
         <div style={{ marginTop: 40, marginBottom: 32 }}>
