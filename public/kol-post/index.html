@@ -443,22 +443,22 @@ body.present{overflow:hidden}
 <div class="chrome">
   <div class="chrome-l">
     <span style="color:var(--gold)">KINGS OF LEON × YOUTUBE</span>
-    <span>O My Beloved · post-album deep dive · November 2026</span>
+    <span id="chrome-sub">O My Beloved · post-album deep dive · November 2026</span>
   </div>
   <div class="chrome-r" style="display:flex;gap:.5rem">
     <div class="seg" role="tablist" aria-label="Switch deck">
-      <button role="tab" onclick="setView('pre')">Pre-album</button>
-      <button role="tab" class="on" aria-selected="true">Post-album</button>
+      <button role="tab" id="tab-pre" onclick="setView('pre')">Pre-album</button>
+      <button role="tab" id="tab-post" class="on" aria-selected="true" onclick="setView('post')">Post-album</button>
     </div>
     <button class="btn" onclick="openSheet()">Analysis</button>
-    <button class="btn primary" onclick="startPresent()">Present</button>
+    <button class="btn primary" onclick="presentNow()">Present</button>
   </div>
 </div>
 
-<!-- The pre-album deck (/kol) opens in place, in this window. It is loaded
-     unchanged; the same Pre/Post switch is added to its own top bar so the
-     two decks read as one piece. -->
-<iframe id="preframe" title="Kings of Leon × YouTube — pre-album deck"></iframe>
+<!-- The pre-album deck (/kol) opens in place, in this window, under this
+     page's bar. /kol itself is unchanged; only its own top bar is hidden
+     inside the frame, so there is one navigation for both decks. -->
+<iframe id="preframe" title="Kings of Leon × YouTube — pre-album deck" allow="fullscreen" allowfullscreen></iframe>
 
 <div class="deck" id="deck">
 
@@ -934,8 +934,14 @@ body.present{overflow:hidden}
 <div class="sheet" id="sheet">
   <button class="btn close" onclick="closeSheet()">Close ✕</button>
   <div class="sheet-in">
-    <div class="label">Analysis</div>
-    <h2 class="display" style="margin-top:.5rem;font-size:clamp(1.7rem,3.6vw,2.8rem)">How this was measured</h2>
+    <div class="label">Analysis · both decks</div>
+    <div class="seg" role="tablist" aria-label="Analysis section" style="margin-top:.9rem">
+      <button role="tab" id="an-tab-pre" onclick="anShow('pre')">Pre-album · Sep 2026</button>
+      <button role="tab" id="an-tab-post" class="on" onclick="anShow('post')">Post-album · Nov 2026</button>
+    </div>
+    <div id="an-pre" class="pre-an" style="display:none"><p style="margin-top:2rem">Loading the pre-album analysis…</p></div>
+    <div id="an-post">
+    <h2 class="display" style="margin-top:1.6rem;font-size:clamp(1.7rem,3.6vw,2.8rem)">How this was measured</h2>
 
     <h3 class="display sec">Sources</h3>
     <div class="mgrid">
@@ -981,6 +987,7 @@ body.present{overflow:hidden}
         <dt>Not visible to us</dt><dd>Impressions, click-through, retention, traffic sources, end screens, cards and Community posts. Studio access would sharpen the read.</dd>
       </dl>
     </div>
+    </div><!-- /an-post -->
   </div>
 </div>
 
@@ -1051,46 +1058,80 @@ function showSlide(i){
   document.getElementById('pbar').style.width = ((i + 1) / s.length * 100) + '%';
 }
 /* ── Pre / Post switch ────────────────────────────────────────────────
-   Pre-album shows /kol in a full-window frame; the switch is injected into
-   that deck's own top bar (same origin), so there is one bar, not two. */
+   One bar for both decks. Pre-album shows /kol in a full-window frame
+   beneath this bar; /kol's own bar is hidden inside the frame (same origin),
+   and Analysis and Present act on whichever deck is showing. */
 var POST_TITLE = document.title;
+var VIEW = 'post';
+function frame(){ return document.getElementById('preframe'); }
+function loadPre(){ var f = frame(); if(!f.getAttribute('src')) f.setAttribute('src', '/kol'); }
 function setView(v){
   var pre = v === 'pre';
-  var f = document.getElementById('preframe');
+  VIEW = pre ? 'pre' : 'post';
   if(pre){
     if(document.body.classList.contains('present')) exitPresent();
-    closeSheet();
-    if(!f.getAttribute('src')) f.setAttribute('src', '/kol');
+    loadPre();
   }
+  closeSheet();
   document.body.classList.toggle('pre', pre);
+  document.getElementById('tab-pre').classList.toggle('on', pre);
+  document.getElementById('tab-post').classList.toggle('on', !pre);
+  document.getElementById('chrome-sub').textContent = pre
+    ? 'Pre-album deep dive · September 2026'
+    : 'O My Beloved · post-album deep dive · November 2026';
   document.title = pre ? 'Kings of Leon × YouTube — pre-album' : POST_TITLE;
   try{ history.replaceState(null, '', pre ? '#pre' : location.pathname + location.search); }catch(e){}
-  if(!pre) window.scrollTo(0, window.scrollY);
 }
-function injectSwitch(){
-  var f = document.getElementById('preframe'), d;
-  try{ d = f.contentDocument; }catch(e){ return; }
-  if(!d || d.getElementById('kolseg')) return;
-  var bar = d.querySelector('.chrome-r');
-  if(!bar) return;
+function preparePre(){
+  var d; try{ d = frame().contentDocument; }catch(e){ return; }
+  if(!d || !d.head || d.getElementById('kolpost-style')) return;
   var st = d.createElement('style');
-  st.textContent =
-    '#kolseg{display:inline-flex;border:1px solid rgba(239,234,227,.14);border-radius:4px;overflow:hidden;margin-right:.35rem}' +
-    '#kolseg button{font-family:inherit;font-size:.58rem;font-weight:700;letter-spacing:.13em;text-transform:uppercase;' +
-    'background:transparent;color:#BDB4A8;border:0;padding:.5rem .85rem;cursor:pointer;white-space:nowrap}' +
-    '#kolseg button+button{border-left:1px solid rgba(239,234,227,.14)}' +
-    '#kolseg button:hover{color:#C8963E}' +
-    '#kolseg button.on{background:rgba(200,150,62,.16);color:#C8963E;cursor:default}';
+  st.id = 'kolpost-style';
+  st.textContent = '.chrome{display:none!important}';
   d.head.appendChild(st);
-  var seg = d.createElement('div');
-  seg.id = 'kolseg'; seg.setAttribute('role', 'tablist');
-  seg.innerHTML = '<button role="tab" class="on" aria-selected="true">Pre-album</button><button role="tab">Post-album</button>';
-  seg.lastChild.addEventListener('click', function(){ setView('post'); });
-  bar.insertBefore(seg, bar.firstChild);
+  /* Hide this page's bar while /kol presents, so its slides get the screen. */
+  try{
+    new MutationObserver(function(){
+      document.body.classList.toggle('pp', d.body.classList.contains('present'));
+    }).observe(d.body, { attributes: true, attributeFilter: ['class'] });
+  }catch(e){}
+  fillPreAnalysis();
 }
-document.getElementById('preframe').addEventListener('load', injectSwitch);
+function fillPreAnalysis(){
+  var box = document.getElementById('an-pre');
+  if(box.getAttribute('data-filled')) return;
+  var d; try{ d = frame().contentDocument; }catch(e){ return; }
+  var src = d && d.getElementById('appendixBody');
+  if(!src || !src.innerHTML.trim()) return;
+  var tmp = document.createElement('div');
+  tmp.innerHTML = src.innerHTML;
+  tmp.querySelectorAll('button,script').forEach(function(b){ b.remove(); });
+  box.innerHTML = tmp.innerHTML;
+  box.setAttribute('data-filled', '1');
+}
+frame().addEventListener('load', preparePre);
+function anShow(which){
+  var pre = which === 'pre';
+  if(pre){ loadPre(); fillPreAnalysis(); }
+  document.getElementById('an-pre').style.display = pre ? '' : 'none';
+  document.getElementById('an-post').style.display = pre ? 'none' : '';
+  document.getElementById('an-tab-pre').classList.toggle('on', pre);
+  document.getElementById('an-tab-post').classList.toggle('on', !pre);
+  document.getElementById('sheet').scrollTop = 0;
+}
+function presentNow(){
+  if(VIEW === 'pre'){
+    var w = frame().contentWindow;
+    if(w && w.startPresent){ w.startPresent(); try{ w.focus(); }catch(e){} }
+    return;
+  }
+  startPresent();
+}
+/* Load the pre-album deck quietly once this one has settled, so switching
+   is instant and its analysis is ready. */
+window.addEventListener('load', function(){ setTimeout(loadPre, 1200); });
 
-function openSheet(){ document.getElementById('sheet').classList.add('open'); }
+function openSheet(){ anShow(VIEW); document.getElementById('sheet').classList.add('open'); }
 function closeSheet(){ document.getElementById('sheet').classList.remove('open'); }
 
 document.addEventListener('keydown', function(e){
@@ -1125,7 +1166,15 @@ document.addEventListener('DOMContentLoaded', function(){
 .seg button+button{border-left:1px solid var(--line)}
 .seg button:hover{color:var(--gold)}
 .seg button.on{background:rgba(200,150,62,.16);color:var(--gold);cursor:default}
-#preframe{position:fixed;inset:0;width:100%;height:100%;border:0;z-index:200;display:none;background:var(--ink)}
+#preframe{position:fixed;inset:0;width:100%;height:100%;border:0;z-index:50;display:none;background:var(--ink)}
+body.pp .chrome,body.pp #pbar{display:none}
+/* The pre-album analysis, restyled from /kol's light sheet into this one. */
+.pre-an h2{font-family:'Oswald',sans-serif;font-weight:600;text-transform:uppercase;font-size:clamp(1.7rem,3.6vw,2.8rem);line-height:.95;margin:1.6rem 0 .6rem;color:var(--cream)}
+.pre-an h3{font-family:'Oswald',sans-serif;font-weight:600;text-transform:uppercase;font-size:clamp(1.05rem,1.9vw,1.4rem);color:var(--gold);margin:2.4rem 0 .7rem;padding-top:1rem;border-top:1px solid var(--line)}
+.pre-an p{font-size:.9rem}
+.pre-an th.n,.pre-an td.n{text-align:right;font-variant-numeric:tabular-nums}
+.pre-an td.n{font-family:'Oswald',sans-serif;color:var(--cream)}
+.pre-an .note{border-left:3px solid var(--red);padding:.6rem 0 .6rem 1rem;margin:1rem 0;color:var(--warm);font-size:.86rem}
 body.pre #preframe{display:block}
 body.pre{overflow:hidden}
 @media(max-width:560px){.seg button{padding:.45rem .55rem;letter-spacing:.08em}.chrome-l{display:none}.chrome{justify-content:flex-end}.chrome .btn.primary{display:none}}
