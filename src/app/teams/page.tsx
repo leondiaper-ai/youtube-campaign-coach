@@ -34,7 +34,10 @@ export const metadata = {
   robots: { index: false, follow: false },
 };
 
-export default async function TeamsPage() {
+export default async function TeamsPage({ searchParams }: { searchParams: Promise<{ market?: string }> }) {
+  const query = await searchParams;
+  const currentMarket = query.market && MARKETS[query.market] ? query.market : 'uk';
+  const marketSuffix = `?market=${currentMarket}`;
   /* The UK is not a team board — it has no entries store and no token. It
      is the default market, which is why an untagged artist lands there and
      why this view sees everything. Shown first and shown differently,
@@ -70,13 +73,13 @@ export default async function TeamsPage() {
     <main className="min-h-screen bg-paper text-ink">
       <AppHeader
         nav={[
-          { href: '/growth', label: 'Channel Health' },
-          { href: '/campaigns', label: 'Active Campaigns' },
-          { href: '/coach', label: 'Coach' },
-          { href: '/teams', label: 'Workspaces' },
-          { href: '/resources', label: 'Resources' },
+          { href: `/growth${marketSuffix}`, label: 'Channel Health' },
+          { href: `/campaigns${marketSuffix}`, label: 'Active Campaigns' },
+          { href: `/coach${marketSuffix}`, label: 'Coach' },
+          { href: `/teams${marketSuffix}`, label: 'Workspaces' },
+          { href: `/resources${marketSuffix}`, label: 'Resources' },
         ]}
-        workspace="Virgin Music UK"
+        workspace={MARKETS[currentMarket].orgName}
       />
 
       <div className="max-w-[1180px] mx-auto px-6">
