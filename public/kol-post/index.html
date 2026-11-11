@@ -1087,8 +1087,25 @@ function preparePre(){
   if(!d || !d.head || d.getElementById('kolpost-style')) return;
   var st = d.createElement('style');
   st.id = 'kolpost-style';
-  st.textContent = '.chrome{display:none!important}';
+  st.textContent = '.chrome{display:none!important}' +
+    /* Hide the live campaign layer at once, before it is removed below. */
+    '[data-t="Campaign live"],[data-t="Channel Deep Dive"],#coverslot,#ideas{display:none!important}';
   d.head.appendChild(st);
+  /* /kol carries a live campaign layer (a "Campaign live" cover and a
+     "Channel Deep Dive" divider) mounted over the September deck. Here we
+     want the pre-album deck as written, so those slides are taken out of
+     the frame's DOM whenever they arrive — removed, not just hidden, so
+     present mode doesn't count blank slides. /kol itself is unchanged. */
+  var strip = function(){
+    var gone = 0;
+    d.querySelectorAll('[data-t="Campaign live"],[data-t="Channel Deep Dive"]').forEach(function(n){ n.remove(); gone++; });
+    if(gone){
+      try{ frame().contentWindow.observeAll(); }catch(e){}
+      if(VIEW === 'pre') try{ frame().contentWindow.scrollTo(0, 0); }catch(e){}
+    }
+  };
+  strip();
+  try{ new MutationObserver(strip).observe(d.getElementById('deck') || d.body, { childList: true }); }catch(e){}
   /* Hide this page's bar while /kol presents, so its slides get the screen. */
   try{
     new MutationObserver(function(){
