@@ -51,9 +51,11 @@ export function AppHeader({
   const baseItems = ownedNav && !nav.some(item => item.href.split('?')[0] === '/growth/owned')
     ? [...nav.slice(0, ownedIndex), { href: '/growth/owned', label: 'Owned Channels', match: '/growth/owned' }, ...nav.slice(ownedIndex)]
     : nav;
-  const items = label ? baseItems.filter(item => ['/growth', '/campaigns', '/coach'].includes(item.href.split('?')[0]))
-    .map(item => item.href.split('?')[0] === '/growth' ? { ...item, href: `/labels/${label.slug}`, match: `/labels/${label.slug}` } : item)
-    : baseItems;
+  const items = label ? [
+    ...baseItems.filter(item => ['/growth', '/campaigns', '/coach'].includes(item.href.split('?')[0]))
+      .map(item => item.href.split('?')[0] === '/growth' ? { ...item, href: `/labels/${label.slug}`, match: `/labels/${label.slug}` } : item),
+    { href: `/labels/${label.slug}/deep-dives`, label: 'Deep Dives', match: `/labels/${label.slug}/deep-dives` },
+  ] : baseItems;
 
   return (
     <header className="border-b border-line bg-surface">
