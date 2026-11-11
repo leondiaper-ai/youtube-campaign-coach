@@ -16,6 +16,18 @@ export const LABELS: Record<string, LabelWorkspace> = {
       'Laura Marling', 'Lip Critic', 'Maple Glider', 'Morphine', 'NoSo', 'Paul Banks',
       'PJ Harvey', 'Sun’s Signature', 'TTSSFU', 'Westerman', 'Witch Post'],
   },
+  futureclassic: {
+    slug: 'futureclassic', workspaceId: 'label-futureclassic', name: 'Future Classic',
+    logo: '/labels/futureclassic/logo.svg', website: 'https://www.futureclassic.com/',
+    rosterSource: 'https://www.futureclassic.com/', rosterCheckedAt: '2026-11-11',
+    /* Opened blank on purpose, so the roster is confirmed with the label rather
+       than inferred from their public site. An empty roster does NOT mean the
+       label has no artists — futureclassic.com listed 33 clients on 11 Nov 2026,
+       mixing label, management and publishing. Channels join through `markets`,
+       which is what "Add artist" writes, so this workspace fills up without the
+       list below changing and nobody later reads it as a check that found none. */
+    roster: [],
+  },
 };
 export function getLabelWorkspace(value: string | null | undefined): LabelWorkspace | null {
   return Object.values(LABELS).find(l => l.slug === value || l.workspaceId === value || l.name === value) ?? null;
