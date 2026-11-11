@@ -41,7 +41,7 @@ import {
   createContext, useContext, useState, useEffect, type ReactNode,
 } from 'react';
 import dynamic from 'next/dynamic';
-import { AppHeader } from '@/components/ui/AppHeader';
+import Link from 'next/link';
 
 const CampaignBehaviour = dynamic(() => import('./CampaignBehaviour'), {
   ssr: false,
@@ -76,9 +76,9 @@ type Tab = 'all' | 'priority' | 'behaviour' | 'tools';
 const TABS: Tab[] = ['all', 'priority', 'behaviour', 'tools'];
 
 const TAB_LABEL: Record<Tab, (n: { all: number; priority: number }) => string> = {
-  all:       (n) => `All Artists (${n.all})`,
+  all:       (n) => `Artists (${n.all})`,
   priority:  (n) => `Priority (${n.priority})`,
-  behaviour: () => 'Channel Behaviour',
+  behaviour: () => 'Activity',
   tools:     () => 'Tools',
 };
 
@@ -283,34 +283,32 @@ export default function TeamBoardShell({
   /* ─── THE BOARD ─────────────────────────────────────────────────── */
   return (
     <main className="min-h-screen bg-paper text-ink">
-    <AppHeader workspace={teamName} nav={[
-      { href: `/growth?market=${marketId}`, label: "Channel Health" },
-      { href: `/campaigns?market=${marketId}`, label: "Active Campaigns" },
-      { href: `/coach?market=${marketId}`, label: "Coach" },
-      { href: "/teams", label: "Workspaces" },
-      { href: "/labels", label: "Labels" },
-      { href: "/resources", label: "Resources" },
-    ]} />
+    <div className="bg-surface border-b border-line">
+      <div className="max-w-[1180px] mx-auto px-6">
+        <div className="h-[52px] flex items-center gap-3 border-b border-line-faint">
+          <span className="font-black tracking-[0.1em] text-[13px]">VMG <span className="text-signal">YOUTUBE</span></span>
+          <span className="text-muted">|</span>
+          <span className="font-bold text-[12px] uppercase tracking-[0.1em] text-muted">{teamName}</span>
+        </div>
+        <nav aria-label="Regional workspace" className="flex flex-wrap items-center gap-x-7 gap-y-0">
+          {TABS.map((t) => (
+            <button key={t} onClick={() => t === 'behaviour' ? setTab(t) : leaveBehaviour(t)}
+              className="relative py-4 text-[14px] transition-colors whitespace-nowrap"
+              style={{ color: tab === t ? INK : '#817C74', fontWeight: tab === t ? 700 : 600 }}>
+              {TAB_LABEL[t]({ all: allCount, priority: priorityCount })}
+              {tab === t && <span className="absolute left-0 right-0 bottom-0 h-[2px] bg-signal rounded-full" />}
+            </button>
+          ))}
+          <Link href="/teams" className="py-4 text-[14px] font-semibold text-muted hover:text-ink">Workspaces</Link>
+          <Link href="/labels" className="py-4 text-[14px] font-semibold text-muted hover:text-ink">Labels</Link>
+          <Link href="/resources" className="py-4 text-[14px] font-semibold text-muted hover:text-ink">Resources</Link>
+        </nav>
+      </div>
+    </div>
     <div className="max-w-[1180px] mx-auto px-6 py-8">
     <OpenBehaviourContext.Provider value={open}>
       {header}
 
-      <div className="flex flex-wrap items-center gap-1 border-b border-line mb-2">
-        {TABS.map((t) => (
-          <button
-            key={t}
-            onClick={() => (t === 'behaviour' ? setTab(t) : leaveBehaviour(t))}
-            className="relative px-3 py-3 text-body transition-colors"
-            style={{
-              color: tab === t ? INK : '#817C74',
-              fontWeight: tab === t ? 700 : 600,
-            }}
-          >
-            {TAB_LABEL[t]({ all: allCount, priority: priorityCount })}
-            {tab === t && <span className="absolute left-3 right-3 -bottom-px h-[2px] bg-signal rounded-full" />}
-          </button>
-        ))}
-      </div>
       <div className="text-[10px] text-ink/35 mb-5 pl-1">
         {TAB_BLURB[tab]}
       </div>
