@@ -10,6 +10,8 @@ const nextConfig = {
       // This rewrite gives it a clean shareable URL (/amyl) instead of /amyl/index.html.
       { source: '/amyl', destination: '/amyl/index.html' },
       { source: '/kol',  destination: '/kol/index.html' },
+      // Kings of Leon post-album deep dive (O My Beloved), November 2026.
+      { source: '/kol/post-album', destination: '/kol-post/index.html' },
       { source: '/chvrches', destination: '/chvrches/index.html' },
       { source: '/vaccines', destination: '/vaccines/index.html' },
       { source: '/ktrap', destination: '/ktrap/index.html' },
