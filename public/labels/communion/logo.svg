@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- PLACEHOLDER, not Communion Music's logo. A plain drawn "C" standing in at
+     the 32-36px the header renders, so the workspace is not missing an image.
+     Replace this whole file with the label's own SVG when it arrives; the path
+     referenced from src/lib/labels.ts does not change. -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" role="img" aria-label="Communion Music (placeholder mark)">
+  <circle cx="50" cy="50" r="46" fill="none" stroke="#0E0E0E" stroke-width="5"/>
+  <path d="M68 33a24 24 0 1 0 0 34" fill="none" stroke="#0E0E0E" stroke-width="9" stroke-linecap="round"/>
+</svg>

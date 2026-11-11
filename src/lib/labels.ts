@@ -28,6 +28,20 @@ export const LABELS: Record<string, LabelWorkspace> = {
        list below changing and nobody later reads it as a check that found none. */
     roster: [],
   },
+  communion: {
+    slug: 'communion', workspaceId: 'label-communion', name: 'Communion Music',
+    logo: '/labels/communion/logo.svg', website: 'https://www.communionmusic.co.uk/',
+    rosterSource: 'https://www.communionmusic.co.uk/', rosterCheckedAt: '2026-11-11',
+    /* Opened blank on purpose, same as Future Classic: the roster gets
+       confirmed with the label rather than inferred. communionmusic.co.uk sat
+       behind a bot check on 11 Nov 2026, so nothing was read from it at all —
+       an empty roster here is "not asked yet", never "none found". Channels
+       join through `markets`, which is what "Add artist" writes, so the
+       workspace fills up without this list changing.
+       The logo is a PLACEHOLDER wordmark, not Communion's mark; swap in
+       their own SVG at public/labels/communion/logo.svg. */
+    roster: [],
+  },
 };
 export function getLabelWorkspace(value: string | null | undefined): LabelWorkspace | null {
   return Object.values(LABELS).find(l => l.slug === value || l.workspaceId === value || l.name === value) ?? null;
