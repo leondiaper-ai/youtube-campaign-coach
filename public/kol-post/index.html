@@ -412,6 +412,21 @@ body.present{overflow:hidden}
 
 .films{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(.8rem,1.8vw,1.4rem)}
 @media(max-width:860px){.films{grid-template-columns:1fr}}
+.films.four{grid-template-columns:repeat(4,1fr)}
+.films.four .thumb{margin-bottom:.55rem}
+.films.four p{font-size:.82rem}
+.films.four .meta{margin:.1rem 0 .3rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;font-size:.64rem}
+@media(max-width:980px){.films.four{grid-template-columns:1fr 1fr}}
+@media(max-width:560px){.films.four{grid-template-columns:1fr}}
+.seq{display:flex;flex-direction:column;gap:.15rem;border-left:2px solid var(--line);margin-left:.3rem}
+.sq{display:grid;grid-template-columns:7.2rem 1fr;gap:1rem;padding:.55rem 0 .55rem 1.1rem;position:relative}
+.sq::before{content:'';position:absolute;left:-6px;top:1rem;width:10px;height:10px;border-radius:50%;background:var(--gold)}
+.sq.sh::before{background:var(--ink);border:2px solid var(--gold);width:6px;height:6px}
+.sq .sd{font-family:'Inter',sans-serif;font-size:.66rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--gold);padding-top:.2rem}
+.sq h3{font-family:'Oswald',sans-serif;font-weight:600;text-transform:uppercase;font-size:clamp(.98rem,1.4vw,1.18rem);line-height:1.1;color:var(--cream)}
+.sq p{font-size:.84rem;color:var(--warm);line-height:1.4;margin-top:.15rem}
+.sq p b{color:var(--cream);font-weight:600}
+@media(max-width:560px){.sq{grid-template-columns:1fr;gap:.2rem}}
 .film .thumb{margin-bottom:.8rem}
 .film h3{font-family:'Oswald',sans-serif;font-weight:600;text-transform:uppercase;font-size:clamp(1.05rem,1.6vw,1.35rem);line-height:1.05}
 .film .meta{font-size:.72rem;color:var(--gold);letter-spacing:.06em;margin:.3rem 0 .45rem}
@@ -503,13 +518,13 @@ body.present{overflow:hidden}
       </div>
       <div class="lp done">
         <div class="plan">Extend · deepen the world <span class="st">Done</span></div>
-        <h3>A live room, a visualiser, every track.</h3>
-        <p>Two live-room performances, a visualiser for the lead single and <b>a video for every album track</b> on release day.</p>
+        <h3>One song in four formats; every track.</h3>
+        <p>My Whole World ran as film, Shorts, visualiser and live session. Then a second live-room video and <b>a video for every album track</b>.</p>
       </div>
       <div class="lp part">
         <div class="plan">A second destination inside 7–14 days <span class="st">Partly</span></div>
         <h3>2 of 4 had another long-form upload within 14 days.</h3>
-        <p>Cold Blue Dawn → My Whole World (Live), <b>8 days</b>. Album → Rose (Live), <b>3 days</b>. My Whole World → visualiser took <b>15</b>; KOYSAR → album <b>21</b>.</p>
+        <p>Cold Blue Dawn → My Whole World (Live), <b>8 days</b>. Album → Rose (Live), <b>3 days</b>. My Whole World → visualiser took <b>15</b>; KOYSAR → album <b>21</b>. This is timing, not breadth.</p>
       </div>
       <div class="lp part">
         <div class="plan">Give release week a centre <span class="st">Partly</span></div>
@@ -575,38 +590,52 @@ body.present{overflow:hidden}
   </div>
 </section>
 
-<!-- ═══ 4 · THREE FILMS ═════════════════════════════════════════════ -->
-<section class="slide" data-t="Three films">
+<!-- ═══ 4 · THE WORLD ═════════════════════════════════════════════
+     The central creative finding. Home, family, place and warmth link the
+     home film, the fairground and the live room; Cold Blue Dawn is allowed
+     its own identity rather than forced into the same theme. Comments are
+     qualitative examples only. Coherence is shown, not credited with views. -->
+<section class="slide" data-t="The world">
   <div class="inner">
-    <div class="label reveal">What the heroes were</div>
-    <h2 class="display reveal" style="margin-top:.7rem;font-size:clamp(1.9rem,4.4vw,3.8rem)">Each single was its own film.</h2>
+    <div class="label reveal">The creative thread</div>
+    <h2 class="display reveal" style="margin-top:.7rem;font-size:clamp(1.9rem,4.4vw,3.8rem)">A recognisable world around the songs.</h2>
 
-    <div class="films stagger" style="margin-top:clamp(1.4rem,3vw,2.2rem)">
+    <div class="films four stagger" style="margin-top:clamp(1.2rem,2.6vw,1.9rem)">
       <div class="film">
         <a class="thumb" href="https://www.youtube.com/watch?v=Bb7YN5wQztk" target="_blank" rel="noopener"><img src="https://i.ytimg.com/vi/Bb7YN5wQztk/maxresdefault.jpg" alt="My Whole World" onerror="this.onerror=null;this.src='https://i.ytimg.com/vi/Bb7YN5wQztk/hqdefault.jpg'"></a>
-        <h3>My Whole World</h3>
-        <div class="meta">Official video · 10 Sep · 4.83M</div>
-        <p>A Southern home, family, the band playing in a living room. 1.3M in six days, then a steady tail.</p>
-      </div>
-      <div class="film">
-        <a class="thumb" href="https://www.youtube.com/watch?v=UHqhzS3XS5s" target="_blank" rel="noopener"><img src="https://i.ytimg.com/vi/UHqhzS3XS5s/maxresdefault.jpg" alt="Cold Blue Dawn" onerror="this.onerror=null;this.src='https://i.ytimg.com/vi/UHqhzS3XS5s/hqdefault.jpg'"></a>
-        <h3>Cold Blue Dawn</h3>
-        <div class="meta" style="color:var(--teal)">Premiere · 30 Sep · 1.14M</div>
-        <p>A lyric video made with The Weather Channel, set to images of Earth. The campaign&rsquo;s only Premiere.</p>
+        <div class="meta">Home · My Whole World</div>
+        <p>A Southern house, family, and the band playing together in a living room.</p>
       </div>
       <div class="film">
         <a class="thumb" href="https://www.youtube.com/watch?v=JY87mCYtYd8" target="_blank" rel="noopener"><img src="https://i.ytimg.com/vi/JY87mCYtYd8/maxresdefault.jpg" alt="KOYSAR" onerror="this.onerror=null;this.src='https://i.ytimg.com/vi/JY87mCYtYd8/hqdefault.jpg'"></a>
-        <h3>KOYSAR</h3>
-        <div class="meta">Official video · 16 Oct · 3.49M</div>
-        <p>A fairground, the crew and their families. 3.26M in its first fifteen days.</p>
+        <div class="meta">Family · KOYSAR</div>
+        <p>A fairground, with the crew and their families in the frame.</p>
+      </div>
+      <div class="film">
+        <a class="thumb" href="https://www.youtube.com/watch?v=j9Z4JcsxXus" target="_blank" rel="noopener"><img src="https://i.ytimg.com/vi/j9Z4JcsxXus/maxresdefault.jpg" alt="My Whole World (Live)" onerror="this.onerror=null;this.src='https://i.ytimg.com/vi/j9Z4JcsxXus/hqdefault.jpg'"></a>
+        <div class="meta">Place · the live sessions</div>
+        <p>An intimate, wood-panelled room: the band up close, playing the record.</p>
+      </div>
+      <div class="film">
+        <a class="thumb" href="https://www.youtube.com/watch?v=UHqhzS3XS5s" target="_blank" rel="noopener"><img src="https://i.ytimg.com/vi/UHqhzS3XS5s/maxresdefault.jpg" alt="Cold Blue Dawn" onerror="this.onerror=null;this.src='https://i.ytimg.com/vi/UHqhzS3XS5s/hqdefault.jpg'"></a>
+        <div class="meta" style="color:var(--teal)">Its own identity · Cold Blue Dawn</div>
+        <p>Earth and weather imagery, made with The Weather Channel. A distinct look for one song.</p>
       </div>
     </div>
 
-    <div class="grid2 stagger" style="margin-top:1.6rem;gap:clamp(1rem,3vw,2.4rem)">
-      <div class="quote" style="border-left-color:var(--teal)">&ldquo;Most lyric videos pick a font. Kings of Leon picked Earth.&rdquo;<cite>132 likes · Cold Blue Dawn</cite></div>
-      <div class="quote">&ldquo;In a world of AI slop and ragebait garbage, this is one of the most human videos uploaded to the internet in recent memory.&rdquo;<cite>199 likes · KOYSAR</cite></div>
+    <p class="statement reveal" style="margin-top:1.3rem;color:var(--gold);max-width:56ch">
+      Familiarity, family, place and human warmth run through the home, fairground and live-room films.
+    </p>
+
+    <div class="reveal" style="margin-top:1.1rem">
+      <div class="label" style="color:var(--warm)">Echoed in the comments · qualitative examples, not representative research</div>
+      <div class="grid3 stagger" style="margin-top:.7rem;gap:clamp(.8rem,2vw,1.6rem)">
+        <div class="quote" style="font-size:.95rem">&ldquo;Loooooove KOL returning to their Southern roots.&rdquo;<cite>527 likes · 2026 single</cite></div>
+        <div class="quote" style="font-size:.95rem;border-left-color:var(--green)">&ldquo;&hellip;one of the most human videos uploaded to the internet in recent memory.&rdquo;<cite>199 likes · KOYSAR</cite></div>
+        <div class="quote" style="font-size:.95rem;border-left-color:var(--teal)">&ldquo;Most lyric videos pick a font. Kings of Leon picked Earth.&rdquo;<cite>132 likes · Cold Blue Dawn</cite></div>
+      </div>
     </div>
-    <div class="src reveal">Source: public YouTube API and relevance-ranked public comments. Comments read as audience signal, not as a cause of views.</div>
+    <div class="src reveal">Source: the videos themselves and a relevance-ranked public comment sample. The coherence is visible in the assets and echoed in comments; we can&rsquo;t show it caused the viewing totals.</div>
   </div>
 </section>
 
@@ -741,32 +770,34 @@ body.present{overflow:hidden}
   </div>
 </section>
 
-<!-- ═══ 8 · THE LIVE ROOM ═══════════════════════════════════════════ -->
-<section class="slide" data-t="Live room" style="padding:0">
-  <div style="display:grid;grid-template-columns:1.05fr 1fr;min-height:100vh;width:100%" class="split5">
+<!-- ═══ 8 · ONE SONG, SEVERAL WAYS IN ════════════════════════════════
+     My Whole World across formats. Breadth is credited separately from
+     timing (the 15-day gap to the first long-form follow-up). Shorts are
+     only those that name the song in title or description. No claim that
+     viewers moved between formats. -->
+<section class="slide" data-t="One song" style="padding:0">
+  <div style="display:grid;grid-template-columns:1fr 1.05fr;min-height:100vh;width:100%" class="split5">
     <div class="bleed" style="position:relative;inset:auto">
-      <img src="https://i.ytimg.com/vi/b8iTWLbLDkU/maxresdefault.jpg" alt="Rose (Live) — the live room session"
-        onerror="this.onerror=null;this.src='https://i.ytimg.com/vi/b8iTWLbLDkU/hqdefault.jpg'">
+      <img src="https://i.ytimg.com/vi/j9Z4JcsxXus/maxresdefault.jpg" alt="My Whole World (Live) — the live room"
+        onerror="this.onerror=null;this.src='https://i.ytimg.com/vi/j9Z4JcsxXus/hqdefault.jpg'">
     </div>
-    <div style="display:flex;flex-direction:column;justify-content:center;padding:6rem var(--pad) 4rem">
-      <div class="label reveal">Extend</div>
-      <h2 class="display reveal" style="margin-top:.8rem;font-size:clamp(1.8rem,3.6vw,3.2rem)">The live room became<br>the extend format.</h2>
-      <div class="stagger" style="margin-top:2rem">
-        <div style="border-top:2px solid var(--gold);padding-top:1rem;margin-bottom:1.4rem;display:flex;gap:2rem;flex-wrap:wrap">
-          <div><div class="big-num" style="font-size:clamp(2.2rem,4.4vw,3.6rem);color:var(--gold)">285K</div><div class="label" style="margin-top:.35rem">My Whole World (Live) · 34 days old</div></div>
-          <div><div class="big-num" style="font-size:clamp(2.2rem,4.4vw,3.6rem);color:var(--gold)">264K</div><div class="label" style="margin-top:.35rem">Rose (Live) · 2 days old</div></div>
-        </div>
-        <div style="border-top:2px solid var(--line);padding-top:1rem">
-          <div class="big-num" style="font-size:clamp(1.8rem,3.4vw,2.6rem);color:var(--warm)">549K <span style="color:var(--dim);font-size:.6em">vs</span> 460K</div>
-          <div class="label" style="margin-top:.35rem">Two 2026 live-room videos, combined · vs all three 2024 live videos, lifetime (~2.5 years)</div>
-        </div>
+    <div style="display:flex;flex-direction:column;justify-content:center;padding:5.5rem var(--pad) 3rem">
+      <div class="label reveal">Extend · My Whole World</div>
+      <h2 class="display reveal" style="margin-top:.7rem;font-size:clamp(1.7rem,3.3vw,2.9rem)">One song, several ways into its world.</h2>
+
+      <div class="seq stagger" style="margin-top:1.4rem">
+        <div class="sq"><div class="sd">10 Sep</div><div><h3>Official video</h3><p>Established the song&rsquo;s world: home, family, the band in a room. <b>4.83M</b></p></div></div>
+        <div class="sq sh"><div class="sd">8 Sep → 8 Oct</div><div><h3>Six Shorts</h3><p>Further entry points: two before release, two after it, then one each for the visualiser and the live session. <b>8K–15K</b> each</p></div></div>
+        <div class="sq"><div class="sd">25 Sep</div><div><h3>Visualiser</h3><p>An alternative way to sit with the song. <b>79K</b></p></div></div>
+        <div class="sq"><div class="sd">8 Oct</div><div><h3>Live session</h3><p>Brought the performance forward, in the wood-panelled room. <b>285K</b></p></div></div>
       </div>
-      <p class="body reveal" style="margin-top:1.6rem">
-        Same warm wood-panelled room, same feel as the My Whole World video. It answers the September deck&rsquo;s
-        point that the live archive was shallow: <b style="color:var(--cream)">this is new live footage, made to sit with the record.</b>
+
+      <p class="body reveal" style="margin-top:1.1rem;font-size:.92rem">
+        <b style="color:var(--cream)">Four formats in four weeks.</b> The breadth is the achievement; timing is separate &mdash; the first long-form follow-up came after 15 days.
+        The live room carried on: <b style="color:var(--cream)">Rose (Live)</b>, 264K in two days. The two sessions total 549K, against 460K lifetime for 2024&rsquo;s three live videos.
       </p>
-      <p class="statement reveal" style="margin-top:1.2rem;color:var(--gold);max-width:32ch">A promising early start for a format worth continuing.</p>
-      <div class="src reveal">Source: public YouTube API, 11 Nov 2026. Public views; ages differ and exposure isn&rsquo;t matched, so this isn&rsquo;t an organic-performance comparison.</div>
+      <p class="statement reveal" style="margin-top:.9rem;color:var(--gold);max-width:34ch;font-size:clamp(1rem,1.5vw,1.3rem)">A model for extending one song, and a live format worth continuing.</p>
+      <div class="src reveal" style="margin-top:.9rem">Source: public YouTube API, 11 Nov 2026. Shorts counted only where they name the song. Public views; we can see the formats, not whether viewers moved between them. Live-video ages differ and exposure isn&rsquo;t matched.</div>
     </div>
   </div>
 </section>
@@ -784,7 +815,7 @@ body.present{overflow:hidden}
       <h2 class="display reveal" style="margin-top:.8rem;font-size:clamp(1.8rem,4vw,3.4rem)">A lifelong audience,<br>growing up with the band.</h2>
       <div class="stagger" style="margin-top:1.8rem;display:flex;flex-direction:column;gap:1.25rem">
         <div class="quote">&ldquo;All of us middle agers are hitting the exact same moment and feels, it seems.&rdquo;<cite>936 likes · My Whole World</cite></div>
-        <div class="quote" style="border-left-color:var(--green)">&ldquo;Loooooove KOL returning to their Southern roots.&rdquo;<cite>527 likes · 2026 single</cite></div>
+        <div class="quote" style="border-left-color:var(--green)">&ldquo;Making music the old fashioned way, with heart and soul.&rdquo;<cite>218 likes · 2026 single</cite></div>
         <div class="quote" style="border-left-color:var(--teal)">&ldquo;I&rsquo;ve been listening to Kings of Leon my entire adult life, since Youth and Young Manhood.&rdquo;<cite>422 likes · 2026 single</cite></div>
       </div>
       <div class="reveal" style="margin-top:1.6rem;border-top:1px solid var(--line);padding-top:1rem;display:flex;gap:1.6rem;align-items:flex-end;flex-wrap:wrap">
@@ -840,17 +871,17 @@ body.present{overflow:hidden}
     <div class="label reveal">Better than last time</div>
     <h2 class="display reveal" style="margin-top:.6rem">What worked.</h2>
     <div class="stagger worked" style="margin-top:clamp(1.4rem,3.2vw,2.2rem)">
-      <div class="lesson"><div class="n">01</div><h3 class="wk">Larger public reach for the singles.</h3><p><b>9.47M</b> public views in under two months, roughly 60% paid / 40% organic. No 2024 split to compare.</p></div>
-      <div class="lesson" style="border-top-color:var(--teal)"><div class="n" style="color:var(--teal)">02</div><h3 class="wk">Each single had its own idea.</h3><p>A home, the Earth, a fairground. Comments talk about <b>the film</b>, not only the song.</p></div>
-      <div class="lesson" style="border-top-color:var(--green)"><div class="n" style="color:var(--green)">03</div><h3 class="wk">The countdown worked twice.</h3><p>Dated Shorts into the single and into the album. <b>&ldquo;2 days&rdquo;</b> was the top Short at 75K.</p></div>
-      <div class="lesson"><div class="n">04</div><h3 class="wk">Shorter gaps.</h3><p>A similar pace, but the longest gap fell from <b>13 days to 6</b>.</p></div>
-      <div class="lesson" style="border-top-color:var(--teal)"><div class="n" style="color:var(--teal)">05</div><h3 class="wk">A promising live format.</h3><p>Two live-room videos at <b>285K</b> and <b>264K</b> in their first weeks and days.</p></div>
-      <div class="lesson" style="border-top-color:var(--green)"><div class="n" style="color:var(--green)">06</div><h3 class="wk">A complete album on the channel.</h3><p><b>All 13 tracks have a video</b>, in one visual world, with Rose (Live) three days later.</p></div>
+      <div class="lesson"><div class="n">01</div><h3 class="wk">A recognisable world.</h3><p>Home, family, place and warmth across the films and the live room. <b>Cold Blue Dawn</b> got its own identity.</p></div>
+      <div class="lesson" style="border-top-color:var(--teal)"><div class="n" style="color:var(--teal)">02</div><h3 class="wk">One song, several ways in.</h3><p><b>My Whole World</b>: official video, six Shorts, visualiser and live session in four weeks.</p></div>
+      <div class="lesson" style="border-top-color:var(--green)"><div class="n" style="color:var(--green)">03</div><h3 class="wk">A live room worth continuing.</h3><p><b>285K</b> and <b>264K</b> early on. More, if more songs were filmed there.</p></div>
+      <div class="lesson"><div class="n">04</div><h3 class="wk">Larger public reach for the singles.</h3><p><b>9.47M</b> public views, roughly 60% paid / 40% organic. No 2024 split to compare.</p></div>
+      <div class="lesson" style="border-top-color:var(--teal)"><div class="n" style="color:var(--teal)">05</div><h3 class="wk">Countdowns and shorter gaps.</h3><p>Dated Shorts into both releases; longest gap down from <b>13 days to 6</b> at a similar pace.</p></div>
+      <div class="lesson" style="border-top-color:var(--green)"><div class="n" style="color:var(--green)">06</div><h3 class="wk">A complete album on the channel.</h3><p><b>All 13 tracks have a video</b>, with Rose (Live) three days after release.</p></div>
     </div>
     <p class="statement reveal" style="margin-top:1.6rem;font-size:clamp(1.2rem,2.5vw,1.9rem);color:var(--gold);max-width:44ch">
-      Bigger public reach, a steadier channel and a promising live format. Next: connect that attention to the album.
+      A recognisable world, one song taken across formats, and a live room worth continuing. Next: connect that attention to the album.
     </p>
-    <div class="src reveal" style="margin-top:1rem">Source: public YouTube API. Every figure appears earlier in this deck. View figures are public totals and include paid support.</div>
+    <div class="src reveal" style="margin-top:1rem">Source: public YouTube API. Every figure appears earlier in this deck. View figures are public totals and include paid support; creative strengths are not credited with the totals.</div>
   </div>
 </section>
 
