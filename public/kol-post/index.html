@@ -446,11 +446,19 @@ body.present{overflow:hidden}
     <span>O My Beloved · post-album deep dive · November 2026</span>
   </div>
   <div class="chrome-r" style="display:flex;gap:.5rem">
-    <a class="btn" href="/kol" style="text-decoration:none">Pre-album deck</a>
+    <div class="seg" role="tablist" aria-label="Switch deck">
+      <button role="tab" onclick="setView('pre')">Pre-album</button>
+      <button role="tab" class="on" aria-selected="true">Post-album</button>
+    </div>
     <button class="btn" onclick="openSheet()">Analysis</button>
     <button class="btn primary" onclick="startPresent()">Present</button>
   </div>
 </div>
+
+<!-- The pre-album deck (/kol) opens in place, in this window. It is loaded
+     unchanged; the same Pre/Post switch is added to its own top bar so the
+     two decks read as one piece. -->
+<iframe id="preframe" title="Kings of Leon × YouTube — pre-album deck"></iframe>
 
 <div class="deck" id="deck">
 
@@ -1041,6 +1049,46 @@ function showSlide(i){
   fill(s[i]);
   document.getElementById('pbar').style.width = ((i + 1) / s.length * 100) + '%';
 }
+/* ── Pre / Post switch ────────────────────────────────────────────────
+   Pre-album shows /kol in a full-window frame; the switch is injected into
+   that deck's own top bar (same origin), so there is one bar, not two. */
+var POST_TITLE = document.title;
+function setView(v){
+  var pre = v === 'pre';
+  var f = document.getElementById('preframe');
+  if(pre){
+    if(document.body.classList.contains('present')) exitPresent();
+    closeSheet();
+    if(!f.getAttribute('src')) f.setAttribute('src', '/kol');
+  }
+  document.body.classList.toggle('pre', pre);
+  document.title = pre ? 'Kings of Leon × YouTube — pre-album' : POST_TITLE;
+  try{ history.replaceState(null, '', pre ? '#pre' : location.pathname + location.search); }catch(e){}
+  if(!pre) window.scrollTo(0, window.scrollY);
+}
+function injectSwitch(){
+  var f = document.getElementById('preframe'), d;
+  try{ d = f.contentDocument; }catch(e){ return; }
+  if(!d || d.getElementById('kolseg')) return;
+  var bar = d.querySelector('.chrome-r');
+  if(!bar) return;
+  var st = d.createElement('style');
+  st.textContent =
+    '#kolseg{display:inline-flex;border:1px solid rgba(239,234,227,.14);border-radius:4px;overflow:hidden;margin-right:.35rem}' +
+    '#kolseg button{font-family:inherit;font-size:.58rem;font-weight:700;letter-spacing:.13em;text-transform:uppercase;' +
+    'background:transparent;color:#BDB4A8;border:0;padding:.5rem .85rem;cursor:pointer;white-space:nowrap}' +
+    '#kolseg button+button{border-left:1px solid rgba(239,234,227,.14)}' +
+    '#kolseg button:hover{color:#C8963E}' +
+    '#kolseg button.on{background:rgba(200,150,62,.16);color:#C8963E;cursor:default}';
+  d.head.appendChild(st);
+  var seg = d.createElement('div');
+  seg.id = 'kolseg'; seg.setAttribute('role', 'tablist');
+  seg.innerHTML = '<button role="tab" class="on" aria-selected="true">Pre-album</button><button role="tab">Post-album</button>';
+  seg.lastChild.addEventListener('click', function(){ setView('post'); });
+  bar.insertBefore(seg, bar.firstChild);
+}
+document.getElementById('preframe').addEventListener('load', injectSwitch);
+
 function openSheet(){ document.getElementById('sheet').classList.add('open'); }
 function closeSheet(){ document.getElementById('sheet').classList.remove('open'); }
 
@@ -1050,7 +1098,7 @@ document.addEventListener('keydown', function(e){
     if(document.body.classList.contains('present')) exitPresent();
     return;
   }
-  if(!document.body.classList.contains('present')) return;
+  if(!document.body.classList.contains('present') || document.body.classList.contains('pre')) return;
   if(e.key === 'ArrowRight' || e.key === ' '){ e.preventDefault(); showSlide(cur + 1); }
   if(e.key === 'ArrowLeft'){ e.preventDefault(); showSlide(cur - 1); }
 });
@@ -1063,11 +1111,23 @@ document.addEventListener('DOMContentLoaded', function(){
     t.innerHTML = new Array(+t.getAttribute('data-n') || 0).fill('<i></i>').join('');
   });
   observeAll();
+  if(location.hash === '#pre') setView('pre');
   document.querySelectorAll('.deck .slide')[0].querySelectorAll('.reveal').forEach(function(el){ el.classList.add('visible'); });
 });
 </script>
 
 <style>
+/* ── Pre / Post switch ─────────────────────────────────────────── */
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:2px;overflow:hidden}
+.seg button{font:inherit;font-family:'Inter',sans-serif;font-size:.66rem;font-weight:600;letter-spacing:.13em;text-transform:uppercase;
+  background:transparent;color:var(--warm);border:0;padding:.45rem .8rem;cursor:pointer;white-space:nowrap}
+.seg button+button{border-left:1px solid var(--line)}
+.seg button:hover{color:var(--gold)}
+.seg button.on{background:rgba(200,150,62,.16);color:var(--gold);cursor:default}
+#preframe{position:fixed;inset:0;width:100%;height:100%;border:0;z-index:200;display:none;background:var(--ink)}
+body.pre #preframe{display:block}
+body.pre{overflow:hidden}
+@media(max-width:560px){.seg button{padding:.45rem .55rem;letter-spacing:.08em}}
 @media(max-width:860px){
   .split5{grid-template-columns:1fr!important}
   .split5 > .bleed{height:44vh}
