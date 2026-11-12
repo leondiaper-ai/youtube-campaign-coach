@@ -4,7 +4,7 @@ import { NextRequest, NextResponse } from 'next/server';
 const LABEL_PASSWORDS: Record<string, string | undefined> = {
   partisan: process.env.LABEL_PASSWORD_PARTISAN,
   futureclassic: process.env.LABEL_PASSWORD_FUTURECLASSIC,
-  communion: process.env.LABEL_PASSWORD_COMMUNION,
+  community: process.env.LABEL_PASSWORD_COMMUNITY,
 };
 
 async function sameSecret(a: string, b: string): Promise<boolean> {
