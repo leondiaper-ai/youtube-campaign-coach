@@ -1,0 +1,424 @@
+
+:root{
+  /* Sampled from the channel's own frames — see the note above. */
+  --red:#E2231A;        /* the roundel, the DFTD panel, the Pacha cherries */
+  --red-dp:#8F1710;
+  --yellow:#F2D53C;     /* Defected Radio · Sam Divine */
+  --lime:#B9F24C;       /* Defected Radio · Rimarkable / 25.09.26 */
+  --cyan:#39D0E6;       /* Defected Radio · Monki */
+  --blue:#2E63E8;       /* Defected Radio · the blue week; Chinois' sea */
+  --pod:#2FBF5F;        /* Moments in Music cover green */
+
+  --ink:#0D0A0B;        /* near-black with a red cast; the rooms are lit red */
+  --ink-2:#15100F;
+  --ink-3:#1E1716;
+  --cream:#F3EDE4;
+  --warm:#BDB3AE;       /* body copy on dark */
+  --dim:#7C726E;        /* labels only, never body text */
+  --line:rgba(243,237,228,.13);
+
+  --pad:clamp(1.6rem,5vw,5.5rem);
+  --an-accent:var(--red);
+}
+
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{
+  background:var(--ink);color:var(--cream);
+  font-family:'Instrument Sans',system-ui,sans-serif;
+  font-size:clamp(15px,1.05vw,18px);line-height:1.55;
+  -webkit-font-smoothing:antialiased;overflow-x:hidden;
+}
+/* A fine grain over everything, 2%: the difference between a web page
+   and a printed thing. */
+body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:55;opacity:.02;
+  background:repeating-linear-gradient(0deg,#fff 0 1px,transparent 1px 3px),
+             repeating-linear-gradient(90deg,#fff 0 1px,transparent 1px 3px)}
+a{color:inherit}
+img{display:block}
+
+/* ── Type ───────────────────────────────────────────────────────────*/
+.display{
+  font-family:'Archivo',sans-serif;
+  font-variation-settings:'wdth' 75,'wght' 800;
+  text-transform:uppercase;line-height:.9;letter-spacing:.005em;
+}
+h1.display{font-size:clamp(3rem,8.8vw,8rem)}
+h2.display{font-size:clamp(2.1rem,5.6vw,4.9rem)}
+h2.display.tight{font-size:clamp(1.8rem,4.2vw,3.6rem)}
+h3.display{font-size:clamp(1.2rem,2.2vw,1.9rem);font-variation-settings:'wdth' 78,'wght' 780}
+.label{
+  font-family:'DM Mono',monospace;font-size:.68rem;font-weight:400;
+  letter-spacing:.16em;text-transform:uppercase;color:var(--dim);
+}
+.statement{font-size:clamp(1.05rem,1.7vw,1.5rem);line-height:1.38;color:var(--cream);max-width:36ch}
+.body{color:var(--warm);max-width:60ch}
+.body b{color:var(--cream);font-weight:600}
+.big-num{
+  font-family:'Archivo',sans-serif;font-variation-settings:'wdth' 78,'wght' 800;
+  line-height:.86;letter-spacing:-.01em;font-variant-numeric:tabular-nums;
+}
+.stamp{font-family:'DM Mono',monospace;font-size:.72rem;letter-spacing:.14em;text-transform:uppercase}
+.qual{
+  font-family:'DM Mono',monospace;font-size:.66rem;line-height:1.5;letter-spacing:.04em;
+  color:var(--warm);border-left:2px solid var(--red);padding-left:.7rem;max-width:70ch;margin-top:1.1rem;
+}
+.src{
+  font-family:'DM Mono',monospace;font-size:.64rem;line-height:1.45;
+  color:var(--dim);border-left:2px solid var(--line);padding-left:.7rem;
+  max-width:80ch;margin-top:1.4rem;
+}
+
+/* ── Slides ─────────────────────────────────────────────────────────*/
+.deck{width:100%}
+.slide{
+  position:relative;min-height:100vh;width:100%;
+  display:flex;flex-direction:column;justify-content:flex-start;
+  padding:5.5rem var(--pad) 4rem;overflow:hidden;
+  border-bottom:1px solid var(--line);
+}
+.inner{position:relative;z-index:3;width:100%;max-width:1400px;margin:auto}
+.bleed{position:absolute;inset:0;z-index:0}
+.bleed img{width:100%;height:100%;object-fit:cover;display:block}
+.scrim-b::after{content:'';position:absolute;inset:0;
+  background:linear-gradient(to top,rgba(13,10,11,.97) 6%,rgba(13,10,11,.74) 40%,rgba(13,10,11,.16) 80%)}
+.scrim-l::after{content:'';position:absolute;inset:0;
+  background:linear-gradient(to right,rgba(13,10,11,.96) 32%,rgba(13,10,11,.66) 58%,rgba(13,10,11,.14) 100%)}
+.scrim-f::after{content:'';position:absolute;inset:0;background:rgba(13,10,11,.8)}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:clamp(1.5rem,4vw,4.5rem)}
+@media(max-width:860px){.grid2{grid-template-columns:1fr}}
+
+/* Flat "broadcast" fields: the radio sleeves' own treatment, black type on colour. */
+.field{color:var(--ink)}
+.field .label,.field .src,.field .qual{color:rgba(13,10,11,.62);border-color:rgba(13,10,11,.25)}
+.field .body{color:rgba(13,10,11,.78)}
+.field .body b,.field .statement{color:var(--ink)}
+.field.lime{background:var(--lime)}
+.field.cyan{background:var(--cyan)}
+.field.pod{background:var(--pod)}
+
+/* ── THE MOTIF: the 52-week strip ───────────────────────────────────
+   One cell per week, height by upload count, the Friday radio episode
+   as a coloured cap in that week's sleeve colour. */
+.weeks{display:flex;gap:3px;align-items:flex-end;width:100%;height:var(--wh,64px)}
+.wk{flex:1 1 0;min-width:1px;position:relative;background:rgba(243,237,228,.12);border-radius:1px;height:12%}
+.wk.on{background:var(--warm)}
+.wk.on::after{content:'';position:absolute;left:0;right:0;top:0;height:4px;border-radius:1px;background:var(--cap,transparent)}
+.wk.radio::after{background:var(--cap)}
+.wk.off{background:rgba(226,35,26,.35)}
+.weeks.mini{--wh:22px;gap:2px}
+.weeks.mini .wk.on::after{height:3px}
+
+/* ── Thumbs ─────────────────────────────────────────────────────────*/
+.thumb{position:relative;display:block;border-radius:3px;overflow:hidden;background:var(--ink-3);aspect-ratio:16/9;text-decoration:none}
+.thumb img{width:100%;height:100%;object-fit:cover;display:block;filter:saturate(1.1) contrast(1.04)}
+.thumb .cap{
+  position:absolute;left:0;right:0;bottom:0;padding:.5rem .55rem .45rem;
+  background:linear-gradient(to top,rgba(13,10,11,.94),rgba(13,10,11,0));
+  font-family:'DM Mono',monospace;font-size:.6rem;line-height:1.35;color:var(--cream);letter-spacing:.04em;
+}
+.thumb .cap b{display:block;font-family:'Archivo',sans-serif;font-variation-settings:'wdth' 78,'wght' 780;font-size:.82rem;text-transform:uppercase;letter-spacing:0;line-height:1.05;margin-bottom:.15rem}
+.thumb.v{aspect-ratio:9/16}
+.shot{border-radius:4px;overflow:hidden;border:1px solid var(--line);background:var(--ink-3);box-shadow:0 20px 50px rgba(0,0,0,.45)}
+.shot img{width:100%;height:auto;display:block}
+.shot.crop{height:clamp(150px,22vh,210px)}
+.shot.crop img{height:100%;object-fit:cover;object-position:0 18%}
+
+/* ── Slide 2 · the year strip ────────────────────────────────────────
+   Width to scale by observed views per upload year. The pre-2022
+   blocks are red, 2022–26 cream, so the split reads before the number. */
+.years{display:flex;gap:2px;width:100%;height:clamp(90px,14vh,150px);align-items:stretch}
+.yr{position:relative;min-width:2px;background:var(--red-dp);border-radius:1px}
+.yr.now{background:var(--cream)}
+.yr.cola{background:var(--red)}
+.yr i{position:absolute;left:0;bottom:-1.35rem;font-style:normal;font-family:'DM Mono',monospace;font-size:.6rem;letter-spacing:.08em;color:var(--dim);white-space:nowrap}
+.yr.now i{color:var(--warm)}
+
+/* ── Slide 3 · radio sleeve band ─────────────────────────────────────*/
+.band{display:grid;grid-template-columns:repeat(8,1fr);gap:4px}
+@media(max-width:860px){.band{grid-template-columns:repeat(4,1fr)}}
+
+/* ── Slide 4 · the set wall + ladder ────────────────────────────────
+   Tiles carry data-s (their setting). Hovering or focusing a ladder row
+   lights that setting and dims the rest: the picture and the point are
+   the same object (D-Block's mechanic). */
+.wall{display:grid;grid-template-columns:repeat(4,1fr);gap:4px}
+@media(max-width:560px){.wall{grid-template-columns:repeat(3,1fr)}}
+.wall .thumb img{transition:filter .4s ease,opacity .4s ease}
+.wall.focus .thumb img{filter:saturate(.6) brightness(.32)}
+.wall.focus .thumb.lit img{filter:saturate(1.15) brightness(1) contrast(1.05)}
+.ladder{display:flex;flex-direction:column;gap:.15rem}
+.rung{display:grid;grid-template-columns:8.4rem 1fr auto;gap:.8rem;align-items:center;padding:.3rem .5rem;border-radius:3px;cursor:default;transition:background .2s ease}
+.rung:hover,.rung.on{background:rgba(243,237,228,.06)}
+.rung .nm{font-family:'DM Mono',monospace;font-size:.66rem;letter-spacing:.12em;text-transform:uppercase;color:var(--warm)}
+.rung .nm i{display:block;font-style:normal;color:var(--dim);letter-spacing:.06em;font-size:.6rem;margin-top:.15rem}
+.rung .bar{height:12px;background:rgba(243,237,228,.08);border-radius:2px;overflow:hidden}
+.rung .bar i{display:block;height:100%;width:var(--w);background:var(--red);border-radius:2px}
+.rung .v{font-family:'Archivo',sans-serif;font-variation-settings:'wdth' 80,'wght' 780;font-size:1.1rem;color:var(--cream);font-variant-numeric:tabular-nums;white-space:nowrap}
+.rung .v i{font-style:normal;font-family:'DM Mono',monospace;font-size:.6rem;color:var(--dim);margin-left:.35rem;letter-spacing:.06em}
+
+/* ── Slide 5 · compilations, the daylight section ──────────────────*/
+.slide.day{background:#F4EBDD;color:#1A1210}
+.slide.day .label{color:#8A6E55}
+.slide.day .body{color:#5B4A40}
+.slide.day .body b,.slide.day .statement{color:#1A1210}
+.slide.day .src,.slide.day .qual{color:#8A6E55;border-color:rgba(26,18,16,.2)}
+.slide.day .qual{border-color:var(--red)}
+.slide.day .big-num{color:var(--red)}
+.slide.day .thumb{background:#DDD2C3}
+.seasons{display:grid;grid-template-columns:repeat(6,1fr);gap:.6rem;margin-top:1.4rem}
+@media(max-width:860px){.seasons{grid-template-columns:repeat(3,1fr)}}
+.season{border-top:2px solid rgba(26,18,16,.15);padding-top:.6rem}
+.season.hi{border-top-color:var(--red)}
+.season .y{font-family:'DM Mono',monospace;font-size:.66rem;letter-spacing:.14em;color:#8A6E55}
+.season .n{font-family:'Archivo',sans-serif;font-variation-settings:'wdth' 78,'wght' 800;font-size:clamp(1.5rem,2.6vw,2.2rem);line-height:.9;margin:.35rem 0 .2rem;color:#1A1210}
+.season .n span{font-size:.5em;color:#8A6E55}
+.season p{font-size:.74rem;line-height:1.35;color:#5B4A40}
+.dots{display:flex;gap:3px;margin:.4rem 0 .35rem;flex-wrap:wrap}
+.dots i{width:9px;height:9px;border-radius:50%;background:rgba(26,18,16,.18)}
+.dots i.k{background:var(--red)}
+.mixes{display:grid;grid-template-columns:repeat(3,1fr);gap:.6rem}
+@media(max-width:860px){.mixes{grid-template-columns:repeat(3,1fr)}}
+
+/* ── Slide 6 · releases ─────────────────────────────────────────────*/
+.sleeves{display:grid;grid-template-columns:repeat(3,1fr);gap:.6rem}
+@media(max-width:560px){.sleeves{grid-template-columns:1fr}}
+.rel{display:flex;gap:1.4rem;flex-wrap:wrap;align-items:flex-end}
+
+/* ── Slide 7 · what to protect: six lanes, each headed by the real asset ─*/
+.lanes{display:grid;grid-template-columns:repeat(6,1fr);gap:clamp(.7rem,1.3vw,1.3rem)}
+@media(max-width:1100px){.lanes{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:760px){.lanes{grid-template-columns:1fr 1fr}}
+@media(max-width:480px){.lanes{grid-template-columns:1fr}}
+.lane{border-top:2px solid var(--line);padding-top:.8rem;min-width:0}
+.lane .thumb{margin-bottom:.7rem}
+.lane .n{font-family:'DM Mono',monospace;font-size:.68rem;letter-spacing:.18em}
+.lane h3{margin:.35rem 0 .45rem;font-size:clamp(1.05rem,1.55vw,1.4rem)}
+.lane p{font-size:.8rem;color:var(--warm);line-height:1.42}
+.lane p b{color:var(--cream);font-weight:600}
+.lane.c1{border-top-color:var(--yellow)}.lane.c1 .n{color:var(--yellow)}
+.lane.c2{border-top-color:var(--red)}.lane.c2 .n{color:var(--red)}
+.lane.c3{border-top-color:var(--cyan)}.lane.c3 .n{color:var(--cyan)}
+.lane.c4{border-top-color:var(--cream)}.lane.c4 .n{color:var(--cream)}
+.lane.c5{border-top-color:var(--lime)}.lane.c5 .n{color:var(--lime)}
+.lane.c6{border-top-color:var(--blue)}.lane.c6 .n{color:#7FA0F5}
+
+/* ── Slide 8 · the radio destination: three surfaces ────────────────*/
+.panels{display:grid;grid-template-columns:1fr 1fr 1.1fr;gap:clamp(.8rem,1.6vw,1.6rem);align-items:start}
+.panels.three{grid-template-columns:1fr 1fr 1.25fr}
+@media(max-width:980px){.panels,.panels.three{grid-template-columns:1fr}}
+.panel .label{margin-bottom:.5rem}
+.callout{
+  font-family:'DM Mono',monospace;font-size:.66rem;line-height:1.45;letter-spacing:.04em;
+  color:var(--ink);background:var(--cream);border-radius:2px;padding:.5rem .65rem;margin-top:.6rem;max-width:40ch;
+}
+.callout b{color:var(--red);font-weight:500}
+.fixtile{display:grid;grid-template-columns:7.5rem 1fr;background:var(--ink);color:var(--cream);border-radius:4px;overflow:hidden;border:1px solid rgba(13,10,11,.3)}
+.fixtile .art{position:relative;aspect-ratio:1;overflow:hidden}
+.fixtile .art img{width:100%;height:100%;object-fit:cover}
+.fixtile .art span{position:absolute;left:.6rem;bottom:.6rem;font-family:'DM Mono',monospace;font-size:.58rem;letter-spacing:.12em;text-transform:uppercase;background:rgba(13,10,11,.85);padding:.25rem .45rem;border-radius:2px}
+.fixtile .bd{padding:.7rem .8rem .8rem;align-self:center}
+.fixtile .bd b{display:block;font-family:'Archivo',sans-serif;font-variation-settings:'wdth' 78,'wght' 780;text-transform:uppercase;font-size:1rem;line-height:1.02}
+.fixtile .bd i{display:block;font-style:normal;font-family:'DM Mono',monospace;font-size:.6rem;letter-spacing:.1em;text-transform:uppercase;color:var(--warm);margin-top:.35rem}
+.miniShelf{display:grid;grid-template-columns:repeat(4,1fr);gap:3px;margin-top:.5rem}
+.steps{list-style:none;counter-reset:s;display:flex;flex-direction:column;gap:.45rem;margin-top:.9rem}
+.steps li{counter-increment:s;position:relative;padding-left:1.7rem;font-size:.8rem;line-height:1.38;color:rgba(13,10,11,.85)}
+.steps li::before{content:'0' counter(s);position:absolute;left:0;top:.1rem;font-family:'DM Mono',monospace;font-size:.62rem;letter-spacing:.1em;color:var(--red)}
+.steps li b{font-weight:600;color:var(--ink)}
+.steps.dark li{color:var(--warm);font-size:.92rem}
+.steps.dark li b{color:var(--cream)}
+.steps.row{display:grid;grid-template-columns:repeat(3,1fr);gap:1.2rem;margin-top:1.1rem;padding-top:.9rem;border-top:1px solid rgba(13,10,11,.2)}
+@media(max-width:860px){.steps.row{grid-template-columns:1fr}}
+
+/* ── Slide 8 · the Home rail (inside the radio slide) ───────────────*/
+.rail9{display:flex;flex-direction:column;gap:2px}
+.field .shelf{background:rgba(13,10,11,.07);color:var(--ink)}
+.field .shelf .t{color:var(--ink)}
+.field .shelf .t i,.field .shelf .i,.field .shelf .k{color:rgba(13,10,11,.6)}
+.field .shelf.add{background:rgba(226,35,26,.12);border:1px dashed rgba(226,35,26,.7)}
+.field .shelf.add .i,.field .shelf.add .k{color:var(--red)}
+.field .shelf.move{background:rgba(13,10,11,.14)}
+.field .shelf.move .k{color:var(--ink)}
+
+/* ── Slide 9 · Premieres: the strength, then the tools ──────────────*/
+.prem{display:grid;grid-template-columns:.95fr 1.25fr;gap:clamp(1.2rem,2.6vw,2.4rem);align-items:start}
+@media(max-width:900px){.prem{grid-template-columns:1fr}}
+.premPage{position:relative;border-radius:4px;overflow:hidden;background:var(--ink-3);border:1px solid var(--line)}
+.premPage .thumb{border-radius:0}
+.premPage .bar{display:flex;justify-content:space-between;gap:1rem;align-items:center;padding:.6rem .8rem;background:var(--ink-2);font-family:'DM Mono',monospace;font-size:.6rem;letter-spacing:.1em;text-transform:uppercase;color:var(--warm);flex-wrap:wrap}
+.premPage .bar b{color:var(--cream);font-weight:500}
+.premPage .pill{display:inline-block;border:1px solid var(--line);border-radius:2px;padding:.2rem .45rem;color:var(--cream)}
+.premPage .pill.on{border-color:var(--red);color:var(--red)}
+.tools{display:grid;grid-template-columns:1fr 1fr;gap:.6rem}
+@media(max-width:560px){.tools{grid-template-columns:1fr}}
+.tool{border-top:2px solid var(--line);padding-top:.55rem}
+.tool b{display:block;font-family:'Archivo',sans-serif;font-variation-settings:'wdth' 78,'wght' 780;text-transform:uppercase;font-size:.95rem;line-height:1.05;color:var(--cream)}
+.tool p{font-size:.76rem;line-height:1.4;color:var(--warm);margin-top:.3rem}
+.tool p i{font-style:normal;color:var(--dim);font-family:'DM Mono',monospace;font-size:.6rem;letter-spacing:.06em}
+.tool.t1{border-top-color:var(--red)}.tool.t2{border-top-color:var(--cyan)}.tool.t3{border-top-color:var(--yellow)}.tool.t4{border-top-color:var(--lime)}
+.facts{display:flex;gap:1.6rem;flex-wrap:wrap;margin-top:1rem}
+.facts div .big-num{font-size:clamp(1.4rem,2.4vw,2.1rem)}
+.facts div .label{margin-top:.3rem}
+
+/* ── Slide 10 · lyric videos: three cases, each an upload on another channel beside its status ─*/
+.cases{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(.8rem,1.6vw,1.6rem)}
+@media(max-width:860px){.cases{grid-template-columns:1fr}}
+.case{border-top:2px solid var(--line);padding-top:.7rem;min-width:0}
+.case .thumb{margin-bottom:.6rem;max-width:68%}
+@media(max-width:860px){.case .thumb{max-width:60%}}
+.case h3{font-size:clamp(1rem,1.5vw,1.3rem)}
+.case .stat{display:grid;grid-template-columns:auto 1fr;gap:.25rem .6rem;margin-top:.5rem;font-size:.76rem;line-height:1.4;color:var(--warm)}
+.case .stat span:nth-child(odd){font-family:'DM Mono',monospace;font-size:.58rem;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);padding-top:.2rem}
+.case .stat b{color:var(--cream);font-weight:600}
+.case .stat .no{color:var(--red);font-weight:600}
+.case .stat .yes{color:var(--cyan);font-weight:600}
+.case.first{border-top-color:var(--red)}
+.case.first h3{color:var(--cream)}
+
+/* ── Slide 11 · the anniversary: a line of what already exists ──────*/
+.line20{display:grid;grid-template-columns:repeat(8,1fr);gap:.45rem;position:relative;margin-top:1.4rem}
+@media(max-width:980px){.line20{grid-template-columns:repeat(4,1fr)}}
+@media(max-width:560px){.line20{grid-template-columns:repeat(2,1fr)}}
+.line20::before{content:'';position:absolute;left:0;right:0;top:-.7rem;height:1px;background:var(--line)}
+.pt{min-width:0}
+.pt .y{font-family:'DM Mono',monospace;font-size:.6rem;letter-spacing:.12em;color:var(--dim);margin-bottom:.35rem;white-space:nowrap}
+.pt .y b{color:var(--red);font-weight:500}
+.line20.fmt .pt .y{white-space:normal;line-height:1.35}
+.line20.fmt .pt .y i{display:block;font-style:normal;color:var(--dim)}
+.field .line20.fmt .pt .y{color:rgba(13,10,11,.7)}
+.field .line20.fmt .pt .y i{color:rgba(13,10,11,.6)}
+.pt .thumb .cap{padding:.35rem .4rem .35rem;font-size:.54rem;background:linear-gradient(to top,rgba(13,10,11,.97) 30%,rgba(13,10,11,.45))}
+.pt .thumb .cap b{font-size:.68rem}
+
+/* ── Slide 14 · three priorities, supporting actions beneath ────────*/
+.prios{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(1rem,2.2vw,2.2rem)}
+@media(max-width:860px){.prios{grid-template-columns:1fr}}
+.prio{border-top:2px solid var(--red);padding-top:.8rem;min-width:0}
+.prio:nth-child(2){border-top-color:var(--yellow)}
+.prio:nth-child(3){border-top-color:var(--cyan)}
+.prio .d{font-family:'DM Mono',monospace;font-size:.62rem;letter-spacing:.14em;text-transform:uppercase;color:var(--dim)}
+.prio .head{display:grid;grid-template-columns:6.4rem 1fr;gap:.8rem;align-items:center;margin-top:.6rem}
+.prio .thumb{margin:0}
+.prio h3{font-size:clamp(1.05rem,1.6vw,1.35rem);line-height:1.05}
+.prio>p{font-size:.8rem;color:var(--warm);line-height:1.4;margin-top:.45rem}
+.prio>p b{color:var(--cream);font-weight:600}
+.prio ul{list-style:none;margin-top:.7rem;border-top:1px solid var(--line)}
+.prio li{font-size:.72rem;color:var(--warm);line-height:1.38;padding:.3rem 0 .3rem .9rem;position:relative;border-bottom:1px solid var(--line)}
+.prio li::before{content:'';position:absolute;left:0;top:.8rem;width:4px;height:4px;border-radius:50%;background:var(--dim)}
+.prio li b{color:var(--cream);font-weight:600}
+.prio .tag{display:inline-block;margin-top:.55rem;font-family:'DM Mono',monospace;font-size:.56rem;letter-spacing:.12em;text-transform:uppercase;padding:.2rem .45rem;border:1px solid var(--line);border-radius:2px;color:var(--warm)}
+.prio .tag.x{border-color:var(--cyan);color:var(--cyan)}
+.shelf{display:grid;grid-template-columns:2rem 1fr auto;gap:.8rem;align-items:center;padding:.28rem .6rem;border-radius:2px;background:rgba(243,237,228,.045);font-size:.78rem}
+.shelf .i{font-family:'DM Mono',monospace;font-size:.6rem;letter-spacing:.1em;color:var(--dim)}
+.shelf .t{color:var(--cream)}
+.shelf .t i{font-style:normal;color:var(--dim);font-size:.74rem;margin-left:.4rem}
+.shelf .k{font-family:'DM Mono',monospace;font-size:.58rem;letter-spacing:.12em;text-transform:uppercase;color:var(--dim)}
+.shelf.add{background:rgba(226,35,26,.14);border:1px dashed rgba(226,35,26,.6)}
+.shelf.add .i,.shelf.add .k{color:var(--red)}
+.shelf.move{background:rgba(57,208,230,.1)}
+.shelf.move .k{color:var(--cyan)}
+@media(max-width:560px){.shelf{grid-template-columns:2rem 1fr;gap:.2rem .6rem}.shelf .k{grid-column:2;white-space:normal}}
+
+/* ── Slide 12 · Shorts ──────────────────────────────────────────────*/
+.months{display:flex;gap:3px;align-items:flex-end;height:70px;width:100%}
+.mo{flex:1 1 0;background:rgba(243,237,228,.22);border-radius:1px;position:relative}
+.mo.y26{background:var(--warm)}
+.mo.zero{background:var(--red);height:3px!important}
+.mo i{position:absolute;left:50%;transform:translateX(-50%);bottom:-1.25rem;font-style:normal;font-family:'DM Mono',monospace;font-size:.56rem;color:var(--dim);letter-spacing:.06em}
+.shorts{display:grid;grid-template-columns:repeat(6,1fr);gap:.5rem}
+@media(max-width:860px){.shorts{grid-template-columns:repeat(3,1fr)}}
+.cmp{display:grid;grid-template-columns:1fr 1fr 1fr;gap:1rem;margin-top:1.2rem}
+@media(max-width:560px){.cmp{grid-template-columns:1fr}}
+.cmp div{border-top:2px solid var(--line);padding-top:.6rem}
+.cmp div.h{border-top-color:var(--yellow)}
+.cmp .big-num{font-size:clamp(1.5rem,2.6vw,2.2rem)}
+.cmp p{font-size:.78rem;color:var(--warm);line-height:1.4;margin-top:.3rem}
+
+/* ── Slide 13 · the podcast timeline ────────────────────────────────*/
+.tl{position:relative;display:grid;grid-template-columns:repeat(26,1fr);gap:2px;align-items:end;height:clamp(120px,18vh,180px)}
+.tl::before{content:'';position:absolute;left:0;right:0;bottom:0;height:1px;background:rgba(13,10,11,.3)}
+.ep{grid-row:1;align-self:end;position:relative}
+.ep .thumb{border-radius:2px;border:2px solid var(--ink)}
+.ep i{position:absolute;left:0;top:calc(100% + .35rem);font-style:normal;font-family:'DM Mono',monospace;font-size:.56rem;line-height:1.35;letter-spacing:.06em;color:rgba(13,10,11,.7);white-space:nowrap}
+.ep i b{display:block;font-weight:500;color:var(--ink)}
+.gap{grid-row:1;align-self:end;height:1.4rem;display:flex;align-items:center;justify-content:center;font-family:'DM Mono',monospace;font-size:.56rem;letter-spacing:.1em;color:rgba(13,10,11,.55);border-bottom:2px dashed rgba(13,10,11,.35);margin-bottom:.4rem}
+
+@media(max-width:860px){
+  .tl{display:flex;flex-wrap:wrap;gap:.6rem 2%;height:auto}
+  .tl::before{display:none}
+  .ep{width:32%}
+  .ep i{position:static;display:block;margin-top:.25rem}
+  .gap{display:none}
+  .podgrid{grid-template-columns:1fr!important}
+}
+
+/* ── (retired) the 90-day rail ─────────────────────────────────────*/
+.rail{display:grid;grid-template-columns:repeat(5,1fr);gap:clamp(.8rem,1.8vw,1.6rem);position:relative}
+@media(max-width:980px){.rail{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:560px){.rail{grid-template-columns:1fr}}
+.stop{border-top:2px solid var(--red);padding-top:.8rem}
+.stop:nth-child(2){border-top-color:var(--yellow)}
+.stop:nth-child(3){border-top-color:var(--cyan)}
+.stop:nth-child(4){border-top-color:var(--lime)}
+.stop:nth-child(5){border-top-color:var(--pod)}
+.stop .d{font-family:'DM Mono',monospace;font-size:.62rem;letter-spacing:.14em;text-transform:uppercase;color:var(--dim)}
+.stop .thumb{margin:.6rem 0 .7rem}
+.stop h3{font-size:clamp(1rem,1.5vw,1.25rem);line-height:1.05}
+.stop p{font-size:.75rem;color:var(--warm);line-height:1.38;margin-top:.4rem}
+.stop p b{color:var(--cream);font-weight:600}
+.stop .tag{display:inline-block;margin-top:.5rem;font-family:'DM Mono',monospace;font-size:.56rem;letter-spacing:.12em;text-transform:uppercase;padding:.2rem .45rem;border:1px solid var(--line);border-radius:2px;color:var(--warm)}
+.stop .tag.x{border-color:var(--cyan);color:var(--cyan)}
+
+/* Closing summary */
+.prios.close{gap:clamp(1.4rem,3vw,3rem)}
+.prios.close .prio{padding-top:1rem}
+.prios.close .thumb{aspect-ratio:16/8}
+.prios.close .d{margin-top:.9rem;font-size:.7rem;color:var(--cream)}
+.prios.close h3{font-size:clamp(1.25rem,2.1vw,1.8rem);line-height:1.04;margin-top:.35rem}
+.prios.close .prio>p{font-size:clamp(.95rem,1.25vw,1.1rem);line-height:1.45;color:var(--cream);opacity:.88;margin-top:.6rem;max-width:32ch}
+@media(max-width:880px){.prios.close{grid-template-columns:1fr}}
+.checks{display:grid;grid-template-columns:1fr 1fr;gap:1rem 2rem;margin-top:1.1rem}
+@media(max-width:760px){.checks{grid-template-columns:1fr}}
+.checks ul{list-style:none}
+.checks li{font-size:.78rem;color:var(--warm);padding:.28rem 0 .28rem 1rem;position:relative;border-bottom:1px solid var(--line);line-height:1.4}
+.checks li::before{content:'';position:absolute;left:0;top:.95rem;width:5px;height:5px;border-radius:50%;background:var(--red)}
+.checks li:last-child{border-bottom:0}
+
+/* ── Chrome ─────────────────────────────────────────────────────────*/
+.chrome{
+  position:fixed;top:0;left:0;right:0;z-index:60;
+  display:flex;justify-content:space-between;align-items:center;gap:1rem;
+  padding:.7rem var(--pad);background:rgba(13,10,11,.9);
+  backdrop-filter:blur(14px);border-bottom:1px solid var(--line);
+  font-family:'DM Mono',monospace;font-size:.66rem;letter-spacing:.13em;text-transform:uppercase;
+}
+.chrome-l{display:flex;gap:1.1rem;align-items:center;color:var(--dim);min-width:0}
+.chrome-l .mark{width:18px;height:18px;border-radius:50%;background:var(--red);flex:none}
+.chrome-l span:first-of-type{white-space:nowrap;color:var(--cream)}
+@media(max-width:760px){.chrome-l span:nth-of-type(2){display:none}}
+.btn{
+  font:inherit;text-transform:uppercase;letter-spacing:.13em;cursor:pointer;
+  background:transparent;color:var(--warm);border:1px solid var(--line);
+  padding:.45rem .8rem;border-radius:2px;white-space:nowrap;
+}
+.btn:hover{border-color:var(--red);color:var(--cream)}
+.btn.primary{border-color:var(--red);color:var(--cream);background:var(--red);font-weight:500}
+.btn.primary:hover{background:#F0352C;border-color:#F0352C}
+#pbar{position:fixed;top:0;left:0;height:2px;background:var(--red);width:0;z-index:70;transition:width .3s ease}
+
+/* ── Present mode ───────────────────────────────────────────────────*/
+body.present .deck .slide{display:none;height:100vh;min-height:100vh;border-bottom:0;padding-top:4.4rem;padding-bottom:2.2rem;overflow-y:auto}
+body.present .deck .slide.active{display:flex}
+body.present{overflow:hidden}
+
+/* ── Motion ─────────────────────────────────────────────────────────*/
+.reveal{opacity:0;transform:translateY(16px);transition:opacity .6s ease,transform .6s ease}
+.reveal.visible{opacity:1;transform:none}
+.stagger>*{opacity:0;transform:translateY(14px);transition:opacity .5s ease,transform .5s ease}
+.stagger.visible>*{opacity:1;transform:none}
+.wk,.mo,.yr,.rung .bar i{transition:height .6s cubic-bezier(.2,.7,.3,1),width .6s cubic-bezier(.2,.7,.3,1)}
+@media(prefers-reduced-motion:reduce){
+  .reveal,.stagger>*{opacity:1!important;transform:none!important;transition:none!important}
+  .wk,.mo,.yr,.rung .bar i{transition:none!important}
+  html{scroll-behavior:auto}
+}
