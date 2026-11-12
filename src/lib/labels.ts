@@ -30,7 +30,7 @@ export const LABELS: Record<string, LabelWorkspace> = {
   },
   community: {
     slug: 'community', workspaceId: 'label-community', name: 'Community Records',
-    logo: '/labels/community/logo.svg', website: 'https://www.communityrecords.org/',
+    logo: '/labels/community/logo.jpg', website: 'https://www.communityrecords.org/',
     rosterSource: 'https://www.communityrecords.org/artists', rosterCheckedAt: '2026-11-12',
     // Start with an empty workspace; the label confirms which catalogue artists to track.
     roster: [],
