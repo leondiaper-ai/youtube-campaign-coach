@@ -198,6 +198,20 @@ const STATUS_MARK: Record<ReleaseAsset['status'], { icon: string; cls: string }>
 };
 
 export default function CoachLanding({ model, slug, classicHref, timelineEditor, readOnly = false }: { model: LandingModel; slug?: string; classicHref?: string; timelineEditor?: ReactNode; readOnly?: boolean }) {
+  const visualPilot = slug === 'chvrches-chvrches-campaign';
+  const uploads = [...model.assets.long, ...model.assets.shorts].filter(u => Number.isFinite(Date.parse(u.publishedAt))).sort((a,b) => Date.parse(a.publishedAt)-Date.parse(b.publishedAt));
+  const last = uploads.at(-1);
+  const first = uploads[0];
+  const rhythm = Array.from({length: 12}, (_,i) => {
+    if (!first || !last) return {long:0,short:0};
+    const start = Date.parse(first.publishedAt), span = Math.max(1,Date.parse(last.publishedAt)-start+1);
+    const slot = uploads.filter(u => Math.min(11,Math.floor((Date.parse(u.publishedAt)-start)/span*12))===i);
+    return {long:slot.filter(u=>u.shape==='long').length,short:slot.filter(u=>u.shape==='short').length};
+  });
+  const maxRhythm = Math.max(1,...rhythm.map(r=>r.long+r.short));
+  const gaps = uploads.slice(1).map((u,i)=>({days:Math.round((Date.parse(u.publishedAt)-Date.parse(uploads[i].publishedAt))/86400000),from:uploads[i],to:u})).filter(g=>g.days>14);
+  const largestGap = gaps.sort((a,b)=>b.days-a.days)[0];
+  const rolloutCounts = {published:model.rollout.flatMap(r=>r.assets).filter(a=>a.status==='published').length, agreed:model.rollout.flatMap(r=>r.assets).filter(a=>a.status==='agreed').length,suggested:model.rollout.flatMap(r=>r.assets).filter(a=>a.status==='suggested').length};
   return (
     <div className="max-w-[1060px] mx-auto px-5 pb-16">
 
@@ -238,6 +252,27 @@ export default function CoachLanding({ model, slug, classicHref, timelineEditor,
           ))}
         </div>
 
+        {visualPilot && <div className="border-t border-line-faint px-4 py-5 bg-[#15191d] text-white rounded-none" aria-label="CHVRCHES visual campaign rhythm pilot">
+          <div className="flex flex-wrap items-end justify-between gap-3 mb-4">
+            <div><p className="text-[10px] tracking-[0.2em] font-bold uppercase text-[#9ca9b7] m-0">Campaign rhythm · visual pilot</p><h3 className="text-[24px] sm:text-[30px] font-black tracking-tight m-0 mt-1">What happens between uploads?</h3></div>
+            <div className="text-right"><strong className="block text-[24px] tabular-nums">{uploads.length}</strong><span className="text-[11px] text-[#b9c3cc]">observed uploads</span></div>
+          </div>
+          <div className="flex items-end gap-1 h-[84px] border-b border-white/20 pb-1" role="img" aria-label={`Twelve equal time segments showing ${model.assets.long.length} longform and ${model.assets.shorts.length} Shorts uploads`}>
+            {rhythm.map((bucket,i)=><div key={i} className="flex-1 flex flex-col justify-end h-full gap-px">
+              <div className="bg-[#f6b64b] w-full rounded-t-sm" style={{height:`${bucket.long/maxRhythm*76}px`}}/>
+              <div className="bg-[#61b9ed] w-full rounded-sm" style={{height:`${bucket.short/maxRhythm*76}px`}}/>
+            </div>)}
+          </div>
+          <div className="flex flex-wrap items-center justify-between gap-2 mt-2 text-[11px] text-[#c0cad2]">
+            <span>{first ? shortDate(first.publishedAt) : 'No dated uploads'} → {last ? shortDate(last.publishedAt) : '—'}</span>
+            <span><span className="text-[#f6b64b]">■</span> Videos · <span className="text-[#61b9ed]">■</span> Shorts</span>
+          </div>
+          <p className="mt-3 mb-0 text-[12px] text-[#e0e5e9]">{largestGap ? `Longest observed upload gap: ${largestGap.days} days. Check whether planned follow-through or label-channel uploads fill it.` : uploads.length>1 ? 'No observed gap longer than 14 days in the available uploads.' : 'Not enough dated uploads to assess rhythm.'}</p>
+          <div className="grid grid-cols-3 gap-2 mt-4 pt-4 border-t border-white/20">
+            {[{label:'Published',count:rolloutCounts.published,tone:'text-[#77dbab]'},{label:'Agreed',count:rolloutCounts.agreed,tone:'text-[#a4b9ff]'},{label:'Suggested',count:rolloutCounts.suggested,tone:'text-[#e8c17c]'}].map(f=><div key={f.label}><strong className={`block text-[23px] tabular-nums ${f.tone}`}>{f.count}</strong><span className="text-[11px] text-[#c0cad2]">{f.label} · rollout assets</span></div>)}
+          </div>
+          <p className="text-[10px] text-[#9ca9b7] mt-3 mb-0">Equal-width time segments between first and last observed upload. Counts are from the current Coach evidence, not a complete official-channel audit. Status counts are planned rollout entries, not unique video IDs.</p>
+        </div>}
         {model.framework && model.framework.singles>0 && <div className="border-t border-line-faint p-4">
           <div className="flex flex-wrap justify-between gap-2 items-baseline mb-3"><Eyebrow>Rollout guide · {model.framework.singles} singles</Eyebrow><span className="text-micro text-muted">Status against guide due today</span></div>
           <div className="grid grid-cols-3 gap-3">
