@@ -451,21 +451,31 @@ body.present{overflow:hidden}
 .rate-l span{flex:1;font-size:.66rem;line-height:1.3;color:var(--dim)}
 
 
-/* Action-first post-album plan: minimal, evidence-led, client-ready. */
-.next-action-row{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.85rem;margin-top:1.1rem}
-.next-action{border-top:3px solid var(--gold);padding:.8rem .5rem .3rem 0}
-.next-action .num{font-size:.66rem;letter-spacing:.1em;text-transform:uppercase;color:var(--gold);font-weight:700}
-.next-action h3{font-size:clamp(1.05rem,1.5vw,1.4rem);line-height:1.2;margin:.45rem 0}
-.next-action p{font-size:clamp(.77rem,1vw,.94rem);line-height:1.5;color:var(--dim);margin:0}
-.next-action .why{font-size:.71rem;color:var(--gold);margin-top:.7rem}
-.next-action img{width:100%;height:125px;object-fit:cover;margin-top:.65rem;border-radius:4px;filter:saturate(.8)}
-.station-hero{margin-top:1.25rem;border:1px solid var(--gold);border-left:6px solid var(--gold);padding:1.1rem 1.3rem;background:linear-gradient(90deg,rgba(204,172,108,.13),rgba(204,172,108,.025))}
-.station-hero .eyebrow{font-size:.68rem;letter-spacing:.12em;color:var(--gold);text-transform:uppercase;font-weight:700}
-.station-hero h3{font-size:clamp(1.35rem,2.2vw,2.1rem);margin:.4rem 0}
-.station-hero p{font-size:clamp(.8rem,1.1vw,1rem);line-height:1.5;max-width:90ch;margin:0}
-.station-hero .next{color:var(--gold);font-size:.77rem;margin-top:.65rem}
-.action-footer{font-size:.72rem;line-height:1.45;color:var(--dim);margin-top:.8rem}
-@media(max-width:760px){.next-action-row{grid-template-columns:1fr}.next-action img{height:95px}.station-hero{padding:.8rem}}
+/* Eight-week campaign walkthrough: weekly beats, anchor moments and persistent discovery. */
+.walk-summary{display:flex;gap:1.5rem;align-items:center;border-top:1px solid rgba(255,255,255,.2);border-bottom:1px solid rgba(255,255,255,.2);padding:.55rem 0;margin-top:.8rem}
+.walk-summary strong{font-size:1.1rem;color:var(--gold)}.walk-summary span{font-size:.73rem;color:var(--dim)}
+.walk-phases{display:grid;grid-template-columns:repeat(3,1fr);gap:.8rem;margin-top:.75rem}
+.walk-phase{border-top:3px solid var(--gold);padding-top:.5rem}
+.walk-phase .phase-date{font-size:.64rem;letter-spacing:.08em;color:var(--gold);text-transform:uppercase}
+.walk-phase h3{font-size:1rem;margin:.25rem 0}.walk-phase p{font-size:.7rem;color:var(--dim);line-height:1.4;margin:0}
+.walk-weeks{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:.3rem;margin-top:1rem}
+.walk-week{border-top:3px solid #666;padding:.5rem .3rem .3rem;min-width:0}
+.walk-week.anchor{border-color:var(--gold);background:rgba(204,172,108,.065)}
+.walk-week .date{font-size:.64rem;color:var(--gold);font-weight:700}
+.walk-week .asset{font-size:.76rem;font-weight:700;line-height:1.22;margin:.35rem 0}
+.walk-week .detail{font-size:.64rem;line-height:1.38;color:var(--dim)}
+.walk-week .to{font-size:.6rem;color:var(--gold);line-height:1.35;margin-top:.45rem}
+.walk-lanes{margin-top:.7rem;display:grid;gap:.38rem}
+.walk-lane{display:grid;grid-template-columns:125px 1fr;align-items:center;gap:.6rem}
+.walk-lane .name{font-size:.64rem;text-transform:uppercase;letter-spacing:.05em;color:var(--dim);font-weight:700}
+.walk-lane .strip{display:grid;grid-template-columns:repeat(8,1fr);gap:.25rem}
+.walk-lane .strip span{height:12px;background:#6d6d6d;display:block;border-radius:2px}
+.walk-lane .strip span.major{background:var(--gold);height:19px}
+.walk-lane .strip span.station{height:12px;background:rgba(204,172,108,.22);border-top:2px solid var(--gold);border-radius:0}
+.walk-station{border:1px solid var(--gold);background:rgba(204,172,108,.08);padding:.6rem .8rem;margin-top:.75rem;font-size:.72rem;line-height:1.4}
+.walk-station strong{color:var(--gold)}
+.walk-foot{font-size:.66rem;color:var(--dim);line-height:1.4;margin-top:.6rem}
+@media(max-width:1000px){.walk-weeks{overflow-x:auto;grid-template-columns:repeat(8,minmax(110px,1fr))}.walk-phases{gap:.35rem}.walk-phase p{font-size:.65rem}}
 /* Post-album continuation: evidence beside the next action. */
 .continue-table{width:100%;border-collapse:collapse;table-layout:fixed;margin-top:clamp(1.2rem,2.5vw,2rem)}
 .continue-table th{text-align:left;font:700 .65rem 'Inter',sans-serif;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);padding:0 1rem .8rem 0}
@@ -898,42 +908,27 @@ body.present{overflow:hidden}
      Practical, proportionate, nothing that tells the band what to make. -->
 
 
-<!-- ═══ 13 · ACTION-FIRST POST-ALBUM PLAN ═══════════════ -->
-<section class="slide" data-t="What next">
-  <div class="inner">
-    <div class="label reveal">Post-album · practical next steps · November 2026 onward</div>
-    <h2 class="display reveal" style="margin-top:.55rem;font-size:clamp(1.8rem,3.9vw,3.35rem)">Keep the world moving.</h2>
-    <p class="body reveal" style="margin-top:.45rem;max-width:none;font-size:.9rem">The album is out. The big spend has happened. <strong>Make more of the songs and footage already connecting.</strong></p>
-    <div class="next-action-row reveal">
-      <div class="next-action">
-        <div class="num">01 · Next 1–2 weeks · proposed</div>
-        <h3>Give Rose another format</h3>
-        <p>Rose (Live) drew an encouraging early response. It already has a visualiser: <strong>test a lyric video next</strong>, with a Short that leads into the full song.</p>
-        <img src="https://i.ytimg.com/vi/j9Z4JcsxXus/hqdefault.jpg" alt="Rose live performance thumbnail">
-        <div class="why">Why: extend a song showing demand, without commissioning another expensive music video.</div>
-      </div>
-      <div class="next-action">
-        <div class="num">02 · Now → December · proposed</div>
-        <h3>Build on the new live upload</h3>
-        <p><strong>Another live track has just dropped.</strong> Give it room to breathe, then cut performance Shorts and a behind-the-scenes moment. Check any London show footage for further approved releases.</p>
-        <img src="https://i.ytimg.com/vi/2x_oiMPK8sY/hqdefault.jpg" alt="Thumbnail for newly shared live upload">
-        <div class="why">Why: live performances already proved useful; follow up within 7–14 days where assets allow.</div>
-      </div>
-      <div class="next-action">
-        <div class="num">03 · December → January · proposed</div>
-        <h3>Make the next song an event</h3>
-        <p>Choose the next priority track from organic response. Pair its main upload with <strong>lyric / live / visualiser</strong> where missing, Shorts, a Premiere if appropriate, and coordinated collaborator / partner promotion where approved.</p>
-        <div class="why">Why: My Whole World worked across formats; the pre-album review also highlighted lyric videos, Premieres and the need for a clear second destination.</div>
-      </div>
-    </div>
-    <div class="station-hero reveal">
-      <div class="eyebrow">Big opportunity · YouTube Station · not yet live</div>
-      <h3>Launch Kings of Leon TV.</h3>
-      <p>For a band with this catalogue, a dedicated Station could connect the new album, live performances and decades of hits in one programmed destination. <strong>Follow up with YouTube now</strong>, agree the proposed rotation and approvals, then work towards activation. This is a strategic opportunity, not a confirmed launch.</p>
-      <div class="next">Alongside launch: complete the album playlist, add missing description links, check end screens and cross-promote from artist, collaborator and partner channels where appropriate.</div>
-    </div>
-    <p class="action-footer reveal"><strong>Review after 30 days:</strong> organic response by song and format, returning viewers, playlist journeys and the next best release. Proposed actions depend on rights, footage, approvals and available budget. The new live video's identity and performance have not been independently verified from the supplied URL.</p>
+<!-- ═══ 13 · EIGHT-WEEK POST-ALBUM WALKTHROUGH ═══════════════ -->
+<section class="slide" data-t="8-week plan">
+ <div class="inner">
+  <div class="label reveal">Post-album · proposed eight-week publishing rhythm · 16 Nov – 10 Jan</div>
+  <h2 class="display reveal" style="margin-top:.4rem;font-size:clamp(1.8rem,3.65vw,3.15rem)">Keep the world moving.</h2>
+  <p class="body reveal" style="margin-top:.35rem;max-width:none;font-size:.83rem">Zack's brief: turn the album's remaining attention into <strong>specific, lower-cost reasons to return</strong>.</p>
+  <div class="walk-summary reveal"><div><strong>3</strong> <span>long-form moments*</span></div><div><strong>1–2</strong> <span>purposeful Shorts per week</span></div><div><strong>8 weeks</strong> <span>of connected discovery</span></div><div><strong>Always on</strong> <span>Station + playlists</span></div></div>
+  <div class="walk-phases reveal">
+   <div class="walk-phase"><div class="phase-date">November · capitalise</div><h3>Live momentum → Rose</h3><p>The new live upload is the first anchor. Rose has shown promise: test a lyric video as its next format.</p></div>
+   <div class="walk-phase"><div class="phase-date">December · keep returning</div><h3>Shorts with destinations</h3><p>Weekly performance, band and catalogue moments, each pointing to a full song or playlist. Prepare the next anchor.</p></div>
+   <div class="walk-phase"><div class="phase-date">January · reactivate</div><h3>One more meaningful release</h3><p>Choose a track and format using organic performance, footage availability and audience demand.</p></div>
   </div>
+  <div class="walk-weeks reveal"><div class="walk-week anchor"><div class="date">16 NOV</div><div class="asset">NEW LIVE</div><div class="detail">New live upload already out. Cut one strong performance Short and a second band-led clip.</div><div class="to">→ full live video</div></div><div class="walk-week anchor"><div class="date">23 NOV</div><div class="asset">ROSE LYRIC</div><div class="detail">Propose a Rose lyric video as its next format. Tease the hook in a Short.</div><div class="to">→ Rose lyric / live</div></div><div class="walk-week "><div class="date">30 NOV</div><div class="asset">ROSE FOLLOW-UP</div><div class="detail">Performance or lyric-led Short; Community post asks fans for their favourite album moment.</div><div class="to">→ Rose + album playlist</div></div><div class="walk-week "><div class="date">7 DEC</div><div class="asset">LIVE / BAND</div><div class="detail">Behind-the-scenes or rehearsal Short from the new live release; check for further live footage.</div><div class="to">→ new live upload</div></div><div class="walk-week "><div class="date">14 DEC</div><div class="asset">NEXT TRACK</div><div class="detail">Choose a strong under-served album song; prepare its next format and supporting edits.</div><div class="to">→ selected album track</div></div><div class="walk-week "><div class="date">21 DEC</div><div class="asset">CATALOGUE BRIDGE</div><div class="detail">Archive-to-album Short; one low-lift Community moment. Avoid a forced major holiday drop.</div><div class="to">→ album playlist</div></div><div class="walk-week "><div class="date">28 DEC</div><div class="asset">LIGHT PRESENCE</div><div class="detail">One year-end live highlight or band message, only if approved footage is ready.</div><div class="to">→ live / catalogue</div></div><div class="walk-week anchor"><div class="date">4 JAN</div><div class="asset">NEXT ANCHOR</div><div class="detail">Target one more full-length song moment: live, lyric or story edit based on organic demand.</div><div class="to">→ new full-length asset</div></div></div>
+  <div class="walk-lanes reveal">
+   <div class="walk-lane"><div class="name">Long-form anchors</div><div class="strip"><span class="major" style=""></span><span class="major" style=""></span><span class="" style=";height:5px;background:#343434"></span><span class="" style=";height:5px;background:#343434"></span><span class="" style=";height:5px;background:#343434"></span><span class="" style=";height:5px;background:#343434"></span><span class="" style=";height:5px;background:#343434"></span><span class="major" style=""></span></div></div>
+   <div class="walk-lane"><div class="name">Weekly Shorts</div><div class="strip"><span class="major" style="height:12px;background:#8a8a8a"></span><span class="major" style="height:12px;background:#8a8a8a"></span><span class="major" style="height:12px;background:#8a8a8a"></span><span class="major" style="height:12px;background:#8a8a8a"></span><span class="major" style="height:12px;background:#8a8a8a"></span><span class="major" style="height:12px;background:#8a8a8a"></span><span class="major" style="height:12px;background:#8a8a8a"></span><span class="major" style="height:12px;background:#8a8a8a"></span></div></div>
+   <div class="walk-lane"><div class="name">Station / discovery</div><div class="strip"><span class="station" style=""></span><span class="station" style=""></span><span class="station" style=""></span><span class="station" style=""></span><span class="station" style=""></span><span class="station" style=""></span><span class="station" style=""></span><span class="station" style=""></span></div></div>
+  </div>
+  <div class="walk-station reveal"><strong>BIG OPPORTUNITY · KINGS OF LEON TV · NOT LIVE</strong> &nbsp; Week 1: chase YouTube activation and requirements → Weeks 2–3: agree album / live / catalogue rotation → December onward: launch when approved and programme continuously. <strong>Do now regardless:</strong> complete album playlist, description links, end screens, related-video links on Shorts and relevant artist / partner cross-promotion.</div>
+  <p class="walk-foot reveal"><strong>Why this rhythm:</strong> My Whole World proved the value of multiple formats; Rose (Live) provides a current song to extend; the pre-album audit found 7–14-day follow-through and lyric / live formats useful. *Three anchors include the live video already released, so this proposes two additional long-form releases, not three new shoots. All future dates are recommendations, not confirmed commitments. Measure organic views, retention and onward viewing; do not equate paid-supported totals with organic demand.</p>
+ </div>
 </section>
 
 <!-- ═══ 13 · NEXT READ ══════════════════════════════════════════════ -->
