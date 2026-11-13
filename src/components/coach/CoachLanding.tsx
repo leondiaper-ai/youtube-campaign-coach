@@ -86,7 +86,7 @@ function AssetRow({ title, items, shape }: { title: string; items: UploadRef[]; 
   );
 }
 
-function ActionCard({ action, slug }: { action: LandingAction; slug?: string }) {
+function ActionCard({ action, slug, readOnly = false }: { action: LandingAction; slug?: string; readOnly?: boolean }) {
   const router = useRouter();
   const [ticked, setTicked] = useState(action.state === 'agreed');
   const [saving, setSaving] = useState<'idle' | 'saving' | 'error'>('idle');
@@ -124,7 +124,7 @@ function ActionCard({ action, slug }: { action: LandingAction; slug?: string }) 
           {action.stage && <Badge fg={action.stage==='Live now'||action.stage==='Album week'?color.positive:'#2458CC'} bg={action.stage==='Live now'||action.stage==='Album week'?color.positiveSoft:'#EDF3FF'}>{action.stage}</Badge>}
           <Eyebrow>{action.context}</Eyebrow>
         </div>
-        {editing ? (
+        {readOnly ? <span className="text-[11px] font-semibold text-secondary px-2 py-[3px] rounded border border-line">{date ? `by ${new Date(date + 'T12:00:00Z').toLocaleDateString('en-GB', { day: 'numeric', month: 'short', timeZone: 'UTC' })}` : action.due}</span> : editing ? (
           <form className="flex flex-wrap items-center gap-2" onSubmit={e => {
             e.preventDefault();
             const value = String(new FormData(e.currentTarget).get('targetDate') ?? '');
@@ -160,11 +160,11 @@ function ActionCard({ action, slug }: { action: LandingAction; slug?: string }) 
       <details className="group mt-3 pt-3 border-t border-line-faint">
         <summary className="flex items-center gap-4 cursor-pointer list-none marker:hidden">
           <span
-            role="checkbox"
-            aria-checked={ticked}
-            tabIndex={0}
-            onClick={e => { e.preventDefault(); e.stopPropagation(); void toggle(!ticked); }}
-            onKeyDown={e => { if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); void toggle(!ticked); } }}
+            role={readOnly ? undefined : 'checkbox'}
+            aria-checked={readOnly ? undefined : ticked}
+            tabIndex={readOnly ? undefined : 0}
+            onClick={e => { if(readOnly) return; e.preventDefault(); e.stopPropagation(); void toggle(!ticked); }}
+            onKeyDown={e => { if (readOnly) return; if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); void toggle(!ticked); } }}
             className="inline-flex items-center gap-2 text-[12.5px] font-semibold text-secondary select-none"
           >
             <span
@@ -197,13 +197,13 @@ const STATUS_MARK: Record<ReleaseAsset['status'], { icon: string; cls: string }>
   suggested: { icon: '○', cls: 'text-faint' },
 };
 
-export default function CoachLanding({ model, slug, classicHref, timelineEditor }: { model: LandingModel; slug?: string; classicHref?: string; timelineEditor?: ReactNode }) {
+export default function CoachLanding({ model, slug, classicHref, timelineEditor, readOnly = false }: { model: LandingModel; slug?: string; classicHref?: string; timelineEditor?: ReactNode; readOnly?: boolean }) {
   return (
     <div className="max-w-[1060px] mx-auto px-5 pb-16">
 
       <nav aria-label="Coach navigation" className="flex flex-wrap items-center gap-5 pt-5 pb-1 text-meta font-semibold">
-        <a href="/growth" className="text-secondary no-underline hover:text-electric hover:underline">← Back to Watcher</a>
-        <a href="/coach" className="text-muted no-underline hover:text-electric hover:underline">All campaigns</a>
+        <a href={readOnly ? "/youtube-uk" : "/growth"} className="text-secondary no-underline hover:text-electric hover:underline">← Back to Watcher</a>
+        <a href={readOnly ? "/youtube-uk/coach" : "/coach"} className="text-muted no-underline hover:text-electric hover:underline">All campaigns</a>
       </nav>
 
       {/* 1 · header */}
@@ -223,7 +223,7 @@ export default function CoachLanding({ model, slug, classicHref, timelineEditor 
       {/* 2 · do next */}
       {!model.completed && <><Eyebrow className="mt-7 mb-2.5">Do next</Eyebrow>
       <div className="grid gap-3 md:grid-cols-2">
-        {model.actions.map(a => <ActionCard key={a.id} action={a} slug={slug} />)}
+        {model.actions.map(a => <ActionCard key={a.id} action={a} slug={slug} readOnly={readOnly} />)}
         {!model.actions.length && <p className="text-meta text-muted">No immediate action identified. Review the rollout below.</p>}
       </div></>}
 
@@ -376,11 +376,11 @@ export default function CoachLanding({ model, slug, classicHref, timelineEditor 
         ))}
       </ol>
 
-      {timelineEditor}
+      {!readOnly && timelineEditor}
 
       <div className="mt-7 pt-3 border-t border-line text-micro text-muted leading-relaxed">
         {model.caveats.map(c => <p key={c} className="m-0 mb-1.5 last:mb-0">{c}</p>)}
-        {classicHref && (
+        {!readOnly && classicHref && (
           <p className="m-0 mt-2">
             <a href={classicHref} className="text-electric font-semibold no-underline hover:underline">
               Open the previous timeline view
