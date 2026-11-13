@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { AppHeader, PageTitle } from '@/components/ui/AppHeader';
-import { getArtistsForMarket } from '@/lib/marketScope';
+import { getAllArtists } from '@/lib/marketScope';
 import { YOUTUBE_UK_ROSTER } from '@/lib/youtubeUkRoster';
 import { listPartnerSlugs } from '@/lib/youtubeUkPartnerStore';
 import { listPlans, loadPlan } from '@/lib/planStore';
@@ -32,7 +32,7 @@ const groups = [
  { status: 'planned' as const, title: 'Upcoming / not launched', description: 'Future timelines without a recorded launch milestone.', accent: 'border-line', dot: 'bg-slate-400' },
 ];
 export default async function SharedCoach() {
- const [artists, extra, plans] = await Promise.all([getArtistsForMarket('uk'), listPartnerSlugs().catch(() => [] as string[]), listPlans()]);
+ const [artists, extra, plans] = await Promise.all([getAllArtists(), listPartnerSlugs().catch(() => [] as string[]), listPlans()]);
  const rosterNames = new Set(YOUTUBE_UK_ROSTER.map(r => norm(r.name)));
  const allowedNames = new Set(artists.filter(a => rosterNames.has(norm(a.name)) || extra.includes(a.slug)).map(a => norm(a.name)));
  for (const r of YOUTUBE_UK_ROSTER) allowedNames.add(norm(r.name));
