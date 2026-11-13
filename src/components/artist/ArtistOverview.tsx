@@ -152,6 +152,26 @@ export default async function ArtistOverview({
         >
           {artist.name}
         </h1>
+        {(() => {
+          const raw = artist.channelHandle?.trim();
+          const id = snap?.channelId && /^UC[A-Za-z0-9_-]{22}$/.test(snap.channelId) ? snap.channelId : null;
+          const handle = raw?.startsWith('@') ? raw : null;
+          const url = id
+            ? `https://www.youtube.com/channel/${id}`
+            : handle && /^@[A-Za-z0-9._-]+$/.test(handle)
+              ? `https://www.youtube.com/${handle}`
+              : raw && /^UC[A-Za-z0-9_-]{22}$/.test(raw)
+                ? `https://www.youtube.com/channel/${raw}`
+                : null;
+          if (!url) return null;
+          return <div className="flex flex-wrap items-center gap-3 mt-4 text-[13px]">
+            {handle && <span className="font-semibold text-ink/65">{handle}</span>}
+            {!handle && id && <span className="font-mono text-[11px] text-ink/55">{id}</span>}
+            <a href={url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 font-bold underline underline-offset-4 text-[#2458CC] hover:text-[#163c93]">
+              View YouTube channel <span aria-hidden="true">↗</span>
+            </a>
+          </div>;
+        })()}
         <div className="flex flex-wrap items-center gap-2.5 mt-4">
           <span className="inline-block w-2.5 h-2.5 rounded-full" style={{ background: statusTheme.dot }} />
           <span className="text-[13px] font-bold uppercase tracking-[0.1em]" style={{ color: statusTheme.fg }}>
