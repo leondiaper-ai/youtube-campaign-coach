@@ -451,30 +451,34 @@ body.present{overflow:hidden}
 .rate-l span{flex:1;font-size:.66rem;line-height:1.3;color:var(--dim)}
 
 
-/* Campaign timeline: anchors, supporting releases and parallel station work. */
-.timeline-shell{margin-top:1.1rem;border-top:1px solid rgba(255,255,255,.2);padding-top:.65rem}
-.timeline-legend{display:flex;gap:1.2rem;flex-wrap:wrap;font-size:.65rem;letter-spacing:.05em;text-transform:uppercase;color:var(--dim);margin-bottom:.9rem}
-.timeline-legend b{display:inline-block;width:9px;height:9px;margin-right:.4rem;border-radius:2px;background:var(--gold)}
-.timeline-legend .support b{background:#797979}.timeline-legend .station b{background:transparent;border:1px dashed var(--gold)}
-.timeline-scroll{overflow-x:auto;padding-bottom:.3rem}
-.timeline-chart{min-width:940px;display:grid;grid-template-columns:120px repeat(8,minmax(0,1fr));position:relative}
-.timeline-corner,.timeline-date{padding:.35rem .45rem .7rem;border-bottom:1px solid rgba(255,255,255,.25);font-size:.65rem;text-transform:uppercase;letter-spacing:.08em;color:var(--gold);font-weight:700}
-.timeline-date span{display:block;font-size:.56rem;color:var(--dim);font-weight:400;margin-top:.25rem}
-.timeline-label{padding:.65rem .45rem .65rem 0;font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--dim);border-bottom:1px solid rgba(255,255,255,.12)}
-.timeline-cell{min-height:115px;padding:.5rem .3rem;border-left:1px solid rgba(255,255,255,.10);border-bottom:1px solid rgba(255,255,255,.12)}
-.timeline-cell.station-cell{min-height:65px}
-.timeline-asset{padding:.55rem .45rem;border-radius:5px;background:rgba(255,255,255,.065);border-top:3px solid #777;height:100%;box-sizing:border-box}
-.timeline-asset.anchor{background:rgba(204,172,108,.13);border-top-color:var(--gold)}
-.timeline-asset strong{display:block;font-size:clamp(.69rem,.9vw,.83rem);line-height:1.2}
-.timeline-asset small{display:block;font-size:.61rem;line-height:1.4;color:var(--dim);margin-top:.35rem}
-.timeline-station{grid-column:2 / 10;grid-row:4;display:flex;align-items:center;justify-content:space-around;gap:.5rem;border:1px dashed var(--gold);border-radius:5px;background:rgba(204,172,108,.055);margin:.45rem .25rem;padding:.6rem;color:var(--gold);font-size:.67rem}
-.timeline-station span{color:var(--dim)}
-.timeline-note{font-size:.72rem;color:var(--dim);line-height:1.5;margin-top:.85rem}
-@media(max-width:760px){.timeline-chart{min-width:880px}.timeline-legend{gap:.7rem}.timeline-shell{margin-top:.7rem}}
-.timeline-evidence{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.6rem;margin-top:.85rem}
-.timeline-proof{border-top:2px solid var(--gold);padding:.55rem .65rem;background:rgba(255,255,255,.035)}
-.timeline-proof strong{display:block;font-size:.76rem;line-height:1.25}.timeline-proof p{font-size:.68rem;line-height:1.45;color:var(--dim);margin:.3rem 0 0}.timeline-proof em{color:var(--gold);font-style:normal}
-@media(max-width:760px){.timeline-evidence{grid-template-columns:1fr}}
+/* Visual campaign sequence: chronological anchors and activity, not a calendar. */
+.story-proof{display:grid;grid-template-columns:repeat(3,1fr);gap:.8rem;margin:.8rem 0}
+.story-proof>div{border-top:2px solid var(--gold);padding:.55rem .35rem}
+.story-proof strong{display:block;font-size:.79rem}.story-proof p{font-size:.69rem;color:var(--dim);line-height:1.35;margin:.3rem 0}
+.story-proof em{color:var(--gold);font-style:normal}
+.story-timeline{position:relative;margin-top:1rem;padding-top:.2rem}
+.story-axis{position:relative;display:flex;justify-content:space-between;align-items:center;border-top:2px solid rgba(204,172,108,.7);padding-top:.55rem}
+.story-axis>span{font-size:.67rem;color:var(--gold);letter-spacing:.04em}
+.story-axis>span:nth-child(even){color:var(--dim)}
+.story-events{display:grid;grid-template-columns:repeat(3,1fr);gap:1.2rem;margin-top:.8rem}
+.story-event{position:relative;border-top:3px solid var(--gold);padding-top:.55rem;display:grid;grid-template-columns:35% 1fr;gap:.65rem;min-height:115px}
+.story-event img{width:100%;height:110px;object-fit:cover;border-radius:3px;filter:saturate(.75)}
+.story-event .story-placeholder{height:110px;background:linear-gradient(145deg,#2e2920,#151515);border:1px dashed rgba(204,172,108,.5);display:flex;align-items:center;justify-content:center;text-align:center;color:var(--gold);font-size:.62rem;padding:.3rem;box-sizing:border-box}
+.story-event .date{font-size:.64rem;color:var(--gold);text-transform:uppercase;letter-spacing:.06em}
+.story-event strong{display:block;font-size:.96rem;margin:.25rem 0}
+.story-event p{font-size:.71rem;line-height:1.38;color:var(--dim);margin:0}
+.story-event small{display:block;color:var(--gold);font-size:.61rem;margin-top:.4rem}
+.story-cadence{display:grid;grid-template-columns:repeat(8,1fr);gap:.3rem;margin-top:.9rem}
+.story-beat{border-top:1px solid #4b4b4b;padding-top:.35rem}
+.story-beat .bars{height:35px;display:flex;align-items:flex-end;gap:3px}
+.story-beat i{display:block;width:8px;background:#777;height:12px}
+.story-beat i.anchor{height:31px;background:var(--gold);width:13px}
+.story-beat i.mid{height:20px;background:#b88c39}
+.story-beat span{font-size:.62rem;color:var(--dim)}
+.story-station{margin-top:.85rem;border-left:3px solid var(--gold);padding:.35rem .8rem;background:rgba(204,172,108,.06);font-size:.73rem;line-height:1.45}
+.story-station strong{color:var(--gold)}
+.story-note{font-size:.66rem;color:var(--dim);margin-top:.7rem;line-height:1.4}
+@media(max-width:760px){.story-proof{grid-template-columns:1fr}.story-events{gap:.5rem}.story-event{display:block}.story-event img,.story-event .story-placeholder{height:80px}.story-event strong{font-size:.78rem}.story-event p{font-size:.63rem}}
 /* Post-album continuation: evidence beside the next action. */
 .continue-table{width:100%;border-collapse:collapse;table-layout:fixed;margin-top:clamp(1.2rem,2.5vw,2rem)}
 .continue-table th{text-align:left;font:700 .65rem 'Inter',sans-serif;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);padding:0 1rem .8rem 0}
@@ -907,27 +911,29 @@ body.present{overflow:hidden}
      Practical, proportionate, nothing that tells the band what to make. -->
 
 
-<!-- ═══ 13 · PROPOSED EIGHT-WEEK TIMELINE ═══════════════ -->
+<!-- ═══ 13 · VISUAL RELEASE SEQUENCE ═══════════════ -->
 <section class="slide" data-t="Release timeline">
   <div class="inner">
-    <div class="label reveal">Post-album · proposed release timeline · 16 Nov – 10 Jan</div>
-    <h2 class="display reveal" style="margin-top:.55rem;font-size:clamp(1.8rem,3.8vw,3.25rem)">Keep the world moving.</h2>
-    <p class="body reveal" style="margin-top:.45rem;max-width:none;font-size:.86rem">Build on what worked, close what was only partly delivered. <strong>Use existing footage first.</strong></p>
-    <div class="timeline-evidence reveal">
-      <div class="timeline-proof"><strong><em>Multi-format:</em> expand beyond My Whole World</strong><p>Its film, six Shorts, visualiser and live version show the model. Not every key single received that range. Give the next priority song a second format and supporting clips.</p></div>
-      <div class="timeline-proof"><strong><em>Follow-through:</em> shorten the gaps</strong><p>Only <b>2 of 4</b> releases had another long-form upload within 14 days. Programme the next full-song destination within 7–14 days where assets allow.</p></div>
-      <div class="timeline-proof"><strong><em>Discovery:</em> finish the connections</strong><p>The album playlist held <b>5 videos</b>, not the full album; the lead single description lacked links. Fix playlists, links and end screens, and pursue the still-unlaunched Station.</p></div>
+    <div class="label reveal">Post-album · proposed campaign sequence · Nov – Jan</div>
+    <h2 class="display reveal" style="margin-top:.4rem;font-size:clamp(1.8rem,3.7vw,3.2rem)">Keep the world moving.</h2>
+    <p class="body reveal" style="margin-top:.3rem;max-width:none;font-size:.85rem">Repeat what worked. Fill the format gaps. Keep the next destination in sight.</p>
+    <div class="story-proof reveal">
+      <div><strong><em>01 · Multi-format</em> · build on the strongest song</strong><p>My Whole World had a film, six Shorts, visualiser and live version. Other key singles did not all receive the same treatment.</p></div>
+      <div><strong><em>02 · Follow-through</em> · plan the next moment</strong><p>Only 2 of 4 releases had another long-form upload within 14 days. Aim for a second destination within 7–14 days.</p></div>
+      <div><strong><em>03 · Discovery</em> · connect the world</strong><p>Album playlist held 5 videos; lead single description lacked links. Complete playlist and linking work, and progress the Station.</p></div>
     </div>
-    <div class="timeline-shell reveal">
-      <div class="timeline-legend"><span><b></b> Priority long-form</span><span class="support"><b></b> Shorts / community</span><span class="station"><b></b> Station activation · pending</span></div>
-      <div class="timeline-scroll"><div class="timeline-chart">
-        <div class="timeline-corner">Content lane</div><div class="timeline-date">16 Nov<span>W1</span></div><div class="timeline-date">23 Nov<span>W2</span></div><div class="timeline-date">30 Nov<span>W3</span></div><div class="timeline-date">7 Dec<span>W4</span></div><div class="timeline-date">14 Dec<span>W5</span></div><div class="timeline-date">21 Dec<span>W6</span></div><div class="timeline-date">28 Dec<span>W7</span></div><div class="timeline-date">4 Jan<span>W8</span></div>
-        <div class="timeline-label">Anchor<br>release</div><div class="timeline-cell"></div><div class="timeline-cell"><div class="timeline-asset anchor"><strong>Feel The Love</strong><small>Second format: live / song story · if available</small></div></div><div class="timeline-cell"></div><div class="timeline-cell"><div class="timeline-asset anchor"><strong>Live room</strong><small>Next full-song destination · if available</small></div></div><div class="timeline-cell"></div><div class="timeline-cell"></div><div class="timeline-cell"></div><div class="timeline-cell"><div class="timeline-asset anchor"><strong>Next song</strong><small>Second format based on organic response</small></div></div>
-        <div class="timeline-label">Keep fans<br>engaged</div><div class="timeline-cell"><div class="timeline-asset "><strong>Rose Short + links</strong><small>Clip live performance; fix album playlist</small></div></div><div class="timeline-cell"><div class="timeline-asset "><strong>Teaser + links</strong><small>Connect to full upload and playlist</small></div></div><div class="timeline-cell"><div class="timeline-asset "><strong>Two Shorts</strong><small>Performance + band/story angle</small></div></div><div class="timeline-cell"><div class="timeline-asset "><strong>Performance Short</strong><small>Support the live-room release</small></div></div><div class="timeline-cell"><div class="timeline-asset "><strong>Behind the scenes</strong><small>Rehearsal / home-life + Community</small></div></div><div class="timeline-cell"><div class="timeline-asset "><strong>Catalogue bridge</strong><small>Archive clip → album playlist</small></div></div><div class="timeline-cell"><div class="timeline-asset "><strong>Year-end moment</strong><small>Best live clip + Community</small></div></div><div class="timeline-cell"><div class="timeline-asset "><strong>Launch Short</strong><small>Drive to January's main upload</small></div></div>
-        <div class="timeline-label">YouTube<br>Station</div><div class="timeline-station"><strong>W1 · Follow up with YouTube</strong><span>→</span><strong>W2 · Agree selections</strong><span>→</span><strong>December · Target activation, subject to approval</strong></div>
-      </div></div>
+    <div class="story-timeline reveal">
+      <div class="story-axis"><span>NOVEMBER · RECONNECT</span><span>DECEMBER · SUSTAIN</span><span>JANUARY · REACTIVATE</span></div>
+      <div class="story-events">
+        <div class="story-event"><img src="https://i.ytimg.com/vi/j9Z4JcsxXus/hqdefault.jpg" alt="Existing Kings of Leon live-room footage, visual reference"><div><div class="date">23 Nov · Proposed anchor 01</div><strong>Give another song its moment</strong><p>Feel The Love: live or song-story second format, subject to footage. Support with Shorts and links.</p><small>Existing live room shown as reference only</small></div></div>
+        <div class="story-event"><img src="https://i.ytimg.com/vi/JY87mCYtYd8/hqdefault.jpg" alt="Existing Kings of Leon performance visual reference"><div><div class="date">7 Dec · Proposed anchor 02</div><strong>Return to the live room</strong><p>Another full-song performance, if available. Follow with performance cuts and behind-the-scenes.</p><small>Illustrative existing footage, not confirmed asset</small></div></div>
+        <div class="story-event"><div class="story-placeholder">NEXT SONG<br>ASSET TBC</div><div><div class="date">4 Jan · Proposed anchor 03</div><strong>Open the next chapter</strong><p>Select the strongest remaining song using December's organic response; deliver a second format.</p><small>Decision point · 6 Dec</small></div></div>
+      </div>
+      <div class="story-cadence"><div class="story-beat"><div class="bars"><i class="mid"></i></div><span>16 Nov</span></div><div class="story-beat"><div class="bars"><i class="anchor"></i><i></i></div><span>23 Nov</span></div><div class="story-beat"><div class="bars"><i class="mid"></i><i></i></div><span>30 Nov</span></div><div class="story-beat"><div class="bars"><i class="anchor"></i><i></i></div><span>7 Dec</span></div><div class="story-beat"><div class="bars"><i class="mid"></i><i></i></div><span>14 Dec</span></div><div class="story-beat"><div class="bars"><i class="mid"></i></div><span>21 Dec</span></div><div class="story-beat"><div class="bars"><i class="mid"></i><i></i></div><span>28 Dec</span></div><div class="story-beat"><div class="bars"><i class="anchor"></i><i></i></div><span>4 Jan</span></div></div>
+      <p class="story-note">Activity strip: <span style="color:var(--gold)">gold = proposed anchor</span>; grey = supporting Shorts, Community or catalogue touchpoints. Heights indicate format priority, <strong>not forecast views or actual upload counts</strong>. Nov: Rose live Short and teaser. Dec: follow-up clips, BTS and catalogue bridge. Late Dec: light year-end presence. Jan: new-song Short.</p>
+      <div class="story-station"><strong>ALWAYS-ON · YOUTUBE STATION · NOT LIVE</strong> &nbsp; Follow up with YouTube in November → confirm album / live / catalogue selections → target activation in December if approved. In parallel, complete album playlist, descriptions and end screens.</div>
     </div>
-    <p class="timeline-note reveal"><strong>Decision gate · 6 Dec:</strong> Review organic views, retention and footage availability before confirming the January song. For each key song, aim for a second format plus supporting Shorts; link each anchor to the complete album playlist. Check end screens, descriptions and Community routes. <strong>All dates and content are proposed, not confirmed.</strong> The Station is not live and depends on YouTube approval.</p>
+    <p class="story-note reveal">Proposed sequence, not a confirmed release schedule. Prioritise footage already available and check organic views, retention and asset inventory before locking dates or songs.</p>
   </div>
 </section>
 
