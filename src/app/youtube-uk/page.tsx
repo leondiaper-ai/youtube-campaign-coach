@@ -1,6 +1,5 @@
 import { getLabelWorkspace } from '@/lib/labels';
 import { YOUTUBE_UK_ROSTER } from '@/lib/youtubeUkRoster';
-import Link from 'next/link';
 import {
   ARTISTS, mergeArtistLists, daysSince, deriveFromLive,
   STATUS_RANK, classifyArtist, isVirginOwned,
@@ -21,7 +20,7 @@ import { bestFormatStack } from '@/lib/formatStack';
 import { commentDemand } from '@/lib/commentDemand';
 import { resolveRowFormatSplit } from '@/lib/formatSplit';
 import { readFormatDaysBatch } from '@/lib/formatHistory';
-import AddArtistButton from '@/components/AddArtistButton';
+import PartnerLinkGuard from '@/components/PartnerLinkGuard';
 import { AppHeader, PageTitle } from '@/components/ui/AppHeader';
 
 export const revalidate = 600;
@@ -281,20 +280,9 @@ export default async function ControlPage({
         />
 
         {/* Client-side board with toggle */}
-        <ChannelHealthBoard singleTab={true} labelRoster={true} linkSuffix={mq} behaviourBase={label ? `/labels/${label.slug}/behaviour` : `/campaigns${mq}`} rows={rows} topVideos={topVideos} marketFormatStats={marketFormatStats} pinnedSlugs={pinnedSlugs} />
+        <PartnerLinkGuard><ChannelHealthBoard singleTab={true} labelRoster={true} linkSuffix={mq} behaviourBase={label ? `/labels/${label.slug}/behaviour` : `/campaigns${mq}`} rows={rows} topVideos={topVideos} marketFormatStats={marketFormatStats} pinnedSlugs={[]} /></PartnerLinkGuard>
 
-        <div className="mt-14 pt-5 pb-10 border-t border-line flex items-center gap-2 text-micro text-faint">
-          <span className="font-semibold text-muted">Channel Health</span>
-          <span aria-hidden>→</span>
-          <Link href={`/campaigns${mq}`} className="font-semibold text-muted hover:text-ink no-underline transition-colors">
-            Active Campaigns
-          </Link>
-          <span aria-hidden>→</span>
-          <Link href={`/coach${mq}`} className="font-semibold text-muted hover:text-ink no-underline transition-colors">
-            Coach
-          </Link>
-          <span className="ml-auto">Channel Health watches · Campaigns track · Plans direct</span>
-        </div>
+
       </div>
     </main>
   );
