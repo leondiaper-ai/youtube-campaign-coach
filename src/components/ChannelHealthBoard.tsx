@@ -1153,6 +1153,7 @@ export default function ChannelHealthBoard({
                 </div>
                 <div className="text-right text-[11px] tabular-nums font-bold" style={{ color: wowColor(r.viewsWoW) }}>
                   {r.viewsWoW != null ? fmtPct(r.viewsWoW) : '—'}
+                </div>
                 {partnerRemovable && (
                     <button type="button" aria-label={`Remove ${r.name} from shared Watcher`}
                       title={`Remove ${r.name} from James's Watcher`}
@@ -1161,7 +1162,6 @@ export default function ChannelHealthBoard({
                       className="inline-flex h-5 w-5 items-center justify-center rounded text-[10px] text-muted/45 hover:text-red-700 hover:bg-red-50 opacity-40 group-hover/row:opacity-100 focus:opacity-100"
                     >{removingId === r.slug ? '…' : '✕'}</button>
                   )}
-                </div>
               </div>
 
               {/* ── Expanded: Actions + Strategy Profile + Fix This Week ───────── */}
