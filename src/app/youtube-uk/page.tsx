@@ -267,7 +267,7 @@ export default async function ControlPage({
                 })}
               </div>
               <div className="tabular-nums">
-                {label ? `${rows.filter(r => r.subs != null).length}/${rows.length} tracked channels with data` : `${syncMeta.artistsSuccess}/${syncMeta.artistsTotal} artists`}
+                {label ? `${rows.filter(r => r.subs != null).length}/${rows.length} tracked channels with data` : `${rows.filter(r => r.subs != null).length}/${rows.length} artists`}
               </div>
             </>
           ) : (
