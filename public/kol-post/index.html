@@ -693,6 +693,31 @@ body.present .slide-audience .stagger+.reveal+.reveal p{font-size:.72rem!importa
 body.present .slide-audience .stagger+.reveal+.reveal div[style*="font-weight:750"]{font-size:.84rem!important}
 body.present .slide-audience .src{font-size:.57rem;line-height:1.25;margin-top:.4rem}
 @media(max-height:760px){body.present .slide-audience{justify-content:flex-start;padding-top:3.45rem}body.present .slide-audience h2.display{font-size:2.1rem!important}body.present .slide-audience .stagger{gap:.35rem!important;margin-top:.45rem!important}body.present .slide-audience .quote{font-size:.83rem}body.present .slide-audience .stagger+.reveal+.reveal{padding:.45rem .65rem!important}}
+
+/* Video wall adapted from the pre-album Station concept */
+.station-wall-slide .tv-wall{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:.45rem;margin-top:1.25rem}
+.station-wall-slide .tv-tile{position:relative;overflow:hidden;aspect-ratio:16/9;background:#181818;border-radius:3px}
+.station-wall-slide .tv-tile img{display:block;width:100%;height:100%;object-fit:cover}
+.station-wall-slide .tv-tile:after{content:"";position:absolute;inset:35% 0 0;background:linear-gradient(transparent,rgba(0,0,0,.88));pointer-events:none}
+.station-wall-slide .tv-tile.is-new{outline:2px solid #cf6b58;outline-offset:-2px}
+.station-wall-slide .tv-caption{position:absolute;z-index:1;left:.55rem;right:.55rem;bottom:.45rem;display:flex;align-items:end;justify-content:space-between;gap:.3rem}
+.station-wall-slide .tv-caption span{font-size:clamp(.6rem,.88vw,.87rem);font-weight:750;color:#fff;line-height:1.12;text-shadow:0 1px 3px #000}
+.station-wall-slide .tv-caption small{font-size:clamp(.42rem,.55vw,.56rem);font-weight:700;color:#d6b3aa;letter-spacing:.06em;white-space:nowrap}
+.station-wall-slide .tv-tile.is-new .tv-caption small{color:#f18b73}
+.station-wall-slide .tv-legend{display:flex;align-items:center;gap:1.4rem;margin-top:.75rem;border-bottom:1px solid #43332f;padding-bottom:.7rem;color:#b4a9a5;font-size:.75rem}
+.station-wall-slide .tv-legend span{display:flex;align-items:center;gap:.4rem}
+.station-wall-slide .tv-dot{display:inline-block;width:10px;height:10px;border-radius:2px}
+.station-wall-slide .tv-old{background:#777}
+.station-wall-slide .tv-new{background:#d46a56}
+.station-wall-slide .tv-legend strong{margin-left:auto;color:#d46a56;letter-spacing:.09em;font-size:.75rem}
+.station-wall-slide .tv-statement{margin-top:1rem;font-size:clamp(1.15rem,2vw,1.85rem);font-weight:750;line-height:1.2}
+.station-wall-slide .tv-statement em{color:#d46a56;font-style:normal}
+.station-wall-slide .world-foot{font-size:.67rem;margin-top:.6rem}
+body.present .station-wall-slide{padding-top:3.8rem;padding-bottom:.75rem;justify-content:center}
+body.present .station-wall-slide .tv-wall{margin-top:.9rem;gap:.36rem}
+body.present .station-wall-slide .tv-legend{margin-top:.55rem;padding-bottom:.5rem}
+body.present .station-wall-slide .tv-statement{margin-top:.7rem}
+@media(max-width:700px){.station-wall-slide .tv-wall{grid-template-columns:repeat(2,minmax(0,1fr))}.station-wall-slide .tv-legend{flex-wrap:wrap}.station-wall-slide .tv-legend strong{margin-left:0}}
 </style>
 </head>
 <body>
@@ -1137,21 +1162,24 @@ body.present .slide-audience .src{font-size:.57rem;line-height:1.25;margin-top:.
 </section>
 
 <!-- ═══ 15 · ALBUM-FIRST STATION OPPORTUNITY ═══════════════ -->
-<section class="slide" data-t="Station opportunity">
+<section class="slide station-wall-slide" data-t="Station opportunity">
  <div class="inner">
-  <div class="label reveal">Kings of Leon TV · proposed Station · not yet live</div>
-  <h2 class="display reveal" style="margin-top:.45rem;font-size:clamp(2rem,4.1vw,3.7rem)">Make the catalogue work for the new album.</h2>
-  <p class="body reveal" style="margin-top:.5rem;max-width:none">New songs meet familiar favourites. Then the sequence returns to the album.</p>
-  <div class="station-sequence reveal">
-   <div class="station-step new"><div class="station-thumb"><img src="https://i.ytimg.com/vi/Bb7YN5wQztk/hqdefault.jpg" alt="My Whole World official music video"><span class="station-number">01</span></div><span class="station-era">New album</span><h3>O My Beloved</h3></div>
-   <div class="station-step"><div class="station-thumb"><img src="https://i.ytimg.com/vi/gnhXHvRoUd0/hqdefault.jpg" alt="Kings of Leon catalogue music video"><span class="station-number">02</span></div><span class="station-era">Catalogue</span><h3>Use Somebody</h3></div>
-   <div class="station-step new"><div class="station-thumb"><img src="https://i.ytimg.com/vi/2x_oiMPK8sY/hqdefault.jpg" alt="Kings of Leon recent live performance"><span class="station-number">03</span></div><span class="station-era">New album</span><h3>Another new track</h3></div>
-   <div class="station-step"><div class="station-thumb"><img src="https://i.ytimg.com/vi/RF0HhrwIwp0/hqdefault.jpg" alt="Kings of Leon Sex on Fire official music video"><span class="station-number">04</span></div><span class="station-era">Catalogue</span><h3>Sex on Fire</h3></div>
-   <div class="station-step new"><div class="station-thumb"><img src="https://i.ytimg.com/vi/UHqhzS3XS5s/hqdefault.jpg" alt="Cold Blue Dawn official video"><span class="station-number">05</span></div><span class="station-era">New album</span><h3>Back to O My Beloved</h3></div>
-  </div>
-  <div class="station-loop reveal"><strong>ONE CONTINUOUS STATION</strong><span>ALBUM ↔ CATALOGUE <b>↻</b></span></div>
-  <div class="station-bottom reveal">Familiar songs bring fans in. <em>New songs give them a reason to stay.</em></div>
-  <p class="world-foot reveal">Proposed sequence only. Confirm Station availability and programming with YouTube, the band and label before launch.</p>
+  <div class="label reveal">YouTube Stations · proposed · not yet live</div>
+  <h2 class="display reveal" style="margin-top:.4rem;font-size:clamp(2rem,3.75vw,3.5rem)">Twenty years of music. One continuous Station.</h2>
+  <p class="body reveal" style="margin-top:.35rem">Programme <strong>O My Beloved</strong> alongside the songs fans already love.</p>
+  <div class="tv-wall reveal"><div class="tv-tile is-new"><img src="https://i.ytimg.com/vi/Bb7YN5wQztk/hqdefault.jpg" alt="My Whole World"><div class="tv-caption"><span>My Whole World</span><small>NEW ALBUM</small></div></div>
+<div class="tv-tile"><img src="https://i.ytimg.com/vi/gnhXHvRoUd0/hqdefault.jpg" alt="Use Somebody"><div class="tv-caption"><span>Use Somebody</span><small>CATALOGUE</small></div></div>
+<div class="tv-tile is-new"><img src="https://i.ytimg.com/vi/2x_oiMPK8sY/hqdefault.jpg" alt="Rose · Live"><div class="tv-caption"><span>Rose · Live</span><small>NEW ALBUM</small></div></div>
+<div class="tv-tile"><img src="https://i.ytimg.com/vi/RF0HhrwIwp0/hqdefault.jpg" alt="Sex on Fire"><div class="tv-caption"><span>Sex on Fire</span><small>CATALOGUE</small></div></div>
+<div class="tv-tile is-new"><img src="https://i.ytimg.com/vi/UHqhzS3XS5s/hqdefault.jpg" alt="Cold Blue Dawn"><div class="tv-caption"><span>Cold Blue Dawn</span><small>NEW ALBUM</small></div></div>
+<div class="tv-tile"><img src="https://i.ytimg.com/vi/uLaJkbkG5NI/hqdefault.jpg" alt="Molly’s Chambers"><div class="tv-caption"><span>Molly’s Chambers</span><small>CATALOGUE</small></div></div>
+<div class="tv-tile"><img src="https://i.ytimg.com/vi/4C9i8E05bgI/hqdefault.jpg" alt="Nowhere to Run"><div class="tv-caption"><span>Nowhere to Run</span><small>CATALOGUE</small></div></div>
+<div class="tv-tile is-new"><img src="https://i.ytimg.com/vi/j9Z4JcsxXus/hqdefault.jpg" alt="My Whole World · Live"><div class="tv-caption"><span>My Whole World · Live</span><small>NEW ALBUM</small></div></div>
+<div class="tv-tile"><img src="https://i.ytimg.com/vi/kWaFVvVoj4o/hqdefault.jpg" alt="The Bucket"><div class="tv-caption"><span>The Bucket</span><small>CATALOGUE</small></div></div>
+<div class="tv-tile"><img src="https://i.ytimg.com/vi/hYECLfqjdnw/hqdefault.jpg" alt="Closer · Live"><div class="tv-caption"><span>Closer · Live</span><small>CATALOGUE</small></div></div></div>
+  <div class="tv-legend reveal"><span><i class="tv-dot tv-old"></i>Catalogue favourites</span><span><i class="tv-dot tv-new"></i>O My Beloved</span><strong>ALBUM ↔ CATALOGUE ↻</strong></div>
+  <div class="tv-statement reveal">Familiar songs bring fans in. <em>New songs give them a reason to stay.</em></div>
+  <p class="world-foot reveal">Illustrative programming only. Confirm Station access and sequencing with YouTube, the band and label before launch.</p>
  </div>
 </section>
 
