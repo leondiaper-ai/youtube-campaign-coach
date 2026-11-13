@@ -451,31 +451,35 @@ body.present{overflow:hidden}
 .rate-l span{flex:1;font-size:.66rem;line-height:1.3;color:var(--dim)}
 
 
-/* Eight-week campaign walkthrough: weekly beats, anchor moments and persistent discovery. */
-.walk-summary{display:flex;gap:1.5rem;align-items:center;border-top:1px solid rgba(255,255,255,.2);border-bottom:1px solid rgba(255,255,255,.2);padding:.55rem 0;margin-top:.8rem}
-.walk-summary strong{font-size:1.1rem;color:var(--gold)}.walk-summary span{font-size:.73rem;color:var(--dim)}
-.walk-phases{display:grid;grid-template-columns:repeat(3,1fr);gap:.8rem;margin-top:.75rem}
-.walk-phase{border-top:3px solid var(--gold);padding-top:.5rem}
-.walk-phase .phase-date{font-size:.64rem;letter-spacing:.08em;color:var(--gold);text-transform:uppercase}
-.walk-phase h3{font-size:1rem;margin:.25rem 0}.walk-phase p{font-size:.7rem;color:var(--dim);line-height:1.4;margin:0}
-.walk-weeks{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:.3rem;margin-top:1rem}
-.walk-week{border-top:3px solid #666;padding:.5rem .3rem .3rem;min-width:0}
-.walk-week.anchor{border-color:var(--gold);background:rgba(204,172,108,.065)}
-.walk-week .date{font-size:.64rem;color:var(--gold);font-weight:700}
-.walk-week .asset{font-size:.76rem;font-weight:700;line-height:1.22;margin:.35rem 0}
-.walk-week .detail{font-size:.64rem;line-height:1.38;color:var(--dim)}
-.walk-week .to{font-size:.6rem;color:var(--gold);line-height:1.35;margin-top:.45rem}
-.walk-lanes{margin-top:.7rem;display:grid;gap:.38rem}
-.walk-lane{display:grid;grid-template-columns:125px 1fr;align-items:center;gap:.6rem}
-.walk-lane .name{font-size:.64rem;text-transform:uppercase;letter-spacing:.05em;color:var(--dim);font-weight:700}
-.walk-lane .strip{display:grid;grid-template-columns:repeat(8,1fr);gap:.25rem}
-.walk-lane .strip span{height:12px;background:#6d6d6d;display:block;border-radius:2px}
-.walk-lane .strip span.major{background:var(--gold);height:19px}
-.walk-lane .strip span.station{height:12px;background:rgba(204,172,108,.22);border-top:2px solid var(--gold);border-radius:0}
-.walk-station{border:1px solid var(--gold);background:rgba(204,172,108,.08);padding:.6rem .8rem;margin-top:.75rem;font-size:.72rem;line-height:1.4}
-.walk-station strong{color:var(--gold)}
-.walk-foot{font-size:.66rem;color:var(--dim);line-height:1.4;margin-top:.6rem}
-@media(max-width:1000px){.walk-weeks{overflow-x:auto;grid-template-columns:repeat(8,minmax(110px,1fr))}.walk-phases{gap:.35rem}.walk-phase p{font-size:.65rem}}
+/* Two-slide executive recommendation: evidence then action. */
+.kol-takeaways{display:grid;grid-template-columns:repeat(3,1fr);gap:1.25rem;margin-top:2.3rem}
+.kol-takeaway{border-top:3px solid var(--gold);padding-top:1.1rem}
+.kol-takeaway .big{font-size:clamp(2.7rem,5.2vw,5.2rem);font-weight:900;line-height:1;color:var(--gold);font-family:var(--display,inherit)}
+.kol-takeaway h3{font-size:clamp(1.05rem,1.5vw,1.45rem);line-height:1.2;margin:.8rem 0 .4rem}
+.kol-takeaway p{font-size:clamp(.78rem,1.05vw,.96rem);line-height:1.5;color:var(--dim);margin:0}
+.kol-verdict{margin-top:2.4rem;border-top:1px solid var(--gold);padding-top:1.1rem;font-size:clamp(1.3rem,2.35vw,2.3rem);font-weight:750;line-height:1.24}
+.kol-verdict em{font-style:normal;color:var(--gold)}
+.kol-timing{display:grid;grid-template-columns:repeat(8,1fr);gap:.35rem;margin-top:1.6rem}
+.kol-time{border-top:4px solid #484848;padding-top:.5rem;min-height:72px}
+.kol-time.key{border-top-color:var(--gold)}
+.kol-time b{display:block;font-size:.68rem;color:var(--gold);margin-bottom:.35rem}
+.kol-time span{display:block;font-size:.7rem;line-height:1.28;color:var(--dim)}
+.kol-time.key span{font-weight:700;color:var(--fg,#f4f0e8)}
+.kol-moments{display:grid;grid-template-columns:repeat(3,1fr);gap:1.1rem;margin-top:1.5rem}
+.kol-moment{border-top:2px solid var(--gold);padding:.65rem .25rem 0 0}
+.kol-moment .when{font-size:.66rem;color:var(--gold);text-transform:uppercase;letter-spacing:.07em}
+.kol-moment h3{font-size:clamp(1.08rem,1.6vw,1.5rem);margin:.4rem 0}
+.kol-moment p{font-size:clamp(.73rem,.97vw,.88rem);color:var(--dim);line-height:1.43;margin:0}
+.kol-rails{display:grid;grid-template-columns:115px 1fr;gap:.5rem;align-items:center;margin-top:1.1rem}
+.kol-rails label{font-size:.67rem;color:var(--dim);text-transform:uppercase;letter-spacing:.05em}
+.kol-rails .rail{display:grid;grid-template-columns:repeat(8,1fr);gap:.35rem}
+.kol-rails .rail i{display:block;background:#858585;height:13px;border-radius:2px}
+.kol-rails .rail i.gold{background:var(--gold);height:13px}
+.kol-rails .rail i.station{background:rgba(204,172,108,.25);border-top:2px solid var(--gold);border-radius:0}
+.kol-station{border:1px solid var(--gold);padding:.8rem 1rem;background:rgba(204,172,108,.08);margin-top:1.2rem;font-size:clamp(.78rem,1vw,.92rem);line-height:1.45}
+.kol-station strong{color:var(--gold)}
+.kol-fine{font-size:.68rem;color:var(--dim);margin-top:.65rem;line-height:1.4}
+@media(max-width:760px){.kol-takeaways,.kol-moments{gap:.5rem}.kol-timing{gap:.15rem}.kol-time span{font-size:.6rem}.kol-rails{grid-template-columns:80px 1fr}.kol-station{padding:.5rem}}
 /* Post-album continuation: evidence beside the next action. */
 .continue-table{width:100%;border-collapse:collapse;table-layout:fixed;margin-top:clamp(1.2rem,2.5vw,2rem)}
 .continue-table th{text-align:left;font:700 .65rem 'Inter',sans-serif;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);padding:0 1rem .8rem 0}
@@ -908,26 +912,37 @@ body.present{overflow:hidden}
      Practical, proportionate, nothing that tells the band what to make. -->
 
 
-<!-- ═══ 13 · EIGHT-WEEK POST-ALBUM WALKTHROUGH ═══════════════ -->
+<!-- ═══ 13 · THREE CAMPAIGN LESSONS ═══════════════ -->
+<section class="slide" data-t="What worked">
+ <div class="inner">
+  <div class="label reveal">Post-album · what the evidence tells us</div>
+  <h2 class="display reveal" style="margin-top:.55rem;font-size:clamp(2.1rem,4.6vw,4rem)">The songs did the heavy lifting.</h2>
+  <p class="body reveal" style="margin-top:.6rem;max-width:none">Three findings should shape the next eight weeks.</p>
+  <div class="kol-takeaways reveal">
+   <div class="kol-takeaway"><div class="big">82.9%</div><h3>The singles won attention</h3><p>Three singles accounted for most public views across the campaign uploads. Prioritise the songs people already know.</p></div>
+   <div class="kol-takeaway"><div class="big">94.9%</div><h3>Long-form carried viewing</h3><p>Most public views came from long-form. Keep meaningful full-song destinations in the plan, not Shorts alone.</p></div>
+   <div class="kol-takeaway"><div class="big">6 days</div><h3>Shorts kept the channel active</h3><p>The longest gap between upload days fell from 13 to 6. Keep weekly discovery around the main releases.</p></div>
+  </div>
+  <div class="kol-verdict reveal">The next move: <em>more formats for proven songs, supported by weekly discovery.</em> Not more uploads for the sake of it.</div>
+  <p class="kol-fine reveal">Based on public YouTube campaign analysis in this deck. Viewing totals include paid-supported activity; do not treat public views as organic-only performance.</p>
+ </div>
+</section>
+
+<!-- ═══ 14 · EIGHT-WEEK ACTION PLAN ═══════════════ -->
 <section class="slide" data-t="8-week plan">
  <div class="inner">
-  <div class="label reveal">Post-album · proposed eight-week publishing rhythm · 16 Nov – 10 Jan</div>
-  <h2 class="display reveal" style="margin-top:.4rem;font-size:clamp(1.8rem,3.65vw,3.15rem)">Keep the world moving.</h2>
-  <p class="body reveal" style="margin-top:.35rem;max-width:none;font-size:.83rem">Zack's brief: turn the album's remaining attention into <strong>specific, lower-cost reasons to return</strong>.</p>
-  <div class="walk-summary reveal"><div><strong>3</strong> <span>long-form moments*</span></div><div><strong>1–2</strong> <span>purposeful Shorts per week</span></div><div><strong>8 weeks</strong> <span>of connected discovery</span></div><div><strong>Always on</strong> <span>Station + playlists</span></div></div>
-  <div class="walk-phases reveal">
-   <div class="walk-phase"><div class="phase-date">November · capitalise</div><h3>Live momentum → Rose</h3><p>The new live upload is the first anchor. Rose has shown promise: test a lyric video as its next format.</p></div>
-   <div class="walk-phase"><div class="phase-date">December · keep returning</div><h3>Shorts with destinations</h3><p>Weekly performance, band and catalogue moments, each pointing to a full song or playlist. Prepare the next anchor.</p></div>
-   <div class="walk-phase"><div class="phase-date">January · reactivate</div><h3>One more meaningful release</h3><p>Choose a track and format using organic performance, footage availability and audience demand.</p></div>
+  <div class="label reveal">Post-album · proposed rhythm · 16 Nov – 10 Jan</div>
+  <h2 class="display reveal" style="margin-top:.5rem;font-size:clamp(2rem,4.2vw,3.65rem)">Three moments. Eight weeks.</h2>
+  <p class="body reveal" style="margin-top:.45rem;max-width:none">Use existing footage. <strong>One or two Shorts each week</strong> should lead fans back to a full song, playlist or current band moment.</p>
+  <div class="kol-moments reveal">
+   <div class="kol-moment"><div class="when">Now · live performance already released</div><h3>01 · Extend the new live track</h3><p>Cut performance and band-led Shorts. Link directly to the full live video. No new shoot needed.</p></div>
+   <div class="kol-moment"><div class="when">Week of 23 Nov · proposed</div><h3>02 · Give Rose a lyric video</h3><p>Rose (Live) showed promise and already has a visualiser. Add a lyric format and follow with a Short that drives to it.</p></div>
+   <div class="kol-moment"><div class="when">Week of 4 Jan · proposed</div><h3>03 · Return with another song</h3><p>Use December's organic response to choose the next track and best available format: live, lyric or story-led.</p></div>
   </div>
-  <div class="walk-weeks reveal"><div class="walk-week anchor"><div class="date">16 NOV</div><div class="asset">NEW LIVE</div><div class="detail">New live upload already out. Cut one strong performance Short and a second band-led clip.</div><div class="to">→ full live video</div></div><div class="walk-week anchor"><div class="date">23 NOV</div><div class="asset">ROSE LYRIC</div><div class="detail">Propose a Rose lyric video as its next format. Tease the hook in a Short.</div><div class="to">→ Rose lyric / live</div></div><div class="walk-week "><div class="date">30 NOV</div><div class="asset">ROSE FOLLOW-UP</div><div class="detail">Performance or lyric-led Short; Community post asks fans for their favourite album moment.</div><div class="to">→ Rose + album playlist</div></div><div class="walk-week "><div class="date">7 DEC</div><div class="asset">LIVE / BAND</div><div class="detail">Behind-the-scenes or rehearsal Short from the new live release; check for further live footage.</div><div class="to">→ new live upload</div></div><div class="walk-week "><div class="date">14 DEC</div><div class="asset">NEXT TRACK</div><div class="detail">Choose a strong under-served album song; prepare its next format and supporting edits.</div><div class="to">→ selected album track</div></div><div class="walk-week "><div class="date">21 DEC</div><div class="asset">CATALOGUE BRIDGE</div><div class="detail">Archive-to-album Short; one low-lift Community moment. Avoid a forced major holiday drop.</div><div class="to">→ album playlist</div></div><div class="walk-week "><div class="date">28 DEC</div><div class="asset">LIGHT PRESENCE</div><div class="detail">One year-end live highlight or band message, only if approved footage is ready.</div><div class="to">→ live / catalogue</div></div><div class="walk-week anchor"><div class="date">4 JAN</div><div class="asset">NEXT ANCHOR</div><div class="detail">Target one more full-length song moment: live, lyric or story edit based on organic demand.</div><div class="to">→ new full-length asset</div></div></div>
-  <div class="walk-lanes reveal">
-   <div class="walk-lane"><div class="name">Long-form anchors</div><div class="strip"><span class="major" style=""></span><span class="major" style=""></span><span class="" style=";height:5px;background:#343434"></span><span class="" style=";height:5px;background:#343434"></span><span class="" style=";height:5px;background:#343434"></span><span class="" style=";height:5px;background:#343434"></span><span class="" style=";height:5px;background:#343434"></span><span class="major" style=""></span></div></div>
-   <div class="walk-lane"><div class="name">Weekly Shorts</div><div class="strip"><span class="major" style="height:12px;background:#8a8a8a"></span><span class="major" style="height:12px;background:#8a8a8a"></span><span class="major" style="height:12px;background:#8a8a8a"></span><span class="major" style="height:12px;background:#8a8a8a"></span><span class="major" style="height:12px;background:#8a8a8a"></span><span class="major" style="height:12px;background:#8a8a8a"></span><span class="major" style="height:12px;background:#8a8a8a"></span><span class="major" style="height:12px;background:#8a8a8a"></span></div></div>
-   <div class="walk-lane"><div class="name">Station / discovery</div><div class="strip"><span class="station" style=""></span><span class="station" style=""></span><span class="station" style=""></span><span class="station" style=""></span><span class="station" style=""></span><span class="station" style=""></span><span class="station" style=""></span><span class="station" style=""></span></div></div>
-  </div>
-  <div class="walk-station reveal"><strong>BIG OPPORTUNITY · KINGS OF LEON TV · NOT LIVE</strong> &nbsp; Week 1: chase YouTube activation and requirements → Weeks 2–3: agree album / live / catalogue rotation → December onward: launch when approved and programme continuously. <strong>Do now regardless:</strong> complete album playlist, description links, end screens, related-video links on Shorts and relevant artist / partner cross-promotion.</div>
-  <p class="walk-foot reveal"><strong>Why this rhythm:</strong> My Whole World proved the value of multiple formats; Rose (Live) provides a current song to extend; the pre-album audit found 7–14-day follow-through and lyric / live formats useful. *Three anchors include the live video already released, so this proposes two additional long-form releases, not three new shoots. All future dates are recommendations, not confirmed commitments. Measure organic views, retention and onward viewing; do not equate paid-supported totals with organic demand.</p>
+  <div class="kol-timing reveal"><div class="kol-time key"><b>16 NOV</b><span>New live</span></div><div class="kol-time key"><b>23 NOV</b><span>Rose lyric</span></div><div class="kol-time "><b>30 NOV</b><span>Rose clips</span></div><div class="kol-time "><b>7 DEC</b><span>Live clips</span></div><div class="kol-time "><b>14 DEC</b><span>Next song prep</span></div><div class="kol-time "><b>21 DEC</b><span>Catalogue</span></div><div class="kol-time "><b>28 DEC</b><span>Year-end</span></div><div class="kol-time key"><b>4 JAN</b><span>New anchor</span></div></div>
+  <div class="kol-rails reveal"><label>Full-song moments</label><div class="rail"><i class="gold" style=""></i><i class="gold" style=""></i><i class="" style="height:5px;background:#343434"></i><i class="" style="height:5px;background:#343434"></i><i class="" style="height:5px;background:#343434"></i><i class="" style="height:5px;background:#343434"></i><i class="" style="height:5px;background:#343434"></i><i class="gold" style=""></i></div><label>Shorts · weekly</label><div class="rail"><i class="" style=""></i><i class="" style=""></i><i class="" style=""></i><i class="" style=""></i><i class="" style=""></i><i class="" style=""></i><i class="" style=""></i><i class="" style=""></i></div><label>Station · ongoing</label><div class="rail"><i class="station" style=""></i><i class="station" style=""></i><i class="station" style=""></i><i class="station" style=""></i><i class="station" style=""></i><i class="station" style=""></i><i class="station" style=""></i><i class="station" style=""></i></div></div>
+  <div class="kol-station reveal"><strong>PRIORITY · LAUNCH KINGS OF LEON TV</strong> &nbsp; The Station is not live. Chase YouTube approval now, agree album / live / catalogue programming, then run it continuously once activated. In parallel, fix the album playlist, descriptions, end screens and related-video links.</div>
+  <p class="kol-fine reveal"><strong>Why this cadence:</strong> long-form earns the main attention; Shorts sustain weekly discovery; the Station gives catalogue and album content an ongoing home. Three moments include the live upload already released. Future assets and dates are proposed, subject to footage, rights and approvals.</p>
  </div>
 </section>
 
