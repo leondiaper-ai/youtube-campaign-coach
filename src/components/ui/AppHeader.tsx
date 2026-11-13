@@ -34,7 +34,7 @@ export interface NavItem {
 }
 
 export function AppHeader({
-  nav, workspace, meta, actions,
+  nav, workspace, meta, actions, hideAutoLabels = false,
 }: {
   nav: NavItem[];
   /** The team's own name for itself, e.g. "Virgin Music UK". */
@@ -42,6 +42,7 @@ export function AppHeader({
   /** Sync state, counts — anything that qualifies the data below. */
   meta?: React.ReactNode;
   actions?: React.ReactNode;
+  hideAutoLabels?: boolean;
 }) {
   const pathname = usePathname();
   // Derive regional context from the caller's existing market-scoped links.
@@ -61,7 +62,7 @@ export function AppHeader({
       .map(item => item.href.split('?')[0] === '/growth' ? { ...item, href: `/labels/${label.slug}`, match: `/labels/${label.slug}` } : item),
     { href: `/labels/${label.slug}/deep-dives`, label: 'Deep Dives', match: `/labels/${label.slug}/deep-dives` },
 
-  ] : baseItems.some(item => item.href.split('?')[0] === '/labels') ? baseItems : [
+  ] : hideAutoLabels || baseItems.some(item => item.href.split('?')[0] === '/labels') ? baseItems : [
     ...baseItems.slice(0, baseItems.findIndex(item => item.href.split('?')[0] === '/resources') >= 0 ? baseItems.findIndex(item => item.href.split('?')[0] === '/resources') : baseItems.length),
     { href: '/labels', label: 'Labels', match: '/labels' },
     ...baseItems.slice(baseItems.findIndex(item => item.href.split('?')[0] === '/resources') >= 0 ? baseItems.findIndex(item => item.href.split('?')[0] === '/resources') : baseItems.length),
