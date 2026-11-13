@@ -561,6 +561,7 @@ export default function ChannelHealthBoard({
   singleTab = false,
   labelRoster = false,
   removable = false,
+  partnerRemovable = false,
   /* Which board's entries these rows belong to. Without it, a write from
      the Australia board lands on the Nordics board — the API defaults to
      nordics when no team is given, which is right for the old callers and
@@ -583,6 +584,7 @@ export default function ChannelHealthBoard({
   /** Show ✕ remove button on each row (team watcher mode) */
   removable?: boolean;
   team?: string;
+  partnerRemovable?: boolean;
   pinnedChannelIds?: string[];
   /** Only show Behaviour button for artists with pinned campaigns */
   pinnedSlugs?: string[];
@@ -615,6 +617,23 @@ export default function ChannelHealthBoard({
      Twenty is roughly a screen and a half, which is enough to scan a
      group without the page becoming a corridor. */
   const [page, setPage] = useState(1);
+
+  const handlePartnerRemove = useCallback(async (slug: string, name: string) => {
+    if (!confirm(`Remove ${name} from James's shared Watcher? The channel will remain in internal workspaces.`)) return;
+    setRemovingId(slug);
+    try {
+      const response = await fetch('/api/youtube-uk/hide', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ slug }),
+      });
+      if (!response.ok) throw new Error('Unable to remove channel');
+      router.refresh();
+    } catch {
+      alert('Unable to remove this channel. Please try again.');
+    } finally {
+      setRemovingId(null);
+    }
+  }, [router]);
 
   const handleRemove = useCallback(async (channelId: string, name: string) => {
     if (!confirm(`Remove ${name} from the Team Watcher? This will stop tracking this channel.`)) return;
@@ -1090,6 +1109,14 @@ export default function ChannelHealthBoard({
                       the channel entirely — a miss on one is a destructive
                       click on the other. Tracking is now a labelled action
                       inside the expanded row, next to the other actions. */}
+                  {partnerRemovable && (
+                    <button type="button" aria-label={`Remove ${r.name} from shared Watcher`}
+                      title={`Remove ${r.name} from James's Watcher`}
+                      onClick={(e) => { e.stopPropagation(); handlePartnerRemove(r.slug, r.name); }}
+                      disabled={removingId === r.slug}
+                      className="absolute right-0 top-1/2 -translate-y-1/2 rounded p-1 text-muted hover:text-red-700 hover:bg-red-50 opacity-60 group-hover/row:opacity-100"
+                    >{removingId === r.slug ? '…' : '✕'}</button>
+                  )}
                   {removable && r.channelId && (
                     <button
                       onClick={(e) => { e.stopPropagation(); handleRemove(r.channelId!, r.name); }}
