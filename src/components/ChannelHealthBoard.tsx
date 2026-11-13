@@ -1174,7 +1174,7 @@ export default function ChannelHealthBoard({
                   <div className="flex items-center gap-2 mb-3">
                     {(labelRoster || pinnedSlugs.includes(r.slug)) && (
                       <Link
-                        href={labelRoster ? `${behaviourBase}/${r.slug}` : `${behaviourBase}${behaviourBase.includes('?') ? '&' : '?'}behaviour=${r.slug}`}
+                        href={behaviourBase.startsWith('/labels/') ? `${behaviourBase}/${r.slug}` : `${behaviourBase}${behaviourBase.includes('?') ? '&' : '?'}behaviour=${encodeURIComponent(r.slug)}`}
                         className="px-3 py-1.5 rounded text-[10px] font-bold uppercase tracking-[0.08em] transition-colors no-underline"
                         style={{ background: '#2C25FF', color: '#fff' }}
                         onClick={(e) => e.stopPropagation()}
