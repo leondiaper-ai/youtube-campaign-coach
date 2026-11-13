@@ -991,7 +991,7 @@ export default function ChannelHealthBoard({
           page and they are the key to everything under them. */}
       <div className="bg-surface border border-line rounded-card shadow-card overflow-hidden">
         <div
-          className="grid grid-cols-[1.75fr_0.6fr_0.65fr_0.55fr_0.7fr_0.7fr_0.5fr_0.7fr_0.5fr] gap-2 px-5 py-3 text-[11px] font-bold uppercase tracking-label text-muted border-b border-line bg-raised/60 sticky top-0 z-10"
+          className={`grid ${partnerRemovable ? 'grid-cols-[1.75fr_0.6fr_0.65fr_0.55fr_0.7fr_0.7fr_0.5fr_0.7fr_0.5fr_20px]' : 'grid-cols-[1.75fr_0.6fr_0.65fr_0.55fr_0.7fr_0.7fr_0.5fr_0.7fr_0.5fr]'} gap-2 px-5 py-3 text-[11px] font-bold uppercase tracking-label text-muted border-b border-line bg-raised/60 sticky top-0 z-10`}
         >
           <div>Artist</div>
           <div title="Subscriber trend over the last 30 days">30d trend</div>
@@ -1051,7 +1051,7 @@ export default function ChannelHealthBoard({
                 /* hover:brightness dimmed the text along with the row, which
                    made the thing you were pointing at the hardest to read.
                    A background change leaves the content alone. */
-                className={`group/row grid grid-cols-[1.75fr_0.6fr_0.65fr_0.55fr_0.7fr_0.7fr_0.5fr_0.7fr_0.5fr] gap-2 px-5 py-3.5 items-center transition-colors cursor-pointer hover:bg-raised ${
+                className={`group/row grid ${partnerRemovable ? 'grid-cols-[1.75fr_0.6fr_0.65fr_0.55fr_0.7fr_0.7fr_0.5fr_0.7fr_0.5fr_20px]' : 'grid-cols-[1.75fr_0.6fr_0.65fr_0.55fr_0.7fr_0.7fr_0.5fr_0.7fr_0.5fr]'} gap-2 px-5 py-3.5 items-center transition-colors cursor-pointer hover:bg-raised ${
                   i === paged.length - 1 && !isExpanded ? '' : 'border-b border-line-faint'
                 }`}
                 style={{ background: st.rowBg }}
@@ -1109,14 +1109,6 @@ export default function ChannelHealthBoard({
                       the channel entirely — a miss on one is a destructive
                       click on the other. Tracking is now a labelled action
                       inside the expanded row, next to the other actions. */}
-                  {partnerRemovable && (
-                    <button type="button" aria-label={`Remove ${r.name} from shared Watcher`}
-                      title={`Remove ${r.name} from James's Watcher`}
-                      onClick={(e) => { e.stopPropagation(); handlePartnerRemove(r.slug, r.name); }}
-                      disabled={removingId === r.slug}
-                      className="absolute right-0 top-1/2 -translate-y-1/2 rounded p-1 text-muted hover:text-red-700 hover:bg-red-50 opacity-60 group-hover/row:opacity-100"
-                    >{removingId === r.slug ? '…' : '✕'}</button>
-                  )}
                   {removable && r.channelId && (
                     <button
                       onClick={(e) => { e.stopPropagation(); handleRemove(r.channelId!, r.name); }}
@@ -1161,6 +1153,14 @@ export default function ChannelHealthBoard({
                 </div>
                 <div className="text-right text-[11px] tabular-nums font-bold" style={{ color: wowColor(r.viewsWoW) }}>
                   {r.viewsWoW != null ? fmtPct(r.viewsWoW) : '—'}
+                {partnerRemovable && (
+                    <button type="button" aria-label={`Remove ${r.name} from shared Watcher`}
+                      title={`Remove ${r.name} from James's Watcher`}
+                      onClick={(e) => { e.stopPropagation(); handlePartnerRemove(r.slug, r.name); }}
+                      disabled={removingId === r.slug}
+                      className="inline-flex h-5 w-5 items-center justify-center rounded text-[10px] text-muted/45 hover:text-red-700 hover:bg-red-50 opacity-40 group-hover/row:opacity-100 focus:opacity-100"
+                    >{removingId === r.slug ? '…' : '✕'}</button>
+                  )}
                 </div>
               </div>
 
