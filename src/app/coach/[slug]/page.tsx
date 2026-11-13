@@ -217,7 +217,16 @@ export default async function CampaignPage({ params, searchParams }: PageProps) 
     }
   }
 
-  // Supplement Palaye's artist-channel snapshot with independently verified\n  // Sumerian-hosted uploads. Match by video ID, not aggregate channel totals.\n  const palayeLabelVideos = saved.artist.toLowerCase() === 'palaye royale'\n    ? await palayeLabelUploads() : [];\n  if (palayeLabelVideos.length) {\n    const byId = new Map(recentUploads.map(v => [v.id, v]));\n    for (const v of palayeLabelVideos) byId.set(v.id, v);\n    recentUploads = [...byId.values()];\n  }\n\n  // Compute data coverage — how complete is the historical picture?
+  // Combine artist-channel evidence with verified Sumerian uploads by video ID.
+  const palayeLabelVideos = saved.artist.toLowerCase() === 'palaye royale'
+    ? await palayeLabelUploads() : [];
+  if (palayeLabelVideos.length) {
+    const byId = new Map(recentUploads.map(v => [v.id, v]));
+    for (const v of palayeLabelVideos) byId.set(v.id, v);
+    recentUploads = [...byId.values()];
+  }
+
+  // Compute data coverage — how complete is the historical picture?
   const dataCoverage = computeDataCoverage(
     recentUploads,
     artistConfig?.campaignStartDate ?? null,
