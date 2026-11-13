@@ -1291,9 +1291,49 @@ body.present .slide-audience .src{margin-top:.45rem;font-size:.62rem;line-height
       <div class="mcard"><div class="ct">Public comments</div><p>Relevance-ranked samples from the singles, Rose (Live) and Sex on Fire. Read as audience signal.</p></div>
     </div>
 
-    <h3 class="display sec">Post-album channel-view scenario</h3>
-    <p class="big-p">How the proposed publishing rhythm relates to total channel viewing, including catalogue. Illustrative scenarios, not an incremental uplift forecast.</p>
-  <div class="cadence-forecast"><strong>KEEP THE WHOLE CHANNEL MOVING</strong><span><b>Observed channel run-rate:</b> 717K/day before the singles → 940K/day during the singles → 1.01M/day in the run-up to the album → 1.36M/day across the three release days. Across 56 days, <b>717K/day = ~40.2M channel views</b>; holding <b>940K–1.01M/day = ~52.6M–56.6M</b>. That is <b>~12.5M–16.4M above the pre-single run-rate</b> as an illustrative retention scenario, <b>not a forecast or attributable album uplift</b>. <b>Content supporting the ambition:</b> 16–32 Shorts at the observed 13.6K median (~218K–435K video views), plus three proposed long-form releases at an assumed 100K–300K each (~300K–900K video views). These video views are <b>part of total channel views, not additional to them</b>. Catalogue, repeat listening and new album consumption all contribute to the channel total; the available snapshots <b>cannot separate their individual effects</b>. The aim is to protect the campaign-era run-rate, not assume the three-day album peak continues.</span></div>
+    <style>
+      .view-scenario{margin:1.4rem 0 3rem;border-top:1px solid rgba(204,158,65,.45);padding-top:1.4rem}
+      .view-scenario .scenario-intro{color:var(--muted);font-size:clamp(1rem,1.55vw,1.35rem);max-width:920px;line-height:1.5;margin:.35rem 0 1.8rem}
+      .scenario-chart{padding:1.5rem 1.6rem 1.2rem;background:rgba(198,151,63,.055);border:1px solid rgba(198,151,63,.22)}
+      .scenario-chart-head{display:flex;justify-content:space-between;gap:1rem;align-items:baseline;margin-bottom:1.3rem;flex-wrap:wrap}
+      .scenario-chart-head strong{color:var(--cream);font-size:1.05rem}
+      .scenario-chart-head span{color:var(--muted);font-size:.78rem;letter-spacing:.04em}
+      .scenario-bars{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:1.15rem;align-items:end;min-height:250px}
+      .scenario-bar{display:flex;flex-direction:column;justify-content:flex-end;min-width:0;height:100%}
+      .scenario-number{font-size:clamp(1.35rem,2.5vw,2.35rem);font-weight:800;letter-spacing:-.035em;color:var(--cream);margin-bottom:.55rem}
+      .scenario-track{height:165px;display:flex;align-items:flex-end;border-bottom:1px solid rgba(255,255,255,.22)}
+      .scenario-fill{width:100%;height:var(--bar-h);background:#55514e;min-height:8px}
+      .scenario-bar:nth-child(2) .scenario-fill{background:#89785d}
+      .scenario-bar:nth-child(3) .scenario-fill{background:#b18b48}
+      .scenario-bar:nth-child(4) .scenario-fill{background:var(--gold)}
+      .scenario-name{color:var(--cream);font-weight:700;font-size:.91rem;margin-top:.75rem}
+      .scenario-period{color:var(--muted);font-size:.78rem;margin-top:.18rem;line-height:1.4}
+      .scenario-cards{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1rem;margin-top:1.2rem}
+      .scenario-card{border-top:2px solid rgba(198,151,63,.55);padding:1rem 0}
+      .scenario-card .ct{font-size:.76rem;letter-spacing:.1em;text-transform:uppercase;color:var(--gold);font-weight:700}
+      .scenario-card .scenario-big{font-size:clamp(1.65rem,2.7vw,2.6rem);color:var(--cream);font-weight:800;letter-spacing:-.04em;margin:.5rem 0}
+      .scenario-card p{color:var(--muted);font-size:.95rem;line-height:1.5;max-width:550px}
+      .scenario-foot{margin-top:1rem;padding-top:1rem;border-top:1px solid rgba(255,255,255,.13);color:var(--muted);font-size:.84rem;line-height:1.55}
+      @media(max-width:650px){.scenario-bars{gap:.5rem;min-height:205px}.scenario-track{height:115px}.scenario-chart{padding:1rem}.scenario-name{font-size:.75rem}.scenario-period{font-size:.68rem}.scenario-cards{grid-template-columns:1fr}}
+    </style>
+    <section class="view-scenario" aria-label="Post-album channel-view scenario">
+      <h3 class="display sec" style="margin-top:0">Keep the whole channel moving.</h3>
+      <p class="scenario-intro">Album week lifted daily channel viewing. The post-album opportunity is to <b>hold on to more of that attention</b> through new long-form, Shorts and catalogue discovery.</p>
+      <div class="scenario-chart">
+        <div class="scenario-chart-head"><strong>How channel viewing built</strong><span>Observed average daily channel views · Watcher snapshots</span></div>
+        <div class="scenario-bars" role="img" aria-label="Observed daily channel views: 717 thousand before singles, 940 thousand during singles, 1.01 million in the album run-up, and 1.36 million across three release days">
+          <div class="scenario-bar"><div class="scenario-number">717K</div><div class="scenario-track"><div class="scenario-fill" style="--bar-h:52.7%"></div></div><div class="scenario-name">Before singles</div><div class="scenario-period">Baseline</div></div>
+          <div class="scenario-bar"><div class="scenario-number">940K</div><div class="scenario-track"><div class="scenario-fill" style="--bar-h:69.1%"></div></div><div class="scenario-name">Singles</div><div class="scenario-period">Campaign building</div></div>
+          <div class="scenario-bar"><div class="scenario-number">1.01M</div><div class="scenario-track"><div class="scenario-fill" style="--bar-h:74.3%"></div></div><div class="scenario-name">Album run-up</div><div class="scenario-period">Pre-release period</div></div>
+          <div class="scenario-bar"><div class="scenario-number">1.36M</div><div class="scenario-track"><div class="scenario-fill" style="--bar-h:100%"></div></div><div class="scenario-name">Album release</div><div class="scenario-period">Three days only</div></div>
+        </div>
+      </div>
+      <div class="scenario-cards">
+        <div class="scenario-card"><div class="ct">Eight-week channel scenario</div><div class="scenario-big">52.6M–56.6M</div><p>Illustrative total channel views if the 940K–1.01M/day campaign run-rate holds for 56 days. Versus <b>40.2M</b> at the 717K/day pre-single baseline.</p></div>
+        <div class="scenario-card"><div class="ct">Content supporting that ambition</div><div class="scenario-big">16–32 Shorts + 3 long-form</div><p>Shorts: <b>~218K–435K</b> video views at the observed 13.6K median. Proposed long-form: <b>~300K–900K</b> views assuming 100K–300K each.</p></div>
+      </div>
+      <p class="scenario-foot"><b>Read this correctly:</b> The 52.6M–56.6M range is a retention scenario, <b>not a forecast</b> or measured album uplift. Short and long-form views are <b>included within</b> channel totals, never added on top. Catalogue and repeat viewing remain important but cannot be separately attributed from these snapshots. The 1.36M/day release reading covers just three days and is <b>not</b> the sustained target.</p>
+    </section>
     <h3 class="display sec">The study</h3>
     <div class="album">
       <div><div class="ct" style="color:var(--gold)">O My Beloved</div><p style="margin-top:.3rem">Released <b style="color:var(--cream)">6 November 2026</b> · lead single My Whole World, 10 September</p></div>
