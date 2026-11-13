@@ -1,6 +1,6 @@
 import { listPartnerSlugs, listHiddenPartnerSlugs } from '@/lib/youtubeUkPartnerStore';
 import PartnerAddChannelButton from '@/components/PartnerAddChannelButton';
-import { getLabelWorkspace } from '@/lib/labels';
+import { getLabelWorkspace, isLabelArtist } from '@/lib/labels';
 import { YOUTUBE_UK_ROSTER } from '@/lib/youtubeUkRoster';
 import {
   ARTISTS, mergeArtistLists, daysSince, deriveFromLive,
@@ -66,12 +66,13 @@ export default async function ControlPage({
   const availableArtists = await getAllArtists();
   const normalize = (name: string) => name.normalize('NFKD').replace(/[\\u0300-\\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]/g, '');
   const rosterNames = new Set(YOUTUBE_UK_ROSTER.map(r => normalize(r.name)));
+  const partisan = getLabelWorkspace('partisan');
   const partnerSlugs = await listPartnerSlugs().catch(() => [] as string[]);
   const hiddenSlugs = new Set(await listHiddenPartnerSlugs().catch(() => [] as string[]));
   const seenChannels = new Set<string>();
   const allArtists = availableArtists.filter(a => {
     if (hiddenSlugs.has(a.slug)) return false;
-    if (!rosterNames.has(normalize(a.name)) && !partnerSlugs.includes(a.slug)) return false;
+    if (!rosterNames.has(normalize(a.name)) && !partnerSlugs.includes(a.slug) && !(partisan && isLabelArtist(partisan, a))) return false;
     const identity = (a.channelHandle || a.slug).toLowerCase();
     if (seenChannels.has(identity)) return false;
     seenChannels.add(identity);
