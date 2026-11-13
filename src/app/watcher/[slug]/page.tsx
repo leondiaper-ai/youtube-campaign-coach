@@ -3,7 +3,7 @@ import { listPartnerSlugs } from '@/lib/youtubeUkPartnerStore';
 import { YOUTUBE_UK_ROSTER } from '@/lib/youtubeUkRoster';
 import PartnerLinkGuard from '@/components/PartnerLinkGuard';
 import { getLabelWorkspace } from '@/lib/labels';
-import { getArtistsForMarket } from '@/lib/marketScope';
+import { getArtistsForMarket, getAllArtists } from '@/lib/marketScope';
 import { notFound } from 'next/navigation';
 import { AppHeader } from '@/components/ui/AppHeader';
 import WatcherArtistView from '@/components/WatcherArtistView';
@@ -39,7 +39,7 @@ export default async function WatcherPage({
   const { slug } = await params;
   const sp = (await searchParams) ?? {};
   const partner = sp.partner === 'youtube-uk';
-  const roster = partner ? await getArtistsForMarket('uk') : [];
+  const roster = partner ? await getAllArtists() : [];
   const allowedNames = new Set(YOUTUBE_UK_ROSTER.map(a => a.name.toLowerCase().replace(/[^a-z0-9]/g, '')));
   const allowed = roster.filter(a => allowedNames.has(a.name.toLowerCase().replace(/[^a-z0-9]/g, '')));
   const extraSlugs = partner ? await listPartnerSlugs().catch(() => [] as string[]) : [];
