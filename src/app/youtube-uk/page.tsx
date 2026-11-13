@@ -1,3 +1,5 @@
+import { listPartnerSlugs } from '@/lib/youtubeUkPartnerStore';
+import PartnerAddChannelButton from '@/components/PartnerAddChannelButton';
 import { getLabelWorkspace } from '@/lib/labels';
 import { YOUTUBE_UK_ROSTER } from '@/lib/youtubeUkRoster';
 import {
@@ -61,7 +63,8 @@ export default async function ControlPage({
      with a team board get everyone on that board — see marketScope. */
   const ukArtists = await getArtistsForMarket('uk');
   const rosterNames = new Set(YOUTUBE_UK_ROSTER.map(r => r.name.toLowerCase().replace(/[^a-z0-9]/g, '')));
-  const allArtists = ukArtists.filter(a => rosterNames.has(a.name.toLowerCase().replace(/[^a-z0-9]/g, '')));
+  const partnerSlugs = await listPartnerSlugs().catch(() => [] as string[]);
+  const allArtists = ukArtists.filter(a => rosterNames.has(a.name.toLowerCase().replace(/[^a-z0-9]/g, '')) || partnerSlugs.includes(a.slug));
   const syncMeta = await readSyncMeta();
   const pinnedSlugs: string[] = [];
 
@@ -254,7 +257,7 @@ export default async function ControlPage({
         hideAutoLabels
         nav={nav}
         workspace="YouTube UK · Shared Watcher"
-        actions={null}
+        actions={<PartnerAddChannelButton />}
         meta={
           syncMeta ? (
             <>
