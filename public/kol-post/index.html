@@ -450,6 +450,18 @@ body.present{overflow:hidden}
 .rate-l{display:flex;gap:clamp(.6rem,1.6vw,1.2rem);margin-top:.45rem}
 .rate-l span{flex:1;font-size:.66rem;line-height:1.3;color:var(--dim)}
 
+
+/* Client-ready continuation roadmap */
+.roadmap-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:.65rem;margin-top:1.1rem}
+.roadmap-week{border:1px solid rgba(255,255,255,.17);border-radius:9px;padding:.8rem .8rem .7rem;background:rgba(255,255,255,.035);min-height:145px}
+.roadmap-week.priority{border-color:var(--gold);background:rgba(204,172,108,.09)}
+.roadmap-week .when{font-size:.63rem;letter-spacing:.09em;text-transform:uppercase;color:var(--gold);font-weight:700}
+.roadmap-week h3{font-size:clamp(.83rem,1.3vw,1.04rem);line-height:1.2;margin:.42rem 0}
+.roadmap-week p{font-size:clamp(.67rem,.9vw,.81rem);line-height:1.4;color:var(--dim);margin:0}
+.roadmap-week .format{display:block;font-size:.59rem;text-transform:uppercase;letter-spacing:.06em;color:var(--gold);margin-top:.6rem}
+.roadmap-foot{font-size:.72rem;color:var(--dim);line-height:1.5;margin-top:1rem}
+@media(max-width:760px){.roadmap-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.roadmap-week{min-height:130px}}
+
 /* Post-album continuation: evidence beside the next action. */
 .continue-table{width:100%;border-collapse:collapse;table-layout:fixed;margin-top:clamp(1.2rem,2.5vw,2rem)}
 .continue-table th{text-align:left;font:700 .65rem 'Inter',sans-serif;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);padding:0 1rem .8rem 0}
@@ -895,6 +907,26 @@ body.present{overflow:hidden}
     <p class="statement reveal" style="margin-top:1.3rem;max-width:none;color:var(--gold)">One song at a time. A follow-up every 7–14 days, where assets allow.</p>
     <p class="body reveal" style="margin-top:.65rem;font-size:.82rem;max-width:none">Support each release with the album playlist, links and end screens.</p>
     <div class="src reveal" style="margin-top:.65rem">Public data · 11 Nov 2026 · views include paid support. Next steps and cadence are proposals; song choices are early signals and footage is unconfirmed. Housekeeping details under Analysis.</div>
+  </div>
+</section>
+
+<!-- ═══ 13 · PROPOSED EIGHT-WEEK ROADMAP ═══════════════════════ -->
+<section class="slide" data-t="8-week roadmap">
+  <div class="inner">
+    <div class="label reveal">Post-album · proposed client release plan · 16 Nov – 10 Jan</div>
+    <h2 class="display reveal" style="margin-top:.55rem;font-size:clamp(1.8rem,3.8vw,3.25rem)">Give fans a reason to return.</h2>
+    <p class="body reveal" style="margin-top:.5rem;max-width:none;font-size:.86rem">Three priority long-form moments, supported by lower-cost Shorts and band storytelling. <strong>Use existing footage first.</strong></p>
+    <div class="roadmap-grid reveal">
+      <article class="roadmap-week"><div class="when">W1 · 16 Nov</div><h3>Extend Rose</h3><p>Cut a performance Short from the existing Rose live video; point to the full session and album playlist.</p><span class="format">Short · existing footage</span></article>
+      <article class="roadmap-week priority"><div class="when">W2 · 23 Nov ★</div><h3>Another song gets its moment</h3><p>Prioritise Feel The Love as a live performance or song-story edit, if footage exists. Tease with a Short.</p><span class="format">Priority · long-form</span></article>
+      <article class="roadmap-week"><div class="when">W3 · 30 Nov</div><h3>Follow the song</h3><p>Two distinct Shorts from the W2 asset: a performance highlight and a band/story moment.</p><span class="format">Shorts · repurpose</span></article>
+      <article class="roadmap-week priority"><div class="when">W4 · 7 Dec ★</div><h3>Return to the live room</h3><p>Release the next unreleased full-song live-room performance, subject to footage and approvals.</p><span class="format">Priority · long-form</span></article>
+      <article class="roadmap-week"><div class="when">W5 · 14 Dec</div><h3>Bring fans inside</h3><p>Rehearsal, behind-the-scenes or home-life moment; use a Community post to point to the live series.</p><span class="format">Short + Community</span></article>
+      <article class="roadmap-week"><div class="when">W6 · 21 Dec</div><h3>Catalogue meets album</h3><p>Archive performance clip with a clear route into the new album playlist. Keep production light.</p><span class="format">Short + playlist</span></article>
+      <article class="roadmap-week"><div class="when">W7 · 28 Dec</div><h3>Stay present, lightly</h3><p>Best live moment of the year and a simple fan Community post; avoid forcing a major holiday drop.</p><span class="format">Short + Community</span></article>
+      <article class="roadmap-week priority"><div class="when">W8 · 4 Jan ★</div><h3>Open the next chapter</h3><p>Choose the strongest remaining song for a live or song-story upload using December's organic response.</p><span class="format">Priority · long-form</span></article>
+    </div>
+    <p class="roadmap-foot reveal"><strong>Decision gate · 6 Dec:</strong> Review organic views, retention, traffic sources and available footage before locking the January asset. <strong>Every priority upload:</strong> supporting Short, album playlist, end screen and clear next watch. Dates, songs and assets are recommendations, not confirmed releases; public view counts elsewhere include paid support.</p>
   </div>
 </section>
 
