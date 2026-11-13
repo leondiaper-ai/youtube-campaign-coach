@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { AppHeader, PageTitle } from '@/components/ui/AppHeader';
 import { getAllArtists } from '@/lib/marketScope';
 import { YOUTUBE_UK_ROSTER } from '@/lib/youtubeUkRoster';
+import { getLabelWorkspace, isLabelArtist } from '@/lib/labels';
 import { listPartnerSlugs } from '@/lib/youtubeUkPartnerStore';
 import { listPlans, loadPlan } from '@/lib/planStore';
 
@@ -34,7 +35,8 @@ const groups = [
 export default async function SharedCoach() {
  const [artists, extra, plans] = await Promise.all([getAllArtists(), listPartnerSlugs().catch(() => [] as string[]), listPlans()]);
  const rosterNames = new Set(YOUTUBE_UK_ROSTER.map(r => norm(r.name)));
- const allowedNames = new Set(artists.filter(a => rosterNames.has(norm(a.name)) || extra.includes(a.slug)).map(a => norm(a.name)));
+ const partisan = getLabelWorkspace('partisan');
+ const allowedNames = new Set(artists.filter(a => rosterNames.has(norm(a.name)) || extra.includes(a.slug) || (partisan && isLabelArtist(partisan, a))).map(a => norm(a.name)));
  for (const r of YOUTUBE_UK_ROSTER) allowedNames.add(norm(r.name));
  const full = await Promise.all(plans.filter(p => allowedNames.has(norm(p.artist))).map(p => loadPlan(p.slug)));
  const now = new Date().toISOString().slice(0,10);
