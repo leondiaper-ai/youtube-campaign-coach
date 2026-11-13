@@ -604,7 +604,7 @@ export default async function CampaignsPage({
         )}
 
         <Suspense fallback={null}>
-          {partner ? <PartnerLinkGuard allowedSlugs={allArtists.map(a => a.slug)}><CampaignStatusBoard market={market.id} initialCards={cards} availableArtists={[]} /></PartnerLinkGuard> : <CampaignStatusBoard market={market.id} initialCards={cards} availableArtists={available.map((a) => ({ slug: a.slug, name: a.name }))} />}
+          {partner ? <PartnerLinkGuard allowedSlugs={allArtists.map(a => a.slug)}><CampaignStatusBoard market={market.id} initialCards={cards} availableArtists={available.map(a => ({ slug: a.slug, name: a.name }))} /></PartnerLinkGuard> : <CampaignStatusBoard market={market.id} initialCards={cards} availableArtists={available.map((a) => ({ slug: a.slug, name: a.name }))} />}
         </Suspense>
       </div>
     </div>
