@@ -70,6 +70,10 @@ export default function CampaignStatusBoard({
      the back button work, which it never was. State is still set
      immediately so opening stays instant; the replace rides behind it. */
   const openBehaviour = useCallback((slug: string | null) => {
+    if (!slug && searchParams.get('partner') === 'youtube-uk') {
+      router.push('/youtube-uk');
+      return;
+    }
     setBehaviourSlug(slug);
     const sp = new URLSearchParams(Array.from(searchParams.entries()));
     if (slug) sp.set('behaviour', slug);
@@ -194,7 +198,7 @@ export default function CampaignStatusBoard({
           {/* The product mark, not two vendor logos. Matches the global
               header so the behaviour view reads as the same product
               rather than a document that arrived from elsewhere. */}
-          <Link href={`/growth${mq}`} className="no-underline shrink-0">
+          <Link href={searchParams.get("partner") === "youtube-uk" ? "/youtube-uk" : `/growth${mq}`} className="no-underline shrink-0">
             {labelWorkspace ? <span className="flex items-center gap-3">
               <img src={labelWorkspace.logo} width={32} height={32} alt="" />
               <span className="text-[13px] font-black">{labelWorkspace.name}</span>
@@ -202,8 +206,8 @@ export default function CampaignStatusBoard({
             <span className="text-[13px] font-black tracking-[0.1em] text-signal ml-1.5">YOUTUBE</span></>}
           </Link>
           <span className="w-px h-3.5 bg-line-strong shrink-0" aria-hidden />
-          <Link href={`/campaigns${mq}`} className="text-[11px] font-bold uppercase tracking-label text-muted hover:text-ink no-underline">
-            ← Active Campaigns
+          <Link href={searchParams.get("partner") === "youtube-uk" ? "/youtube-uk" : `/campaigns${mq}`} className="text-[11px] font-bold uppercase tracking-label text-muted hover:text-ink no-underline">
+            {searchParams.get("partner") === "youtube-uk" ? "← YouTube UK Watcher" : "← Active Campaigns"}
           </Link>
         </div>
 
