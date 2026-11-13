@@ -156,7 +156,7 @@ export default async function CampaignPage({ params, searchParams }: PageProps) 
           regen.events.sort((a, b) => a.dateISO.localeCompare(b.dateISO));
 
           saved.plan = regen;
-          savePlan(saved.slug, saved.artist, regen, saved.channelCtx, timelineText).catch(() => {});
+          if (!partner) savePlan(saved.slug, saved.artist, regen, saved.channelCtx, timelineText).catch(() => {});
         }
       }
     }
