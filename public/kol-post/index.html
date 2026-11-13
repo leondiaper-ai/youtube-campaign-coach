@@ -761,6 +761,27 @@ body.present .slide-audience .src{margin-top:.45rem;font-size:.62rem;line-height
 /* Keep the released video integrated with the other weekly captions, not a hero headline. */
 .cadence-map-grid .map-week:first-child .map-weeknote{font-size:clamp(.6rem,.8vw,.75rem);font-weight:650;line-height:1.2}
 .cadence-map-grid .map-week:first-child .map-video-link{border-bottom:0;text-decoration:none}
+
+/* Post-album strategic pillars: a single legible presentation frame */
+.slide-pillars .pillars-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1rem;margin-top:2.1rem}
+.slide-pillars .pillar{padding:1.55rem 1.35rem 1.2rem;border-top:3px solid var(--gold);background:rgba(186,146,78,.065);display:flex;flex-direction:column;min-height:250px}
+.slide-pillars .pillar-num{font-size:.67rem;letter-spacing:.14em;color:var(--gold);font-weight:750}
+.slide-pillars .pillar-symbol{font-size:2rem;line-height:1;margin:1.2rem 0 .65rem;color:var(--gold)}
+.slide-pillars .pillar h3{font-size:clamp(1.1rem,1.65vw,1.65rem);color:var(--cream);margin:0 0 .65rem;font-weight:800}
+.slide-pillars .pillar p{font-size:clamp(.82rem,1vw,1rem);line-height:1.5;color:var(--muted);margin:0;flex:1}
+.slide-pillars .pillar p b{color:var(--cream)}
+.slide-pillars .pillar-tag{font-size:.65rem;letter-spacing:.09em;color:var(--gold);margin-top:1.25rem;padding-top:.8rem;border-top:1px solid rgba(198,151,63,.23);font-weight:700}
+.slide-pillars .pillars-next{display:flex;gap:1rem;align-items:center;margin-top:1.35rem;color:var(--muted);font-size:.85rem}
+.slide-pillars .pillars-next strong{color:var(--gold);letter-spacing:.1em;font-size:.68rem}
+body.present .slide-pillars{padding-top:3.6rem;padding-bottom:.75rem;justify-content:center}
+body.present .slide-pillars h2.display{font-size:clamp(2rem,3.6vw,3.35rem);line-height:1.03}
+body.present .slide-pillars .pillars-grid{margin-top:1.25rem;gap:.75rem}
+body.present .slide-pillars .pillar{padding:1rem 1.05rem;min-height:205px}
+body.present .slide-pillars .pillar-symbol{margin:.65rem 0 .45rem;font-size:1.5rem}
+body.present .slide-pillars .pillar p{font-size:.85rem;line-height:1.35}
+body.present .slide-pillars .pillar-tag{margin-top:.7rem;padding-top:.55rem}
+body.present .slide-pillars .pillars-next{margin-top:.8rem}
+@media(max-width:760px){.slide-pillars .pillars-grid{grid-template-columns:1fr}.slide-pillars .pillar{min-height:0}.slide-pillars .pillar-symbol{margin:.55rem 0}.slide-pillars .pillars-next{flex-wrap:wrap}}
 </style>
 </head>
 <body>
@@ -1187,6 +1208,21 @@ body.present .slide-audience .src{margin-top:.45rem;font-size:.62rem;line-height
 <!-- ═══ 12 · WHAT TO DO NOW ═════════════════════════════════════════
      Practical, proportionate, nothing that tells the band what to make. -->
 
+
+<!-- ═══ POST-ALBUM STRATEGY · THREE PILLARS ═══════════════ -->
+<section class="slide slide-pillars" data-t="Post-album priorities">
+  <div class="inner">
+    <div class="label reveal">O My Beloved · the post-album opportunity</div>
+    <h2 class="display reveal" style="margin-top:.55rem">The album brought fans in.<br><span style="color:var(--gold)">Give them reasons to return.</span></h2>
+    <p class="body reveal" style="margin-top:.7rem;max-width:78ch">Build on the campaign rhythm and formats already connecting with fans. Three priorities, one continuing album era.</p>
+    <div class="pillars-grid reveal">
+      <div class="pillar"><span class="pillar-num">01 · DISCOVERY</span><div class="pillar-symbol">↻</div><h3>YouTube Stations</h3><p>Connect familiar catalogue videos to <em>O My Beloved</em> in a proposed always-on viewing experience.</p><div class="pillar-tag">CATALOGUE ↔ NEW ALBUM</div></div>
+      <div class="pillar"><span class="pillar-num">02 · CONSISTENCY</span><div class="pillar-symbol">▥</div><h3>Keep the rhythm</h3><p>Carry forward the release-era cadence: <b>2–4 Shorts a week</b> around purposeful long-form moments.</p><div class="pillar-tag">DON'T GO QUIET POST-ALBUM</div></div>
+      <div class="pillar"><span class="pillar-num">03 · MOMENTUM</span><div class="pillar-symbol">▶</div><h3>Build on what works</h3><p>Extend priority songs through <b>live, lyric and supporting formats</b>. Use audience response to choose the next moment.</p><div class="pillar-tag">DOUBLE DOWN ON RESPONSE</div></div>
+    </div>
+    <div class="pillars-next reveal"><strong>UP NEXT</strong><span>How Stations could work → an illustrative November–January programming timeline</span></div>
+  </div>
+</section>
 
 <!-- ═══ 15 · ALBUM-FIRST STATION OPPORTUNITY ═══════════════ -->
 <section class="slide station-wall-slide" data-t="O My Beloved · post-album programming · November → January">
