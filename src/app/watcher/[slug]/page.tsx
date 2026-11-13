@@ -1,3 +1,5 @@
+import { YOUTUBE_UK_ROSTER } from '@/lib/youtubeUkRoster';
+import PartnerLinkGuard from '@/components/PartnerLinkGuard';
 import { getLabelWorkspace } from '@/lib/labels';
 import { getArtistsForMarket } from '@/lib/marketScope';
 import { notFound } from 'next/navigation';
@@ -33,6 +35,12 @@ export default async function WatcherPage({
     | Promise<Record<string, string | string[] | undefined>>;
 }) {
   const { slug } = await params;
+  const sp = (await searchParams) ?? {};
+  const partner = sp.partner === 'youtube-uk';
+  const roster = partner ? await getArtistsForMarket('uk') : [];
+  const allowedNames = new Set(YOUTUBE_UK_ROSTER.map(a => a.name.toLowerCase().replace(/[^a-z0-9]/g, '')));
+  const allowed = roster.filter(a => allowedNames.has(a.name.toLowerCase().replace(/[^a-z0-9]/g, '')));
+  if (partner && !allowed.some(a => a.slug === slug)) notFound();
   /* The action bar's default "← Dashboard" and "Channel behaviour" links are
      built from this. Without it an Australian user clicking either one left
      their workspace. */
@@ -47,10 +55,6 @@ export default async function WatcherPage({
       { href: `/campaigns${q}`, label: 'Active Campaigns' },
       { href: `/coach${q}`, label: 'Coach' },
     ]} />}
-    <WatcherArtistView
-      slug={slug}
-      market={market.id}
-      signature="Watcher watches · Coach plans · You decide"
-    />
+    {partner ? <PartnerLinkGuard allowedSlugs={allowed.map(a => a.slug)}><WatcherArtistView slug={slug} market="uk" signature="YouTube UK · Shared Watcher" /></PartnerLinkGuard> : <WatcherArtistView slug={slug} market={market.id} signature="Watcher watches · Coach plans · You decide" />}
   </>;
 }
