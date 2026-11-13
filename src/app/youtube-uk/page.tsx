@@ -249,7 +249,7 @@ export default async function ControlPage({
   /* The same four destinations the page already had, in the shared shell
      rather than hand-drawn pills. The market query is still threaded by
      this page, exactly as before. */
-  const nav = [{ href: '/youtube-uk', label: 'Channel Health', match: '/youtube-uk' }];
+  const nav = [{ href: '/youtube-uk', label: 'Channel Health', match: '/youtube-uk' }, { href: '/youtube-uk/coach', label: 'Active Coach Timelines', match: '/youtube-uk/coach' }];
 
   return (
     <main className="min-h-screen bg-paper text-ink">
