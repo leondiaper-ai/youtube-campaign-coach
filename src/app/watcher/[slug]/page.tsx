@@ -1,3 +1,4 @@
+import { deepDiveFor } from '@/lib/deepDiveLink';
 import { listPartnerSlugs } from '@/lib/youtubeUkPartnerStore';
 import { YOUTUBE_UK_ROSTER } from '@/lib/youtubeUkRoster';
 import PartnerLinkGuard from '@/components/PartnerLinkGuard';
@@ -43,6 +44,8 @@ export default async function WatcherPage({
   const allowed = roster.filter(a => allowedNames.has(a.name.toLowerCase().replace(/[^a-z0-9]/g, '')));
   const extraSlugs = partner ? await listPartnerSlugs().catch(() => [] as string[]) : [];
   if (partner && !allowed.some(a => a.slug === slug) && !extraSlugs.includes(slug)) notFound();
+  const partnerArtist = partner ? (await getArtistsForMarket('uk')).find(a => a.slug === slug) : undefined;
+  const partnerDeck = partnerArtist ? deepDiveFor(partnerArtist.name) : null;
   /* The action bar's default "← Dashboard" and "Channel behaviour" links are
      built from this. Without it an Australian user clicking either one left
      their workspace. */
@@ -57,6 +60,6 @@ export default async function WatcherPage({
       { href: `/campaigns${q}`, label: 'Active Campaigns' },
       { href: `/coach${q}`, label: 'Coach' },
     ]} />}
-    {partner ? <PartnerLinkGuard allowedSlugs={[...allowed.map(a => a.slug), ...extraSlugs]}><WatcherArtistView slug={slug} market="uk" signature="YouTube UK · Shared Watcher" /></PartnerLinkGuard> : <WatcherArtistView slug={slug} market={market.id} signature="Watcher watches · Coach plans · You decide" />}
+    {partner ? <PartnerLinkGuard allowedSlugs={[...allowed.map(a => a.slug), ...extraSlugs]} allowedDeepDiveHrefs={partnerDeck ? [partnerDeck.href] : []}><WatcherArtistView slug={slug} market="uk" signature="YouTube UK · Shared Watcher" /></PartnerLinkGuard> : <WatcherArtistView slug={slug} market={market.id} signature="Watcher watches · Coach plans · You decide" />}
   </>;
 }
