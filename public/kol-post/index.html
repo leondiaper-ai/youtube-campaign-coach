@@ -742,6 +742,19 @@ body.present .station-wall-slide .station-how{margin-top:.45rem;font-size:.68rem
 body.present .station-wall-slide .tv-wall{margin-top:.65rem}
 body.present .station-wall-slide h2.display{font-size:clamp(1.9rem,3.25vw,3rem)!important}
 @media(max-width:700px){.station-wall-slide .station-how{flex-wrap:wrap}.station-wall-slide .station-how-arrow{display:none}}
+
+/* Audience slide: use the presentation canvas, not a narrow column in the corner. */
+body.present .slide-audience{padding-top:3.9rem;padding-bottom:1rem;justify-content:center}
+body.present .slide-audience .inner{width:100%;max-width:none}
+body.present .slide-audience .inner>div{max-width:min(950px,67vw)!important}
+body.present .slide-audience h2.display{font-size:clamp(2.2rem,3.6vw,3.65rem)!important;line-height:.98;margin-top:.4rem!important}
+body.present .slide-audience .stagger{margin-top:1rem!important;gap:.7rem!important}
+body.present .slide-audience .quote{font-size:clamp(.9rem,1.2vw,1.2rem);line-height:1.27}
+body.present .slide-audience .quote cite{margin-top:.2rem}
+body.present .slide-audience .stagger+.reveal{margin-top:.85rem!important;padding-top:.65rem!important}
+body.present .slide-audience .stagger+.reveal+.reveal{margin-top:.8rem!important;padding:.8rem 1rem!important}
+body.present .slide-audience .src{margin-top:.45rem;font-size:.62rem;line-height:1.25;max-width:80ch}
+@media(max-height:780px){body.present .slide-audience .inner>div{max-width:min(940px,70vw)!important}body.present .slide-audience h2.display{font-size:2.6rem!important}body.present .slide-audience .stagger{gap:.45rem!important}}
 </style>
 </head>
 <body>
