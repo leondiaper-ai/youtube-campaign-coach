@@ -1,4 +1,4 @@
-import { listPartnerSlugs } from '@/lib/youtubeUkPartnerStore';
+import { listPartnerSlugs, listHiddenPartnerSlugs } from '@/lib/youtubeUkPartnerStore';
 import PartnerAddChannelButton from '@/components/PartnerAddChannelButton';
 import { getLabelWorkspace } from '@/lib/labels';
 import { YOUTUBE_UK_ROSTER } from '@/lib/youtubeUkRoster';
@@ -67,8 +67,10 @@ export default async function ControlPage({
   const normalize = (name: string) => name.normalize('NFKD').replace(/[\\u0300-\\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]/g, '');
   const rosterNames = new Set(YOUTUBE_UK_ROSTER.map(r => normalize(r.name)));
   const partnerSlugs = await listPartnerSlugs().catch(() => [] as string[]);
+  const hiddenSlugs = new Set(await listHiddenPartnerSlugs().catch(() => [] as string[]));
   const seenChannels = new Set<string>();
   const allArtists = availableArtists.filter(a => {
+    if (hiddenSlugs.has(a.slug)) return false;
     if (!rosterNames.has(normalize(a.name)) && !partnerSlugs.includes(a.slug)) return false;
     const identity = (a.channelHandle || a.slug).toLowerCase();
     if (seenChannels.has(identity)) return false;
@@ -293,7 +295,7 @@ export default async function ControlPage({
         />
 
         {/* Client-side board with toggle */}
-        <PartnerLinkGuard allowedSlugs={rows.map(r => r.slug)}><ChannelHealthBoard singleTab={true} labelRoster={true} linkSuffix={mq} behaviourBase={label ? `/labels/${label.slug}/behaviour` : `/campaigns${mq}`} rows={rows} topVideos={topVideos} marketFormatStats={marketFormatStats} pinnedSlugs={[]} /></PartnerLinkGuard>
+        <PartnerLinkGuard allowedSlugs={rows.map(r => r.slug)}><ChannelHealthBoard singleTab={true} labelRoster={true} partnerRemovable={true} linkSuffix={mq} behaviourBase={label ? `/labels/${label.slug}/behaviour` : `/campaigns${mq}`} rows={rows} topVideos={topVideos} marketFormatStats={marketFormatStats} pinnedSlugs={[]} /></PartnerLinkGuard>
 
 
       </div>
