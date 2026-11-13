@@ -9,7 +9,7 @@ import {
 } from '@/lib/artists';
 import { listCustomArtists } from '@/lib/artistStore';
 import { getMarketFromRequest } from '@/lib/marketServer';
-import { getArtistsForMarket } from '@/lib/marketScope';
+import { getAllArtists } from '@/lib/marketScope';
 import { listAllTeamEntries } from '@/lib/teamWatcherStore';
 import { TEAMS, TEAM_SLUGS } from '@/lib/teams';
 import { readAllLiveSnaps, readSyncMeta } from '@/lib/kvCache';
@@ -61,10 +61,20 @@ export default async function ControlPage({
   );
   /* Scoped to the market so the Watcher shows this team's roster. Markets
      with a team board get everyone on that board — see marketScope. */
-  const ukArtists = await getArtistsForMarket('uk');
-  const rosterNames = new Set(YOUTUBE_UK_ROSTER.map(r => r.name.toLowerCase().replace(/[^a-z0-9]/g, '')));
+  // The shared UK list is a view over all existing Watcher channels, regardless
+  // of which regional workspace originally registered the channel.
+  const availableArtists = await getAllArtists();
+  const normalize = (name: string) => name.normalize('NFKD').replace(/[\\u0300-\\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]/g, '');
+  const rosterNames = new Set(YOUTUBE_UK_ROSTER.map(r => normalize(r.name)));
   const partnerSlugs = await listPartnerSlugs().catch(() => [] as string[]);
-  const allArtists = ukArtists.filter(a => rosterNames.has(a.name.toLowerCase().replace(/[^a-z0-9]/g, '')) || partnerSlugs.includes(a.slug));
+  const seenChannels = new Set<string>();
+  const allArtists = availableArtists.filter(a => {
+    if (!rosterNames.has(normalize(a.name)) && !partnerSlugs.includes(a.slug)) return false;
+    const identity = (a.channelHandle || a.slug).toLowerCase();
+    if (seenChannels.has(identity)) return false;
+    seenChannels.add(identity);
+    return true;
+  });
   const syncMeta = await readSyncMeta();
   const pinnedSlugs: string[] = [];
 
