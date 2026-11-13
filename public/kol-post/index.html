@@ -451,17 +451,26 @@ body.present{overflow:hidden}
 .rate-l span{flex:1;font-size:.66rem;line-height:1.3;color:var(--dim)}
 
 
-/* Client-ready continuation roadmap */
-.roadmap-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:.65rem;margin-top:1.1rem}
-.roadmap-week{border:1px solid rgba(255,255,255,.17);border-radius:9px;padding:.8rem .8rem .7rem;background:rgba(255,255,255,.035);min-height:145px}
-.roadmap-week.priority{border-color:var(--gold);background:rgba(204,172,108,.09)}
-.roadmap-week .when{font-size:.63rem;letter-spacing:.09em;text-transform:uppercase;color:var(--gold);font-weight:700}
-.roadmap-week h3{font-size:clamp(.83rem,1.3vw,1.04rem);line-height:1.2;margin:.42rem 0}
-.roadmap-week p{font-size:clamp(.67rem,.9vw,.81rem);line-height:1.4;color:var(--dim);margin:0}
-.roadmap-week .format{display:block;font-size:.59rem;text-transform:uppercase;letter-spacing:.06em;color:var(--gold);margin-top:.6rem}
-.roadmap-foot{font-size:.72rem;color:var(--dim);line-height:1.5;margin-top:1rem}
-@media(max-width:760px){.roadmap-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.roadmap-week{min-height:130px}}
-
+/* Campaign timeline: anchors, supporting releases and parallel station work. */
+.timeline-shell{margin-top:1.1rem;border-top:1px solid rgba(255,255,255,.2);padding-top:.65rem}
+.timeline-legend{display:flex;gap:1.2rem;flex-wrap:wrap;font-size:.65rem;letter-spacing:.05em;text-transform:uppercase;color:var(--dim);margin-bottom:.9rem}
+.timeline-legend b{display:inline-block;width:9px;height:9px;margin-right:.4rem;border-radius:2px;background:var(--gold)}
+.timeline-legend .support b{background:#797979}.timeline-legend .station b{background:transparent;border:1px dashed var(--gold)}
+.timeline-scroll{overflow-x:auto;padding-bottom:.3rem}
+.timeline-chart{min-width:940px;display:grid;grid-template-columns:120px repeat(8,minmax(0,1fr));position:relative}
+.timeline-corner,.timeline-date{padding:.35rem .45rem .7rem;border-bottom:1px solid rgba(255,255,255,.25);font-size:.65rem;text-transform:uppercase;letter-spacing:.08em;color:var(--gold);font-weight:700}
+.timeline-date span{display:block;font-size:.56rem;color:var(--dim);font-weight:400;margin-top:.25rem}
+.timeline-label{padding:.65rem .45rem .65rem 0;font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--dim);border-bottom:1px solid rgba(255,255,255,.12)}
+.timeline-cell{min-height:115px;padding:.5rem .3rem;border-left:1px solid rgba(255,255,255,.10);border-bottom:1px solid rgba(255,255,255,.12)}
+.timeline-cell.station-cell{min-height:65px}
+.timeline-asset{padding:.55rem .45rem;border-radius:5px;background:rgba(255,255,255,.065);border-top:3px solid #777;height:100%;box-sizing:border-box}
+.timeline-asset.anchor{background:rgba(204,172,108,.13);border-top-color:var(--gold)}
+.timeline-asset strong{display:block;font-size:clamp(.69rem,.9vw,.83rem);line-height:1.2}
+.timeline-asset small{display:block;font-size:.61rem;line-height:1.4;color:var(--dim);margin-top:.35rem}
+.timeline-station{grid-column:2 / 10;grid-row:4;display:flex;align-items:center;justify-content:space-around;gap:.5rem;border:1px dashed var(--gold);border-radius:5px;background:rgba(204,172,108,.055);margin:.45rem .25rem;padding:.6rem;color:var(--gold);font-size:.67rem}
+.timeline-station span{color:var(--dim)}
+.timeline-note{font-size:.72rem;color:var(--dim);line-height:1.5;margin-top:.85rem}
+@media(max-width:760px){.timeline-chart{min-width:880px}.timeline-legend{gap:.7rem}.timeline-shell{margin-top:.7rem}}
 /* Post-album continuation: evidence beside the next action. */
 .continue-table{width:100%;border-collapse:collapse;table-layout:fixed;margin-top:clamp(1.2rem,2.5vw,2rem)}
 .continue-table th{text-align:left;font:700 .65rem 'Inter',sans-serif;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);padding:0 1rem .8rem 0}
@@ -910,24 +919,22 @@ body.present{overflow:hidden}
   </div>
 </section>
 
-<!-- ═══ 13 · PROPOSED EIGHT-WEEK ROADMAP ═══════════════════════ -->
-<section class="slide" data-t="8-week roadmap">
+<!-- ═══ 13 · PROPOSED EIGHT-WEEK TIMELINE ═══════════════ -->
+<section class="slide" data-t="Release timeline">
   <div class="inner">
-    <div class="label reveal">Post-album · proposed client release plan · 16 Nov – 10 Jan</div>
-    <h2 class="display reveal" style="margin-top:.55rem;font-size:clamp(1.8rem,3.8vw,3.25rem)">Give fans a reason to return.</h2>
-    <p class="body reveal" style="margin-top:.5rem;max-width:none;font-size:.86rem">Three priority long-form moments, supported by lower-cost Shorts and band storytelling. <strong>Use existing footage first.</strong></p>
-    <div class="roadmap-grid reveal">
-      <article class="roadmap-week"><div class="when">W1 · 16 Nov</div><h3>Extend Rose</h3><p>Cut a performance Short from the existing Rose live video; point to the full session and album playlist.</p><span class="format">Short · existing footage</span></article>
-      <article class="roadmap-week priority"><div class="when">W2 · 23 Nov ★</div><h3>Another song gets its moment</h3><p>Prioritise Feel The Love as a live performance or song-story edit, if footage exists. Tease with a Short.</p><span class="format">Priority · long-form</span></article>
-      <article class="roadmap-week"><div class="when">W3 · 30 Nov</div><h3>Follow the song</h3><p>Two distinct Shorts from the W2 asset: a performance highlight and a band/story moment.</p><span class="format">Shorts · repurpose</span></article>
-      <article class="roadmap-week priority"><div class="when">W4 · 7 Dec ★</div><h3>Return to the live room</h3><p>Release the next unreleased full-song live-room performance, subject to footage and approvals.</p><span class="format">Priority · long-form</span></article>
-      <article class="roadmap-week"><div class="when">W5 · 14 Dec</div><h3>Bring fans inside</h3><p>Rehearsal, behind-the-scenes or home-life moment; use a Community post to point to the live series.</p><span class="format">Short + Community</span></article>
-      <article class="roadmap-week"><div class="when">W6 · 21 Dec</div><h3>Catalogue meets album</h3><p>Archive performance clip with a clear route into the new album playlist. Keep production light.</p><span class="format">Short + playlist</span></article>
-      <article class="roadmap-week"><div class="when">W7 · 28 Dec</div><h3>Stay present, lightly</h3><p>Best live moment of the year and a simple fan Community post; avoid forcing a major holiday drop.</p><span class="format">Short + Community</span></article>
-      <article class="roadmap-week priority"><div class="when">W8 · 4 Jan ★</div><h3>Open the next chapter</h3><p>Choose the strongest remaining song for a live or song-story upload using December's organic response.</p><span class="format">Priority · long-form</span></article>
+    <div class="label reveal">Post-album · proposed release timeline · 16 Nov – 10 Jan</div>
+    <h2 class="display reveal" style="margin-top:.55rem;font-size:clamp(1.8rem,3.8vw,3.25rem)">Keep the world moving.</h2>
+    <p class="body reveal" style="margin-top:.45rem;max-width:none;font-size:.86rem">Three anchor releases. A supporting beat each week. One Station workstream. <strong>Use existing footage first.</strong></p>
+    <div class="timeline-shell reveal">
+      <div class="timeline-legend"><span><b></b> Priority long-form</span><span class="support"><b></b> Shorts / community</span><span class="station"><b></b> Station activation · pending</span></div>
+      <div class="timeline-scroll"><div class="timeline-chart">
+        <div class="timeline-corner">Content lane</div><div class="timeline-date">16 Nov<span>W1</span></div><div class="timeline-date">23 Nov<span>W2</span></div><div class="timeline-date">30 Nov<span>W3</span></div><div class="timeline-date">7 Dec<span>W4</span></div><div class="timeline-date">14 Dec<span>W5</span></div><div class="timeline-date">21 Dec<span>W6</span></div><div class="timeline-date">28 Dec<span>W7</span></div><div class="timeline-date">4 Jan<span>W8</span></div>
+        <div class="timeline-label">Anchor<br>release</div><div class="timeline-cell"></div><div class="timeline-cell"><div class="timeline-asset anchor"><strong>Feel The Love</strong><small>Live / song-story edit · if footage exists</small></div></div><div class="timeline-cell"></div><div class="timeline-cell"><div class="timeline-asset anchor"><strong>Live room</strong><small>Next full-song session · if available</small></div></div><div class="timeline-cell"></div><div class="timeline-cell"></div><div class="timeline-cell"></div><div class="timeline-cell"><div class="timeline-asset anchor"><strong>Next song</strong><small>Choose from December organic signals</small></div></div>
+        <div class="timeline-label">Keep fans<br>engaged</div><div class="timeline-cell"><div class="timeline-asset "><strong>Rose Short</strong><small>Clip existing live performance</small></div></div><div class="timeline-cell"><div class="timeline-asset "><strong>Teaser Short</strong><small>Point to the new full upload</small></div></div><div class="timeline-cell"><div class="timeline-asset "><strong>Two Shorts</strong><small>Performance + band/story angle</small></div></div><div class="timeline-cell"><div class="timeline-asset "><strong>Performance Short</strong><small>Support the live-room release</small></div></div><div class="timeline-cell"><div class="timeline-asset "><strong>Behind the scenes</strong><small>Rehearsal / home-life + Community</small></div></div><div class="timeline-cell"><div class="timeline-asset "><strong>Catalogue bridge</strong><small>Archive clip → album playlist</small></div></div><div class="timeline-cell"><div class="timeline-asset "><strong>Year-end moment</strong><small>Best live clip + Community</small></div></div><div class="timeline-cell"><div class="timeline-asset "><strong>Launch Short</strong><small>Drive to January's main upload</small></div></div>
+        <div class="timeline-label">YouTube<br>Station</div><div class="timeline-station"><strong>W1 · Follow up with YouTube</strong><span>→</span><strong>W2 · Agree selections</strong><span>→</span><strong>December · Target activation, subject to approval</strong></div>
+      </div></div>
     </div>
-    <div class="reveal" style="margin-top:.85rem;padding:.8rem 1rem;border:1px solid var(--gold);border-radius:9px;background:rgba(204,172,108,.07)"><div style="font-size:.66rem;color:var(--gold);font-weight:700;text-transform:uppercase;letter-spacing:.08em">Parallel priority · YouTube Station · not yet live</div><p style="font-size:clamp(.75rem,1vw,.9rem);line-height:1.5;margin:.35rem 0 0"><strong>W1:</strong> Follow up with YouTube on activation requirements and approvals. <strong>W2:</strong> Agree the album, live and catalogue selections. <strong>December:</strong> Aim to activate if approved, then assess whether it drives discovery and onward viewing. Timing depends on YouTube; this is not a confirmed launch.</p></div>
-    <p class="roadmap-foot reveal"><strong>Decision gate · 6 Dec:</strong> Review organic views, retention, traffic sources and available footage before locking the January asset. <strong>Every priority upload:</strong> supporting Short, album playlist, end screen and clear next watch. Dates, songs and assets are recommendations, not confirmed releases; public view counts elsewhere include paid support.</p>
+    <p class="timeline-note reveal"><strong>Decision gate · 6 Dec:</strong> Review organic views, retention and footage availability before confirming the January song. Each anchor should link to the album playlist and have a supporting Short. <strong>All dates and content are proposed, not confirmed.</strong> The Station is not live and depends on YouTube approval.</p>
   </div>
 </section>
 
