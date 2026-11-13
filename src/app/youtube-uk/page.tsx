@@ -63,8 +63,7 @@ export default async function ControlPage({
   const rosterNames = new Set(YOUTUBE_UK_ROSTER.map(r => r.name.toLowerCase().replace(/[^a-z0-9]/g, '')));
   const allArtists = ukArtists.filter(a => rosterNames.has(a.name.toLowerCase().replace(/[^a-z0-9]/g, '')));
   const syncMeta = await readSyncMeta();
-  const pinned = [];
-  const pinnedSlugs = pinned.map((p) => p.slug);
+  const pinnedSlugs: string[] = [];
 
   // Batch-read all cached snaps from KV (zero YouTube API calls)
   const handles = allArtists
