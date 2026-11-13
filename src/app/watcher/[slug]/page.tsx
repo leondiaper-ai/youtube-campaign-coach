@@ -1,8 +1,8 @@
 import { deepDiveFor } from '@/lib/deepDiveLink';
-import { listPartnerSlugs } from '@/lib/youtubeUkPartnerStore';
+import { listPartnerSlugs, listHiddenPartnerSlugs } from '@/lib/youtubeUkPartnerStore';
 import { YOUTUBE_UK_ROSTER } from '@/lib/youtubeUkRoster';
 import PartnerLinkGuard from '@/components/PartnerLinkGuard';
-import { getLabelWorkspace } from '@/lib/labels';
+import { getLabelWorkspace, isLabelArtist } from '@/lib/labels';
 import { getArtistsForMarket, getAllArtists } from '@/lib/marketScope';
 import { notFound } from 'next/navigation';
 import { AppHeader } from '@/components/ui/AppHeader';
@@ -40,11 +40,19 @@ export default async function WatcherPage({
   const sp = (await searchParams) ?? {};
   const partner = sp.partner === 'youtube-uk';
   const roster = partner ? await getAllArtists() : [];
-  const allowedNames = new Set(YOUTUBE_UK_ROSTER.map(a => a.name.toLowerCase().replace(/[^a-z0-9]/g, '')));
-  const allowed = roster.filter(a => allowedNames.has(a.name.toLowerCase().replace(/[^a-z0-9]/g, '')));
-  const extraSlugs = partner ? await listPartnerSlugs().catch(() => [] as string[]) : [];
-  if (partner && !allowed.some(a => a.slug === slug) && !extraSlugs.includes(slug)) notFound();
-  const partnerArtist = partner ? (await getArtistsForMarket('uk')).find(a => a.slug === slug) : undefined;
+  const normalize = (name: string) => name.normalize('NFKD').replace(/[\\u0300-\\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]/g, '');
+  const allowedNames = new Set(YOUTUBE_UK_ROSTER.map(a => normalize(a.name)));
+  const partisan = getLabelWorkspace('partisan');
+  const [extraSlugs, hiddenSlugs] = partner ? await Promise.all([
+    listPartnerSlugs().catch(() => [] as string[]),
+    listHiddenPartnerSlugs().catch(() => [] as string[]),
+  ]) : [[], []];
+  const allowed = roster.filter(a =>
+    !hiddenSlugs.includes(a.slug) &&
+    (allowedNames.has(normalize(a.name)) || extraSlugs.includes(a.slug) || (partisan && isLabelArtist(partisan, a)))
+  );
+  if (partner && !allowed.some(a => a.slug === slug)) notFound();
+  const partnerArtist = partner ? roster.find(a => a.slug === slug) : undefined;
   const partnerDeck = partnerArtist ? deepDiveFor(partnerArtist.name) : null;
   /* The action bar's default "← Dashboard" and "Channel behaviour" links are
      built from this. Without it an Australian user clicking either one left
@@ -60,6 +68,6 @@ export default async function WatcherPage({
       { href: `/campaigns${q}`, label: 'Active Campaigns' },
       { href: `/coach${q}`, label: 'Coach' },
     ]} />}
-    {partner ? <PartnerLinkGuard allowedSlugs={[...allowed.map(a => a.slug), ...extraSlugs]} allowedDeepDiveHrefs={partnerDeck ? [partnerDeck.href] : []}><WatcherArtistView slug={slug} market="uk" signature="YouTube UK · Shared Watcher" /></PartnerLinkGuard> : <WatcherArtistView slug={slug} market={market.id} signature="Watcher watches · Coach plans · You decide" />}
+    {partner ? <PartnerLinkGuard allowedSlugs={allowed.map(a => a.slug)} allowedDeepDiveHrefs={partnerDeck ? [partnerDeck.href] : []}><WatcherArtistView slug={slug} market="uk" signature="YouTube UK · Shared Watcher" /></PartnerLinkGuard> : <WatcherArtistView slug={slug} market={market.id} signature="Watcher watches · Coach plans · You decide" />}
   </>;
 }
