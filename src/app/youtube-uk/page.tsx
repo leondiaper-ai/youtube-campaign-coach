@@ -280,7 +280,7 @@ export default async function ControlPage({
         />
 
         {/* Client-side board with toggle */}
-        <PartnerLinkGuard><ChannelHealthBoard singleTab={true} labelRoster={true} linkSuffix={mq} behaviourBase={label ? `/labels/${label.slug}/behaviour` : `/campaigns${mq}`} rows={rows} topVideos={topVideos} marketFormatStats={marketFormatStats} pinnedSlugs={[]} /></PartnerLinkGuard>
+        <PartnerLinkGuard allowedSlugs={rows.map(r => r.slug)}><ChannelHealthBoard singleTab={true} labelRoster={true} linkSuffix={mq} behaviourBase={label ? `/labels/${label.slug}/behaviour` : `/campaigns${mq}`} rows={rows} topVideos={topVideos} marketFormatStats={marketFormatStats} pinnedSlugs={[]} /></PartnerLinkGuard>
 
 
       </div>
