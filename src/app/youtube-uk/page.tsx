@@ -251,6 +251,7 @@ export default async function ControlPage({
   return (
     <main className="min-h-screen bg-paper text-ink">
       <AppHeader
+        hideAutoLabels
         nav={nav}
         workspace="YouTube UK · Shared Watcher"
         actions={null}
