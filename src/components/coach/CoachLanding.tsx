@@ -198,7 +198,8 @@ const STATUS_MARK: Record<ReleaseAsset['status'], { icon: string; cls: string }>
 };
 
 export default function CoachLanding({ model, slug, classicHref, timelineEditor, readOnly = false }: { model: LandingModel; slug?: string; classicHref?: string; timelineEditor?: ReactNode; readOnly?: boolean }) {
-  const visualPilot = slug === 'chvrches-chvrches-campaign';
+  // The visual delivery map is the shared Coach experience, not an artist-only pilot.
+  const visualPilot = true;
   const uploads = [...model.assets.long, ...model.assets.shorts].filter(u => Number.isFinite(Date.parse(u.publishedAt))).sort((a,b) => Date.parse(a.publishedAt)-Date.parse(b.publishedAt));
   const last = uploads.at(-1);
   const first = uploads[0];
@@ -261,7 +262,7 @@ export default function CoachLanding({ model, slug, classicHref, timelineEditor,
         {visualPilot && <section className="border-t border-line-faint bg-[#15191d] text-white p-5 sm:p-7" aria-label="CHVRCHES campaign delivery map">
           <div className="flex flex-wrap items-start justify-between gap-4">
             <div><p className="text-[10px] uppercase tracking-[.2em] text-[#aebac5] font-bold m-0">Campaign delivery map</p><h2 className="text-[27px] sm:text-[34px] leading-tight font-black tracking-tight m-0 mt-1">What needs to go live next?</h2><p className="text-[12px] text-[#b9c5ce] m-0 mt-2">One view of the asset plan, publishing rhythm and format coverage.</p></div>
-            <div className="text-right"><strong className="text-[36px] leading-none font-black tabular-nums">{rolloutCounts.agreed+rolloutCounts.suggested}</strong><span className="block text-[11px] text-[#bdc7d0] mt-1">assets still in the rollout plan</span></div>
+            <div className="text-right"><strong className="text-[36px] leading-none font-black tabular-nums">{rolloutCounts.agreed+rolloutCounts.suggested}</strong><span className="block text-[11px] text-[#bdc7d0] mt-1">outstanding rollout assets</span></div>
           </div>
           {(() => {
             const upcoming=model.rollout.flatMap(r=>r.assets.filter(a=>a.status!=='published').map(a=>({...a,moment:r.name,date:r.dateLabel,stage:r.stage})));
@@ -279,7 +280,7 @@ export default function CoachLanding({ model, slug, classicHref, timelineEditor,
                   <strong className="block text-[24px] leading-tight mt-3">{next?.label??'No outstanding planned asset'}</strong>
                   <p className="text-[13px] text-[#d2dbe2] mt-2 mb-0">{next?next.moment:'Review the rollout for the next campaign moment'}</p>
                   <div className="flex flex-wrap gap-2 mt-5"><span className="rounded-md bg-white/10 px-3 py-2 text-[12px] font-bold">{next?.date??'Date not set'}</span><span className="rounded-md bg-[#3c4b57] px-3 py-2 text-[12px] font-bold">{next?.status==='agreed'?'Agreed with team':next?'Suggested · confirm with team':'No action queued'}</span></div>
-                  <p className="text-[11px] text-[#a9b8c5] mt-3 mb-0">Date is the saved release moment, not a confirmed asset deadline.</p>
+                  <p className="text-[11px] text-[#a9b8c5] mt-3 mb-0">Release moment shown, not a confirmed production deadline.</p>
                 </div>
                 <div className="rounded-xl border border-white/15 p-5">
                   <p className="text-[10px] uppercase tracking-[.16em] font-bold text-[#a9b8c5] m-0">Next 28 days · working requirement</p>
@@ -287,7 +288,7 @@ export default function CoachLanding({ model, slug, classicHref, timelineEditor,
                     <div><strong className="text-[34px] leading-none font-black tabular-nums">{framework?.next28Videos??'—'}</strong><span className="block text-[11px] mt-2 text-[#bdc7d0]">video moments</span></div>
                     <div><strong className="text-[34px] leading-none font-black tabular-nums">{framework?.next28Shorts??'—'}</strong><span className="block text-[11px] mt-2 text-[#bdc7d0]">minimum Shorts</span></div>
                   </div>
-                  <p className="text-[12px] text-[#c8d2da] mt-5 mb-0">{framework?framework.upcomingMoments+' upcoming release moments · baseline of two Shorts per week, increased for releases.':'Add release dates to calculate the upcoming asset requirement.'}</p>
+                  <p className="text-[12px] text-[#c8d2da] mt-5 mb-0">{framework?framework.upcomingMoments+' upcoming release moments · baseline of two Shorts per week, increased for releases.':'Add dated release moments to calculate a reliable 28-day requirement.'}</p>
                 </div>
               </div>
               {formats.length>0&&<div className="mt-6">
@@ -335,6 +336,12 @@ export default function CoachLanding({ model, slug, classicHref, timelineEditor,
           <span><strong className="text-secondary">Campaign evidence:</strong> {model.assets.long.length} videos · {model.assets.shorts.length} Shorts observed in the selected window</span>
           <span>Partial coverage · other official or label channels may hold additional assets</span>
         </div>
+        <div className="border-t border-line-faint px-4 pt-5 pb-2">
+          <div className="flex flex-wrap items-baseline justify-between gap-2">
+            <div><Eyebrow>Campaign evidence · what is working</Eyebrow><p className="text-[12px] text-secondary mt-1 mb-0">Real uploads and sampled fan response, separated from the suggested plan.</p></div>
+            <span className="text-[11px] text-muted">{model.assets.long.length} videos · {model.assets.shorts.length} Shorts checked</span>
+          </div>
+        </div>
         <div className="border-t border-line-faint grid md:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)]">
           <div className="p-4 flex flex-col sm:flex-row gap-3.5">
             {model.latest && (
@@ -369,8 +376,9 @@ export default function CoachLanding({ model, slug, classicHref, timelineEditor,
             )}
           </div>
 
-          {model.fan && (
-            <div className="p-4 border-t md:border-t-0 md:border-l border-line-faint">
+          <div className="p-4 border-t md:border-t-0 md:border-l border-line-faint">
+            {!model.fan && <div className="h-full flex flex-col justify-center"><Eyebrow>Fan response</Eyebrow><p className="text-body font-extrabold text-ink m-0 mt-2">Awaiting a reliable comment sample</p><p className="text-[12px] text-secondary m-0 mt-2 leading-relaxed">No verified sentiment reading for these campaign uploads yet. The Coach will show sampled comments and themes when enough evidence is available.</p></div>}
+            {model.fan && <>
               <Eyebrow>Fan response</Eyebrow>
               <p className="text-body font-extrabold text-ink m-0 mt-1 leading-snug">
                 {model.fan.tone}{model.fan.theme ? ` · ${model.fan.theme}` : ''}
@@ -385,8 +393,8 @@ export default function CoachLanding({ model, slug, classicHref, timelineEditor,
                 Sampled from {exact(model.fan.commentsOnAsset)} comments across {model.fan.assetLabel},
                 read {shortDate(model.fan.at)}. A sample, not the view of the audience.
               </p>
-            </div>
-          )}
+            </>}
+          </div>
         </div>
 
         <div className="border-t border-line-faint p-4 grid gap-5 lg:grid-cols-[minmax(0,2fr)_minmax(0,3fr)]">
