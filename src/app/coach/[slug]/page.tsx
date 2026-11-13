@@ -82,9 +82,12 @@ export default async function CampaignPage({ params, searchParams }: PageProps) 
   // Find the artist's channel handle
   const custom = await listCustomArtists();
   const allArtists = [...ARTISTS, ...custom];
-  const artistConfig = allArtists.find(
-    (a) => a.slug === saved.artist.toLowerCase().replace(/\s+/g, '-') ||
-           a.name.toLowerCase() === saved.artist.toLowerCase()
+  // Campaign slugs are not artist slugs (e.g. tom-a-smith-the-golden-gates).
+  // Resolve punctuation and spacing consistently with the Watcher roster.
+  const normalizeArtist = (value: string) => value.normalize('NFKD').replace(/[\\u0300-\\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]/g, '');
+  const artistConfig = allArtists.find(a =>
+    normalizeArtist(a.name) === normalizeArtist(saved.artist) ||
+    normalizeArtist(a.slug) === normalizeArtist(saved.artist)
   );
 
   // Auto-regenerate plan when:
