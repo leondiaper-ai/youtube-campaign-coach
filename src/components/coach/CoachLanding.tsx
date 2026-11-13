@@ -211,6 +211,12 @@ export default function CoachLanding({ model, slug, classicHref, timelineEditor,
   const maxRhythm = Math.max(1,...rhythm.map(r=>r.long+r.short));
   const gaps = uploads.slice(1).map((u,i)=>({days:Math.round((Date.parse(u.publishedAt)-Date.parse(uploads[i].publishedAt))/86400000),from:uploads[i],to:u})).filter(g=>g.days>14);
   const largestGap = gaps.sort((a,b)=>b.days-a.days)[0];
+  // CHVRCHES-only editorial pilot: use the same observed assets and saved rollout plan.
+  const videoLeaders = [...model.assets.long].filter(v => v.views !== null && v.views > 0).sort((a,b)=>(b.views??0)-(a.views??0));
+  const leadingVideo = videoLeaders[0] ?? null;
+  const videoMedian = videoLeaders.length >= 3 ? [...videoLeaders].map(v=>v.views??0).sort((a,b)=>a-b)[Math.floor((videoLeaders.length-1)/2)] : null;
+  const notableLeader = leadingVideo && videoMedian !== null && videoMedian > 0 && (leadingVideo.views??0) >= videoMedian * 2 ? leadingVideo : null;
+  const rolloutMoments = model.rollout.filter(r=>r.assets.length>0).slice(0,5);
   const rolloutCounts = {published:model.rollout.flatMap(r=>r.assets).filter(a=>a.status==='published').length, agreed:model.rollout.flatMap(r=>r.assets).filter(a=>a.status==='agreed').length,suggested:model.rollout.flatMap(r=>r.assets).filter(a=>a.status==='suggested').length};
   return (
     <div className="max-w-[1060px] mx-auto px-5 pb-16">
@@ -268,6 +274,37 @@ export default function CoachLanding({ model, slug, classicHref, timelineEditor,
             <span><span className="text-[#f6b64b]">■</span> Videos · <span className="text-[#61b9ed]">■</span> Shorts</span>
           </div>
           <p className="mt-3 mb-0 text-[12px] text-[#e0e5e9]">{largestGap ? `Longest observed upload gap: ${largestGap.days} days. Check whether planned follow-through or label-channel uploads fill it.` : uploads.length>1 ? 'No observed gap longer than 14 days in the available uploads.' : 'Not enough dated uploads to assess rhythm.'}</p>
+          <div className="mt-5 pt-4 border-t border-white/20">
+            <div className="flex flex-wrap items-baseline justify-between gap-2 mb-3">
+              <strong className="text-[14px]">Release → follow-through</strong>
+              <span className="text-[10px] uppercase tracking-wider text-[#aeb9c3]">Saved rollout · not inferred uploads</span>
+            </div>
+            {rolloutMoments.length ? <div className="grid gap-2 sm:grid-cols-2">
+              {rolloutMoments.map((moment,i)=>{
+                const published=moment.assets.filter(a=>a.status==='published');
+                const agreed=moment.assets.filter(a=>a.status==='agreed');
+                const suggested=moment.assets.filter(a=>a.status==='suggested');
+                return <div key={i} className="rounded-lg border border-white/15 bg-white/[0.06] px-3 py-3">
+                  <div className="text-[10px] uppercase tracking-wide text-[#aeb9c3]">{moment.dateLabel} · {moment.stage}</div>
+                  <strong className="block text-[13px] mt-1 truncate" title={moment.name}>{moment.name}</strong>
+                  <div className="flex gap-1 mt-3 h-2" aria-label={`${published.length} published, ${agreed.length} agreed, ${suggested.length} suggested`}>
+                    {[...published.map((_,n)=>({k:'p'+n,c:'#77dbab'})),...agreed.map((_,n)=>({k:'a'+n,c:'#a4b9ff'})),...suggested.map((_,n)=>({k:'s'+n,c:'#e8c17c'}))].map(x=><span key={x.k} className="h-2 rounded-sm min-w-2 flex-1" style={{background:x.c}} />)}
+                  </div>
+                  <p className="text-[11px] text-[#c0cad2] mt-2 mb-0">{published.length} published · {agreed.length} agreed · {suggested.length} suggested</p>
+                </div>;
+              })}
+            </div> : <p className="text-[12px] text-[#b9c3cc]">No saved release moments available for a format map.</p>}
+          </div>
+          <div className="mt-5 pt-4 border-t border-white/20">
+            <strong className="block text-[14px]">Where to build next</strong>
+            {notableLeader ? <div className="flex gap-3 mt-3 items-center">
+              <Thumb v={notableLeader} className="w-24 h-16 shrink-0" />
+              <div><p className="m-0 text-[12px] font-bold">{notableLeader.title}</p>
+                <p className="m-0 mt-1 text-[11px] text-[#c0cad2]">{compact(notableLeader.views??0)} lifetime views · at least 2× the median of {videoLeaders.length} observed longform uploads. Consider a distinct Short, live cut or lyric follow-up if not already covered.</p>
+              </div>
+            </div> : <p className="text-[12px] text-[#c0cad2] mt-2 mb-0">No reliably comparable standout video from the observed longform sample. Prioritise the release plan rather than assuming a winner from raw views.</p>}
+            <p className="text-[11px] text-[#c0cad2] mt-3 mb-0">{model.framework && (model.framework.assessment.followUps.tone==='behind'||model.framework.assessment.shorts.tone==='behind') ? 'Possible follow-through gap: review planned and label-channel assets before commissioning new formats.' : 'Check each release for a clear destination video and meaningful follow-up across formats.'}</p>
+          </div>
           <div className="grid grid-cols-3 gap-2 mt-4 pt-4 border-t border-white/20">
             {[{label:'Published',count:rolloutCounts.published,tone:'text-[#77dbab]'},{label:'Agreed',count:rolloutCounts.agreed,tone:'text-[#a4b9ff]'},{label:'Suggested',count:rolloutCounts.suggested,tone:'text-[#e8c17c]'}].map(f=><div key={f.label}><strong className={`block text-[23px] tabular-nums ${f.tone}`}>{f.count}</strong><span className="text-[11px] text-[#c0cad2]">{f.label} · rollout assets</span></div>)}
           </div>
