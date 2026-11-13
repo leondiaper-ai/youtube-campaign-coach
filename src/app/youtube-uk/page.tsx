@@ -1,83 +1,301 @@
-import Link from 'next/link';
-import { getAllArtists } from '@/lib/marketScope';
-import { readAllLiveSnaps, readSyncMeta } from '@/lib/kvCache';
-import { readHistory } from '@/lib/snapshots';
-import { normalizeChannelData, rawDelta } from '@/lib/youtube/normalizeChannelData';
+import { getLabelWorkspace } from '@/lib/labels';
 import { YOUTUBE_UK_ROSTER } from '@/lib/youtubeUkRoster';
+import Link from 'next/link';
+import {
+  ARTISTS, mergeArtistLists, daysSince, deriveFromLive,
+  STATUS_RANK, classifyArtist, isVirginOwned,
+  type Artist, type ChannelState,
+} from '@/lib/artists';
+import { listCustomArtists } from '@/lib/artistStore';
+import { getMarketFromRequest } from '@/lib/marketServer';
+import { getArtistsForMarket } from '@/lib/marketScope';
+import { listAllTeamEntries } from '@/lib/teamWatcherStore';
+import { TEAMS, TEAM_SLUGS } from '@/lib/teams';
+import { readAllLiveSnaps, readSyncMeta } from '@/lib/kvCache';
+import { listPinned } from '@/lib/campaignStore';
+import { readHistory } from '@/lib/snapshots';
+import { normalizeChannelData, rawDelta, computeWoW } from '@/lib/youtube/normalizeChannelData';
+import ChannelHealthBoard, { type RowData, type TopVideo, type MarketFormatStats } from '@/components/ChannelHealthBoard';
+import { computeMultiformat } from '@/lib/contentStructure';
+import { bestFormatStack } from '@/lib/formatStack';
+import { commentDemand } from '@/lib/commentDemand';
+import { resolveRowFormatSplit } from '@/lib/formatSplit';
+import { readFormatDaysBatch } from '@/lib/formatHistory';
+import AddArtistButton from '@/components/AddArtistButton';
+import { AppHeader, PageTitle } from '@/components/ui/AppHeader';
 
 export const revalidate = 600;
+
 export const metadata = {
-  title: 'YouTube UK | Shared Channel Watcher',
-  description: 'Agreed UK artist monitoring universe, using the same cached YouTube observations as the VMG Watcher.',
-  robots: { index: false, follow: false },
+  title: 'YouTube UK Shared Watcher — YouTube Campaign System',
+  description: 'Shared UK priority artist monitoring with the existing Channel Health Watcher.',
 };
 
-const key = (s: string) => s.toLowerCase().replace(/[^a-z0-9]/g, '');
-const fmt = (n: number | null | undefined) => n == null ? '—' : Intl.NumberFormat('en-GB', { notation: 'compact', maximumFractionDigits: 1 }).format(n);
-const count = (n: number | null | undefined) => n == null ? '—' : n.toLocaleString('en-GB');
+export default async function ControlPage({
+  searchParams,
+}: {
+  searchParams?:
+    | Record<string, string | string[] | undefined>
+    | Promise<Record<string, string | string[] | undefined>>;
+}) {
+  const market = await getMarketFromRequest(searchParams);
+  const label = getLabelWorkspace(market.id);
+  /* Every internal link on this page carries the market. The page resolved it
+     and then discarded it, which is the most common way a workspace leaks. */
+  const mq = market.id === 'uk' ? '' : `?market=${market.id}`;
 
-export default async function YoutubeUkWatcher() {
-  const all = await getAllArtists();
-  const byName = new Map(all.map(a => [key(a.name), a]));
-  const roster = YOUTUBE_UK_ROSTER.map(item => ({ ...item, artist: byName.get(key(item.name)) }));
-  const handles = roster.map(r => r.artist?.channelHandle).filter((v): v is string => !!v);
-  const [snaps, sync] = await Promise.all([readAllLiveSnaps(handles), readSyncMeta()]);
-  const rows = await Promise.all(roster.map(async item => {
-    const snap = item.artist?.channelHandle ? snaps.get(item.artist.channelHandle) : null;
-    const history = snap?.channelId && !snap.error ? await readHistory(snap.channelId) : [];
-    const normalized = normalizeChannelData(snap ?? null, history);
-    const uploads = snap?.recentUploads ?? [];
-    const lastUpload = uploads.length ? uploads.map(u => u.publishedAt).sort().reverse()[0] : null;
+
+  /* ── WHO ELSE IS WATCHING ───────────────────────────────────────────
+     Artists a regional team adds already arrive here: everything added
+     through any board lands in the same `artists:custom` pool, and this
+     page reads that pool. What was missing was WHOSE they are — an
+     unfamiliar name in the roster with no explanation is a puzzle rather
+     than information.
+
+     So each row picks up the tag of the team that added it. Read-only,
+     and keyed on channel id so a rename on their side cannot break it. */
+  const teamEntries: Awaited<ReturnType<typeof listAllTeamEntries>> = [];
+  const teamTagByChannel = new Map(
+    teamEntries.map(e => [e.channelId, TEAMS[e.team]?.regionTag ?? e.regionTag]),
+  );
+  /* Scoped to the market so the Watcher shows this team's roster. Markets
+     with a team board get everyone on that board — see marketScope. */
+  const ukArtists = await getArtistsForMarket('uk');
+  const rosterNames = new Set(YOUTUBE_UK_ROSTER.map(r => r.name.toLowerCase().replace(/[^a-z0-9]/g, '')));
+  const allArtists = ukArtists.filter(a => rosterNames.has(a.name.toLowerCase().replace(/[^a-z0-9]/g, '')));
+  const syncMeta = await readSyncMeta();
+  const pinned = [];
+  const pinnedSlugs = pinned.map((p) => p.slug);
+
+  // Batch-read all cached snaps from KV (zero YouTube API calls)
+  const handles = allArtists
+    .map((a) => a.channelHandle)
+    .filter(Boolean) as string[];
+  const snapMap = await readAllLiveSnaps(handles);
+
+  /* ── FORMAT SPLIT, SERVER-SIDE, NO NEW API CALLS ────────────────────
+     Everything the split needs is already on this page: recentUploads
+     and lifetime views come from the snaps read above. The only extra
+     fetch is the stored daily history, batched into one Redis mget so
+     the Formats column costs a single round trip for the whole roster
+     rather than one per artist. */
+  const formatDaysByChannel = await readFormatDaysBatch(
+    allArtists
+      .map((a) => (a.channelHandle ? snapMap.get(a.channelHandle)?.channelId : null))
+      .filter(Boolean) as string[],
+  );
+
+  const rows: RowData[] = await Promise.all(
+    allArtists.map(async (a) => {
+      const snap = a.channelHandle ? (snapMap.get(a.channelHandle) ?? null) : null;
+      const history =
+        snap?.channelId && !snap.error ? await readHistory(snap.channelId) : [];
+
+      // ── Normalized data layer ───────────────────────────────────────────
+      const nc = normalizeChannelData(snap, history);
+
+      // Week-on-week: compare this 7d delta vs previous 7d delta
+      const subs7Val = rawDelta(nc.subs7d);
+      const views7Val = rawDelta(nc.views7d);
+      // For WoW we need the raw 14d deltas to derive "previous week"
+      const { deltaOver: deltaOverFn } = await import('@/lib/snapshots');
+      const subs14Raw = deltaOverFn(history, 14, 'subs');
+      const views14Raw = deltaOverFn(history, 14, 'views');
+      // Use centralized WoW calculator with proper guards
+      const subsWoWResult = computeWoW(nc.subs7d, subs14Raw);
+      const viewsWoWResult = computeWoW(nc.views7d, views14Raw);
+      const subsWoW = subsWoWResult?.value ?? null;
+      const viewsWoW = viewsWoWResult?.value ?? null;
+
+      const derived = snap ? deriveFromLive(snap, {
+        subs7Delta: subs7Val,
+        views7Delta: views7Val,
+      }) : null;
+      const status: ChannelState = derived?.status ?? 'COLD';
+      const classification = classifyArtist(status, nc.cadence.uploads30d);
+      const reason = derived?.reason ?? 'No cached data yet';
+
+      return {
+        slug: a.slug,
+        name: a.name,
+        isVirgin: isVirginOwned(a),
+        teamTag: snap?.channelId ? teamTagByChannel.get(snap.channelId) : undefined,
+        subs: nc.subs,
+        subs7Delta: subs7Val,
+        views7Delta: views7Val,
+        subsWoW,
+        viewsWoW,
+        uploads30d: nc.cadence.uploads30d,
+        shorts30d: nc.cadence.shorts30d,
+        status,
+        classification,
+        reason,
+        subsSeries: nc.sparklineSubs30d,
+        totalViews: nc.views,
+        confidence: nc.confidence,
+        healthNote: nc.healthNote,
+        dataStatus: nc.dataStatus,
+        dataStatusNote: nc.dataStatusNote,
+        viewDataFreshness: nc.viewDataFreshness,
+        movementConfidence: nc.movementConfidence,
+        movementFreshness: nc.movementFreshness,
+        lastKnownGoodViews7d: nc.lastKnownGood.views7d,
+        lastKnownGoodSubs7d: nc.lastKnownGood.subs7d,
+        lastKnownGoodDaysAgo: nc.lastKnownGood.daysAgo,
+        bestAvailableSource: nc.bestAvailable.source,
+        bestAvailableShouldUseInTopMovers: nc.bestAvailable.shouldUseInTopMovers,
+        multiformat: snap?.recentUploads ? computeMultiformat(snap.recentUploads) : undefined,
+        /* Release-level, unlike multiformat above, which is channel-level.
+           Both are kept because they answer different questions — see the
+           header of formatStack.ts. */
+        /* The channel avatar is already on the snap — the campaigns
+           sidebar has been using it. No fetch, no extra field to sync. */
+        thumbnail: snap?.thumbnail ?? undefined,
+        /* Free: commentCount is already on every cached upload. */
+        commentDemand: snap?.recentUploads
+          ? commentDemand(snap.recentUploads) ?? undefined
+          : undefined,
+        formatStack: snap?.recentUploads
+          ? bestFormatStack(snap.recentUploads, a.name) ?? undefined
+          : undefined,
+        /* Recent-vs-lifetime decided by the shared resolver, so this
+           column can never disagree with the artist strip. */
+        formatSplit:
+          snap?.recentUploads && snap.channelId
+            ? resolveRowFormatSplit(
+                snap.recentUploads,
+                formatDaysByChannel.get(snap.channelId) ?? [],
+                snap.views ?? null,
+              ) ?? undefined
+            : undefined,
+      };
+    })
+  );
+
+  // ── Top Performing Videos (managed artists, last 14d, ranked by velocity) ──
+  const topVideos: TopVideo[] = (() => {
+    const now = Date.now();
+    const cutoff = 14 * 86400000; // 14 days
+    const videos: TopVideo[] = [];
+
+    for (const a of allArtists) {
+      if (!label && !isVirginOwned(a)) continue;
+      const snap = a.channelHandle ? (snapMap.get(a.channelHandle) ?? null) : null;
+      if (!snap?.recentUploads) continue;
+
+      for (const u of snap.recentUploads) {
+        const ageMs = now - new Date(u.publishedAt).getTime();
+        if (ageMs > cutoff || ageMs < 0) continue; // only last 14 days
+        const daysAgo = Math.max(1, Math.floor(ageMs / 86400000));
+        const velocity = Math.round(u.viewCount / daysAgo);
+        if (velocity < 100) continue; // skip negligible
+
+        videos.push({
+          videoId: u.id,
+          title: u.title,
+          artistName: a.name,
+          artistSlug: a.slug,
+          views: u.viewCount,
+          velocity,
+          publishedAt: u.publishedAt,
+          daysAgo,
+          isShort: u.durationSec <= 62,
+        });
+      }
+    }
+
+    // Return all qualifying videos — component splits into Shorts vs Long-form
+    return videos.sort((a, b) => b.velocity - a.velocity);
+  })();
+
+  // ── Market Format Stats (long-form vs Shorts across market artists, 30d) ──
+  const marketFormatStats: MarketFormatStats = (() => {
+    let longformCount = 0;
+    let longformViews = 0;
+    let shortsCount = 0;
+    let shortsViews = 0;
+    const activeArtistSlugs = new Set<string>();
+
+    for (const a of allArtists) {
+      if (isVirginOwned(a)) continue; // market only
+      const snap = a.channelHandle ? (snapMap.get(a.channelHandle) ?? null) : null;
+      if (!snap?.recentUploads) continue;
+
+      let hasUpload = false;
+      for (const u of snap.recentUploads) {
+        hasUpload = true;
+        if (u.durationSec <= 62) {
+          shortsCount++;
+          shortsViews += u.viewCount;
+        } else {
+          longformCount++;
+          longformViews += u.viewCount;
+        }
+      }
+      if (hasUpload) activeArtistSlugs.add(a.slug);
+    }
+
     return {
-      ...item,
-      matched: !!item.artist,
-      hasData: !!snap && !snap.error,
-      subscribers: normalized.subs,
-      views7d: rawDelta(normalized.views7d),
-      subs7d: rawDelta(normalized.subs7d),
-      uploads30d: normalized.cadence.uploads30d,
-      shorts30d: normalized.cadence.shorts30d,
-      lastUpload,
-      freshness: normalized.dataStatus,
+      longformCount,
+      longformViews,
+      shortsCount,
+      shortsViews,
+      totalUploads: longformCount + shortsCount,
+      activeArtists: activeArtistSlugs.size,
     };
-  }));
-  const tracked = rows.filter(r => r.hasData).length;
-  const active = rows.filter(r => (r.uploads30d ?? 0) + (r.shorts30d ?? 0) > 0).length;
-  const missing = rows.filter(r => !r.hasData).length;
-  const syncedAt = sync?.lastSyncAt ? new Date(sync.lastSyncAt).toLocaleString('en-GB', { dateStyle: 'medium', timeStyle: 'short', timeZone: 'Europe/London' }) : 'Unavailable';
+  })();
 
-  return <main className="min-h-screen bg-paper text-ink">
-    <header className="border-b border-line bg-surface">
-      <div className="max-w-[1180px] mx-auto px-6 py-5 flex flex-wrap justify-between items-center gap-3">
-        <div><div className="text-xs font-bold uppercase tracking-widest text-muted">VMG × YouTube UK</div><div className="text-xl font-bold">Shared Channel Watcher</div></div>
-        <div className="text-xs text-muted">YouTube observations last synced: {syncedAt}</div>
+  /* The same four destinations the page already had, in the shared shell
+     rather than hand-drawn pills. The market query is still threaded by
+     this page, exactly as before. */
+  const nav = [{ href: '/youtube-uk', label: 'Channel Health', match: '/youtube-uk' }];
+
+  return (
+    <main className="min-h-screen bg-paper text-ink">
+      <AppHeader
+        nav={nav}
+        workspace="YouTube UK · Shared Watcher"
+        actions={null}
+        meta={
+          syncMeta ? (
+            <>
+              <div className="tabular-nums">
+                Synced {new Date(syncMeta.lastSyncAt).toLocaleString('en-GB', {
+                  day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit',
+                })}
+              </div>
+              <div className="tabular-nums">
+                {label ? `${rows.filter(r => r.subs != null).length}/${rows.length} tracked channels with data` : `${syncMeta.artistsSuccess}/${syncMeta.artistsTotal} artists`}
+              </div>
+            </>
+          ) : (
+            <div>No sync data yet</div>
+          )
+        }
+      />
+
+      <div className="max-w-[1180px] mx-auto px-6">
+        <PageTitle
+          title="YouTube UK · Channel Health"
+          lede="Agreed UK priority artists · Same Watcher metrics and format intelligence · Roster reviewed every six months."
+        />
+
+        {/* Client-side board with toggle */}
+        <ChannelHealthBoard singleTab={true} labelRoster={true} linkSuffix={mq} behaviourBase={label ? `/labels/${label.slug}/behaviour` : `/campaigns${mq}`} rows={rows} topVideos={topVideos} marketFormatStats={marketFormatStats} pinnedSlugs={pinnedSlugs} />
+
+        <div className="mt-14 pt-5 pb-10 border-t border-line flex items-center gap-2 text-micro text-faint">
+          <span className="font-semibold text-muted">Channel Health</span>
+          <span aria-hidden>→</span>
+          <Link href={`/campaigns${mq}`} className="font-semibold text-muted hover:text-ink no-underline transition-colors">
+            Active Campaigns
+          </Link>
+          <span aria-hidden>→</span>
+          <Link href={`/coach${mq}`} className="font-semibold text-muted hover:text-ink no-underline transition-colors">
+            Coach
+          </Link>
+          <span className="ml-auto">Channel Health watches · Campaigns track · Plans direct</span>
+        </div>
       </div>
-    </header>
-    <section className="max-w-[1180px] mx-auto px-6 py-9">
-      <div className="flex flex-wrap justify-between gap-4 items-end mb-7">
-        <div><h1 className="text-3xl font-bold tracking-tight">UK priority channels</h1><p className="text-sm text-muted mt-2 max-w-2xl">One agreed artist universe for Virgin Music and YouTube UK. The numbers use the same Watcher cache, not a separate reporting engine.</p></div>
-        <a className="text-sm font-semibold underline" href="https://docs.google.com/spreadsheets/d/1vgJXqW5kH4XAWAzyOUPOOZdiY78iOzOlEbVrzp0bzWI/edit?gid=0#gid=0" target="_blank" rel="noreferrer">Agreed roster ↗</a>
-      </div>
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-7">
-        {[[String(rows.length),'Priority artists'],[String(tracked),'With Watcher data'],[String(active),'Publishing in 30d'],[String(missing),'Need channel matching / data']].map(([value,label]) => <div key={label} className="border border-line bg-surface rounded-xl p-4"><div className="text-3xl font-bold tabular-nums">{value}</div><div className="text-xs text-muted mt-1">{label}</div></div>)}
-      </div>
-      <div className="rounded-xl border border-line bg-surface overflow-x-auto">
-        <table className="w-full text-sm text-left">
-          <thead className="text-xs uppercase tracking-wide text-muted border-b border-line bg-paper"><tr><th className="p-3">Artist</th><th className="p-3">Label</th><th className="p-3 text-right">Subscribers</th><th className="p-3 text-right">Views 7d</th><th className="p-3 text-right">Subs 7d</th><th className="p-3 text-right">Uploads 30d</th><th className="p-3 text-right">Shorts 30d</th><th className="p-3">Last upload</th><th className="p-3">Coverage</th></tr></thead>
-          <tbody>{rows.map((r,i) => <tr key={r.name + i} className="border-b border-line-faint last:border-0 hover:bg-paper/70">
-            <td className="p-3 font-semibold whitespace-nowrap">{r.artist ? <Link href={`/channel/${r.artist.slug}`} className="underline decoration-line-strong hover:text-signal">{r.name}</Link> : r.name}</td>
-            <td className="p-3 text-muted whitespace-nowrap">{r.label || '—'}</td>
-            <td className="p-3 text-right tabular-nums">{fmt(r.subscribers)}</td>
-            <td className="p-3 text-right tabular-nums">{fmt(r.views7d)}</td>
-            <td className="p-3 text-right tabular-nums">{count(r.subs7d)}</td>
-            <td className="p-3 text-right tabular-nums">{count(r.uploads30d)}</td>
-            <td className="p-3 text-right tabular-nums">{count(r.shorts30d)}</td>
-            <td className="p-3 text-muted whitespace-nowrap">{r.lastUpload ? new Date(r.lastUpload).toLocaleDateString('en-GB', {day:'numeric',month:'short',year:'numeric'}) : '—'}</td>
-            <td className="p-3 whitespace-nowrap text-xs">{!r.matched ? 'Channel not matched' : !r.hasData ? 'Awaiting snapshot' : 'Tracked'}</td>
-          </tr>)}</tbody>
-        </table>
-      </div>
-      <div className="mt-5 text-xs text-muted space-y-2"><p>Roster: agreed UK priority list, snapshot from 13 Nov 2026. Review membership every six months with YouTube UK. Edits to the Google Sheet do not yet update this page automatically.</p><p>Missing readings are shown as —, not zero. New artist channels need matching and inclusion in the shared Watcher collection before data can appear. This is a partner-facing view: it does not include private campaign plans or edit controls.</p></div>
-    </section>
-  </main>;
+    </main>
+  );
 }
