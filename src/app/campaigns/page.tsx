@@ -1,4 +1,6 @@
-import { redirect } from 'next/navigation';
+import { redirect, notFound } from 'next/navigation';
+import { YOUTUBE_UK_ROSTER } from '@/lib/youtubeUkRoster';
+import PartnerLinkGuard from '@/components/PartnerLinkGuard';
 import { getLabelWorkspace, labelRecordKey } from '@/lib/labels';
 import { Suspense } from 'react';
 import { ARTISTS, mergeArtistLists, fmtNum, daysSince, deriveFromLive, STATUS_COLOR, type Artist, type ChannelState } from '@/lib/artists';
@@ -531,6 +533,9 @@ export default async function CampaignsPage({
   const market = await getMarketFromRequest(searchParams);
   const labelWorkspace = getLabelWorkspace(market.id);
   const requested = (await searchParams)?.behaviour;
+  const partner = (await searchParams)?.partner === 'youtube-uk';
+  const rosterNames = new Set(YOUTUBE_UK_ROSTER.map(a => a.name.toLowerCase().replace(/[^a-z0-9]/g, '')));
+  if (partner && (typeof requested !== 'string' || !(await getArtistsForMarket('uk')).some(a => a.slug === requested && rosterNames.has(a.name.toLowerCase().replace(/[^a-z0-9]/g, ''))))) notFound();
   if (labelWorkspace && typeof requested === 'string') {
     const roster = await getArtistsForMarket(market.id);
     if (roster.some(a => a.slug === requested)) {
@@ -538,10 +543,12 @@ export default async function CampaignsPage({
     }
   }
   const pinned = await listPinned(market.id);
-  const allArtists = await getArtistsForMarket(market.id);
+  const marketArtists = await getArtistsForMarket(market.id);
+  const allArtists = partner ? marketArtists.filter(a => rosterNames.has(a.name.toLowerCase().replace(/[^a-z0-9]/g, ''))) : marketArtists;
 
+  const scopedPinned = partner ? pinned.filter(p => allArtists.some(a => a.slug === p.slug)) : pinned;
   const cards = (
-    await Promise.all(pinned.map((p) => loadCard(p, allArtists, market.id)))
+    await Promise.all(scopedPinned.map((p) => loadCard(p, allArtists, market.id)))
   ).filter((c): c is StatusCardData => c !== null);
 
   cards.sort((a, b) => {
@@ -595,10 +602,7 @@ export default async function CampaignsPage({
         )}
 
         <Suspense fallback={null}>
-          <CampaignStatusBoard market={market.id}
-            initialCards={cards}
-            availableArtists={available.map((a) => ({ slug: a.slug, name: a.name }))}
-          />
+          {partner ? <PartnerLinkGuard allowedSlugs={allArtists.map(a => a.slug)}><CampaignStatusBoard market={market.id} initialCards={cards} availableArtists={[]} /></PartnerLinkGuard> : <CampaignStatusBoard market={market.id} initialCards={cards} availableArtists={available.map((a) => ({ slug: a.slug, name: a.name }))} />}
         </Suspense>
       </div>
     </div>
