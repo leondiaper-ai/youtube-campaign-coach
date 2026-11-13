@@ -250,10 +250,19 @@ export default function CoachLanding({ model, slug, classicHref, timelineEditor,
                 <p className="text-micro text-muted m-0 mt-1">{f.status.label}</p>
               </div>)}
           </div>
+          <p className="m-0 mt-3 text-meta font-semibold text-secondary leading-relaxed">
+            {model.framework.assessment.followUps.tone === 'behind' || model.framework.assessment.shorts.tone === 'behind'
+              ? 'Possible multiformat support gap: the checked campaign uploads have fewer follow-up videos or release-linked Shorts than the rollout guide. Confirm other official and label channels before commissioning.'
+              : 'Multiformat support is tracking against the rollout guide in the checked uploads.'}
+          </p>
           <p className="m-0 mt-3 text-meta font-semibold text-ink">Next 28 days: {model.framework.upcomingMoments} release moment{model.framework.upcomingMoments===1?'':'s'}{(model.framework.next28Videos??0)>0?` · ${model.framework.next28Videos} video moments`:''} · at least {model.framework.next28Shorts} Shorts</p>
           <details className="mt-2 text-micro text-muted"><summary className="cursor-pointer text-electric font-semibold">How the guide works</summary><p className="m-0 mt-2">Per single: one release video, one distinct follow-up around days 7–14, and three Shorts across teaser, launch and follow-up. Totals include future singles; colours assess only support due by today. Cadence uses a working minimum of two Shorts per week, or more when dated release moments call for it. A saved team target takes precedence. This baseline is a planning choice, not a YouTube requirement. The next 28 days includes launch and follow-up video moments plus ongoing Shorts each week. Release-linked Shorts fill those weekly slots; extra release moments raise the weekly count. Actual upload dates are used where available. These are starting suggestions, not YouTube quotas. Only track-matched public uploads count toward the bars.</p></details>
         </div>}
 
+        <div className="border-t border-line-faint px-4 py-2.5 flex flex-wrap items-center justify-between gap-2 text-micro text-muted">
+          <span><strong className="text-secondary">Campaign evidence:</strong> {model.assets.long.length} videos · {model.assets.shorts.length} Shorts observed in the selected window</span>
+          <span>Partial coverage · other official or label channels may hold additional assets</span>
+        </div>
         <div className="border-t border-line-faint grid md:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)]">
           <div className="p-4 flex flex-col sm:flex-row gap-3.5">
             {model.latest && (
