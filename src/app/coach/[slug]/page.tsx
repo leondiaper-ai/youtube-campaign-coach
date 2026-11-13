@@ -1,3 +1,4 @@
+import { palayeLabelUploads } from '@/lib/coach/palayeSources';
 import { YOUTUBE_UK_ROSTER } from '@/lib/youtubeUkRoster';
 import { listPartnerSlugs } from '@/lib/youtubeUkPartnerStore';
 import { getAllArtists } from '@/lib/marketScope';
@@ -216,7 +217,7 @@ export default async function CampaignPage({ params, searchParams }: PageProps) 
     }
   }
 
-  // Compute data coverage — how complete is the historical picture?
+  // Supplement Palaye's artist-channel snapshot with independently verified\n  // Sumerian-hosted uploads. Match by video ID, not aggregate channel totals.\n  const palayeLabelVideos = saved.artist.toLowerCase() === 'palaye royale'\n    ? await palayeLabelUploads() : [];\n  if (palayeLabelVideos.length) {\n    const byId = new Map(recentUploads.map(v => [v.id, v]));\n    for (const v of palayeLabelVideos) byId.set(v.id, v);\n    recentUploads = [...byId.values()];\n  }\n\n  // Compute data coverage — how complete is the historical picture?
   const dataCoverage = computeDataCoverage(
     recentUploads,
     artistConfig?.campaignStartDate ?? null,
@@ -312,7 +313,7 @@ export default async function CampaignPage({ params, searchParams }: PageProps) 
     model.rollout.sort((a,b) => (dates.get(a.name) ?? '').localeCompare(dates.get(b.name) ?? ''));
     const multiChannelWarning = saved.artist.toLowerCase() === 'palaye royale';
     return <>
-      {multiChannelWarning && <div className="max-w-[1060px] mx-auto px-5 pt-5"><div className="border border-amber-300 bg-amber-50 text-amber-950 rounded-xl p-4 text-sm leading-relaxed"><strong>Coverage note · Palaye Royale</strong><p className="mt-1 mb-2">This Coach's automatic video matching currently reads the artist channel, not the complete Sumerian Records + Palaye Royale Topic ecosystem reviewed in the deep dive. A missing video or format here does not mean it was not published. The September deep-dive figures are historical snapshots, not current totals.</p><a className="underline font-semibold" href="/palaye">View the verified three-channel deep dive ↗</a></div></div>}
+      {multiChannelWarning && <div className="max-w-[1060px] mx-auto px-5 pt-5"><div className="border border-amber-300 bg-amber-50 text-amber-950 rounded-xl p-4 text-sm leading-relaxed"><strong>Coverage note · Palaye Royale</strong><p className="mt-1 mb-2">This Coach combines the artist-channel snapshot with {palayeLabelVideos.length} verified Sumerian-hosted videos found in the current API search. The Topic channel and older Sumerian catalogue are not yet comprehensively scanned, so a missing video or format does not prove it was not published. The September deep-dive figures are historical snapshots, not current totals.</p><a className="underline font-semibold" href="/palaye">View the verified three-channel deep dive ↗</a></div></div>}
       <CoachLanding model={model} slug={saved.slug} readOnly={partner} timelineEditor={
       <CoachTimelineEditor slug={saved.slug} artist={saved.artist} campaignName={saved.campaignName}
         timeline={saved.timelineText || saved.plan.events.map(e => `${e.dateISO} - ${e.title}`).join('\n')}
