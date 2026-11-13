@@ -537,7 +537,7 @@ export default async function CampaignsPage({
   const partner = (await searchParams)?.partner === 'youtube-uk';
   const rosterNames = new Set(YOUTUBE_UK_ROSTER.map(a => a.name.toLowerCase().replace(/[^a-z0-9]/g, '')));
   const extraSlugs = partner ? await listPartnerSlugs().catch(() => [] as string[]) : [];
-  if (partner && (typeof requested !== 'string' || !(await getAllArtists()).some(a => a.slug === requested && (rosterNames.has(a.name.toLowerCase().replace(/[^a-z0-9]/g, '')) || extraSlugs.includes(a.slug))))) notFound();
+  if (partner && typeof requested === 'string' && !(await getAllArtists()).some(a => a.slug === requested && (rosterNames.has(a.name.toLowerCase().replace(/[^a-z0-9]/g, '')) || extraSlugs.includes(a.slug)))) notFound();
   if (labelWorkspace && typeof requested === 'string') {
     const roster = await getArtistsForMarket(market.id);
     if (roster.some(a => a.slug === requested)) {
