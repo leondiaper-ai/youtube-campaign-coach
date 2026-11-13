@@ -6,7 +6,7 @@ import { listPartnerSlugs, listHiddenPartnerSlugs } from '@/lib/youtubeUkPartner
 import { readAllLiveSnaps } from '@/lib/kvCache';
 
 export const dynamic = 'force-dynamic';
-const norm = (s: string) => s.normalize('NFKD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]/g, '');
+const norm = (s: string) => s.normalize('NFKD').replace(/[\\u0300-\\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]/g, '');
 export async function GET() {
   const all = await getAllArtists();
   const [added, hidden] = await Promise.all([listPartnerSlugs(), listHiddenPartnerSlugs()]);
