@@ -535,6 +535,17 @@ body.present{overflow:hidden}
 .station-bottom{margin-top:1.2rem;font-size:clamp(1.1rem,2vw,1.85rem);font-weight:750;line-height:1.3}
 .station-bottom em{font-style:normal;color:var(--gold)}
 @media(max-width:760px){.station-sequence{gap:.2rem}.station-step .station-thumb{height:85px}.station-step p{font-size:.58rem}.station-loop{gap:.5rem}}
+
+/* Publishing rhythm: weekly output and 7–14 day follow-through */
+.cadence-lanes{margin-top:1.1rem;display:grid;grid-template-columns:150px repeat(8,minmax(0,1fr));gap:4px;align-items:stretch}
+.cadence-lanes .lane-label{font-size:.7rem;font-weight:750;color:#b8aea0;align-self:center;line-height:1.3}
+.cadence-lanes .lane-cell{min-height:35px;background:#252525;border-top:3px solid #5a5a5a;padding:.35rem .25rem;text-align:center;font-size:clamp(.6rem,.8vw,.76rem);color:#ddd}
+.cadence-lanes .lane-cell.gold{border-color:var(--gold);background:#2c2417;color:#f4d395}
+.cadence-lanes .lane-cell.muted{border-color:#858585;background:#222}
+.cadence-lanes .lane-cell.always{border-color:#a58038;background:#241f16;color:#c7ad76}
+.cadence-note{margin-top:.7rem;padding:.65rem .85rem;border-left:3px solid var(--gold);background:#171510;font-size:clamp(.72rem,.95vw,.9rem);color:#d5cec4;line-height:1.4}
+.cadence-note strong{color:var(--gold)}
+@media(max-width:760px){.cadence-lanes{grid-template-columns:80px repeat(8,minmax(0,1fr));gap:2px}.cadence-lanes .lane-label{font-size:.55rem}.cadence-lanes .lane-cell{font-size:.52rem;padding:.25rem .1rem}}
 /* Post-album continuation: evidence beside the next action. */
 .continue-table{width:100%;border-collapse:collapse;table-layout:fixed;margin-top:clamp(1.2rem,2.5vw,2rem)}
 .continue-table th{text-align:left;font:700 .65rem 'Inter',sans-serif;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);padding:0 1rem .8rem 0}
@@ -976,15 +987,22 @@ body.present{overflow:hidden}
  <div class="inner">
   <div class="label reveal">O My Beloved · proposed post-album continuation · 16 Nov – 10 Jan</div>
   <h2 class="display reveal" style="margin-top:.4rem;font-size:clamp(2rem,4.1vw,3.55rem)">One world. Three new reasons to return.</h2>
-  <p class="body reveal" style="margin-top:.4rem;max-width:none;font-size:.9rem">Build around the songs and footage already working. <strong>One or two Shorts every week</strong> connect fans back to each main moment.</p>
+  <p class="body reveal" style="margin-top:.4rem;max-width:none;font-size:.9rem">Build around the songs and footage already working. <strong>Two purposeful Shorts each week</strong> keep discovery moving; aim to follow priority songs with a meaningful second format within 7–14 days.</p>
   <div class="world-journey reveal">
    <div class="world-stop"><div class="visual"><img src="https://i.ytimg.com/vi/2x_oiMPK8sY/hqdefault.jpg" alt="New Kings of Leon live upload"><div class="overlay">Already released · November</div></div><div class="when">01 · Now</div><h3>Keep the live moment alive</h3><p>Cut a performance Short and a band-led clip from the new live upload. Both point back to the full performance.</p></div>
    <div class="world-stop"><div class="visual"><img src="https://i.ytimg.com/vi/j9Z4JcsxXus/hqdefault.jpg" alt="Kings of Leon Rose live reference"><div class="overlay">Proposed · 23 November</div></div><div class="when">02 · Rose</div><h3>Give Rose a new format</h3><p>Propose a lyric video alongside its existing live and visualiser versions. Follow with a lyric-led Short.</p></div>
    <div class="world-stop"><div class="visual"><div class="placeholder">NEXT SONG<br>TO SELECT</div><div class="overlay">Proposed · 4 January</div></div><div class="when">03 · January</div><h3>Make the next song a moment</h3><p>Choose the next format from organic response: a missing live / lyric video, or a band-led “Growing Up With Kings of Leon” film if suitable footage exists.</p></div>
   </div>
-  <div class="world-path reveal"><div class="world-week key"><b>16 NOV</b><span>New live</span></div><div class="world-week key"><b>23 NOV</b><span>Rose lyric</span></div><div class="world-week "><b>30 NOV</b><span>Rose Short</span></div><div class="world-week "><b>7 DEC</b><span>Live Short</span></div><div class="world-week "><b>14 DEC</b><span>Next track</span></div><div class="world-week "><b>21 DEC</b><span>Catalogue</span></div><div class="world-week "><b>28 DEC</b><span>Year-end</span></div><div class="world-week key"><b>4 JAN</b><span>New format</span></div></div>
+  <div class="world-path reveal"><div class="world-week key"><b>16 NOV</b><span>W1</span></div><div class="world-week key"><b>23 NOV</b><span>W2</span></div><div class="world-week "><b>30 NOV</b><span>W3</span></div><div class="world-week "><b>7 DEC</b><span>W4</span></div><div class="world-week "><b>14 DEC</b><span>W5</span></div><div class="world-week "><b>21 DEC</b><span>W6</span></div><div class="world-week "><b>28 DEC</b><span>W7</span></div><div class="world-week key"><b>4 JAN</b><span>W8</span></div></div>
+  <div class="cadence-lanes reveal">
+   <div class="lane-label">LONG-FORM / SECOND FORMAT</div><div class="lane-cell gold">New live ✓</div><div class="lane-cell gold">Rose lyric*</div><div class="lane-cell ">·</div><div class="lane-cell ">·</div><div class="lane-cell gold">Review next song</div><div class="lane-cell ">·</div><div class="lane-cell ">·</div><div class="lane-cell gold">Next format*</div>
+   <div class="lane-label">SHORTS · WEEKLY</div><div class="lane-cell muted">2 / week</div><div class="lane-cell muted">2 / week</div><div class="lane-cell muted">2 / week</div><div class="lane-cell muted">2 / week</div><div class="lane-cell muted">2 / week</div><div class="lane-cell muted">2 / week</div><div class="lane-cell muted">2 / week</div><div class="lane-cell muted">2 / week</div>
+   <div class="lane-label">DISCOVERY / SUPPORT</div><div class="lane-cell gold">Link live</div><div class="lane-cell gold">Rose → lyric</div><div class="lane-cell gold">Rose clips</div><div class="lane-cell gold">Live / BTS</div><div class="lane-cell gold">Album track</div><div class="lane-cell gold">Catalogue</div><div class="lane-cell gold">Year-end</div><div class="lane-cell gold">New song</div>
+   <div class="lane-label">STATION / PLAYLISTS</div><div class="lane-cell always">Ongoing</div><div class="lane-cell always">Ongoing</div><div class="lane-cell always">Ongoing</div><div class="lane-cell always">Ongoing</div><div class="lane-cell always">Ongoing</div><div class="lane-cell always">Ongoing</div><div class="lane-cell always">Ongoing</div><div class="lane-cell always">Ongoing</div>
+  </div>
+  <div class="cadence-note reveal"><strong>7–14 DAY FOLLOW-THROUGH:</strong> After a priority long-form upload, aim for a second meaningful destination within 1–2 weeks: lyric, live, performance, story-led edit or another available full-length asset. This is a proposed programming target informed by the campaign audit, <strong>not a universal YouTube requirement.</strong> Keep the two weekly Shorts connected to those destinations, not posted just to hit a quota.</div>
   <div class="world-always reveal"><div class="title">KINGS OF LEON TV<br><span style="font-size:.65rem;font-weight:500;color:#cbb58e">STATION · ALWAYS-ON GOAL</span></div><p><strong>Biggest strategic opportunity:</strong> activate the proposed YouTube Station, connecting the album, live performances and catalogue. Chase approval now; programme continuously once live. Meanwhile, complete album playlists, video links and end screens.</p></div>
-  <p class="world-foot reveal"><strong>The rhythm:</strong> three full-song moments, including the live video already released; weekly Shorts and band / catalogue activity between them. Future releases are proposals, not confirmed assets or dates. Use December organic response and available footage to decide January's format.</p>
+  <p class="world-foot reveal"><strong>The rhythm:</strong> the new live upload is already out; Rose lyric and January’s next format are proposals, subject to assets and approval. Two purposeful Shorts per week is a planning baseline, not a guarantee. Future releases are proposals, not confirmed assets or dates. Use December organic response and available footage to decide January's format.</p>
  </div>
 </section>
 
