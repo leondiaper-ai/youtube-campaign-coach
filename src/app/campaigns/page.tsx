@@ -1,3 +1,4 @@
+import { listPartnerSlugs } from '@/lib/youtubeUkPartnerStore';
 import { redirect, notFound } from 'next/navigation';
 import { YOUTUBE_UK_ROSTER } from '@/lib/youtubeUkRoster';
 import PartnerLinkGuard from '@/components/PartnerLinkGuard';
@@ -535,7 +536,8 @@ export default async function CampaignsPage({
   const requested = (await searchParams)?.behaviour;
   const partner = (await searchParams)?.partner === 'youtube-uk';
   const rosterNames = new Set(YOUTUBE_UK_ROSTER.map(a => a.name.toLowerCase().replace(/[^a-z0-9]/g, '')));
-  if (partner && (typeof requested !== 'string' || !(await getArtistsForMarket('uk')).some(a => a.slug === requested && rosterNames.has(a.name.toLowerCase().replace(/[^a-z0-9]/g, ''))))) notFound();
+  const extraSlugs = partner ? await listPartnerSlugs().catch(() => [] as string[]) : [];
+  if (partner && (typeof requested !== 'string' || !(await getArtistsForMarket('uk')).some(a => a.slug === requested && (rosterNames.has(a.name.toLowerCase().replace(/[^a-z0-9]/g, '')) || extraSlugs.includes(a.slug))))) notFound();
   if (labelWorkspace && typeof requested === 'string') {
     const roster = await getArtistsForMarket(market.id);
     if (roster.some(a => a.slug === requested)) {
@@ -544,7 +546,7 @@ export default async function CampaignsPage({
   }
   const pinned = await listPinned(market.id);
   const marketArtists = await getArtistsForMarket(market.id);
-  const allArtists = partner ? marketArtists.filter(a => rosterNames.has(a.name.toLowerCase().replace(/[^a-z0-9]/g, ''))) : marketArtists;
+  const allArtists = partner ? marketArtists.filter(a => rosterNames.has(a.name.toLowerCase().replace(/[^a-z0-9]/g, '')) || extraSlugs.includes(a.slug)) : marketArtists;
 
   const scopedPinned = partner ? pinned.filter(p => allArtists.some(a => a.slug === p.slug)) : pinned;
   const cards = (
