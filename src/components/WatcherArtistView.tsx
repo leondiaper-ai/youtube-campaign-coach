@@ -429,6 +429,47 @@ export default async function WatcherArtistView({
           }
         />
 
+        {/* Campaign-specific planning guidance, not channel-wide upload counts. */}
+        {campaignStart && (() => {
+          const campaignUploads = (live?.recentUploads ?? []).filter(u =>
+            u.live !== 'upcoming' && new Date(u.publishedAt).getTime() >= new Date(campaignStart).getTime()
+          );
+          const shorts = campaignUploads.filter(u => u.durationSec <= 62);
+          const longform = campaignUploads.filter(u => u.durationSec > 62);
+          const supporting = longform.filter(u => /lyric|visuali[sz]er|live|acoustic|behind.the.scenes|performance|official audio/i.test(u.title));
+          const hasMix = shorts.length >= 2 && supporting.length >= 1;
+          const day = campaignDaysSinceStart ?? 0;
+          const target = day <= 7 ? 4 : day <= 30 ? 8 : 12;
+          const gap = Math.max(0, target - campaignUploads.length);
+          const upcoming = daysToNextMoment != null && daysToNextMoment >= 0 && daysToNextMoment <= 21;
+          const top = [...campaignUploads].filter(u => u.viewCount > 0 && u.live !== 'upcoming')
+            .sort((a,b) => b.viewCount - a.viewCount)[0];
+          const median = [...campaignUploads].map(u => u.viewCount).sort((a,b) => a-b);
+          const middle = median.length ? median[Math.floor((median.length - 1)/2)] : 0;
+          const breakout = top && campaignUploads.length >= 3 && middle > 0 && top.viewCount >= middle * 2 ? top : null;
+          return <section className="mt-5 rounded-xl border border-line bg-surface p-5">
+            <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
+              <h2 className="text-[15px] font-black">Campaign rollout · asset check</h2>
+              <span className="text-[10px] font-bold uppercase tracking-wider text-muted">Planning guide, not a fixed target</span>
+            </div>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
+              <div><div className="text-2xl font-black">{campaignUploads.length}</div><div className="text-xs text-muted">Assets observed</div></div>
+              <div><div className="text-2xl font-black">{shorts.length}</div><div className="text-xs text-muted">Shorts</div></div>
+              <div><div className="text-2xl font-black">{supporting.length}</div><div className="text-xs text-muted">Supporting longform</div></div>
+              <div><div className="text-2xl font-black">{gap > 0 ? `+${gap}` : 'On pace'}</div><div className="text-xs text-muted">Indicative asset headroom</div></div>
+            </div>
+            <div className="space-y-2 text-[12px] leading-relaxed">
+              <p><strong>{hasMix ? 'Multiformat rollout active.' : 'Multiformat gap.'}</strong> {hasMix
+                ? 'Shorts and supporting longform are both present. Keep building around the strongest track.'
+                : `Only ${shorts.length} Shorts and ${supporting.length} supporting longform assets identified. Consider ${shorts.length < 2 ? 'more Shorts cuts' : 'additional Shorts'} plus a lyric, live or visualiser asset where rights and production allow.`}</p>
+              {gap > 0 && <p><strong>Asset opportunity:</strong> Around {gap} more pieces would reach an illustrative {target}-asset rollout for this stage. This is a planning benchmark, not evidence that every campaign needs {target} uploads.</p>}
+              {upcoming && <p><strong>Window approaching:</strong> Next recorded moment in {daysToNextMoment} day{daysToNextMoment === 1 ? '' : 's'}. Prepare the anchor video, Shorts cuts and follow-up formats before the moment.</p>}
+              {breakout && <p><strong>Support the winner:</strong> “{cleanTitle(breakout.title, artist.name)}” has {fmtNum(breakout.viewCount)} views, at least 2× the median observed campaign asset. Prioritise a related Short, alternate format, community post and links from other videos while attention is there.</p>}
+            </div>
+            <p className="mt-3 text-[10px] text-muted">Counts use available channel uploads since the recorded campaign start; label-channel uploads and untracked assets may be missing. Title-based format detection is indicative.</p>
+          </section>;
+        })()}
+
         {/* The decision headline and its consequence. The overview carries
             the state and the action; this is the reasoning behind them,
             and it only earns space when something is actually wrong. */}
