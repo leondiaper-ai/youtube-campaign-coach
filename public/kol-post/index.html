@@ -555,6 +555,19 @@ body.present{overflow:hidden}
 .continue-table td+td h3{color:var(--teal)}
 .continue-table p{font-size:clamp(.82rem,1.1vw,.98rem);line-height:1.4;color:var(--warm)}
 @media(max-width:600px){.continue-table td{padding:.8rem .7rem .8rem 0}.continue-table h3{font-size:1rem}.continue-table p{font-size:.78rem}}
+
+/* Editorial rollout rhythm: inspired by the simpler upload strips used in the underscores deck */
+.rollout-rhythm{margin-top:1.55rem;border-top:1px solid #504633;padding-top:.85rem}
+.rollout-rhythm-head{display:flex;justify-content:space-between;align-items:center;gap:1rem;flex-wrap:wrap;font-size:.68rem;letter-spacing:.1em;color:var(--gold);font-weight:700}
+.rollout-rhythm-head strong{font-size:.74rem;letter-spacing:0;color:#e5ded3}
+.rollout-ticks{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:5px;margin-top:1rem}
+.rollout-tick{min-width:0;display:flex;flex-direction:column;gap:.4rem}
+.rollout-tick b{font-size:.66rem;color:#bdb6ad}
+.rollout-tick i{display:block;height:27px;border-radius:2px;background:#292929;border-top:3px solid #656565}
+.rollout-tick.hot i{background:#3b2b15;border-top-color:var(--gold)}
+.rollout-tick.hot b{color:var(--gold)}
+.rollout-tick span{font-size:clamp(.62rem,.85vw,.78rem);color:#b8aea0;line-height:1.25}
+@media(max-width:760px){.rollout-ticks{gap:3px}.rollout-tick b{font-size:.52rem}.rollout-tick span{font-size:.55rem}.rollout-rhythm-head{font-size:.6rem}}
 </style>
 </head>
 <body>
@@ -985,24 +998,28 @@ body.present{overflow:hidden}
 <!-- ═══ 14 · CAMPAIGN ROLLOUT ═══════════════ -->
 <section class="slide" data-t="8-week plan">
  <div class="inner">
-  <div class="label reveal">O My Beloved · proposed post-album continuation · 16 Nov – 10 Jan</div>
-  <h2 class="display reveal" style="margin-top:.4rem;font-size:clamp(2rem,4.1vw,3.55rem)">One world. Three new reasons to return.</h2>
-  <p class="body reveal" style="margin-top:.4rem;max-width:none;font-size:.9rem">Build around the songs and footage already working. <strong>Two purposeful Shorts each week</strong> keep discovery moving; aim to follow priority songs with a meaningful second format within 7–14 days.</p>
+  <div class="label reveal">O My Beloved · post-album plan · November → January</div>
+  <h2 class="display reveal" style="margin-top:.35rem;font-size:clamp(2rem,4.1vw,3.55rem)">Three moments. One continuous story.</h2>
+  <p class="body reveal" style="margin-top:.35rem;max-width:none">Give each priority song a new reason to watch. <strong>Use Shorts to lead fans back to the full-length video.</strong></p>
   <div class="world-journey reveal">
-   <div class="world-stop"><div class="visual"><img src="https://i.ytimg.com/vi/2x_oiMPK8sY/hqdefault.jpg" alt="New Kings of Leon live upload"><div class="overlay">Already released · November</div></div><div class="when">01 · Now</div><h3>Keep the live moment alive</h3><p>Cut a performance Short and a band-led clip from the new live upload. Both point back to the full performance.</p></div>
-   <div class="world-stop"><div class="visual"><img src="https://i.ytimg.com/vi/j9Z4JcsxXus/hqdefault.jpg" alt="Kings of Leon Rose live reference"><div class="overlay">Proposed · 23 November</div></div><div class="when">02 · Rose</div><h3>Give Rose a new format</h3><p>Propose a lyric video alongside its existing live and visualiser versions. Follow with a lyric-led Short.</p></div>
-   <div class="world-stop"><div class="visual"><div class="placeholder">NEXT SONG<br>TO SELECT</div><div class="overlay">Proposed · 4 January</div></div><div class="when">03 · January</div><h3>Make the next song a moment</h3><p>Choose the next format from organic response: a missing live / lyric video, or a band-led “Growing Up With Kings of Leon” film if suitable footage exists.</p></div>
+   <div class="world-stop"><div class="visual"><img src="https://i.ytimg.com/vi/2x_oiMPK8sY/hqdefault.jpg" alt="Kings of Leon new live performance"><div class="overlay">LIVE NOW · NOVEMBER</div></div><div class="when">01 · Extend the live moment</div><h3>New live → two Shorts</h3><p>Performance highlight + band moment. Both link to the full live video.</p></div>
+   <div class="world-stop"><div class="visual"><img src="https://i.ytimg.com/vi/j9Z4JcsxXus/hqdefault.jpg" alt="Rose live session"><div class="overlay">PROPOSED · 23 NOV</div></div><div class="when">02 · Give Rose another life</div><h3>Rose lyric → Short</h3><p>Add a lyric video to the live and visualiser versions, then cut a lyric-led Short.</p></div>
+   <div class="world-stop"><div class="visual"><div class="placeholder">NEXT<br>CHAPTER</div><div class="overlay">PROPOSED · JANUARY</div></div><div class="when">03 · Follow the response</div><h3>One new destination</h3><p>Choose a live, lyric or story-led film from December's response and available footage.</p></div>
   </div>
-  <div class="world-path reveal"><div class="world-week key"><b>16 NOV</b><span>W1</span></div><div class="world-week key"><b>23 NOV</b><span>W2</span></div><div class="world-week "><b>30 NOV</b><span>W3</span></div><div class="world-week "><b>7 DEC</b><span>W4</span></div><div class="world-week "><b>14 DEC</b><span>W5</span></div><div class="world-week "><b>21 DEC</b><span>W6</span></div><div class="world-week "><b>28 DEC</b><span>W7</span></div><div class="world-week key"><b>4 JAN</b><span>W8</span></div></div>
-  <div class="cadence-lanes reveal">
-   <div class="lane-label">LONG-FORM / SECOND FORMAT</div><div class="lane-cell gold">New live ✓</div><div class="lane-cell gold">Rose lyric*</div><div class="lane-cell ">·</div><div class="lane-cell ">·</div><div class="lane-cell gold">Review next song</div><div class="lane-cell ">·</div><div class="lane-cell ">·</div><div class="lane-cell gold">Next format*</div>
-   <div class="lane-label">SHORTS · WEEKLY</div><div class="lane-cell muted">2 / week</div><div class="lane-cell muted">2 / week</div><div class="lane-cell muted">2 / week</div><div class="lane-cell muted">2 / week</div><div class="lane-cell muted">2 / week</div><div class="lane-cell muted">2 / week</div><div class="lane-cell muted">2 / week</div><div class="lane-cell muted">2 / week</div>
-   <div class="lane-label">DISCOVERY / SUPPORT</div><div class="lane-cell gold">Link live</div><div class="lane-cell gold">Rose → lyric</div><div class="lane-cell gold">Rose clips</div><div class="lane-cell gold">Live / BTS</div><div class="lane-cell gold">Album track</div><div class="lane-cell gold">Catalogue</div><div class="lane-cell gold">Year-end</div><div class="lane-cell gold">New song</div>
-   
+  <div class="rollout-rhythm reveal">
+   <div class="rollout-rhythm-head"><span>THE 8-WEEK RHYTHM</span><strong>2 purposeful Shorts / week · aim for a second format within 7–14 days</strong></div>
+   <div class="rollout-ticks">
+    <div class="rollout-tick hot"><b>16 NOV</b><i></i><span>Live + clips</span></div>
+    <div class="rollout-tick hot"><b>23 NOV</b><i></i><span>Rose lyric*</span></div>
+    <div class="rollout-tick"><b>30 NOV</b><i></i><span>Rose clips</span></div>
+    <div class="rollout-tick"><b>7 DEC</b><i></i><span>Live / BTS</span></div>
+    <div class="rollout-tick"><b>14 DEC</b><i></i><span>Review response</span></div>
+    <div class="rollout-tick"><b>21 DEC</b><i></i><span>Catalogue</span></div>
+    <div class="rollout-tick"><b>28 DEC</b><i></i><span>Year-end</span></div>
+    <div class="rollout-tick hot"><b>4 JAN</b><i></i><span>Next format*</span></div>
+   </div>
   </div>
-  <div class="cadence-note reveal"><strong>7–14 DAY FOLLOW-THROUGH:</strong> After a priority long-form upload, aim for a second meaningful destination within 1–2 weeks: lyric, live, performance, story-led edit or another available full-length asset. This is a proposed programming target informed by the campaign audit, <strong>not a universal YouTube requirement.</strong> Keep the two weekly Shorts connected to those destinations, not posted just to hit a quota.</div>
-  
-  <p class="world-foot reveal"><strong>The rhythm:</strong> the new live upload is already out; Rose lyric and January’s next format are proposals, subject to assets and approval. Two purposeful Shorts per week is a planning baseline, not a guarantee. Future releases are proposals, not confirmed assets or dates. Use December organic response and available footage to decide January's format.</p>
+  <p class="world-foot reveal">* Proposed, subject to approval and available assets. Two Shorts per week and a 7–14-day follow-up are planning targets, not guaranteed releases or YouTube requirements. January's format should be selected after reviewing December's organic response.</p>
  </div>
 </section>
 
