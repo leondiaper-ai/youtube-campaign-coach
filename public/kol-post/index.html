@@ -674,6 +674,25 @@ body.present .slide[data-t="Station opportunity"] .station-sequence{margin-top:1
 body.present .slide[data-t="Station opportunity"] .station-step .station-thumb{height:clamp(95px,10vw,155px)}
 body.present .slide[data-t="Station opportunity"] .station-loop{margin-top:.8rem;padding:.45rem 0}
 body.present .slide[data-t="Station opportunity"] .station-bottom{margin-top:.7rem}
+
+/* Audience slide: fit complete narrative into one presentation viewport */
+body.present .slide-audience{padding-top:3.8rem;padding-bottom:.6rem;justify-content:center}
+body.present .slide-audience .inner{width:100%;max-width:none}
+body.present .slide-audience .inner>div{max-width:760px!important}
+body.present .slide-audience h2.display{font-size:clamp(1.9rem,3vw,2.85rem)!important;line-height:.96;margin-top:.3rem!important}
+body.present .slide-audience .stagger{margin-top:.75rem!important;gap:.55rem!important}
+body.present .slide-audience .quote{font-size:clamp(.78rem,1.15vw,1.04rem);line-height:1.22;padding:.12rem .65rem}
+body.present .slide-audience .quote cite{font-size:.62rem;margin-top:.17rem}
+body.present .slide-audience .stagger+.reveal{margin-top:.65rem!important;padding-top:.5rem!important;gap:1rem!important;align-items:center!important}
+body.present .slide-audience .stagger+.reveal .big-num{font-size:1.75rem!important}
+body.present .slide-audience .stagger+.reveal .body{font-size:.76rem!important;line-height:1.25}
+body.present .slide-audience .stagger+.reveal+.reveal{margin-top:.65rem!important;padding:.65rem .8rem!important;gap:.9rem!important}
+body.present .slide-audience .stagger+.reveal+.reveal .label{font-size:.56rem}
+body.present .slide-audience .stagger+.reveal+.reveal div[style*="font-weight:800"]{font-size:1.25rem!important;margin-top:.2rem!important}
+body.present .slide-audience .stagger+.reveal+.reveal p{font-size:.72rem!important;line-height:1.3!important;margin-top:.25rem!important}
+body.present .slide-audience .stagger+.reveal+.reveal div[style*="font-weight:750"]{font-size:.84rem!important}
+body.present .slide-audience .src{font-size:.57rem;line-height:1.25;margin-top:.4rem}
+@media(max-height:760px){body.present .slide-audience{justify-content:flex-start;padding-top:3.45rem}body.present .slide-audience h2.display{font-size:2.1rem!important}body.present .slide-audience .stagger{gap:.35rem!important;margin-top:.45rem!important}body.present .slide-audience .quote{font-size:.83rem}body.present .slide-audience .stagger+.reveal+.reveal{padding:.45rem .65rem!important}}
 </style>
 </head>
 <body>
@@ -1028,7 +1047,7 @@ body.present .slide[data-t="Station opportunity"] .station-bottom{margin-top:.7r
 </section>
 
 <!-- ═══ 9 · THE AUDIENCE ════════════════════════════════════════════ -->
-<section class="slide" data-t="Audience">
+<section class="slide slide-audience" data-t="Audience">
   <div class="bleed scrim-l">
     <img src="https://i.ytimg.com/vi/JY87mCYtYd8/maxresdefault.jpg" alt="KOYSAR"
       style="object-position:62% 40%"
