@@ -310,11 +310,14 @@ export default async function CampaignPage({ params, searchParams }: PageProps) 
     }
     const dates = new Map([...tracks.map(t => [t.name,t.releaseDate] as const), ...saved.plan.events.map(e => [e.title,e.dateISO] as const), ...evidence.uploads.map(u => [u.title,u.publishedAt.slice(0,10)] as const)]);
     model.rollout.sort((a,b) => (dates.get(a.name) ?? '').localeCompare(dates.get(b.name) ?? ''));
-    return <CoachLanding model={model} slug={saved.slug} readOnly={partner} timelineEditor={
+    const multiChannelWarning = saved.artist.toLowerCase() === 'palaye royale';
+    return <>
+      {multiChannelWarning && <div className="max-w-[1060px] mx-auto px-5 pt-5"><div className="border border-amber-300 bg-amber-50 text-amber-950 rounded-xl p-4 text-sm leading-relaxed"><strong>Coverage note · Palaye Royale</strong><p className="mt-1 mb-2">This Coach's automatic video matching currently reads the artist channel, not the complete Sumerian Records + Palaye Royale Topic ecosystem reviewed in the deep dive. A missing video or format here does not mean it was not published. The September deep-dive figures are historical snapshots, not current totals.</p><a className="underline font-semibold" href="/palaye">View the verified three-channel deep dive ↗</a></div></div>}
+      <CoachLanding model={model} slug={saved.slug} readOnly={partner} timelineEditor={
       <CoachTimelineEditor slug={saved.slug} artist={saved.artist} campaignName={saved.campaignName}
         timeline={saved.timelineText || saved.plan.events.map(e => `${e.dateISO} - ${e.title}`).join('\n')}
         channelCtx={saved.channelCtx} campaignStartDate={artistConfig?.campaignStartDate} market={saved.market} />
-    } classicHref={`/coach/${saved.slug}?view=classic`} />;
+    } classicHref={`/coach/${saved.slug}?view=classic`} /></>;
   }
 
   return (
