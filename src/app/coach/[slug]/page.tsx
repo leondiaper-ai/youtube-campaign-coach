@@ -223,7 +223,7 @@ export default async function CampaignPage({ params, searchParams }: PageProps) 
   if (palayeLabelVideos.length) {
     const byId = new Map(recentUploads.map(v => [v.id, v]));
     for (const v of palayeLabelVideos) byId.set(v.id, v);
-    recentUploads = [...byId.values()];
+    recentUploads = Array.from(byId.values());
   }
 
   // Compute data coverage — how complete is the historical picture?
