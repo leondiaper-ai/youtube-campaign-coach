@@ -1,3 +1,6 @@
+import { YOUTUBE_UK_ROSTER } from '@/lib/youtubeUkRoster';
+import { listPartnerSlugs } from '@/lib/youtubeUkPartnerStore';
+import { getAllArtists } from '@/lib/marketScope';
 import { notFound } from 'next/navigation';
 import { loadPlan, savePlan, type CampaignDataCoverage, type HistoricalSource } from '@/lib/planStore';
 import { readLiveSnapByHandle, readChannelMapping } from '@/lib/kvCache';
@@ -47,9 +50,16 @@ export default async function CampaignPage({ params, searchParams }: PageProps) 
      new layout misbehaves on a live campaign, the fix is a URL, not a
      revert — and the old view keeps working from the same data. */
   const sp = (await searchParams) ?? {};
-  const classic = (Array.isArray(sp.view) ? sp.view[0] : sp.view) === 'classic';
+  const partner = sp.partner === 'youtube-uk';
+  const classic = !partner && (Array.isArray(sp.view) ? sp.view[0] : sp.view) === 'classic';
   const saved = await loadPlan(slug);
   if (!saved) notFound();
+  if (partner) {
+    const [artists, extras] = await Promise.all([getAllArtists(), listPartnerSlugs().catch(() => [] as string[])]);
+    const norm = (name: string) => name.toLowerCase().replace(/[^a-z0-9]/g, '');
+    const allowed = new Set([...YOUTUBE_UK_ROSTER.map(r => norm(r.name)), ...artists.filter(a => extras.includes(a.slug)).map(a => norm(a.name))]);
+    if (!allowed.has(norm(saved.artist))) notFound();
+  }
 
   // Try to fetch live channel data
   let liveChannel: {
@@ -300,7 +310,7 @@ export default async function CampaignPage({ params, searchParams }: PageProps) 
     }
     const dates = new Map([...tracks.map(t => [t.name,t.releaseDate] as const), ...saved.plan.events.map(e => [e.title,e.dateISO] as const), ...evidence.uploads.map(u => [u.title,u.publishedAt.slice(0,10)] as const)]);
     model.rollout.sort((a,b) => (dates.get(a.name) ?? '').localeCompare(dates.get(b.name) ?? ''));
-    return <CoachLanding model={model} slug={saved.slug} timelineEditor={
+    return <CoachLanding model={model} slug={saved.slug} readOnly={partner} timelineEditor={
       <CoachTimelineEditor slug={saved.slug} artist={saved.artist} campaignName={saved.campaignName}
         timeline={saved.timelineText || saved.plan.events.map(e => `${e.dateISO} - ${e.title}`).join('\n')}
         channelCtx={saved.channelCtx} campaignStartDate={artistConfig?.campaignStartDate} market={saved.market} />
