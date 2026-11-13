@@ -280,6 +280,26 @@ export default async function CampaignPage({ params, searchParams }: PageProps) 
       readDecisions(saved.slug),
     ]);
 
+    // Tom A. Smith pilot: populate fan evidence from the confirmed official video
+    // when the shared sentiment cache has not yet been generated. Never fabricate
+    // a sentiment verdict when comments are disabled or the sample is insufficient.
+    if (saved.slug === 'tom-a-smith-the-golden-gates' && !evidence.fanResponse) {
+      try {
+        const { fetchCommentsForAssets, buildFanResponse } = await import('@/lib/intelligence/fanResponse');
+        const { writeFanResponse } = await import('@/lib/kvCache');
+        const video = evidence.uploads.find(u => u.id === 'AY-tiFXP3a0');
+        if (video) {
+          const sampled = [{videoId:video.id,title:video.title,publishedAt:video.publishedAt}];
+          const { comments } = await fetchCommentsForAssets([video.id], 100);
+          if (comments.length) {
+            const response = buildFanResponse(comments, sampled);
+            evidence.fanResponse = response;
+            await writeFanResponse(artistConfig?.slug ?? saved.slug, response);
+          }
+        }
+      } catch { /* Sentiment is optional; never block the campaign page. */ }
+    }
+
     const tracks = buildRoadmap(saved.plan, evidence, Date.now(), driveLibrary);
 
     /* Only the videos the roadmap matched. Nothing speculative. */
