@@ -1,8 +1,11 @@
 import type { RecentUpload } from './artists';
+import { reviewedReleaseSource } from './channelAuditSources';
 
 export type AuditCatalogue = {
   version: 1; channelId: string; startedAt: string; fetchedAt: string;
   includesLinkedUploads?: boolean;
+  playlistFetchedAt?: string; playlistComplete?: boolean; sourceOffset?: number;
+  reviewedReleases?: {version:string;checkedAt:string;sourceUrl:string;label:string;videoCount:number};
   complete: boolean; nextPage: string | null; playlist: string;
   publicVideoCount: number | null; scannedIds: number; uploads: (RecentUpload & {uploaderChannelId?: string})[];
 };
@@ -28,7 +31,9 @@ function seconds(iso: string) {
 export async function scanAuditCatalogue(id: string): Promise<AuditCatalogue> {
   const redis=await store();
   const existing=await redis.get<AuditCatalogue>(key(id));
-  if(existing?.complete && existing.includesLinkedUploads===true && Date.now()-Date.parse(existing.fetchedAt)<WEEK) return existing;
+  const source=reviewedReleaseSource(id);
+  const sourceCurrent=!source || existing?.reviewedReleases?.version===source.version;
+  if(existing?.complete && existing.includesLinkedUploads===true && sourceCurrent && Date.now()-Date.parse(existing.playlistFetchedAt ?? existing.fetchedAt)<WEEK) return existing;
   const lock=key(id)+':lock';
   if(!await redis.set(lock,true,{nx:true,ex:90})) throw new Error('A catalogue scan is already running. Try again shortly.');
   try {
@@ -40,26 +45,41 @@ export async function scanAuditCatalogue(id: string): Promise<AuditCatalogue> {
       if(!response.ok) throw new Error('YouTube collection returned '+response.status+'. Saved progress is preserved.');
       return response.json();
     }
-    let job=existing && !existing.complete && existing.includesLinkedUploads===true ? existing : null;
+    let job=existing && existing.includesLinkedUploads===true && (!existing.complete || (!sourceCurrent && Date.now()-Date.parse(existing.playlistFetchedAt ?? existing.fetchedAt)<WEEK)) ? {...existing,playlistFetchedAt:existing.playlistFetchedAt ?? existing.fetchedAt,playlistComplete:existing.playlistComplete ?? existing.complete,complete:false} : null;
     if(!job) {
       const result=await get('channels',{part:'statistics,contentDetails',id});
       const channel=result.items?.[0];
       const playlist=channel?.contentDetails?.relatedPlaylists?.uploads;
       if(!playlist) throw new Error('No public uploads playlist found.');
       const now=new Date().toISOString();
-      job={version:1,includesLinkedUploads:true,channelId:id,playlist,publicVideoCount:channel.statistics?.videoCount!=null?Number(channel.statistics.videoCount):null,scannedIds:0,uploads:[],nextPage:null,complete:false,startedAt:now,fetchedAt:now};
+      job={version:1,includesLinkedUploads:true,channelId:id,playlist,publicVideoCount:channel.statistics?.videoCount!=null?Number(channel.statistics.videoCount):null,scannedIds:0,uploads:[],nextPage:null,playlistComplete:false,complete:false,startedAt:now,fetchedAt:now,playlistFetchedAt:now};
     }
     const started=Date.now();
-    for(let page=0;page<10 && Date.now()-started<45000;page++) {
+    for(let page=0;!job.playlistComplete && page<10 && Date.now()-started<45000;page++) {
       const list=await get('playlistItems',{part:'contentDetails',playlistId:job.playlist,maxResults:'50',...(job.nextPage?{pageToken:job.nextPage}:{})});
       const ids=(list.items??[]).map((x:any)=>x.contentDetails?.videoId).filter(Boolean) as string[];
       const result=ids.length ? await get('videos',{part:'snippet,statistics,contentDetails,liveStreamingDetails',id:ids.join(',')}) : {items:[]};
       const uploads:RecentUpload[]=(result.items??[]).filter((v:any)=>ids.includes(v.id)).map((v:any)=>({id:v.id,uploaderChannelId:v.snippet?.channelId,title:v.snippet.title??'',description:(v.snippet.description??'').slice(0,1200),publishedAt:v.snippet.publishedAt,durationSec:seconds(v.contentDetails?.duration??''),captions:v.contentDetails?.caption==='true',live:v.snippet?.liveBroadcastContent??'none',scheduledStart:v.liveStreamingDetails?.scheduledStartTime??null,actualStart:v.liveStreamingDetails?.actualStartTime??null,viewCount:Number(v.statistics?.viewCount??0),likeCount:Number(v.statistics?.likeCount??0),commentCount:Number(v.statistics?.commentCount??0),engagementAvailability:{likes:v.statistics?.likeCount!=null,comments:v.statistics?.commentCount!=null}}));
       const byId:Map<string,RecentUpload>=new Map(job.uploads.map(u=>[u.id,u]));
       uploads.forEach(u=>byId.set(u.id,u));
-      job={...job,uploads:Array.from(byId.values()),scannedIds:job.scannedIds+ids.length,nextPage:list.nextPageToken??null,complete:!list.nextPageToken,fetchedAt:new Date().toISOString()};
+      job={...job,uploads:Array.from(byId.values()),scannedIds:job.scannedIds+ids.length,nextPage:list.nextPageToken??null,playlistComplete:!list.nextPageToken,complete:!list.nextPageToken && !source,playlistFetchedAt:new Date().toISOString(),fetchedAt:new Date().toISOString()};
       await redis.set(key(id),job,{ex:TTL});
-      if(job.complete) break;
+      if(job.playlistComplete) break;
+    }
+    if(job.playlistComplete && source) {
+      if(job.reviewedReleases?.version!==source.version) job={...job,sourceOffset:0,reviewedReleases:{version:source.version,checkedAt:source.checkedAt,sourceUrl:source.sourceUrl,label:source.label,videoCount:0}};
+      const known=new Set(job.uploads.filter(u=>!u.auditReviewedRelease).map(u=>u.id));
+      const ids=source.videoIds.filter(id=>!known.has(id));
+      for(let offset=job.sourceOffset??0;offset<ids.length && Date.now()-started<45000;offset+=50) {
+        const batch=ids.slice(offset,offset+50);
+        const result=await get('videos',{part:'snippet,statistics,contentDetails,liveStreamingDetails',id:batch.join(',')});
+        const releases:RecentUpload[]=(result.items??[]).filter((v:any)=>batch.includes(v.id)).map((v:any)=>({id:v.id,uploaderChannelId:v.snippet?.channelId,auditReviewedRelease:true,title:v.snippet?.title??'',description:(v.snippet?.description??'').slice(0,1200),publishedAt:v.snippet?.publishedAt,durationSec:seconds(v.contentDetails?.duration??''),captions:v.contentDetails?.caption==='true',live:v.snippet?.liveBroadcastContent??'none',scheduledStart:v.liveStreamingDetails?.scheduledStartTime??null,actualStart:v.liveStreamingDetails?.actualStartTime??null,viewCount:Number(v.statistics?.viewCount??0),likeCount:Number(v.statistics?.likeCount??0),commentCount:Number(v.statistics?.commentCount??0),engagementAvailability:{likes:v.statistics?.likeCount!=null,comments:v.statistics?.commentCount!=null}}));
+        const byId:Map<string,RecentUpload>=new Map(job.uploads.map(u=>[u.id,u]));releases.forEach(u=>byId.set(u.id,u));
+        job={...job,uploads:Array.from(byId.values()),sourceOffset:Math.min(offset+50,ids.length),fetchedAt:new Date().toISOString(),reviewedReleases:{...job.reviewedReleases!,videoCount:Array.from(byId.values()).filter(u=>u.auditReviewedRelease).length}};
+        await redis.set(key(id),job,{ex:TTL});
+      }
+      job={...job,complete:(job.sourceOffset??0)>=ids.length,fetchedAt:new Date().toISOString()};
+      await redis.set(key(id),job,{ex:TTL});
     }
     return job;
   } finally { await redis.del(lock); }

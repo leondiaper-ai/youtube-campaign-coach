@@ -26,6 +26,7 @@ export type AuditIntel = {
   movement: string | null;
   context: string | null;
   coverageWarning: string | null;
+  reviewedReleases?: {checkedAt:string;sourceUrl:string;label:string;videoCount:number};
 };
 const NAMES: Record<UploadFormat, string> = {
   short:'Shorts', omv:'Music videos', live:'Live performance', lyric:'Lyric videos', visualiser:'Visualisers', bts:'Behind the scenes',
@@ -57,7 +58,7 @@ function monday(at: number) {
 }
 export function buildAuditIntel(input: {
   name: string; items: Item[]; now: number; dataAt: string | null; uploadsAt?: string | null;
-  catalogue?: { complete: boolean; fetchedAt: string; publicVideoCount: number | null };
+  catalogue?: { complete: boolean; fetchedAt: string; publicVideoCount: number | null; reviewedReleases?: AuditIntel['reviewedReleases'] };
   stats: { subs: number | null; lifetimeViews: number | null; views7d: number | null; subs7d: number | null };
   context?: { campaign?: string; nextMomentLabel?: string; nextMomentDate?: string };
 }): AuditIntel {
@@ -77,7 +78,9 @@ export function buildAuditIntel(input: {
   // This is a coverage check, not a claim that deleted/Topic videos explain the difference.
   const discrepancy = complete && ((input.catalogue?.publicVideoCount ?? 0)>all.length+2 ||
     (all.length>0 && (input.stats.lifetimeViews??0)>Math.max(allViews*2,10000)));
-  const reliable = complete && fresh && !discrepancy;
+  const reviewed=input.catalogue?.reviewedReleases;
+  const reviewDated=!!reviewed && at-Date.parse(reviewed.checkedAt)>7*DAY;
+  const reliable = complete && fresh && !discrepancy && !reviewDated;
   const months: AuditIntel['months'] = [];
   const cursor = new Date(from); cursor.setUTCDate(1);
   while(cursor.getTime()<=at) {
@@ -104,7 +107,7 @@ export function buildAuditIntel(input: {
     const likes=measured(u,'likes'),comments=measured(u,'comments');
     return {id:u.id,title:u.title,publishedAt:u.publishedAt,format:NAMES[format],views:u.viewCount,likes,comments,rate:u.viewCount>0 && likes!=null && comments!=null?(likes+comments)/u.viewCount*100:null,older:Date.parse(u.publishedAt)<from};
   });
-  const responding=proof.find(p=>(p.comments??0)>0 || (p.likes??0)>0);
+  const responding=[...proof].sort((a,b)=>(b.comments??-1)-(a.comments??-1) || (b.likes??-1)-(a.likes??-1)).find(p=>(p.comments??0)>0 || (p.likes??0)>0);
   const best = groups.find(g=>g.key!=='longform');
   const longformViews=videos.reduce((sum,{u})=>sum+u.viewCount,0)+audio.reduce((sum,{u})=>sum+u.viewCount,0);
   const topShare=views>0?[...recent].sort((a,b)=>b.u.viewCount-a.u.viewCount).slice(0,3).reduce((sum,{u})=>sum+u.viewCount,0)/views:0;
@@ -113,9 +116,9 @@ export function buildAuditIntel(input: {
   const unknownDominates=(groups.find(g=>g.key==='longform')?.views??0)>views*.5;
   const next: AuditIntel['next']=[];
   let state: AuditIntel['state']='developing', headline='A channel read grounded in the uploads.', read='';
-  if(!complete || !fresh || (discrepancy && recent.length<=8)) {
+  if(!complete || !fresh || ((discrepancy || reviewDated) && recent.length<=8)) {
     state='limited';headline=responding?'The response is visible. Coverage needs checking.':all.length?'Read the verified uploads. Check the coverage.':'Build the upload evidence first.';
-    read=discrepancy?'The channel totals and scanned upload inventory differ substantially. We can show verified examples, but cannot call the whole channel quiet.':!complete?'This is a partial upload inventory. The figures below show what was found; gaps are not yet evidence of missing content.':'The upload reading is over seven days old. Activity below ends at the recorded date.';
+    read=reviewDated?`Known releases are included, but the Releases-source check is dated ${reviewed!.checkedAt}. New release IDs may need adding before judging the channel’s current activity.`:discrepancy?'The channel totals and scanned upload inventory differ substantially. We can show verified examples, but cannot call the whole channel quiet.':!complete?'This is a partial upload inventory. The figures below show what was found; gaps are not yet evidence of missing content.':'The upload reading is over seven days old. Activity below ends at the recorded date.';
   } else if(!recent.length) {
     state=responding?'quiet-response':'empty';headline=responding?'Earlier content gets a response. No recent uploads found.':'No uploads found in the last six months.';
     read=responding?`“${responding.title}” records ${number(responding.views)} lifetime views${responding.comments!=null?' and '+number(responding.comments)+' comments':''}. It predates this window.`:'No public uploads in the scanned playlist fall inside this window. Release and partner appearances are not a complete inventory here.';
@@ -147,7 +150,7 @@ export function buildAuditIntel(input: {
     headline=best && !unknownDominates?`Most recorded viewing sits with ${best.name.toLowerCase()}.`:'The strongest uploads are the starting point.';
     read=`${count(recent.length,'upload')} found in six months; ${count(shorts.length,'Short')}. Use the examples and publishing timeline together.`;
   }
-  if(!reliable && state==='limited') next.push({title:'Check coverage first',evidence:discrepancy?'The totals do not establish a complete release inventory.':!complete?'A complete uploads-playlist scan is still needed.':'The upload reading needs updating.',action:discrepancy?'Check the artist’s Releases and linked channels before making an inactivity or missing-asset claim.':!complete?'Finish the catalogue scan; the examples below remain useful while it runs.':'Refresh the catalogue before using this as a current channel brief.'});
+  if(!reliable && state==='limited') next.push({title:'Check coverage first',evidence:discrepancy?'The totals do not establish a complete release inventory.':!complete?'A complete uploads-playlist scan is still needed.':'The upload reading needs updating.',action:reviewDated?'Review the artist’s current Releases tab and update the known source IDs.':discrepancy?'Check the artist’s Releases and linked channels before making an inactivity or missing-asset claim.':!complete?'Finish the catalogue scan; the examples below remain useful while it runs.':'Refresh the catalogue before using this as a current channel brief.'});
   if(unknownDominates) {
     const v=recent.filter(x=>x.format==='longform').sort((a,b)=>b.u.viewCount-a.u.viewCount)[0];
     next.push({title:'Confirm the leading format',evidence:`“${v.u.title}” has ${number(v.u.viewCount)} views, but its format is not reliably labelled.`,action:'Review this upload before recommending more of a particular format.'});
@@ -172,7 +175,7 @@ export function buildAuditIntel(input: {
     input.stats.views7d!=null?`${number(input.stats.views7d)} channel views in the available 7-day comparison`:null,
     input.stats.subs7d!=null?`${input.stats.subs7d>=0?'+':''}${number(input.stats.subs7d)} net subscribers`:null,
   ].filter(Boolean).join(' · ')+'. Channel movement does not attribute subscribers to a video.':null;
-  return {version:1,state,headline,read,window:{from:date(from),to:date(at),fresh,playlistComplete:complete,reliable,note:'Six-month upload cohort; views, likes and comments are lifetime readings, not gains during these months. Formats, including Shorts, use title/duration evidence, explicit format tags and saved corrections.'},activity:{uploads:recent.length,shorts:shorts.length,audio:audio.length,videos:videos.length,views,activeWeeks:active.size,totalWeeks,latest:recent.length?date(Math.max(...recent.map(({u})=>Date.parse(u.publishedAt)))):null},months,engagement:{...engagementRead,note:'(Likes + comments) ÷ views × 100, weighted across uploads where both counts are available. Counts are interactions, not unique fans; zeroes from old caches may be unknown. No returning-viewer, loyalty or subscriber-conversion claim.'},formats:groups,proof,next:next.slice(0,2),movement,context,coverageWarning:discrepancy?'Release coverage needs checking: the channel and upload totals differ.':!complete?'Partial inventory — no whole-channel absence claims.':!fresh?'Dated upload reading — not current activity.':null};
+  return {version:1,state,headline,read,window:{from:date(from),to:date(at),fresh,playlistComplete:complete,reliable,note:'Six-month upload cohort; views, likes and comments are lifetime readings, not gains during these months. Formats, including Shorts, use title/duration evidence, explicit format tags and saved corrections.'},activity:{uploads:recent.length,shorts:shorts.length,audio:audio.length,videos:videos.length,views,activeWeeks:active.size,totalWeeks,latest:recent.length?date(Math.max(...recent.map(({u})=>Date.parse(u.publishedAt)))):null},months,engagement:{...engagementRead,note:'(Likes + comments) ÷ views × 100, weighted across uploads where both counts are available. Counts are interactions, not unique fans; zeroes from old caches may be unknown. No returning-viewer, loyalty or subscriber-conversion claim.'},formats:groups,proof,next:next.slice(0,2),movement,context,reviewedReleases:reviewed,coverageWarning:reviewDated?'The known Releases source needs a fresh completeness check.':discrepancy?'Release coverage needs checking: the channel and upload totals differ.':!complete?'Partial inventory — no whole-channel absence claims.':!fresh?'Dated upload reading — not current activity.':null};
 }
 
 export function auditIntelText(name: string, intel: AuditIntel): string {
@@ -181,7 +184,7 @@ export function auditIntelText(name: string, intel: AuditIntel): string {
     intel.headline,intel.read,`${a.uploads} uploads found · ${a.shorts} Shorts · ${a.audio} release audio · ${number(a.views)} lifetime views on those uploads`,
     ...(intel.window.reliable?[`${a.activeWeeks}/${a.totalWeeks} complete weeks with uploads`]:[]),
     ...intel.proof.map(p=>`${p.title} (${p.publishedAt.slice(0,10)}${p.older?', older example':''})\n${number(p.views)} views${p.likes!=null?' · '+number(p.likes)+' likes':''}${p.comments!=null?' · '+number(p.comments)+' comments':''}\nhttps://www.youtube.com/watch?v=${p.id}`),
-    ...intel.next.map(p=>`${p.title}\n${p.evidence}\n${p.action}`),intel.context,intel.movement,intel.coverageWarning,intel.window.note,
+    ...intel.next.map(p=>`${p.title}\n${p.evidence}\n${p.action}`),intel.reviewedReleases?`${intel.reviewedReleases.videoCount} additional releases included from ${intel.reviewedReleases.label} (checked ${intel.reviewedReleases.checkedAt})\n${intel.reviewedReleases.sourceUrl}`:null,intel.context,intel.movement,intel.coverageWarning,intel.window.note,
     'Public channel totals do not measure subscribers attributed to a video. Release audio beyond the uploads playlist and third-party appearances have not been fully verified.',
   ].filter(Boolean).join('\n\n');
 }

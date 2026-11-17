@@ -191,6 +191,8 @@ export type RecentUpload = {
   engagementAvailability?: { likes: boolean; comments: boolean };
   /** Original uploader, including linked artist-channel videos. */
   uploaderChannelId?: string;
+  /** Included through an explicitly reviewed release-source register. */
+  auditReviewedRelease?: boolean;
   // ── Companion confidence (fuzzy matching) ──
   shortCompanion?: CompanionConfidence;
   lyricCompanion?: CompanionConfidence;

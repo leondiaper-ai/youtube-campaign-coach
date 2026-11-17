@@ -99,7 +99,7 @@ async function downloadIntelPng(a: ChannelAudit) {
   text('Videos',48,933,13,orange,true);text('Shorts',130,933,13,blue,true);text('Release audio',207,933,13,'#8F887E',true);text('*Partial month · Views/likes/comments are lifetime counts; not unique fans or subscriber conversion.',350,933,12,muted);
   const url='https://youtube-campaign-coach.vercel.app/watcher/'+encodeURIComponent(a.slug);
   const qr=document.createElement('canvas');await toCanvas(qr,url,{width:96,margin:1,color:{dark:ink,light:'#FAF7F2'}});c.drawImage(qr,1450,77,96,96);
-  text('Source: cached YouTube Data API · Playlist scope; Releases/Topic and third-party appearances not fully verified · Open channel via QR',48,977,11,muted);
+  text('Source: cached YouTube Data API · Playlist + stated reviewed sources; no exhaustive Releases/Topic or third-party inventory · Open channel via QR',48,977,11,muted);
   const blob=await new Promise<Blob|null>(resolve=>canvas.toBlob(resolve,'image/png'));if(!blob)throw Error('Export failed');
   const objectUrl=URL.createObjectURL(blob),link=document.createElement('a');link.href=objectUrl;link.download=`${a.slug}-quick-intel-${i.window.to}.png`;link.click();setTimeout(()=>URL.revokeObjectURL(objectUrl),1000);
 }

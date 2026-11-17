@@ -52,3 +52,12 @@ Verification: `node scripts/test-channel-audit-intel.cjs` exercises different ch
 
 
 Live QA refinement: an all-Shorts recent inventory now asks for a relevant full-length destination rather than automatically prescribing more Shorts. Title-based song-family matching proposes a named destination only when one exists; otherwise it asks for a match check. Sparse inventories explaining less than half the channel counter trigger a coverage check, including Interplanetary Criminal's linked/Topic gap. Positive observations in larger samples stay usable with an explicit coverage warning; unknown coverage does not become an inactivity verdict. Explicit #visualiser / #lyricvideo metadata can classify an otherwise unlabelled long-form upload without using promotional links in the description.
+
+
+## Reuse reviewed release research
+
+`channelAuditSources.ts` is a channel-ID source register for explicitly reviewed Releases video IDs. The initial entries reuse the 30 visible release playlists per artist collected for the Alice / Fan Health review (MPH: 102 distinct IDs; Interplanetary Criminal: 57). Partner-channel matches are deliberately not imported as artist releases. This is a bounded source set checked on 17 November, not automatic discovery of new releases.
+
+The existing scan hydrates only registered IDs missing from its uploads playlist, in videos.list batches of fifty, saving source offsets after every batch. A source-version upgrade augments a fresh completed playlist without re-paging it. The original playlist's freshness timestamp is retained, so adding a source cannot extend its seven-day cache lifetime. Failed source batches resume without replaying the playlist. A cache is ready only when both playlist collection and the registered source version are complete. Other artists have no additional requests. Initial incremental cost for these two source sets is around four videos.list requests; subsequent warm audit opens add none.
+
+The API and exports expose the additional-source count, source URL and review date. A source check more than seven days old is not treated as proof that no new Releases exist, even when its known IDs have fresh view counters. The quick read includes audio in the publishing timeline and selects the named proof with the most reported comments among the displayed examples for a participation-led next step. It never converts these views into a subscriber-conversion rate.
