@@ -175,3 +175,15 @@ Next page keeps its established iframe route and now permits fullscreen.
 Frozen dated API evidence means all headline numbers and narrative remain
 consistent. Regenerate deliberately after new research; do not hydrate a
 static conclusion with changing counters at page load.
+
+## Violins visual identity update · 17 November 2026
+
+The cover now uses the official Violins artwork, retrieved from the artist's
+Bandcamp og:image (https://f4.bcbits.com/img/a1970050484_5.jpg).
+The artist's current official website supplies the olive accent #817819:
+https://static1.squarespace.com/static/custom-css/62c5e930a7fabc72bdc99ed1/62c5e931a7fabc72bdc99ef1/22/custom.css
+The remaining palette follows the record cover's sand, umber, silver-grey
+and pale rose. Lowercase, regular-weight sans-serif typography replaces
+the reference deck's condensed caps, contrasting serif and star motif.
+A separate violins.css skin scopes this change to Blondshell.
+All research rows, calculations, recommendations and slide IDs are retained.
