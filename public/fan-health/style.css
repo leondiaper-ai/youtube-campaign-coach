@@ -21,3 +21,7 @@ html{scroll-padding-top:75px}body{font-family:'Instrument Sans',sans-serif}.skip
 .release-rhythm{display:grid;grid-template-columns:1fr;gap:5px;margin-top:8px;border-top:1px solid var(--line);padding-top:7px}.release-rhythm>span{font:9px 'DM Mono',monospace;color:var(--dim)}.release-months{display:grid;grid-template-columns:repeat(7,1fr);gap:10px}.release-months b{font:12px 'DM Mono',monospace;color:var(--warm)}.reading b{color:var(--cream)}.metrics-first .gap>span{font-size:10px;min-width:86px}.metrics-first h1{font-size:clamp(28px,3.5vw,52px)}
 @media(min-width:1100px) and (max-height:790px){.metrics-first h1{font-size:36px}.release-rhythm{margin-top:5px;padding-top:5px}.metrics-first .next-read p{font-size:14px}}
 @media(max-width:650px){.release-rhythm{grid-template-columns:1fr;gap:7px}.release-months b{text-align:left}.metrics-first h1{font-size:35px}.metrics-first .gap>span{font-size:12px}}
+
+
+/* The activity timeline includes release audio; no misleading inactivity counter. */
+.metrics-first .rhythm{grid-template-columns:1fr;gap:0}
