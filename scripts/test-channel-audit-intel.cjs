@@ -36,6 +36,9 @@ const partial=audit([u('partial','Live in London',100000,150)],{catalogue:undefi
 assert.equal(partial.intel.state,'limited');assert(!partial.intel.window.reliable);assert(!partial.intel.headline.includes('Little regular'));
 const mismatch=audit([u('only','Live in London',100000,150)],{stats:{subs:7600,lifetimeViews:9000000,views7d:null,views30d:null,subs7d:null}});
 assert.equal(mismatch.intel.state,'limited');assert(mismatch.intel.coverageWarning.includes('Release coverage'));
+const linkedGap=audit([u('audio-gap','Song (Official Audio)',1670000,81)],{stats:{subs:12900,lifetimeViews:6122284,views7d:null,views30d:null,subs7d:null}});assert.equal(linkedGap.intel.state,'limited','A completed playlist that explains under half the channel counter must not become a whole-channel quiet claim');
+const broadGap=audit(Array.from({length:26},(_,j)=>u('broad'+j,'Artist - Weekly (Official Video)',1000,j*7+3)),{stats:{subs:10000,lifetimeViews:1000000,views7d:null,views30d:null,subs7d:null}});assert(broadGap.intel.coverageWarning);assert.equal(broadGap.intel.state,'regular','Found regular activity is positive evidence even while completeness is uncertain');
+const tagged=audit([u('tag','Lola',20000,30,{description:'Artist - Lola\n#Visualiser'})]);assert.equal(tagged.intel.formats.find(f=>f.key==='visualiser').uploads,1);
 const staleDate=new Date(now-20*day).toISOString();
 const stale=audit([u('stale','Live in London',100000,25)],{dataAt:staleDate,uploadsAt:staleDate,catalogue:{complete:true,fetchedAt:staleDate,publicVideoCount:null,scannedIds:2}});
 assert.equal(stale.intel.window.to,staleDate.slice(0,10));assert.equal(stale.intel.window.fresh,false);

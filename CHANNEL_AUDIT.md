@@ -49,3 +49,6 @@ Guardrails:
 - The same model drives the modal, Copy quick intel, the text audit and a compact local PNG. Full-audit PNG remains available. The PNG preserves date/scope and QR/source links; clickable links remain in copied text.
 
 Verification: `node scripts/test-channel-audit-intel.cjs` exercises different channel patterns, release-audio inclusion, freshness/coverage gates, missing counters, early channels, saved corrections, exclusions/deduplication, cache merge ordering, copy output and server-rendered UI. Existing audit, catalogue and label tests, TypeScript and production build also pass.
+
+
+Live QA refinement: an all-Shorts recent inventory now asks for a relevant full-length destination rather than automatically prescribing more Shorts. Title-based song-family matching proposes a named destination only when one exists; otherwise it asks for a match check. Sparse inventories explaining less than half the channel counter trigger a coverage check, including Interplanetary Criminal's linked/Topic gap. Positive observations in larger samples stay usable with an explicit coverage warning; unknown coverage does not become an inactivity verdict. Explicit #visualiser / #lyricvideo metadata can classify an otherwise unlabelled long-form upload without using promotional links in the description.

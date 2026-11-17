@@ -76,7 +76,7 @@ export function buildAuditIntel(input: {
   const allViews = all.reduce((sum,{u})=>sum+u.viewCount,0);
   // This is a coverage check, not a claim that deleted/Topic videos explain the difference.
   const discrepancy = complete && ((input.catalogue?.publicVideoCount ?? 0)>all.length+2 ||
-    (all.length>0 && all.length<=20 && (input.stats.lifetimeViews??0)>Math.max(allViews*4,10000)));
+    (all.length>0 && (input.stats.lifetimeViews??0)>Math.max(allViews*2,10000)));
   const reliable = complete && fresh && !discrepancy;
   const months: AuditIntel['months'] = [];
   const cursor = new Date(from); cursor.setUTCDate(1);
@@ -113,7 +113,7 @@ export function buildAuditIntel(input: {
   const unknownDominates=(groups.find(g=>g.key==='longform')?.views??0)>views*.5;
   const next: AuditIntel['next']=[];
   let state: AuditIntel['state']='developing', headline='A channel read grounded in the uploads.', read='';
-  if(!reliable) {
+  if(!complete || !fresh || (discrepancy && recent.length<=8)) {
     state='limited';headline=responding?'The response is visible. Coverage needs checking.':all.length?'Read the verified uploads. Check the coverage.':'Build the upload evidence first.';
     read=discrepancy?'The channel totals and scanned upload inventory differ substantially. We can show verified examples, but cannot call the whole channel quiet.':!complete?'This is a partial upload inventory. The figures below show what was found; gaps are not yet evidence of missing content.':'The upload reading is over seven days old. Activity below ends at the recorded date.';
   } else if(!recent.length) {
@@ -137,7 +137,7 @@ export function buildAuditIntel(input: {
   } else if(recent.length>=10 && topShare>=.8) {
     state='concentrated';headline='A few uploads carry most recorded viewing.';
     read=`The three leading uploads hold ${Math.round(topShare*100)}% of lifetime views on ${recent.length} uploads in this window. Check their songs and creative before repeating the output volume.`;
-  } else if(totalWeeks>0 && active.size/totalWeeks<.4) {
+  } else if(reliable && totalWeeks>0 && active.size/totalWeeks<.4) {
     state='inconsistent';headline='Activity arrives in bursts.';
     read=`${count(recent.length,'upload')} across ${active.size} of ${totalWeeks} complete weeks. ${best && !unknownDominates ? best.name+' leads recorded viewing among labelled formats.':'The timeline shows the publishing gaps.'}`;
   } else if(totalWeeks>0 && active.size/totalWeeks>=.65) {
@@ -147,7 +147,7 @@ export function buildAuditIntel(input: {
     headline=best && !unknownDominates?`Most recorded viewing sits with ${best.name.toLowerCase()}.`:'The strongest uploads are the starting point.';
     read=`${count(recent.length,'upload')} found in six months; ${count(shorts.length,'Short')}. Use the examples and publishing timeline together.`;
   }
-  if(!reliable) next.push({title:'Check coverage first',evidence:discrepancy?'The totals do not establish a complete release inventory.':!complete?'A complete uploads-playlist scan is still needed.':'The upload reading needs updating.',action:discrepancy?'Check the artist’s Releases and linked channels before making an inactivity or missing-asset claim.':!complete?'Finish the catalogue scan; the examples below remain useful while it runs.':'Refresh the catalogue before using this as a current channel brief.'});
+  if(!reliable && state==='limited') next.push({title:'Check coverage first',evidence:discrepancy?'The totals do not establish a complete release inventory.':!complete?'A complete uploads-playlist scan is still needed.':'The upload reading needs updating.',action:discrepancy?'Check the artist’s Releases and linked channels before making an inactivity or missing-asset claim.':!complete?'Finish the catalogue scan; the examples below remain useful while it runs.':'Refresh the catalogue before using this as a current channel brief.'});
   if(unknownDominates) {
     const v=recent.filter(x=>x.format==='longform').sort((a,b)=>b.u.viewCount-a.u.viewCount)[0];
     next.push({title:'Confirm the leading format',evidence:`“${v.u.title}” has ${number(v.u.viewCount)} views, but its format is not reliably labelled.`,action:'Review this upload before recommending more of a particular format.'});
@@ -164,6 +164,7 @@ export function buildAuditIntel(input: {
     next.push({title:shorts.length<=2?'Give viewers a reason to return':'Build on a specific response',evidence:`“${responding.title}”: ${number(responding.views)} views${responding.likes!=null?', '+number(responding.likes)+' likes':''}${responding.comments!=null?', '+number(responding.comments)+' comments':''}${responding.older?' · older example':''}.`,action:family.length>=3?`Test ${idea}, using this format’s ${family.length} observed examples as the reference. Compare new uploads at the same age.`:`Test ${idea} using this upload as a creative reference${shorts.length<=2?'; a more regular rhythm could give viewers more reasons to return and subscribe':''}. One example is a starting point, not a proven formula.`});
     }
   }
+  if(discrepancy && state!=='limited' && next.length<2) next.push({title:'Check the wider release coverage',evidence:'The scanned uploads explain less than half the channel lifetime counter, or the reported public-video count exceeds the inventory.',action:'Keep these findings scoped to the named uploads. Check Releases and linked channels before treating format gaps as whole-channel gaps.'});
   if(next.length<2 && shorts.length>2 && shorts.length<recent.length && reliable) next.push({title:'Test follow-through on the leading upload',evidence:`${count(shorts.length,'Short')} published in this window.`,action:ranked[0]?`Check that relevant Shorts point to “${ranked[0].u.title}” using a related video. Links and end screens have not been inspected.`:'Review how Shorts connect to a full-length destination.'});
   const contextDate=Date.parse(input.context?.nextMomentDate??'');
   const context=Number.isFinite(contextDate) && contextDate>input.now?`Saved next moment: ${input.context?.nextMomentLabel??'Release'} · ${input.context!.nextMomentDate}.` : input.context?.campaign?`Saved campaign: ${input.context.campaign}. No future release date is assumed.`:null;
@@ -171,7 +172,7 @@ export function buildAuditIntel(input: {
     input.stats.views7d!=null?`${number(input.stats.views7d)} channel views in the available 7-day comparison`:null,
     input.stats.subs7d!=null?`${input.stats.subs7d>=0?'+':''}${number(input.stats.subs7d)} net subscribers`:null,
   ].filter(Boolean).join(' · ')+'. Channel movement does not attribute subscribers to a video.':null;
-  return {version:1,state,headline,read,window:{from:date(from),to:date(at),fresh,playlistComplete:complete,reliable,note:'Six-month upload cohort; views, likes and comments are lifetime readings, not gains during these months. Formats, including Shorts, use title/duration evidence and saved corrections.'},activity:{uploads:recent.length,shorts:shorts.length,audio:audio.length,videos:videos.length,views,activeWeeks:active.size,totalWeeks,latest:recent.length?date(Math.max(...recent.map(({u})=>Date.parse(u.publishedAt)))):null},months,engagement:{...engagementRead,note:'(Likes + comments) ÷ views × 100, weighted across uploads where both counts are available. Counts are interactions, not unique fans; zeroes from old caches may be unknown. No returning-viewer, loyalty or subscriber-conversion claim.'},formats:groups,proof,next:next.slice(0,2),movement,context,coverageWarning:discrepancy?'Release coverage needs checking: the channel and upload totals differ.':!complete?'Partial inventory — no whole-channel absence claims.':!fresh?'Dated upload reading — not current activity.':null};
+  return {version:1,state,headline,read,window:{from:date(from),to:date(at),fresh,playlistComplete:complete,reliable,note:'Six-month upload cohort; views, likes and comments are lifetime readings, not gains during these months. Formats, including Shorts, use title/duration evidence, explicit format tags and saved corrections.'},activity:{uploads:recent.length,shorts:shorts.length,audio:audio.length,videos:videos.length,views,activeWeeks:active.size,totalWeeks,latest:recent.length?date(Math.max(...recent.map(({u})=>Date.parse(u.publishedAt)))):null},months,engagement:{...engagementRead,note:'(Likes + comments) ÷ views × 100, weighted across uploads where both counts are available. Counts are interactions, not unique fans; zeroes from old caches may be unknown. No returning-viewer, loyalty or subscriber-conversion claim.'},formats:groups,proof,next:next.slice(0,2),movement,context,coverageWarning:discrepancy?'Release coverage needs checking: the channel and upload totals differ.':!complete?'Partial inventory — no whole-channel absence claims.':!fresh?'Dated upload reading — not current activity.':null};
 }
 
 export function auditIntelText(name: string, intel: AuditIntel): string {
