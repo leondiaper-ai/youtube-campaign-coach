@@ -130,7 +130,7 @@ export function buildAuditIntel(input: {
     read=`${count(audio.length,'release-audio upload')} alongside ${count(videos.length,'other video')} and ${count(shorts.length,'Short')}. Consumption and artist interaction need separate reads.`;
   } else if(recent.length<=8 && responding) {
     state='quiet-response';headline='People respond. Little regular artist content.';
-    read=`${count(recent.length,'upload')} found in six months, including ${count(shorts.length,'Short')}. The leading example below records ${number(responding.views)} views.`;
+    read=`${count(recent.length,'upload')} found in six months, including ${count(shorts.length,'Short')}. “${responding.title}” records ${number(responding.views)} views.`;
   } else if(recent.length>=3 && shorts.length===recent.length) {
     state='shorts-only';headline='Shorts are active. Give them a destination.';
     read=`All ${recent.length} uploads found in this window are Shorts, with ${number(views)} recorded lifetime views. Check how they lead viewers into the full-length catalogue.`;
@@ -156,7 +156,6 @@ export function buildAuditIntel(input: {
     next.push({title:'Confirm the leading format',evidence:`“${v.u.title}” has ${number(v.u.viewCount)} views, but its format is not reliably labelled.`,action:'Review this upload before recommending more of a particular format.'});
   } else if(responding) {
     const candidate=ranked.find(x=>x.u.id===responding.id)!;
-    const family=all.filter(x=>x.format===candidate.format);
     const dj=/\b(dj|mixmag|boiler room|dj set|mix set)\b/i.test(candidate.u.title);
     const idea=['live','acoustic'].includes(candidate.format)?(dj?'a performance-led DJ clip':'a performance clip'):['bts','documentary','interview','tour'].includes(candidate.format)?'an artist or behind-the-scenes clip':candidate.format==='short'?'one more Short with a similar song or creative hook':'an artist-led Short around the track';
     if(candidate.format==='short' && shorts.length>=3 && shorts.length===recent.length) {
@@ -164,7 +163,7 @@ export function buildAuditIntel(input: {
       const destination=[...all].filter(x=>x.format!=='short' && key.length>=3 && songKey(x.u.title,input.name).toLowerCase()===key).sort((a,b)=>b.u.viewCount-a.u.viewCount)[0];
       next.push({title:'Connect the Short to a full-length destination',evidence:`“${responding.title}”: ${number(responding.views)} views${responding.comments!=null?', '+number(responding.comments)+' comments':''}. All ${recent.length} recent uploads found are Shorts.`,action:destination?`Review a related-video link from this Short to “${destination.u.title}” (${number(destination.u.viewCount)} lifetime views); confirm the track match and existing link in Studio.`:`Check which full-length upload matches “${responding.title}”. If a suitable destination exists, add it as the related video; if none exists and the song is a priority, consider a full-length asset. Existing links have not been inspected.`});
     } else {
-    next.push({title:shorts.length<=2?'Give viewers a reason to return':'Build on a specific response',evidence:`“${responding.title}”: ${number(responding.views)} views${responding.likes!=null?', '+number(responding.likes)+' likes':''}${responding.comments!=null?', '+number(responding.comments)+' comments':''}${responding.older?' · older example':''}.`,action:family.length>=3?`Test ${idea}, using this format’s ${family.length} observed examples as the reference. Compare new uploads at the same age.`:`Test ${idea} using this upload as a creative reference${shorts.length<=2?'; a more regular rhythm could give viewers more reasons to return and subscribe':''}. One example is a starting point, not a proven formula.`});
+    next.push({title:shorts.length<=2?'Give viewers a reason to return':'Build on a specific response',evidence:`“${responding.title}”: ${number(responding.views)} views${responding.likes!=null?', '+number(responding.likes)+' likes':''}${responding.comments!=null?', '+number(responding.comments)+' comments':''}${responding.older?' · older example':''}.`,action:`Test ${idea} using this upload as the creative reference. ${shorts.length<=2?'A regular rhythm could give viewers more reasons to return and subscribe.':'Compare new uploads at the same age.'}`});
     }
   }
   if(discrepancy && state!=='limited' && next.length<2) next.push({title:'Check the wider release coverage',evidence:'The scanned uploads explain less than half the channel lifetime counter, or the reported public-video count exceeds the inventory.',action:'Keep these findings scoped to the named uploads. Check Releases and linked channels before treating format gaps as whole-channel gaps.'});
