@@ -183,7 +183,7 @@ export function auditIntelText(name: string, intel: AuditIntel): string {
     intel.headline,intel.read,`${a.uploads} uploads found · ${a.shorts} Shorts · ${a.audio} release audio · ${number(a.views)} lifetime views on those uploads`,
     ...(intel.window.reliable?[`${a.activeWeeks}/${a.totalWeeks} complete weeks with uploads`]:[]),
     ...intel.proof.map(p=>`${p.title} (${p.publishedAt.slice(0,10)}${p.older?', older example':''})\n${number(p.views)} views${p.likes!=null?' · '+number(p.likes)+' likes':''}${p.comments!=null?' · '+number(p.comments)+' comments':''}\nhttps://www.youtube.com/watch?v=${p.id}`),
-    ...intel.next.map(p=>`${p.title}\n${p.evidence}\n${p.action}`),intel.reviewedReleases?`${intel.reviewedReleases.videoCount} additional releases included from ${intel.reviewedReleases.label} (checked ${intel.reviewedReleases.checkedAt})\n${intel.reviewedReleases.sourceUrl}`:null,intel.context,intel.movement,intel.coverageWarning,intel.window.note,
+    ...intel.next.map(p=>`${p.title}\n${p.evidence}\n${p.action}`),intel.reviewedReleases?`${intel.reviewedReleases.videoCount} additional release uploads across all dates from ${intel.reviewedReleases.label} (checked ${intel.reviewedReleases.checkedAt})\n${intel.reviewedReleases.sourceUrl}`:null,intel.context,intel.movement,intel.coverageWarning,intel.window.note,
     'Public channel totals do not measure subscribers attributed to a video. Release audio beyond the uploads playlist and third-party appearances have not been fully verified.',
   ].filter(Boolean).join('\n\n');
 }

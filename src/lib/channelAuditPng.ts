@@ -71,6 +71,7 @@ async function downloadIntelPng(a: ChannelAudit) {
   wrap(a.name,48,100,1120,42,1,ink,true);
   text(i.window.from+' — '+i.window.to,1190,42,15,muted);
   text(i.window.playlistComplete?'Uploads playlist scanned':'Partial inventory',1190,68,14,muted);
+  if(i.reviewedReleases)text('Releases check '+i.reviewedReleases.checkedAt,1190,94,13,muted);
   [[n(a.stats.subs),'SUBSCRIBERS'],[String(act.uploads),'UPLOADS FOUND / 6 MONTHS'],[String(act.shorts),'SHORTS IDENTIFIED / 6 MONTHS'],[n(act.views),'LIFETIME VIEWS ON THESE UPLOADS']].forEach(([value,label],j)=>{text(value,48+j*390,170,38,ink,true);text(label,48+j*390,197,12,muted,true);});
   wrap(i.headline,48,260,1495,30,2,ink,true);
   wrap(i.read,48,328,1495,18,2,muted);
