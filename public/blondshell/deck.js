@@ -23,7 +23,7 @@ function show(i){
  document.getElementById('page-count').textContent=`${index+1} / ${slides.length}`;
  document.getElementById('previous').disabled=index===0;
  document.getElementById('next').disabled=index===slides.length-1;
- if(presenting){window.scrollTo({top:0,behavior:'instant'});requestAnimationFrame(fitCurrent);}
+ if(presenting){window.scrollTo({top:0,behavior:'instant'});fitCurrent();requestAnimationFrame(fitCurrent);}
 }
 function isFullscreen(){return Boolean(document.fullscreenElement||document.webkitFullscreenElement);}
 function updatePresentButton(){
