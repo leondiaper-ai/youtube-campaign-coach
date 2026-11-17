@@ -16,6 +16,7 @@ import {
 import { readLiveSnapByHandle, readSyncMeta } from '@/lib/kvCache';
 import { readHistory, channelDeltaSince, type ChannelSnapshot } from '@/lib/snapshots';
 import { campaignPerformanceFor } from '@/lib/intelligence/campaignWindow';
+import { listPlans, loadPlan, type PlanIndexEntry } from '@/lib/planStore';
 import {
   generateYouTubeGrowthRead, getCampaignSignal, getChannelHealth,
   getYouTubeGrowthState, type GrowthInput,
@@ -181,6 +182,7 @@ async function loadCard(
   pin: PinnedCampaign,
   allArtists: Artist[],
   workspace = 'uk',
+  coachPlans: PlanIndexEntry[] = [],
 ): Promise<StatusCardData | null> {
   const artist = allArtists.find((a) => a.slug === pin.slug);
   if (!artist) return null;
@@ -226,7 +228,22 @@ async function loadCard(
   const history = snap.channelId ? await readHistory(snap.channelId) : [];
 
   // ── Normalized data layer — single source of truth for metrics ────────
-  const campaignStart = (label ? pin.pinnedAt : artist.campaignStartDate ?? pin.pinnedAt) ?? null;
+  // Saved Coach milestones define the campaign, not the Watcher pin date.
+  const normaliseName = (name: string) => name.toLowerCase().replace(/[^a-z0-9]/g, '');
+  const matchingPlans = coachPlans.filter(p =>
+    (p.market ?? 'uk') === workspace &&
+    normaliseName(p.artist) === normaliseName(artist.name)
+  );
+  // Never guess between multiple album plans for the same artist.
+  const selectedPlan = matchingPlans.length === 1
+    ? await loadPlan(matchingPlans[0].slug).catch(() => null)
+    : null;
+  const coachDates = (selectedPlan?.plan.events ?? [])
+    .map(event => event.dateISO)
+    .filter(date => /^\d{4}-\d{2}-\d{2}$/.test(date) && Number.isFinite(Date.parse(date)))
+    .sort();
+  const coachStart = coachDates[0] ?? null;
+  const campaignStart = coachStart ?? artist.campaignStartDate ?? null;
   const nc = normalizeChannelData(snap, history, campaignStart ? {
     campaignName: artist.campaign ?? 'Tracking',
     campaignStartDate: campaignStart,
@@ -340,7 +357,8 @@ async function loadCard(
        between this page and the Campaign Home disappears. */
     const perf = campaignPerformanceFor({
       uploads: snap.recentUploads ?? [],
-      baselineAt: campaignStart,
+      statedAt: campaignStart,
+      statedBy: coachStart ? 'saved Coach timeline' : 'artist campaign configuration',
     });
     const campaignDay = perf?.day ?? Math.max(1, Math.floor((Date.now() - startTs) / 86400000) + 1);
 
@@ -549,8 +567,9 @@ export default async function CampaignsPage({
   const allArtists = partner ? marketArtists.filter(a => rosterNames.has(a.name.toLowerCase().replace(/[^a-z0-9]/g, '')) || extraSlugs.includes(a.slug)) : marketArtists;
 
   const scopedPinned = partner ? pinned.filter(p => allArtists.some(a => a.slug === p.slug)) : pinned;
+  const coachPlans = await listPlans().catch(() => [] as PlanIndexEntry[]);
   const cards = (
-    await Promise.all(scopedPinned.map((p) => loadCard(p, allArtists, market.id)))
+    await Promise.all(scopedPinned.map((p) => loadCard(p, allArtists, market.id, coachPlans)))
   ).filter((c): c is StatusCardData => c !== null);
 
   cards.sort((a, b) => {
