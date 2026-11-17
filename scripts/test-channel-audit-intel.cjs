@@ -25,6 +25,7 @@ assert.equal(releases.intel.state,'release-led');assert.equal(releases.intel.act
 assert(releases.intel.next.some(p=>p.action.includes('artist-led Short')));assert(!releases.intel.next.some(p=>p.action.includes('DJ')),'Do not invent a DJ identity from audio-only releases');
 const shortsHeavy=audit([...Array.from({length:20},(_,j)=>u('short'+j,'Short #shorts',300,j*7+2,{durationSec:30})),...Array.from({length:3},(_,j)=>u('perf'+j,'Live at Hall '+j,100000,j*35+3))]);
 assert.equal(shortsHeavy.intel.state,'shorts-led');assert(shortsHeavy.intel.read.includes('Long-form')||shortsHeavy.intel.headline.includes('Long-form'));
+const onlyShorts=audit(Array.from({length:12},(_,j)=>u('only-short'+j,'Song #shorts',2000,j*7+2,{durationSec:30})));assert.equal(onlyShorts.intel.state,'shorts-only');assert(onlyShorts.intel.next.some(p=>p.action.includes('full-length')));assert(!onlyShorts.intel.next.some(p=>p.action.includes('one more Short')));
 const regular=audit(Array.from({length:26},(_,j)=>u('weekly'+j,'Artist - Weekly (Official Video)',1000,j*7+3)));
 assert.equal(regular.intel.state,'regular');assert(regular.intel.activity.activeWeeks>=24);
 const bursts=audit(Array.from({length:18},(_,j)=>u('burst'+j,'Artist - Song (Official Video)',1000,Math.floor(j/6)*50+5)));
@@ -53,7 +54,7 @@ const merged=mergeAuditUploads(cat,{cachedAt:'2026-11-17',recentUploads:[newer,u
 assert.equal(merged.length,2);assert.equal(merged[0].viewCount,2000);assert.equal(merged[0].uploaderChannelId,'linked');assert.equal(merged[0].engagementAvailability.comments,false,'A newer unknown zero must not inherit an older availability flag');
 assert.equal(mergeAuditUploads({...cat,fetchedAt:'2026-11-17'},{cachedAt:'2026-11-10',recentUploads:[newer]})[0].viewCount,1000,'An older cache must not overwrite the newer catalogue');
 const {default:Intel}=load('src/components/ChannelAuditIntel.tsx');
-for(const a of [sparse,releases,shortsHeavy,regular,bursts,mismatch,hidden,partial,stale,early,zero]){
+for(const a of [sparse,releases,shortsHeavy,regular,bursts,mismatch,hidden,partial,stale,early,zero,onlyShorts]){
  const markup=renderToStaticMarkup(React.createElement(Intel,{audit:a}));assert(markup.includes('Quick channel intel'));assert(!markup.includes('NaN'));assert.equal(a.intel.proof.length,new Set(a.intel.proof.map(p=>p.id)).size);
  const output=auditIntelText(a.name,a.intel);assert(!output.includes('3.2×'));assert(!output.includes('conversion rate'));assert(channelAuditText(a).includes(a.intel.headline));
 }

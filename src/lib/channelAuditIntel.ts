@@ -1,5 +1,6 @@
 import type { RecentUpload } from './artists';
 import type { UploadFormat } from './formatClassifier';
+import { songKey } from './formatStack';
 
 const DAY = 86400000;
 const number = (v: number) => new Intl.NumberFormat('en-GB', { notation: 'compact', maximumFractionDigits: 1 }).format(v);
@@ -13,7 +14,7 @@ export type IntelVideo = {
 };
 export type AuditIntel = {
   version: 1;
-  state: 'limited' | 'empty' | 'early' | 'quiet-response' | 'quiet' | 'release-led' | 'shorts-led' | 'concentrated' | 'inconsistent' | 'regular' | 'developing';
+  state: 'limited' | 'empty' | 'early' | 'quiet-response' | 'quiet' | 'release-led' | 'shorts-only' | 'shorts-led' | 'concentrated' | 'inconsistent' | 'regular' | 'developing';
   headline: string; read: string;
   window: { from: string; to: string; fresh: boolean; playlistComplete: boolean; reliable: boolean; note: string };
   activity: { uploads: number; shorts: number; audio: number; videos: number; views: number; activeWeeks: number; totalWeeks: number; latest: string | null };
@@ -55,7 +56,7 @@ function monday(at: number) {
   const d = new Date(at); d.setUTCHours(0,0,0,0); d.setUTCDate(d.getUTCDate()-(d.getUTCDay()+6)%7); return d.getTime();
 }
 export function buildAuditIntel(input: {
-  items: Item[]; now: number; dataAt: string | null; uploadsAt?: string | null;
+  name: string; items: Item[]; now: number; dataAt: string | null; uploadsAt?: string | null;
   catalogue?: { complete: boolean; fetchedAt: string; publicVideoCount: number | null };
   stats: { subs: number | null; lifetimeViews: number | null; views7d: number | null; subs7d: number | null };
   context?: { campaign?: string; nextMomentLabel?: string; nextMomentDate?: string };
@@ -127,6 +128,9 @@ export function buildAuditIntel(input: {
   } else if(recent.length<=8 && responding) {
     state='quiet-response';headline='People respond. Little regular artist content.';
     read=`${count(recent.length,'upload')} found in six months, including ${count(shorts.length,'Short')}. The leading example below records ${number(responding.views)} views.`;
+  } else if(recent.length>=3 && shorts.length===recent.length) {
+    state='shorts-only';headline='Shorts are active. Give them a destination.';
+    read=`All ${recent.length} uploads found in this window are Shorts, with ${number(views)} recorded lifetime views. Check how they lead viewers into the full-length catalogue.`;
   } else if(shorts.length>=recent.length*.7 && longformViews>=views*.7 && recent.length>=5) {
     state='shorts-led';headline='Shorts lead output. Long-form leads recorded viewing.';
     read=`${shorts.length} of ${recent.length} uploads are Shorts; long-form holds ${Math.round(longformViews/views*100)}% of their recorded lifetime views. This is not an age-matched comparison.`;
@@ -140,7 +144,7 @@ export function buildAuditIntel(input: {
     state='regular';headline=responding?'Regular output. Build on the formats getting a response.':'Regular output. Check the audience response.';
     read=`Uploads in ${active.size} of ${totalWeeks} complete weeks. ${best && !unknownDominates?best.name+' leads recorded viewing among labelled formats.':'Review the strongest examples below before selecting the next format.'}`;
   } else {
-    headline=best && !unknownDominates?`${best.name} leads the recorded viewing.`:'The strongest uploads are the starting point.';
+    headline=best && !unknownDominates?`Most recorded viewing sits with ${best.name.toLowerCase()}.`:'The strongest uploads are the starting point.';
     read=`${count(recent.length,'upload')} found in six months; ${count(shorts.length,'Short')}. Use the examples and publishing timeline together.`;
   }
   if(!reliable) next.push({title:'Check coverage first',evidence:discrepancy?'The totals do not establish a complete release inventory.':!complete?'A complete uploads-playlist scan is still needed.':'The upload reading needs updating.',action:discrepancy?'Check the artist’s Releases and linked channels before making an inactivity or missing-asset claim.':!complete?'Finish the catalogue scan; the examples below remain useful while it runs.':'Refresh the catalogue before using this as a current channel brief.'});
@@ -152,9 +156,15 @@ export function buildAuditIntel(input: {
     const family=all.filter(x=>x.format===candidate.format);
     const dj=/\b(dj|mixmag|boiler room|dj set|mix set)\b/i.test(candidate.u.title);
     const idea=['live','acoustic'].includes(candidate.format)?(dj?'a performance-led DJ clip':'a performance clip'):['bts','documentary','interview','tour'].includes(candidate.format)?'an artist or behind-the-scenes clip':candidate.format==='short'?'one more Short with a similar song or creative hook':'an artist-led Short around the track';
+    if(candidate.format==='short' && shorts.length>=3 && shorts.length===recent.length) {
+      const key=songKey(candidate.u.title,input.name).toLowerCase();
+      const destination=[...all].filter(x=>x.format!=='short' && key.length>=3 && songKey(x.u.title,input.name).toLowerCase()===key).sort((a,b)=>b.u.viewCount-a.u.viewCount)[0];
+      next.push({title:'Connect the Short to a full-length destination',evidence:`“${responding.title}”: ${number(responding.views)} views${responding.comments!=null?', '+number(responding.comments)+' comments':''}. All ${recent.length} recent uploads found are Shorts.`,action:destination?`Review a related-video link from this Short to “${destination.u.title}” (${number(destination.u.viewCount)} lifetime views); confirm the track match and existing link in Studio.`:`Check which full-length upload matches “${responding.title}”. If a suitable destination exists, add it as the related video; if none exists and the song is a priority, consider a full-length asset. Existing links have not been inspected.`});
+    } else {
     next.push({title:shorts.length<=2?'Give viewers a reason to return':'Build on a specific response',evidence:`“${responding.title}”: ${number(responding.views)} views${responding.likes!=null?', '+number(responding.likes)+' likes':''}${responding.comments!=null?', '+number(responding.comments)+' comments':''}${responding.older?' · older example':''}.`,action:family.length>=3?`Test ${idea}, using this format’s ${family.length} observed examples as the reference. Compare new uploads at the same age.`:`Test ${idea} using this upload as a creative reference${shorts.length<=2?'; a more regular rhythm could give viewers more reasons to return and subscribe':''}. One example is a starting point, not a proven formula.`});
+    }
   }
-  if(next.length<2 && shorts.length>2 && reliable) next.push({title:'Test follow-through on the leading upload',evidence:`${count(shorts.length,'Short')} published in this window.`,action:ranked[0]?`Check that relevant Shorts point to “${ranked[0].u.title}” using a related video. Links and end screens have not been inspected.`:'Review how Shorts connect to a full-length destination.'});
+  if(next.length<2 && shorts.length>2 && shorts.length<recent.length && reliable) next.push({title:'Test follow-through on the leading upload',evidence:`${count(shorts.length,'Short')} published in this window.`,action:ranked[0]?`Check that relevant Shorts point to “${ranked[0].u.title}” using a related video. Links and end screens have not been inspected.`:'Review how Shorts connect to a full-length destination.'});
   const contextDate=Date.parse(input.context?.nextMomentDate??'');
   const context=Number.isFinite(contextDate) && contextDate>input.now?`Saved next moment: ${input.context?.nextMomentLabel??'Release'} · ${input.context!.nextMomentDate}.` : input.context?.campaign?`Saved campaign: ${input.context.campaign}. No future release date is assumed.`:null;
   const movement=input.stats.views7d!=null || input.stats.subs7d!=null?[
