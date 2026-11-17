@@ -1,7 +1,8 @@
 import { auditNumber as n, type ChannelAudit } from './channelAudit';
 
 /** Local canvas export: no data or artwork is sent to an image service. */
-export async function downloadAuditPng(a:ChannelAudit) {
+export async function downloadAuditPng(a:ChannelAudit, quick=false) {
+  if(quick)return downloadIntelPng(a);
   const {toCanvas}=await import('qrcode');
   const canvas=document.createElement('canvas');canvas.width=1600;canvas.height=1000;
   const c=canvas.getContext('2d');if(!c)throw Error('Canvas unavailable');
@@ -50,4 +51,55 @@ export async function downloadAuditPng(a:ChannelAudit) {
   text('Watcher · YouTube cached data / Chartmetric markets · Partial/complete coverage shown above · Current week incomplete',48,983,11,muted);
   const blob=await new Promise<Blob|null>(resolve=>canvas.toBlob(resolve,'image/png'));if(!blob)throw Error('Export failed');
   const objectUrl=URL.createObjectURL(blob);const link=document.createElement('a');link.href=objectUrl;link.download=`${a.slug}-channel-audit-${a.generatedAt.slice(0,10)}.png`;link.click();setTimeout(()=>URL.revokeObjectURL(objectUrl),1000);
+}
+
+/** Compact evidence sheet for the same quick intel shown in the modal. */
+async function downloadIntelPng(a: ChannelAudit) {
+  const {toCanvas}=await import('qrcode');
+  const canvas=document.createElement('canvas');canvas.width=1600;canvas.height=1000;
+  const c=canvas.getContext('2d');if(!c)throw Error('Canvas unavailable');
+  const ink='#141414',muted='#776F65',orange='#FF4A1C',blue='#2C25FF',rule='#E5DED2';
+  c.fillStyle='#FAF7F2';c.fillRect(0,0,1600,1000);
+  const text=(v:string,x:number,y:number,size=18,color=ink,bold=false)=>{c.font=`${bold?700:400} ${size}px Arial, sans-serif`;c.fillStyle=color;c.fillText(v,x,y);};
+  function wrap(v:string,x:number,y:number,width:number,size=18,maxLines=3,color=ink,bold=false){
+    c!.font=`${bold?700:400} ${size}px Arial, sans-serif`;const words=v.split(/\s+/),lines:string[]=[];let row='';
+    for(const word of words){const next=row?row+' '+word:word;if(c!.measureText(next).width>width && row){lines.push(row);row=word;}else row=next;}if(row)lines.push(row);
+    lines.slice(0,maxLines).forEach((line,i)=>{let out=line;if(i===maxLines-1 && lines.length>maxLines){while(c!.measureText(out+'…').width>width)out=out.slice(0,-1);out+='…';}text(out,x,y+i*(size+6),size,color,bold);});
+  }
+  const i=a.intel,act=i.activity;
+  text('YOUTUBE / QUICK CHANNEL INTEL',48,42,15,orange,true);
+  wrap(a.name,48,100,1120,42,1,ink,true);
+  text(i.window.from+' — '+i.window.to,1190,42,15,muted);
+  text(i.window.playlistComplete?'Uploads playlist scanned':'Partial inventory',1190,68,14,muted);
+  [[n(a.stats.subs),'SUBSCRIBERS'],[String(act.uploads),'UPLOADS FOUND / 6 MONTHS'],[String(act.shorts),'SHORTS IDENTIFIED / 6 MONTHS'],[n(act.views),'LIFETIME VIEWS ON THESE UPLOADS']].forEach(([value,label],j)=>{text(value,48+j*390,170,38,ink,true);text(label,48+j*390,197,12,muted,true);});
+  wrap(i.headline,48,260,1495,30,2,ink,true);
+  wrap(i.read,48,328,1495,18,2,muted);
+  if(i.coverageWarning)wrap(i.coverageWarning,48,380,1495,15,1,orange,true);
+  text('WHERE PEOPLE RESPOND',48,432,16,ink,true);
+  i.proof.slice(0,2).forEach((v,j)=>{
+    const x=48+j*530;
+    wrap(v.title,x,470,480,21,2,ink,true);
+    text(v.publishedAt.slice(0,10)+' · '+v.format+(v.older?' · older example':''),x,529,13,muted);
+    text(n(v.views)+' views',x,567,28,ink,true);
+    text((v.likes==null?'Likes unavailable':n(v.likes)+' likes')+' · '+(v.comments==null?'Comments unavailable':n(v.comments)+' comments'),x,596,16,muted);
+    text('youtube.com/watch?v='+v.id,x,622,12,muted);
+  });
+  text('NEXT USEFUL STEP',1135,432,16,orange,true);
+  const action=i.next[0];
+  if(action){wrap(action.title,1135,470,410,23,2,ink,true);wrap(action.action,1135,535,410,18,6);}
+  text('PUBLISHING RHYTHM / ALL UPLOADS FOUND',48,698,16,ink,true);
+  const max=Math.max(1,...i.months.map(m=>m.videos+m.shorts+m.audio));
+  const step=1450/i.months.length;
+  i.months.forEach((m,j)=>{
+    const x=48+j*step,barWidth=Math.min(100,step-25),h=112/max;let bottom=872;
+    for(const [value,color] of [[m.videos,orange],[m.shorts,blue],[m.audio,'#8F887E']] as const){c.fillStyle=color;c.fillRect(x,bottom-value*h,barWidth,value*h);bottom-=value*h;}
+    if(m.videos+m.shorts+m.audio===0){c.fillStyle=rule;c.fillRect(x,870,barWidth,2);}
+    text(String(m.videos+m.shorts+m.audio),x,bottom-12,17,ink,true);text(m.label+(m.partial?'*':''),x,897,14,muted);
+  });
+  text('Videos',48,933,13,orange,true);text('Shorts',130,933,13,blue,true);text('Release audio',207,933,13,'#8F887E',true);text('*Partial month · Views/likes/comments are lifetime counts; not unique fans or subscriber conversion.',350,933,12,muted);
+  const url='https://youtube-campaign-coach.vercel.app/watcher/'+encodeURIComponent(a.slug);
+  const qr=document.createElement('canvas');await toCanvas(qr,url,{width:96,margin:1,color:{dark:ink,light:'#FAF7F2'}});c.drawImage(qr,1450,77,96,96);
+  text('Source: cached YouTube Data API · Playlist scope; Releases/Topic and third-party appearances not fully verified · Open channel via QR',48,977,11,muted);
+  const blob=await new Promise<Blob|null>(resolve=>canvas.toBlob(resolve,'image/png'));if(!blob)throw Error('Export failed');
+  const objectUrl=URL.createObjectURL(blob),link=document.createElement('a');link.href=objectUrl;link.download=`${a.slug}-quick-intel-${i.window.to}.png`;link.click();setTimeout(()=>URL.revokeObjectURL(objectUrl),1000);
 }

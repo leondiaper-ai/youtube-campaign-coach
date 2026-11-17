@@ -37,13 +37,15 @@ global.fetch=async raw=>{
   requests++;const u=new URL(raw);let result;
   if(u.pathname.endsWith('/channels'))result={items:[{statistics:{videoCount:'12'},contentDetails:{relatedPlaylists:{uploads:'playlist'}}}]};
   else if(u.pathname.endsWith('/playlistItems')) {const p=Number(u.searchParams.get('pageToken')||0);result={items:[{contentDetails:{videoId:'video'+p}}],...(p<11?{nextPageToken:String(p+1)}:{})};}
-  else result={items:u.searchParams.get('id').split(',').map(id=>({id,snippet:{channelId:id==='video0'?'linked-channel':'channel',title:id,publishedAt:'2020-01-01',liveBroadcastContent:'none'},contentDetails:{duration:'PT3M',caption:'true'},statistics:{viewCount:'100'}}))};
+  else result={items:u.searchParams.get('id').split(',').map(id=>({id,snippet:{channelId:id==='video0'?'linked-channel':'channel',title:id,publishedAt:'2020-01-01',liveBroadcastContent:'none'},contentDetails:{duration:'PT3M',caption:'true'},statistics:{viewCount:'100',...(id==='video0'?{likeCount:'0',commentCount:'0'}:{})}}))};
   return {ok:true,json:async()=>result};
 };
 (async()=>{
   const {scanAuditCatalogue,readAuditCatalogue}=load('src/lib/channelAuditCatalogue.ts');
   const first=await scanAuditCatalogue('channel');assert.equal(first.scannedIds,10);assert.equal(first.complete,false);assert.equal(first.nextPage,'10');
   const second=await scanAuditCatalogue('channel');assert.equal(second.scannedIds,12);assert.equal(second.complete,true);assert.equal(second.uploads.length,12);assert(second.uploads[0].captions);assert.equal(second.uploads[0].uploaderChannelId,'linked-channel','Retain linked uploads explicitly returned in the artist uploads playlist');assert(second.includesLinkedUploads);assert.equal(second.uploads[0].durationSec,180);
+  assert.deepEqual(second.uploads[0].engagementAvailability,{likes:true,comments:true},'Reported zeroes are measured zeroes');
+  assert.deepEqual(second.uploads[1].engagementAvailability,{likes:false,comments:false},'Absent counters remain unavailable');
   const before=requests;await scanAuditCatalogue('channel');assert.equal(requests,before,'Fresh complete scan must make zero vendor calls');
   assert.equal((await readAuditCatalogue('channel')).uploads.length,12);
   data.set('audit:catalogue:v1:channel',{...second,includesLinkedUploads:undefined});

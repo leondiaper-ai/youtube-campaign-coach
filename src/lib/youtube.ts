@@ -409,6 +409,7 @@ async function fetchTopEverVideos(
           viewCount: Number(v.statistics?.viewCount ?? 0),
           likeCount: Number(v.statistics?.likeCount ?? 0),
           commentCount: Number(v.statistics?.commentCount ?? 0),
+          engagementAvailability: { likes: v.statistics?.likeCount != null, comments: v.statistics?.commentCount != null },
         });
       }
     }
@@ -487,6 +488,7 @@ async function fetchCollabVideos(
           viewCount: Number(v.statistics?.viewCount ?? 0),
           likeCount: Number(v.statistics?.likeCount ?? 0),
           commentCount: Number(v.statistics?.commentCount ?? 0),
+          engagementAvailability: { likes: v.statistics?.likeCount != null, comments: v.statistics?.commentCount != null },
           isCollab: true,
           collabChannel: v.snippet?.channelTitle ?? undefined,
         });
@@ -680,6 +682,7 @@ export async function fetchChannelSnap(input: string): Promise<LiveSnap | null> 
             viewCount,
             likeCount,
             commentCount,
+            engagementAvailability: { likes: v.statistics?.likeCount != null, comments: v.statistics?.commentCount != null },
           });
           const ageDays =
             (Date.now() - new Date(publishedAt).getTime()) / 86400000;
@@ -868,6 +871,7 @@ export async function fetchChannelSnapLite(input: string, opts?: { campaignStart
             viewCount,
             likeCount,
             commentCount,
+            engagementAvailability: { likes: v.statistics?.likeCount != null, comments: v.statistics?.commentCount != null },
           });
           const ageDays = (Date.now() - new Date(publishedAt).getTime()) / 86400000;
           if (ageDays <= 30 && dur > 0 && dur <= 60) shorts30d++;

@@ -54,7 +54,7 @@ export async function scanAuditCatalogue(id: string): Promise<AuditCatalogue> {
       const list=await get('playlistItems',{part:'contentDetails',playlistId:job.playlist,maxResults:'50',...(job.nextPage?{pageToken:job.nextPage}:{})});
       const ids=(list.items??[]).map((x:any)=>x.contentDetails?.videoId).filter(Boolean) as string[];
       const result=ids.length ? await get('videos',{part:'snippet,statistics,contentDetails,liveStreamingDetails',id:ids.join(',')}) : {items:[]};
-      const uploads:RecentUpload[]=(result.items??[]).filter((v:any)=>ids.includes(v.id)).map((v:any)=>({id:v.id,uploaderChannelId:v.snippet?.channelId,title:v.snippet.title??'',description:(v.snippet.description??'').slice(0,1200),publishedAt:v.snippet.publishedAt,durationSec:seconds(v.contentDetails?.duration??''),captions:v.contentDetails?.caption==='true',live:v.snippet?.liveBroadcastContent??'none',scheduledStart:v.liveStreamingDetails?.scheduledStartTime??null,actualStart:v.liveStreamingDetails?.actualStartTime??null,viewCount:Number(v.statistics?.viewCount??0),likeCount:Number(v.statistics?.likeCount??0),commentCount:Number(v.statistics?.commentCount??0)}));
+      const uploads:RecentUpload[]=(result.items??[]).filter((v:any)=>ids.includes(v.id)).map((v:any)=>({id:v.id,uploaderChannelId:v.snippet?.channelId,title:v.snippet.title??'',description:(v.snippet.description??'').slice(0,1200),publishedAt:v.snippet.publishedAt,durationSec:seconds(v.contentDetails?.duration??''),captions:v.contentDetails?.caption==='true',live:v.snippet?.liveBroadcastContent??'none',scheduledStart:v.liveStreamingDetails?.scheduledStartTime??null,actualStart:v.liveStreamingDetails?.actualStartTime??null,viewCount:Number(v.statistics?.viewCount??0),likeCount:Number(v.statistics?.likeCount??0),commentCount:Number(v.statistics?.commentCount??0),engagementAvailability:{likes:v.statistics?.likeCount!=null,comments:v.statistics?.commentCount!=null}}));
       const byId:Map<string,RecentUpload>=new Map(job.uploads.map(u=>[u.id,u]));
       uploads.forEach(u=>byId.set(u.id,u));
       job={...job,uploads:Array.from(byId.values()),scannedIds:job.scannedIds+ids.length,nextPage:list.nextPageToken??null,complete:!list.nextPageToken,fetchedAt:new Date().toISOString()};
@@ -63,4 +63,22 @@ export async function scanAuditCatalogue(id: string): Promise<AuditCatalogue> {
     }
     return job;
   } finally { await redis.del(lock); }
+}
+
+/** Merge a weekly library scan with newer Watcher observations. Metadata may
+ * fill gaps, but engagement availability must describe the selected reading. */
+export function mergeAuditUploads(catalogue: AuditCatalogue | null, snapshot: { cachedAt: string; recentUploads?: RecentUpload[]; topEverVideos?: RecentUpload[] }): RecentUpload[] {
+  const byId = new Map<string, RecentUpload>();
+  const sources = [
+    { at: Date.parse(catalogue?.fetchedAt ?? '') || 0, uploads: catalogue?.uploads ?? [] },
+    { at: Date.parse(snapshot.cachedAt) || 0, uploads: [...(snapshot.topEverVideos ?? []), ...(snapshot.recentUploads ?? [])] },
+  ].sort((a,b)=>a.at-b.at);
+  for (const source of sources) for (const u of source.uploads) {
+    const older=byId.get(u.id);
+    byId.set(u.id, {...older,...u,
+      uploaderChannelId:u.uploaderChannelId ?? older?.uploaderChannelId,
+      engagementAvailability:u.engagementAvailability ?? {likes:Number.isFinite(u.likeCount) && u.likeCount>0,comments:Number.isFinite(u.commentCount) && u.commentCount>0},
+    });
+  }
+  return Array.from(byId.values());
 }

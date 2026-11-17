@@ -33,3 +33,19 @@ Live validation: IDLES playlist returned 372 IDs / 371 published uploads, reachi
 ## Linked artist-channel uploads
 
 The uploads playlist can return linked videos whose original uploader channel ID differs from the current artist channel. The collector now retains every video explicitly requested from that playlist, recording uploaderChannelId for provenance, rather than dropping those linked uploads. It does not discover arbitrary third-party videos. Old completed caches lacking includesLinkedUploads are marked incomplete by the audit API and automatically recollected on next use. This repaired Tom Odell's missing legacy uploads, including Another Love, found during the cross-channel QA.
+
+
+## Quick channel intel (17 November 2026)
+
+The existing Channel audit modal now opens on a concise evidence-led read. The existing Channel report stays a separate short movement report; no extra row of launch buttons is added. Full format analysis, caption/asset checks, manual format review, market data and historical deck references remain below the quick read.
+
+`channelAuditIntel.ts` derives a six-month cohort and monthly timeline from the classified uploads. It includes release audio found in that inventory; it never equates an artist-video gap with no music releases. It chooses a read from the actual pattern: sparse output with a response, release-led output, bursts, sustained output, Shorts-heavy publishing with long-form viewing, concentration, or early observed output. Named uploads with views, reported likes/comments and dates support the read. Actions refer to those uploads and observed formats; a DJ identity is suggested only with explicit DJ/mix evidence. Saved campaign/next-moment metadata is used only when present; no album is invented.
+
+Guardrails:
+- Partial, stale or materially unreconciled inventories receive a coverage read instead of a whole-channel inactivity claim. A completed uploads playlist does not verify the entire Releases/Topic catalogue or third-party appearances. The discrepancy check is a review heuristic, not a diagnosis of the difference.
+- The window ends at the latest usable upload reading. Full-week cadence excludes partial boundary weeks. First and last calendar months are partial. Older proof uploads are labelled when the six-month cohort is empty.
+- `mergeAuditUploads` combines the weekly scan with newer cached recent/top uploads, deduplicating by ID and preferring the newer source reading. Metadata provenance is retained. GET still adds zero YouTube/vendor API calls; no cron, artist-roster or access changes.
+- Collection now preserves whether likes/comments were actually reported. Legacy zeroes are unknown, not fabricated measured zeroes. A weighted interaction rate uses only uploads with both available counters and positive views, showing the video/view denominator. Positive legacy counts are usable. Counts do not imply sentiment, loyalty, unique engaged fans or subscriber attribution. A views/subscriber ratio is not used as conversion.
+- The same model drives the modal, Copy quick intel, the text audit and a compact local PNG. Full-audit PNG remains available. The PNG preserves date/scope and QR/source links; clickable links remain in copied text.
+
+Verification: `node scripts/test-channel-audit-intel.cjs` exercises different channel patterns, release-audio inclusion, freshness/coverage gates, missing counters, early channels, saved corrections, exclusions/deduplication, cache merge ordering, copy output and server-rendered UI. Existing audit, catalogue and label tests, TypeScript and production build also pass.

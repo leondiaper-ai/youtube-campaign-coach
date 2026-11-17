@@ -187,6 +187,10 @@ export type RecentUpload = {
   viewCount: number;
   likeCount: number;
   commentCount: number;
+  /** Whether the API actually returned an engagement counter; old coerced zeroes are unknown. */
+  engagementAvailability?: { likes: boolean; comments: boolean };
+  /** Original uploader, including linked artist-channel videos. */
+  uploaderChannelId?: string;
   // ── Companion confidence (fuzzy matching) ──
   shortCompanion?: CompanionConfidence;
   lyricCompanion?: CompanionConfidence;
