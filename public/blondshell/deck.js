@@ -8,13 +8,22 @@ const header=document.querySelector('.topbar');
 const controls=document.querySelector('.present-controls');
 const auditHashes=new Set(['analysis','catalogue-audit','album-audit','audit-priorities']);
 let index=0,presenting=false,analysisOpen=false,returnHash='#intro',returnScroll=0,returnFocus=null;
+function fitCurrent(){
+ const inner=slides[index]?.querySelector('.inner');
+ if(!inner)return;
+ inner.style.removeProperty('--fit');
+ if(presenting&&window.innerWidth>650&&!slides[index].classList.contains('cover')){
+  const available=Math.max(260,window.innerHeight-148);
+  inner.style.setProperty('--fit',String(Math.min(1,available/inner.scrollHeight)));
+ }
+}
 function show(i){
  index=Math.max(0,Math.min(slides.length-1,i));
  slides.forEach((s,n)=>s.classList.toggle('active',n===index));
  document.getElementById('page-count').textContent=`${index+1} / ${slides.length}`;
  document.getElementById('previous').disabled=index===0;
  document.getElementById('next').disabled=index===slides.length-1;
- if(presenting)window.scrollTo({top:0,behavior:'instant'});
+ if(presenting){window.scrollTo({top:0,behavior:'instant'});requestAnimationFrame(fitCurrent);}
 }
 function isFullscreen(){return Boolean(document.fullscreenElement||document.webkitFullscreenElement);}
 function updatePresentButton(){
@@ -94,5 +103,7 @@ document.addEventListener('fullscreenchange',syncFullscreen);
 document.addEventListener('webkitfullscreenchange',syncFullscreen);
 window.addEventListener('popstate',syncLocation);
 window.addEventListener('hashchange',syncLocation);
+window.addEventListener('resize',fitCurrent);
+document.querySelectorAll('img').forEach(img=>img.addEventListener('load',fitCurrent));
 show(0);syncLocation();
 })();
