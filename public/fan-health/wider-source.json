@@ -1,0 +1,2643 @@
+{
+  "capturedOn": "2026-11-17",
+  "period": [
+    "2026-05-17",
+    "2026-11-17"
+  ],
+  "scope": "30 visible release playlists per artist; latest 200 uploads each from Mixmag, DJ Mag and Boiler Room. Bounded scan, not all YouTube. Video IDs deduplicated within each artist release inventory. Original artist upload cohort retained separately.",
+  "artists": {
+    "mph": {
+      "releasePlaylistCount": 30,
+      "uniqueReleaseVideos": 102,
+      "releaseVideos": [
+        {
+          "videoId": "5tI8zt34af0",
+          "url": "https://www.youtube.com/watch?v=5tI8zt34af0",
+          "title": "Lights On",
+          "publishedAt": "2024-07-25T10:02:54Z",
+          "durationSec": 194,
+          "views": 609007,
+          "likes": 9431,
+          "comments": 2,
+          "wasLive": false,
+          "scheduledStart": null,
+          "actualStart": null,
+          "sourcePlaylists": [
+            "OLAK5uy_k0Ldo8lPe7UHkDAfG-ljDEbKxD6RABaHc"
+          ]
+        },
+        {
+          "videoId": "tjoUeUXvfSo",
+          "url": "https://www.youtube.com/watch?v=tjoUeUXvfSo",
+          "title": "-Sunset-",
+          "publishedAt": "2023-06-06T23:49:42Z",
+          "durationSec": 101,
+          "views": 5656,
+          "likes": 48,
+          "comments": 0,
+          "wasLive": false,
+          "scheduledStart": null,
+          "actualStart": null,
+          "sourcePlaylists": [
+            "OLAK5uy_k1rc6fwuNTVRdoP2RxrB__cxFoeBPA5hM"
+          ]
+        },
+        {
+          "videoId": "ue8OL_pMT_U",
+          "url": "https://www.youtube.com/watch?v=ue8OL_pMT_U",
+          "title": "Doubt",
+          "publishedAt": "2023-06-06T23:49:42Z",
+          "durationSec": 205,
+          "views": 6284,
+          "likes": 128,
+          "comments": 0,
+          "wasLive": false,
+          "scheduledStart": null,
+          "actualStart": null,
+          "sourcePlaylists": [
+            "OLAK5uy_k1rc6fwuNTVRdoP2RxrB__cxFoeBPA5hM"
+          ]
+        },
+        {
+          "videoId": "63uShH-lN-Y",
+          "url": "https://www.youtube.com/watch?v=63uShH-lN-Y",
+          "title": "Ghost",
+          "publishedAt": "2023-06-06T23:49:42Z",
+          "durationSec": 160,
+          "views": 44694,
+          "likes": 940,
+          "comments": 3,
+          "wasLive": false,
+          "scheduledStart": null,
+          "actualStart": null,
+          "sourcePlaylists": [
+            "OLAK5uy_k1rc6fwuNTVRdoP2RxrB__cxFoeBPA5hM"
+          ]
+        },
+        {
+          "videoId": "23iKxgHL9g8",
+          "url": "https://www.youtube.com/watch?v=23iKxgHL9g8",
+          "title": "Rush",
+          "publishedAt": "2023-06-06T23:49:42Z",
+          "durationSec": 233,
+          "views": 6948,
+          "likes": 119,
+          "comments": 0,
+          "wasLive": false,
+          "scheduledStart": null,
+          "actualStart": null,
+          "sourcePlaylists": [
+            "OLAK5uy_k1rc6fwuNTVRdoP2RxrB__cxFoeBPA5hM"
+          ]
+        },
+        {
+          "videoId": "aLPQ8JCckKY",
+          "url": "https://www.youtube.com/watch?v=aLPQ8JCckKY",
+          "title": "-Sunrise-",
+          "publishedAt": "2023-06-06T23:49:42Z",
+          "durationSec": 123,
+          "views": 18768,
+          "likes": 303,
+          "comments": 1,
+          "wasLive": false,
+          "scheduledStart": null,
+          "actualStart": null,
+          "sourcePlaylists": [
+            "OLAK5uy_k1rc6fwuNTVRdoP2RxrB__cxFoeBPA5hM"
+          ]
+        },
+        {
+          "videoId": "RR3NmNOriQM",
+          "url": "https://www.youtube.com/watch?v=RR3NmNOriQM",
+          "title": "California",
+          "publishedAt": "2023-06-06T23:49:42Z",
+          "durationSec": 188,
+          "views": 64054,
+          "likes": 849,
+          "comments": 1,
+          "wasLive": false,
+          "scheduledStart": null,
+          "actualStart": null,
+          "sourcePlaylists": [
+            "OLAK5uy_k1rc6fwuNTVRdoP2RxrB__cxFoeBPA5hM"
+          ]
+        },
+        {
+          "videoId": "Gvr9KmDCBw8",
+          "url": "https://www.youtube.com/watch?v=Gvr9KmDCBw8",
+          "title": "R & R",
+          "publishedAt": "2023-06-06T23:49:42Z",
+          "durationSec": 167,
+          "views": 34890,
+          "likes": 553,
+          "comments": 1,
+          "wasLive": false,
+          "scheduledStart": null,
+          "actualStart": null,
+          "sourcePlaylists": [
+            "OLAK5uy_k1rc6fwuNTVRdoP2RxrB__cxFoeBPA5hM"
+          ]
+        },
+        {
+          "videoId": "Msv7JOHrw2I",
+          "url": "https://www.youtube.com/watch?v=Msv7JOHrw2I",
+          "title": "One Sixty",
+          "publishedAt": "2024-02-15T10:02:27Z",
+          "durationSec": 230,
+          "views": 238912,
+          "likes": 4477,
+          "comments": 4,
+          "wasLive": false,
+          "scheduledStart": null,
+          "actualStart": null,
+          "sourcePlaylists": [
+            "OLAK5uy_k5U8q2ppH0tHDy-m73Eb0vUAVss-_ahYs"
+          ]
+        },
+        {
+          "videoId": "Xnuznjzk_sg",
+          "url": "https://www.youtube.com/watch?v=Xnuznjzk_sg",
+          "title": "Run It",
+          "publishedAt": "2024-03-28T10:01:41Z",
+          "durationSec": 212,
+          "views": 85786,
+          "likes": 1842,
+          "comments": 4,
+          "wasLive": false,
+          "scheduledStart": null,
+          "actualStart": null,
+          "sourcePlaylists": [
+            "OLAK5uy_kLvOnqqCquYtfCuFghb5WSsc_YyDL0_Ns"
+          ]
+        },
+        {
+          "videoId": "3ZdtZ8hm5LA",
+          "url": "https://www.youtube.com/watch?v=3ZdtZ8hm5LA",
+          "title": "Original",
+          "publishedAt": "2020-01-02T11:27:20Z",
+          "durationSec": 263,
+          "views": 1205,
+          "likes": 22,
+          "comments": 0,
+          "wasLive": false,
+          "scheduledStart": null,
+          "actualStart": null,
+          "sourcePlaylists": [
+            "OLAK5uy_kWUlcZ_Kul13pN44OZqqYpf1vm9OmzApA"
+          ]
+        },
+        {
+          "videoId": "_MEUuoxXvbA",
+          "url": "https://www.youtube.com/watch?v=_MEUuoxXvbA",
+          "title": "Interlude",
+          "publishedAt": "2020-01-02T11:27:27Z",
+          "durationSec": 252,
+          "views": 1908,
+          "likes": 39,
+          "comments": 0,
+          "wasLive": false,
+          "scheduledStart": null,
+          "actualStart": null,
+          "sourcePlaylists": [
+            "OLAK5uy_kWUlcZ_Kul13pN44OZqqYpf1vm9OmzApA"
+          ]
+        },
+        {
+          "videoId": "BF95IgpXEt4",
+          "url": "https://www.youtube.com/watch?v=BF95IgpXEt4",
+          "title": "Radiation",
+          "publishedAt": "2020-01-02T11:27:32Z",
+          "durationSec": 279,
+          "views": 2942,
+          "likes": 90,
+          "comments": 1,
+          "wasLive": false,
+          "scheduledStart": null,
+          "actualStart": null,
+          "sourcePlaylists": [
+            "OLAK5uy_kWUlcZ_Kul13pN44OZqqYpf1vm9OmzApA"
+          ]
+        },
+        {
+          "videoId": "x0pQKuRVUss",
+          "url": "https://www.youtube.com/watch?v=x0pQKuRVUss",
+          "title": "38 Calibre",
+          "publishedAt": "2020-01-02T11:27:37Z",
+          "durationSec": 271,
+          "views": 552,
+          "likes": 9,
+          "comments": 0,
+          "wasLive": false,
+          "scheduledStart": null,
+          "actualStart": null,
+          "sourcePlaylists": [
+            "OLAK5uy_kWUlcZ_Kul13pN44OZqqYpf1vm9OmzApA"
+          ]
+        },
+        {
+          "videoId": "d8MDC1qUgjM",
+          "url": "https://www.youtube.com/watch?v=d8MDC1qUgjM",
+          "title": "Overrated",
+          "publishedAt": "2023-08-24T10:02:45Z",
+          "durationSec": 228,
+          "views": 91543,
+          "likes": 827,
+          "comments": 1,
+          "wasLive": false,
+          "scheduledStart": null,
+          "actualStart": null,
+          "sourcePlaylists": [
+            "OLAK5uy_k_BPnJoIQ90zXJbY7frkRmyYg1R2wAZvs"
+          ]
+        },
+        {
+          "videoId": "BO5t5-fJFAw",
+          "url": "https://www.youtube.com/watch?v=BO5t5-fJFAw",
+          "title": "Gentlemens Club x MPH - GOOD 4 U",
+          "publishedAt": "2024-12-02T16:19:39Z",
+          "durationSec": 161,
+          "views": 55748,
+          "likes": 1763,
+          "comments": 40,
+          "wasLive": false,
+          "scheduledStart": null,
+          "actualStart": null,
+          "sourcePlaylists": [
+            "OLAK5uy_k_V3DlfHivwtnzpAlRCQGX8DY2kFVqpqA"
+          ]
+        },
+        {
+          "videoId": "Tvyh54Cydls",
+          "url": "https://www.youtube.com/watch?v=Tvyh54Cydls",
+          "title": "Mirage",
+          "publishedAt": "2026-08-13T10:04:52Z",
+          "durationSec": 292,
+          "views": 235988,
+          "likes": 8022,
+          "comments": 20,
+          "wasLive": false,
+          "scheduledStart": null,
+          "actualStart": null,
+          "sourcePlaylists": [
+            "OLAK5uy_kkRvgsOWlAxTX2qLujeFkSK1vbEHN2pQs"
+          ]
+        },
+        {
+          "videoId": "dXCXFXFmk1A",
+          "url": "https://www.youtube.com/watch?v=dXCXFXFmk1A",
+          "title": "Warlord",
+          "publishedAt": "2026-09-24T10:02:49Z",
+          "durationSec": 194,
+          "views": 53211,
+          "likes": 1981,
+          "comments": 18,
+          "wasLive": false,
+          "scheduledStart": null,
+          "actualStart": null,
+          "sourcePlaylists": [
+            "OLAK5uy_kx2w8qyd0b8_1Qfy-uxZEJqjbOdBYj_MY"
+          ]
+        },
+        {
+          "videoId": "8MT_HLH08Gs",
+          "url": "https://www.youtube.com/watch?v=8MT_HLH08Gs",
+          "title": "Unconditional",
+          "publishedAt": "2026-04-23T10:03:02Z",
+          "durationSec": 180,
+          "views": 72295,
+          "likes": 1719,
+          "comments": 5,
+          "wasLive": false,
+          "scheduledStart": null,
+          "actualStart": null,
+          "sourcePlaylists": [
+            "OLAK5uy_kzkVfG4_NqD-dm5V1nQvjGAgGOH2_XMos"
+          ]
+        },
+        {
+          "videoId": "tq2mcvZbbBs",
+          "url": "https://www.youtube.com/watch?v=tq2mcvZbbBs",
+          "title": "Bouncin'",
+          "publishedAt": "2025-10-02T10:02:00Z",
+          "durationSec": 170,
+          "views": 53503,
+          "likes": 753,
+          "comments": 1,
+          "wasLive": false,
+          "scheduledStart": null,
+          "actualStart": null,
+          "sourcePlaylists": [
+            "OLAK5uy_l6ad_fsFALrhaRR-5L4n3gA1Uats7IoqI"
+          ]
+        },
+        {
+          "videoId": "nN8k7S4I6ws",
+          "url": "https://www.youtube.com/watch?v=nN8k7S4I6ws",
+          "title": "Substance",
+          "publishedAt": "2025-10-02T10:02:16Z",
+          "durationSec": 195,
+          "views": 56637,
+          "likes": 870,
+          "comments": 0,
+          "wasLive": false,
+          "scheduledStart": null,
+          "actualStart": null,
+          "sourcePlaylists": [
+            "OLAK5uy_l6ad_fsFALrhaRR-5L4n3gA1Uats7IoqI"
+          ]
+        },
+        {
+          "videoId": "NkBaFo5y9co",
+          "url": "https://www.youtube.com/watch?v=NkBaFo5y9co",
+          "title": "Until The Morning",
+          "publishedAt": "2025-10-02T10:02:19Z",
+          "durationSec": 203,
+          "views": 13348,
+          "likes": 261,
+          "comments": 0,
+          "wasLive": false,
+          "scheduledStart": null,
+          "actualStart": null,
+          "sourcePlaylists": [
+            "OLAK5uy_l6ad_fsFALrhaRR-5L4n3gA1Uats7IoqI"
+          ]
+        },
+        {
+          "videoId": "g9k-Ntkfplc",
+          "url": "https://www.youtube.com/watch?v=g9k-Ntkfplc",
+          "title": "Hold On",
+          "publishedAt": "2025-10-02T10:02:39Z",
+          "durationSec": 254,
+          "views": 38583,
+          "likes": 597,
+          "comments": 0,
+          "wasLive": false,
+          "scheduledStart": null,
+          "actualStart": null,
+          "sourcePlaylists": [
+            "OLAK5uy_l6ad_fsFALrhaRR-5L4n3gA1Uats7IoqI"
+          ]
+        },
+        {
+          "videoId": "glvubwNy0w8",
+          "url": "https://www.youtube.com/watch?v=glvubwNy0w8",
+          "title": "LA NYC",
+          "publishedAt": "2025-10-02T10:02:39Z",
+          "durationSec": 246,
+          "views": 56295,
+          "likes": 857,
+          "comments": 0,
+          "wasLive": false,
+          "scheduledStart": null,
+          "actualStart": null,
+          "sourcePlaylists": [
+            "OLAK5uy_l6ad_fsFALrhaRR-5L4n3gA1Uats7IoqI"
+          ]
+        },
+        {
+          "videoId": "KlKsRWY6BlY",
+          "url": "https://www.youtube.com/watch?v=KlKsRWY6BlY",
+          "title": "Vulnerable",
+          "publishedAt": "2025-10-02T10:03:17Z",
+          "durationSec": 167,
+          "views": 98117,
+          "likes": 1134,
+          "comments": 0,
+          "wasLive": false,
+          "scheduledStart": null,
+          "actualStart": null,
+          "sourcePlaylists": [
+            "OLAK5uy_l6ad_fsFALrhaRR-5L4n3gA1Uats7IoqI"
+          ]
+        },
+        {
+          "videoId": "cU7rs8XhxVs",
+          "url": "https://www.youtube.com/watch?v=cU7rs8XhxVs",
+          "title": "Against The Clock",
+          "publishedAt": "2025-10-02T10:03:31Z",
+          "durationSec": 168,
+          "views": 77839,
+          "likes": 1298,
+          "comments": 2,
+          "wasLive": false,
+          "scheduledStart": null,
+          "actualStart": null,
+          "sourcePlaylists": [
+            "OLAK5uy_l6ad_fsFALrhaRR-5L4n3gA1Uats7IoqI"
+          ]
+        },
+        {
+          "videoId": "0J5On9ltiCE",
+          "url": "https://www.youtube.com/watch?v=0J5On9ltiCE",
+          "title": "Untouchable",
+          "publishedAt": "2025-10-02T10:03:53Z",
+          "durationSec": 235,
+          "views": 149595,
+          "likes": 2753,
+          "comments": 2,
+          "wasLive": false,
+          "scheduledStart": null,
+          "actualStart": null,
+          "sourcePlaylists": [
+            "OLAK5uy_l6ad_fsFALrhaRR-5L4n3gA1Uats7IoqI"
+          ]
+        },
+        {
+          "videoId": "_u98wO2JGkU",
+          "url": "https://www.youtube.com/watch?v=_u98wO2JGkU",
+          "title": "Pre's",
+          "publishedAt": "2025-10-02T10:03:55Z",
+          "durationSec": 173,
+          "views": 196490,
+          "likes": 2856,
+          "comments": 3,
+          "wasLive": false,
+          "scheduledStart": null,
+          "actualStart": null,
+          "sourcePlaylists": [
+            "OLAK5uy_l6ad_fsFALrhaRR-5L4n3gA1Uats7IoqI"
+          ]
+        },
+        {
+          "videoId": "Aopm-I0ylfs",
+          "url": "https://www.youtube.com/watch?v=Aopm-I0ylfs",
+          "title": "Alone",
+          "publishedAt": "2025-10-02T10:04:03Z",
+          "durationSec": 207,
+          "views": 19188,
+          "likes": 284,
+          "comments": 0,
+          "wasLive": false,
+          "scheduledStart": null,
+          "actualStart": null,
+          "sourcePlaylists": [
+            "OLAK5uy_l6ad_fsFALrhaRR-5L4n3gA1Uats7IoqI"
+          ]
+        },
+        {
+          "videoId": "pqCKW39WJJA",
+          "url": "https://www.youtube.com/watch?v=pqCKW39WJJA",
+          "title": "Euphoria",
+          "publishedAt": "2025-10-02T10:04:45Z",
+          "durationSec": 121,
+          "views": 25165,
+          "likes": 312,
+          "comments": 0,
+          "wasLive": false,
+          "scheduledStart": null,
+          "actualStart": null,
+          "sourcePlaylists": [
+            "OLAK5uy_l6ad_fsFALrhaRR-5L4n3gA1Uats7IoqI"
+          ]
+        },
+        {
+          "videoId": "eg2a-M7-CBg",
+          "url": "https://www.youtube.com/watch?v=eg2a-M7-CBg",
+          "title": "ABC's",
+          "publishedAt": "2025-10-02T10:04:49Z",
+          "durationSec": 179,
+          "views": 8506,
+          "likes": 142,
+          "comments": 0,
+          "wasLive": false,
+          "scheduledStart": null,
+          "actualStart": null,
+          "sourcePlaylists": [
+            "OLAK5uy_l6ad_fsFALrhaRR-5L4n3gA1Uats7IoqI"
+          ]
+        },
+        {
+          "videoId": "NwJ1dtRJ8Qc",
+          "url": "https://www.youtube.com/watch?v=NwJ1dtRJ8Qc",
+          "title": "Run",
+          "publishedAt": "2025-10-02T10:05:01Z",
+          "durationSec": 194,
+          "views": 114567,
+          "likes": 2140,
+          "comments": 0,
+          "wasLive": false,
+          "scheduledStart": null,
+          "actualStart": null,
+          "sourcePlaylists": [
+            "OLAK5uy_l6ad_fsFALrhaRR-5L4n3gA1Uats7IoqI"
+          ]
+        },
+        {
+          "videoId": "ae0FQ3rfffQ",
+          "url": "https://www.youtube.com/watch?v=ae0FQ3rfffQ",
+          "title": "Raw",
+          "publishedAt": "2025-06-19T10:03:41Z",
+          "durationSec": 193,
+          "views": 449911,
+          "likes": 10184,
+          "comments": 6,
+          "wasLive": false,
+          "scheduledStart": null,
+          "actualStart": null,
+          "sourcePlaylists": [
+            "OLAK5uy_l8HENqJVhS_4U1zmY15UcXo8wcspynnHk"
+          ]
+        },
+        {
+          "videoId": "J8Snk96AS2U",
+          "url": "https://www.youtube.com/watch?v=J8Snk96AS2U",
+          "title": "ABC's",
+          "publishedAt": "2025-09-18T10:03:21Z",
+          "durationSec": 179,
+          "views": 123407,
+          "likes": 2034,
+          "comments": 3,
+          "wasLive": false,
+          "scheduledStart": null,
+          "actualStart": null,
+          "sourcePlaylists": [
+            "OLAK5uy_lX8UVrHkCKJIgQnkaHfoCtXbCIoJh2O8I"
+          ]
+        },
+        {
+          "videoId": "AWs5buSu7SU",
+          "url": "https://www.youtube.com/watch?v=AWs5buSu7SU",
+          "title": "Tremble (ft. Kim English) (MPH Extended Remix)",
+          "publishedAt": "2025-02-20T10:04:00Z",
+          "durationSec": 222,
+          "views": 14907,
+          "likes": 328,
+          "comments": 6,
+          "wasLive": false,
+          "scheduledStart": null,
+          "actualStart": null,
+          "sourcePlaylists": [
+            "OLAK5uy_lgKeFFs47U1sOpoJjz4SrrKkj2KC52b4U"
+          ]
+        },
+        {
+          "videoId": "hiYOf1n8354",
+          "url": "https://www.youtube.com/watch?v=hiYOf1n8354",
+          "title": "Tremble (ft. Kim English) (9OASES Extended Remix)",
+          "publishedAt": "2025-02-20T10:04:07Z",
+          "durationSec": 318,
+          "views": 1087,
+          "likes": 31,
+          "comments": 0,
+          "wasLive": false,
+          "scheduledStart": null,
+          "actualStart": null,
+          "sourcePlaylists": [
+            "OLAK5uy_lgKeFFs47U1sOpoJjz4SrrKkj2KC52b4U"
+          ]
+        },
+        {
+          "videoId": "l_Mu6xsYqUE",
+          "url": "https://www.youtube.com/watch?v=l_Mu6xsYqUE",
+          "title": "Tremble (ft. Kim English) (Extended Mix)",
+          "publishedAt": "2025-02-20T10:04:27Z",
+          "durationSec": 352,
+          "views": 1936,
+          "likes": 46,
+          "comments": 0,
+          "wasLive": false,
+          "scheduledStart": null,
+          "actualStart": null,
+          "sourcePlaylists": [
+            "OLAK5uy_lgKeFFs47U1sOpoJjz4SrrKkj2KC52b4U"
+          ]
+        },
+        {
+          "videoId": "lxCYZjbO2AU",
+          "url": "https://www.youtube.com/watch?v=lxCYZjbO2AU",
+          "title": "Falling 4 U",
+          "publishedAt": "2025-04-24T10:05:07Z",
+          "durationSec": 198,
+          "views": 89756,
+          "likes": 1907,
+          "comments": 25,
+          "wasLive": false,
+          "scheduledStart": null,
+          "actualStart": null,
+          "sourcePlaylists": [
+            "OLAK5uy_liWq-QzylYa0Fx-7qHHATN2wvzRrbLnwM"
+          ]
+        },
+        {
+          "videoId": "NDC_na6tuQI",
+          "url": "https://www.youtube.com/watch?v=NDC_na6tuQI",
+          "title": "Alone",
+          "publishedAt": "2025-04-10T10:02:36Z",
+          "durationSec": 207,
+          "views": 229957,
+          "likes": 2519,
+          "comments": 3,
+          "wasLive": false,
+          "scheduledStart": null,
+          "actualStart": null,
+          "sourcePlaylists": [
+            "OLAK5uy_lm2OrEs7Gr9c5noFhgESuJR9WVOBL_2ZA"
+          ]
+        },
+        {
+          "videoId": "5TCbtrO6VSY",
+          "url": "https://www.youtube.com/watch?v=5TCbtrO6VSY",
+          "title": "Crash & Burn",
+          "publishedAt": "2023-10-19T10:01:04Z",
+          "durationSec": 217,
+          "views": 2800,
+          "likes": 62,
+          "comments": 0,
+          "wasLive": false,
+          "scheduledStart": null,
+          "actualStart": null,
+          "sourcePlaylists": [
+            "OLAK5uy_losCf9-NKldlZ5pY8pWtChhuveXAjLqCk"
+          ]
+        },
+        {
+          "videoId": "F317k70zI0Y",
+          "url": "https://www.youtube.com/watch?v=F317k70zI0Y",
+          "title": "Overrated",
+          "publishedAt": "2023-10-19T10:01:15Z",
+          "durationSec": 228,
+          "views": 1930,
+          "likes": 41,
+          "comments": 0,
+          "wasLive": false,
+          "scheduledStart": null,
+          "actualStart": null,
+          "sourcePlaylists": [
+            "OLAK5uy_losCf9-NKldlZ5pY8pWtChhuveXAjLqCk"
+          ]
+        },
+        {
+          "videoId": "Qx0GBVNUv0c",
+          "url": "https://www.youtube.com/watch?v=Qx0GBVNUv0c",
+          "title": "Bad Day",
+          "publishedAt": "2023-10-19T10:02:52Z",
+          "durationSec": 262,
+          "views": 43410,
+          "likes": 792,
+          "comments": 4,
+          "wasLive": false,
+          "scheduledStart": null,
+          "actualStart": null,
+          "sourcePlaylists": [
+            "OLAK5uy_losCf9-NKldlZ5pY8pWtChhuveXAjLqCk"
+          ]
+        },
+        {
+          "videoId": "GKUYhdcdSW4",
+          "url": "https://www.youtube.com/watch?v=GKUYhdcdSW4",
+          "title": "Promise",
+          "publishedAt": "2023-10-19T10:04:22Z",
+          "durationSec": 207,
+          "views": 56058,
+          "likes": 1025,
+          "comments": 0,
+          "wasLive": false,
+          "scheduledStart": null,
+          "actualStart": null,
+          "sourcePlaylists": [
+            "OLAK5uy_losCf9-NKldlZ5pY8pWtChhuveXAjLqCk"
+          ]
+        },
+        {
+          "videoId": "0UGR_nMdg_0",
+          "url": "https://www.youtube.com/watch?v=0UGR_nMdg_0",
+          "title": "Show Me",
+          "publishedAt": "2023-10-19T10:04:45Z",
+          "durationSec": 208,
+          "views": 1736,
+          "likes": 42,
+          "comments": 0,
+          "wasLive": false,
+          "scheduledStart": null,
+          "actualStart": null,
+          "sourcePlaylists": [
+            "OLAK5uy_losCf9-NKldlZ5pY8pWtChhuveXAjLqCk"
+          ]
+        },
+        {
+          "videoId": "o299NScKOyM",
+          "url": "https://www.youtube.com/watch?v=o299NScKOyM",
+          "title": "Stop Dawdling",
+          "publishedAt": "2025-02-21T00:30:22Z",
+          "durationSec": 240,
+          "views": 1899,
+          "likes": 44,
+          "comments": 0,
+          "wasLive": false,
+          "scheduledStart": null,
+          "actualStart": null,
+          "sourcePlaylists": [
+            "OLAK5uy_luKteuN8KWSbW9Otup2CnOM8OaHIN_hJo"
+          ]
+        },
+        {
+          "videoId": "5aESeO-h0g0",
+          "url": "https://www.youtube.com/watch?v=5aESeO-h0g0",
+          "title": "The Streets",
+          "publishedAt": "2025-02-21T00:30:22Z",
+          "durationSec": 266,
+          "views": 4508,
+          "likes": 59,
+          "comments": 0,
+          "wasLive": false,
+          "scheduledStart": null,
+          "actualStart": null,
+          "sourcePlaylists": [
+            "OLAK5uy_luKteuN8KWSbW9Otup2CnOM8OaHIN_hJo"
+          ]
+        },
+        {
+          "videoId": "jGSVSEd6eUw",
+          "url": "https://www.youtube.com/watch?v=jGSVSEd6eUw",
+          "title": "Endorphins",
+          "publishedAt": "2024-06-20T10:02:46Z",
+          "durationSec": 225,
+          "views": 664725,
+          "likes": 9791,
+          "comments": 1,
+          "wasLive": false,
+          "scheduledStart": null,
+          "actualStart": null,
+          "sourcePlaylists": [
+            "OLAK5uy_lwz-j5BFbtULPLrhskf_NQIIst9dwNTjM"
+          ]
+        },
+        {
+          "videoId": "kDPVL5VmrC4",
+          "url": "https://www.youtube.com/watch?v=kDPVL5VmrC4",
+          "title": "Show Me",
+          "publishedAt": "2023-09-21T10:01:42Z",
+          "durationSec": 208,
+          "views": 227285,
+          "likes": 3004,
+          "comments": 3,
+          "wasLive": false,
+          "scheduledStart": null,
+          "actualStart": null,
+          "sourcePlaylists": [
+            "OLAK5uy_mF0WYIDpukhLzjXF6LO57ojawIB3YiMxQ"
+          ]
+        },
+        {
+          "videoId": "1Z74IjU59-g",
+          "url": "https://www.youtube.com/watch?v=1Z74IjU59-g",
+          "title": "Road Ahead",
+          "publishedAt": "2015-11-10T17:22:09Z",
+          "durationSec": 204,
+          "views": 185,
+          "likes": 5,
+          "comments": 0,
+          "wasLive": false,
+          "scheduledStart": null,
+          "actualStart": null,
+          "sourcePlaylists": [
+            "OLAK5uy_mYd1-T8u-VX73RFnAE8iS-uKAVgjRHpb0"
+          ]
+        },
+        {
+          "videoId": "3UqBW4q6Gy4",
+          "url": "https://www.youtube.com/watch?v=3UqBW4q6Gy4",
+          "title": "Drop the Clutch",
+          "publishedAt": "2015-11-10T17:25:17Z",
+          "durationSec": 388,
+          "views": 399,
+          "likes": 5,
+          "comments": 0,
+          "wasLive": false,
+          "scheduledStart": null,
+          "actualStart": null,
+          "sourcePlaylists": [
+            "OLAK5uy_mYd1-T8u-VX73RFnAE8iS-uKAVgjRHpb0"
+          ]
+        },
+        {
+          "videoId": "7IsXwh7NFYE",
+          "url": "https://www.youtube.com/watch?v=7IsXwh7NFYE",
+          "title": "Torque",
+          "publishedAt": "2015-11-10T17:42:07Z",
+          "durationSec": 252,
+          "views": 1102,
+          "likes": 14,
+          "comments": 0,
+          "wasLive": false,
+          "scheduledStart": null,
+          "actualStart": null,
+          "sourcePlaylists": [
+            "OLAK5uy_mYd1-T8u-VX73RFnAE8iS-uKAVgjRHpb0"
+          ]
+        },
+        {
+          "videoId": "9T_vSnoqg40",
+          "url": "https://www.youtube.com/watch?v=9T_vSnoqg40",
+          "title": "Starter",
+          "publishedAt": "2015-11-10T17:49:25Z",
+          "durationSec": 278,
+          "views": 109,
+          "likes": 2,
+          "comments": 0,
+          "wasLive": false,
+          "scheduledStart": null,
+          "actualStart": null,
+          "sourcePlaylists": [
+            "OLAK5uy_mYd1-T8u-VX73RFnAE8iS-uKAVgjRHpb0"
+          ]
+        },
+        {
+          "videoId": "BMMbfrzsbBs",
+          "url": "https://www.youtube.com/watch?v=BMMbfrzsbBs",
+          "title": "Around the Rosie",
+          "publishedAt": "2015-11-10T17:54:32Z",
+          "durationSec": 265,
+          "views": 149,
+          "likes": 2,
+          "comments": 0,
+          "wasLive": false,
+          "scheduledStart": null,
+          "actualStart": null,
+          "sourcePlaylists": [
+            "OLAK5uy_mYd1-T8u-VX73RFnAE8iS-uKAVgjRHpb0"
+          ]
+        },
+        {
+          "videoId": "Eh1J6OOdGxU",
+          "url": "https://www.youtube.com/watch?v=Eh1J6OOdGxU",
+          "title": "Fuel Injector",
+          "publishedAt": "2015-11-10T18:05:56Z",
+          "durationSec": 304,
+          "views": 476,
+          "likes": 5,
+          "comments": 0,
+          "wasLive": false,
+          "scheduledStart": null,
+          "actualStart": null,
+          "sourcePlaylists": [
+            "OLAK5uy_mYd1-T8u-VX73RFnAE8iS-uKAVgjRHpb0"
+          ]
+        },
+        {
+          "videoId": "DZI65H7qk6A",
+          "url": "https://www.youtube.com/watch?v=DZI65H7qk6A",
+          "title": "Spontaneous Trip",
+          "publishedAt": "2015-11-10T18:06:19Z",
+          "durationSec": 246,
+          "views": 139,
+          "likes": 6,
+          "comments": 0,
+          "wasLive": false,
+          "scheduledStart": null,
+          "actualStart": null,
+          "sourcePlaylists": [
+            "OLAK5uy_mYd1-T8u-VX73RFnAE8iS-uKAVgjRHpb0"
+          ]
+        },
+        {
+          "videoId": "GMQ0qlPgAos",
+          "url": "https://www.youtube.com/watch?v=GMQ0qlPgAos",
+          "title": "Donuts",
+          "publishedAt": "2015-11-10T18:12:51Z",
+          "durationSec": 166,
+          "views": 157,
+          "likes": 3,
+          "comments": 0,
+          "wasLive": false,
+          "scheduledStart": null,
+          "actualStart": null,
+          "sourcePlaylists": [
+            "OLAK5uy_mYd1-T8u-VX73RFnAE8iS-uKAVgjRHpb0"
+          ]
+        },
+        {
+          "videoId": "J7uS7ky9mow",
+          "url": "https://www.youtube.com/watch?v=J7uS7ky9mow",
+          "title": "Junk in the Trunk",
+          "publishedAt": "2015-11-10T18:23:28Z",
+          "durationSec": 196,
+          "views": 273,
+          "likes": 2,
+          "comments": 0,
+          "wasLive": false,
+          "scheduledStart": null,
+          "actualStart": null,
+          "sourcePlaylists": [
+            "OLAK5uy_mYd1-T8u-VX73RFnAE8iS-uKAVgjRHpb0"
+          ]
+        },
+        {
+          "videoId": "VjvnzH_ACuw",
+          "url": "https://www.youtube.com/watch?v=VjvnzH_ACuw",
+          "title": "Megashifter",
+          "publishedAt": "2015-11-10T19:09:31Z",
+          "durationSec": 328,
+          "views": 158,
+          "likes": 5,
+          "comments": 0,
+          "wasLive": false,
+          "scheduledStart": null,
+          "actualStart": null,
+          "sourcePlaylists": [
+            "OLAK5uy_mYd1-T8u-VX73RFnAE8iS-uKAVgjRHpb0"
+          ]
+        },
+        {
+          "videoId": "XTGUUISLYY8",
+          "url": "https://www.youtube.com/watch?v=XTGUUISLYY8",
+          "title": "Hyper Driven",
+          "publishedAt": "2015-11-10T19:13:39Z",
+          "durationSec": 316,
+          "views": 276,
+          "likes": 6,
+          "comments": 0,
+          "wasLive": false,
+          "scheduledStart": null,
+          "actualStart": null,
+          "sourcePlaylists": [
+            "OLAK5uy_mYd1-T8u-VX73RFnAE8iS-uKAVgjRHpb0"
+          ]
+        },
+        {
+          "videoId": "XfTsBxRN_CU",
+          "url": "https://www.youtube.com/watch?v=XfTsBxRN_CU",
+          "title": "In Pursuit",
+          "publishedAt": "2015-11-10T19:15:37Z",
+          "durationSec": 500,
+          "views": 614,
+          "likes": 7,
+          "comments": 0,
+          "wasLive": false,
+          "scheduledStart": null,
+          "actualStart": null,
+          "sourcePlaylists": [
+            "OLAK5uy_mYd1-T8u-VX73RFnAE8iS-uKAVgjRHpb0"
+          ]
+        },
+        {
+          "videoId": "hBx5K_MpO9M",
+          "url": "https://www.youtube.com/watch?v=hBx5K_MpO9M",
+          "title": "Tsunami",
+          "publishedAt": "2015-11-10T20:05:09Z",
+          "durationSec": 160,
+          "views": 98,
+          "likes": 2,
+          "comments": 0,
+          "wasLive": false,
+          "scheduledStart": null,
+          "actualStart": null,
+          "sourcePlaylists": [
+            "OLAK5uy_mYd1-T8u-VX73RFnAE8iS-uKAVgjRHpb0"
+          ]
+        },
+        {
+          "videoId": "ipsHIPFQqDc",
+          "url": "https://www.youtube.com/watch?v=ipsHIPFQqDc",
+          "title": "Foor Door",
+          "publishedAt": "2015-11-10T20:05:17Z",
+          "durationSec": 308,
+          "views": 333,
+          "likes": 6,
+          "comments": 0,
+          "wasLive": false,
+          "scheduledStart": null,
+          "actualStart": null,
+          "sourcePlaylists": [
+            "OLAK5uy_mYd1-T8u-VX73RFnAE8iS-uKAVgjRHpb0"
+          ]
+        },
+        {
+          "videoId": "ocsgJcqQkkU",
+          "url": "https://www.youtube.com/watch?v=ocsgJcqQkkU",
+          "title": "Oh Yeah!",
+          "publishedAt": "2015-11-10T20:22:40Z",
+          "durationSec": 289,
+          "views": 236,
+          "likes": 5,
+          "comments": 0,
+          "wasLive": false,
+          "scheduledStart": null,
+          "actualStart": null,
+          "sourcePlaylists": [
+            "OLAK5uy_mYd1-T8u-VX73RFnAE8iS-uKAVgjRHpb0"
+          ]
+        },
+        {
+          "videoId": "t0jVsTe-LD4",
+          "url": "https://www.youtube.com/watch?v=t0jVsTe-LD4",
+          "title": "No Hands",
+          "publishedAt": "2015-11-10T20:43:15Z",
+          "durationSec": 265,
+          "views": 103,
+          "likes": 2,
+          "comments": 0,
+          "wasLive": false,
+          "scheduledStart": null,
+          "actualStart": null,
+          "sourcePlaylists": [
+            "OLAK5uy_mYd1-T8u-VX73RFnAE8iS-uKAVgjRHpb0"
+          ]
+        },
+        {
+          "videoId": "xmopNVSaPSQ",
+          "url": "https://www.youtube.com/watch?v=xmopNVSaPSQ",
+          "title": "Wind & Stone",
+          "publishedAt": "2015-11-10T20:54:32Z",
+          "durationSec": 97,
+          "views": 226,
+          "likes": 0,
+          "comments": 0,
+          "wasLive": false,
+          "scheduledStart": null,
+          "actualStart": null,
+          "sourcePlaylists": [
+            "OLAK5uy_mYd1-T8u-VX73RFnAE8iS-uKAVgjRHpb0"
+          ]
+        },
+        {
+          "videoId": "zZR5TUUVmGU",
+          "url": "https://www.youtube.com/watch?v=zZR5TUUVmGU",
+          "title": "In the Rearview",
+          "publishedAt": "2015-11-10T21:06:05Z",
+          "durationSec": 248,
+          "views": 198,
+          "likes": 3,
+          "comments": 0,
+          "wasLive": false,
+          "scheduledStart": null,
+          "actualStart": null,
+          "sourcePlaylists": [
+            "OLAK5uy_mYd1-T8u-VX73RFnAE8iS-uKAVgjRHpb0"
+          ]
+        },
+        {
+          "videoId": "RzZhbmHz4Zg",
+          "url": "https://www.youtube.com/watch?v=RzZhbmHz4Zg",
+          "title": "Until The Morning",
+          "publishedAt": "2025-08-28T10:04:12Z",
+          "durationSec": 203,
+          "views": 111952,
+          "likes": 2054,
+          "comments": 2,
+          "wasLive": false,
+          "scheduledStart": null,
+          "actualStart": null,
+          "sourcePlaylists": [
+            "OLAK5uy_n6kaXfddYUQJqzYhIctjpNN6YZI2_v7SQ"
+          ]
+        },
+        {
+          "videoId": "BjyJuWByzQM",
+          "url": "https://www.youtube.com/watch?v=BjyJuWByzQM",
+          "title": "Power Trip",
+          "publishedAt": "2015-11-10T17:57:58Z",
+          "durationSec": 195,
+          "views": 265,
+          "likes": 2,
+          "comments": 0,
+          "wasLive": false,
+          "scheduledStart": null,
+          "actualStart": null,
+          "sourcePlaylists": [
+            "OLAK5uy_n7x2gadIkNqW8Wl4HYuFZ8xLUphUGRhNc"
+          ]
+        },
+        {
+          "videoId": "DBeWT49TZ_c",
+          "url": "https://www.youtube.com/watch?v=DBeWT49TZ_c",
+          "title": "Feel the Light",
+          "publishedAt": "2015-11-10T18:03:08Z",
+          "durationSec": 317,
+          "views": 163,
+          "likes": 0,
+          "comments": 0,
+          "wasLive": false,
+          "scheduledStart": null,
+          "actualStart": null,
+          "sourcePlaylists": [
+            "OLAK5uy_n7x2gadIkNqW8Wl4HYuFZ8xLUphUGRhNc"
+          ]
+        },
+        {
+          "videoId": "GwkH6_fXxo8",
+          "url": "https://www.youtube.com/watch?v=GwkH6_fXxo8",
+          "title": "Scheherazade",
+          "publishedAt": "2015-11-10T18:16:06Z",
+          "durationSec": 296,
+          "views": 156,
+          "likes": 1,
+          "comments": 0,
+          "wasLive": false,
+          "scheduledStart": null,
+          "actualStart": null,
+          "sourcePlaylists": [
+            "OLAK5uy_n7x2gadIkNqW8Wl4HYuFZ8xLUphUGRhNc"
+          ]
+        },
+        {
+          "videoId": "Hj5V2tiMlmc",
+          "url": "https://www.youtube.com/watch?v=Hj5V2tiMlmc",
+          "title": "Blounce",
+          "publishedAt": "2015-11-10T18:18:03Z",
+          "durationSec": 342,
+          "views": 206,
+          "likes": 5,
+          "comments": 0,
+          "wasLive": false,
+          "scheduledStart": null,
+          "actualStart": null,
+          "sourcePlaylists": [
+            "OLAK5uy_n7x2gadIkNqW8Wl4HYuFZ8xLUphUGRhNc"
+          ]
+        },
+        {
+          "videoId": "KtYALpZD3M4",
+          "url": "https://www.youtube.com/watch?v=KtYALpZD3M4",
+          "title": "Dolphin Raves",
+          "publishedAt": "2015-11-10T18:27:31Z",
+          "durationSec": 172,
+          "views": 162,
+          "likes": 1,
+          "comments": 0,
+          "wasLive": false,
+          "scheduledStart": null,
+          "actualStart": null,
+          "sourcePlaylists": [
+            "OLAK5uy_n7x2gadIkNqW8Wl4HYuFZ8xLUphUGRhNc"
+          ]
+        },
+        {
+          "videoId": "U1q6QYqxs24",
+          "url": "https://www.youtube.com/watch?v=U1q6QYqxs24",
+          "title": "Mahler I",
+          "publishedAt": "2015-11-10T18:58:59Z",
+          "durationSec": 350,
+          "views": 114,
+          "likes": 1,
+          "comments": 0,
+          "wasLive": false,
+          "scheduledStart": null,
+          "actualStart": null,
+          "sourcePlaylists": [
+            "OLAK5uy_n7x2gadIkNqW8Wl4HYuFZ8xLUphUGRhNc"
+          ]
+        },
+        {
+          "videoId": "g8TkrE_QOTc",
+          "url": "https://www.youtube.com/watch?v=g8TkrE_QOTc",
+          "title": "0-60",
+          "publishedAt": "2015-11-10T19:49:44Z",
+          "durationSec": 343,
+          "views": 861,
+          "likes": 11,
+          "comments": 0,
+          "wasLive": false,
+          "scheduledStart": null,
+          "actualStart": null,
+          "sourcePlaylists": [
+            "OLAK5uy_n7x2gadIkNqW8Wl4HYuFZ8xLUphUGRhNc"
+          ]
+        },
+        {
+          "videoId": "hd9IZwnvb0o",
+          "url": "https://www.youtube.com/watch?v=hd9IZwnvb0o",
+          "title": "Big Rush",
+          "publishedAt": "2015-11-10T19:50:12Z",
+          "durationSec": 212,
+          "views": 220,
+          "likes": 3,
+          "comments": 0,
+          "wasLive": false,
+          "scheduledStart": null,
+          "actualStart": null,
+          "sourcePlaylists": [
+            "OLAK5uy_n7x2gadIkNqW8Wl4HYuFZ8xLUphUGRhNc"
+          ]
+        },
+        {
+          "videoId": "lJK-VWmVJRk",
+          "url": "https://www.youtube.com/watch?v=lJK-VWmVJRk",
+          "title": "Jungle Fever",
+          "publishedAt": "2015-11-10T20:12:05Z",
+          "durationSec": 295,
+          "views": 282,
+          "likes": 1,
+          "comments": 0,
+          "wasLive": false,
+          "scheduledStart": null,
+          "actualStart": null,
+          "sourcePlaylists": [
+            "OLAK5uy_n7x2gadIkNqW8Wl4HYuFZ8xLUphUGRhNc"
+          ]
+        },
+        {
+          "videoId": "zOJhW7s1xxI",
+          "url": "https://www.youtube.com/watch?v=zOJhW7s1xxI",
+          "title": "Big Wayang",
+          "publishedAt": "2015-11-10T20:57:37Z",
+          "durationSec": 236,
+          "views": 415,
+          "likes": 1,
+          "comments": 0,
+          "wasLive": false,
+          "scheduledStart": null,
+          "actualStart": null,
+          "sourcePlaylists": [
+            "OLAK5uy_n7x2gadIkNqW8Wl4HYuFZ8xLUphUGRhNc"
+          ]
+        },
+        {
+          "videoId": "xk-wZqeG4_o",
+          "url": "https://www.youtube.com/watch?v=xk-wZqeG4_o",
+          "title": "Blast Off!",
+          "publishedAt": "2015-11-10T21:00:55Z",
+          "durationSec": 163,
+          "views": 184,
+          "likes": 3,
+          "comments": 0,
+          "wasLive": false,
+          "scheduledStart": null,
+          "actualStart": null,
+          "sourcePlaylists": [
+            "OLAK5uy_n7x2gadIkNqW8Wl4HYuFZ8xLUphUGRhNc"
+          ]
+        },
+        {
+          "videoId": "EpVhSzu-bsg",
+          "url": "https://www.youtube.com/watch?v=EpVhSzu-bsg",
+          "title": "Viper",
+          "publishedAt": "2020-10-08T13:54:21Z",
+          "durationSec": 292,
+          "views": 20476,
+          "likes": 326,
+          "comments": 3,
+          "wasLive": false,
+          "scheduledStart": null,
+          "actualStart": null,
+          "sourcePlaylists": [
+            "OLAK5uy_nCMubT0sQYY-WydY4zjeA3GSvdJqJpP_8"
+          ]
+        },
+        {
+          "videoId": "1Kvv7TMuBmY",
+          "url": "https://www.youtube.com/watch?v=1Kvv7TMuBmY",
+          "title": "Quarantine",
+          "publishedAt": "2020-10-08T13:54:21Z",
+          "durationSec": 262,
+          "views": 3257,
+          "likes": 87,
+          "comments": 0,
+          "wasLive": false,
+          "scheduledStart": null,
+          "actualStart": null,
+          "sourcePlaylists": [
+            "OLAK5uy_nCMubT0sQYY-WydY4zjeA3GSvdJqJpP_8"
+          ]
+        },
+        {
+          "videoId": "JDDrWvuOUbA",
+          "url": "https://www.youtube.com/watch?v=JDDrWvuOUbA",
+          "title": "I See",
+          "publishedAt": "2020-10-08T13:54:21Z",
+          "durationSec": 284,
+          "views": 12634,
+          "likes": 216,
+          "comments": 0,
+          "wasLive": false,
+          "scheduledStart": null,
+          "actualStart": null,
+          "sourcePlaylists": [
+            "OLAK5uy_nCMubT0sQYY-WydY4zjeA3GSvdJqJpP_8"
+          ]
+        },
+        {
+          "videoId": "2jPzX1n9Vb0",
+          "url": "https://www.youtube.com/watch?v=2jPzX1n9Vb0",
+          "title": "Bounce",
+          "publishedAt": "2020-10-08T13:54:21Z",
+          "durationSec": 226,
+          "views": 25068,
+          "likes": 380,
+          "comments": 0,
+          "wasLive": false,
+          "scheduledStart": null,
+          "actualStart": null,
+          "sourcePlaylists": [
+            "OLAK5uy_nCMubT0sQYY-WydY4zjeA3GSvdJqJpP_8"
+          ]
+        },
+        {
+          "videoId": "271vqDghqIo",
+          "url": "https://www.youtube.com/watch?v=271vqDghqIo",
+          "title": "Skin To Skin",
+          "publishedAt": "2026-10-22T10:04:16Z",
+          "durationSec": 193,
+          "views": 126642,
+          "likes": 3030,
+          "comments": 32,
+          "wasLive": false,
+          "scheduledStart": null,
+          "actualStart": null,
+          "sourcePlaylists": [
+            "OLAK5uy_nRsoskmFwrrESAJWxHhGoWEOw614cwgug"
+          ]
+        },
+        {
+          "videoId": "ApfOHfhDSBs",
+          "url": "https://www.youtube.com/watch?v=ApfOHfhDSBs",
+          "title": "Hold On",
+          "publishedAt": "2025-03-06T10:04:52Z",
+          "durationSec": 254,
+          "views": 425729,
+          "likes": 4987,
+          "comments": 7,
+          "wasLive": false,
+          "scheduledStart": null,
+          "actualStart": null,
+          "sourcePlaylists": [
+            "OLAK5uy_nZvs_t7rfKyhWMUc9qJBBoEa78FgN5hcY"
+          ]
+        },
+        {
+          "videoId": "HfSONmQqLUE",
+          "url": "https://www.youtube.com/watch?v=HfSONmQqLUE",
+          "title": "MPH & Nathan Nicholson - Long Goodbye",
+          "publishedAt": "2026-06-12T18:00:29Z",
+          "durationSec": 215,
+          "views": 12720,
+          "likes": 351,
+          "comments": 11,
+          "wasLive": false,
+          "scheduledStart": null,
+          "actualStart": null,
+          "sourcePlaylists": [
+            "OLAK5uy_ncvFV6boyo62AgMisoOGq9FFWrAxft7AA"
+          ]
+        },
+        {
+          "videoId": "P3UOte6Rj8g",
+          "url": "https://www.youtube.com/watch?v=P3UOte6Rj8g",
+          "title": "Funk Master",
+          "publishedAt": "2024-05-30T10:01:25Z",
+          "durationSec": 223,
+          "views": 125601,
+          "likes": 2715,
+          "comments": 2,
+          "wasLive": false,
+          "scheduledStart": null,
+          "actualStart": null,
+          "sourcePlaylists": [
+            "OLAK5uy_nggIEjNITh612jxKZN9pTmLElakWoVyNM"
+          ]
+        },
+        {
+          "videoId": "0BJaRgGbcM0",
+          "url": "https://www.youtube.com/watch?v=0BJaRgGbcM0",
+          "title": "Over This",
+          "publishedAt": "2024-08-22T10:01:15Z",
+          "durationSec": 200,
+          "views": 42898,
+          "likes": 708,
+          "comments": 0,
+          "wasLive": false,
+          "scheduledStart": null,
+          "actualStart": null,
+          "sourcePlaylists": [
+            "OLAK5uy_nkwxfhkEKYgY2oOpjG7Cbif-z0sLjZhCo"
+          ]
+        },
+        {
+          "videoId": "dKc6MIFRSvY",
+          "url": "https://www.youtube.com/watch?v=dKc6MIFRSvY",
+          "title": "Crowd Rolling",
+          "publishedAt": "2024-08-22T10:01:28Z",
+          "durationSec": 275,
+          "views": 35829,
+          "likes": 578,
+          "comments": 0,
+          "wasLive": false,
+          "scheduledStart": null,
+          "actualStart": null,
+          "sourcePlaylists": [
+            "OLAK5uy_nkwxfhkEKYgY2oOpjG7Cbif-z0sLjZhCo"
+          ]
+        },
+        {
+          "videoId": "Wigk9LdmbcA",
+          "url": "https://www.youtube.com/watch?v=Wigk9LdmbcA",
+          "title": "North LDN",
+          "publishedAt": "2024-08-22T10:01:51Z",
+          "durationSec": 195,
+          "views": 58839,
+          "likes": 1224,
+          "comments": 2,
+          "wasLive": false,
+          "scheduledStart": null,
+          "actualStart": null,
+          "sourcePlaylists": [
+            "OLAK5uy_nkwxfhkEKYgY2oOpjG7Cbif-z0sLjZhCo"
+          ]
+        },
+        {
+          "videoId": "70V6jbV1Pho",
+          "url": "https://www.youtube.com/watch?v=70V6jbV1Pho",
+          "title": "Brainwashing",
+          "publishedAt": "2024-08-22T10:01:58Z",
+          "durationSec": 204,
+          "views": 67752,
+          "likes": 1202,
+          "comments": 1,
+          "wasLive": false,
+          "scheduledStart": null,
+          "actualStart": null,
+          "sourcePlaylists": [
+            "OLAK5uy_nkwxfhkEKYgY2oOpjG7Cbif-z0sLjZhCo"
+          ]
+        },
+        {
+          "videoId": "7Mk-zgJGs4E",
+          "url": "https://www.youtube.com/watch?v=7Mk-zgJGs4E",
+          "title": "Cadence",
+          "publishedAt": "2024-08-22T10:02:00Z",
+          "durationSec": 171,
+          "views": 131795,
+          "likes": 1774,
+          "comments": 0,
+          "wasLive": false,
+          "scheduledStart": null,
+          "actualStart": null,
+          "sourcePlaylists": [
+            "OLAK5uy_nkwxfhkEKYgY2oOpjG7Cbif-z0sLjZhCo"
+          ]
+        },
+        {
+          "videoId": "MomddE5v_jk",
+          "url": "https://www.youtube.com/watch?v=MomddE5v_jk",
+          "title": "Lights On",
+          "publishedAt": "2024-08-22T10:02:38Z",
+          "durationSec": 194,
+          "views": 27140,
+          "likes": 458,
+          "comments": 0,
+          "wasLive": false,
+          "scheduledStart": null,
+          "actualStart": null,
+          "sourcePlaylists": [
+            "OLAK5uy_nkwxfhkEKYgY2oOpjG7Cbif-z0sLjZhCo"
+          ]
+        },
+        {
+          "videoId": "jAFBS6lZbxI",
+          "url": "https://www.youtube.com/watch?v=jAFBS6lZbxI",
+          "title": "Pushing (Intro)",
+          "publishedAt": "2024-08-22T10:02:52Z",
+          "durationSec": 246,
+          "views": 66274,
+          "likes": 905,
+          "comments": 0,
+          "wasLive": false,
+          "scheduledStart": null,
+          "actualStart": null,
+          "sourcePlaylists": [
+            "OLAK5uy_nkwxfhkEKYgY2oOpjG7Cbif-z0sLjZhCo"
+          ]
+        },
+        {
+          "videoId": "vbCmUnj3nnA",
+          "url": "https://www.youtube.com/watch?v=vbCmUnj3nnA",
+          "title": "Haunted",
+          "publishedAt": "2024-08-22T10:03:01Z",
+          "durationSec": 199,
+          "views": 55636,
+          "likes": 733,
+          "comments": 0,
+          "wasLive": false,
+          "scheduledStart": null,
+          "actualStart": null,
+          "sourcePlaylists": [
+            "OLAK5uy_nkwxfhkEKYgY2oOpjG7Cbif-z0sLjZhCo"
+          ]
+        },
+        {
+          "videoId": "S_7qCMrDLKE",
+          "url": "https://www.youtube.com/watch?v=S_7qCMrDLKE",
+          "title": "Just Like",
+          "publishedAt": "2024-08-22T10:03:08Z",
+          "durationSec": 206,
+          "views": 99351,
+          "likes": 1543,
+          "comments": 1,
+          "wasLive": false,
+          "scheduledStart": null,
+          "actualStart": null,
+          "sourcePlaylists": [
+            "OLAK5uy_nkwxfhkEKYgY2oOpjG7Cbif-z0sLjZhCo"
+          ]
+        },
+        {
+          "videoId": "Ek1SnG9W-c4",
+          "url": "https://www.youtube.com/watch?v=Ek1SnG9W-c4",
+          "title": "Funk Master",
+          "publishedAt": "2024-08-22T10:03:13Z",
+          "durationSec": 223,
+          "views": 7815,
+          "likes": 159,
+          "comments": 0,
+          "wasLive": false,
+          "scheduledStart": null,
+          "actualStart": null,
+          "sourcePlaylists": [
+            "OLAK5uy_nkwxfhkEKYgY2oOpjG7Cbif-z0sLjZhCo"
+          ]
+        },
+        {
+          "videoId": "bTxe9TXS_kc",
+          "url": "https://www.youtube.com/watch?v=bTxe9TXS_kc",
+          "title": "My Mind",
+          "publishedAt": "2024-08-22T10:03:33Z",
+          "durationSec": 233,
+          "views": 254710,
+          "likes": 3481,
+          "comments": 2,
+          "wasLive": false,
+          "scheduledStart": null,
+          "actualStart": null,
+          "sourcePlaylists": [
+            "OLAK5uy_nkwxfhkEKYgY2oOpjG7Cbif-z0sLjZhCo"
+          ]
+        },
+        {
+          "videoId": "nfpsIN0O5bc",
+          "url": "https://www.youtube.com/watch?v=nfpsIN0O5bc",
+          "title": "Intermission",
+          "publishedAt": "2024-08-22T10:03:36Z",
+          "durationSec": 117,
+          "views": 10679,
+          "likes": 96,
+          "comments": 0,
+          "wasLive": false,
+          "scheduledStart": null,
+          "actualStart": null,
+          "sourcePlaylists": [
+            "OLAK5uy_nkwxfhkEKYgY2oOpjG7Cbif-z0sLjZhCo"
+          ]
+        },
+        {
+          "videoId": "XAvkQoo3DJE",
+          "url": "https://www.youtube.com/watch?v=XAvkQoo3DJE",
+          "title": "Records",
+          "publishedAt": "2024-08-22T10:03:44Z",
+          "durationSec": 270,
+          "views": 40335,
+          "likes": 731,
+          "comments": 0,
+          "wasLive": false,
+          "scheduledStart": null,
+          "actualStart": null,
+          "sourcePlaylists": [
+            "OLAK5uy_nkwxfhkEKYgY2oOpjG7Cbif-z0sLjZhCo"
+          ]
+        },
+        {
+          "videoId": "cc1TLoOfmZo",
+          "url": "https://www.youtube.com/watch?v=cc1TLoOfmZo",
+          "title": "Endorphins",
+          "publishedAt": "2024-08-22T10:03:59Z",
+          "durationSec": 225,
+          "views": 25441,
+          "likes": 400,
+          "comments": 0,
+          "wasLive": false,
+          "scheduledStart": null,
+          "actualStart": null,
+          "sourcePlaylists": [
+            "OLAK5uy_nkwxfhkEKYgY2oOpjG7Cbif-z0sLjZhCo"
+          ]
+        },
+        {
+          "videoId": "YYK_nRLiutM",
+          "url": "https://www.youtube.com/watch?v=YYK_nRLiutM",
+          "title": "Shoot To Kill",
+          "publishedAt": "2024-08-22T10:04:24Z",
+          "durationSec": 228,
+          "views": 170984,
+          "likes": 2807,
+          "comments": 1,
+          "wasLive": false,
+          "scheduledStart": null,
+          "actualStart": null,
+          "sourcePlaylists": [
+            "OLAK5uy_nkwxfhkEKYgY2oOpjG7Cbif-z0sLjZhCo"
+          ]
+        },
+        {
+          "videoId": "iFKEviiSRK8",
+          "url": "https://www.youtube.com/watch?v=iFKEviiSRK8",
+          "title": "Flex It",
+          "publishedAt": "2026-02-26T10:03:52Z",
+          "durationSec": 176,
+          "views": 229679,
+          "likes": 6345,
+          "comments": 8,
+          "wasLive": false,
+          "scheduledStart": null,
+          "actualStart": null,
+          "sourcePlaylists": [
+            "OLAK5uy_nxI0LaYETqKLnhuoa7KQ6TWZdzh7IZvB4"
+          ]
+        }
+      ]
+    },
+    "ipc": {
+      "releasePlaylistCount": 30,
+      "uniqueReleaseVideos": 57,
+      "releaseVideos": [
+        {
+          "videoId": "xnw7MFoRnNE",
+          "url": "https://www.youtube.com/watch?v=xnw7MFoRnNE",
+          "title": "MC Tip",
+          "publishedAt": "2022-11-10T10:05:35Z",
+          "durationSec": 308,
+          "views": 16570,
+          "likes": 371,
+          "comments": 1,
+          "wasLive": false,
+          "scheduledStart": null,
+          "actualStart": null,
+          "sourcePlaylists": [
+            "OLAK5uy_k2hxIvzcIMo0L2dZUNWzuAzIT0P96B7y0"
+          ]
+        },
+        {
+          "videoId": "nMULZgdJL3E",
+          "url": "https://www.youtube.com/watch?v=nMULZgdJL3E",
+          "title": "Killer Instinct",
+          "publishedAt": "2026-10-08T10:04:14Z",
+          "durationSec": 278,
+          "views": 21814,
+          "likes": 758,
+          "comments": 11,
+          "wasLive": false,
+          "scheduledStart": null,
+          "actualStart": null,
+          "sourcePlaylists": [
+            "OLAK5uy_k4HpcVt3JTzu_51fFxRMV7Hi9fH-ThaYQ"
+          ]
+        },
+        {
+          "videoId": "P7sOfG9V7k0",
+          "url": "https://www.youtube.com/watch?v=P7sOfG9V7k0",
+          "title": "Nanana",
+          "publishedAt": "2026-10-08T10:04:42Z",
+          "durationSec": 274,
+          "views": 9340,
+          "likes": 341,
+          "comments": 3,
+          "wasLive": false,
+          "scheduledStart": null,
+          "actualStart": null,
+          "sourcePlaylists": [
+            "OLAK5uy_k4HpcVt3JTzu_51fFxRMV7Hi9fH-ThaYQ"
+          ]
+        },
+        {
+          "videoId": "t1MzMZAo7dk",
+          "url": "https://www.youtube.com/watch?v=t1MzMZAo7dk",
+          "title": "Memories",
+          "publishedAt": "2026-10-08T10:05:07Z",
+          "durationSec": 285,
+          "views": 37090,
+          "likes": 1248,
+          "comments": 17,
+          "wasLive": false,
+          "scheduledStart": null,
+          "actualStart": null,
+          "sourcePlaylists": [
+            "OLAK5uy_k4HpcVt3JTzu_51fFxRMV7Hi9fH-ThaYQ"
+          ]
+        },
+        {
+          "videoId": "8_6XNcTswRI",
+          "url": "https://www.youtube.com/watch?v=8_6XNcTswRI",
+          "title": "Untitled A",
+          "publishedAt": "2022-09-29T10:05:02Z",
+          "durationSec": 349,
+          "views": 22634,
+          "likes": 562,
+          "comments": 1,
+          "wasLive": false,
+          "scheduledStart": null,
+          "actualStart": null,
+          "sourcePlaylists": [
+            "OLAK5uy_kGWO0UyEsHCOUZx0AC8gaG8yLs1gTmvCI"
+          ]
+        },
+        {
+          "videoId": "4ddcMBUFu98",
+          "url": "https://www.youtube.com/watch?v=4ddcMBUFu98",
+          "title": "Untitled B",
+          "publishedAt": "2022-09-29T10:09:02Z",
+          "durationSec": 335,
+          "views": 3084,
+          "likes": 75,
+          "comments": 1,
+          "wasLive": false,
+          "scheduledStart": null,
+          "actualStart": null,
+          "sourcePlaylists": [
+            "OLAK5uy_kGWO0UyEsHCOUZx0AC8gaG8yLs1gTmvCI"
+          ]
+        },
+        {
+          "videoId": "nJG-z5c2Ft4",
+          "url": "https://www.youtube.com/watch?v=nJG-z5c2Ft4",
+          "title": "Don't Hurt Me",
+          "publishedAt": "2023-02-22T10:01:42Z",
+          "durationSec": 212,
+          "views": 36708,
+          "likes": 493,
+          "comments": 3,
+          "wasLive": false,
+          "scheduledStart": null,
+          "actualStart": null,
+          "sourcePlaylists": [
+            "OLAK5uy_kJOp-dXbrOWB6jmhkxuKjFqHoLUEe7S3g"
+          ]
+        },
+        {
+          "videoId": "KJueIzCM_9c",
+          "url": "https://www.youtube.com/watch?v=KJueIzCM_9c",
+          "title": "Interplanetary Criminal, Silva Bumpa - HOLD DA PHONE (Official Audio)",
+          "publishedAt": "2026-08-28T10:14:31Z",
+          "durationSec": 205,
+          "views": 190268,
+          "likes": 2667,
+          "comments": 39,
+          "wasLive": false,
+          "scheduledStart": null,
+          "actualStart": null,
+          "sourcePlaylists": [
+            "OLAK5uy_kKv8N7aDsrD1_9FS5m0jYz1bNsnvkyG1s",
+            "OLAK5uy_mC29KqYkg-LLVViIatU8IefSPk8Y9Im68"
+          ]
+        },
+        {
+          "videoId": "TIko3CeHINA",
+          "url": "https://www.youtube.com/watch?v=TIko3CeHINA",
+          "title": "Champion, Interplanetary Criminal & Crookers - Lose My Mind [Official Visualiser]",
+          "publishedAt": "2025-10-03T09:20:57Z",
+          "durationSec": 200,
+          "views": 85566,
+          "likes": 1728,
+          "comments": 36,
+          "wasLive": false,
+          "scheduledStart": null,
+          "actualStart": null,
+          "sourcePlaylists": [
+            "OLAK5uy_kURbZzlsIk0Zz4jMA2GkLt8i_gAuz7Luo"
+          ]
+        },
+        {
+          "videoId": "XVzxU5HNwtk",
+          "url": "https://www.youtube.com/watch?v=XVzxU5HNwtk",
+          "title": "Interplanetary Criminal - No Time (feat. Sadboi) [Official Video]",
+          "publishedAt": "2024-07-31T14:55:00Z",
+          "durationSec": 174,
+          "views": 309813,
+          "likes": 9988,
+          "comments": 205,
+          "wasLive": false,
+          "scheduledStart": null,
+          "actualStart": null,
+          "sourcePlaylists": [
+            "OLAK5uy_kWo6g_ytDJPAztlenwTIJe8V7kkORG_xA",
+            "OLAK5uy_nUVM2YNLBM_ki6vmqaeAziHH6pInaHMjI"
+          ]
+        },
+        {
+          "videoId": "StNGbdb5lDQ",
+          "url": "https://www.youtube.com/watch?v=StNGbdb5lDQ",
+          "title": "Da Groove",
+          "publishedAt": "2023-03-28T10:01:09Z",
+          "durationSec": 254,
+          "views": 1746,
+          "likes": 26,
+          "comments": 0,
+          "wasLive": false,
+          "scheduledStart": null,
+          "actualStart": null,
+          "sourcePlaylists": [
+            "OLAK5uy_kcPstRKlr14zRd0G4NC9Cr9jSO0kyAAcU"
+          ]
+        },
+        {
+          "videoId": "U8RhMEjHOLQ",
+          "url": "https://www.youtube.com/watch?v=U8RhMEjHOLQ",
+          "title": "Last One (Radio Edit)",
+          "publishedAt": "2023-03-28T10:01:14Z",
+          "durationSec": 194,
+          "views": 4059,
+          "likes": 101,
+          "comments": 0,
+          "wasLive": false,
+          "scheduledStart": null,
+          "actualStart": null,
+          "sourcePlaylists": [
+            "OLAK5uy_kcPstRKlr14zRd0G4NC9Cr9jSO0kyAAcU"
+          ]
+        },
+        {
+          "videoId": "M0_ulpYsqr0",
+          "url": "https://www.youtube.com/watch?v=M0_ulpYsqr0",
+          "title": "A Love Like",
+          "publishedAt": "2023-03-28T10:01:23Z",
+          "durationSec": 334,
+          "views": 3282,
+          "likes": 56,
+          "comments": 0,
+          "wasLive": false,
+          "scheduledStart": null,
+          "actualStart": null,
+          "sourcePlaylists": [
+            "OLAK5uy_kcPstRKlr14zRd0G4NC9Cr9jSO0kyAAcU"
+          ]
+        },
+        {
+          "videoId": "leu3R89Gfmc",
+          "url": "https://www.youtube.com/watch?v=leu3R89Gfmc",
+          "title": "Last One (Extended Mix)",
+          "publishedAt": "2023-03-28T10:01:43Z",
+          "durationSec": 365,
+          "views": 2478,
+          "likes": 56,
+          "comments": 0,
+          "wasLive": false,
+          "scheduledStart": null,
+          "actualStart": null,
+          "sourcePlaylists": [
+            "OLAK5uy_kcPstRKlr14zRd0G4NC9Cr9jSO0kyAAcU"
+          ]
+        },
+        {
+          "videoId": "7oliuw_u_R0",
+          "url": "https://www.youtube.com/watch?v=7oliuw_u_R0",
+          "title": "In Time",
+          "publishedAt": "2023-03-28T10:01:44Z",
+          "durationSec": 311,
+          "views": 1619,
+          "likes": 26,
+          "comments": 0,
+          "wasLive": false,
+          "scheduledStart": null,
+          "actualStart": null,
+          "sourcePlaylists": [
+            "OLAK5uy_kcPstRKlr14zRd0G4NC9Cr9jSO0kyAAcU"
+          ]
+        },
+        {
+          "videoId": "aeL8Lzbfp8Y",
+          "url": "https://www.youtube.com/watch?v=aeL8Lzbfp8Y",
+          "title": "All Night Long",
+          "publishedAt": "2023-03-28T10:02:11Z",
+          "durationSec": 284,
+          "views": 2046,
+          "likes": 44,
+          "comments": 0,
+          "wasLive": false,
+          "scheduledStart": null,
+          "actualStart": null,
+          "sourcePlaylists": [
+            "OLAK5uy_kcPstRKlr14zRd0G4NC9Cr9jSO0kyAAcU"
+          ]
+        },
+        {
+          "videoId": "KyZdXFNkEjg",
+          "url": "https://www.youtube.com/watch?v=KyZdXFNkEjg",
+          "title": "Reckless (feat. Lily McKenzie)",
+          "publishedAt": "2023-03-28T10:02:41Z",
+          "durationSec": 235,
+          "views": 8397,
+          "likes": 114,
+          "comments": 1,
+          "wasLive": false,
+          "scheduledStart": null,
+          "actualStart": null,
+          "sourcePlaylists": [
+            "OLAK5uy_kcPstRKlr14zRd0G4NC9Cr9jSO0kyAAcU"
+          ]
+        },
+        {
+          "videoId": "R-qycNbhoJQ",
+          "url": "https://www.youtube.com/watch?v=R-qycNbhoJQ",
+          "title": "Lift Me Up",
+          "publishedAt": "2023-03-28T10:02:58Z",
+          "durationSec": 294,
+          "views": 2446,
+          "likes": 50,
+          "comments": 0,
+          "wasLive": false,
+          "scheduledStart": null,
+          "actualStart": null,
+          "sourcePlaylists": [
+            "OLAK5uy_kcPstRKlr14zRd0G4NC9Cr9jSO0kyAAcU"
+          ]
+        },
+        {
+          "videoId": "sl2tP0zkAB0",
+          "url": "https://www.youtube.com/watch?v=sl2tP0zkAB0",
+          "title": "On 'Em",
+          "publishedAt": "2023-03-28T10:03:34Z",
+          "durationSec": 285,
+          "views": 2306,
+          "likes": 60,
+          "comments": 0,
+          "wasLive": false,
+          "scheduledStart": null,
+          "actualStart": null,
+          "sourcePlaylists": [
+            "OLAK5uy_kcPstRKlr14zRd0G4NC9Cr9jSO0kyAAcU"
+          ]
+        },
+        {
+          "videoId": "A4MlnAF75h4",
+          "url": "https://www.youtube.com/watch?v=A4MlnAF75h4",
+          "title": "Jump Up",
+          "publishedAt": "2023-03-28T10:03:37Z",
+          "durationSec": 283,
+          "views": 2173,
+          "likes": 17,
+          "comments": 0,
+          "wasLive": false,
+          "scheduledStart": null,
+          "actualStart": null,
+          "sourcePlaylists": [
+            "OLAK5uy_kcPstRKlr14zRd0G4NC9Cr9jSO0kyAAcU"
+          ]
+        },
+        {
+          "videoId": "CseTDyvbQeY",
+          "url": "https://www.youtube.com/watch?v=CseTDyvbQeY",
+          "title": "Shake",
+          "publishedAt": "2023-03-28T10:03:42Z",
+          "durationSec": 344,
+          "views": 4032,
+          "likes": 101,
+          "comments": 0,
+          "wasLive": false,
+          "scheduledStart": null,
+          "actualStart": null,
+          "sourcePlaylists": [
+            "OLAK5uy_kcPstRKlr14zRd0G4NC9Cr9jSO0kyAAcU"
+          ]
+        },
+        {
+          "videoId": "XEsmhA5Tztk",
+          "url": "https://www.youtube.com/watch?v=XEsmhA5Tztk",
+          "title": "Me and You",
+          "publishedAt": "2023-03-28T10:03:59Z",
+          "durationSec": 137,
+          "views": 1592,
+          "likes": 30,
+          "comments": 0,
+          "wasLive": false,
+          "scheduledStart": null,
+          "actualStart": null,
+          "sourcePlaylists": [
+            "OLAK5uy_kcPstRKlr14zRd0G4NC9Cr9jSO0kyAAcU"
+          ]
+        },
+        {
+          "videoId": "egfR4I4xt7U",
+          "url": "https://www.youtube.com/watch?v=egfR4I4xt7U",
+          "title": "O.B.F.C",
+          "publishedAt": "2023-03-28T10:04:00Z",
+          "durationSec": 310,
+          "views": 4774,
+          "likes": 84,
+          "comments": 0,
+          "wasLive": false,
+          "scheduledStart": null,
+          "actualStart": null,
+          "sourcePlaylists": [
+            "OLAK5uy_kcPstRKlr14zRd0G4NC9Cr9jSO0kyAAcU"
+          ]
+        },
+        {
+          "videoId": "aRae4VYzdHs",
+          "url": "https://www.youtube.com/watch?v=aRae4VYzdHs",
+          "title": "Why",
+          "publishedAt": "2023-03-28T10:04:12Z",
+          "durationSec": 328,
+          "views": 7382,
+          "likes": 198,
+          "comments": 1,
+          "wasLive": false,
+          "scheduledStart": null,
+          "actualStart": null,
+          "sourcePlaylists": [
+            "OLAK5uy_kcPstRKlr14zRd0G4NC9Cr9jSO0kyAAcU"
+          ]
+        },
+        {
+          "videoId": "ZFXVPmM6UNU",
+          "url": "https://www.youtube.com/watch?v=ZFXVPmM6UNU",
+          "title": "Rev",
+          "publishedAt": "2023-03-28T10:04:24Z",
+          "durationSec": 285,
+          "views": 1703,
+          "likes": 40,
+          "comments": 0,
+          "wasLive": false,
+          "scheduledStart": null,
+          "actualStart": null,
+          "sourcePlaylists": [
+            "OLAK5uy_kcPstRKlr14zRd0G4NC9Cr9jSO0kyAAcU"
+          ]
+        },
+        {
+          "videoId": "T5hyVYPkegc",
+          "url": "https://www.youtube.com/watch?v=T5hyVYPkegc",
+          "title": "Don't Hurt Me",
+          "publishedAt": "2023-03-28T10:04:49Z",
+          "durationSec": 212,
+          "views": 10763,
+          "likes": 166,
+          "comments": 0,
+          "wasLive": false,
+          "scheduledStart": null,
+          "actualStart": null,
+          "sourcePlaylists": [
+            "OLAK5uy_kcPstRKlr14zRd0G4NC9Cr9jSO0kyAAcU"
+          ]
+        },
+        {
+          "videoId": "Z9YFihOwHSA",
+          "url": "https://www.youtube.com/watch?v=Z9YFihOwHSA",
+          "title": "Gangster Time",
+          "publishedAt": "2022-10-27T10:09:56Z",
+          "durationSec": 207,
+          "views": 196210,
+          "likes": 3313,
+          "comments": 6,
+          "wasLive": false,
+          "scheduledStart": null,
+          "actualStart": null,
+          "sourcePlaylists": [
+            "OLAK5uy_kliR7mTlfm3NYPr1f98l_czngsG-hSW7k"
+          ]
+        },
+        {
+          "videoId": "sOeE9EgNJ5U",
+          "url": "https://www.youtube.com/watch?v=sOeE9EgNJ5U",
+          "title": "Gorgon City, Interplanetary Criminal - Contact [Official Visualiser]",
+          "publishedAt": "2026-01-09T00:00:06Z",
+          "durationSec": 188,
+          "views": 235510,
+          "likes": 4065,
+          "comments": 122,
+          "wasLive": true,
+          "scheduledStart": "2026-01-09T00:00:00Z",
+          "actualStart": "2026-01-09T00:00:06Z",
+          "sourcePlaylists": [
+            "OLAK5uy_l59JL8algfrcvpU1Gm96_etvf0NH1-HSU"
+          ]
+        },
+        {
+          "videoId": "XQOVVFYiE6Y",
+          "url": "https://www.youtube.com/watch?v=XQOVVFYiE6Y",
+          "title": "Coming On Strong",
+          "publishedAt": "2022-12-08T10:02:45Z",
+          "durationSec": 363,
+          "views": 30141,
+          "likes": 621,
+          "comments": 1,
+          "wasLive": false,
+          "scheduledStart": null,
+          "actualStart": null,
+          "sourcePlaylists": [
+            "OLAK5uy_l8cxJqJ_BWYYcxpcUwcCRlJ2VEqEAQCGY"
+          ]
+        },
+        {
+          "videoId": "9foG0dE8sMM",
+          "url": "https://www.youtube.com/watch?v=9foG0dE8sMM",
+          "title": "Beat Work",
+          "publishedAt": "2022-12-08T10:05:13Z",
+          "durationSec": 264,
+          "views": 4432,
+          "likes": 121,
+          "comments": 0,
+          "wasLive": false,
+          "scheduledStart": null,
+          "actualStart": null,
+          "sourcePlaylists": [
+            "OLAK5uy_l8cxJqJ_BWYYcxpcUwcCRlJ2VEqEAQCGY"
+          ]
+        },
+        {
+          "videoId": "SAtWB4lSFng",
+          "url": "https://www.youtube.com/watch?v=SAtWB4lSFng",
+          "title": "Gangster Time",
+          "publishedAt": "2022-12-08T10:06:03Z",
+          "durationSec": 207,
+          "views": 7971,
+          "likes": 188,
+          "comments": 1,
+          "wasLive": false,
+          "scheduledStart": null,
+          "actualStart": null,
+          "sourcePlaylists": [
+            "OLAK5uy_l8cxJqJ_BWYYcxpcUwcCRlJ2VEqEAQCGY"
+          ]
+        },
+        {
+          "videoId": "e2TRzDUIXlw",
+          "url": "https://www.youtube.com/watch?v=e2TRzDUIXlw",
+          "title": "MC Tip",
+          "publishedAt": "2022-12-08T10:06:43Z",
+          "durationSec": 308,
+          "views": 5413,
+          "likes": 147,
+          "comments": 0,
+          "wasLive": false,
+          "scheduledStart": null,
+          "actualStart": null,
+          "sourcePlaylists": [
+            "OLAK5uy_l8cxJqJ_BWYYcxpcUwcCRlJ2VEqEAQCGY"
+          ]
+        },
+        {
+          "videoId": "0aZQQi86LEg",
+          "url": "https://www.youtube.com/watch?v=0aZQQi86LEg",
+          "title": "100%",
+          "publishedAt": "2022-06-02T10:02:22Z",
+          "durationSec": 364,
+          "views": 370229,
+          "likes": 6908,
+          "comments": 0,
+          "wasLive": false,
+          "scheduledStart": null,
+          "actualStart": null,
+          "sourcePlaylists": [
+            "OLAK5uy_l9djI7RqVzR_hs2HVBn6WYq8e9f1QpqfU"
+          ]
+        },
+        {
+          "videoId": "gLLhelmrouk",
+          "url": "https://www.youtube.com/watch?v=gLLhelmrouk",
+          "title": "Backshot",
+          "publishedAt": "2022-06-02T10:02:38Z",
+          "durationSec": 407,
+          "views": 75877,
+          "likes": 1472,
+          "comments": 0,
+          "wasLive": false,
+          "scheduledStart": null,
+          "actualStart": null,
+          "sourcePlaylists": [
+            "OLAK5uy_l9djI7RqVzR_hs2HVBn6WYq8e9f1QpqfU"
+          ]
+        },
+        {
+          "videoId": "WhfDNBEKS3k",
+          "url": "https://www.youtube.com/watch?v=WhfDNBEKS3k",
+          "title": "Glamour",
+          "publishedAt": "2022-06-02T10:05:52Z",
+          "durationSec": 290,
+          "views": 23568,
+          "likes": 420,
+          "comments": 0,
+          "wasLive": false,
+          "scheduledStart": null,
+          "actualStart": null,
+          "sourcePlaylists": [
+            "OLAK5uy_l9djI7RqVzR_hs2HVBn6WYq8e9f1QpqfU"
+          ]
+        },
+        {
+          "videoId": "8FX_PG6iVSQ",
+          "url": "https://www.youtube.com/watch?v=8FX_PG6iVSQ",
+          "title": "With U",
+          "publishedAt": "2022-06-02T10:07:59Z",
+          "durationSec": 365,
+          "views": 90993,
+          "likes": 1614,
+          "comments": 0,
+          "wasLive": false,
+          "scheduledStart": null,
+          "actualStart": null,
+          "sourcePlaylists": [
+            "OLAK5uy_l9djI7RqVzR_hs2HVBn6WYq8e9f1QpqfU"
+          ]
+        },
+        {
+          "videoId": "wVS_mRcUlro",
+          "url": "https://www.youtube.com/watch?v=wVS_mRcUlro",
+          "title": "Interplanetary Criminal, Original Koffee - Slow Burner (Visualiser)",
+          "publishedAt": "2025-06-27T07:01:04Z",
+          "durationSec": 214,
+          "views": 493969,
+          "likes": 4588,
+          "comments": 61,
+          "wasLive": false,
+          "scheduledStart": null,
+          "actualStart": null,
+          "sourcePlaylists": [
+            "OLAK5uy_lKxa0binD4yZTeaR4GhvFhLrNza-B0spk",
+            "OLAK5uy_l_XBlLeWXjMwSI8MgtBhrL1eAeekFGei4"
+          ]
+        },
+        {
+          "videoId": "mJbSRftmBuI",
+          "url": "https://www.youtube.com/watch?v=mJbSRftmBuI",
+          "title": "Interplanetary Criminal - Races (feat. Blanco) [Official Audio]",
+          "publishedAt": "2024-03-22T07:00:19Z",
+          "durationSec": 142,
+          "views": 77616,
+          "likes": 1454,
+          "comments": 56,
+          "wasLive": false,
+          "scheduledStart": null,
+          "actualStart": null,
+          "sourcePlaylists": [
+            "OLAK5uy_lRrxzPYYQcga0tkRBN1VJ-8r5FEC3eOB4",
+            "OLAK5uy_lfVqoctN6_CbAEifWTR6wyOCxDSptR2pI"
+          ]
+        },
+        {
+          "videoId": "0btBK2Olo0o",
+          "url": "https://www.youtube.com/watch?v=0btBK2Olo0o",
+          "title": "Beat Work",
+          "publishedAt": "2022-11-24T10:04:36Z",
+          "durationSec": 264,
+          "views": 29848,
+          "likes": 660,
+          "comments": 1,
+          "wasLive": false,
+          "scheduledStart": null,
+          "actualStart": null,
+          "sourcePlaylists": [
+            "OLAK5uy_ldpv3Fx5GgjO4kBZOnzv5KYuieeq_j-6M"
+          ]
+        },
+        {
+          "videoId": "1DuZsN2Ol90",
+          "url": "https://www.youtube.com/watch?v=1DuZsN2Ol90",
+          "title": "Trust Me",
+          "publishedAt": "2021-12-02T10:01:08Z",
+          "durationSec": 304,
+          "views": 1149,
+          "likes": 21,
+          "comments": 2,
+          "wasLive": false,
+          "scheduledStart": null,
+          "actualStart": null,
+          "sourcePlaylists": [
+            "OLAK5uy_lxcGOxAY6nn1i6iA5K325OR44yXFAK8ak"
+          ]
+        },
+        {
+          "videoId": "aBjG-7ZyW5I",
+          "url": "https://www.youtube.com/watch?v=aBjG-7ZyW5I",
+          "title": "Jumpin",
+          "publishedAt": "2021-12-02T10:01:44Z",
+          "durationSec": 259,
+          "views": 2971,
+          "likes": 88,
+          "comments": 0,
+          "wasLive": false,
+          "scheduledStart": null,
+          "actualStart": null,
+          "sourcePlaylists": [
+            "OLAK5uy_lxcGOxAY6nn1i6iA5K325OR44yXFAK8ak"
+          ]
+        },
+        {
+          "videoId": "-QH8xVs_goA",
+          "url": "https://www.youtube.com/watch?v=-QH8xVs_goA",
+          "title": "Ruff (Hyper Mix)",
+          "publishedAt": "2021-12-02T10:06:19Z",
+          "durationSec": 275,
+          "views": 930,
+          "likes": 14,
+          "comments": 0,
+          "wasLive": false,
+          "scheduledStart": null,
+          "actualStart": null,
+          "sourcePlaylists": [
+            "OLAK5uy_lxcGOxAY6nn1i6iA5K325OR44yXFAK8ak"
+          ]
+        },
+        {
+          "videoId": "7nFSgjydEfY",
+          "url": "https://www.youtube.com/watch?v=7nFSgjydEfY",
+          "title": "Movin'",
+          "publishedAt": "2026-11-12T10:00:14Z",
+          "durationSec": 287,
+          "views": 6800,
+          "likes": 167,
+          "comments": 0,
+          "wasLive": false,
+          "scheduledStart": null,
+          "actualStart": null,
+          "sourcePlaylists": [
+            "OLAK5uy_mAJN7uZZTiZbnoxdWzX0rMMQ0X-iruUHk"
+          ]
+        },
+        {
+          "videoId": "XoGt-m2swto",
+          "url": "https://www.youtube.com/watch?v=XoGt-m2swto",
+          "title": "From the south coast mate",
+          "publishedAt": "2026-11-12T10:00:15Z",
+          "durationSec": 316,
+          "views": 4773,
+          "likes": 92,
+          "comments": 0,
+          "wasLive": false,
+          "scheduledStart": null,
+          "actualStart": null,
+          "sourcePlaylists": [
+            "OLAK5uy_mAJN7uZZTiZbnoxdWzX0rMMQ0X-iruUHk"
+          ]
+        },
+        {
+          "videoId": "LRlBydOhYDc",
+          "url": "https://www.youtube.com/watch?v=LRlBydOhYDc",
+          "title": "I just can't get",
+          "publishedAt": "2026-11-12T10:00:59Z",
+          "durationSec": 285,
+          "views": 9740,
+          "likes": 234,
+          "comments": 0,
+          "wasLive": false,
+          "scheduledStart": null,
+          "actualStart": null,
+          "sourcePlaylists": [
+            "OLAK5uy_mAJN7uZZTiZbnoxdWzX0rMMQ0X-iruUHk"
+          ]
+        },
+        {
+          "videoId": "NQKV-QlelXg",
+          "url": "https://www.youtube.com/watch?v=NQKV-QlelXg",
+          "title": "Dangerous",
+          "publishedAt": "2026-11-12T10:01:07Z",
+          "durationSec": 287,
+          "views": 6960,
+          "likes": 212,
+          "comments": 0,
+          "wasLive": false,
+          "scheduledStart": null,
+          "actualStart": null,
+          "sourcePlaylists": [
+            "OLAK5uy_mAJN7uZZTiZbnoxdWzX0rMMQ0X-iruUHk"
+          ]
+        },
+        {
+          "videoId": "4KSOIi14GLY",
+          "url": "https://www.youtube.com/watch?v=4KSOIi14GLY",
+          "title": "Reckless (feat. Lily McKenzie)",
+          "publishedAt": "2023-03-28T10:00:02Z",
+          "durationSec": 235,
+          "views": 50553,
+          "likes": 532,
+          "comments": 1,
+          "wasLive": false,
+          "scheduledStart": null,
+          "actualStart": null,
+          "sourcePlaylists": [
+            "OLAK5uy_mLBo930JsSg2BQn-O4GeoTZRswj0n3-IU"
+          ]
+        },
+        {
+          "videoId": "7nJ-tXmliN8",
+          "url": "https://www.youtube.com/watch?v=7nJ-tXmliN8",
+          "title": "Manchester",
+          "publishedAt": "2024-09-05T10:00:11Z",
+          "durationSec": 326,
+          "views": 117864,
+          "likes": 2168,
+          "comments": 12,
+          "wasLive": false,
+          "scheduledStart": null,
+          "actualStart": null,
+          "sourcePlaylists": [
+            "OLAK5uy_mrQfeu4XUX7trYqmtdy88zlo7j_058gJ4"
+          ]
+        },
+        {
+          "videoId": "Kvu4LtaNy9s",
+          "url": "https://www.youtube.com/watch?v=Kvu4LtaNy9s",
+          "title": "The Valley",
+          "publishedAt": "2024-09-05T10:00:18Z",
+          "durationSec": 366,
+          "views": 62190,
+          "likes": 1269,
+          "comments": 12,
+          "wasLive": false,
+          "scheduledStart": null,
+          "actualStart": null,
+          "sourcePlaylists": [
+            "OLAK5uy_mrQfeu4XUX7trYqmtdy88zlo7j_058gJ4"
+          ]
+        },
+        {
+          "videoId": "swypbOyl7bU",
+          "url": "https://www.youtube.com/watch?v=swypbOyl7bU",
+          "title": "Gunman",
+          "publishedAt": "2024-09-05T10:01:02Z",
+          "durationSec": 212,
+          "views": 605816,
+          "likes": 10272,
+          "comments": 18,
+          "wasLive": false,
+          "scheduledStart": null,
+          "actualStart": null,
+          "sourcePlaylists": [
+            "OLAK5uy_mrQfeu4XUX7trYqmtdy88zlo7j_058gJ4"
+          ]
+        },
+        {
+          "videoId": "l_qWsxbjByE",
+          "url": "https://www.youtube.com/watch?v=l_qWsxbjByE",
+          "title": "Ruff (Hyper Mix)",
+          "publishedAt": "2021-11-25T10:04:20Z",
+          "durationSec": 275,
+          "views": 3956,
+          "likes": 88,
+          "comments": 0,
+          "wasLive": false,
+          "scheduledStart": null,
+          "actualStart": null,
+          "sourcePlaylists": [
+            "OLAK5uy_n40wnc0MnTjeTJS2nd-DDoyghCHS09CyE"
+          ]
+        },
+        {
+          "videoId": "lQQrgmcAtw0",
+          "url": "https://www.youtube.com/watch?v=lQQrgmcAtw0",
+          "title": "Be The Only",
+          "publishedAt": "2024-11-28T10:04:31Z",
+          "durationSec": 211,
+          "views": 217056,
+          "likes": 3265,
+          "comments": 36,
+          "wasLive": false,
+          "scheduledStart": null,
+          "actualStart": null,
+          "sourcePlaylists": [
+            "OLAK5uy_n97FifprztkcInzPVbavl1EHdRSols02I"
+          ]
+        },
+        {
+          "videoId": "KtGFByAJRQQ",
+          "url": "https://www.youtube.com/watch?v=KtGFByAJRQQ",
+          "title": "Eliza Rose & Interplanetary Criminal - B.O.T.A. (Baddest Of Them All) [Official Video]",
+          "publishedAt": "2022-06-15T05:17:10Z",
+          "durationSec": 227,
+          "views": 55279190,
+          "likes": 424737,
+          "comments": 7527,
+          "wasLive": false,
+          "scheduledStart": null,
+          "actualStart": null,
+          "sourcePlaylists": [
+            "OLAK5uy_nG3n8WvVGq8ypuCaHLpnsI55Dn5xiPRmU",
+            "OLAK5uy_nG3n8WvVGq8ypuCaHLpnsI55Dn5xiPRmU"
+          ]
+        },
+        {
+          "videoId": "ZDJdynqu-i4",
+          "url": "https://www.youtube.com/watch?v=ZDJdynqu-i4",
+          "title": "KETTAMA & Interplanetary Criminal - Yosemite",
+          "publishedAt": "2025-06-24T15:21:04Z",
+          "durationSec": 267,
+          "views": 954399,
+          "likes": 7560,
+          "comments": 114,
+          "wasLive": false,
+          "scheduledStart": null,
+          "actualStart": null,
+          "sourcePlaylists": [
+            "OLAK5uy_nRWWaG3gw6vDjVltIaQyG3I2qK05Rcpoo"
+          ]
+        },
+        {
+          "videoId": "uYhd4NIYTV0",
+          "url": "https://www.youtube.com/watch?v=uYhd4NIYTV0",
+          "title": "Sammy Virji, Interplanetary Criminal - Damager (Official Visualiser)",
+          "publishedAt": "2024-11-15T05:00:50Z",
+          "durationSec": 225,
+          "views": 361954,
+          "likes": 6742,
+          "comments": 120,
+          "wasLive": false,
+          "scheduledStart": null,
+          "actualStart": null,
+          "sourcePlaylists": [
+            "OLAK5uy_nWpQvcmDqD3SM1g87ySykYP0apGGP-epA"
+          ]
+        },
+        {
+          "videoId": "l96rlNBnS5M",
+          "url": "https://www.youtube.com/watch?v=l96rlNBnS5M",
+          "title": "Why",
+          "publishedAt": "2022-03-31T10:01:19Z",
+          "durationSec": 328,
+          "views": 39268,
+          "likes": 923,
+          "comments": 13,
+          "wasLive": false,
+          "scheduledStart": null,
+          "actualStart": null,
+          "sourcePlaylists": [
+            "OLAK5uy_nc1EsbjXV_3rVRyS_Oml_ocyYo3Uff2pA"
+          ]
+        },
+        {
+          "videoId": "mabLSJCCYKk",
+          "url": "https://www.youtube.com/watch?v=mabLSJCCYKk",
+          "title": "Interplanetary Criminal - Fón Póca (feat. Travy) [Visualiser]",
+          "publishedAt": "2025-08-29T15:00:44Z",
+          "durationSec": 219,
+          "views": 45887,
+          "likes": 849,
+          "comments": 39,
+          "wasLive": false,
+          "scheduledStart": null,
+          "actualStart": null,
+          "sourcePlaylists": [
+            "OLAK5uy_nk_VBv-Vx2HWc24dEjzWE7u5VPjQHquUM"
+          ]
+        }
+      ]
+    }
+  },
+  "partnerMatches": [
+    {
+      "videoId": "CZc5Fz54dXc",
+      "url": "https://www.youtube.com/watch?v=CZc5Fz54dXc",
+      "title": "MPH | Mixmag Lab London",
+      "publishedAt": "2026-10-29T19:00:10Z",
+      "durationSec": 3631,
+      "views": 144232,
+      "likes": 2909,
+      "comments": 261,
+      "wasLive": true,
+      "scheduledStart": "2026-10-29T19:00:00Z",
+      "actualStart": "2026-10-29T19:00:10Z",
+      "sourceChannel": "mixmag"
+    },
+    {
+      "videoId": "oJydHoz61DY",
+      "url": "https://www.youtube.com/watch?v=oJydHoz61DY",
+      "title": "MPH in the Mixmag Lab London is out now #ukg #bassline #dj #dancemusic",
+      "publishedAt": "2026-10-29T19:00:18Z",
+      "durationSec": 22,
+      "views": 8138,
+      "likes": 169,
+      "comments": 9,
+      "wasLive": false,
+      "scheduledStart": null,
+      "actualStart": null,
+      "sourceChannel": "mixmag"
+    },
+    {
+      "videoId": "ghecFbw7res",
+      "url": "https://www.youtube.com/watch?v=ghecFbw7res",
+      "title": "MPH puts a spin on his classic ‘One Sixty’ for the Mixmag Lab. Watch the full set 🔗",
+      "publishedAt": "2026-10-30T16:00:10Z",
+      "durationSec": 20,
+      "views": 18025,
+      "likes": 245,
+      "comments": 17,
+      "wasLive": false,
+      "scheduledStart": null,
+      "actualStart": null,
+      "sourceChannel": "mixmag"
+    },
+    {
+      "videoId": "LO4ScSgjlng",
+      "url": "https://www.youtube.com/watch?v=LO4ScSgjlng",
+      "title": "MPH serving up high energy only in his debut Mixmag Lab. Watch the full set 🔗",
+      "publishedAt": "2026-10-31T17:00:36Z",
+      "durationSec": 19,
+      "views": 11030,
+      "likes": 183,
+      "comments": 9,
+      "wasLive": false,
+      "scheduledStart": null,
+      "actualStart": null,
+      "sourceChannel": "mixmag"
+    },
+    {
+      "videoId": "T888KgF6STc",
+      "url": "https://www.youtube.com/watch?v=T888KgF6STc",
+      "title": "MPH plays a set of heaters only, dropping his own ‘Until The Morning’ in the Mixmag Lab",
+      "publishedAt": "2026-11-01T18:00:30Z",
+      "durationSec": 21,
+      "views": 3820,
+      "likes": 57,
+      "comments": 3,
+      "wasLive": false,
+      "scheduledStart": null,
+      "actualStart": null,
+      "sourceChannel": "mixmag"
+    }
+  ]
+}
