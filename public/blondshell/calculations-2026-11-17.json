@@ -1,0 +1,72 @@
+{
+  "capturedAt": "2026-11-17T16:00:21.901Z",
+  "release": "2026-09-25",
+  "previousRelease": "2025-05-02",
+  "currentWindow": {
+    "start": "2026-05-14",
+    "end": "2026-11-17",
+    "uploads": 110,
+    "fullSongUploads": 11,
+    "shortClips": 99,
+    "lifetimeViewsOnWindowUploads": 675544,
+    "lifetimeViewsOnAlbumFullSongs": 396051,
+    "lifetimeViewsOnShortClips": 279493,
+    "formats": {
+      "Lyric video": {
+        "uploads": 1,
+        "lifetimeViews": 33902
+      },
+      "Music video": {
+        "uploads": 2,
+        "lifetimeViews": 236044
+      },
+      "Official audio": {
+        "uploads": 7,
+        "lifetimeViews": 27128
+      },
+      "Short clip\u00b9": {
+        "uploads": 99,
+        "lifetimeViews": 279493
+      },
+      "Visualizer": {
+        "uploads": 1,
+        "lifetimeViews": 98977
+      }
+    }
+  },
+  "matchedWindows": {
+    "relativeDays": [
+      -130,
+      53
+    ],
+    "current": {
+      "uploads": 108,
+      "shortClips": 97,
+      "fullLength": 11,
+      "activeWeeks": 23,
+      "weekBins": 27,
+      "longestGapDays": 16
+    },
+    "previous": {
+      "uploads": 110,
+      "shortClips": 98,
+      "fullLength": 12,
+      "activeWeeks": 25,
+      "weekBins": 27,
+      "longestGapDays": 14
+    }
+  },
+  "coverage": {
+    "retrievedRows": 520,
+    "publicVideoCounter": 513,
+    "rowViews": 6290022,
+    "channelLifetimeViews": 8523384,
+    "unreconciledViewDifference": 2233362
+  },
+  "postRelease": {
+    "days": 53,
+    "uploads": 24,
+    "shortClips": 24,
+    "newFullSongVersions": 0
+  }
+}

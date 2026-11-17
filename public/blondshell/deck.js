@@ -1,6 +1,98 @@
-(()=>{'use strict';const $=id=>document.getElementById(id),fmt=n=>n==null?'—':n>=1e9?(n/1e9).toFixed(2)+'B':n>=1e6?(n/1e6).toFixed(2)+'M':n>=1e3?(n/1e3).toFixed(1)+'K':String(n),dt=s=>new Date(s).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}),safe=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));let slides=[...document.querySelectorAll('#deck>.slide')],i=0,present=false;function show(){slides.forEach((s,n)=>s.classList.toggle('active',n===i));$('page-count').textContent=(i+1)+' / '+slides.length;$('previous').disabled=i===0;$('next').disabled=i===slides.length-1;if(present)scrollTo(0,0)}$('present').onclick=()=>{present=!present;document.body.classList.toggle('present',present);$('present').textContent=present?'Exit present':'Present';if(present)i=Math.max(0,slides.findIndex(s=>s.getBoundingClientRect().bottom>100));show()};$('previous').onclick=()=>{i=Math.max(0,i-1);show()};$('next').onclick=()=>{i=Math.min(slides.length-1,i+1);show()};document.addEventListener('keydown',e=>{if(!present)return;if(e.key==='Escape')$('present').click();if(e.key==='ArrowRight'){i=Math.min(slides.length-1,i+1);show()}if(e.key==='ArrowLeft'){i=Math.max(0,i-1);show()}});document.querySelectorAll('.topbar a[href^="#"]').forEach(a=>a.addEventListener('click',()=>{if(present){let n=slides.findIndex(s=>s.id===a.hash.slice(1));if(n>=0){i=n;show()}}}));show();
-const release=Date.parse('2026-09-25T00:00:00Z'),prevStart=Date.parse('2025-02-01T00:00:00Z'),prevEnd=Date.parse('2025-07-01T00:00:00Z'),leadStart=Date.parse('2026-04-01T00:00:00Z'),today=Date.now();
-const category=v=>{let t=v.title.toLowerCase();if(v.isShort)return 'Shorts';if(/lyric/.test(t))return 'Lyric / visualiser';if(/visuali[sz]er/.test(t))return 'Visualiser';if(/official audio|audio only|\(audio\)/.test(t))return 'Official audio';if(/live|session|performance/.test(t))return 'Live / session';if(/official video|music video/.test(t))return 'Music video';return 'Other'};
-function row(v){return '<a class="mini-row" href="https://www.youtube.com/watch?v='+encodeURIComponent(v.id)+'" target="_blank" rel="noopener"><img loading="lazy" src="https://i.ytimg.com/vi/'+encodeURIComponent(v.id)+'/mqdefault.jpg" alt=""><span><strong>'+safe(v.title)+'</strong><small>'+dt(v.publishedAt)+' · '+category(v)+'</small></span><b>'+fmt(v.views)+'</b></a>'}
-function format(data,key){let m={};data.forEach(v=>{let k=category(v);m[k]=(m[k]||0)+(key==='views'?v.views:1)});let total=Object.values(m).reduce((a,b)=>a+b,0);return Object.entries(m).sort((a,b)=>b[1]-a[1]).map(([k,n])=>'<div class="asset-row"><strong>'+safe(k)+'</strong><span>'+fmt(n)+'</span><span>'+Math.round(n/Math.max(1,total)*100)+'%</span></div><div class="chartbar"><span style="width:'+n/Math.max(1,total)*100+'%"></span></div>').join('')||'<p>No classified uploads</p>'}
-async function load(){try{let res=await fetch('/api/full-catalogue?handle=%40Blondshell&slim=1&cap=2000',{cache:'no-store'});if(!res.ok)throw Error('YouTube API returned '+res.status);let data=await res.json();if(data.error)throw Error(data.error);let all=(data.videos||[]).filter(v=>v.publishedAt&&Number.isFinite(v.views)).sort((a,b)=>Date.parse(a.publishedAt)-Date.parse(b.publishedAt));if(!all.length)throw Error('No public uploads returned');let pre=all.filter(v=>Date.parse(v.publishedAt)>=leadStart&&Date.parse(v.publishedAt)<release),post=all.filter(v=>Date.parse(v.publishedAt)>=release),releaseWeek=post.filter(v=>Date.parse(v.publishedAt)<release+4*864e5),extend=post.filter(v=>Date.parse(v.publishedAt)>=release+7*864e5&&Date.parse(v.publishedAt)<release+31*864e5),prev=all.filter(v=>{let t=Date.parse(v.publishedAt);return t>=prevStart&&t<prevEnd}),album=[...pre,...post],sortViews=a=>[...a].sort((x,y)=>y.views-x.views),sum=a=>a.reduce((n,v)=>n+v.views,0);$('load-status').textContent='Public catalogue loaded · '+all.length+' uploads · '+dt(data.fetchedAt);$('sub-count').textContent=fmt(data.channel.subscribers);$('view-count').textContent=fmt(data.channel.lifetimeViews);$('video-count').textContent=fmt(all.length);$('alltime-rows').innerHTML=sortViews(all).slice(0,5).map(row).join('');$('alltime-top').textContent=fmt(sortViews(all)[0].views);$('alltime-read').textContent='Top available catalogue asset: '+sortViews(all)[0].title+'. The repeatable creative format needs manual review alongside more recent uploads.';$('violins-assets').textContent=album.length;$('violins-views').textContent=fmt(sum(album));$('violins-long').textContent=album.filter(v=>!v.isShort).length;$('violins-shorts').textContent=album.filter(v=>v.isShort).length;$('pre-count').textContent=pre.length;$('release-count').textContent=releaseWeek.length;$('extend-count').textContent=extend.length;$('rollout-rows').innerHTML=[...album].sort((a,b)=>Date.parse(b.publishedAt)-Date.parse(a.publishedAt)).slice(0,15).map(v=>'<div class="asset-row"><strong><a target="_blank" rel="noopener" href="https://www.youtube.com/watch?v='+encodeURIComponent(v.id)+'">'+safe(v.title)+'</a></strong><span>'+dt(v.publishedAt)+' · '+category(v)+'</span><span>'+fmt(v.views)+' views</span></div>').join('');$('format-uploads').innerHTML=format(album,'count');$('format-views').innerHTML=format(album,'views');$('winner-rows').innerHTML=sortViews(album).slice(0,5).map(row).join('');let top=sortViews(album)[0];if(top){$('winner-image').src='https://i.ytimg.com/vi/'+encodeURIComponent(top.id)+'/hqdefault.jpg';$('cover-img').src='https://i.ytimg.com/vi/'+encodeURIComponent(top.id)+'/hqdefault.jpg';$('winner-caption').textContent=top.title+' · '+fmt(top.views)+' public views';$('winner-read').textContent='The highest-viewed identified campaign upload is '+top.title+'. Check publication age and paid support before interpreting why it leads.';$('priority-1').textContent='Start with '+top.title+' as the leading public-viewing signal; confirm which related assets are available and approved.'}$('album-read').textContent='Across the provisional April–November campaign cohort: '+album.length+' uploads and '+fmt(sum(album))+' current public asset views. '+pre.length+' appeared before release; '+post.length+' from album day onward. This is not channel-view growth.';$('format-read').textContent='Detected format mix: '+[...new Set(album.map(category))].join(', ')+'. Assess which formats earned the most public viewing relative to their upload share.';$('prev-assets').textContent=prev.length;$('prev-views').textContent=fmt(sum(prev));$('prev-formats').textContent=new Set(prev.map(category)).size;$('previous-rows').innerHTML=sortViews(prev).slice(0,5).map(row).join('')||'No uploads in provisional 2025 window';$('previous-read').textContent='2025 window: '+prev.length+' uploads across '+new Set(prev.map(category)).size+' detected formats. 2026 working window: '+album.length+' uploads across '+new Set(album.map(category)).size+' formats. These windows differ in length and age: compare publishing structure, not raw view totals.';$('gap-copy-1').textContent=extend.length+' uploads appeared in days 7–30 after the release date. '+(extend.length<3?'This suggests a thin post-release window worth discussing, subject to the full inventory.':'There is follow-up activity to inspect for consistency and audience response.');let cats=new Set(album.map(category));$('gap-copy-2').textContent='Detected '+cats.size+' format categories. '+(!cats.has('Live / session')?'No clearly labelled live/session upload found in this provisional campaign cohort; check unlabelled assets and team plans.':'Live/session material is present; assess how it connects to the album videos.');let gap=data.channel.publicVideoCount-all.length;$('channel-read').textContent='The public uploads playlist returned '+all.length+' videos against '+data.channel.publicVideoCount+' public videos reported by the channel.'+(gap?' Investigate the count difference before calculating catalogue share.':' The counts align; lifetime channel views may still include unavailable content.');$('coverage').textContent='Channel '+data.channel.id+' · '+all.length+' video rows retrieved · '+data.channel.publicVideoCount+' public videos reported · capped='+Boolean(data.capped)+'. Historical video views are current lifetime totals, not views earned within the original release period.';$('retrieved').textContent='YouTube Data API via Campaign Coach · retrieved '+data.fetchedAt+'. Watcher snapshots are a separate observed series.';try{let sr=await fetch('/api/debug/snapshots?handle=%40Blondshell',{cache:'no-store'});if(!sr.ok)throw Error('No Watcher mapping');let s=await sr.json();$('seven-views').textContent=s.deltaDebug?.views7dDelta==null?'—':fmt(s.deltaDebug.views7dDelta);$('channel-read').textContent+=' Watcher: '+s.totalSnapshots+' snapshots'+(s.dateRange?' from '+dt(s.dateRange.first)+' to '+dt(s.dateRange.last):'')+'.';$('coverage').textContent+=' Watcher: '+s.totalSnapshots+' snapshots.'}catch(e){$('seven-views').textContent='N/A';$('channel-read').textContent+=' No verified Watcher history available for this handle.'}}catch(e){$('load-status').textContent='API unavailable: '+e.message;$('channel-read').textContent='The public API did not return data. No performance figures have been substituted.';$('coverage').textContent='API request failed: '+e.message}}load()})();
+(()=>{'use strict';
+const slides=[...document.querySelectorAll('#deck > .slide')];
+const toggle=document.getElementById('present');
+const sheet=document.getElementById('analysis');
+const close=document.getElementById('close-analysis');
+const deck=document.getElementById('deck');
+const header=document.querySelector('.topbar');
+const controls=document.querySelector('.present-controls');
+const auditHashes=new Set(['analysis','catalogue-audit','album-audit','audit-priorities']);
+let index=0,presenting=false,analysisOpen=false,returnHash='#intro',returnScroll=0,returnFocus=null;
+function show(i){
+ index=Math.max(0,Math.min(slides.length-1,i));
+ slides.forEach((s,n)=>s.classList.toggle('active',n===index));
+ document.getElementById('page-count').textContent=`${index+1} / ${slides.length}`;
+ document.getElementById('previous').disabled=index===0;
+ document.getElementById('next').disabled=index===slides.length-1;
+ if(presenting)window.scrollTo({top:0,behavior:'instant'});
+}
+function isFullscreen(){return Boolean(document.fullscreenElement||document.webkitFullscreenElement);}
+function updatePresentButton(){
+ toggle.textContent=presenting?(isFullscreen()?'Exit full screen':'Exit present'):'Present';
+ toggle.title=presenting?'Exit presentation':'Present in full screen';
+ toggle.setAttribute('aria-pressed',String(presenting));
+}
+async function setPresent(on){
+ if(on){const current=slides.findIndex(s=>s.getBoundingClientRect().bottom>100);index=Math.max(0,current);}
+ presenting=on;document.body.classList.toggle('present',on);
+ updatePresentButton();show(index);
+ if(!on)slides[index].scrollIntoView({behavior:'instant',block:'start'});
+ if(on&&!isFullscreen()){
+  const root=document.documentElement;
+  const request=root.requestFullscreen||root.webkitRequestFullscreen;
+  if(request){try{await request.call(root);}catch{/* Keep presentation usable if the browser blocks fullscreen. */}}
+ }else if(!on&&isFullscreen()){
+  const exit=document.exitFullscreen||document.webkitExitFullscreen;
+  if(exit){try{await exit.call(document);}catch{/* The slide view has already returned to normal. */}}
+ }
+ updatePresentButton();
+}
+function syncFullscreen(){
+ if(!isFullscreen()&&presenting){
+  if(analysisOpen)closeAnalysis();
+  setPresent(false);
+ }else updatePresentButton();
+}
+
+function openAnalysis(target='analysis',writeHistory=true){
+ if(!analysisOpen){
+  returnHash=presenting?'#'+slides[index].id:(auditHashes.has(location.hash.slice(1))?'#intro':location.hash||'#intro');
+  returnScroll=window.scrollY;returnFocus=document.activeElement;
+  analysisOpen=true;sheet.hidden=false;document.body.classList.add('analysis-open');
+  deck.inert=true;header.inert=true;controls.inert=true;
+  sheet.scrollTop=0;sheet.focus({preventScroll:true});
+  if(writeHistory)history.pushState(null,'','#'+target);
+ }else if(writeHistory)history.replaceState(null,'','#'+target);
+ if(target!=='analysis')document.getElementById(target)?.scrollIntoView({behavior:'instant',block:'start'});
+ else sheet.scrollTop=0;
+}
+function closeAnalysis(writeHistory=true){
+ if(!analysisOpen)return;
+ analysisOpen=false;sheet.hidden=true;document.body.classList.remove('analysis-open');
+ deck.inert=false;header.inert=false;controls.inert=false;
+ if(writeHistory)history.replaceState(null,'',returnHash);
+ window.scrollTo({top:returnScroll,behavior:'instant'});
+ if(returnFocus instanceof HTMLElement&&returnFocus.isConnected)returnFocus.focus({preventScroll:true});
+}
+function syncLocation(){const target=location.hash.slice(1);if(auditHashes.has(target))openAnalysis(target,false);else closeAnalysis(false);}
+toggle.addEventListener('click',()=>setPresent(!presenting));
+close.addEventListener('click',()=>closeAnalysis());
+document.getElementById('previous').addEventListener('click',()=>show(index-1));
+document.getElementById('next').addEventListener('click',()=>show(index+1));
+document.addEventListener('keydown',e=>{
+ if(analysisOpen){
+  if(e.key==='Escape'){e.preventDefault();closeAnalysis();return;}
+  if(e.key==='Tab'){
+   const items=[...sheet.querySelectorAll('a[href],button,summary,input,select,textarea,[tabindex]:not([tabindex="-1"])')].filter(el=>el.getClientRects().length&&!el.disabled);
+   const first=items[0],last=items[items.length-1];
+   if(first&&e.shiftKey&&(document.activeElement===first||document.activeElement===sheet)){e.preventDefault();last.focus();}
+   else if(first&&!e.shiftKey&&(document.activeElement===last||document.activeElement===sheet)){e.preventDefault();first.focus();}
+  }
+  return;
+ }
+ if(!presenting||/INPUT|TEXTAREA|SELECT|SUMMARY/.test(e.target.tagName))return;
+ if(e.key==='Escape'){setPresent(false);return;}
+ if(e.key==='ArrowRight'||e.key==='PageDown'){e.preventDefault();show(index+1);}
+ if(e.key==='ArrowLeft'||e.key==='PageUp'){e.preventDefault();show(index-1);}
+});
+document.querySelectorAll('a[href^="#"]').forEach(a=>a.addEventListener('click',e=>{
+ const target=a.hash.slice(1);
+ if(auditHashes.has(target)){e.preventDefault();openAnalysis(target);return;}
+ const n=slides.findIndex(s=>s.id===target);if(presenting&&n>=0)show(n);
+}));
+document.addEventListener('fullscreenchange',syncFullscreen);
+document.addEventListener('webkitfullscreenchange',syncFullscreen);
+window.addEventListener('popstate',syncLocation);
+window.addEventListener('hashchange',syncLocation);
+show(0);syncLocation();
+})();
