@@ -1,0 +1,1017 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Everything But The Girl × YouTube — Blue Reservoir</title>
+
+<!--
+  EVERYTHING BUT THE GIRL × YOUTUBE
+  Artist-facing deep dive for Ben Watt and Tracey Thorn · November 2026
+  Question: how can EBTG use their existing YouTube audience and catalogue
+  to introduce listeners to Blue Reservoir (out 19 February 2027)?
+
+  SOURCES AND SCOPES (never mixed)
+   A. YouTube Studio, supplied by the team, 19 Aug – 16 Nov 2026 (90 days).
+      A1 Total music reach: views across the Official Artist Channel AND
+         other channels' videos using the music (26.8M, 9.1M unique viewers,
+         2.3M returning viewers, 6.8K subscribers gained, 53% / 47% split).
+      A2 Videos report (official channel videos only): 16.2M views, 52.7M
+         impressions, 5.7% CTR, 2:40 average view duration, traffic sources,
+         search terms, external sources.
+      A3 Audience: age, gender, countries, cities, notification settings.
+   B. Public YouTube Data API via the Watcher (/api/full-catalogue,
+      /api/video-series, /api/debug/snapshots, /api/channel-shelf,
+      /api/comment-scan), retrieved 18 November 2026. Lifetime video views
+      are lifetime, never campaign views.
+   C. Album facts: ebtg.com news post (28 Oct 2026) and press coverage.
+
+  RULES
+   - No subscriber conversion rate is calculated (6.8K is net subscribers;
+     9.1M is unique viewers across all channels — different denominators).
+   - Unique viewers are not views; returning viewers are not subscribers.
+   - Archive assets have not been seen by us: recommendations are
+     conditional on quality and edit points.
+   - Hypotheses are labelled as hypotheses. No forecasts.
+
+  Route: /ebtg  ·  Visual identity: Blue Reservoir — water blue, paper,
+  the gold tinsel curtain of the Young and Dumb film. Oswald + Inter.
+-->
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@300;400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+:root{
+  --paper:#F1ECE3;
+  --paper-2:#E8E1D4;
+  --ink:#14212C;
+  --ink-2:#3B4955;
+  --mute:#6F7A82;
+  --line:rgba(20,33,44,.14);
+  --deep:#0F2433;        /* the reservoir at night */
+  --blue:#24597A;        /* reservoir blue */
+  --water:#8FB5C9;       /* surface light */
+  --mist:#D5E3EA;
+  --gold:#C49A3E;        /* the tinsel curtain, Young and Dumb */
+  --gold-lt:#E2C27A;
+  --rose:#B5564A;        /* sparing: what needs attention */
+  --pad:clamp(1.25rem,5vw,5.5rem);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--paper);color:var(--ink);font-family:'Inter',system-ui,sans-serif;font-size:17px;line-height:1.5;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+img{display:block;max-width:100%}
+a{color:inherit}
+
+/* ── type ── */
+.serif{font-family:'Oswald',sans-serif}
+h1,h2{font-family:'Oswald',sans-serif;font-weight:600;letter-spacing:.005em;line-height:.98;text-transform:uppercase}
+h1{font-size:clamp(2.8rem,7.4vw,6.4rem)}
+h2{font-size:clamp(1.8rem,3.7vw,3.1rem)}
+h2 em,h1 em{font-style:normal;color:var(--blue)}
+.dark h2 em,.dark h1 em{color:var(--gold-lt)}
+h3{font-family:'Inter',sans-serif;font-weight:700;font-size:1.02rem;line-height:1.25}
+.kicker{font-size:.7rem;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--blue)}
+.dark .kicker{color:var(--gold-lt)}
+.lede{font-size:clamp(1.05rem,1.55vw,1.3rem);line-height:1.5;color:var(--ink-2);max-width:56ch}
+.dark .lede{color:rgba(241,236,227,.82)}
+.body{color:var(--ink-2);max-width:62ch}
+.dark .body{color:rgba(241,236,227,.78)}
+.src{margin-top:1.4rem;font-size:.72rem;line-height:1.5;color:var(--mute);max-width:90ch}
+.dark .src{color:rgba(241,236,227,.5)}
+.num{font-family:'Oswald',sans-serif;font-weight:600;line-height:.95;letter-spacing:.005em;font-variant-numeric:lining-nums}
+.tag{display:inline-block;font-size:.62rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;padding:.22rem .5rem;border-radius:99px;border:1px solid var(--line);color:var(--mute);white-space:nowrap}
+.tag.studio{border-color:var(--blue);color:var(--blue)}
+.tag.api{border-color:var(--gold);color:#8E6C22}
+.tag.hyp{border-style:dashed}
+.dark .tag{border-color:rgba(241,236,227,.3);color:rgba(241,236,227,.7)}
+
+/* ── chrome ── */
+.chrome{position:fixed;top:0;left:0;right:0;z-index:60;display:flex;align-items:center;justify-content:space-between;gap:1rem;padding:.7rem var(--pad);background:rgba(241,236,227,.9);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.chrome .brand{font-family:'Oswald',sans-serif;font-weight:500;font-size:.92rem;letter-spacing:.12em;text-transform:uppercase;white-space:nowrap}
+.chrome .brand span{color:var(--mute);font-family:'Inter',sans-serif;font-size:.74rem;letter-spacing:.08em;text-transform:uppercase;margin-left:.7rem}
+.chrome .r{display:flex;gap:.5rem}
+.btn{font:inherit;font-size:.74rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;padding:.5rem .9rem;border-radius:99px;border:1px solid var(--line);background:transparent;color:var(--ink);cursor:pointer;white-space:nowrap}
+.btn:hover{border-color:var(--blue);color:var(--blue)}
+.btn.primary{background:var(--deep);color:var(--paper);border-color:var(--deep)}
+.btn.primary:hover{background:var(--blue);border-color:var(--blue);color:#fff}
+@media(max-width:640px){.chrome .brand span{display:none}.btn.primary{display:none}.chrome .brand{font-size:.74rem;letter-spacing:.06em}}
+#pbar{position:fixed;top:0;left:0;height:2px;background:var(--gold);width:0;z-index:70;transition:width .3s}
+
+/* ── slides ── */
+.slide{position:relative;min-height:100vh;padding:6.2rem var(--pad) 3.4rem;display:flex;flex-direction:column;justify-content:center;border-bottom:1px solid var(--line);overflow:hidden}
+.slide.dark{background:var(--deep);color:var(--paper);border-color:rgba(255,255,255,.06)}
+.slide.mist{background:var(--paper-2)}
+.inner{position:relative;z-index:2;width:100%;max-width:1240px;margin:0 auto}
+.bleed{position:absolute;inset:0;z-index:0;overflow:hidden}
+.bleed img{width:100%;height:100%;object-fit:cover}
+.bleed::after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,rgba(15,36,51,.94) 0%,rgba(15,36,51,.72) 45%,rgba(15,36,51,.25) 100%)}
+.bleed.full::after{background:linear-gradient(180deg,rgba(15,36,51,.35) 0%,rgba(15,36,51,.55) 45%,rgba(15,36,51,.96) 100%)}
+.ripple{position:absolute;inset:auto 0 0 0;height:38%;z-index:1;pointer-events:none;opacity:.5;
+  background:repeating-linear-gradient(180deg,transparent 0 14px,rgba(143,181,201,.10) 14px 15px)}
+
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:clamp(1.5rem,4vw,4rem)}
+.g3{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(1rem,2.6vw,2rem)}
+.g4{display:grid;grid-template-columns:repeat(4,1fr);gap:clamp(.8rem,2vw,1.5rem)}
+@media(max-width:900px){.g2,.g3{grid-template-columns:1fr}.g4{grid-template-columns:1fr 1fr}}
+@media(max-width:520px){.g4{grid-template-columns:1fr}}
+
+/* stat */
+.stat .num{font-size:clamp(2.6rem,5.4vw,4.6rem)}
+.stat .lbl{margin-top:.5rem;font-size:.86rem;font-weight:600}
+.stat .sub{font-size:.78rem;color:var(--mute);margin-top:.15rem}
+.dark .stat .sub{color:rgba(241,236,227,.55)}
+.stat .up{color:var(--blue);font-weight:700}
+.dark .stat .up{color:var(--water)}
+
+/* bars */
+.hbar{display:grid;grid-template-columns:minmax(7rem,12rem) 1fr 3.4rem;align-items:center;gap:.8rem;margin:.42rem 0;font-size:.88rem}
+.hbar .t{height:12px;border-radius:99px;background:rgba(20,33,44,.07);overflow:hidden}
+.dark .hbar .t{background:rgba(241,236,227,.1)}
+.hbar .t i{display:block;height:100%;border-radius:99px;background:var(--blue);width:0;transition:width 1s cubic-bezier(.2,.7,.3,1)}
+.hbar.hi .t i{background:var(--gold)}
+.hbar .v{text-align:right;font-weight:600;font-variant-numeric:tabular-nums}
+.hbar .k{color:var(--ink-2)}
+.dark .hbar .k{color:rgba(241,236,227,.8)}
+
+/* split bar 53/47 */
+.split{display:flex;height:84px;border-radius:14px;overflow:hidden;margin-top:1.2rem}
+.split div{display:flex;flex-direction:column;justify-content:flex-end;padding:.8rem 1rem;color:#fff}
+.split .a{background:var(--blue)}
+.split .b{background:repeating-linear-gradient(135deg,#5E8BA5 0 10px,#6B97B0 10px 20px)}
+.split b{font-family:'Oswald',sans-serif;font-weight:600;font-size:1.9rem;line-height:1}
+.split span{font-size:.74rem;font-weight:600;letter-spacing:.04em;opacity:.92}
+
+/* cards */
+.card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:1.2rem 1.25rem}
+.dark .card{background:rgba(241,236,227,.05);border-color:rgba(241,236,227,.12)}
+.card p{font-size:.9rem;color:var(--ink-2);margin-top:.4rem;line-height:1.45}
+.dark .card p{color:rgba(241,236,227,.75)}
+.card p b{color:var(--ink)}
+.dark .card p b{color:var(--paper)}
+.thumb{display:block;position:relative;aspect-ratio:16/9;border-radius:12px;overflow:hidden;background:var(--deep)}
+.thumb img{width:100%;height:100%;object-fit:cover}
+.thumb .cap{position:absolute;left:.6rem;bottom:.5rem;right:.6rem;font-size:.7rem;font-weight:600;color:#fff;text-shadow:0 1px 6px rgba(0,0,0,.6)}
+
+.quote{font-family:'Inter',sans-serif;font-weight:500;font-size:clamp(.98rem,1.4vw,1.18rem);line-height:1.4;border-left:2px solid var(--gold);padding-left:1rem}
+.quote cite{display:block;margin-top:.45rem;font-family:'Inter',sans-serif;font-style:normal;font-size:.72rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--mute)}
+.dark .quote cite{color:rgba(241,236,227,.55)}
+
+/* fix list */
+.fix{display:grid;grid-template-columns:2.4rem 1fr;gap:.9rem;padding:.75rem 0;border-top:1px solid var(--line)}
+.fix .n{font-family:'Oswald',sans-serif;font-size:1.6rem;line-height:1;color:var(--rose)}
+.fix p{font-size:.92rem;color:var(--ink-2);margin-top:.25rem}
+.fix p b{color:var(--ink)}
+
+/* assets — the centrepiece */
+.assets{display:grid;grid-template-columns:repeat(4,1fr);gap:clamp(.8rem,1.8vw,1.4rem)}
+@media(max-width:1000px){.assets{grid-template-columns:1fr 1fr}}
+@media(max-width:560px){.assets{grid-template-columns:1fr}}
+.asset{display:flex;flex-direction:column;background:rgba(241,236,227,.06);border:1px solid rgba(241,236,227,.14);border-radius:18px;overflow:hidden}
+.asset .face{position:relative;aspect-ratio:4/3;display:flex;flex-direction:column;justify-content:flex-end;padding:1rem;color:var(--paper);overflow:hidden}
+.asset .face.arch{background:radial-gradient(120% 90% at 30% 20%,#2C5C78 0%,#173548 55%,#0C1C28 100%)}
+.asset .face.arch::before{content:'';position:absolute;inset:0;background:repeating-linear-gradient(0deg,rgba(255,255,255,.035) 0 2px,transparent 2px 4px);mix-blend-mode:screen}
+.asset .face .yr{position:absolute;top:.8rem;right:1rem;font-family:'Oswald',sans-serif;font-size:2.4rem;color:rgba(226,194,122,.85);line-height:1}
+.asset .face .song{font-family:'Oswald',sans-serif;font-size:clamp(1.35rem,2vw,1.8rem);line-height:1.02}
+.asset .face .where{font-size:.72rem;letter-spacing:.06em;text-transform:uppercase;opacity:.8;margin-top:.3rem}
+.asset .face.img img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 30%}
+.asset .face.img::after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(12,28,40,0) 35%,rgba(12,28,40,.92))}
+.asset .face.img > *:not(img){position:relative;z-index:2}
+.asset .face.img > .vert,.asset .face.img > .yr,.asset .face.img > .rank{position:absolute}
+.asset .face .vert{position:absolute;top:.8rem;left:1rem;z-index:3;font-size:.62rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;background:var(--gold);color:var(--deep);padding:.2rem .45rem;border-radius:99px}
+.asset .txt{padding:1rem 1.05rem 1.15rem;display:flex;flex-direction:column;gap:.5rem;flex:1}
+.asset .role{font-family:'Oswald',sans-serif;font-weight:500;text-transform:uppercase;letter-spacing:.04em;font-size:1.05rem;color:var(--gold-lt);line-height:1.15}
+.asset .txt p{font-size:.86rem;line-height:1.45;color:rgba(241,236,227,.78)}
+.asset .txt p b{color:var(--paper)}
+.asset .do{margin-top:auto;padding-top:.6rem;border-top:1px solid rgba(241,236,227,.12);font-size:.76rem;line-height:1.45;color:rgba(241,236,227,.65)}
+.asset .do b{color:var(--paper);font-weight:600}
+.rank{position:absolute;top:.8rem;left:1rem;z-index:3;font-size:.62rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;border:1px solid rgba(226,194,122,.6);color:var(--gold-lt);padding:.2rem .45rem;border-radius:99px}
+
+/* route */
+.route{display:grid;grid-template-columns:repeat(4,1fr);gap:0;margin-top:2rem;position:relative}
+.route::before{content:'';position:absolute;top:62px;left:6%;right:6%;height:2px;background:linear-gradient(90deg,var(--water),var(--blue),var(--gold))}
+.stop{position:relative;padding:0 1rem;text-align:center}
+.stop .dot{width:124px;height:124px;margin:0 auto 1rem;border-radius:50%;display:flex;align-items:center;justify-content:center;background:var(--paper);border:2px solid var(--blue);font-family:'Oswald',sans-serif;font-size:1.5rem;color:var(--blue);position:relative;z-index:2}
+.stop.new .dot{border-color:var(--gold);color:#8E6C22;background:#FBF6EA}
+.stop h3{font-family:'Oswald',sans-serif;font-weight:600;font-size:1.3rem}
+.stop p{font-size:.86rem;color:var(--ink-2);margin-top:.35rem}
+.stop .how{margin-top:.6rem;font-size:.72rem;font-weight:600;letter-spacing:.04em;color:var(--blue)}
+@media(max-width:860px){.route{grid-template-columns:1fr;gap:1.4rem}.route::before{display:none}.stop{text-align:left;display:grid;grid-template-columns:84px 1fr;gap:1rem;padding:0}.stop .dot{margin:0;width:84px;height:84px}}
+
+/* plan */
+.weeks{display:grid;grid-template-columns:repeat(5,1fr);gap:.8rem;margin-top:1.6rem}
+@media(max-width:1100px){.weeks{grid-template-columns:1fr 1fr}}
+@media(max-width:560px){.weeks{grid-template-columns:1fr}}
+.wk{background:#fff;border:1px solid var(--line);border-radius:16px;padding:1rem;display:flex;flex-direction:column;gap:.45rem}
+.wk.opt{background:transparent;border-style:dashed}
+.wk .w{font-size:.66rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--blue)}
+.wk h3{font-family:'Oswald',sans-serif;font-weight:600;font-size:1.22rem;line-height:1.1}
+.wk .fmt{font-size:.74rem;font-weight:600;color:#8E6C22}
+.wk dl{font-size:.76rem;line-height:1.4;color:var(--ink-2);display:grid;gap:.35rem;margin-top:.2rem}
+.wk dt{font-weight:700;color:var(--ink);font-size:.64rem;letter-spacing:.1em;text-transform:uppercase}
+.wk .ttl{font-family:'Oswald',sans-serif;font-size:.86rem;color:var(--ink)}
+
+/* priorities */
+.pri{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(1rem,2.4vw,2rem);margin-top:2rem}
+@media(max-width:900px){.pri{grid-template-columns:1fr}}
+.pr{border-top:3px solid var(--gold);padding-top:1rem}
+.pr .n{font-family:'Oswald',sans-serif;font-size:3rem;line-height:1;color:var(--gold-lt)}
+.pr h3{font-family:'Oswald',sans-serif;font-weight:600;font-size:1.5rem;line-height:1.1;margin-top:.4rem;color:var(--paper)}
+.pr p{font-size:.9rem;color:rgba(241,236,227,.78);margin-top:.5rem}
+.pr .meta{margin-top:.8rem;font-size:.74rem;line-height:1.5;color:rgba(241,236,227,.6)}
+.pr .meta b{color:var(--paper)}
+
+/* character: grain, tape, archive treatment */
+.grain::before{content:'';position:absolute;inset:0;z-index:3;pointer-events:none;opacity:.16;mix-blend-mode:overlay;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
+.vhs{filter:saturate(.8) contrast(1.06) sepia(.12)}
+.tapes{display:grid;grid-template-columns:repeat(5,1fr);gap:.55rem}
+@media(max-width:900px){.tapes{grid-template-columns:repeat(2,1fr)}}
+.tape{position:relative;display:block;aspect-ratio:16/10;border-radius:10px;overflow:hidden;background:#0a1620;text-decoration:none}
+.tape img{width:100%;height:100%;object-fit:cover;transition:transform .5s}
+.tape:hover img{transform:scale(1.05)}
+.tape::after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(12,28,40,0) 40%,rgba(12,28,40,.92));z-index:1}
+.tape::before{content:'';position:absolute;inset:0;z-index:2;background:repeating-linear-gradient(0deg,rgba(255,255,255,.04) 0 1px,transparent 1px 3px);pointer-events:none}
+.tape .yr{position:absolute;top:.45rem;left:.55rem;z-index:3;font-family:'Oswald',sans-serif;font-size:1.15rem;color:var(--gold-lt);text-shadow:0 1px 8px rgba(0,0,0,.6)}
+.tape .ti{position:absolute;left:.6rem;right:.6rem;bottom:.5rem;z-index:3;font-size:.68rem;line-height:1.3;color:rgba(241,236,227,.75)}
+.tape .ti b{display:block;font-family:'Oswald',sans-serif;font-weight:600;font-size:1.25rem;color:var(--paper)}
+.tape.hi{outline:2px solid var(--gold);outline-offset:2px}
+.shorts{display:flex;gap:.6rem}
+.vshort{position:relative;flex:1;aspect-ratio:9/13;border-radius:12px;overflow:hidden;display:block;max-width:118px}
+.vshort img{width:100%;height:100%;object-fit:cover}
+.vshort::after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(12,28,40,0) 45%,rgba(12,28,40,.92))}
+.vshort span{position:absolute;left:.5rem;right:.5rem;bottom:.45rem;z-index:2;font-size:.66rem;line-height:1.25;color:rgba(241,236,227,.8)}
+.vshort span b{display:block;font-family:'Oswald',sans-serif;font-weight:600;font-size:1.35rem;color:var(--gold-lt)}
+.yt .thumb{aspect-ratio:2.3/1}
+.yt .thumb img{object-position:50% 30%}
+.yt{background:#fff;border:1px solid var(--line);border-radius:16px;padding:.8rem;box-shadow:0 18px 40px -24px rgba(20,33,44,.35)}
+.yt-t{font-weight:700;font-size:.95rem;margin-top:.7rem;line-height:1.3}
+.yt-m{font-size:.78rem;color:var(--mute);margin-top:.2rem}
+.yt-d{position:relative;margin-top:.55rem;background:var(--paper);border-radius:10px;padding:.75rem .85rem 2.4rem;font-size:.78rem;line-height:1.45;color:var(--ink-2);font-family:ui-monospace,Menlo,monospace}
+.yt-d .flag{position:absolute;left:.85rem;bottom:.6rem;font-family:'Inter',sans-serif;font-size:.68rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#fff;background:var(--rose);padding:.22rem .55rem;border-radius:99px}
+.stop .dot.img{overflow:hidden;padding:0;position:relative}
+.stop .dot.img img{width:100%;height:100%;object-fit:cover}
+.stop .dot.img i{position:absolute;bottom:4px;left:0;right:0;font-family:'Oswald',sans-serif;font-size:.8rem;color:#fff;text-shadow:0 1px 4px #000}
+.asset .face.arch.img::before{z-index:1}
+
+.station{display:grid;grid-template-columns:repeat(5,1fr);gap:.55rem;margin-top:1.4rem}
+@media(max-width:900px){.station{grid-template-columns:repeat(2,1fr)}}
+.st{position:relative;aspect-ratio:16/8.4;border-radius:10px;overflow:hidden;background:#0a1620}
+.st img{width:100%;height:100%;object-fit:cover}
+.st::after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(12,28,40,0) 40%,rgba(12,28,40,.9))}
+.st .nm{position:absolute;left:.6rem;bottom:.45rem;right:.6rem;z-index:2;font-family:'Oswald',sans-serif;font-size:1.05rem;line-height:1.1;color:var(--paper)}
+.st .nm small{display:block;font-family:'Inter',sans-serif;font-size:.64rem;color:rgba(241,236,227,.7);margin-top:.1rem}
+.st .lb{position:absolute;right:.5rem;top:.45rem;text-shadow:0 1px 6px rgba(0,0,0,.7);z-index:2;font-size:.56rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:rgba(241,236,227,.7)}
+.st.new{outline:2px solid var(--gold);outline-offset:-2px}
+.st.new .lb{color:var(--gold-lt)}
+.st.ph{background:radial-gradient(120% 100% at 30% 20%,#245572,#0E2231);outline:1.5px dashed rgba(143,181,201,.55);outline-offset:-6px}
+.st.ph::after{background:repeating-linear-gradient(0deg,rgba(255,255,255,.035) 0 2px,transparent 2px 4px)}
+.st.ph .lb{color:var(--water)}
+.st.next{background:radial-gradient(120% 100% at 30% 20%,#5b4a22,#1c1709);outline-color:rgba(226,194,122,.6)}
+.st.next .lb{color:var(--gold-lt)}
+.steps{display:grid;grid-template-columns:1fr auto 1fr auto 1fr;gap:1rem;align-items:start;margin-top:1.2rem;font-size:.9rem;color:rgba(241,236,227,.8)}
+.steps b{display:block;font-size:.68rem;letter-spacing:.14em;text-transform:uppercase;color:var(--gold-lt);margin-bottom:.25rem}
+.steps i{font-style:normal;color:var(--gold-lt);font-size:1.3rem;line-height:1.6}
+@media(max-width:760px){.steps{grid-template-columns:1fr}.steps i{display:none}}
+.legend{font-size:.78rem;color:rgba(241,236,227,.7);display:flex;align-items:center;gap:.45rem;flex-wrap:wrap}
+.legend span{display:inline-block;width:10px;height:10px;border-radius:2px;margin-left:.6rem}
+.legend .c{background:rgba(241,236,227,.4);margin-left:0}.legend .n{background:var(--gold)}.legend .a{border:1.5px dashed var(--water)}
+
+.decay{display:flex;align-items:flex-end;gap:5px;height:160px;margin-top:1rem}
+.decay .dc{flex:1;display:flex;flex-direction:column;justify-content:flex-end;height:100%;min-width:0}
+.decay .dc i{display:block;background:var(--blue);border-radius:3px 3px 0 0;height:0;transition:height .9s cubic-bezier(.2,.7,.3,1)}
+.decay .dc.first i{background:var(--gold)}
+.decay .dc b{font-family:'Oswald',sans-serif;font-weight:500;font-size:.72rem;color:var(--ink-2);text-align:center;margin-bottom:.2rem}
+.decay .dc span{font-size:.58rem;color:var(--mute);text-align:center;margin-top:.3rem;white-space:nowrap;overflow:hidden}
+.fmts{margin-top:.7rem;display:flex;flex-direction:column}
+.fm{display:grid;grid-template-columns:2rem 1fr auto;gap:.8rem;align-items:center;padding:.45rem 0;border-top:1px solid var(--line)}
+.fm .ic{font-family:'Oswald',sans-serif;font-weight:600;font-size:1.05rem;color:var(--blue)}
+.fm h3{font-family:'Oswald',sans-serif;font-weight:600;text-transform:uppercase;font-size:.98rem;letter-spacing:.01em}
+.fm p{font-size:.82rem;color:var(--ink-2);margin-top:.1rem;line-height:1.4}
+.fm p b{color:var(--ink)}
+.fm .ok,.fm .mk{font-size:.58rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;padding:.22rem .5rem;border-radius:99px;white-space:nowrap}
+.fm .ok{background:var(--blue);color:#fff}
+.fm .mk{border:1px dashed var(--blue);color:var(--blue)}
+.cad{display:flex;align-items:stretch;gap:.6rem;margin-top:1.3rem;background:#fff;border:1px solid var(--line);border-radius:14px;padding:.8rem 1rem;flex-wrap:wrap}
+.cad .ck{font-family:'Oswald',sans-serif;font-weight:600;text-transform:uppercase;font-size:.9rem;align-self:center;margin-right:.6rem;color:var(--ink)}
+.cad div{font-size:.82rem;color:var(--ink-2)}
+.cad div b{display:block;font-size:.6rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--blue)}
+.cad .nx b{color:#8E6C22}
+.cad i{font-style:normal;color:var(--gold);align-self:center}
+@media(max-width:760px){.cad i{display:none}.cad{gap:1rem}}
+
+.ylist{list-style:none;margin-top:1rem;display:flex;flex-direction:column;gap:.55rem}
+.ylist li{font-size:.88rem;color:var(--ink-2);padding-left:.9rem;border-left:2px solid var(--gold);line-height:1.4}
+.ylist b{color:var(--ink)}
+.wants{display:grid;grid-template-columns:repeat(3,1fr);gap:.7rem;margin-top:.9rem}
+@media(max-width:900px){.wants{grid-template-columns:1fr}}
+.wants div{background:#fff;border:1px solid var(--line);border-radius:12px;padding:.7rem .9rem;font-size:.8rem;color:var(--ink-2);line-height:1.4}
+.wants b{display:block;font-family:'Oswald',sans-serif;font-weight:600;text-transform:uppercase;font-size:.95rem;color:var(--blue);margin-bottom:.15rem}
+.tl{position:relative;display:grid;grid-template-columns:repeat(9,1fr);gap:.5rem;margin-top:1.6rem;padding-top:2.2rem}
+.tl-track{position:absolute;left:0;right:0;top:3.05rem;height:4px;border-radius:99px;background:linear-gradient(90deg,var(--water),var(--blue))}
+.tl-track .pw{position:absolute;top:-10px;height:24px;border-radius:6px;background:rgba(196,154,62,.18);border:1px dashed rgba(196,154,62,.6)}
+.tl-i{position:relative;display:flex;flex-direction:column;gap:.25rem;padding:0 .2rem}
+.tl-d{position:absolute;top:-2.2rem;left:.2rem;font-size:.66rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--blue);white-space:nowrap}
+.tl-dot{width:14px;height:14px;border-radius:50%;background:var(--paper);border:3px solid var(--blue);margin:.15rem 0 .55rem;position:relative;z-index:2}
+.tl-i.rel .tl-dot{width:22px;height:22px;margin-top:-.1rem;background:var(--gold);border-color:var(--gold)}
+.tl-i.rel .tl-d{color:#8E6C22}
+.tl-i.now .tl-dot{background:var(--blue)}
+.tl-i h3{font-family:'Oswald',sans-serif;font-weight:600;text-transform:uppercase;font-size:1rem;line-height:1.08;letter-spacing:.01em}
+.tl-i.rel h3{font-size:1.3rem;color:#7A5B18}
+.tl-f{font-size:.7rem;font-weight:600;color:var(--mute)}
+.tl-i p{font-size:.76rem;line-height:1.35;color:var(--ink-2)}
+.tl-n{font-size:.7rem;font-weight:600;color:var(--blue)}
+.tl-s{align-self:flex-start;margin-top:.25rem;font-size:.54rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:.18rem .45rem;border-radius:99px;white-space:nowrap}
+.tl-s.ready{background:var(--blue);color:#fff}
+.tl-s.ask{border:1px dashed #8E6C22;color:#8E6C22}
+.tl-s.clear{border:1px dashed var(--blue);color:var(--blue)}
+.tl-s.rel{background:var(--gold);color:var(--deep)}
+.tl-th{aspect-ratio:16/10;border-radius:8px;overflow:hidden;background:var(--deep);margin-bottom:.35rem}
+.tl-th img{width:100%;height:100%;object-fit:cover}
+.tl-th.v916{display:flex;align-items:center;justify-content:center;background:radial-gradient(120% 100% at 30% 20%,#2C5C78,#0E2231)}
+.tl-th.v916 span{font-family:'Oswald',sans-serif;font-weight:600;font-size:1.4rem;color:var(--gold-lt);border:2px solid var(--gold-lt);border-radius:6px;padding:.3rem .25rem;writing-mode:horizontal-tb}
+.tl-th.rel{display:flex;align-items:flex-end;padding:.4rem .5rem;background:linear-gradient(160deg,#E2C27A,#C49A3E 60%,#8E6C22)}
+.tl-th.rel span{font-family:'Oswald',sans-serif;font-weight:600;font-size:1.5rem;color:var(--deep);line-height:1}
+@media(max-width:1000px){.tl-th{display:none}}
+.tl-key{display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;margin-top:1.3rem;font-size:.76rem;color:var(--ink-2)}
+.tl-key .k{display:inline-block;width:12px;height:12px;border-radius:50%;margin-left:.9rem}
+.tl-key .k.rel{background:var(--gold);margin-left:0}.tl-key .k.sup{border:3px solid var(--blue)}.tl-key .k.pw{border-radius:3px;background:rgba(196,154,62,.18);border:1px dashed rgba(196,154,62,.7);width:20px}
+@media(max-width:1000px){.tl{grid-template-columns:1fr;padding-top:0;gap:0}.tl-track{display:none}
+  .tl-i{display:grid;grid-template-columns:5.5rem 22px 1fr;column-gap:.7rem;padding:.6rem 0;border-top:1px solid var(--line)}
+  .tl-d{position:static;grid-row:1/span 5}.tl-dot{grid-row:1/span 5;margin:0}.tl-i>*:not(.tl-d):not(.tl-dot){grid-column:3}}
+
+/* cover calendar — cadence at a glance */
+.cal{margin-top:2.2rem;max-width:1000px}
+.cal-row{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;gap:3px;align-items:end;height:30px}
+.cal-row i{display:block;height:12px;border-radius:2px;background:rgba(241,236,227,.16)}
+.cal-row i.sh{background:var(--water);height:18px}
+.cal-row i.lf{background:var(--paper);height:22px}
+.cal-row i.rel{background:var(--gold);height:30px}
+.cal-cap{margin-top:.8rem;font-size:.66rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:rgba(241,236,227,.6);display:flex;flex-wrap:wrap;gap:.4rem 1.4rem;align-items:center}
+.cal-key{display:inline-flex;align-items:center;gap:.4rem;letter-spacing:.08em}
+.cal-key .k{display:inline-block;width:8px;height:12px;border-radius:2px;margin-left:.6rem}
+.cal-key .k.rel{background:var(--gold);margin-left:0}.cal-key .k.lf{background:var(--paper)}.cal-key .k.sh{background:var(--water)}
+@media(max-width:640px){.cal-row{gap:1px}}
+
+.auds{display:grid;grid-template-columns:1fr auto 1fr;gap:clamp(1rem,2.4vw,2rem);align-items:stretch;margin-top:1.6rem}
+@media(max-width:860px){.auds{grid-template-columns:1fr}.auds .vs{display:none}}
+.aud{background:rgba(241,236,227,.05);border:1px solid rgba(241,236,227,.14);border-radius:18px;padding:1.1rem 1.2rem}
+.aud.hi{border-color:rgba(226,194,122,.55)}
+.aud-h{display:flex;gap:.8rem;align-items:center}
+.aud-h img{width:84px;aspect-ratio:16/10;object-fit:cover;border-radius:8px}
+.aud-h b{display:block;font-family:'Oswald',sans-serif;font-weight:600;text-transform:uppercase;font-size:1.35rem;letter-spacing:.01em;color:var(--paper)}
+.aud-h span{font-size:.72rem;color:rgba(241,236,227,.6);letter-spacing:.04em}
+.aud-n{display:flex;gap:2rem;margin-top:1rem}
+.aud-n .num{font-size:clamp(2.4rem,4.4vw,3.8rem);color:var(--gold-lt)}
+.aud-n .num.o{color:var(--water)}
+.aud-n .lbl{font-size:.78rem;font-weight:600;color:rgba(241,236,227,.75);margin-top:.25rem}
+.agebar{display:flex;height:14px;border-radius:99px;overflow:hidden;margin-top:1rem;gap:2px}
+.agebar .u{background:rgba(241,236,227,.35)}.agebar .m{background:var(--gold)}.agebar .o{background:var(--water)}
+.aud-g{margin-top:.6rem;font-size:.74rem;color:rgba(241,236,227,.6)}
+.vs{align-self:center;font-family:'Oswald',sans-serif;font-size:1.4rem;color:rgba(241,236,227,.4);text-transform:uppercase}
+.agekey{display:flex;align-items:center;gap:.45rem;margin-top:.8rem;font-size:.72rem;color:rgba(241,236,227,.65)}
+.agekey .k{display:inline-block;width:12px;height:10px;border-radius:2px;margin-left:.8rem}
+.agekey .k.u{background:rgba(241,236,227,.35);margin-left:0}.agekey .k.m{background:var(--gold)}.agekey .k.o{background:var(--water)}
+
+.chan{display:flex;align-items:center;gap:1rem;margin-top:1rem;padding:.6rem 1rem;border:1px dashed rgba(241,236,227,.2);border-radius:12px}
+.chan .cl{font-family:'Oswald',sans-serif;font-weight:600;text-transform:uppercase;font-size:.9rem;color:rgba(241,236,227,.8);white-space:nowrap}
+.chan .cv{font-size:.78rem;color:rgba(241,236,227,.7);white-space:nowrap}
+.chan .cv b{color:var(--paper)}
+@media(max-width:640px){.chan{flex-wrap:wrap}}
+.ways{display:grid;grid-template-columns:repeat(3,1fr);gap:.6rem;margin-top:.9rem}
+@media(max-width:640px){.ways{grid-template-columns:1fr}}
+.ways span{font-size:.74rem;line-height:1.35;color:rgba(241,236,227,.7);border-left:2px solid var(--gold);padding-left:.6rem}
+.ways b{display:block;font-family:'Oswald',sans-serif;font-weight:600;text-transform:uppercase;font-size:.85rem;color:var(--paper)}
+
+.decay-wrap{position:relative;padding:0 5.2rem 0 0}
+[data-t="Formats"] .decay{height:190px!important;margin-top:0}
+.dw-top{display:block;margin-bottom:.5rem;font-family:'Oswald',sans-serif;font-weight:600;font-size:1.3rem;color:var(--ink);line-height:1.05}
+.dw-end{position:absolute;right:0;bottom:0;font-family:'Oswald',sans-serif;font-weight:600;font-size:1.3rem;color:var(--blue);line-height:1.05;text-align:right}
+.dw-top small,.dw-end small{font-family:'Inter',sans-serif;font-weight:500;font-size:.66rem;color:var(--mute);letter-spacing:.06em;text-transform:uppercase}
+.dw-axis{display:flex;justify-content:space-between;margin-top:.5rem;padding-right:5.2rem;font-size:.66rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--mute)}
+.three{display:flex;flex-direction:column;gap:.6rem}
+.tw{display:grid;grid-template-columns:3rem 1fr;gap:1rem;align-items:center;background:#fff;border:1px solid var(--line);border-radius:14px;padding:.8rem 1.1rem}
+.tw .n{font-family:'Oswald',sans-serif;font-weight:600;font-size:2.2rem;color:var(--gold);line-height:1}
+.tw h3{font-family:'Oswald',sans-serif;font-weight:600;text-transform:uppercase;font-size:1.25rem;letter-spacing:.01em}
+.tw p{font-size:.92rem;color:var(--ink-2);margin-top:.15rem}
+
+.newb{position:absolute;left:1rem;top:.8rem;z-index:4;font-size:.6rem;font-weight:800;letter-spacing:.14em;text-transform:uppercase;background:var(--gold);color:var(--deep);padding:.25rem .55rem;border-radius:99px}
+.asset .face.img > .newb{position:absolute}
+.asset .face .rank,.asset .face .vert{top:2.4rem!important}
+.asset .face .vert{background:transparent;border:1px solid var(--gold-lt);color:var(--gold-lt)}
+
+.pitch{display:inline-flex;align-items:center;gap:1rem;margin-top:1rem;padding:.65rem 1rem .65rem .7rem;border:1.5px solid var(--gold);border-radius:99px;background:rgba(196,154,62,.12);font-size:.92rem;color:var(--paper)}
+.pitch .pt{background:var(--gold);color:var(--deep);font-size:.66rem;font-weight:800;letter-spacing:.14em;text-transform:uppercase;padding:.35rem .7rem;border-radius:99px;white-space:nowrap}
+@media(max-width:640px){.pitch{border-radius:14px;flex-direction:column;align-items:flex-start;gap:.5rem}}
+
+/* reveal */
+.reveal{opacity:0;transform:translateY(14px);transition:opacity .7s ease,transform .7s ease}
+.reveal.on{opacity:1;transform:none}
+@media(prefers-reduced-motion:reduce){.reveal{opacity:1;transform:none;transition:none}.hbar .t i{transition:none}}
+
+/* present mode */
+body.present{overflow:hidden}
+body.present .slide{display:none;height:100vh;min-height:0;border:0}
+body.present .slide.active{display:flex}
+body.present .reveal{opacity:1;transform:none}
+@media(max-height:800px){
+  body.present .slide{padding-top:4.6rem;padding-bottom:1.4rem}
+  body.present h2{font-size:clamp(1.6rem,3.2vw,2.6rem)}
+  body.present .src{margin-top:.8rem}
+  body.present .asset .face{aspect-ratio:16/10}
+  body.present .tape{aspect-ratio:2/1}
+  body.present .st{aspect-ratio:2.4/1}
+  body.present .auds{margin-top:1rem}
+  body.present .ways{display:none}
+  body.present [data-t="Album so far"] .stat .num{font-size:3rem}
+  body.present [data-t="Album so far"] .body{font-size:.86rem!important}
+  body.present .tw{padding:.55rem .9rem}
+  body.present .tw p{font-size:.82rem}
+  body.present .tw h3{font-size:1.05rem}
+  body.present [data-t="Formats"] .decay{height:140px!important}
+  body.present .chan{margin-top:.6rem;padding:.45rem .9rem}
+  body.present .aud{padding:.8rem 1rem}
+  body.present .aud-n{margin-top:.6rem}
+  body.present .wants div{padding:.5rem .7rem;font-size:.74rem}
+  body.present .ylist li{font-size:.82rem}
+  body.present .tl-i p{font-size:.72rem}
+  body.present .tl-intro{display:none}
+  body.present .tl-i h3{font-size:.9rem}
+  body.present .tl-i.rel h3{font-size:1.1rem}
+  body.present .wants{margin-top:.7rem}
+  body.present [data-t="Formats"] .g2{margin-top:1rem!important}
+  body.present .decay{height:110px}
+  body.present .fm{padding:.38rem 0}
+  body.present .fm p{font-size:.78rem}
+  body.present .cad{margin-top:.9rem;padding:.6rem .9rem}
+  body.present .station{margin-top:.9rem}
+  body.present .pitch{margin-top:.6rem;padding:.45rem .9rem .45rem .55rem;font-size:.84rem}
+  body.present [data-t="Station"] .lede{font-size:.98rem}
+  body.present .steps{margin-top:.8rem;font-size:.84rem}
+  body.present .tape{aspect-ratio:2.3/1}
+  body.present .tapes{gap:.4rem}
+  body.present .vshort{max-width:80px}
+  body.present .fix h3{font-size:.95rem}
+  body.present .yt-d{padding-bottom:2.1rem}
+  body.present [data-t="Working"] .g2{margin-top:1rem!important}
+  body.present [data-t="Attention"] .closing{display:none}
+  body.present .stop .dot{width:96px;height:96px}
+  body.present .route::before{top:48px}
+  body.present .yt .thumb{aspect-ratio:3.2/1}
+  body.present .vshort{max-width:96px}
+  body.present .tape .ti b{font-size:1.05rem}
+  body.present .fix{padding:.55rem 0}
+  body.present .fix p{font-size:.86rem}
+  body.present .yt-d{font-size:.72rem}
+  body.present .asset .txt{padding:.8rem .9rem .9rem;gap:.4rem}
+  body.present .asset .txt p{font-size:.82rem}
+}
+
+@media(max-height:740px){
+  body.present h2{font-size:clamp(1.5rem,3vw,2.3rem)}
+  body.present .yt .thumb{display:none}
+  body.present .next-line{display:none}
+  body.present .auds{margin-top:.7rem}
+  body.present [data-t="Album so far"] .quote{font-size:.9rem}
+  body.present .decay{height:80px}
+  body.present .aud-n .num{font-size:2.6rem}
+  body.present .ways span{font-size:.7rem}
+  body.present .tl-th{aspect-ratio:2.2/1}
+  body.present .tl{margin-top:1rem}
+  body.present .fm p{font-size:.74rem}
+  body.present .fm{padding:.3rem 0}
+  body.present .wants div{font-size:.7rem}
+  body.present .asset .face{aspect-ratio:2.1/1}
+  body.present .asset .txt p{font-size:.78rem}
+  body.present .asset .do{font-size:.7rem}
+  body.present .kicker{font-size:.64rem}
+}
+/* Oswald headings, KOL-style */
+.stop h3,.wk h3,.pr h3,.sheet h3{text-transform:uppercase;letter-spacing:.01em}
+.asset .face .song,.tape .ti b,.st .nm{letter-spacing:.01em}
+/* analysis sheet */
+.sheet{position:fixed;inset:0;z-index:80;background:var(--paper);overflow-y:auto;display:none;padding:4.5rem var(--pad) 4rem}
+.sheet.open{display:block}
+.sheet-in{max-width:960px;margin:0 auto}
+.sheet h2{font-size:clamp(1.8rem,3.4vw,2.8rem)}
+.sheet h3{margin-top:2.2rem;padding-top:1rem;border-top:1px solid var(--line);font-family:'Oswald',sans-serif;font-weight:600;font-size:1.35rem}
+.sheet p,.sheet li{font-size:.9rem;color:var(--ink-2);margin-top:.5rem}
+.sheet ul{padding-left:1.1rem}
+.sheet table{width:100%;border-collapse:collapse;margin-top:.8rem;font-size:.84rem}
+.sheet th{text-align:left;font-size:.64rem;letter-spacing:.12em;text-transform:uppercase;color:var(--mute);padding:.5rem .5rem;border-bottom:2px solid var(--ink)}
+.sheet td{padding:.5rem;border-bottom:1px solid var(--line);vertical-align:top}
+.sheet td.n{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.sheet .close{position:fixed;top:1rem;right:var(--pad)}
+</style>
+</head>
+<body>
+<div id="pbar"></div>
+
+<div class="chrome">
+  <div class="brand">Everything But The Girl × YouTube<span>Blue Reservoir · November 2026</span></div>
+  <div class="r">
+    <button class="btn" onclick="openSheet()">Analysis</button>
+    <button class="btn primary" onclick="startPresent()">Present</button>
+  </div>
+</div>
+
+<main id="deck">
+
+<!-- ═══ 1 · COVER ═══ -->
+<section class="slide dark grain" data-t="Cover" style="justify-content:flex-end;padding-bottom:4rem">
+  <div class="bleed full"><img src="https://i.ytimg.com/vi/Zs-N7b3e6P4/maxresdefault.jpg" alt="Ben and Tracey on stage in front of a gold curtain, from the Young and Dumb film" style="object-position:50% 35%;transform:scale(1.2);transform-origin:66% 12%"></div>
+  <div class="ripple"></div>
+  <div class="inner">
+    <div class="kicker reveal">For Ben and Tracey · Virgin Music Group · YouTube</div>
+    <h1 class="reveal" style="margin-top:1rem">Everything But The Girl <em>/ YouTube</em></h1>
+    <p class="lede reveal" style="margin-top:1.2rem;font-size:clamp(1.2rem,2vw,1.7rem)">Connecting the catalogue audience to the new album.</p>
+    <div class="cal reveal" id="cal" aria-label="The cadence plan, 28 October 2026 to 19 February 2027"></div>
+    <div class="cal-cap reveal">The plan at a glance · 28 Oct → 19 Feb · two or three posts a week <span class="cal-key"><span class="k rel"></span>Release <span class="k lf"></span>Archive film <span class="k sh"></span>Short</span></div>
+  </div>
+</section>
+
+<!-- ═══ 2 · THE OPPORTUNITY ═══ -->
+<section class="slide dark grain" data-t="Opportunity">
+  <div class="bleed"><img src="https://i.ytimg.com/vi/U56Ns66Qrb8/maxresdefault.jpg" alt="Tracey walking down a street at night, from the Missing video" style="object-position:30% 50%;transform:scale(1.15);transform-origin:80% 20%"></div>
+  <div class="inner">
+    <div class="kicker reveal">The opportunity</div>
+    <h2 class="reveal" style="margin-top:.8rem;max-width:26ch">Nine million people played your music on YouTube <em>in the last three months.</em></h2>
+    <div class="g4 reveal" style="margin-top:2.4rem;max-width:980px">
+      <div class="stat"><div class="num">26.8M</div><div class="lbl">Views of your music</div><div class="sub"><span class="up">+46%</span> on the previous 90 days</div></div>
+      <div class="stat"><div class="num">9.1M</div><div class="lbl">Different viewers</div><div class="sub"><span class="up">+41%</span> on the previous 90 days</div></div>
+      <div class="stat"><div class="num">2.3M</div><div class="lbl">Came back more than once</div><div class="sub">Returning viewers</div></div>
+      <div class="stat"><div class="num">685K</div><div class="lbl">Hours of listening</div><div class="sub">About level with the previous 90 days</div></div>
+    </div>
+    <p class="lede reveal" style="margin-top:2.2rem">That's a large, active audience, and it's growing. Most of it arrives through songs people already love. The job now is to make sure the new record is easy to find from there.</p>
+  </div>
+</section>
+
+<!-- ═══ 3 · WHERE THE AUDIENCE IS ═══ -->
+<section class="slide mist" data-t="Where">
+  <div class="inner">
+    <div class="kicker reveal">Where the audience is today</div>
+    <h2 class="reveal" style="margin-top:.8rem;max-width:32ch">About half the listening happens <em>off your channel.</em></h2>
+    <div class="g2 reveal" style="margin-top:2rem;align-items:start">
+      <div>
+        <div class="split">
+          <div class="a" style="flex:53"><b>53%</b><span>Your official channel</span></div>
+          <div class="b" style="flex:47"><b>47%</b><span>Other channels using your music</span></div>
+        </div>
+        <p class="body" style="margin-top:1.1rem;font-size:.95rem">That&rsquo;s normal for a catalogue this loved: fan uploads, compilations and playlists. YouTube doesn&rsquo;t let you redirect those viewers. What you can do is make the official channel the obvious next stop when they come looking.</p>
+      </div>
+      <div>
+        <div class="kicker" style="color:var(--ink-2)">On your channel, the catalogue leads the way</div>
+        <div style="margin-top:1rem">
+          <div class="hbar hi"><span class="k">Missing (Todd Terry Remix)</span><span class="t"><i data-w="100"></i></span><span class="v">61.4M</span></div>
+          <div class="hbar hi"><span class="k">Missing (original video)</span><span class="t"><i data-w="28.5"></i></span><span class="v">17.5M</span></div>
+          <div class="hbar"><span class="k">Nothing Left To Lose</span><span class="t"><i data-w="4.6"></i></span><span class="v">2.8M</span></div>
+          <div class="hbar"><span class="k">Driving</span><span class="t"><i data-w="2.4"></i></span><span class="v">1.5M</span></div>
+          <div class="hbar"><span class="k">Wrong</span><span class="t"><i data-w="2.1"></i></span><span class="v">1.3M</span></div>
+        </div>
+        <p class="body" style="margin-top:1rem;font-size:.95rem"><b style="color:var(--ink)">The two Missing videos hold 82% of the views</b> on your public uploads. The remix alone is still adding around <b style="color:var(--ink)">30,000 views a day</b>. The catalogue is the front door. The job is to show people what&rsquo;s new once they&rsquo;re in.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ 4 · WHAT BRINGS PEOPLE ═══ -->
+<section class="slide" data-t="Discovery">
+  <div class="inner">
+    <div class="kicker reveal">What brings people to the music</div>
+    <h2 class="reveal" style="margin-top:.8rem;max-width:29ch">People mostly <em>listen in playlists,</em> and search for the songs they know.</h2>
+    <div class="g2 reveal" style="margin-top:2rem">
+      <div>
+        <div class="kicker" style="color:var(--ink-2)">How viewers found your videos</div>
+        <div style="margin-top:1rem">
+          <div class="hbar hi"><span class="k">Playlists</span><span class="t"><i data-w="100"></i></span><span class="v">61.2%</span></div>
+          <div class="hbar"><span class="k">Browse (home, subscriptions)</span><span class="t"><i data-w="25.5"></i></span><span class="v">15.6%</span></div>
+          <div class="hbar"><span class="k">YouTube search</span><span class="t"><i data-w="14.9"></i></span><span class="v">9.1%</span></div>
+          <div class="hbar"><span class="k">Suggested videos</span><span class="t"><i data-w="8.8"></i></span><span class="v">5.4%</span></div>
+          <div class="hbar"><span class="k">Other</span><span class="t"><i data-w="8"></i></span><span class="v">4.9%</span></div>
+          <div class="hbar"><span class="k">Direct or unknown</span><span class="t"><i data-w="6.2"></i></span><span class="v">3.8%</span></div>
+        </div>
+        <p class="body" style="margin-top:1rem;font-size:.92rem">Playlists drive most of it. These can be anyone&rsquo;s playlists, not only yours, so we can&rsquo;t assume you control that traffic. The part you do control is your own playlists: <b style="color:var(--ink)">where new songs sit next to old ones.</b></p>
+      </div>
+      <div>
+        <div class="kicker" style="color:var(--ink-2)">What people type into YouTube search</div>
+        <div style="margin-top:1rem">
+          <div class="hbar hi"><span class="k">missing</span><span class="t"><i data-w="100"></i></span><span class="v">10.4%</span></div>
+          <div class="hbar"><span class="k">everything but the girl</span><span class="t"><i data-w="93"></i></span><span class="v">9.7%</span></div>
+          <div class="hbar hi"><span class="k">missing todd terry remix</span><span class="t"><i data-w="52"></i></span><span class="v">5.4%</span></div>
+          <div class="hbar hi"><span class="k">missing everything but the girl</span><span class="t"><i data-w="42"></i></span><span class="v">4.4%</span></div>
+          <div class="hbar hi"><span class="k">everything but the girl missing</span><span class="t"><i data-w="37.5"></i></span><span class="v">3.9%</span></div>
+        </div>
+        <p class="body" style="margin-top:1rem;font-size:.92rem">Four of the top five searches are for Missing: <b style="color:var(--ink)">24% of search traffic</b> between them. An archive performance with &ldquo;Missing&rdquo; in its title would be speaking the same language as those searches.</p>
+        <p class="body" style="margin-top:.6rem;font-size:.82rem;color:var(--mute)">Outside YouTube, links bring in just 1.2% of views, mostly from Google.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ 9b · TWO AUDIENCES ═══
+     Studio, video-level: Missing (Todd Terry Remix) 20 Aug – 17 Nov 2026;
+     Young and Dumb since release, 28 Oct. Shares of each video's views,
+     not audience sizes. Checked: Missing 25–44 = 23.7+33.5 = 57.2,
+     45+ = 24.5+8.4+1.8 = 34.7; Young and Dumb 25–44 = 5.3+15.1 = 20.4,
+     45+ = 33.7+33.0+9.6 = 76.3. -->
+<section class="slide dark grain" data-t="Two audiences">
+  <div class="inner">
+    <div class="kicker reveal">Who is listening</div>
+    <h2 class="reveal" style="margin-top:.7rem;max-width:52ch;font-size:clamp(1.7rem,3.3vw,2.8rem)">Your catalogue reaches a younger audience. <em>Can we bring them into the new album?</em></h2>
+    <div class="auds reveal">
+      <div class="aud hi">
+        <div class="aud-h"><img src="https://i.ytimg.com/vi/IAkY5m00rpY/hqdefault.jpg" alt=""><div><b>Missing</b><span>Todd Terry Remix · last 90 days</span></div></div>
+        <div class="aud-n"><div><div class="num">57.2%</div><div class="lbl">aged 25–44</div></div><div><div class="num o">34.7%</div><div class="lbl">aged 45+</div></div></div>
+        <div class="agebar"><span class="u" style="flex:8.2"></span><span class="m" style="flex:57.2"></span><span class="o" style="flex:34.7"></span></div>
+        <div class="aud-g">68.6% male · 31.4% female</div>
+      </div>
+      <div class="vs">vs</div>
+      <div class="aud">
+        <div class="aud-h"><img src="https://i.ytimg.com/vi/Zs-N7b3e6P4/hqdefault.jpg" alt=""><div><b>Young and Dumb</b><span>Since release, 28 Oct</span></div></div>
+        <div class="aud-n"><div><div class="num">20.4%</div><div class="lbl">aged 25–44</div></div><div><div class="num o">76.3%</div><div class="lbl">aged 45+</div></div></div>
+        <div class="agebar"><span class="u" style="flex:3.3"></span><span class="m" style="flex:20.4"></span><span class="o" style="flex:76.3"></span></div>
+        <div class="aud-g">84.1% male · 15.9% female</div>
+      </div>
+    </div>
+    <div class="chan reveal"><span class="cl">Whole channel</span><div class="agebar" style="margin:0;flex:1"><span class="u" style="flex:16.5"></span><span class="m" style="flex:52.2"></span><span class="o" style="flex:31.3"></span></div><span class="cv"><b>52%</b> 25–44 · <b>31%</b> 45+</span></div>
+    <div class="agekey reveal"><span class="k u"></span>Under 25 <span class="k m"></span>25–44 <span class="k o"></span>45 and over</div>
+    <div class="g2 reveal" style="margin-top:1.4rem;align-items:start">
+      <div>
+        <p class="lede" style="font-size:clamp(1rem,1.4vw,1.2rem)">Your biggest catalogue video reaches a younger audience, much like the channel as a whole. Young and Dumb is currently drawing an older, more male fanbase. <b style="color:var(--paper)">That&rsquo;s not a problem with the song.</b> It&rsquo;s a gap we can try to close.</p>
+        <div class="ways"><span><b>The remix</b>61M views, a top search</span><span><b>Other artists</b>Covers by Caroline Polachek, Yumi Zouma</span><span><b>Playlists</b>&ldquo;I heard this on a Spotify playlist&rdquo;</span></div>
+      </div>
+      <div class="card" style="padding:1rem 1.1rem">
+        <div class="kicker"><span class="newb" style="position:static;margin-right:.5rem">New</span>The test</div>
+        <p style="margin-top:.4rem"><b>Use the newly found 1995 Missing performance as the bridge.</b> Put &ldquo;Missing&rdquo; in the title to meet the searches, add one Short, and point the end screen to Young and Dumb or Scala. Then compare the clip&rsquo;s audience, and Young and Dumb&rsquo;s, a few weeks later.</p>
+      </div>
+    </div>
+    <p class="body reveal" style="margin-top:1rem;font-size:.84rem;color:rgba(241,236,227,.55)">These are shares of each video&rsquo;s views, not audience sizes. Young and Dumb has three weeks of data, against 90 days for Missing.</p>
+  </div>
+</section>
+
+<!-- ═══ 6 · WHAT IS WORKING — the tape wall ═══ -->
+<section class="slide dark grain" data-t="Working">
+  <div class="inner">
+    <div class="g2" style="grid-template-columns:1.55fr 1fr;align-items:end">
+      <div>
+        <div class="kicker reveal">What is working on the channel</div>
+        <h2 class="reveal" style="margin-top:.8rem;max-width:26ch">Your old TV performances <em>already do well here.</em></h2>
+      </div>
+      <p class="body reveal" style="font-size:.95rem">Ten archive TV and concert clips, all uploaded in 2017. <b style="color:var(--paper)">The typical one has 233K views</b>, 2.75M between them. The most-watched is a Missing performance.</p>
+    </div>
+    <div class="tapes reveal" style="margin-top:1.6rem"><a class="tape hi" href="https://www.youtube.com/watch?v=5fMNDi3uisw" target="_blank" rel="noopener"><img class="vhs" src="https://i.ytimg.com/vi/5fMNDi3uisw/hqdefault.jpg" alt="Before Today &amp; Missing, The White Room 1996" loading="lazy"><span class="yr">1996</span><span class="ti"><b>Before Today &amp; Missing</b>The White Room · 779K</span></a><a class="tape" href="https://www.youtube.com/watch?v=S75cUskEXwQ" target="_blank" rel="noopener"><img class="vhs" src="https://i.ytimg.com/vi/S75cUskEXwQ/hqdefault.jpg" alt="Temperamental, The Forum 1999" loading="lazy"><span class="yr">1999</span><span class="ti"><b>Temperamental</b>The Forum · 617K</span></a><a class="tape" href="https://www.youtube.com/watch?v=7YhnJFwriw8" target="_blank" rel="noopener"><img class="vhs" src="https://i.ytimg.com/vi/7YhnJFwriw8/hqdefault.jpg" alt="Before Today, The Forum 1999" loading="lazy"><span class="yr">1999</span><span class="ti"><b>Before Today</b>The Forum · 356K</span></a><a class="tape" href="https://www.youtube.com/watch?v=YSM97WF9w1A" target="_blank" rel="noopener"><img class="vhs" src="https://i.ytimg.com/vi/YSM97WF9w1A/hqdefault.jpg" alt="Protection, The Forum 1999" loading="lazy"><span class="yr">1999</span><span class="ti"><b>Protection</b>The Forum · 339K</span></a><a class="tape" href="https://www.youtube.com/watch?v=5mQO3BMTYog" target="_blank" rel="noopener"><img class="vhs" src="https://i.ytimg.com/vi/5mQO3BMTYog/hqdefault.jpg" alt="Driving, Letterman 1990" loading="lazy"><span class="yr">1990</span><span class="ti"><b>Driving</b>Letterman · 287K</span></a><a class="tape" href="https://www.youtube.com/watch?v=PA8Pv_gTjLg" target="_blank" rel="noopener"><img class="vhs" src="https://i.ytimg.com/vi/PA8Pv_gTjLg/hqdefault.jpg" alt="Corcovado, Red Hot + Rio 1996" loading="lazy"><span class="yr">1996</span><span class="ti"><b>Corcovado</b>Red Hot + Rio · 179K</span></a><a class="tape" href="https://www.youtube.com/watch?v=AQqnffMyTz8" target="_blank" rel="noopener"><img class="vhs" src="https://i.ytimg.com/vi/AQqnffMyTz8/hqdefault.jpg" alt="Five Fathoms, Conan O&rsquo;Brien 1999" loading="lazy"><span class="yr">1999</span><span class="ti"><b>Five Fathoms</b>Conan O&rsquo;Brien · 97K</span></a><a class="tape" href="https://www.youtube.com/watch?v=NnDNVykcrnQ" target="_blank" rel="noopener"><img class="vhs" src="https://i.ytimg.com/vi/NnDNVykcrnQ/hqdefault.jpg" alt="This Love Not For Sale, Live 1985" loading="lazy"><span class="yr">1985</span><span class="ti"><b>This Love Not For Sale</b>Live · 49K</span></a><a class="tape" href="https://www.youtube.com/watch?v=EpdlZxIhcSo" target="_blank" rel="noopener"><img class="vhs" src="https://i.ytimg.com/vi/EpdlZxIhcSo/hqdefault.jpg" alt="Frost &amp; Fire, Whistle Test 1984" loading="lazy"><span class="yr">1984</span><span class="ti"><b>Frost &amp; Fire</b>Whistle Test · 24K</span></a><a class="tape" href="https://www.youtube.com/watch?v=wIzyVz2Ivao" target="_blank" rel="noopener"><img class="vhs" src="https://i.ytimg.com/vi/wIzyVz2Ivao/hqdefault.jpg" alt="Are You Trying To Be Funny?, Live 1985" loading="lazy"><span class="yr">1985</span><span class="ti"><b>Are You Trying To Be Funny?</b>Live · 23K</span></a></div>
+    <div class="g2 reveal" style="grid-template-columns:1fr 1.3fr;margin-top:1.5rem;align-items:center">
+      <div class="shorts"><a class="vshort" href="https://www.youtube.com/shorts/1if5_C27G5U" target="_blank" rel="noopener"><img src="https://i.ytimg.com/vi/1if5_C27G5U/hqdefault.jpg" alt="Maida Vale session" loading="lazy"><span><b>125K</b>Maida Vale session</span></a><a class="vshort" href="https://www.youtube.com/shorts/XMRZJzpuH5E" target="_blank" rel="noopener"><img src="https://i.ytimg.com/vi/XMRZJzpuH5E/hqdefault.jpg" alt="BBC session" loading="lazy"><span><b>69K</b>BBC session</span></a><a class="vshort" href="https://www.youtube.com/shorts/Y3lelf77rd4" target="_blank" rel="noopener"><img src="https://i.ytimg.com/vi/Y3lelf77rd4/hqdefault.jpg" alt="Just a voice and a piano" loading="lazy"><span><b>31K</b>Just a voice and a piano</span></a></div>
+      <div>
+        <p class="lede" style="font-size:clamp(1rem,1.4vw,1.2rem)">During Fuse, the Shorts that worked were performances. <b style="color:var(--paper)">The typical Fuse Short had 3.5K views.</b></p>
+        <p class="lede" style="margin-top:.8rem;font-size:clamp(1.05rem,1.5vw,1.3rem);color:var(--gold-lt)">On this channel, people respond to watching you play. That&rsquo;s exactly what the archive gives you.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ 7 · WHAT NEEDS ATTENTION ═══ -->
+<section class="slide mist" data-t="Attention" style="padding-bottom:2.4rem">
+  <div class="inner">
+    <div class="kicker reveal">What needs attention</div>
+    <h2 class="reveal" style="margin-top:.8rem;max-width:29ch">The new music isn&rsquo;t yet <em>where people already are.</em></h2>
+    <div class="g2 reveal" style="margin-top:1.8rem;align-items:start;grid-template-columns:1fr 1.05fr">
+      <div class="yt">
+        <a class="thumb" href="https://www.youtube.com/watch?v=IAkY5m00rpY" target="_blank" rel="noopener"><img src="https://i.ytimg.com/vi/IAkY5m00rpY/maxresdefault.jpg" alt="Missing (Todd Terry Remix) video"></a>
+        <div class="yt-t">Everything But The Girl - Missing (Todd Terry Remix) [Official Music Video]</div>
+        <div class="yt-m">61,382,133 views · about 30,000 more every day</div>
+        <div class="yt-d">Music video by Everything But The Girl performing Missing (Todd Terry Remix) [Official Music Video]<br><br>Follow Everything But The Girl;<br>Music Online - https://EBTG.lnk.to/Stream<br>Website - https://EBTG.lnk.to/Web<span class="flag">No mention of Young and Dumb or Blue Reservoir</span></div>
+      </div>
+      <div>
+        <div class="fix"><div class="n">1</div><div><h3>The catalogue doesn&rsquo;t mention the new album</h3><p>Missing, your most-watched video, still carries its <b>2018 links</b>, and so do the other catalogue videos we checked.</p></div></div>
+        <div class="fix"><div class="n">2</div><div><h3>The Blue Reservoir playlist has one video</h3><p>Only Young and Dumb so far. Is there any behind-the-scenes from the video shoot? With the run-through, that would start to fill it.</p></div></div>
+        <div class="fix"><div class="n">3</div><div><h3>A long quiet spell</h3><p>From August 2023 to October 2026 the channel posted <b>two Shorts</b>, both about the Best Of.</p></div></div>
+        <div class="fix"><div class="n">4</div><div><h3>Worth checking: end screens and the homepage</h3><p>Not visible in public data. If the catalogue&rsquo;s end screens don&rsquo;t point to Young and Dumb, that&rsquo;s the easiest change of all.</p></div></div>
+        <p class="body closing" style="margin-top:.6rem;font-size:.92rem"><b style="color:var(--ink)">You don&rsquo;t need lots more uploads,</b> just better connections between what&rsquo;s there and what&rsquo;s new.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ 12 · SIMPLE CHANNEL CHANGES ═══ -->
+<section class="slide" data-t="Changes">
+  <div class="inner">
+    <div class="kicker reveal">The quick fixes · this week</div>
+    <h2 class="reveal" style="margin-top:.7rem;max-width:32ch">Small edits, <em>in the places people already visit.</em></h2>
+    <div class="g2 reveal" style="margin-top:1.8rem;align-items:start">
+      <div class="card">
+        <div class="kicker">1 · Top of your catalogue descriptions</div>
+        <p style="font-family:'Oswald',sans-serif;font-size:1.05rem;color:var(--ink);background:var(--mist);border-radius:10px;padding:.8rem 1rem;margin-top:.7rem;line-height:1.4">New: Young and Dumb → youtu.be/Zs-N7b3e6P4<br>Scala out 4 Dec · New album Blue Reservoir 19 Feb 2027<br>Pre-order: EBTG.lnk.to/BlueReservoir</p>
+        <p>Add this to the top of your most-watched catalogue videos, starting with the two Missing videos, and update the first line at each release. Only the first lines show before &ldquo;more&rdquo;.</p>
+      </div>
+      <div class="card">
+        <div class="kicker">2 · End screens across the catalogue</div>
+        <p>Set one end-screen slot on your most-watched catalogue videos to <b>the newest release</b>: Young and Dumb now, then Scala, then Forward. Check what&rsquo;s there now first.</p>
+        <div class="kicker" style="margin-top:1.1rem">3 · Build out the Blue Reservoir playlist</div>
+        <p>Young and Dumb, the run-through Short, Scala, Forward, then each archive performance as it lands. <b>Put it at the top of the homepage.</b></p>
+        <div class="kicker" style="margin-top:1.1rem">4 · Keep the archive together</div>
+        <p>Add new archive uploads to the existing <b>Live Performances</b> playlist (11 videos, created in 2017), with Young and Dumb at the end.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ 8 · THE NEW ALBUM SO FAR ═══ -->
+<section class="slide" data-t="Album so far">
+  <div class="inner">
+    <div class="g2" style="align-items:center">
+      <div>
+        <div class="kicker reveal">The new album so far · Single 1, 28 October</div>
+        <h2 class="reveal" style="margin-top:.8rem">Young and Dumb <em>is off to a good start.</em></h2>
+        <div class="reveal" style="display:flex;gap:2.4rem;flex-wrap:wrap;margin-top:1.8rem">
+          <div class="stat"><div class="num">409K</div><div class="lbl">Views on Young and Dumb</div><div class="sub">200K in the first three days</div></div>
+          <div class="stat"><div class="num" style="color:var(--blue)">583K</div><div class="lbl">New views on your biggest catalogue video, the Missing remix</div><div class="sub">in the same three weeks, 28 Oct – 18 Nov</div></div>
+        </div>
+        <p class="body reveal" style="margin-top:1.4rem;font-size:.95rem">It&rsquo;s already past the <b style="color:var(--ink)">lifetime totals</b> of two Fuse singles (No One Knows We&rsquo;re Dancing 401K, Caution To The Wind 365K). It isn&rsquo;t fair to set it against catalogue songs with decades behind them, or against Nothing Left To Lose, your first new song in 24 years. It&rsquo;s now settling at around 3,000 views a day.</p>
+        <p class="body reveal" style="margin-top:.8rem;font-size:.95rem"><b style="color:var(--ink)">The catalogue is still doing most of the work.</b> Since 28 October roughly one in ten views on the channel went to the two new uploads, the video and a Short (12.5K). We can&rsquo;t yet see how many catalogue viewers have found Young and Dumb.</p>
+        <p class="body reveal next-line" style="margin-top:.6rem;font-size:.88rem;color:var(--mute)">Next: <b style="color:var(--ink)">Scala, 4 Dec</b> (instant grat) · <b style="color:var(--ink)">Forward, 20 Jan</b> (single 2) · <b style="color:var(--ink)">Blue Reservoir, 19 Feb</b></p>
+      </div>
+      <div class="reveal">
+        <a class="thumb" href="https://www.youtube.com/watch?v=Zs-N7b3e6P4" target="_blank" rel="noopener"><img src="https://i.ytimg.com/vi/Zs-N7b3e6P4/maxresdefault.jpg" alt="Young and Dumb official video"><span class="cap">Young and Dumb (Official) · 28 Oct 2026</span></a>
+        <div style="display:flex;flex-direction:column;gap:1rem;margin-top:1.4rem">
+          <div class="quote">&ldquo;We&rsquo;ve missed you&hellip; like the deserts miss the rain&hellip;&rdquo;<cite>682 likes · Young and Dumb</cite></div>
+          <div class="quote">&ldquo;Getting back to classic EBTG vibes!&rdquo;<cite>290 likes · Young and Dumb</cite></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ 8b · ONE SONG, SEVERAL WAYS IN ═══ -->
+<section class="slide mist" data-t="Formats">
+  <div class="inner">
+    <div class="kicker reveal">Keeping a song alive</div>
+    <h2 class="reveal" style="margin-top:.7rem;max-width:34ch">Give each release <em>more than one way in.</em></h2>
+    <div class="g2 reveal" style="margin-top:1.8rem;align-items:center;grid-template-columns:1fr 1fr">
+      <div>
+        <div class="decay-wrap">
+          <span class="dw-top">68K a day <small>in the first week</small></span>
+          <div class="decay"><div class="dc first"><i data-h="93.8"></i></div><div class="dc"><i data-h="100.0"></i></div><div class="dc"><i data-h="60.2"></i></div><div class="dc"><i data-h="33.7"></i></div><div class="dc"><i data-h="10.1"></i></div><div class="dc"><i data-h="18.0"></i></div><div class="dc"><i data-h="7.7"></i></div><div class="dc"><i data-h="3.3"></i></div><div class="dc"><i data-h="10.4"></i></div><div class="dc"><i data-h="5.4"></i></div><div class="dc"><i data-h="4.1"></i></div></div>
+          <span class="dw-end">3K a day<br><small>now</small></span>
+        </div>
+        <div class="dw-axis"><span>28 Oct</span><span>Young and Dumb, views per day</span><span>18 Nov</span></div>
+        <p class="lede" style="margin-top:1.2rem;font-size:clamp(1rem,1.4vw,1.2rem)">A big first week, then a natural fade. <b style="color:var(--ink)">Nothing new has pointed people back to the song since.</b></p>
+      </div>
+      <div class="three">
+        <div class="tw"><span class="n">1</span><div><h3>The video</h3><p>The main event, on release day.</p></div></div>
+        <div class="tw"><span class="n">2</span><div><h3>A performance Short</h3><p>The two of you playing it. Performance Shorts do best here.</p></div></div>
+        <div class="tw"><span class="n">3</span><div><h3>Other versions of the song</h3><p>A lyric video, a visualiser, an acoustic take. Each one is another way into the same song. During Fuse the Caution To The Wind lyric video reached 365K.</p></div></div>
+        <div class="tw"><span class="n">4</span><div><h3>An archive clip that fits</h3><p>An old performance that sits well beside the new song.</p></div></div>
+      </div>
+    </div>
+    <p class="lede reveal" style="margin-top:1.6rem;font-size:clamp(1rem,1.4vw,1.2rem);max-width:70ch"><b style="color:var(--blue)">For Young and Dumb, Scala and Forward:</b> the release, then a Short, another version and an archive clip in the weeks after. A lyric video or visualiser for Young and Dumb would give it a second moment before Scala.</p>
+  </div>
+</section>
+
+<!-- ═══ 9 · FOUR ASSETS — the centrepiece ═══ -->
+<section class="slide dark grain" data-t="Four assets">
+  <div class="inner">
+    <div class="kicker reveal">New content you&rsquo;ve found · none of it is on the channel yet</div>
+    <h2 class="reveal" style="margin-top:.7rem;max-width:35ch">Four new videos, <em>four different jobs.</em></h2>
+    <p class="route-line reveal"><b>The catalogue</b> brings people in <span>&rarr;</span> <b>the archive</b> shows where the new sound comes from <span>&rarr;</span> <b>Young and Dumb, Scala and Forward</b> take them to the record.</p>
+    <div class="assets reveal" style="margin-top:1.8rem">
+      <div class="asset">
+        <div class="face arch img"><span class="newb">New to the channel</span><img class="vhs" src="https://i.ytimg.com/vi/5fMNDi3uisw/hqdefault.jpg" alt="Reference: Tracey on The White Room, 1996"><span class="rank">Start here</span><span class="yr">1995</span><div class="song">Missing</div><div class="where">Italian TV · vocal, guitar, Todd Terry beat</div></div>
+        <div class="txt">
+          <div class="role">The way in</div>
+          <p>Your biggest song, stripped back, weeks before it went global. <b>It meets the people already searching for Missing</b>, then points them at the new record.</p>
+          <div class="do"><b>Use it:</b> full clip as it is, plus one Short if a moment really stands out. End screen to Young and Dumb, then Scala.<br><b>When:</b> around 14 Dec.</div>
+        </div>
+      </div>
+      <div class="asset">
+        <div class="face arch img"><span class="newb">New to the channel</span><img class="vhs" src="https://i.ytimg.com/vi/ARkGvp4NJ9U/hqdefault.jpg" alt="Reference: the Rollercoaster video" style="object-position:50% 55%"><span class="yr">early &rsquo;90s</span><div class="song">Rollercoaster</div><div class="where">BBC · live at Glasgow Old Fruitmarket</div></div>
+        <div class="txt">
+          <div class="role">The acoustic thread</div>
+          <p>Proof the sound of Blue Reservoir was always there. The song already has <b>849K views</b> here.</p>
+          <div class="do"><b>Use it:</b> full clip, with the year and venue in the title, in the Blue Reservoir playlist.<br><b>When:</b> early January, ahead of Forward.</div>
+        </div>
+      </div>
+      <div class="asset">
+        <div class="face arch img"><span class="newb">New to the channel</span><img class="vhs" src="https://i.ytimg.com/vi/5mQO3BMTYog/maxresdefault.jpg" alt="Reference: Tracey on Letterman, 1990"><span class="yr">early &rsquo;90s</span><div class="song">Get Me</div><div class="where">with Danny Thompson · The Lighthouse</div></div>
+        <div class="txt">
+          <div class="role">For the deep listeners</div>
+          <p>Danny Thompson on double bass, a Terrence Higgins Trust benefit, introduced by Holly Johnson. <b>Blue Reservoir is built on double bass too.</b></p>
+          <div class="do"><b>Use it:</b> full clip, with its story in the description. No Short.<br><b>When:</b> early February, before the album.</div>
+        </div>
+      </div>
+      <div class="asset">
+        <div class="face img"><span class="newb">New to the channel</span><img src="https://i.ytimg.com/vi/gaxH2u7jrlU/maxresdefault.jpg" alt="Young and Dumb, from the Short published 29 October"><span class="vert">9:16 · ready now</span><div class="song">Young and Dumb</div><div class="where">Run-through, behind the scenes</div></div>
+        <div class="txt">
+          <div class="role">Keep the single alive</div>
+          <p>The two of you running through the song. <b>Performance Shorts were the channel&rsquo;s best</b> during Fuse.</p>
+          <div class="do"><b>Use it:</b> your Instagram clip, posted as a Short as it is, linked to the video. Nothing new to film.<br><b>When:</b> this week, before Scala.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ 10b · A STATION ═══ -->
+<section class="slide dark grain" data-t="Station">
+  <div class="inner">
+    <div class="kicker reveal">YouTube Stations</div>
+    <h2 class="reveal" style="margin-top:.7rem;max-width:none;font-size:clamp(1.7rem,3.4vw,2.9rem)">Let the catalogue play <em>into the new record.</em></h2>
+    <p class="lede reveal" style="margin-top:.9rem;max-width:92ch"><b style="color:var(--paper)">What&rsquo;s a Station?</b> A continuous, programmed stream of your videos on YouTube. It mixes the songs people already love with Blue Reservoir and the archive as each piece arrives.</p>
+    <div class="pitch reveal"><span class="pt">We&rsquo;ll pitch this</span><span>We&rsquo;ll take a Station for the channel to YouTube and ask for access. Nothing for you to do.</span></div>
+    <div class="station reveal"><div class="st cat"><img class="vhs" src="https://i.ytimg.com/vi/IAkY5m00rpY/maxresdefault.jpg" alt="Missing" loading="lazy"><span class="nm">Missing<small>Todd Terry Remix</small></span><span class="lb">Catalogue</span></div><div class="st new"><img class="" src="https://i.ytimg.com/vi/Zs-N7b3e6P4/maxresdefault.jpg" alt="Young and Dumb" loading="lazy"><span class="nm">Young and Dumb</span><span class="lb">Blue Reservoir</span></div><div class="st cat"><img class="vhs" src="https://i.ytimg.com/vi/qsRnVtIeLyg/hqdefault.jpg" alt="Driving" loading="lazy"><span class="nm">Driving</span><span class="lb">Catalogue</span></div><div class="st arch ph"><span class="nm">Missing<small>Italian TV · 1995</small></span><span class="lb">New to the channel</span></div><div class="st cat"><img class="vhs" src="https://i.ytimg.com/vi/mVi78cWhFmE/hqdefault.jpg" alt="Wrong" loading="lazy"><span class="nm">Wrong</span><span class="lb">Catalogue</span></div><div class="st cat"><img class="vhs" src="https://i.ytimg.com/vi/ARkGvp4NJ9U/maxresdefault.jpg" alt="Rollercoaster" loading="lazy"><span class="nm">Rollercoaster</span><span class="lb">Catalogue</span></div><div class="st arch ph"><span class="nm">Get Me<small>with Danny Thompson</small></span><span class="lb">New to the channel</span></div><div class="st cat"><img class="vhs" src="https://i.ytimg.com/vi/M6QKZJeK-5w/maxresdefault.jpg" alt="Nothing Left To Lose" loading="lazy"><span class="nm">Nothing Left To Lose</span><span class="lb">Catalogue</span></div><div class="st cat"><img class="vhs" src="https://i.ytimg.com/vi/5fMNDi3uisw/hqdefault.jpg" alt="Missing · Live" loading="lazy"><span class="nm">Missing · Live<small>The White Room, 1996</small></span><span class="lb">Catalogue</span></div><div class="st next ph"><span class="nm">Scala · Forward<small>4 Dec · 20 Jan</small></span><span class="lb">Coming</span></div></div>
+    <div class="steps reveal">
+      <div><b>01 · Arrive</b>Fans come for the songs they know</div>
+      <i>&rarr;</i>
+      <div><b>02 · Introduce</b>Young and Dumb and the archive play alongside them</div>
+      <i>&rarr;</i>
+      <div><b>03 · Keep it fresh</b>Add each new single and archive film as it lands</div>
+    </div>
+    <div class="reveal" style="display:flex;justify-content:space-between;align-items:flex-end;gap:1.5rem;flex-wrap:wrap;margin-top:1.4rem;padding-top:1.1rem;border-top:1px solid rgba(241,236,227,.14)">
+      <p class="lede" style="font-size:clamp(1.1rem,1.8vw,1.55rem);color:var(--paper);max-width:40ch">Familiar songs bring people in. <span style="color:var(--gold-lt);font-family:'Oswald',sans-serif">New songs give them a reason to stay.</span></p>
+      <div class="legend"><span class="c"></span>Catalogue <span class="n"></span>Blue Reservoir <span class="a"></span>New to the channel / coming</div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ 11 · THE CAMPAIGN TIMELINE ═══
+     Confirmed releases (gold) are protected: no archive upload within about
+     a week either side. Supporting uploads use only confirmed assets. -->
+<section class="slide mist" data-t="Timeline">
+  <div class="inner">
+    <div class="kicker reveal">The campaign, release by release</div>
+    <h2 class="reveal" style="margin-top:.7rem;max-width:36ch">Let the new releases lead. <em>Fill the gaps in between.</em></h2>
+    <p class="body reveal tl-intro" style="margin-top:.7rem;max-width:80ch">Each release gets its week to itself. The new archive videos and Shorts fill the quieter weeks in between, and every upload points onward to the next new thing.</p>
+    <div class="tl reveal">
+      <div class="tl-track"><span class="pw" style="left:32.3%;width:10%"></span><span class="pw" style="left:65.7%;width:10%"></span><span class="pw" style="left:87.9%;width:12.1%"></span></div>
+      <div class="tl-i now"><div class="tl-d">Now · w/c 16 Nov</div><div class="tl-dot"></div><div class="tl-th"><img class="" src="https://i.ytimg.com/vi/IAkY5m00rpY/hqdefault.jpg" alt="" loading="lazy"></div><h3>Channel connections</h3><div class="tl-f">Catalogue descriptions, end screens, Blue Reservoir playlist</div><p>Connect the catalogue</p><div class="tl-n">→ Young and Dumb</div><span class="tl-s ready">Do now</span></div><div class="tl-i sup"><div class="tl-d">This week</div><div class="tl-dot"></div><div class="tl-th v916"><span>9:16</span></div><h3>Young and Dumb run-through</h3><div class="tl-f">Short · your Instagram clip</div><p>Keep single 1 alive</p><div class="tl-n">→ Young and Dumb video</div><span class="tl-s ready">New · ready now</span></div><div class="tl-i sup"><div class="tl-d">w/c 23 Nov</div><div class="tl-dot"></div><div class="tl-th"><img src="https://i.ytimg.com/vi/Zs-N7b3e6P4/hqdefault.jpg" alt="" loading="lazy"></div><h3>Young and Dumb · video BTS</h3><div class="tl-f">Short or full clip · if you have it</div><p>Behind the scenes of the video shoot</p><div class="tl-n">→ Young and Dumb video</div><span class="tl-s ask">If it exists</span></div><div class="tl-i rel"><div class="tl-d">4 Dec</div><div class="tl-dot"></div><div class="tl-th rel"><span>4.12</span></div><h3>Scala</h3><div class="tl-f">Instant grat</div><p>Release</p><div class="tl-n">→ Blue Reservoir playlist</div><span class="tl-s rel">Confirmed release</span></div><div class="tl-i sup"><div class="tl-d">w/c 14 Dec</div><div class="tl-dot"></div><div class="tl-th"><img class="vhs" src="https://i.ytimg.com/vi/5fMNDi3uisw/hqdefault.jpg" alt="" loading="lazy"></div><h3>Missing · Italian TV 1995</h3><div class="tl-f">Full clip + one Short</div><p>Catalogue discovery, in the longest gap</p><div class="tl-n">→ Young and Dumb, Scala</div><span class="tl-s clear">New · your archive</span></div><div class="tl-i sup"><div class="tl-d">w/c 4 Jan</div><div class="tl-dot"></div><div class="tl-th"><img class="vhs" src="https://i.ytimg.com/vi/ARkGvp4NJ9U/hqdefault.jpg" alt="" loading="lazy"></div><h3>Rollercoaster · BBC</h3><div class="tl-f">Full clip</div><p>The acoustic thread</p><div class="tl-n">→ Blue Reservoir playlist</div><span class="tl-s clear">New · your archive</span></div><div class="tl-i rel"><div class="tl-d">20 Jan</div><div class="tl-dot"></div><div class="tl-th rel"><span>20.01</span></div><h3>Forward</h3><div class="tl-f">Single 2</div><p>Release</p><div class="tl-n">→ Forward, pre-order</div><span class="tl-s rel">Confirmed release</span></div><div class="tl-i sup"><div class="tl-d">w/c 2 Feb</div><div class="tl-dot"></div><div class="tl-th"><img class="vhs" src="https://i.ytimg.com/vi/5mQO3BMTYog/hqdefault.jpg" alt="" loading="lazy"></div><h3>Get Me · Danny Thompson</h3><div class="tl-f">Full clip</div><p>For the deep listeners</p><div class="tl-n">→ Forward, pre-order</div><span class="tl-s clear">New · your archive</span></div><div class="tl-i rel"><div class="tl-d">19 Feb</div><div class="tl-dot"></div><div class="tl-th rel"><span>19.02</span></div><h3>Blue Reservoir</h3><div class="tl-f">The album</div><p>Release</p><div class="tl-n">→ Album playlist, homepage</div><span class="tl-s rel">Confirmed release</span></div>
+    </div>
+    <div class="tl-key reveal"><span class="k rel"></span>Confirmed release <span class="k sup"></span>Supporting upload, using footage you have <span class="k pw"></span>Release week, kept clear for the new music</div>
+    <p class="body reveal" style="margin-top:.7rem;font-size:.9rem;max-width:90ch"><b style="color:var(--ink)">Shorts in between:</b> about two a week, each cut from whatever has just gone up (a moment from Young and Dumb, Scala, Missing 1995, Forward). Nothing new to film, and nothing that steps on a release day.</p>
+  </div>
+</section>
+
+<!-- ═══ 13 · WHAT WE RECOMMEND NEXT ═══ -->
+<section class="slide dark grain" data-t="Next">
+  <div class="bleed"><img src="https://i.ytimg.com/vi/5mQO3BMTYog/maxresdefault.jpg" alt="Tracey singing on Late Night with David Letterman" style="object-position:70% 30%"></div>
+  <div class="inner">
+    <div class="kicker reveal">What we recommend next</div>
+    <h2 class="reveal" style="margin-top:.8rem;max-width:26ch">Three things, <em>in this order.</em></h2>
+    <div class="pri reveal">
+      <div class="pr"><div class="n">1</div><h3>Connect the catalogue to the new music</h3><p>Descriptions, end screens and the Blue Reservoir playlist.</p></div>
+      <div class="pr"><div class="n">2</div><h3>Post the Young and Dumb run-through</h3><p>As a Short, as it is, linked to the video, before Scala on 4 Dec.</p></div>
+      <div class="pr"><div class="n">3</div><h3>Line up the archive films</h3><p>Missing for mid-December, Rollercoaster for early January, Get Me for early February.</p></div>
+    </div>
+    <p class="lede reveal" style="margin-top:2rem">After Scala we&rsquo;ll look at Young and Dumb and Scala, whether the age mix on the new music is widening, end-screen clicks from the catalogue, the Blue Reservoir playlist, and subscribers gained against the 6.8K of the last 90 days. Then again after Forward. Alongside this, we&rsquo;ll pitch a YouTube Station for the channel.</p>
+  </div>
+</section>
+
+</main>
+
+<!-- ═══ ANALYSIS ═══ -->
+<div class="sheet" id="sheet">
+  <button class="btn close" onclick="closeSheet()">Close ✕</button>
+  <div class="sheet-in">
+    <div class="kicker">Analysis</div>
+    <h2 style="margin-top:.5rem">How this was put together</h2>
+
+    <h3>Sources and what each one covers</h3>
+    <table>
+      <tr><th>Source</th><th>Scope</th><th>Used for</th></tr>
+      <tr><td>YouTube Studio · total reach</td><td>All views of EBTG music, official channel and other channels, 19 Aug – 16 Nov 2026</td><td>26.8M views (+46%), 9.1M unique viewers (+41%), 2.3M returning viewers, 685.3K watch hours (≈ flat), 6.8K subscribers gained (+38%), 53% / 47% split, 583,192 views in the last 48 hours</td></tr>
+      <tr><td>YouTube Studio · Videos report</td><td>The official channel&rsquo;s own videos, same period</td><td>16.2M views, 52.7M thumbnail impressions (−10%), 5.7% CTR, 2:40 average view duration, traffic sources, search terms, external sources (1.2% of traffic)</td></tr>
+      <tr><td>YouTube Studio · audience</td><td>Same period</td><td>Age, gender, countries, cities, notification settings (8.9% all notifications; 3.7% all notifications plus YouTube notifications on)</td></tr>
+      <tr><td>Public YouTube data (Watcher)</td><td>70 public uploads, lifetime to 18 Nov 2026; daily readings from 15 Sep 2026</td><td>Video-level views, likes, comments, descriptions, playlists, upload history, daily trends</td></tr>
+      <tr><td>ebtg.com and press</td><td>Album announcement, 28 Oct 2026</td><td>Blue Reservoir, 19 Feb 2027; ten songs; recorded largely live at RAK Studios; voices, guitars, double bass, drums and percussion</td></tr>
+    </table>
+    <p>The Studio figures come from screenshots supplied by the team and are treated as artist-authorised first-party data.</p>
+
+    <h3>Confirmed campaign timeline (from the artist)</h3>
+    <table>
+      <tr><th>Date</th><th>Release</th><th>Role</th></tr>
+      <tr><td>28 Oct 2026</td><td>Young and Dumb</td><td>Single 1 (official video out)</td></tr>
+      <tr><td>4 Dec 2026</td><td>Scala</td><td>Instant grat (video not confirmed)</td></tr>
+      <tr><td>20 Jan 2027</td><td>Forward</td><td>Single 2 (video not confirmed)</td></tr>
+      <tr><td>19 Feb 2027</td><td>Blue Reservoir</td><td>Album</td></tr>
+    </table>
+    <p>Campaign vs catalogue since 28 Oct: Young and Dumb 409,059 views and the 29 Oct Short 12,537 views. Over the same days, Missing (Todd Terry Remix) went from 60,796,807 to 61,379,579 (+582,772). The public channel counter moved from 156.98M (22 Oct) to 160.97M (14 Nov), so new uploads were roughly 10% of channel views. That&rsquo;s approximate, because the counter updates in steps. The 29 Oct Short is a clip of the official video, so the run-through footage hasn&rsquo;t been posted.</p>
+
+    <h3>Two audiences: video-level demographics (YouTube Studio)</h3>
+    <table>
+      <tr><th>Age</th><th class="n">Missing (TT Remix)</th><th class="n">Young and Dumb</th></tr>
+      <tr><td>13–17</td><td class="n">2.1%</td><td class="n">2.8%</td></tr>
+      <tr><td>18–24</td><td class="n">6.1%</td><td class="n">0.5%</td></tr>
+      <tr><td>25–34</td><td class="n">23.7%</td><td class="n">5.3%</td></tr>
+      <tr><td>35–44</td><td class="n">33.5%</td><td class="n">15.1%</td></tr>
+      <tr><td>45–54</td><td class="n">24.5%</td><td class="n">33.7%</td></tr>
+      <tr><td>55–64</td><td class="n">8.4%</td><td class="n">33.0%</td></tr>
+      <tr><td>65+</td><td class="n">1.8%</td><td class="n">9.6%</td></tr>
+      <tr><td><b>25–44</b></td><td class="n"><b>57.2%</b></td><td class="n"><b>20.4%</b></td></tr>
+      <tr><td><b>45+</b></td><td class="n"><b>34.7%</b></td><td class="n"><b>76.3%</b></td></tr>
+      <tr><td>Male / female</td><td class="n">68.6% / 31.4%</td><td class="n">84.1% / 15.9%</td></tr>
+    </table>
+    <p>Whole channel, 19 Aug – 16 Nov 2026: 13–17 5.1%, 18–24 11.4%, 25–34 27.7%, 35–44 24.5%, 45–54 18.1%, 55–64 9.3%, 65+ 3.9% (25–44 52.2%, 45+ 31.3%); male 71.3%, female 28.3%, user-specified 0.4%. Top countries: US 12.3%, UK 6.7%, Brazil 5.2%, Italy 4.8%, Germany 3.9%. Top cities: London, Moscow, Santiago, Milan, Mexico City.</p>
+    <p>Missing: 20 Aug – 17 Nov 2026. Young and Dumb: since release on 28 Oct. These are shares of each video&rsquo;s measured views, not audience sizes, and the windows differ. Possible explanations include discovery sources, playlist listening, search, established fan engagement, promotional targeting and recommendation activity. All are hypotheses. None of this shows the new single is failing to reach younger listeners, or that catalogue viewers will follow on their own.</p>
+
+    <h3>Reading the numbers fairly</h3>
+    <ul>
+      <li><b>No conversion rate.</b> 6.8K is net subscribers gained on the channel; 9.1M is unique viewers across all channels. They have different scopes, so we don&rsquo;t divide one by the other.</li>
+      <li><b>Viewers are not views,</b> and returning viewers are not subscribers.</li>
+      <li><b>Total reach vs Videos report.</b> Total reach (26.8M) includes other channels; the Videos report (16.2M) covers official videos only. They&rsquo;re never combined.</li>
+      <li><b>Studio vs Watcher.</b> The public lifetime counter rose from 150.4M (15 Sep) to 161.0M (14 Nov), about 10.6M in 60 days. Studio puts the official channel at roughly 14M over 90 days (53% of 26.8M). The two are similar in scale; the public counter updates in steps, so Studio is used for all period figures.</li>
+      <li><b>Lifetime is not campaign.</b> Catalogue video totals span up to 17 years on YouTube. They show what lasts, not what a campaign did.</li>
+      <li><b>Visible uploads.</b> The 70 public uploads carry 96.5M lifetime views against a channel total of 161.0M. The difference sits in videos that are no longer public, so concentration shares are of visible uploads.</li>
+    </ul>
+
+    <h3>Key catalogue figures</h3>
+    <table>
+      <tr><th>Video</th><th>Published</th><th class="n">Lifetime views</th></tr>
+      <tr><td>Missing (Todd Terry Remix)</td><td>2018</td><td class="n">61,382,133</td></tr>
+      <tr><td>Missing (Official Music Video)</td><td>2017</td><td class="n">17,521,663</td></tr>
+      <tr><td>Nothing Left To Lose</td><td>Jan 2023</td><td class="n">2,845,645</td></tr>
+      <tr><td>Before Today &amp; Missing (Live on The White Room, 1996)</td><td>2017</td><td class="n">778,528</td></tr>
+      <tr><td>Rollercoaster (Official Music Video)</td><td>2017</td><td class="n">849,278</td></tr>
+      <tr><td>Young and Dumb (Official)</td><td>28 Oct 2026</td><td class="n">409,059</td></tr>
+    </table>
+    <p>Concentration across visible uploads: top 1 63.6%, top 2 81.8%, top 5 87.6%, top 10 92.2%. Missing (Todd Terry Remix) went from 59.54M on 22 Sep to 61.38M on 18 Nov, about 32K a day.</p>
+
+    <h3>Previous album (Fuse, 2023)</h3>
+    <p>January – August 2023: 36 uploads (9 long-form, 27 Shorts) across 15 active weeks. Long-form: Nothing Left To Lose 2.85M; Run A Red Light 556K; No One Knows We&rsquo;re Dancing 401K; Caution To The Wind (lyric) 365K; remixes and two archive films (33K and 16K, not performances). The median Short had 3.5K views; the three best were performance clips (Maida Vale 125K, BBC session 69K, voice and piano 31K). Lifetime totals, so directional only.</p>
+
+    <h3>What we couldn&rsquo;t check</h3>
+    <ul>
+      <li>End screens, cards, the homepage featured video, the channel trailer and Community posts aren&rsquo;t in public data.</li>
+      <li>Which playlists produce the 61.2% playlist traffic.</li>
+      <li>Traffic sources by video: how viewers find Missing compared with Young and Dumb (playlists, search, suggested). This would help explain the age difference.</li>
+      <li>Whether Young and Dumb or Fuse had paid promotion.</li>
+      <li>Whether the channel can get a YouTube Station. We&rsquo;ll pitch it to YouTube; until access is confirmed, the Station slide is a proposal.</li>
+    </ul>
+
+    
+  </div>
+</div>
+
+<script>
+/* reveal + bars */
+function fill(root){
+  root.querySelectorAll('.hbar .t i').forEach(function(b){ b.style.width = b.getAttribute('data-w') + '%'; });
+  root.querySelectorAll('.decay i').forEach(function(b){ b.style.height = b.getAttribute('data-h') + '%'; });
+}
+var io = ('IntersectionObserver' in window) ? new IntersectionObserver(function(es){
+  es.forEach(function(e){
+    if(!e.isIntersecting) return;
+    e.target.classList.add('on'); fill(e.target);
+    io.unobserve(e.target);
+  });
+}, { threshold: .15 }) : null;
+document.querySelectorAll('.reveal').forEach(function(el){
+  if(io) io.observe(el); else { el.classList.add('on'); fill(el); }
+});
+
+/* present mode */
+var cur = 0;
+function slides(){ return document.querySelectorAll('#deck .slide'); }
+function showSlide(i){
+  var s = slides();
+  cur = Math.max(0, Math.min(s.length - 1, i));
+  s.forEach(function(el, n){ el.classList.toggle('active', n === cur); });
+  s[cur].querySelectorAll('.reveal').forEach(function(el){ el.classList.add('on'); });
+  fill(s[cur]);
+  document.getElementById('pbar').style.width = ((cur + 1) / s.length * 100) + '%';
+}
+function startPresent(){ document.body.classList.add('present'); showSlide(0); }
+function exitPresent(){ document.body.classList.remove('present'); document.getElementById('pbar').style.width = '0'; }
+function openSheet(){ document.getElementById('sheet').classList.add('open'); }
+function closeSheet(){ document.getElementById('sheet').classList.remove('open'); }
+document.addEventListener('keydown', function(e){
+  if(e.key === 'Escape'){ closeSheet(); if(document.body.classList.contains('present')) exitPresent(); return; }
+  if(!document.body.classList.contains('present')) return;
+  if(e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown'){ e.preventDefault(); showSlide(cur + 1); }
+  if(e.key === 'ArrowLeft' || e.key === 'PageUp'){ e.preventDefault(); showSlide(cur - 1); }
+});
+document.addEventListener('click', function(e){
+  if(!document.body.classList.contains('present')) return;
+  if(e.target.closest('a,button,.sheet')) return;
+  showSlide(cur + (e.clientX > window.innerWidth / 3 ? 1 : -1));
+});
+
+/* cover calendar: the cadence plan, one tick per day, 28 Oct 2026 → 19 Feb 2027.
+   Releases are confirmed; everything else is the proposed plan (illustrative days). */
+(function(){
+  var el=document.getElementById('cal'); if(!el) return;
+  var D=function(y,m,d){return Date.UTC(y,m-1,d)}, start=D(2026,10,28), end=D(2027,2,19), day=864e5;
+  var n=Math.round((end-start)/day)+1, idx=function(t){return Math.round((t-start)/day)}, mark={};
+  [D(2026,10,28),D(2026,12,4),D(2027,1,20),D(2027,2,19)].forEach(function(t){mark[idx(t)]='rel'});
+  [D(2026,12,14),D(2027,1,5),D(2027,2,3)].forEach(function(t){mark[idx(t)]='lf'});
+  /* Shorts: about two a week (Tue + Fri pattern), never on a release or archive day */
+  var sh=[D(2026,10,29)];
+  for(var t=D(2026,11,3);t<end;t+=day){var w=new Date(t).getUTCDay(); if(w===2||w===5) sh.push(t);}
+  sh.forEach(function(t){var k=idx(t); if(!mark[k]) mark[k]='sh';});
+  var row='';
+  for(var i=0;i<n;i++) row+='<i'+(mark[i]?' class="'+mark[i]+'"':'')+'></i>';
+  el.innerHTML='<div class="cal-row">'+row+'</div>';
+})();
+</script>
+</body>
+</html>
