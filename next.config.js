@@ -14,6 +14,8 @@ const nextConfig = {
       { source: '/kol/post-album', destination: '/kol-post/index.html' },
       { source: '/chvrches', destination: '/chvrches/index.html' },
       { source: '/vaccines', destination: '/vaccines/index.html' },
+      // Everything But The Girl — artist-facing deep dive, Blue Reservoir (Nov 2026).
+      { source: '/ebtg', destination: '/ebtg/index.html' },
       { source: '/ktrap', destination: '/ktrap/index.html' },
       { source: '/palaye', destination: '/palaye/index.html' },
       { source: '/idles', destination: '/idles/index.html' },
