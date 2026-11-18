@@ -6,7 +6,7 @@ const close=document.getElementById('close-analysis');
 const deck=document.getElementById('deck');
 const header=document.querySelector('.topbar');
 const controls=document.querySelector('.present-controls');
-const auditHashes=new Set(['analysis','catalogue-audit','album-audit','audit-priorities','signal-overview','format-audit','song-audit','fan-audit','premiere-audit','evidence-notes']);
+const auditHashes=new Set(['analysis','catalogue-audit','album-audit','audit-priorities','signal-overview','format-audit','song-audit','fan-audit','premiere-audit','channel-walk','evidence-notes']);
 let index=0,presenting=false,analysisOpen=false,returnHash='#intro',returnScroll=0,returnFocus=null;
 function fitCurrent(){
  const inner=slides[index]?.querySelector('.inner');
