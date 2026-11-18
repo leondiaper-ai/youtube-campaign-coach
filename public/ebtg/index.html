@@ -191,14 +191,14 @@ h3{font-family:'Figtree',sans-serif;font-weight:700;font-size:1.02rem;line-heigh
 
 /* route */
 .route{display:grid;grid-template-columns:repeat(4,1fr);gap:0;margin-top:2rem;position:relative}
-.route::before{content:'';position:absolute;top:38px;left:6%;right:6%;height:2px;background:linear-gradient(90deg,var(--water),var(--blue),var(--gold))}
+.route::before{content:'';position:absolute;top:62px;left:6%;right:6%;height:2px;background:linear-gradient(90deg,var(--water),var(--blue),var(--gold))}
 .stop{position:relative;padding:0 1rem;text-align:center}
-.stop .dot{width:76px;height:76px;margin:0 auto 1rem;border-radius:50%;display:flex;align-items:center;justify-content:center;background:var(--paper);border:2px solid var(--blue);font-family:'Fraunces',serif;font-size:1.5rem;color:var(--blue);position:relative;z-index:2}
+.stop .dot{width:124px;height:124px;margin:0 auto 1rem;border-radius:50%;display:flex;align-items:center;justify-content:center;background:var(--paper);border:2px solid var(--blue);font-family:'Fraunces',serif;font-size:1.5rem;color:var(--blue);position:relative;z-index:2}
 .stop.new .dot{border-color:var(--gold);color:#8E6C22;background:#FBF6EA}
 .stop h3{font-family:'Fraunces',serif;font-weight:400;font-size:1.3rem}
 .stop p{font-size:.86rem;color:var(--ink-2);margin-top:.35rem}
 .stop .how{margin-top:.6rem;font-size:.72rem;font-weight:600;letter-spacing:.04em;color:var(--blue)}
-@media(max-width:860px){.route{grid-template-columns:1fr;gap:1.4rem}.route::before{display:none}.stop{text-align:left;display:grid;grid-template-columns:76px 1fr;gap:1rem;padding:0}.stop .dot{margin:0}}
+@media(max-width:860px){.route{grid-template-columns:1fr;gap:1.4rem}.route::before{display:none}.stop{text-align:left;display:grid;grid-template-columns:84px 1fr;gap:1rem;padding:0}.stop .dot{margin:0;width:84px;height:84px}}
 
 /* plan */
 .weeks{display:grid;grid-template-columns:repeat(5,1fr);gap:.8rem;margin-top:1.6rem}
@@ -272,6 +272,9 @@ body.present .reveal{opacity:1;transform:none}
   body.present .src{margin-top:.8rem}
   body.present .asset .face{aspect-ratio:16/10}
   body.present .tape{aspect-ratio:16/9}
+  body.present .stop .dot{width:96px;height:96px}
+  body.present .route::before{top:48px}
+  body.present .yt .thumb{aspect-ratio:2.8/1}
   body.present .vshort{max-width:96px}
   body.present .tape .ti b{font-size:1.05rem}
   body.present .fix{padding:.55rem 0}
