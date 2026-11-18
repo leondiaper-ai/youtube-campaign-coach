@@ -61,7 +61,7 @@ body.present .slide h2{font-size:clamp(40px,5vw,80px)!important}
 .night-cover{background:var(--night)!important;color:var(--cream);padding-bottom:40px!important}
 .night-cover .cover-bg{position:absolute;top:0;right:0;bottom:0;left:auto;width:66%;height:100%;object-fit:cover;object-position:50% 30%;filter:saturate(.85) contrast(1.05) brightness(.85);z-index:0}
 .night-cover .cover-shade{position:absolute;inset:0;z-index:1;background:linear-gradient(90deg,var(--night) 0%,var(--night) 34%,rgba(19,17,13,.7) 48%,rgba(19,17,13,.05) 70%),linear-gradient(0deg,rgba(19,17,13,.9) 0%,transparent 30%);pointer-events:none}
-.night-cover .inner{z-index:2;text-align:left!important;align-items:flex-start;display:flex;flex-direction:column;justify-content:center;padding:0!important}
+.night-cover .inner{z-index:2;text-align:left!important;align-items:flex-start!important;display:flex;flex-direction:column;justify-content:center;padding:0 clamp(28px,6vw,96px)!important;max-width:none!important}
 .night-cover .mono{color:var(--chart);margin-bottom:22px}
 .cover-artist{font-family:var(--heading);font-size:clamp(26px,2.6vw,40px);letter-spacing:-.04em;margin:0;color:var(--cream)}
 .cover-record{font-family:var(--heading)!important;font-weight:400!important;font-size:clamp(120px,17vw,270px)!important;line-height:.78!important;letter-spacing:-.075em!important;margin:4px 0 0 -.06em!important;color:var(--cream)!important;text-transform:lowercase;max-width:none!important}
