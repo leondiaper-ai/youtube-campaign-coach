@@ -341,33 +341,18 @@ h3{font-family:'Inter',sans-serif;font-weight:700;font-size:1.02rem;line-height:
   .tl-i{display:grid;grid-template-columns:5.5rem 22px 1fr;column-gap:.7rem;padding:.6rem 0;border-top:1px solid var(--line)}
   .tl-d{position:static;grid-row:1/span 5}.tl-dot{grid-row:1/span 5;margin:0}.tl-i>*:not(.tl-d):not(.tl-dot){grid-column:3}}
 
-/* cover calendar */
-.cal{position:relative;margin-top:2rem;max-width:1080px;padding:2.1rem 0 2.6rem;background:linear-gradient(90deg,rgba(15,36,51,.55),rgba(15,36,51,0))}
-.cal-row{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;gap:2px;align-items:end;height:30px}
-.cal-row i{display:block;height:14px;border-radius:2px;background:rgba(241,236,227,.22)}
-.cal-row i.up{background:var(--paper);height:18px}
-.cal-row i.prop{background:transparent;box-shadow:inset 0 0 0 1px rgba(143,181,201,.75)}
+/* cover calendar — cadence at a glance */
+.cal{margin-top:2.2rem;max-width:1000px}
+.cal-row{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;gap:3px;align-items:end;height:30px}
+.cal-row i{display:block;height:12px;border-radius:2px;background:rgba(241,236,227,.16)}
+.cal-row i.sh{background:var(--water);height:18px}
+.cal-row i.lf{background:var(--paper);height:22px}
 .cal-row i.rel{background:var(--gold);height:30px}
-.cal-row i.past{background:rgba(241,236,227,.4)}
-.cal-m{position:absolute;bottom:0;transform:translateX(-2px);font-size:.62rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:rgba(241,236,227,.45);white-space:nowrap}
-.cal-r{position:absolute;top:0;transform:translateX(-2px);white-space:nowrap;line-height:1.1}
-.cal-r b{display:block;font-family:'Oswald',sans-serif;font-weight:600;text-transform:uppercase;font-size:.95rem;color:var(--gold-lt);letter-spacing:.02em}
-.cal-r span{font-size:.62rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:rgba(241,236,227,.6)}
-.cal-r.end{transform:translateX(-100%)}
-.cal-today{position:absolute;top:1.15rem;bottom:2.2rem;width:2px;background:var(--water)}
-.cal-today::after{content:'Today';position:absolute;top:-1.05rem;left:-14px;font-size:.6rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--water)}
-.cal-w{position:absolute;bottom:1.25rem;font-size:.56rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--water);white-space:nowrap}
-.cal-key{display:flex;align-items:center;gap:.45rem;flex-wrap:wrap;font-size:.72rem;color:rgba(241,236,227,.65)}
-.cal-key .k{display:inline-block;width:10px;height:12px;border-radius:2px;margin-left:.8rem}
-.cal-key .k.up{background:var(--paper);margin-left:0}.cal-key .k.rel{background:var(--gold)}.cal-key .k.prop{box-shadow:inset 0 0 0 1px var(--water)}.cal-key .k.today{width:2px;background:var(--water)}
-@media(max-width:640px){.cal-r,.cal-w{display:none}.cal-today::after{display:none}.cal{padding-top:.4rem}.cal-today{top:0}}
-.cal-list{display:none}
-@media(max-width:640px){.cal-list{display:grid;grid-template-columns:auto 1fr;gap:.25rem .8rem;margin-top:.4rem;font-size:.8rem;color:rgba(241,236,227,.8)}
-  .cal-list b{font-family:'Oswald',sans-serif;font-weight:600;color:var(--gold-lt);text-transform:uppercase;letter-spacing:.04em}}
-
-.route-line{margin-top:.8rem;font-size:clamp(.95rem,1.3vw,1.12rem);color:rgba(241,236,227,.75);max-width:92ch}
-.route-line b{color:var(--paper);font-weight:600}
-.route-line span{color:var(--gold-lt);margin:0 .25rem}
+.cal-cap{margin-top:.8rem;font-size:.66rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:rgba(241,236,227,.6);display:flex;flex-wrap:wrap;gap:.4rem 1.4rem;align-items:center}
+.cal-key{display:inline-flex;align-items:center;gap:.4rem;letter-spacing:.08em}
+.cal-key .k{display:inline-block;width:8px;height:12px;border-radius:2px;margin-left:.6rem}
+.cal-key .k.rel{background:var(--gold);margin-left:0}.cal-key .k.lf{background:var(--paper)}.cal-key .k.sh{background:var(--water)}
+@media(max-width:640px){.cal-row{gap:1px}}
 
 /* reveal */
 .reveal{opacity:0;transform:translateY(14px);transition:opacity .7s ease,transform .7s ease}
@@ -468,10 +453,8 @@ body.present .reveal{opacity:1;transform:none}
     <div class="kicker reveal">For Ben and Tracey · Virgin Music Group · YouTube</div>
     <h1 class="reveal" style="margin-top:1rem">Everything But The Girl <em>/ YouTube</em></h1>
     <p class="lede reveal" style="margin-top:1.2rem;font-size:clamp(1.2rem,2vw,1.7rem)">Connecting the catalogue audience to the new album.</p>
-    <div class="cal reveal" id="cal" aria-label="Campaign calendar, 28 October 2026 to 19 February 2027"></div>
-    <div class="cal-list reveal"><b>28 Oct</b><span>Young and Dumb · out now</span><b>4 Dec</b><span>Scala</span><b>20 Jan</b><span>Forward</span><b>19 Feb</b><span>Blue Reservoir</span></div>
-    <div class="cal-key reveal"><span class="k up"></span>Uploaded <span class="k rel"></span>Release <span class="k prop"></span>Proposed week, using footage you have <span class="k today"></span>Today</div>
-    <p class="body reveal" style="margin-top:.9rem;font-size:.86rem">Every day of the campaign, from Young and Dumb to the album. Three releases to come, and the footage you already have to fill the gaps, without turning you into full-time content makers.</p>
+    <div class="cal reveal" id="cal" aria-label="The cadence plan, 28 October 2026 to 19 February 2027"></div>
+    <div class="cal-cap reveal">The plan at a glance · 28 Oct → 19 Feb · one or two posts a week <span class="cal-key"><span class="k rel"></span>Release <span class="k lf"></span>Archive film <span class="k sh"></span>Short</span></div>
   </div>
 </section>
 
@@ -943,29 +926,19 @@ document.addEventListener('click', function(e){
   showSlide(cur + (e.clientX > window.innerWidth / 3 ? 1 : -1));
 });
 
-/* cover calendar: every day 28 Oct 2026 → 19 Feb 2027 */
+/* cover calendar: the cadence plan, one tick per day, 28 Oct 2026 → 19 Feb 2027.
+   Releases are confirmed; everything else is the proposed plan (illustrative days). */
 (function(){
   var el=document.getElementById('cal'); if(!el) return;
-  var D=function(y,m,d){return Date.UTC(y,m-1,d)};
-  var start=D(2026,10,28), end=D(2027,2,19), today=D(2026,11,18), day=864e5;
-  var n=Math.round((end-start)/day)+1, idx=function(t){return Math.round((t-start)/day)};
-  var rel={}; [[D(2026,10,28),'Young and Dumb','Single 1 · 28 Oct'],[D(2026,12,4),'Scala','4 Dec'],[D(2027,1,20),'Forward','Single 2 · 20 Jan'],[D(2027,2,19),'Blue Reservoir','Album · 19 Feb']].forEach(function(r){rel[idx(r[0])]=r});
-  var up={}; up[idx(D(2026,10,28))]=1; up[idx(D(2026,10,29))]=1;
-  /* proposed weeks (Mon–Sun), never inside a release's protected week */
-  var weeks=[[D(2026,11,16),'Run-through Short'],[D(2026,12,14),'Missing · 1995'],[D(2027,1,4),'Rollercoaster'],[D(2027,2,2),'Get Me']];
-  var wk={}; weeks.forEach(function(w){for(var k=0;k<7;k++){wk[idx(w[0])+k]=1}});
+  var D=function(y,m,d){return Date.UTC(y,m-1,d)}, start=D(2026,10,28), end=D(2027,2,19), day=864e5;
+  var n=Math.round((end-start)/day)+1, idx=function(t){return Math.round((t-start)/day)}, mark={};
+  [D(2026,10,28),D(2026,12,4),D(2027,1,20),D(2027,2,19)].forEach(function(t){mark[idx(t)]='rel'});
+  [D(2026,12,14),D(2027,1,5),D(2027,2,3)].forEach(function(t){mark[idx(t)]='lf'});
+  [D(2026,10,29),D(2026,11,19),D(2026,11,26),D(2026,12,2),D(2026,12,7),D(2026,12,16),
+   D(2027,1,8),D(2027,1,14),D(2027,1,23),D(2027,2,6),D(2027,2,12),D(2027,2,16)].forEach(function(t){mark[idx(t)]='sh'});
   var row='';
-  for(var i=0;i<n;i++){
-    var c = rel[i] ? 'rel' : up[i] ? 'up' : wk[i] ? 'prop' : (i < idx(today) ? 'past' : '');
-    row+='<i class="'+c+'"></i>';
-  }
-  var pct=function(i){return (i/(n-1)*100).toFixed(2)+'%'};
-  var h='<div class="cal-row">'+row+'</div>';
-  Object.keys(rel).forEach(function(k){var r=rel[k];var e=(+k===n-1)?' end':'';h+='<div class="cal-r'+e+'" style="left:'+pct(+k)+'"><b>'+r[1]+'</b><span>'+r[2]+'</span></div>'});
-  weeks.forEach(function(w){h+='<div class="cal-w" style="left:'+pct(idx(w[0]))+'">'+w[1]+'</div>'});
-  h+='<div class="cal-today" style="left:'+pct(idx(today))+'"></div>';
-  [['Nov',D(2026,11,1)],['Dec',D(2026,12,1)],['Jan',D(2027,1,1)],['Feb',D(2027,2,1)]].forEach(function(m){h+='<div class="cal-m" style="left:'+pct(idx(m[1]))+'">'+m[0]+'</div>'});
-  el.innerHTML=h;
+  for(var i=0;i<n;i++) row+='<i'+(mark[i]?' class="'+mark[i]+'"':'')+'></i>';
+  el.innerHTML='<div class="cal-row">'+row+'</div>';
 })();
 </script>
 </body>
