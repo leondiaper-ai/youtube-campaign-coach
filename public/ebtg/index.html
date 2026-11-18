@@ -923,7 +923,7 @@ document.addEventListener('click', function(e){
   /* Shorts: about two a week (Tue + Fri pattern), never on a release or archive day */
   var sh=[D(2026,10,29)];
   for(var t=D(2026,11,3);t<end;t+=day){var w=new Date(t).getUTCDay(); if(w===2||w===5) sh.push(t);}
-  shforEach(function(t){var k=idx(t); if(!mark[k]) mark[k]='sh';});
+  sh.forEach(function(t){var k=idx(t); if(!mark[k]) mark[k]='sh';});
   var row='';
   for(var i=0;i<n;i++) row+='<i'+(mark[i]?' class="'+mark[i]+'"':'')+'></i>';
   el.innerHTML='<div class="cal-row">'+row+'</div>';
