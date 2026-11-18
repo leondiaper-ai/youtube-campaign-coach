@@ -67,6 +67,7 @@ def cinema(orig,by,make,head,fmt,note,tag,E):
   if k in('intro','channel','verdict'):continue
   orig[k]=re.sub(r'<img (class="[^"]*" )?src="/blondshell/images/([\w-]{11})\.jpg"',up,orig[k])
 
+ orig['rollout']=orig['rollout'].replace('Sand · Shorts &nbsp; Olive · full songs','Grey · Shorts &nbsp; Yellow · full songs').replace('sand Shorts, olive full-song uploads','grey Shorts, yellow full-song uploads')
  # 5 · night mode for all but the three data-dense slides
  for k in orig:
   if k in('intro','last-album','fixes','roadmap'):continue
