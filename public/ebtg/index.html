@@ -341,6 +341,27 @@ h3{font-family:'Inter',sans-serif;font-weight:700;font-size:1.02rem;line-height:
   .tl-i{display:grid;grid-template-columns:5.5rem 22px 1fr;column-gap:.7rem;padding:.6rem 0;border-top:1px solid var(--line)}
   .tl-d{position:static;grid-row:1/span 5}.tl-dot{grid-row:1/span 5;margin:0}.tl-i>*:not(.tl-d):not(.tl-dot){grid-column:3}}
 
+/* cover calendar */
+.cal{position:relative;margin-top:2rem;max-width:1080px;padding:2.1rem 0 2.6rem}
+.cal-row{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;gap:2px;align-items:end;height:30px}
+.cal-row i{display:block;height:14px;border-radius:2px;background:rgba(241,236,227,.14)}
+.cal-row i.up{background:var(--paper);height:18px}
+.cal-row i.wk{background:transparent;box-shadow:inset 0 0 0 1px rgba(143,181,201,.75)}
+.cal-row i.rel{background:var(--gold);height:30px}
+.cal-row i.past{background:rgba(241,236,227,.28)}
+.cal-m{position:absolute;bottom:0;transform:translateX(-2px);font-size:.62rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:rgba(241,236,227,.45);white-space:nowrap}
+.cal-r{position:absolute;top:0;transform:translateX(-2px);white-space:nowrap;line-height:1.1}
+.cal-r b{display:block;font-family:'Oswald',sans-serif;font-weight:600;text-transform:uppercase;font-size:.95rem;color:var(--gold-lt);letter-spacing:.02em}
+.cal-r span{font-size:.62rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:rgba(241,236,227,.6)}
+.cal-r.end{transform:translateX(-100%)}
+.cal-today{position:absolute;top:1.6rem;bottom:1.35rem;width:2px;background:var(--water)}
+.cal-today::after{content:'Today';position:absolute;bottom:-1.3rem;left:-14px;font-size:.6rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--water)}
+.cal-w{position:absolute;bottom:1.25rem;font-size:.56rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--water);white-space:nowrap}
+.cal-key{display:flex;align-items:center;gap:.45rem;flex-wrap:wrap;font-size:.72rem;color:rgba(241,236,227,.65)}
+.cal-key .k{display:inline-block;width:10px;height:12px;border-radius:2px;margin-left:.8rem}
+.cal-key .k.up{background:var(--paper);margin-left:0}.cal-key .k.rel{background:var(--gold)}.cal-key .k.wk{box-shadow:inset 0 0 0 1px var(--water)}.cal-key .k.today{width:2px;background:var(--water)}
+@media(max-width:640px){.cal-r b{font-size:.78rem}.cal-r span{display:none}.cal-w{display:none}}
+
 /* reveal */
 .reveal{opacity:0;transform:translateY(14px);transition:opacity .7s ease,transform .7s ease}
 .reveal.on{opacity:1;transform:none}
@@ -440,7 +461,9 @@ body.present .reveal{opacity:1;transform:none}
     <div class="kicker reveal">For Ben and Tracey · Virgin Music Group · YouTube</div>
     <h1 class="reveal" style="margin-top:1rem">Everything But The Girl <em>/ YouTube</em></h1>
     <p class="lede reveal" style="margin-top:1.2rem;font-size:clamp(1.2rem,2vw,1.7rem)">Connecting the catalogue audience to the new album.</p>
-    <p class="body reveal" style="margin-top:1.6rem;font-size:.86rem">Young and Dumb is out now. Scala follows on 4 December, Forward on 20 January, and Blue Reservoir on 19 February 2027. This is how YouTube is listening today, and how the footage you already have can lead people from Missing to the record, without turning you into full-time content makers.</p>
+    <div class="cal reveal" id="cal" aria-label="Campaign calendar, 28 October 2026 to 19 February 2027"></div>
+    <div class="cal-key reveal"><span class="k up"></span>Uploaded <span class="k rel"></span>Release <span class="k wk"></span>Proposed week, using footage you have <span class="k today"></span>Today</div>
+    <p class="body reveal" style="margin-top:.9rem;font-size:.86rem">Every day of the campaign, from Young and Dumb to the album. Three releases to come, and the footage you already have to fill the gaps, without turning you into full-time content makers.</p>
   </div>
 </section>
 
@@ -926,6 +949,31 @@ document.addEventListener('click', function(e){
   if(e.target.closest('a,button,.sheet')) return;
   showSlide(cur + (e.clientX > window.innerWidth / 3 ? 1 : -1));
 });
+
+/* cover calendar: every day 28 Oct 2026 → 19 Feb 2027 */
+(function(){
+  var el=document.getElementById('cal'); if(!el) return;
+  var D=function(y,m,d){return Date.UTC(y,m-1,d)};
+  var start=D(2026,10,28), end=D(2027,2,19), today=D(2026,11,18), day=864e5;
+  var n=Math.round((end-start)/day)+1, idx=function(t){return Math.round((t-start)/day)};
+  var rel={}; [[D(2026,10,28),'Young and Dumb','Single 1 · 28 Oct'],[D(2026,12,4),'Scala','4 Dec'],[D(2027,1,20),'Forward','Single 2 · 20 Jan'],[D(2027,2,19),'Blue Reservoir','Album · 19 Feb']].forEach(function(r){rel[idx(r[0])]=r});
+  var up={}; up[idx(D(2026,10,28))]=1; up[idx(D(2026,10,29))]=1;
+  /* proposed weeks (Mon–Sun), never inside a release's protected week */
+  var weeks=[[D(2026,11,16),'Run-through Short'],[D(2026,12,14),'Missing · 1995'],[D(2027,1,4),'Rollercoaster'],[D(2027,2,2),'Get Me']];
+  var wk={}; weeks.forEach(function(w){for(var k=0;k<7;k++){wk[idx(w[0])+k]=1}});
+  var row='';
+  for(var i=0;i<n;i++){
+    var c = rel[i] ? 'rel' : up[i] ? 'up' : wk[i] ? 'wk' : (i < idx(today) ? 'past' : '');
+    row+='<i class="'+c+'"></i>';
+  }
+  var pct=function(i){return (i/(n-1)*100).toFixed(2)+'%'};
+  var h='<div class="cal-row">'+row+'</div>';
+  Object.keys(rel).forEach(function(k){var r=rel[k];var e=(+k===n-1)?' end':'';h+='<div class="cal-r'+e+'" style="left:'+pct(+k)+'"><b>'+r[1]+'</b><span>'+r[2]+'</span></div>'});
+  weeks.forEach(function(w){h+='<div class="cal-w" style="left:'+pct(idx(w[0]))+'">'+w[1]+'</div>'});
+  h+='<div class="cal-today" style="left:'+pct(idx(today))+'"></div>';
+  [['Nov',D(2026,11,1)],['Dec',D(2026,12,1)],['Jan',D(2027,1,1)],['Feb',D(2027,2,1)]].forEach(function(m){h+='<div class="cal-m" style="left:'+pct(idx(m[1]))+'">'+m[0]+'</div>'});
+  el.innerHTML=h;
+})();
 </script>
 </body>
 </html>
