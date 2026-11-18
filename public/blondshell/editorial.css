@@ -1,5 +1,5 @@
 /* Editorial pass · status tags, image-led readout, merged comparison and versions slides. */
-#previous{background:#e2d4bd}#versions{background:#e5d6d0}
+#last-album{background:#e2d4bd}#versions{background:#e5d6d0}
 
 /* status tags: on the channel / not on the channel / proposed */
 .st{display:inline-flex;align-items:center;gap:6px;font:600 10px/1 var(--body);letter-spacing:.04em;text-transform:lowercase;padding:6px 9px 6px 8px;border-radius:2px;white-space:nowrap;vertical-align:middle}
@@ -47,7 +47,7 @@
 .ed-late .label{margin-bottom:14px}
 .ed-late-row{display:grid;grid-template-columns:1fr 1fr;gap:16px}
 .ed-late-more{font-size:14px;margin-top:16px;border-top:1px solid var(--line);padding-top:12px}.ed-late-more b{font:400 22px var(--heading);margin-right:8px}
-#previous .takeaway{margin-top:22px}
+#last-album .takeaway{margin-top:22px}
 
 /* second versions */
 .ed-versions{display:grid;grid-template-columns:1fr 1fr .8fr;gap:28px;align-items:start}
