@@ -99,6 +99,8 @@ def edit(orig,by,make,head,fmt):
  for k,(c,t) in SEC.items():
   orig[k]=orig[k].replace('<div class="inner">',f'<div class="inner"><span class="sec sec-{c}">{t}</span>',1)
   assert f'sec-{c}' in orig[k],k
+ from blondshell_cinema import cinema
+ cinema(orig,by,make,head,fmt,note,tag,E)
  return order
 
 
