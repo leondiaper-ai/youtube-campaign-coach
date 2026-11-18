@@ -342,13 +342,13 @@ h3{font-family:'Inter',sans-serif;font-weight:700;font-size:1.02rem;line-height:
   .tl-d{position:static;grid-row:1/span 5}.tl-dot{grid-row:1/span 5;margin:0}.tl-i>*:not(.tl-d):not(.tl-dot){grid-column:3}}
 
 /* cover calendar */
-.cal{position:relative;margin-top:2rem;max-width:1080px;padding:2.1rem 0 2.6rem}
+.cal{position:relative;margin-top:2rem;max-width:1080px;padding:2.1rem 0 2.6rem;background:linear-gradient(90deg,rgba(15,36,51,.55),rgba(15,36,51,0))}
 .cal-row{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;gap:2px;align-items:end;height:30px}
-.cal-row i{display:block;height:14px;border-radius:2px;background:rgba(241,236,227,.14)}
+.cal-row i{display:block;height:14px;border-radius:2px;background:rgba(241,236,227,.22)}
 .cal-row i.up{background:var(--paper);height:18px}
-.cal-row i.wk{background:transparent;box-shadow:inset 0 0 0 1px rgba(143,181,201,.75)}
+.cal-row i.prop{background:transparent;box-shadow:inset 0 0 0 1px rgba(143,181,201,.75)}
 .cal-row i.rel{background:var(--gold);height:30px}
-.cal-row i.past{background:rgba(241,236,227,.28)}
+.cal-row i.past{background:rgba(241,236,227,.4)}
 .cal-m{position:absolute;bottom:0;transform:translateX(-2px);font-size:.62rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:rgba(241,236,227,.45);white-space:nowrap}
 .cal-r{position:absolute;top:0;transform:translateX(-2px);white-space:nowrap;line-height:1.1}
 .cal-r b{display:block;font-family:'Oswald',sans-serif;font-weight:600;text-transform:uppercase;font-size:.95rem;color:var(--gold-lt);letter-spacing:.02em}
@@ -359,7 +359,7 @@ h3{font-family:'Inter',sans-serif;font-weight:700;font-size:1.02rem;line-height:
 .cal-w{position:absolute;bottom:1.25rem;font-size:.56rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--water);white-space:nowrap}
 .cal-key{display:flex;align-items:center;gap:.45rem;flex-wrap:wrap;font-size:.72rem;color:rgba(241,236,227,.65)}
 .cal-key .k{display:inline-block;width:10px;height:12px;border-radius:2px;margin-left:.8rem}
-.cal-key .k.up{background:var(--paper);margin-left:0}.cal-key .k.rel{background:var(--gold)}.cal-key .k.wk{box-shadow:inset 0 0 0 1px var(--water)}.cal-key .k.today{width:2px;background:var(--water)}
+.cal-key .k.up{background:var(--paper);margin-left:0}.cal-key .k.rel{background:var(--gold)}.cal-key .k.prop{box-shadow:inset 0 0 0 1px var(--water)}.cal-key .k.today{width:2px;background:var(--water)}
 @media(max-width:640px){.cal-r b{font-size:.78rem}.cal-r span{display:none}.cal-w{display:none}}
 
 /* reveal */
@@ -462,7 +462,7 @@ body.present .reveal{opacity:1;transform:none}
     <h1 class="reveal" style="margin-top:1rem">Everything But The Girl <em>/ YouTube</em></h1>
     <p class="lede reveal" style="margin-top:1.2rem;font-size:clamp(1.2rem,2vw,1.7rem)">Connecting the catalogue audience to the new album.</p>
     <div class="cal reveal" id="cal" aria-label="Campaign calendar, 28 October 2026 to 19 February 2027"></div>
-    <div class="cal-key reveal"><span class="k up"></span>Uploaded <span class="k rel"></span>Release <span class="k wk"></span>Proposed week, using footage you have <span class="k today"></span>Today</div>
+    <div class="cal-key reveal"><span class="k up"></span>Uploaded <span class="k rel"></span>Release <span class="k prop"></span>Proposed week, using footage you have <span class="k today"></span>Today</div>
     <p class="body reveal" style="margin-top:.9rem;font-size:.86rem">Every day of the campaign, from Young and Dumb to the album. Three releases to come, and the footage you already have to fill the gaps, without turning you into full-time content makers.</p>
   </div>
 </section>
@@ -963,7 +963,7 @@ document.addEventListener('click', function(e){
   var wk={}; weeks.forEach(function(w){for(var k=0;k<7;k++){wk[idx(w[0])+k]=1}});
   var row='';
   for(var i=0;i<n;i++){
-    var c = rel[i] ? 'rel' : up[i] ? 'up' : wk[i] ? 'wk' : (i < idx(today) ? 'past' : '');
+    var c = rel[i] ? 'rel' : up[i] ? 'up' : wk[i] ? 'prop' : (i < idx(today) ? 'past' : '');
     row+='<i class="'+c+'"></i>';
   }
   var pct=function(i){return (i/(n-1)*100).toFixed(2)+'%'};
