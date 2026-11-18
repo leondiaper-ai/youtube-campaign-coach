@@ -7,10 +7,10 @@
     "end": "2026-11-17",
     "uploads": 110,
     "fullSongUploads": 11,
-    "shortClips": 99,
+    "shorts": 99,
     "lifetimeViewsOnWindowUploads": 675544,
     "lifetimeViewsOnAlbumFullSongs": 396051,
-    "lifetimeViewsOnShortClips": 279493,
+    "lifetimeViewsOnShorts": 279493,
     "formats": {
       "Lyric video": {
         "uploads": 1,
@@ -41,7 +41,7 @@
     ],
     "current": {
       "uploads": 108,
-      "shortClips": 97,
+      "shorts": 97,
       "fullLength": 11,
       "activeWeeks": 23,
       "weekBins": 27,
@@ -49,7 +49,7 @@
     },
     "previous": {
       "uploads": 110,
-      "shortClips": 98,
+      "shorts": 98,
       "fullLength": 12,
       "activeWeeks": 25,
       "weekBins": 27,
@@ -66,7 +66,7 @@
   "postRelease": {
     "days": 53,
     "uploads": 24,
-    "shortClips": 24,
+    "shorts": 24,
     "newFullSongVersions": 0
   }
 }
