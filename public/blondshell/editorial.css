@@ -123,7 +123,7 @@
 .sec-fix{background:#a8584a;color:#fbf2ec}.sec-fix::before{background:#fbf2ec}
 .sec-do{background:#3b352b;color:#f2eade}.sec-do::before{background:#e3a291}
 #followthrough .sec-fix,#priorities .sec-do{background:#f2eade;color:#2f2a21}
-.sec+.label{display:block}
+.sec{margin-right:12px;vertical-align:middle}.sec+.label{display:inline-block;vertical-align:middle;margin-bottom:14px}
 
 /* next steps */
 #next-steps{background:#3b352b;color:#f2eade}#next-steps .sec-do{background:#f2eade;color:#2f2a21}
