@@ -52,7 +52,11 @@ const londonDay = (d: Date = new Date()) =>
 export async function GET(req: NextRequest) {
   // Vercel Cron sets this header automatically. Block public access.
   const auth = req.headers.get('authorization');
-  if (process.env.CRON_SECRET && auth !== `Bearer ${process.env.CRON_SECRET}`) {
+  // Fail closed: an unset CRON_SECRET must never make a write-capable cron public.
+  if (!process.env.CRON_SECRET) {
+    return NextResponse.json({ error: 'service unavailable' }, { status: 503 });
+  }
+  if (auth !== `Bearer ${process.env.CRON_SECRET}`) {
     return NextResponse.json({ error: 'unauthorized' }, { status: 401 });
   }
 
