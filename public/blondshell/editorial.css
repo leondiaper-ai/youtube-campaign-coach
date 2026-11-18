@@ -86,3 +86,5 @@
  .ed-key{flex-direction:column;gap:8px}
  .st{font-size:9.5px}
 }
+
+#premieres .premiere-sequence .photo img{aspect-ratio:16/7!important;height:auto}
