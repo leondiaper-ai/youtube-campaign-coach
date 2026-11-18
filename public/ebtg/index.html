@@ -279,6 +279,61 @@ h3{font-family:'Inter',sans-serif;font-weight:700;font-size:1.02rem;line-height:
 .legend span{display:inline-block;width:10px;height:10px;border-radius:2px;margin-left:.6rem}
 .legend .c{background:rgba(241,236,227,.4);margin-left:0}.legend .n{background:var(--gold)}.legend .a{border:1.5px dashed var(--water)}
 
+.decay{display:flex;align-items:flex-end;gap:5px;height:160px;margin-top:1rem}
+.decay .dc{flex:1;display:flex;flex-direction:column;justify-content:flex-end;height:100%;min-width:0}
+.decay .dc i{display:block;background:var(--blue);border-radius:3px 3px 0 0;height:0;transition:height .9s cubic-bezier(.2,.7,.3,1)}
+.decay .dc.first i{background:var(--gold)}
+.decay .dc b{font-family:'Oswald',sans-serif;font-weight:500;font-size:.72rem;color:var(--ink-2);text-align:center;margin-bottom:.2rem}
+.decay .dc span{font-size:.58rem;color:var(--mute);text-align:center;margin-top:.3rem;white-space:nowrap;overflow:hidden}
+.fmts{margin-top:.7rem;display:flex;flex-direction:column}
+.fm{display:grid;grid-template-columns:2rem 1fr auto;gap:.8rem;align-items:center;padding:.55rem 0;border-top:1px solid var(--line)}
+.fm .ic{font-family:'Oswald',sans-serif;font-weight:600;font-size:1.05rem;color:var(--blue)}
+.fm h3{font-family:'Oswald',sans-serif;font-weight:600;text-transform:uppercase;font-size:.98rem;letter-spacing:.01em}
+.fm p{font-size:.82rem;color:var(--ink-2);margin-top:.1rem;line-height:1.4}
+.fm p b{color:var(--ink)}
+.fm .ok,.fm .mk{font-size:.58rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;padding:.22rem .5rem;border-radius:99px;white-space:nowrap}
+.fm .ok{background:var(--blue);color:#fff}
+.fm .mk{border:1px dashed var(--blue);color:var(--blue)}
+.cad{display:flex;align-items:stretch;gap:.6rem;margin-top:1.3rem;background:#fff;border:1px solid var(--line);border-radius:14px;padding:.8rem 1rem;flex-wrap:wrap}
+.cad .ck{font-family:'Oswald',sans-serif;font-weight:600;text-transform:uppercase;font-size:.9rem;align-self:center;margin-right:.6rem;color:var(--ink)}
+.cad div{font-size:.82rem;color:var(--ink-2)}
+.cad div b{display:block;font-size:.6rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--blue)}
+.cad .nx b{color:#8E6C22}
+.cad i{font-style:normal;color:var(--gold);align-self:center}
+@media(max-width:760px){.cad i{display:none}.cad{gap:1rem}}
+
+.ylist{list-style:none;margin-top:1rem;display:flex;flex-direction:column;gap:.55rem}
+.ylist li{font-size:.88rem;color:var(--ink-2);padding-left:.9rem;border-left:2px solid var(--gold);line-height:1.4}
+.ylist b{color:var(--ink)}
+.wants{display:grid;grid-template-columns:repeat(3,1fr);gap:.7rem;margin-top:1.1rem}
+@media(max-width:900px){.wants{grid-template-columns:1fr}}
+.wants div{background:#fff;border:1px solid var(--line);border-radius:12px;padding:.7rem .9rem;font-size:.8rem;color:var(--ink-2);line-height:1.4}
+.wants b{display:block;font-family:'Oswald',sans-serif;font-weight:600;text-transform:uppercase;font-size:.95rem;color:var(--blue);margin-bottom:.15rem}
+.tl{position:relative;display:grid;grid-template-columns:repeat(8,1fr);gap:.5rem;margin-top:1.6rem;padding-top:2.2rem}
+.tl-track{position:absolute;left:0;right:0;top:3.05rem;height:4px;border-radius:99px;background:linear-gradient(90deg,var(--water),var(--blue))}
+.tl-track .pw{position:absolute;top:-10px;height:24px;border-radius:6px;background:rgba(196,154,62,.18);border:1px dashed rgba(196,154,62,.6)}
+.tl-i{position:relative;display:flex;flex-direction:column;gap:.25rem;padding:0 .2rem}
+.tl-d{position:absolute;top:-2.2rem;left:.2rem;font-size:.66rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--blue);white-space:nowrap}
+.tl-dot{width:14px;height:14px;border-radius:50%;background:var(--paper);border:3px solid var(--blue);margin:.15rem 0 .55rem;position:relative;z-index:2}
+.tl-i.rel .tl-dot{width:22px;height:22px;margin-top:-.1rem;background:var(--gold);border-color:var(--gold)}
+.tl-i.rel .tl-d{color:#8E6C22}
+.tl-i.now .tl-dot{background:var(--blue)}
+.tl-i h3{font-family:'Oswald',sans-serif;font-weight:600;text-transform:uppercase;font-size:1rem;line-height:1.08;letter-spacing:.01em}
+.tl-i.rel h3{font-size:1.3rem;color:#7A5B18}
+.tl-f{font-size:.7rem;font-weight:600;color:var(--mute)}
+.tl-i p{font-size:.76rem;line-height:1.35;color:var(--ink-2)}
+.tl-n{font-size:.7rem;font-weight:600;color:var(--blue)}
+.tl-s{align-self:flex-start;margin-top:.25rem;font-size:.54rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:.18rem .45rem;border-radius:99px;white-space:nowrap}
+.tl-s.ready{background:var(--blue);color:#fff}
+.tl-s.clear{border:1px dashed var(--blue);color:var(--blue)}
+.tl-s.rel{background:var(--gold);color:var(--deep)}
+.tl-key{display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;margin-top:1.3rem;font-size:.76rem;color:var(--ink-2)}
+.tl-key .k{display:inline-block;width:12px;height:12px;border-radius:50%;margin-left:.9rem}
+.tl-key .k.rel{background:var(--gold);margin-left:0}.tl-key .k.sup{border:3px solid var(--blue)}.tl-key .k.pw{border-radius:3px;background:rgba(196,154,62,.18);border:1px dashed rgba(196,154,62,.7);width:20px}
+@media(max-width:1000px){.tl{grid-template-columns:1fr;padding-top:0;gap:0}.tl-track{display:none}
+  .tl-i{display:grid;grid-template-columns:5.5rem 22px 1fr;column-gap:.7rem;padding:.6rem 0;border-top:1px solid var(--line)}
+  .tl-d{position:static;grid-row:1/span 5}.tl-dot{grid-row:1/span 5;margin:0}.tl-i>*:not(.tl-d):not(.tl-dot){grid-column:3}}
+
 /* reveal */
 .reveal{opacity:0;transform:translateY(14px);transition:opacity .7s ease,transform .7s ease}
 .reveal.on{opacity:1;transform:none}
@@ -296,6 +351,13 @@ body.present .reveal{opacity:1;transform:none}
   body.present .asset .face{aspect-ratio:16/10}
   body.present .tape{aspect-ratio:2/1}
   body.present .st{aspect-ratio:2.4/1}
+  body.present .wants div{padding:.5rem .7rem;font-size:.74rem}
+  body.present .ylist li{font-size:.82rem}
+  body.present .tl-i p{font-size:.72rem}
+  body.present .decay{height:110px}
+  body.present .fm{padding:.38rem 0}
+  body.present .fm p{font-size:.78rem}
+  body.present .cad{margin-top:.9rem;padding:.6rem .9rem}
   body.present .station{margin-top:.9rem}
   body.present [data-t="Station"] .lede{font-size:.98rem}
   body.present .steps{margin-top:.8rem;font-size:.84rem}
@@ -362,7 +424,7 @@ body.present .reveal{opacity:1;transform:none}
     <div class="kicker reveal">For Ben and Tracey · Virgin Music Group · YouTube</div>
     <h1 class="reveal" style="margin-top:1rem">Everything But The Girl <em>/ YouTube</em></h1>
     <p class="lede reveal" style="margin-top:1.2rem;font-size:clamp(1.2rem,2vw,1.7rem)">Connecting the catalogue audience to the new album.</p>
-    <p class="body reveal" style="margin-top:1.6rem;font-size:.86rem">Blue Reservoir is out 19 February 2027. Young and Dumb is out now. This is how YouTube is listening today, and how your archive and new footage could lead people to the record.</p>
+    <p class="body reveal" style="margin-top:1.6rem;font-size:.86rem">Young and Dumb is out now. Scala follows on 4 December, Forward on 20 January, and Blue Reservoir on 19 February 2027. This is how YouTube is listening today, and how the footage you already have can lead people from Missing to the record, without turning you into full-time content makers.</p>
   </div>
 </section>
 
@@ -468,18 +530,20 @@ body.present .reveal{opacity:1;transform:none}
         <p class="body" style="margin-top:1rem;font-size:.95rem"><b style="color:var(--ink)">Over half the views (52%) come from people aged 25 to 44.</b> Many of them were children, or not yet born, when Missing came out. The audience is 71% male.</p>
       </div>
       <div>
-        <div class="kicker" style="color:var(--ink-2)">Top countries</div>
-        <div style="margin-top:1rem">
-          <div class="hbar"><span class="k">United States</span><span class="t"><i data-w="100"></i></span><span class="v">12.3%</span></div>
-          <div class="hbar"><span class="k">United Kingdom</span><span class="t"><i data-w="54.5"></i></span><span class="v">6.7%</span></div>
-          <div class="hbar"><span class="k">Brazil</span><span class="t"><i data-w="42.3"></i></span><span class="v">5.2%</span></div>
-          <div class="hbar hi"><span class="k">Italy</span><span class="t"><i data-w="39"></i></span><span class="v">4.8%</span></div>
-          <div class="hbar"><span class="k">Germany</span><span class="t"><i data-w="31.7"></i></span><span class="v">3.9%</span></div>
+        <div class="kicker" style="color:var(--ink-2)">How younger listeners reach you</div>
+        <div style="display:flex;gap:2rem;margin-top:1rem;align-items:flex-end;flex-wrap:wrap">
+          <div class="stat"><div class="num" style="font-size:clamp(2.2rem,4vw,3.4rem)">1 in 6</div><div class="sub">views from under-25s (16.5%%)</div></div>
+          <div class="stat"><div class="num" style="font-size:clamp(2.2rem,4vw,3.4rem)">27.7%%</div><div class="sub">25–34, the largest group</div></div>
         </div>
-        <p class="body" style="margin-top:1rem;font-size:.92rem">Top cities: London, Moscow, Santiago, <b style="color:var(--ink)">Milan</b>, Mexico City. The audience is spread widely, with no single home market. Italy is the fourth-largest country and Milan the fourth city, a nice fit for the 1995 Italian TV performance. That&rsquo;s a hunch, not evidence that Italians will watch it.</p>
+        <ul class="ylist">
+          <li><b>Through the remix.</b> The Todd Terry version has 61M views to the original&rsquo;s 17.5M, and &ldquo;missing todd terry remix&rdquo; is a top search.</li>
+          <li><b>Through other artists.</b> Caroline Polachek and Yumi Zouma have both covered Missing.</li>
+          <li><b>Through playlists.</b> &ldquo;By chance I heard this on a Spotify playlist&rdquo; is typical of the comments, alongside &ldquo;I was 13 the first time&hellip; now I&rsquo;m 38&rdquo;.</li>
+        </ul>
+        <p class="body" style="margin-top:.7rem;font-size:.84rem;color:var(--mute)">What we can&rsquo;t see yet: age by video. Studio can show whether Young and Dumb draws a different age group from the Missing remix. That&rsquo;s worth pulling. Top countries: US 12.3%%, UK 6.7%%, Brazil 5.2%%, <b style="color:var(--ink)">Italy 4.8%%</b>, Germany 3.9%%.</p>
       </div>
     </div>
-    <div class="src reveal"><span class="tag studio">YouTube Studio</span>&nbsp; Audience reports, 19 Aug – 16 Nov 2026. Age and country are shares of measured views. Gender: male 71.3%, female 28.3%, user-specified 0.4%.</div>
+    <div class="src reveal"><span class="tag studio">YouTube Studio</span>&nbsp; Audience reports, 19 Aug – 16 Nov 2026. Age and country are shares of measured views. Gender: male 71.3%, female 28.3%, user-specified 0.4%. Covers: Stereogum, 2022. Comments: relevance-ranked public sample on Missing (Todd Terry Remix); qualitative.</div>
   </div>
 </section>
 
@@ -534,14 +598,15 @@ body.present .reveal{opacity:1;transform:none}
   <div class="inner">
     <div class="g2" style="align-items:center">
       <div>
-        <div class="kicker reveal">The new album so far</div>
+        <div class="kicker reveal">The new album so far · Single 1, 28 October</div>
         <h2 class="reveal" style="margin-top:.8rem">Young and Dumb <em>is off to a good start.</em></h2>
         <div class="reveal" style="display:flex;gap:2.4rem;flex-wrap:wrap;margin-top:1.8rem">
           <div class="stat"><div class="num">409K</div><div class="lbl">Views in three weeks</div><div class="sub">200K in the first three days</div></div>
-          <div class="stat"><div class="num">13K</div><div class="lbl">Likes</div><div class="sub">813 comments</div></div>
+          <div class="stat"><div class="num" style="color:var(--blue)">583K</div><div class="lbl">Added by the Missing remix</div><div class="sub">over the same three weeks</div></div>
         </div>
         <p class="body reveal" style="margin-top:1.4rem;font-size:.95rem">It&rsquo;s already past the <b style="color:var(--ink)">lifetime totals</b> of two Fuse singles (No One Knows We&rsquo;re Dancing 401K, Caution To The Wind 365K). It isn&rsquo;t fair to set it against Missing&rsquo;s decades, or against Nothing Left To Lose, your first new song in 24 years. It&rsquo;s now settling at around 3,000 views a day.</p>
-        <p class="body reveal" style="margin-top:.8rem;font-size:.95rem">So far the campaign is that video, <b style="color:var(--ink)">one Short (12.5K)</b> and a one-video playlist. We can&rsquo;t tell from public data how many Missing viewers have found it.</p>
+        <p class="body reveal" style="margin-top:.8rem;font-size:.95rem"><b style="color:var(--ink)">The catalogue is still doing most of the work.</b> Since 28 October roughly one in ten views on the channel went to the two new uploads, the video and a Short (12.5K). We can&rsquo;t yet see how many Missing viewers have found Young and Dumb.</p>
+        <p class="body reveal" style="margin-top:.6rem;font-size:.88rem;color:var(--mute)">Next: <b style="color:var(--ink)">Scala, 4 Dec</b> (instant grat) · <b style="color:var(--ink)">Forward, 20 Jan</b> (single 2) · <b style="color:var(--ink)">Blue Reservoir, 19 Feb</b></p>
       </div>
       <div class="reveal">
         <a class="thumb" href="https://www.youtube.com/watch?v=Zs-N7b3e6P4" target="_blank" rel="noopener"><img src="https://i.ytimg.com/vi/Zs-N7b3e6P4/maxresdefault.jpg" alt="Young and Dumb official video"><span class="cap">Young and Dumb (Official) · 28 Oct 2026</span></a>
@@ -551,7 +616,40 @@ body.present .reveal{opacity:1;transform:none}
         </div>
       </div>
     </div>
-    <div class="src reveal"><span class="tag api">Public YouTube data</span>&nbsp; Daily readings from 28 Oct to 18 Nov 2026. Fuse figures are lifetime totals with three-plus years to build, so treat them as context. Whether paid promotion supported either campaign isn&rsquo;t known to us. The top comment quotes Missing back at the band, which shows the catalogue audience is here and listening.</div>
+    <div class="src reveal"><span class="tag api">Public YouTube data</span>&nbsp; Daily readings from 28 Oct to 18 Nov 2026. The one-in-ten share compares the new uploads with the public channel counter (157.0M to 161.0M, 22 Oct – 14 Nov), so it&rsquo;s approximate. Fuse figures are lifetime totals with three-plus years to build, so treat them as context. Whether paid promotion supported either campaign isn&rsquo;t known to us. The top comment quotes Missing back at the band, which shows the catalogue audience is here and listening.</div>
+  </div>
+</section>
+
+<!-- ═══ 8b · CADENCE + FORMATS ═══ -->
+<section class="slide mist" data-t="Formats">
+  <div class="inner">
+    <div class="kicker reveal">Cadence and formats</div>
+    <h2 class="reveal" style="margin-top:.7rem;max-width:34ch">Give each release <em>more than one way in.</em></h2>
+    <div class="wants reveal">
+      <div><b>Whole songs, lean-back</b>61%% of video views come through playlists; the average view lasts 2:40</div>
+      <div><b>Watching you play</b>Archive live clips: typical 233K. Performance Shorts: 125K against 3.5K</div>
+      <div><b>The Todd Terry beat</b>The remix outdraws the original 3.5 to 1, and the Italian clip carries that beat</div>
+    </div>
+    <div class="g2 reveal" style="margin-top:1.6rem;align-items:start;grid-template-columns:1fr 1.1fr">
+      <div>
+        <div class="kicker" style="color:var(--ink-2)">Young and Dumb · views per day</div>
+        <div class="decay"><div class="dc first"><b>64K</b><i data-h="93.8"></i><span>28–29 Oct</span></div><div class="dc"><b>68K</b><i data-h="100.0"></i><span>31 Oct</span></div><div class="dc"><b>41K</b><i data-h="60.2"></i><span>2 Nov</span></div><div class="dc"><b>23K</b><i data-h="33.7"></i><span>4 Nov</span></div><div class="dc"><b>7K</b><i data-h="10.1"></i><span>6 Nov</span></div><div class="dc"><b>12K</b><i data-h="18.0"></i><span>8 Nov</span></div><div class="dc"><b>5K</b><i data-h="7.7"></i><span>10 Nov</span></div><div class="dc"><b>2K</b><i data-h="3.3"></i><span>12 Nov</span></div><div class="dc"><b>7K</b><i data-h="10.4"></i><span>14 Nov</span></div><div class="dc"><b>4K</b><i data-h="5.4"></i><span>16 Nov</span></div><div class="dc"><b>3K</b><i data-h="4.1"></i><span>18 Nov</span></div></div>
+        <p class="body" style="margin-top:.9rem;font-size:.92rem">A strong first week, then a natural fade to around <b style="color:var(--ink)">3,000 a day</b>. One Short went up on 29 October, and nothing new has pointed people back to the song since.</p>
+        <p class="body" style="margin-top:.6rem;font-size:.92rem">During Fuse the channel posted <b style="color:var(--ink)">36 times across 15 weeks</b>. Blue Reservoir is on 2 in 3 weeks.</p>
+      </div>
+      <div>
+        <div class="kicker" style="color:var(--ink-2)">Ways into a song, and what they did during Fuse</div>
+        <div class="fmts">
+          <div class="fm"><span class="ic">01</span><div><h3>Official video</h3><p>The anchor. <b>Nothing Left To Lose 2.85M</b>; Young and Dumb 409K so far.</p></div><span class="ok">Confirmed · Y&amp;D</span></div>
+          <div class="fm"><span class="ic">02</span><div><h3>Performance Short</h3><p>The two of you playing it. <b>Maida Vale 125K</b> against a typical Short of 3.5K.</p></div><span class="ok">Confirmed · Y&amp;D</span></div>
+          <div class="fm"><span class="ic">03</span><div><h3>Lyric video or visualiser</h3><p>A second, quieter version to sit with. <b>Caution To The Wind 365K</b>, No One Knows We&rsquo;re Dancing 171K.</p></div><span class="mk">Not confirmed</span></div>
+          <div class="fm"><span class="ic">04</span><div><h3>Archive companion</h3><p>An old performance that rhymes with the new song, like Rollercoaster beside Forward.</p></div><span class="ok">Confirmed · 3 clips</span></div>
+          <div class="fm"><span class="ic">05</span><div><h3>Remix or alternate take</h3><p>Reaches a different listener. <b>Four Tet&rsquo;s Nothing Left To Lose 98K.</b></p></div><span class="mk">Not confirmed</span></div>
+        </div>
+      </div>
+    </div>
+    <p class="body reveal" style="margin-top:1rem;font-size:.92rem;max-width:90ch"><b style="color:var(--ink)">For Scala and Forward:</b> a release moment, then one follow-up from footage that exists, a week or two later. We haven&rsquo;t assumed any visualisers, lyric videos or new live films; if any are planned, they slot in here.</p>
+    <div class="src reveal"><span class="tag api">Public YouTube data</span>&nbsp; Young and Dumb: average views per day between our readings, 28 Oct – 18 Nov 2026. Fuse figures are lifetime totals, so treat them as directional. Playlists and view duration: YouTube Studio, Videos report, 19 Aug – 16 Nov 2026. <span class="tag hyp">Suggestion</span>&nbsp; A new way into a song every week or two keeps it surfacing; we can&rsquo;t promise any format adds views.</div>
   </div>
 </section>
 
@@ -566,7 +664,7 @@ body.present .reveal{opacity:1;transform:none}
         <div class="txt">
           <div class="role">The way in</div>
           <p>Your best-known song in a form most people haven&rsquo;t seen, filmed just before it broke worldwide. <b>It speaks to the people already searching for Missing</b> and hints at the new record&rsquo;s acoustic feel.</p>
-          <div class="do"><b>How to use it:</b> upload the full clip as it is. If 30–60 seconds of it really stand out, cut one Short from the same footage. Point the end screen and description to Young and Dumb.</div>
+          <div class="do"><b>How to use it:</b> upload the full clip as it is. If 30–60 seconds of it really stand out, cut one Short from the same footage. Point the end screen and description to Young and Dumb and Scala.<br><b>When:</b> the quiet stretch after Scala, around 14 Dec.</div>
         </div>
       </div>
       <div class="asset">
@@ -574,7 +672,7 @@ body.present .reveal{opacity:1;transform:none}
         <div class="txt">
           <div class="role">The acoustic thread</div>
           <p>Shows that the stripped-back sound of Blue Reservoir has always been part of you. The Rollercoaster video already has <b>849K views</b> here.</p>
-          <div class="do"><b>How to use it:</b> upload the full clip, with the year and venue in the title. Add it to a playlist beside Young and Dumb. A Short only if a moment stands out.</div>
+          <div class="do"><b>How to use it:</b> upload the full clip, with the year and venue in the title. Add it to the Blue Reservoir playlist. A Short only if a moment stands out.<br><b>When:</b> early January, setting up Forward.</div>
         </div>
       </div>
       <div class="asset">
@@ -582,7 +680,7 @@ body.present .reveal{opacity:1;transform:none}
         <div class="txt">
           <div class="role">For the deep listeners</div>
           <p>Double bass, a benefit for the Terrence Higgins Trust, introduced by Holly Johnson. Blue Reservoir is built on voices, guitars and <b>double bass</b>, so this one rewards the people who dig.</p>
-          <div class="do"><b>How to use it:</b> upload the full clip and tell its story in the description. No Short needed. Confirm the original broadcaster before naming Channel 4.</div>
+          <div class="do"><b>How to use it:</b> upload the full clip and tell its story in the description. No Short needed. Confirm the original broadcaster before naming Channel 4.<br><b>When:</b> early February, between Forward and the album.</div>
         </div>
       </div>
       <div class="asset">
@@ -590,7 +688,7 @@ body.present .reveal{opacity:1;transform:none}
         <div class="txt">
           <div class="role">Keep the single alive</div>
           <p>The two of you running through the song, just as it is. On this channel <b>performance Shorts did best</b> during Fuse.</p>
-          <div class="do"><b>How to use it:</b> post the clip you shared on Instagram as a Short this week, as it is. Link it to the Young and Dumb video. No new filming needed.</div>
+          <div class="do"><b>How to use it:</b> post the clip you shared on Instagram as a Short this week, as it is. Link it to the Young and Dumb video. No new filming needed.<br><b>When:</b> this week, before Scala, if it isn&rsquo;t on YouTube yet. The Short from 29 Oct is a clip of the official video.</div>
         </div>
       </div>
     </div>
@@ -607,7 +705,7 @@ body.present .reveal{opacity:1;transform:none}
       <div class="stop"><div class="dot img"><img src="https://i.ytimg.com/vi/IAkY5m00rpY/hqdefault.jpg" alt=""></div><div><h3>Missing</h3><p>Where most people already are: 61M views, still growing, and top of search.</p><div class="how">Description + end screen → step 2 or 4</div></div></div>
       <div class="stop"><div class="dot img"><img class="vhs" src="https://i.ytimg.com/vi/5fMNDi3uisw/hqdefault.jpg" alt=""><i>1995</i></div><div><h3>Missing, live in Italy, 1995</h3><p>A familiar song in an unfamiliar, stripped-back form.</p><div class="how">End screen → Young and Dumb</div></div></div>
       <div class="stop"><div class="dot img"><img class="vhs" src="https://i.ytimg.com/vi/ARkGvp4NJ9U/hqdefault.jpg" alt=""></div><div><h3>Rollercoaster · Get Me</h3><p>The acoustic side of you, early on: the history of the new sound.</p><div class="how">Playlist next to the new songs</div></div></div>
-      <div class="stop new"><div class="dot img"><img src="https://i.ytimg.com/vi/Zs-N7b3e6P4/hqdefault.jpg" alt=""></div><div><h3>Young and Dumb · Blue Reservoir</h3><p>The new record, and the songs still to come.</p><div class="how">Blue Reservoir playlist, homepage</div></div></div>
+      <div class="stop new"><div class="dot img"><img src="https://i.ytimg.com/vi/Zs-N7b3e6P4/hqdefault.jpg" alt=""></div><div><h3>Young and Dumb → Scala → Forward → Blue Reservoir</h3><p>The new record, release by release.</p><div class="how">Blue Reservoir playlist, homepage</div></div></div>
     </div>
     <p class="lede reveal" style="margin-top:2.4rem">This is a route you can offer, not one people will automatically take. End screens, descriptions and playlist order are how you offer it. Each step only has to work for some of the people who reach it.</p>
     <div class="src reveal"><span class="tag hyp">Hypothesis</span>&nbsp; Circle images are reference stills from the channel. Familiar songs → archive acoustic performances → new acoustic recordings. Steps 1, 2 and 4 are supported by search and catalogue data. Whether viewers move between steps can be read in Studio (end-screen clicks, suggested traffic) once the videos are up.</div>
@@ -620,7 +718,7 @@ body.present .reveal{opacity:1;transform:none}
     <div class="kicker reveal">An idea worth exploring · YouTube Stations</div>
     <h2 class="reveal" style="margin-top:.7rem;max-width:35ch">Let Missing play <em>into the new record.</em></h2>
     <p class="lede reveal" style="margin-top:.9rem;max-width:64ch"><b style="color:var(--paper)">What&rsquo;s a Station?</b> A continuous, programmed stream of your videos on YouTube. It mixes the songs people already love with Blue Reservoir and the archive as each piece arrives.</p>
-    <div class="station reveal"><div class="st cat"><img class="vhs" src="https://i.ytimg.com/vi/IAkY5m00rpY/maxresdefault.jpg" alt="Missing" loading="lazy"><span class="nm">Missing<small>Todd Terry Remix</small></span><span class="lb">Catalogue</span></div><div class="st new"><img class="" src="https://i.ytimg.com/vi/Zs-N7b3e6P4/maxresdefault.jpg" alt="Young and Dumb" loading="lazy"><span class="nm">Young and Dumb</span><span class="lb">Blue Reservoir</span></div><div class="st cat"><img class="vhs" src="https://i.ytimg.com/vi/qsRnVtIeLyg/hqdefault.jpg" alt="Driving" loading="lazy"><span class="nm">Driving</span><span class="lb">Catalogue</span></div><div class="st arch ph"><span class="nm">Missing<small>Italian TV · 1995</small></span><span class="lb">From the archive</span></div><div class="st cat"><img class="vhs" src="https://i.ytimg.com/vi/mVi78cWhFmE/hqdefault.jpg" alt="Wrong" loading="lazy"><span class="nm">Wrong</span><span class="lb">Catalogue</span></div><div class="st cat"><img class="vhs" src="https://i.ytimg.com/vi/ARkGvp4NJ9U/maxresdefault.jpg" alt="Rollercoaster" loading="lazy"><span class="nm">Rollercoaster</span><span class="lb">Catalogue</span></div><div class="st arch ph"><span class="nm">Get Me<small>with Danny Thompson</small></span><span class="lb">From the archive</span></div><div class="st cat"><img class="vhs" src="https://i.ytimg.com/vi/M6QKZJeK-5w/maxresdefault.jpg" alt="Nothing Left To Lose" loading="lazy"><span class="nm">Nothing Left To Lose</span><span class="lb">Catalogue</span></div><div class="st cat"><img class="vhs" src="https://i.ytimg.com/vi/5fMNDi3uisw/hqdefault.jpg" alt="Missing · Live" loading="lazy"><span class="nm">Missing · Live<small>The White Room, 1996</small></span><span class="lb">Catalogue</span></div><div class="st next ph"><span class="nm">Next single<small>Blue Reservoir</small></span><span class="lb">Coming</span></div></div>
+    <div class="station reveal"><div class="st cat"><img class="vhs" src="https://i.ytimg.com/vi/IAkY5m00rpY/maxresdefault.jpg" alt="Missing" loading="lazy"><span class="nm">Missing<small>Todd Terry Remix</small></span><span class="lb">Catalogue</span></div><div class="st new"><img class="" src="https://i.ytimg.com/vi/Zs-N7b3e6P4/maxresdefault.jpg" alt="Young and Dumb" loading="lazy"><span class="nm">Young and Dumb</span><span class="lb">Blue Reservoir</span></div><div class="st cat"><img class="vhs" src="https://i.ytimg.com/vi/qsRnVtIeLyg/hqdefault.jpg" alt="Driving" loading="lazy"><span class="nm">Driving</span><span class="lb">Catalogue</span></div><div class="st arch ph"><span class="nm">Missing<small>Italian TV · 1995</small></span><span class="lb">From the archive</span></div><div class="st cat"><img class="vhs" src="https://i.ytimg.com/vi/mVi78cWhFmE/hqdefault.jpg" alt="Wrong" loading="lazy"><span class="nm">Wrong</span><span class="lb">Catalogue</span></div><div class="st cat"><img class="vhs" src="https://i.ytimg.com/vi/ARkGvp4NJ9U/maxresdefault.jpg" alt="Rollercoaster" loading="lazy"><span class="nm">Rollercoaster</span><span class="lb">Catalogue</span></div><div class="st arch ph"><span class="nm">Get Me<small>with Danny Thompson</small></span><span class="lb">From the archive</span></div><div class="st cat"><img class="vhs" src="https://i.ytimg.com/vi/M6QKZJeK-5w/maxresdefault.jpg" alt="Nothing Left To Lose" loading="lazy"><span class="nm">Nothing Left To Lose</span><span class="lb">Catalogue</span></div><div class="st cat"><img class="vhs" src="https://i.ytimg.com/vi/5fMNDi3uisw/hqdefault.jpg" alt="Missing · Live" loading="lazy"><span class="nm">Missing · Live<small>The White Room, 1996</small></span><span class="lb">Catalogue</span></div><div class="st next ph"><span class="nm">Scala · Forward<small>4 Dec · 20 Jan</small></span><span class="lb">Coming</span></div></div>
     <div class="steps reveal">
       <div><b>01 · Arrive</b>Fans come for Missing and the songs they know</div>
       <i>&rarr;</i>
@@ -636,59 +734,20 @@ body.present .reveal{opacity:1;transform:none}
   </div>
 </section>
 
-<!-- ═══ 11 · RELEASE PLAN ═══ -->
-<section class="slide mist" data-t="Plan">
+<!-- ═══ 11 · THE CAMPAIGN TIMELINE ═══
+     Confirmed releases (gold) are protected: no archive upload within about
+     a week either side. Supporting uploads use only confirmed assets. -->
+<section class="slide mist" data-t="Timeline">
   <div class="inner">
-    <div class="kicker reveal">A suggested release plan</div>
-    <h2 class="reveal" style="margin-top:.7rem;max-width:35ch">Small, steady steps <em>over five weeks.</em></h2>
-    <p class="body reveal" style="margin-top:.8rem">Built only from footage you already have, with nothing new to film. Exact dates depend on clearances and the next single, so these are weeks, not days.</p>
-    <div class="weeks reveal">
-      <div class="wk">
-        <div class="w">Week 1 · now</div>
-        <h3>Young and Dumb run-through</h3>
-        <div class="fmt">Short · essential</div>
-        <dl><dt>Title</dt><dd class="ttl">Young and Dumb, the run-through</dd>
-        <dt>Links to</dt><dd>Young and Dumb video</dd>
-        <dt>Prep</dt><dd>None. It&rsquo;s ready.</dd>
-        <dt>Good looks like</dt><dd>Above the Fuse Short norm (3.5K)</dd></dl>
-      </div>
-      <div class="wk">
-        <div class="w">Week 1 · now</div>
-        <h3>Point Missing at the new music</h3>
-        <div class="fmt">Channel changes · essential</div>
-        <dl><dt>What</dt><dd>Descriptions, end screens, Blue Reservoir playlist (slide 12)</dd>
-        <dt>Prep</dt><dd>About an hour in Studio</dd>
-        <dt>Good looks like</dt><dd>End-screen clicks from Missing to Young and Dumb in Studio</dd></dl>
-      </div>
-      <div class="wk">
-        <div class="w">Week 2–3</div>
-        <h3>Missing, Italian TV 1995</h3>
-        <div class="fmt">Full video + one Short · essential</div>
-        <dl><dt>Title</dt><dd class="ttl">Everything But The Girl – Missing (Live on Italian TV, 1995)</dd>
-        <dt>Thumbnail</dt><dd>A clear frame of you both; small &ldquo;1995&rdquo;</dd>
-        <dt>Links to</dt><dd>Young and Dumb</dd>
-        <dt>Prep</dt><dd>Rights, Content ID, best-quality transfer</dd></dl>
-      </div>
-      <div class="wk">
-        <div class="w">Week 3–4</div>
-        <h3>Rollercoaster, BBC</h3>
-        <div class="fmt">Full video · essential</div>
-        <dl><dt>Title</dt><dd class="ttl">Rollercoaster (Live at Glasgow Old Fruitmarket, 199x)</dd>
-        <dt>Thumbnail</dt><dd>Matching archive style</dd>
-        <dt>Links to</dt><dd>Blue Reservoir playlist</dd>
-        <dt>Prep</dt><dd>BBC clearance; confirm year</dd></dl>
-      </div>
-      <div class="wk opt">
-        <div class="w">Week 4–5</div>
-        <h3>Get Me, with Danny Thompson</h3>
-        <div class="fmt">Full video · when cleared</div>
-        <dl><dt>Title</dt><dd class="ttl">Get Me (Live at The Lighthouse, with Danny Thompson)</dd>
-        <dt>Links to</dt><dd>Next single, or Blue Reservoir playlist</dd>
-        <dt>Prep</dt><dd>Verify broadcaster and rights</dd>
-        <dt>Optional</dt><dd>If anything gets filmed at the Union Chapel or MOTH shows anyway, a short clip fits here</dd></dl>
-      </div>
+    <div class="kicker reveal">The campaign, release by release</div>
+    <h2 class="reveal" style="margin-top:.7rem;max-width:36ch">Three releases to protect, <em>three gaps to fill.</em></h2>
+    <p class="body reveal" style="margin-top:.7rem;max-width:80ch">The new releases lead. The archive fills the quiet stretches in between, with about a week of clear space either side of each release, and every upload points onward to the next new thing.</p>
+    <div class="tl reveal">
+      <div class="tl-track"><span class="pw" style="left:24%;width:11%"></span><span class="pw" style="left:61.5%;width:11%"></span><span class="pw" style="left:86.5%;width:13.5%"></span></div>
+      <div class="tl-i now"><div class="tl-d">Now · w/c 16 Nov</div><div class="tl-dot"></div><h3>Channel connections</h3><div class="tl-f">Missing descriptions, end screens, Blue Reservoir playlist</div><p>Connect the catalogue</p><div class="tl-n">→ Young and Dumb</div><span class="tl-s ready">Ready now</span></div><div class="tl-i sup"><div class="tl-d">This week</div><div class="tl-dot"></div><h3>Young and Dumb run-through</h3><div class="tl-f">Short · your Instagram clip</div><p>Keep single 1 alive</p><div class="tl-n">→ Young and Dumb video</div><span class="tl-s ready">Ready now</span></div><div class="tl-i rel"><div class="tl-d">4 Dec</div><div class="tl-dot"></div><h3>Scala</h3><div class="tl-f">Instant grat</div><p>Release</p><div class="tl-n">→ Blue Reservoir playlist</div><span class="tl-s rel">Confirmed release</span></div><div class="tl-i sup"><div class="tl-d">w/c 14 Dec</div><div class="tl-dot"></div><h3>Missing · Italian TV 1995</h3><div class="tl-f">Full clip + one Short</div><p>Catalogue discovery, in the longest gap</p><div class="tl-n">→ Young and Dumb, Scala</div><span class="tl-s clear">After clearance</span></div><div class="tl-i sup"><div class="tl-d">w/c 4 Jan</div><div class="tl-dot"></div><h3>Rollercoaster · BBC</h3><div class="tl-f">Full clip</div><p>The acoustic thread</p><div class="tl-n">→ Blue Reservoir playlist</div><span class="tl-s clear">After clearance</span></div><div class="tl-i rel"><div class="tl-d">20 Jan</div><div class="tl-dot"></div><h3>Forward</h3><div class="tl-f">Single 2</div><p>Release</p><div class="tl-n">→ Forward, pre-order</div><span class="tl-s rel">Confirmed release</span></div><div class="tl-i sup"><div class="tl-d">w/c 2 Feb</div><div class="tl-dot"></div><h3>Get Me · Danny Thompson</h3><div class="tl-f">Full clip</div><p>For the deep listeners</p><div class="tl-n">→ Forward, pre-order</div><span class="tl-s clear">After clearance</span></div><div class="tl-i rel"><div class="tl-d">19 Feb</div><div class="tl-dot"></div><h3>Blue Reservoir</h3><div class="tl-f">The album</div><p>Release</p><div class="tl-n">→ Album playlist, homepage</div><span class="tl-s rel">Confirmed release</span></div>
     </div>
-    <div class="src reveal">Use the same title style as your existing live uploads (&ldquo;Song – (Live at …, Year)&rdquo;) so the archive reads as one collection. No forecasts: &ldquo;good&rdquo; means better than this channel&rsquo;s own recent norms. Dashed card: do it if it&rsquo;s cleared in time.</div>
+    <div class="tl-key reveal"><span class="k rel"></span>Confirmed release <span class="k sup"></span>Supporting upload, using footage you have <span class="k pw"></span>Protected window, no archive uploads</div>
+    <div class="src reveal">Release dates confirmed by the artist. Release formats and videos for Scala and Forward aren&rsquo;t confirmed, so none are assumed. Archive dates depend on clearance; if Missing clears early, the week of 23 Nov also works, leading into Scala. The longest gap is Scala to Forward (47 days), so Missing goes there.</div>
   </div>
 </section>
 
@@ -700,14 +759,14 @@ body.present .reveal{opacity:1;transform:none}
     <div class="g2 reveal" style="margin-top:1.8rem;align-items:start">
       <div class="card">
         <div class="kicker">1 · Top of the Missing descriptions</div>
-        <p style="font-family:'Oswald',sans-serif;font-size:1.05rem;color:var(--ink);background:var(--mist);border-radius:10px;padding:.8rem 1rem;margin-top:.7rem;line-height:1.4">New: Young and Dumb, from our new album Blue Reservoir (out 19 Feb 2027) → youtu.be/Zs-N7b3e6P4<br>Pre-order: EBTG.lnk.to/BlueReservoir</p>
-        <p>Add this as the first two lines on both Missing videos, then the most-watched catalogue videos. Only the first lines show before &ldquo;more&rdquo;.</p>
+        <p style="font-family:'Oswald',sans-serif;font-size:1.05rem;color:var(--ink);background:var(--mist);border-radius:10px;padding:.8rem 1rem;margin-top:.7rem;line-height:1.4">New: Young and Dumb → youtu.be/Zs-N7b3e6P4<br>Scala out 4 Dec · New album Blue Reservoir 19 Feb 2027<br>Pre-order: EBTG.lnk.to/BlueReservoir</p>
+        <p>Add this to the top of both Missing videos, then the most-watched catalogue videos, and update the first line at each release. Only the first lines show before &ldquo;more&rdquo;.</p>
       </div>
       <div class="card">
         <div class="kicker">2 · End screens on Missing</div>
-        <p>Set one end-screen slot on each Missing video to <b>Young and Dumb</b>, and later to the Italian TV performance. Check what&rsquo;s there now first.</p>
+        <p>Set one end-screen slot on each Missing video to <b>the newest release</b>: Young and Dumb now, then Scala, then Forward. Check what&rsquo;s there now first.</p>
         <div class="kicker" style="margin-top:1.1rem">3 · Build out the Blue Reservoir playlist</div>
-        <p>Young and Dumb, the run-through Short, then each archive performance as it lands, then each new single. <b>Put it at the top of the homepage.</b></p>
+        <p>Young and Dumb, the run-through Short, Scala, Forward, then each archive performance as it lands. <b>Put it at the top of the homepage.</b></p>
         <div class="kicker" style="margin-top:1.1rem">4 · Keep the archive together</div>
         <p>Add new archive uploads to the existing <b>Live Performances</b> playlist (11 videos, created in 2017), with Young and Dumb at the end.</p>
       </div>
@@ -724,10 +783,10 @@ body.present .reveal{opacity:1;transform:none}
     <h2 class="reveal" style="margin-top:.8rem;max-width:26ch">Three things, <em>in this order.</em></h2>
     <div class="pri reveal">
       <div class="pr"><div class="n">1</div><h3>Connect Missing to the new music</h3><p>Descriptions, end screens and the Blue Reservoir playlist.</p><div class="meta"><b>Who:</b> label channel team<br><b>Needs:</b> nothing. Can happen this week.</div></div>
-      <div class="pr"><div class="n">2</div><h3>Post the Young and Dumb run-through</h3><p>As a Short, as it is, linked to the video.</p><div class="meta"><b>Who:</b> Ben and Tracey, with the label<br><b>Needs:</b> nothing. It&rsquo;s your own footage.</div></div>
-      <div class="pr"><div class="n">3</div><h3>Clear and upload Missing, Italy 1995</h3><p>Then Rollercoaster, then Get Me, about a week apart.</p><div class="meta"><b>Who:</b> label rights team; Ben and Tracey to supply the best copies<br><b>Needs:</b> rights and Content ID checks first.</div></div>
+      <div class="pr"><div class="n">2</div><h3>Post the Young and Dumb run-through</h3><p>As a Short, as it is, linked to the video, before Scala on 4 Dec.</p><div class="meta"><b>Who:</b> Ben and Tracey, with the label<br><b>Needs:</b> nothing. It&rsquo;s your own footage.</div></div>
+      <div class="pr"><div class="n">3</div><h3>Start the archive clearances now</h3><p>Missing for mid-December, Rollercoaster for early January, Get Me for early February.</p><div class="meta"><b>Who:</b> label rights team; Ben and Tracey to supply the best copies<br><b>Needs:</b> rights and Content ID checks first.</div></div>
     </div>
-    <p class="lede reveal" style="margin-top:2rem">In a month we&rsquo;ll look at how the archive videos and Young and Dumb are doing, end-screen clicks from Missing, the Blue Reservoir playlist, and subscribers gained against the 6.8K of the last 90 days.</p>
+    <p class="lede reveal" style="margin-top:2rem">After Scala we&rsquo;ll look at Young and Dumb and Scala, end-screen clicks from Missing, the Blue Reservoir playlist, and subscribers gained against the 6.8K of the last 90 days. Then again after Forward.</p>
     <div class="src reveal">Public data covers views, likes and playlists. End-screen clicks, traffic sources and subscribers gained come from Studio. Method and sources are in the Analysis panel.</div>
   </div>
 </section>
@@ -751,6 +810,16 @@ body.present .reveal{opacity:1;transform:none}
       <tr><td>ebtg.com and press</td><td>Album announcement, 28 Oct 2026</td><td>Blue Reservoir, 19 Feb 2027; ten songs; recorded largely live at RAK Studios; voices, guitars, double bass, drums and percussion</td></tr>
     </table>
     <p>The Studio figures come from screenshots supplied by the team and are treated as artist-authorised first-party data.</p>
+
+    <h3>Confirmed campaign timeline (from the artist)</h3>
+    <table>
+      <tr><th>Date</th><th>Release</th><th>Role</th></tr>
+      <tr><td>28 Oct 2026</td><td>Young and Dumb</td><td>Single 1 (official video out)</td></tr>
+      <tr><td>4 Dec 2026</td><td>Scala</td><td>Instant grat (video not confirmed)</td></tr>
+      <tr><td>20 Jan 2027</td><td>Forward</td><td>Single 2 (video not confirmed)</td></tr>
+      <tr><td>19 Feb 2027</td><td>Blue Reservoir</td><td>Album</td></tr>
+    </table>
+    <p>Campaign vs catalogue since 28 Oct: Young and Dumb 409,059 views and the 29 Oct Short 12,537 views. Over the same days, Missing (Todd Terry Remix) went from 60,796,807 to 61,379,579 (+582,772). The public channel counter moved from 156.98M (22 Oct) to 160.97M (14 Nov), so new uploads were roughly 10% of channel views. That&rsquo;s approximate, because the counter updates in steps. The 29 Oct Short is a clip of the official video, so the run-through footage hasn&rsquo;t been posted.</p>
 
     <h3>Reading the numbers fairly</h3>
     <ul>
@@ -781,6 +850,7 @@ body.present .reveal{opacity:1;transform:none}
     <ul>
       <li>End screens, cards, the homepage featured video, the channel trailer and Community posts aren&rsquo;t in public data.</li>
       <li>Which playlists produce the 61.2% playlist traffic.</li>
+      <li>Age split by video or traffic source (whether younger viewers watch differently). Studio can filter Audience by video.</li>
       <li>Whether Young and Dumb or Fuse had paid promotion.</li>
       <li>Whether the channel is eligible for a YouTube Station, and how one would be programmed. The Station slide is a proposed concept.</li>
       <li>The archive footage itself: its quality, length, edit points and rights.</li>
@@ -801,6 +871,7 @@ body.present .reveal{opacity:1;transform:none}
 /* reveal + bars */
 function fill(root){
   root.querySelectorAll('.hbar .t i').forEach(function(b){ b.style.width = b.getAttribute('data-w') + '%'; });
+  root.querySelectorAll('.decay i').forEach(function(b){ b.style.height = b.getAttribute('data-h') + '%'; });
 }
 var io = ('IntersectionObserver' in window) ? new IntersectionObserver(function(es){
   es.forEach(function(e){
