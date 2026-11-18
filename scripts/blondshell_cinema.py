@@ -28,22 +28,22 @@ def cinema(orig,by,make,head,fmt,note,tag,E):
  def cell(n,a,b):
   k='rel' if n==rw else 'full' if a else 'sh'
   wk=(A+dt.timedelta(days=7*n)).strftime('%-d %b')
-  return f'<i class="{k}" style="height:{max(5,round(100*(a+b)/mx))}%" title="Week of {wk}: {a} full-song, {b} Shorts"></i>'
+  return f'<i class="{k}" style="height:{max(5,round(100*(a+b)/mx))}%" title="Week of {wk}: {a} long-form, {b} Shorts"></i>'
  cells=''.join(cell(n,a,b) for n,(a,b) in enumerate(bins))
  orig['intro']=('<section class="slide cover dark night-cover" id="intro" data-title="Violins · a channel and campaign review">'
   '<img class="cover-bg" src="/blondshell/images/portrait.jpg" alt="Blondshell portrait by Reese Layton" fetchpriority="high"><div class="cover-shade"></div>'
-  '<div class="inner"><span class="mono">Virgin Music Group × Partisan Records · YouTube deep dive · 18 Nov 2026</span>'
-  '<p class="cover-artist">blondshell</p><h1 class="cover-record">violins</h1>'
-  '<p class="cover-line">The songs are there.<br><span>Give them a second life.</span></p>'
-  f'<div class="cadence"><div class="cad-bars">{cells}</div><div class="cad-key"><span><i class="full"></i>full song</span><span><i class="rel"></i>album day</span><span><i class="sh"></i>Shorts only</span><span class="cad-range">every week · 14 May → 17 Nov 2026</span></div></div>'
+  '<div class="inner"><span class="mono">YouTube channel deep dive · after Violins · 18 Nov 2026</span>'
+  '<h1 class="cover-record">blondshell</h1>'
+  '<p class="cover-line">Violins is out.<br><span>What does the channel do next?</span></p>'
+  f'<div class="cadence"><div class="cad-bars">{cells}</div><div class="cad-key"><span><i class="full"></i>long-form</span><span><i class="rel"></i>album day</span><span><i class="sh"></i>Shorts only</span><span class="cad-range">the Violins era, week by week · 14 May → 17 Nov</span></div></div>'
   '</div><div class="folio"><span>Blondshell × YouTube · Partisan Records</span><span>01 / Violins · a channel and campaign review</span></div></section>')
 
  # 2 · channel: stats beside a wall of her latest uploads (all Shorts)
  recent=sorted([v for v in by.values() if v['durationSec'] and d(v)<=END],key=lambda v:v['publishedAt'],reverse=True)[:8]
  assert all(0<v['durationSec']<=62 for v in recent)
  wall=''.join(f'<a class="wall-tile" href="https://www.youtube.com/shorts/{v["id"]}" target="_blank" rel="noopener">{img(v["id"],v["title"])}<span>{d(v).strftime("%-d %b")}</span></a>' for v in recent)
- orig['channel']=make('channel','The channel today',head('Channel today · captured 17 November','Active in Shorts.<br><span class="serif">Quiet in full songs.</span>')
-  +f'<div class="ch-grid mt"><div class="ch-stats"><div><b>14<small>/14</small></b><span>uploads in the last 30 days are Shorts</span></div><div><b>25 Sep</b><span>last full-song upload · album day</span></div><div class="ch-pair"><p><b>18.8k</b> subscribers</p><p><b>8.52m</b> channel views</p></div></div>'
+ orig['channel']=make('channel','The channel today',head('Channel today · captured 17 November','Active in Shorts.<br><span class="serif">Quiet in long-form.</span>')
+  +f'<div class="ch-grid mt"><div class="ch-stats"><div><b>14<small>/14</small></b><span>uploads in the last 30 days are Shorts</span></div><div><b>25 Sep</b><span>last long-form upload · album day</span></div><div class="ch-pair"><p><b>18.8k</b> subscribers</p><p><b>8.52m</b> channel views</p></div></div>'
   +f'<div class="ch-wall"><span class="mono">Her latest eight uploads · all Shorts</span><div class="wall">{wall}</div></div></div>'
   +note('API + WATCHER','30-day window 19 Oct–17 Nov. Watcher: 22 observations from 27 Oct; the channel counter repeats unchanged 9–17 Nov, so no growth rate is claimed.'))
 
@@ -55,7 +55,7 @@ def cinema(orig,by,make,head,fmt,note,tag,E):
  orig['verdict']=make('verdict','The readout',head('The readout · day 53','Violins arrived complete.<br><span class="serif">The second chapter hasn’t started.</span>')
   +'<div class="pnls mt">'
   +panel('pnl-works','7M9A_sVI4BI','Stone Fruit music video',tag('on'),'What works','11<small>/11</small>','songs live by release day','The two music videos hold <b>59.6%</b> of album-video viewing.')
-  +panel('pnl-fix','R_1iHTmZ90k','Two Fried Short',tag('on','Short'),'What needs fixing','0','new full-song versions since release','<b>24</b> Shorts instead. And the album playlist plays a pitch copy of Stone Fruit.')
+  +panel('pnl-fix','R_1iHTmZ90k','Two Fried Short',tag('on','Short'),'What needs fixing','0','long-form uploads since release','<b>24</b> Shorts instead. And the album playlist plays a pitch copy of Stone Fruit.')
   +panel('pnl-do','h0bN0GGLJSQ','Stone Fruit on XMU',tag('prop','Proposed'),'What to do first','1','full Stone Fruit performance','Fix the album playlists first. Then two Shorts a week to 17 January.')
   +'</div>'+note('API → INFERENCE','Lifetime counters at 17 Nov capture. The XMU full take, its rights and edit are unconfirmed.'))
 
