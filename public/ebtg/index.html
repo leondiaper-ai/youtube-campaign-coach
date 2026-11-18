@@ -375,6 +375,16 @@ h3{font-family:'Inter',sans-serif;font-weight:700;font-size:1.02rem;line-height:
 .agekey .k{display:inline-block;width:12px;height:10px;border-radius:2px;margin-left:.8rem}
 .agekey .k.u{background:rgba(241,236,227,.35);margin-left:0}.agekey .k.m{background:var(--gold)}.agekey .k.o{background:var(--water)}
 
+.chan{display:flex;align-items:center;gap:1rem;margin-top:1rem;padding:.6rem 1rem;border:1px dashed rgba(241,236,227,.2);border-radius:12px}
+.chan .cl{font-family:'Oswald',sans-serif;font-weight:600;text-transform:uppercase;font-size:.9rem;color:rgba(241,236,227,.8);white-space:nowrap}
+.chan .cv{font-size:.78rem;color:rgba(241,236,227,.7);white-space:nowrap}
+.chan .cv b{color:var(--paper)}
+@media(max-width:640px){.chan{flex-wrap:wrap}}
+.ways{display:grid;grid-template-columns:repeat(3,1fr);gap:.6rem;margin-top:.9rem}
+@media(max-width:640px){.ways{grid-template-columns:1fr}}
+.ways span{font-size:.74rem;line-height:1.35;color:rgba(241,236,227,.7);border-left:2px solid var(--gold);padding-left:.6rem}
+.ways b{display:block;font-family:'Oswald',sans-serif;font-weight:600;text-transform:uppercase;font-size:.85rem;color:var(--paper)}
+
 /* reveal */
 .reveal{opacity:0;transform:translateY(14px);transition:opacity .7s ease,transform .7s ease}
 .reveal.on{opacity:1;transform:none}
@@ -392,6 +402,9 @@ body.present .reveal{opacity:1;transform:none}
   body.present .asset .face{aspect-ratio:16/10}
   body.present .tape{aspect-ratio:2/1}
   body.present .st{aspect-ratio:2.4/1}
+  body.present .auds{margin-top:1rem}
+  body.present .aud{padding:.8rem 1rem}
+  body.present .aud-n{margin-top:.6rem}
   body.present .wants div{padding:.5rem .7rem;font-size:.74rem}
   body.present .ylist li{font-size:.82rem}
   body.present .tl-i p{font-size:.72rem}
@@ -430,6 +443,8 @@ body.present .reveal{opacity:1;transform:none}
   body.present h2{font-size:clamp(1.5rem,3vw,2.3rem)}
   body.present .yt .thumb{display:none}
   body.present .decay{height:80px}
+  body.present .aud-n .num{font-size:2.6rem}
+  body.present .ways span{font-size:.7rem}
   body.present .tl-th{aspect-ratio:2.2/1}
   body.present .tl{margin-top:1rem}
   body.present .fm p{font-size:.74rem}
@@ -562,39 +577,44 @@ body.present .reveal{opacity:1;transform:none}
   </div>
 </section>
 
-<!-- ═══ 5 · WHO IS LISTENING ═══ -->
-<section class="slide mist" data-t="Who">
+<!-- ═══ 9b · TWO AUDIENCES ═══
+     Studio, video-level: Missing (Todd Terry Remix) 20 Aug – 17 Nov 2026;
+     Young and Dumb since release, 28 Oct. Shares of each video's views,
+     not audience sizes. Checked: Missing 25–44 = 23.7+33.5 = 57.2,
+     45+ = 24.5+8.4+1.8 = 34.7; Young and Dumb 25–44 = 5.3+15.1 = 20.4,
+     45+ = 33.7+33.0+9.6 = 76.3. -->
+<section class="slide dark grain" data-t="Two audiences">
   <div class="inner">
     <div class="kicker reveal">Who is listening</div>
-    <h2 class="reveal" style="margin-top:.8rem;max-width:32ch">Not only the people who were there <em>the first time.</em></h2>
-    <div class="g2 reveal" style="margin-top:2rem;align-items:start">
-      <div>
-        <div class="kicker" style="color:var(--ink-2)">Age of viewers, share of views</div>
-        <div style="margin-top:1rem">
-          <div class="hbar"><span class="k">13–17</span><span class="t"><i data-w="18.4"></i></span><span class="v">5.1%</span></div>
-          <div class="hbar"><span class="k">18–24</span><span class="t"><i data-w="41.2"></i></span><span class="v">11.4%</span></div>
-          <div class="hbar hi"><span class="k">25–34</span><span class="t"><i data-w="100"></i></span><span class="v">27.7%</span></div>
-          <div class="hbar hi"><span class="k">35–44</span><span class="t"><i data-w="88.4"></i></span><span class="v">24.5%</span></div>
-          <div class="hbar"><span class="k">45–54</span><span class="t"><i data-w="65.3"></i></span><span class="v">18.1%</span></div>
-          <div class="hbar"><span class="k">55–64</span><span class="t"><i data-w="33.6"></i></span><span class="v">9.3%</span></div>
-          <div class="hbar"><span class="k">65+</span><span class="t"><i data-w="14.1"></i></span><span class="v">3.9%</span></div>
-        </div>
-        <p class="body" style="margin-top:1rem;font-size:.95rem"><b style="color:var(--ink)">Over half the views (52%) come from people aged 25 to 44.</b> Many of them were children, or not yet born, when Missing came out. The audience is 71% male.</p>
+    <h2 class="reveal" style="margin-top:.7rem;max-width:34ch">Missing reaches a younger audience. <em>Can we bring them into the new album?</em></h2>
+    <div class="auds reveal">
+      <div class="aud hi">
+        <div class="aud-h"><img src="https://i.ytimg.com/vi/IAkY5m00rpY/hqdefault.jpg" alt=""><div><b>Missing</b><span>Todd Terry Remix · last 90 days</span></div></div>
+        <div class="aud-n"><div><div class="num">57.2%</div><div class="lbl">aged 25–44</div></div><div><div class="num o">34.7%</div><div class="lbl">aged 45+</div></div></div>
+        <div class="agebar"><span class="u" style="flex:8.2"></span><span class="m" style="flex:57.2"></span><span class="o" style="flex:34.7"></span></div>
+        <div class="aud-g">68.6% male · 31.4% female</div>
       </div>
-      <div>
-        <div class="kicker" style="color:var(--ink-2)">How younger listeners reach you</div>
-        <div style="display:flex;gap:2rem;margin-top:1rem;align-items:flex-end;flex-wrap:wrap">
-          <div class="stat"><div class="num" style="font-size:clamp(2.2rem,4vw,3.4rem)">1 in 6</div><div class="sub">views from under-25s (16.5%)</div></div>
-          <div class="stat"><div class="num" style="font-size:clamp(2.2rem,4vw,3.4rem)">27.7%</div><div class="sub">25–34, the largest group</div></div>
-        </div>
-        <ul class="ylist">
-          <li><b>Through the remix.</b> The Todd Terry version has 61M views to the original&rsquo;s 17.5M, and &ldquo;missing todd terry remix&rdquo; is a top search.</li>
-          <li><b>Through other artists.</b> Caroline Polachek and Yumi Zouma have both covered Missing.</li>
-          <li><b>Through playlists.</b> &ldquo;By chance I heard this on a Spotify playlist&rdquo; is typical of the comments, alongside &ldquo;I was 13 the first time&hellip; now I&rsquo;m 38&rdquo;.</li>
-        </ul>
-        <p class="body" style="margin-top:.7rem;font-size:.84rem;color:var(--mute)">By video it&rsquo;s sharper still: 57% of the Missing remix&rsquo;s views come from 25–44s, against 20% for Young and Dumb. More on that further on. Top countries: US 12.3%, UK 6.7%, Brazil 5.2%, <b style="color:var(--ink)">Italy 4.8%</b>, Germany 3.9%.</p>
+      <div class="vs">vs</div>
+      <div class="aud">
+        <div class="aud-h"><img src="https://i.ytimg.com/vi/Zs-N7b3e6P4/hqdefault.jpg" alt=""><div><b>Young and Dumb</b><span>Since release, 28 Oct</span></div></div>
+        <div class="aud-n"><div><div class="num">20.4%</div><div class="lbl">aged 25–44</div></div><div><div class="num o">76.3%</div><div class="lbl">aged 45+</div></div></div>
+        <div class="agebar"><span class="u" style="flex:3.3"></span><span class="m" style="flex:20.4"></span><span class="o" style="flex:76.3"></span></div>
+        <div class="aud-g">84.1% male · 15.9% female</div>
       </div>
     </div>
+    <div class="chan reveal"><span class="cl">Whole channel</span><div class="agebar" style="margin:0;flex:1"><span class="u" style="flex:16.5"></span><span class="m" style="flex:52.2"></span><span class="o" style="flex:31.3"></span></div><span class="cv"><b>52%</b> 25–44 · <b>31%</b> 45+</span></div>
+    <div class="agekey reveal"><span class="k u"></span>Under 25 <span class="k m"></span>25–44 <span class="k o"></span>45 and over</div>
+    <div class="g2 reveal" style="margin-top:1.4rem;align-items:start">
+      <div>
+        <p class="lede" style="font-size:clamp(1rem,1.4vw,1.2rem)">Missing reaches a younger audience, much like the channel as a whole. Young and Dumb is currently drawing an older, more male fanbase. <b style="color:var(--paper)">That&rsquo;s not a problem with the song.</b> It&rsquo;s a gap we can try to close.</p>
+        <div class="ways"><span><b>The remix</b>61M views, a top search</span><span><b>Other artists</b>Covers by Caroline Polachek, Yumi Zouma</span><span><b>Playlists</b>&ldquo;I heard this on a Spotify playlist&rdquo;</span></div>
+      </div>
+      <div class="card" style="padding:1rem 1.1rem">
+        <div class="kicker">The test</div>
+        <p style="margin-top:.4rem"><b>Use the 1995 Missing performance as the bridge.</b> Put &ldquo;Missing&rdquo; in the title to meet the searches, add one Short, and point the end screen to Young and Dumb or Scala. Then compare the clip&rsquo;s audience, and Young and Dumb&rsquo;s, a few weeks later.</p>
+      </div>
+    </div>
+    <p class="body reveal" style="margin-top:1rem;font-size:.84rem;color:rgba(241,236,227,.55)">These are shares of each video&rsquo;s views, not audience sizes. Young and Dumb has three weeks of data, against 90 days for Missing.</p>
   </div>
 </section>
 
@@ -688,43 +708,6 @@ body.present .reveal{opacity:1;transform:none}
         </div>
       </div>
     </div>
-  </div>
-</section>
-
-<!-- ═══ 9b · TWO AUDIENCES ═══
-     Studio, video-level: Missing (Todd Terry Remix) 20 Aug – 17 Nov 2026;
-     Young and Dumb since release, 28 Oct. Shares of each video's views,
-     not audience sizes. Checked: Missing 25–44 = 23.7+33.5 = 57.2,
-     45+ = 24.5+8.4+1.8 = 34.7; Young and Dumb 25–44 = 5.3+15.1 = 20.4,
-     45+ = 33.7+33.0+9.6 = 76.3. -->
-<section class="slide dark grain" data-t="Two audiences">
-  <div class="inner">
-    <div class="kicker reveal">Two audiences</div>
-    <h2 class="reveal" style="margin-top:.7rem;max-width:34ch">Missing reaches a younger audience. <em>Can we bring them into the new album?</em></h2>
-    <div class="auds reveal">
-      <div class="aud hi">
-        <div class="aud-h"><img src="https://i.ytimg.com/vi/IAkY5m00rpY/hqdefault.jpg" alt=""><div><b>Missing</b><span>Todd Terry Remix · last 90 days</span></div></div>
-        <div class="aud-n"><div><div class="num">57.2%</div><div class="lbl">aged 25–44</div></div><div><div class="num o">34.7%</div><div class="lbl">aged 45+</div></div></div>
-        <div class="agebar"><span class="u" style="flex:8.2"></span><span class="m" style="flex:57.2"></span><span class="o" style="flex:34.7"></span></div>
-        <div class="aud-g">68.6% male · 31.4% female</div>
-      </div>
-      <div class="vs">vs</div>
-      <div class="aud">
-        <div class="aud-h"><img src="https://i.ytimg.com/vi/Zs-N7b3e6P4/hqdefault.jpg" alt=""><div><b>Young and Dumb</b><span>Since release, 28 Oct</span></div></div>
-        <div class="aud-n"><div><div class="num">20.4%</div><div class="lbl">aged 25–44</div></div><div><div class="num o">76.3%</div><div class="lbl">aged 45+</div></div></div>
-        <div class="agebar"><span class="u" style="flex:3.3"></span><span class="m" style="flex:20.4"></span><span class="o" style="flex:76.3"></span></div>
-        <div class="aud-g">84.1% male · 15.9% female</div>
-      </div>
-    </div>
-    <div class="agekey reveal"><span class="k u"></span>Under 25 <span class="k m"></span>25–44 <span class="k o"></span>45 and over</div>
-    <div class="g2 reveal" style="margin-top:1.4rem;align-items:start">
-      <p class="lede" style="font-size:clamp(1rem,1.4vw,1.2rem)">Missing reaches a younger audience, much like the channel as a whole. Young and Dumb is currently drawing an older, more male fanbase. <b style="color:var(--paper)">That&rsquo;s not a problem with the song.</b> It&rsquo;s a gap we can try to close.</p>
-      <div class="card" style="padding:1rem 1.1rem">
-        <div class="kicker">The test</div>
-        <p style="margin-top:.4rem"><b>Use the 1995 Missing performance as the bridge.</b> Put &ldquo;Missing&rdquo; in the title to meet the searches, add one Short, and point the end screen to Young and Dumb or Scala. Then compare the clip&rsquo;s audience, and Young and Dumb&rsquo;s, a few weeks later.</p>
-      </div>
-    </div>
-    <p class="body reveal" style="margin-top:1rem;font-size:.84rem;color:rgba(241,236,227,.55)">These are shares of each video&rsquo;s views, not audience sizes. Young and Dumb has three weeks of data, against 90 days for Missing.</p>
   </div>
 </section>
 
@@ -900,6 +883,7 @@ body.present .reveal{opacity:1;transform:none}
       <tr><td><b>45+</b></td><td class="n"><b>34.7%</b></td><td class="n"><b>76.3%</b></td></tr>
       <tr><td>Male / female</td><td class="n">68.6% / 31.4%</td><td class="n">84.1% / 15.9%</td></tr>
     </table>
+    <p>Whole channel, 19 Aug – 16 Nov 2026: 13–17 5.1%, 18–24 11.4%, 25–34 27.7%, 35–44 24.5%, 45–54 18.1%, 55–64 9.3%, 65+ 3.9% (25–44 52.2%, 45+ 31.3%); male 71.3%, female 28.3%, user-specified 0.4%. Top countries: US 12.3%, UK 6.7%, Brazil 5.2%, Italy 4.8%, Germany 3.9%. Top cities: London, Moscow, Santiago, Milan, Mexico City.</p>
     <p>Missing: 20 Aug – 17 Nov 2026. Young and Dumb: since release on 28 Oct. These are shares of each video&rsquo;s measured views, not audience sizes, and the windows differ. Possible explanations include discovery sources, playlist listening, search, established fan engagement, promotional targeting and recommendation activity. All are hypotheses. None of this shows the new single is failing to reach younger listeners, or that catalogue viewers will follow on their own.</p>
 
     <h3>Reading the numbers fairly</h3>
