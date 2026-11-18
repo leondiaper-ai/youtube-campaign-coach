@@ -179,7 +179,7 @@ h3{font-family:'Figtree',sans-serif;font-weight:700;font-size:1.02rem;line-heigh
 .asset .face.img img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 30%}
 .asset .face.img::after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(12,28,40,0) 35%,rgba(12,28,40,.92))}
 .asset .face.img > *:not(img){position:relative;z-index:2}
-.asset .face.img > .vert{position:absolute}
+.asset .face.img > .vert,.asset .face.img > .yr,.asset .face.img > .rank{position:absolute}
 .asset .face .vert{position:absolute;top:.8rem;left:1rem;z-index:3;font-size:.62rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;background:var(--gold);color:var(--deep);padding:.2rem .45rem;border-radius:99px}
 .asset .txt{padding:1rem 1.05rem 1.15rem;display:flex;flex-direction:column;gap:.5rem;flex:1}
 .asset .role{font-family:'Fraunces',serif;font-style:italic;font-size:1.2rem;color:var(--gold-lt);line-height:1.15}
@@ -222,6 +222,37 @@ h3{font-family:'Figtree',sans-serif;font-weight:700;font-size:1.02rem;line-heigh
 .pr p{font-size:.9rem;color:rgba(241,236,227,.78);margin-top:.5rem}
 .pr .meta{margin-top:.8rem;font-size:.74rem;line-height:1.5;color:rgba(241,236,227,.6)}
 .pr .meta b{color:var(--paper)}
+
+/* character: grain, tape, archive treatment */
+.grain::before{content:'';position:absolute;inset:-50%;z-index:3;pointer-events:none;opacity:.16;mix-blend-mode:overlay;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
+.vhs{filter:saturate(.8) contrast(1.06) sepia(.12)}
+.tapes{display:grid;grid-template-columns:repeat(5,1fr);gap:.55rem}
+@media(max-width:900px){.tapes{grid-template-columns:repeat(2,1fr)}}
+.tape{position:relative;display:block;aspect-ratio:4/3;border-radius:10px;overflow:hidden;background:#0a1620;text-decoration:none}
+.tape img{width:100%;height:100%;object-fit:cover;transition:transform .5s}
+.tape:hover img{transform:scale(1.05)}
+.tape::after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(12,28,40,0) 40%,rgba(12,28,40,.92));z-index:1}
+.tape::before{content:'';position:absolute;inset:0;z-index:2;background:repeating-linear-gradient(0deg,rgba(255,255,255,.04) 0 1px,transparent 1px 3px);pointer-events:none}
+.tape .yr{position:absolute;top:.45rem;left:.55rem;z-index:3;font-family:'Fraunces',serif;font-style:italic;font-size:1.15rem;color:var(--gold-lt);text-shadow:0 1px 8px rgba(0,0,0,.6)}
+.tape .ti{position:absolute;left:.6rem;right:.6rem;bottom:.5rem;z-index:3;font-size:.68rem;line-height:1.3;color:rgba(241,236,227,.75)}
+.tape .ti b{display:block;font-family:'Fraunces',serif;font-weight:400;font-size:1.25rem;color:var(--paper)}
+.tape.hi{outline:2px solid var(--gold);outline-offset:2px}
+.shorts{display:flex;gap:.6rem}
+.vshort{position:relative;flex:1;aspect-ratio:9/14;border-radius:12px;overflow:hidden;display:block;max-width:150px}
+.vshort img{width:100%;height:100%;object-fit:cover}
+.vshort::after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(12,28,40,0) 45%,rgba(12,28,40,.92))}
+.vshort span{position:absolute;left:.5rem;right:.5rem;bottom:.45rem;z-index:2;font-size:.66rem;line-height:1.25;color:rgba(241,236,227,.8)}
+.vshort span b{display:block;font-family:'Fraunces',serif;font-weight:400;font-size:1.35rem;color:var(--gold-lt)}
+.yt{background:#fff;border:1px solid var(--line);border-radius:16px;padding:.8rem;box-shadow:0 18px 40px -24px rgba(20,33,44,.35)}
+.yt-t{font-weight:700;font-size:.95rem;margin-top:.7rem;line-height:1.3}
+.yt-m{font-size:.78rem;color:var(--mute);margin-top:.2rem}
+.yt-d{position:relative;margin-top:.7rem;background:var(--paper);border-radius:10px;padding:.75rem .85rem 2.4rem;font-size:.78rem;line-height:1.45;color:var(--ink-2);font-family:ui-monospace,Menlo,monospace}
+.yt-d .flag{position:absolute;left:.85rem;bottom:.6rem;font-family:'Figtree',sans-serif;font-size:.68rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#fff;background:var(--rose);padding:.22rem .55rem;border-radius:99px}
+.stop .dot.img{overflow:hidden;padding:0;position:relative}
+.stop .dot.img img{width:100%;height:100%;object-fit:cover}
+.stop .dot.img i{position:absolute;bottom:4px;left:0;right:0;font-family:'Fraunces',serif;font-size:.8rem;color:#fff;text-shadow:0 1px 4px #000}
+.asset .face.arch.img::before{z-index:1}
 
 /* reveal */
 .reveal{opacity:0;transform:translateY(14px);transition:opacity .7s ease,transform .7s ease}
@@ -271,7 +302,7 @@ body.present .reveal{opacity:1;transform:none}
 <main id="deck">
 
 <!-- ═══ 1 · COVER ═══ -->
-<section class="slide dark" data-t="Cover" style="justify-content:flex-end;padding-bottom:4rem">
+<section class="slide dark grain" data-t="Cover" style="justify-content:flex-end;padding-bottom:4rem">
   <div class="bleed full"><img src="https://i.ytimg.com/vi/Zs-N7b3e6P4/maxresdefault.jpg" alt="Ben and Tracey on stage in front of a gold curtain, from the Young and Dumb film" style="object-position:50% 35%;transform:scale(1.2);transform-origin:66% 12%"></div>
   <div class="ripple"></div>
   <div class="inner">
@@ -283,18 +314,19 @@ body.present .reveal{opacity:1;transform:none}
 </section>
 
 <!-- ═══ 2 · THE OPPORTUNITY ═══ -->
-<section class="slide" data-t="Opportunity">
+<section class="slide dark grain" data-t="Opportunity">
+  <div class="bleed"><img src="https://i.ytimg.com/vi/U56Ns66Qrb8/maxresdefault.jpg" alt="Tracey walking down a street at night, from the Missing video" style="object-position:30% 50%;transform:scale(1.15);transform-origin:80% 20%"></div>
   <div class="inner">
     <div class="kicker reveal">The opportunity</div>
-    <h2 class="reveal" style="margin-top:.8rem;max-width:20ch">Nine million people played your music on YouTube <em>in the last three months.</em></h2>
-    <div class="g4 reveal" style="margin-top:2.4rem">
+    <h2 class="reveal" style="margin-top:.8rem;max-width:18ch">Nine million people played your music on YouTube <em>in the last three months.</em></h2>
+    <div class="g4 reveal" style="margin-top:2.4rem;max-width:980px">
       <div class="stat"><div class="num">26.8M</div><div class="lbl">Views of your music</div><div class="sub"><span class="up">+46%</span> on the previous 90 days</div></div>
       <div class="stat"><div class="num">9.1M</div><div class="lbl">Different viewers</div><div class="sub"><span class="up">+41%</span> on the previous 90 days</div></div>
       <div class="stat"><div class="num">2.3M</div><div class="lbl">Came back more than once</div><div class="sub">Returning viewers</div></div>
       <div class="stat"><div class="num">685K</div><div class="lbl">Hours of listening</div><div class="sub">About level with the previous 90 days</div></div>
     </div>
     <p class="lede reveal" style="margin-top:2.2rem">That's a large, active audience, and it's growing. Most of it arrives through songs people already love. The job now is to make sure the new record is easy to find from there.</p>
-    <div class="src reveal"><span class="tag studio">YouTube Studio</span>&nbsp; Total reach of your music, 19 Aug – 16 Nov 2026, including videos on other channels. Viewers are people, not plays; returning viewers are not the same as subscribers.</div>
+    <div class="src reveal"><span class="tag studio">YouTube Studio</span>&nbsp; Total reach of your music, 19 Aug – 16 Nov 2026, including videos on other channels. Viewers are people, not plays; returning viewers are not the same as subscribers. Image: Missing (Official Music Video).</div>
   </div>
 </section>
 
@@ -398,29 +430,24 @@ body.present .reveal{opacity:1;transform:none}
   </div>
 </section>
 
-<!-- ═══ 6 · WHAT IS WORKING ═══ -->
-<section class="slide" data-t="Working">
+<!-- ═══ 6 · WHAT IS WORKING — the tape wall ═══ -->
+<section class="slide dark grain" data-t="Working">
   <div class="inner">
-    <div class="kicker reveal">What is working on the channel</div>
-    <h2 class="reveal" style="margin-top:.8rem;max-width:22ch">Your old TV performances <em>already do well here.</em></h2>
-    <div class="g3 reveal" style="margin-top:1.8rem">
+    <div class="g2" style="grid-template-columns:1.55fr 1fr;align-items:end">
       <div>
-        <a class="thumb" href="https://www.youtube.com/watch?v=5fMNDi3uisw" target="_blank" rel="noopener"><img src="https://i.ytimg.com/vi/5fMNDi3uisw/hqdefault.jpg" alt="Tracey on The White Room, 1996" style="object-position:50% 40%"><span class="cap">Before Today &amp; Missing · The White Room, 1996</span></a>
-        <div class="num" style="font-size:2.2rem;margin-top:.7rem">779K</div>
-        <p class="body" style="font-size:.86rem">The most-watched live video on the channel. It&rsquo;s a Missing performance.</p>
+        <div class="kicker reveal">What is working on the channel</div>
+        <h2 class="reveal" style="margin-top:.8rem;max-width:18ch">Your old TV performances <em>already do well here.</em></h2>
       </div>
+      <p class="body reveal" style="font-size:.95rem">Ten archive TV and concert clips, all uploaded in 2017. <b style="color:var(--paper)">The typical one has 233K views</b>, 2.75M between them. The most-watched is a Missing performance.</p>
+    </div>
+    <div class="tapes reveal" style="margin-top:1.6rem"><a class="tape hi" href="https://www.youtube.com/watch?v=5fMNDi3uisw" target="_blank" rel="noopener"><img class="vhs" src="https://i.ytimg.com/vi/5fMNDi3uisw/hqdefault.jpg" alt="Before Today &amp; Missing, The White Room 1996" loading="lazy"><span class="yr">1996</span><span class="ti"><b>Before Today &amp; Missing</b>The White Room · 779K</span></a><a class="tape" href="https://www.youtube.com/watch?v=S75cUskEXwQ" target="_blank" rel="noopener"><img class="vhs" src="https://i.ytimg.com/vi/S75cUskEXwQ/hqdefault.jpg" alt="Temperamental, The Forum 1999" loading="lazy"><span class="yr">1999</span><span class="ti"><b>Temperamental</b>The Forum · 617K</span></a><a class="tape" href="https://www.youtube.com/watch?v=7YhnJFwriw8" target="_blank" rel="noopener"><img class="vhs" src="https://i.ytimg.com/vi/7YhnJFwriw8/hqdefault.jpg" alt="Before Today, The Forum 1999" loading="lazy"><span class="yr">1999</span><span class="ti"><b>Before Today</b>The Forum · 356K</span></a><a class="tape" href="https://www.youtube.com/watch?v=YSM97WF9w1A" target="_blank" rel="noopener"><img class="vhs" src="https://i.ytimg.com/vi/YSM97WF9w1A/hqdefault.jpg" alt="Protection, The Forum 1999" loading="lazy"><span class="yr">1999</span><span class="ti"><b>Protection</b>The Forum · 339K</span></a><a class="tape" href="https://www.youtube.com/watch?v=5mQO3BMTYog" target="_blank" rel="noopener"><img class="vhs" src="https://i.ytimg.com/vi/5mQO3BMTYog/hqdefault.jpg" alt="Driving, Letterman 1990" loading="lazy"><span class="yr">1990</span><span class="ti"><b>Driving</b>Letterman · 287K</span></a><a class="tape" href="https://www.youtube.com/watch?v=PA8Pv_gTjLg" target="_blank" rel="noopener"><img class="vhs" src="https://i.ytimg.com/vi/PA8Pv_gTjLg/hqdefault.jpg" alt="Corcovado, Red Hot + Rio 1996" loading="lazy"><span class="yr">1996</span><span class="ti"><b>Corcovado</b>Red Hot + Rio · 179K</span></a><a class="tape" href="https://www.youtube.com/watch?v=AQqnffMyTz8" target="_blank" rel="noopener"><img class="vhs" src="https://i.ytimg.com/vi/AQqnffMyTz8/hqdefault.jpg" alt="Five Fathoms, Conan O&rsquo;Brien 1999" loading="lazy"><span class="yr">1999</span><span class="ti"><b>Five Fathoms</b>Conan O&rsquo;Brien · 97K</span></a><a class="tape" href="https://www.youtube.com/watch?v=NnDNVykcrnQ" target="_blank" rel="noopener"><img class="vhs" src="https://i.ytimg.com/vi/NnDNVykcrnQ/hqdefault.jpg" alt="This Love Not For Sale, Live 1985" loading="lazy"><span class="yr">1985</span><span class="ti"><b>This Love Not For Sale</b>Live · 49K</span></a><a class="tape" href="https://www.youtube.com/watch?v=EpdlZxIhcSo" target="_blank" rel="noopener"><img class="vhs" src="https://i.ytimg.com/vi/EpdlZxIhcSo/hqdefault.jpg" alt="Frost &amp; Fire, Whistle Test 1984" loading="lazy"><span class="yr">1984</span><span class="ti"><b>Frost &amp; Fire</b>Whistle Test · 24K</span></a><a class="tape" href="https://www.youtube.com/watch?v=wIzyVz2Ivao" target="_blank" rel="noopener"><img class="vhs" src="https://i.ytimg.com/vi/wIzyVz2Ivao/hqdefault.jpg" alt="Are You Trying To Be Funny?, Live 1985" loading="lazy"><span class="yr">1985</span><span class="ti"><b>Are You Trying To Be Funny?</b>Live · 23K</span></a></div>
+    <div class="g2 reveal" style="grid-template-columns:1fr 1.3fr;margin-top:1.5rem;align-items:center">
+      <div class="shorts"><a class="vshort" href="https://www.youtube.com/shorts/1if5_C27G5U" target="_blank" rel="noopener"><img src="https://i.ytimg.com/vi/1if5_C27G5U/hqdefault.jpg" alt="Maida Vale session" loading="lazy"><span><b>125K</b>Maida Vale session</span></a><a class="vshort" href="https://www.youtube.com/shorts/XMRZJzpuH5E" target="_blank" rel="noopener"><img src="https://i.ytimg.com/vi/XMRZJzpuH5E/hqdefault.jpg" alt="BBC session" loading="lazy"><span><b>69K</b>BBC session</span></a><a class="vshort" href="https://www.youtube.com/shorts/Y3lelf77rd4" target="_blank" rel="noopener"><img src="https://i.ytimg.com/vi/Y3lelf77rd4/hqdefault.jpg" alt="Just a voice and a piano" loading="lazy"><span><b>31K</b>Just a voice and a piano</span></a></div>
       <div>
-        <a class="thumb" href="https://www.youtube.com/watch?v=S75cUskEXwQ" target="_blank" rel="noopener"><img src="https://i.ytimg.com/vi/S75cUskEXwQ/sddefault.jpg" alt="Tracey on stage at the Forum, 1999"><span class="cap">Temperamental · Live at the Forum, 1999</span></a>
-        <div class="num" style="font-size:2.2rem;margin-top:.7rem">617K</div>
-        <p class="body" style="font-size:.86rem">Ten archive TV and concert clips, all uploaded in 2017. <b style="color:var(--ink)">The typical one has 233K views</b>, 2.75M between them.</p>
-      </div>
-      <div>
-        <a class="thumb" href="https://www.youtube.com/shorts/1if5_C27G5U" target="_blank" rel="noopener"><img src="https://i.ytimg.com/vi/1if5_C27G5U/maxresdefault.jpg" alt="Tracey singing at Maida Vale"><span class="cap">Maida Vale session · Short, 2023</span></a>
-        <div class="num" style="font-size:2.2rem;margin-top:.7rem">125K</div>
-        <p class="body" style="font-size:.86rem">During Fuse, the Shorts that worked were performances: Maida Vale 125K, the BBC session 69K, voice and piano 31K. <b style="color:var(--ink)">The typical Fuse Short had 3.5K.</b></p>
+        <p class="lede" style="font-size:clamp(1rem,1.4vw,1.2rem)">During Fuse, the Shorts that worked were performances. <b style="color:var(--paper)">The typical Fuse Short had 3.5K views.</b></p>
+        <p class="lede" style="margin-top:.8rem;font-size:clamp(1.05rem,1.5vw,1.3rem);color:var(--gold-lt)">On this channel, people respond to watching you play. That&rsquo;s exactly what the archive gives you.</p>
       </div>
     </div>
-    <p class="lede reveal" style="margin-top:1.8rem">The pattern is simple. <b style="color:var(--ink)">On this channel, people respond to watching you play.</b> That&rsquo;s exactly what the archive gives you.</p>
     <div class="src reveal"><span class="tag api">Public YouTube data</span>&nbsp; Lifetime views, 18 Nov 2026. Catalogue figures are lifetime totals over many years, not campaign results. Fuse Shorts: 27 published Jan – Aug 2023.</div>
   </div>
 </section>
@@ -428,20 +455,24 @@ body.present .reveal{opacity:1;transform:none}
 <!-- ═══ 7 · WHAT NEEDS ATTENTION ═══ -->
 <section class="slide mist" data-t="Attention">
   <div class="inner">
-    <div class="g2" style="align-items:start">
-      <div>
-        <div class="kicker reveal">What needs attention</div>
-        <h2 class="reveal" style="margin-top:.8rem">The new music isn&rsquo;t yet <em>where people already are.</em></h2>
-        <p class="lede reveal" style="margin-top:1.2rem">You don&rsquo;t need lots more uploads. You need better connections between what&rsquo;s already there and what&rsquo;s new.</p>
+    <div class="kicker reveal">What needs attention</div>
+    <h2 class="reveal" style="margin-top:.8rem;max-width:20ch">The new music isn&rsquo;t yet <em>where people already are.</em></h2>
+    <div class="g2 reveal" style="margin-top:1.8rem;align-items:start;grid-template-columns:1fr 1.05fr">
+      <div class="yt">
+        <a class="thumb" href="https://www.youtube.com/watch?v=IAkY5m00rpY" target="_blank" rel="noopener"><img src="https://i.ytimg.com/vi/IAkY5m00rpY/maxresdefault.jpg" alt="Missing (Todd Terry Remix) video"></a>
+        <div class="yt-t">Everything But The Girl - Missing (Todd Terry Remix) [Official Music Video]</div>
+        <div class="yt-m">61,382,133 views · about 30,000 more every day</div>
+        <div class="yt-d">Music video by Everything But The Girl performing Missing (Todd Terry Remix) [Official Music Video]<br><br>Follow Everything But The Girl;<br>Music Online - https://EBTG.lnk.to/Stream<br>Website - https://EBTG.lnk.to/Web<span class="flag">No mention of Young and Dumb or Blue Reservoir</span></div>
       </div>
-      <div class="reveal">
-        <div class="fix"><div class="n">1</div><div><h3>Missing doesn&rsquo;t mention the new album</h3><p>The remix video gains around 30,000 views a day, but its description still carries <b>2018 links</b>, with nothing on Young and Dumb or Blue Reservoir. Same for the original Missing video and the other catalogue videos we checked.</p></div></div>
-        <div class="fix"><div class="n">2</div><div><h3>The Blue Reservoir playlist has one video</h3><p>It holds only Young and Dumb. There&rsquo;s nothing yet that carries a viewer from the single into the record&rsquo;s world.</p></div></div>
-        <div class="fix"><div class="n">3</div><div><h3>A long quiet spell</h3><p>Between August 2023 and October 2026 the channel posted <b>two Shorts</b>, both about the Best Of. Subscribers haven&rsquo;t had much reason to look in, so it&rsquo;s worth giving them a few good reasons now.</p></div></div>
-        <div class="fix"><div class="n">4</div><div><h3>Worth checking: end screens and the homepage</h3><p>We can&rsquo;t see end screens, cards or the featured video from public data. If Missing&rsquo;s end screen doesn&rsquo;t point to Young and Dumb, that&rsquo;s the easiest change of all.</p></div></div>
+      <div>
+        <div class="fix"><div class="n">1</div><div><h3>Missing doesn&rsquo;t mention the new album</h3><p>The description still carries its <b>2018 links</b>. So does the original Missing video, and so do the other catalogue videos we checked.</p></div></div>
+        <div class="fix"><div class="n">2</div><div><h3>The Blue Reservoir playlist has one video</h3><p>Only Young and Dumb, with nothing yet to carry a viewer into the record&rsquo;s world.</p></div></div>
+        <div class="fix"><div class="n">3</div><div><h3>A long quiet spell</h3><p>From August 2023 to October 2026 the channel posted <b>two Shorts</b>, both about the Best Of.</p></div></div>
+        <div class="fix"><div class="n">4</div><div><h3>Worth checking: end screens and the homepage</h3><p>Not visible in public data. If Missing&rsquo;s end screen doesn&rsquo;t point to Young and Dumb, that&rsquo;s the easiest change of all.</p></div></div>
+        <p class="body" style="margin-top:1rem;font-size:.92rem"><b style="color:var(--ink)">You don&rsquo;t need lots more uploads,</b> just better connections between what&rsquo;s there and what&rsquo;s new.</p>
       </div>
     </div>
-    <div class="src reveal"><span class="tag api">Public YouTube data</span>&nbsp; Descriptions, playlists and upload history checked 18 Nov 2026 (points 1–3 are verified). Point 4 is a check to make, not a finding. Only 8.9% of subscribers have all notifications switched on, below Studio&rsquo;s typical range; that&rsquo;s context, not a diagnosis.</div>
+    <div class="src reveal"><span class="tag api">Public YouTube data</span>&nbsp; Descriptions, playlists and upload history checked 18 Nov 2026 (points 1–3 are verified; the description shown is the real opening). Point 4 is a check, not a finding. Only 8.9% of subscribers have all notifications on, below Studio&rsquo;s typical range; that&rsquo;s context, not a diagnosis.</div>
   </div>
 </section>
 
@@ -472,13 +503,13 @@ body.present .reveal{opacity:1;transform:none}
 </section>
 
 <!-- ═══ 9 · FOUR ASSETS — the centrepiece ═══ -->
-<section class="slide dark" data-t="Four assets">
+<section class="slide dark grain" data-t="Four assets">
   <div class="inner">
     <div class="kicker reveal">Your archive and new footage</div>
     <h2 class="reveal" style="margin-top:.7rem;max-width:24ch">Four recordings, <em>four different jobs.</em></h2>
     <div class="assets reveal" style="margin-top:1.8rem">
       <div class="asset">
-        <div class="face arch"><span class="rank">Start here</span><span class="yr">1995</span><div class="song">Missing</div><div class="where">Italian TV · vocal, guitar, Todd Terry beat</div></div>
+        <div class="face arch img"><img class="vhs" src="https://i.ytimg.com/vi/5fMNDi3uisw/hqdefault.jpg" alt="Reference: Tracey on The White Room, 1996"><span class="rank">Start here</span><span class="yr">1995</span><div class="song">Missing</div><div class="where">Italian TV · vocal, guitar, Todd Terry beat</div></div>
         <div class="txt">
           <div class="role">The way in</div>
           <p>Your best-known song in a form most people haven&rsquo;t seen, filmed just before it broke worldwide. <b>It speaks to the people already searching for Missing</b> and hints at the new record&rsquo;s acoustic feel.</p>
@@ -486,7 +517,7 @@ body.present .reveal{opacity:1;transform:none}
         </div>
       </div>
       <div class="asset">
-        <div class="face arch"><span class="yr">early &rsquo;90s</span><div class="song">Rollercoaster</div><div class="where">BBC · live at Glasgow Old Fruitmarket</div></div>
+        <div class="face arch img"><img class="vhs" src="https://i.ytimg.com/vi/ARkGvp4NJ9U/hqdefault.jpg" alt="Reference: the Rollercoaster video" style="object-position:50% 55%"><span class="yr">early &rsquo;90s</span><div class="song">Rollercoaster</div><div class="where">BBC · live at Glasgow Old Fruitmarket</div></div>
         <div class="txt">
           <div class="role">The acoustic thread</div>
           <p>Shows that the stripped-back sound of Blue Reservoir has always been part of you. The Rollercoaster video already has <b>849K views</b> here.</p>
@@ -494,7 +525,7 @@ body.present .reveal{opacity:1;transform:none}
         </div>
       </div>
       <div class="asset">
-        <div class="face arch"><span class="yr">early &rsquo;90s</span><div class="song">Get Me</div><div class="where">with Danny Thompson · The Lighthouse</div></div>
+        <div class="face arch img"><img class="vhs" src="https://i.ytimg.com/vi/5mQO3BMTYog/maxresdefault.jpg" alt="Reference: Tracey on Letterman, 1990"><span class="yr">early &rsquo;90s</span><div class="song">Get Me</div><div class="where">with Danny Thompson · The Lighthouse</div></div>
         <div class="txt">
           <div class="role">For the deep listeners</div>
           <p>Double bass, a benefit for the Terrence Higgins Trust, introduced by Holly Johnson. Blue Reservoir is built on voices, guitars and <b>double bass</b>, so this one rewards the people who dig.</p>
@@ -510,7 +541,7 @@ body.present .reveal{opacity:1;transform:none}
         </div>
       </div>
     </div>
-    <div class="src reveal">We haven&rsquo;t seen the archive footage, so these depend on quality and on finding good edit points. Before anything archival goes up: confirm broadcast and master rights, performance and composition clearances, any third-party footage, existing Content ID claims, and the aspect ratio. Image on the fourth card: the Young and Dumb Short from 29 Oct, shown for reference.</div>
+    <div class="src reveal">We haven&rsquo;t seen the archive footage, so these depend on quality and on finding good edit points. Before anything archival goes up: confirm broadcast and master rights, performance and composition clearances, any third-party footage, existing Content ID claims, and the aspect ratio. Card images are reference stills from your channel (The White Room 1996, the Rollercoaster video, Letterman 1990, the Young and Dumb Short), not the archive footage itself.</div>
   </div>
 </section>
 
@@ -520,13 +551,13 @@ body.present .reveal{opacity:1;transform:none}
     <div class="kicker reveal">How the content connects</div>
     <h2 class="reveal" style="margin-top:.8rem;max-width:22ch">From the song they know <em>to the record they don&rsquo;t yet.</em></h2>
     <div class="route reveal">
-      <div class="stop"><div class="dot">1</div><div><h3>Missing</h3><p>Where most people already are: 61M views, still growing, and top of search.</p><div class="how">Description + end screen → step 2 or 4</div></div></div>
-      <div class="stop"><div class="dot">2</div><div><h3>Missing, live in Italy, 1995</h3><p>A familiar song in an unfamiliar, stripped-back form.</p><div class="how">End screen → Young and Dumb</div></div></div>
-      <div class="stop"><div class="dot">3</div><div><h3>Rollercoaster · Get Me</h3><p>The acoustic side of you, early on: the history of the new sound.</p><div class="how">Playlist next to the new songs</div></div></div>
-      <div class="stop new"><div class="dot">4</div><div><h3>Young and Dumb · Blue Reservoir</h3><p>The new record, and the songs still to come.</p><div class="how">Blue Reservoir playlist, homepage</div></div></div>
+      <div class="stop"><div class="dot img"><img src="https://i.ytimg.com/vi/IAkY5m00rpY/hqdefault.jpg" alt=""></div><div><h3>Missing</h3><p>Where most people already are: 61M views, still growing, and top of search.</p><div class="how">Description + end screen → step 2 or 4</div></div></div>
+      <div class="stop"><div class="dot img"><img class="vhs" src="https://i.ytimg.com/vi/5fMNDi3uisw/hqdefault.jpg" alt=""><i>1995</i></div><div><h3>Missing, live in Italy, 1995</h3><p>A familiar song in an unfamiliar, stripped-back form.</p><div class="how">End screen → Young and Dumb</div></div></div>
+      <div class="stop"><div class="dot img"><img class="vhs" src="https://i.ytimg.com/vi/ARkGvp4NJ9U/hqdefault.jpg" alt=""></div><div><h3>Rollercoaster · Get Me</h3><p>The acoustic side of you, early on: the history of the new sound.</p><div class="how">Playlist next to the new songs</div></div></div>
+      <div class="stop new"><div class="dot img"><img src="https://i.ytimg.com/vi/Zs-N7b3e6P4/hqdefault.jpg" alt=""></div><div><h3>Young and Dumb · Blue Reservoir</h3><p>The new record, and the songs still to come.</p><div class="how">Blue Reservoir playlist, homepage</div></div></div>
     </div>
     <p class="lede reveal" style="margin-top:2.4rem">This is a route you can offer, not one people will automatically take. End screens, descriptions and playlist order are how you offer it. Each step only has to work for some of the people who reach it.</p>
-    <div class="src reveal"><span class="tag hyp">Hypothesis</span>&nbsp; Familiar songs → archive acoustic performances → new acoustic recordings. Steps 1, 2 and 4 are supported by search and catalogue data. Whether viewers move between steps can be read in Studio (end-screen clicks, suggested traffic) once the videos are up.</div>
+    <div class="src reveal"><span class="tag hyp">Hypothesis</span>&nbsp; Circle images are reference stills from the channel. Familiar songs → archive acoustic performances → new acoustic recordings. Steps 1, 2 and 4 are supported by search and catalogue data. Whether viewers move between steps can be read in Studio (end-screen clicks, suggested traffic) once the videos are up.</div>
   </div>
 </section>
 
@@ -611,7 +642,7 @@ body.present .reveal{opacity:1;transform:none}
 </section>
 
 <!-- ═══ 13 · WHAT WE RECOMMEND NEXT ═══ -->
-<section class="slide dark" data-t="Next">
+<section class="slide dark grain" data-t="Next">
   <div class="bleed"><img src="https://i.ytimg.com/vi/5mQO3BMTYog/maxresdefault.jpg" alt="Tracey singing on Late Night with David Letterman" style="object-position:70% 30%"></div>
   <div class="inner">
     <div class="kicker reveal">What we recommend next</div>
