@@ -1,0 +1,160 @@
+{
+  "counterCapture": "2026-11-17T16:00:21.901Z",
+  "signalsVerifiedAt": "2026-11-18T10:46:56.668Z",
+  "formats": {
+    "Short clips¹": {
+      "count": 465,
+      "lifetimeViews": 1777412,
+      "median": 2574
+    },
+    "Unavailable record": {
+      "count": 1,
+      "lifetimeViews": 0,
+      "median": 0
+    },
+    "Official audio": {
+      "count": 27,
+      "lifetimeViews": 1179074,
+      "median": 16764
+    },
+    "Music video": {
+      "count": 9,
+      "lifetimeViews": 1771839,
+      "median": 184783
+    },
+    "Lyric video": {
+      "count": 9,
+      "lifetimeViews": 922792,
+      "median": 40892
+    },
+    "Visualizer": {
+      "count": 3,
+      "lifetimeViews": 367745,
+      "median": 98977
+    },
+    "Live performance video": {
+      "count": 3,
+      "lifetimeViews": 190392,
+      "median": 24604
+    },
+    "Session audio": {
+      "count": 1,
+      "lifetimeViews": 71821,
+      "median": 71821
+    },
+    "Home demo": {
+      "count": 1,
+      "lifetimeViews": 7436,
+      "median": 7436
+    },
+    "Artist conversation": {
+      "count": 1,
+      "lifetimeViews": 1511,
+      "median": 1511
+    }
+  },
+  "confirmedMusicVideoBroadcasts": [
+    "P0agRfByknA",
+    "0Zy1_ZbBbJg",
+    "m-AolGenrfg",
+    "hb3ZlYG1cKA"
+  ],
+  "commentSample": {
+    "videos": 62,
+    "comments": 2076,
+    "maxPerVideo": 100,
+    "order": "relevance",
+    "countsByVideo": {
+      "m_ebNdyNlpQ": 7,
+      "9AykYm1Dh8c": 6,
+      "dkjUFrdivYg": 4,
+      "zb0qW0gPOak": 5,
+      "UihOOlmTMXU": 9,
+      "7M9A_sVI4BI": 32,
+      "pCJ76bmI-io": 4,
+      "qGj15z-9Rig": 3,
+      "m1pJ3WNwlCo": 66,
+      "ytdwKm-dJyg": 100,
+      "5qX3xsr5zlQ": 88,
+      "zkaLvuyMlY4": 7,
+      "pAiV7uQpZMA": 7,
+      "gg7_6KjBw_8": 6,
+      "RSr8aV17T4Q": 11,
+      "1iE2RY1KtN8": 7,
+      "v42NfgSoIuE": 38,
+      "IN9t2rlQnM0": 34,
+      "Gh79OdPxXqU": 35,
+      "vC4ywcAOCM8": 47,
+      "uB-TfwbcH_Y": 13,
+      "q113Iv_YN3o": 10,
+      "DxkPktrOiwE": 9,
+      "Gfv2jhVZIQo": 15,
+      "CSJF-hjQWOM": 15,
+      "3y5QcrOGfMA": 13,
+      "A4iYGsFF194": 17,
+      "P0agRfByknA": 86,
+      "pxwZl7_xIm4": 53,
+      "MbaRp6LqVsQ": 54,
+      "0Zy1_ZbBbJg": 100,
+      "pvXT8BjqhUs": 100,
+      "zzZiTQ20EFc": 100,
+      "-B-eYyHwO6w": 10,
+      "if2juwy6T70": 100,
+      "fX5Gumruthg": 13,
+      "UHjf98jACeI": 12,
+      "tbCXx0bPx-Q": 66,
+      "rt4xHcPyzEk": 10,
+      "5SHLlMlt2f0": 23,
+      "nIXwigX5lTY": 2,
+      "m-AolGenrfg": 100,
+      "bziyln8NbDM": 22,
+      "ScLq-MshPYc": 12,
+      "71y4IS2dMa4": 12,
+      "wbu4mZmdAFY": 76,
+      "mO2GZ_j-6uY": 38,
+      "hb3ZlYG1cKA": 89,
+      "EUQ3pVFHY_8": 2,
+      "KOumG_7b1u8": 4,
+      "6TAPFUrk-nw": 76,
+      "ZE20gz-0XEI": 66,
+      "n0icWlgfryY": 45,
+      "dk44JuEaTmc": 100,
+      "5ihOp1jBpEU": 10,
+      "IBtqjLAXVPc": 34,
+      "LlmnnTRCVhA": 18,
+      "ccrDP-oKEK0": 5,
+      "sXFHF425wU0": 5,
+      "0SNamQhIv0I": 7,
+      "jXzfMGEr250": 8,
+      "b0TUdh_fM8w": 10
+    },
+    "requests": [
+      {
+        "fetchedAt": "2026-11-18T10:47:25.588Z",
+        "order": "relevance",
+        "requested": 20,
+        "commentsDisabled": 0
+      },
+      {
+        "fetchedAt": "2026-11-18T10:47:24.723Z",
+        "order": "relevance",
+        "requested": 20,
+        "commentsDisabled": 0
+      },
+      {
+        "fetchedAt": "2026-11-18T10:47:26.443Z",
+        "order": "relevance",
+        "requested": 20,
+        "commentsDisabled": 0
+      },
+      {
+        "fetchedAt": "2026-11-18T10:47:21.553Z",
+        "order": "relevance",
+        "requested": 2,
+        "commentsDisabled": 0
+      }
+    ],
+    "olympusInvincibleMentions": 55,
+    "olympusSampleSize": 100
+  }
+}

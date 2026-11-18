@@ -187,3 +187,40 @@ and pale rose. Lowercase, regular-weight sans-serif typography replaces
 the reference deck's condensed caps, contrasting serif and star motif.
 A separate violins.css skin scopes this change to Blondshell.
 All research rows, calculations, recommendations and slide IDs are retained.
+
+
+## 18 November: artist-specific signals and Analysis rebuild
+
+Catalogue and campaign counters remain fixed to the 17 November capture. A new
+18 November metadata/comment pass is separately dated; no day-on-day growth is
+inferred. `signals-2026-11-18.json` holds the selected source evidence, not raw
+commenter identities or a full comment export.
+
+- 2,076 relevance-ranked top-level comments sampled across 62 selected uploads:
+  all 54 playable full-length entries and eight highest-viewed duration-proxy
+  clips, up to 100 comments each. This is not a representative audience sample.
+- 55 of 100 sampled Olympus comments mention Invincible. An existing artist
+  clip explicitly references that discovery route. This is not a traffic share.
+- Individual Arms comments request an acoustic version and recognise the later
+  Gigi Perez alternate. Arrangement credits confirm acoustic instrumentation.
+  Acoustic content already exists; a stripped Violins performance is a proposed
+  test, not remediation of an entirely absent format.
+- Docket live comments specifically respond to the paired voices; the live duet
+  has 144,661 lifetime views at the counter capture. No controlled format test
+  or recommendation to commission another collaboration is implied.
+- Four official music videos retain both scheduled and actual broadcast starts:
+  Joiner, Salad, T&A and Event of a Fire. The Yves Rothman conversation is a
+  separate livestream, starting 16 May 2023 at 16:30 UTC before Salad at 17:00.
+  Its description explicitly invites that sequence. The publication date is
+  17 May; it is not the actual broadcast date. Missing current-album broadcast
+  metadata means unknown, not proof no Premiere took place.
+- Live is classified more carefully: three full performance videos plus one
+  session audio (Diet Pepsi). A KEXP partner full performance is linked outside
+  owned-channel counts. BBC and Berlin acoustic examples are short excerpts.
+
+The new Analysis surface opens with readable channel, format, song-version,
+fan-signal and broadcast tables; long inventories stay available on demand.
+Recommendations now name the full XMU takes, one stripped performance test and
+an optional title-track lyric route, with asset clearance and production needs
+made explicit. `scripts/blondshell_signals.py` rebuilds these additions and
+asserts core counts against the saved research. Other artists are unchanged.

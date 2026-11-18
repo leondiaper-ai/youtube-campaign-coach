@@ -1,0 +1,214 @@
+{
+  "verifiedAt": "2026-11-18T10:46:56.668Z",
+  "catalogueRows": 520,
+  "channelId": "UCJ1FMy0FK0aSeXosWvGXShg",
+  "catalogueNote": "Video counters in the deck remain the frozen 17 Nov baseline; broadcast metadata, descriptions and audience samples rechecked 18 Nov. No mixed daily deltas.",
+  "commentScan": {
+    "videos": 62,
+    "comments": 2076,
+    "maxPerVideo": 100,
+    "order": "relevance",
+    "countsByVideo": {
+      "m_ebNdyNlpQ": 7,
+      "9AykYm1Dh8c": 6,
+      "dkjUFrdivYg": 4,
+      "zb0qW0gPOak": 5,
+      "UihOOlmTMXU": 9,
+      "7M9A_sVI4BI": 32,
+      "pCJ76bmI-io": 4,
+      "qGj15z-9Rig": 3,
+      "m1pJ3WNwlCo": 66,
+      "ytdwKm-dJyg": 100,
+      "5qX3xsr5zlQ": 88,
+      "zkaLvuyMlY4": 7,
+      "pAiV7uQpZMA": 7,
+      "gg7_6KjBw_8": 6,
+      "RSr8aV17T4Q": 11,
+      "1iE2RY1KtN8": 7,
+      "v42NfgSoIuE": 38,
+      "IN9t2rlQnM0": 34,
+      "Gh79OdPxXqU": 35,
+      "vC4ywcAOCM8": 47,
+      "uB-TfwbcH_Y": 13,
+      "q113Iv_YN3o": 10,
+      "DxkPktrOiwE": 9,
+      "Gfv2jhVZIQo": 15,
+      "CSJF-hjQWOM": 15,
+      "3y5QcrOGfMA": 13,
+      "A4iYGsFF194": 17,
+      "P0agRfByknA": 86,
+      "pxwZl7_xIm4": 53,
+      "MbaRp6LqVsQ": 54,
+      "0Zy1_ZbBbJg": 100,
+      "pvXT8BjqhUs": 100,
+      "zzZiTQ20EFc": 100,
+      "-B-eYyHwO6w": 10,
+      "if2juwy6T70": 100,
+      "fX5Gumruthg": 13,
+      "UHjf98jACeI": 12,
+      "tbCXx0bPx-Q": 66,
+      "rt4xHcPyzEk": 10,
+      "5SHLlMlt2f0": 23,
+      "nIXwigX5lTY": 2,
+      "m-AolGenrfg": 100,
+      "bziyln8NbDM": 22,
+      "ScLq-MshPYc": 12,
+      "71y4IS2dMa4": 12,
+      "wbu4mZmdAFY": 76,
+      "mO2GZ_j-6uY": 38,
+      "hb3ZlYG1cKA": 89,
+      "EUQ3pVFHY_8": 2,
+      "KOumG_7b1u8": 4,
+      "6TAPFUrk-nw": 76,
+      "ZE20gz-0XEI": 66,
+      "n0icWlgfryY": 45,
+      "dk44JuEaTmc": 100,
+      "5ihOp1jBpEU": 10,
+      "IBtqjLAXVPc": 34,
+      "LlmnnTRCVhA": 18,
+      "ccrDP-oKEK0": 5,
+      "sXFHF425wU0": 5,
+      "0SNamQhIv0I": 7,
+      "jXzfMGEr250": 8,
+      "b0TUdh_fM8w": 10
+    },
+    "requests": [
+      {
+        "fetchedAt": "2026-11-18T10:47:25.588Z",
+        "order": "relevance",
+        "requested": 20,
+        "commentsDisabled": 0
+      },
+      {
+        "fetchedAt": "2026-11-18T10:47:24.723Z",
+        "order": "relevance",
+        "requested": 20,
+        "commentsDisabled": 0
+      },
+      {
+        "fetchedAt": "2026-11-18T10:47:26.443Z",
+        "order": "relevance",
+        "requested": 20,
+        "commentsDisabled": 0
+      },
+      {
+        "fetchedAt": "2026-11-18T10:47:21.553Z",
+        "order": "relevance",
+        "requested": 2,
+        "commentsDisabled": 0
+      }
+    ],
+    "olympusInvincibleMentions": 55,
+    "olympusSampleSize": 100
+  },
+  "selectedComments": [
+    {
+      "text": "Here from Invincible. Amazing song ❤",
+      "likes": 2141,
+      "at": "2023-11-24",
+      "videoId": "dk44JuEaTmc"
+    },
+    {
+      "text": "Adore the new album! This is definitely my favorite track ❤️ this would be fantastic as an acoustic version!",
+      "likes": 11,
+      "at": "2025-05-10",
+      "videoId": "CSJF-hjQWOM"
+    },
+    {
+      "text": "Perfection! I begged for an acoustic version of Arms since the album dropped and this delivers ten fold!",
+      "likes": 12,
+      "at": "2025-10-09",
+      "videoId": "v42NfgSoIuE"
+    },
+    {
+      "text": "If the two of you did an entire album together it would probably be incredible. This is my favorite song this year.",
+      "likes": 279,
+      "at": "2024-06-26",
+      "videoId": "zzZiTQ20EFc"
+    },
+    {
+      "text": "every new blondshell bridge rewires my brain godddd she does not miss!!!!!",
+      "likes": 17,
+      "at": "2026-05-26",
+      "videoId": "5qX3xsr5zlQ"
+    },
+    {
+      "text": "really interested in the recurring imagery of obscured vision with this album wowowowow",
+      "likes": 30,
+      "at": "2026-09-25",
+      "videoId": "7M9A_sVI4BI"
+    },
+    {
+      "text": "love this song so much!! can anyone tell me what the lyrics are in the chorus though i can’t understand them but i want to",
+      "likes": 1,
+      "at": "2026-06-29",
+      "videoId": "ytdwKm-dJyg"
+    },
+    {
+      "text": "Please more of this execs.",
+      "likes": 5,
+      "at": "2025-09-11",
+      "videoId": "Gh79OdPxXqU"
+    }
+  ],
+  "broadcasts": [
+    {
+      "id": "oHAC9CnFgmE",
+      "title": "Blondshell Live Stream",
+      "publishedAt": "2026-09-25T13:51:59Z",
+      "durationSec": 0,
+      "scheduledStart": null,
+      "actualStart": null
+    },
+    {
+      "id": "P0agRfByknA",
+      "title": "Blondshell - Event of a Fire (Official Music Video)",
+      "publishedAt": "2025-04-30T04:00:06Z",
+      "durationSec": 252,
+      "scheduledStart": "2025-04-30T04:00:00Z",
+      "actualStart": "2025-04-30T04:00:06Z"
+    },
+    {
+      "id": "0Zy1_ZbBbJg",
+      "title": "Blondshell - T&A (Official Music Video)",
+      "publishedAt": "2025-01-09T15:00:06Z",
+      "durationSec": 231,
+      "scheduledStart": "2025-01-09T15:00:00Z",
+      "actualStart": "2025-01-09T15:00:06Z"
+    },
+    {
+      "id": "nIXwigX5lTY",
+      "title": "Blondshell and Producer Yves Rothman in Conversation about the Recording of Her Self-Titled Debut",
+      "publishedAt": "2023-05-17T17:54:56Z",
+      "durationSec": 1861,
+      "scheduledStart": "2023-05-16T16:30:00Z",
+      "actualStart": "2023-05-16T16:30:05Z"
+    },
+    {
+      "id": "m-AolGenrfg",
+      "title": "Blondshell - Salad (Official Music Video)",
+      "publishedAt": "2023-05-16T17:00:06Z",
+      "durationSec": 287,
+      "scheduledStart": "2023-05-16T17:00:00Z",
+      "actualStart": "2023-05-16T17:00:06Z"
+    },
+    {
+      "id": "hb3ZlYG1cKA",
+      "title": "Blondshell - Joiner (Official Music Video)",
+      "publishedAt": "2023-01-24T14:00:09Z",
+      "durationSec": 242,
+      "scheduledStart": "2023-01-24T14:00:00Z",
+      "actualStart": "2023-01-24T14:00:09Z"
+    }
+  ],
+  "producerDescription": "Watch Blondshell and Producer Yves Rothman chat about recording her self-titled debut album, out now https://blondshell.lnk.to/blondshell\n\nSet a reminder to join for the livestream at 9:30am PT on May 16, with the release of the “Salad” video to follow at 10am PT!  https://blondshell.lnk.to/salad-video",
+  "acousticCredits": "\"Arms (feat. Gigi Perez)\" by Blondshell, from 'Another Picture' out November 14, 2025 on Partisan Records: https://blondshell.lnk.to/anotherpicture\n \nFOLLOW:\nINSTAGRAM: https://blondshell.lnk.to/instagram\nTIKTOK: https://blondshell.lnk.to/tiktok\nSPOTIFY: https://blondshell.lnk.to/spotify\nYOUTUBE: https://blondshell.lnk.to/youtube\nBANDCAMP: https://blondshell.lnk.to/bandcamp\nFACEBOOK: https://blondshell.lnk.to/facebook\nTWITTER: https://blondshell.lnk.to/twitter\n \nManagement: Shira Knishkowy at Another Management Company\nLabel: Partisan Records\n \n \nAUDIO CREDITS:\nSongwriters: Sabrina Teitelbaum and Sam Stewart\nProduced by Yves Rothman \nEngineered By Dave Schiffman, Yves Rothman, Aidan Hobbs \nMixed By Lawrence Rothman \nMastered by Joe LaPorta\n\nVocals: Sabrina Teitelbaum\nVocals & Acoustic Guitar: Gigi Perez\nAcoustic Guitars: Sam Stewart \nSlide Guitar & Acoustic Guitars: Aidan Hobbs \nCello & Bass Guitar: Gabe Noel\n \n \n",
+  "partnerSources": [
+    {
+      "id": "oMufqxs64bw",
+      "title": "Blondshell — Full Performance (Live on KEXP)",
+      "url": "https://www.youtube.com/watch?v=oMufqxs64bw",
+      "scope": "Partner channel; linked reference only, excluded from owned-channel counts and views."
+    }
+  ]
+}
