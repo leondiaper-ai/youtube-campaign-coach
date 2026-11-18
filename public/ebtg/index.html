@@ -97,7 +97,7 @@ h3{font-family:'Inter',sans-serif;font-weight:700;font-size:1.02rem;line-height:
 .btn:hover{border-color:var(--blue);color:var(--blue)}
 .btn.primary{background:var(--deep);color:var(--paper);border-color:var(--deep)}
 .btn.primary:hover{background:var(--blue);border-color:var(--blue);color:#fff}
-@media(max-width:640px){.chrome .brand span{display:none}.btn.primary{display:none}}
+@media(max-width:640px){.chrome .brand span{display:none}.btn.primary{display:none}.chrome .brand{font-size:.74rem;letter-spacing:.06em}}
 #pbar{position:fixed;top:0;left:0;height:2px;background:var(--gold);width:0;z-index:70;transition:width .3s}
 
 /* ── slides ── */
@@ -360,7 +360,10 @@ h3{font-family:'Inter',sans-serif;font-weight:700;font-size:1.02rem;line-height:
 .cal-key{display:flex;align-items:center;gap:.45rem;flex-wrap:wrap;font-size:.72rem;color:rgba(241,236,227,.65)}
 .cal-key .k{display:inline-block;width:10px;height:12px;border-radius:2px;margin-left:.8rem}
 .cal-key .k.up{background:var(--paper);margin-left:0}.cal-key .k.rel{background:var(--gold)}.cal-key .k.prop{box-shadow:inset 0 0 0 1px var(--water)}.cal-key .k.today{width:2px;background:var(--water)}
-@media(max-width:640px){.cal-r b{font-size:.78rem}.cal-r span{display:none}.cal-w{display:none}}
+@media(max-width:640px){.cal-r,.cal-w{display:none}.cal-today::after{display:none}.cal{padding-top:.4rem}.cal-today{top:0}}
+.cal-list{display:none}
+@media(max-width:640px){.cal-list{display:grid;grid-template-columns:auto 1fr;gap:.25rem .8rem;margin-top:.4rem;font-size:.8rem;color:rgba(241,236,227,.8)}
+  .cal-list b{font-family:'Oswald',sans-serif;font-weight:600;color:var(--gold-lt);text-transform:uppercase;letter-spacing:.04em}}
 
 /* reveal */
 .reveal{opacity:0;transform:translateY(14px);transition:opacity .7s ease,transform .7s ease}
@@ -462,6 +465,7 @@ body.present .reveal{opacity:1;transform:none}
     <h1 class="reveal" style="margin-top:1rem">Everything But The Girl <em>/ YouTube</em></h1>
     <p class="lede reveal" style="margin-top:1.2rem;font-size:clamp(1.2rem,2vw,1.7rem)">Connecting the catalogue audience to the new album.</p>
     <div class="cal reveal" id="cal" aria-label="Campaign calendar, 28 October 2026 to 19 February 2027"></div>
+    <div class="cal-list reveal"><b>28 Oct</b><span>Young and Dumb · out now</span><b>4 Dec</b><span>Scala</span><b>20 Jan</b><span>Forward</span><b>19 Feb</b><span>Blue Reservoir</span></div>
     <div class="cal-key reveal"><span class="k up"></span>Uploaded <span class="k rel"></span>Release <span class="k prop"></span>Proposed week, using footage you have <span class="k today"></span>Today</div>
     <p class="body reveal" style="margin-top:.9rem;font-size:.86rem">Every day of the campaign, from Young and Dumb to the album. Three releases to come, and the footage you already have to fill the gaps, without turning you into full-time content makers.</p>
   </div>
