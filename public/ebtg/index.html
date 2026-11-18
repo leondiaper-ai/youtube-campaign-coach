@@ -105,7 +105,7 @@ h3{font-family:'Figtree',sans-serif;font-weight:700;font-size:1.02rem;line-heigh
 .slide.dark{background:var(--deep);color:var(--paper);border-color:rgba(255,255,255,.06)}
 .slide.mist{background:var(--paper-2)}
 .inner{position:relative;z-index:2;width:100%;max-width:1240px;margin:0 auto}
-.bleed{position:absolute;inset:0;z-index:0}
+.bleed{position:absolute;inset:0;z-index:0;overflow:hidden}
 .bleed img{width:100%;height:100%;object-fit:cover}
 .bleed::after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,rgba(15,36,51,.94) 0%,rgba(15,36,51,.72) 45%,rgba(15,36,51,.25) 100%)}
 .bleed.full::after{background:linear-gradient(180deg,rgba(15,36,51,.35) 0%,rgba(15,36,51,.55) 45%,rgba(15,36,51,.96) 100%)}
@@ -237,6 +237,9 @@ body.present .reveal{opacity:1;transform:none}
   body.present .slide{padding-top:4.6rem;padding-bottom:1.4rem}
   body.present h2{font-size:clamp(1.8rem,3.9vw,3.1rem)}
   body.present .src{margin-top:.8rem}
+  body.present .asset .face{aspect-ratio:16/10}
+  body.present .asset .txt{padding:.8rem .9rem .9rem;gap:.4rem}
+  body.present .asset .txt p{font-size:.82rem}
 }
 
 /* analysis sheet */
@@ -269,7 +272,7 @@ body.present .reveal{opacity:1;transform:none}
 
 <!-- ═══ 1 · COVER ═══ -->
 <section class="slide dark" data-t="Cover" style="justify-content:flex-end;padding-bottom:4rem">
-  <div class="bleed full"><img src="https://i.ytimg.com/vi/Zs-N7b3e6P4/maxresdefault.jpg" alt="Ben and Tracey on stage in front of a gold curtain, from the Young and Dumb film" style="object-position:50% 35%;transform:scale(1.12);transform-origin:62% 18%"></div>
+  <div class="bleed full"><img src="https://i.ytimg.com/vi/Zs-N7b3e6P4/maxresdefault.jpg" alt="Ben and Tracey on stage in front of a gold curtain, from the Young and Dumb film" style="object-position:50% 35%;transform:scale(1.2);transform-origin:66% 12%"></div>
   <div class="ripple"></div>
   <div class="inner">
     <div class="kicker reveal">For Ben and Tracey · Virgin Music Group · YouTube</div>
