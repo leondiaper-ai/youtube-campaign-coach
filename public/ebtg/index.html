@@ -385,6 +385,17 @@ h3{font-family:'Inter',sans-serif;font-weight:700;font-size:1.02rem;line-height:
 .ways span{font-size:.74rem;line-height:1.35;color:rgba(241,236,227,.7);border-left:2px solid var(--gold);padding-left:.6rem}
 .ways b{display:block;font-family:'Oswald',sans-serif;font-weight:600;text-transform:uppercase;font-size:.85rem;color:var(--paper)}
 
+.decay-wrap{position:relative;padding:0 4.6rem 0 0}
+.dw-top{position:absolute;top:-.2rem;left:3.2rem;font-family:'Oswald',sans-serif;font-weight:600;font-size:1.3rem;color:var(--ink);line-height:1.05}
+.dw-end{position:absolute;right:0;bottom:0;font-family:'Oswald',sans-serif;font-weight:600;font-size:1.3rem;color:var(--blue);line-height:1.05;text-align:right}
+.dw-top small,.dw-end small{font-family:'Inter',sans-serif;font-weight:500;font-size:.66rem;color:var(--mute);letter-spacing:.06em;text-transform:uppercase}
+.dw-axis{display:flex;justify-content:space-between;margin-top:.5rem;padding-right:4.6rem;font-size:.66rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--mute)}
+.three{display:flex;flex-direction:column;gap:.8rem}
+.tw{display:grid;grid-template-columns:3rem 1fr;gap:1rem;align-items:center;background:#fff;border:1px solid var(--line);border-radius:14px;padding:1rem 1.1rem}
+.tw .n{font-family:'Oswald',sans-serif;font-weight:600;font-size:2.2rem;color:var(--gold);line-height:1}
+.tw h3{font-family:'Oswald',sans-serif;font-weight:600;text-transform:uppercase;font-size:1.25rem;letter-spacing:.01em}
+.tw p{font-size:.92rem;color:var(--ink-2);margin-top:.15rem}
+
 /* reveal */
 .reveal{opacity:0;transform:translateY(14px);transition:opacity .7s ease,transform .7s ease}
 .reveal.on{opacity:1;transform:none}
@@ -711,35 +722,28 @@ body.present .reveal{opacity:1;transform:none}
   </div>
 </section>
 
-<!-- ═══ 8b · CADENCE + FORMATS ═══ -->
+<!-- ═══ 8b · ONE SONG, SEVERAL WAYS IN ═══ -->
 <section class="slide mist" data-t="Formats">
   <div class="inner">
-    <div class="kicker reveal">Cadence and formats</div>
+    <div class="kicker reveal">Keeping a song alive</div>
     <h2 class="reveal" style="margin-top:.7rem;max-width:34ch">Give each release <em>more than one way in.</em></h2>
-    <div class="wants reveal">
-      <div><b>Whole songs, lean-back</b>61% of video views come through playlists; the average view lasts 2:40</div>
-      <div><b>Watching you play</b>Archive live clips: typical 233K. Performance Shorts: 125K against 3.5K</div>
-      <div><b>The Todd Terry beat</b>The remix outdraws the original 3.5 to 1, and the Italian clip carries that beat</div>
-    </div>
-    <div class="g2 reveal" style="margin-top:1.6rem;align-items:start;grid-template-columns:1fr 1.1fr">
+    <div class="g2 reveal" style="margin-top:1.8rem;align-items:center;grid-template-columns:1fr 1fr">
       <div>
-        <div class="kicker" style="color:var(--ink-2)">Young and Dumb · views per day</div>
-        <div class="decay"><div class="dc first"><b>64K</b><i data-h="93.8"></i><span>28–29 Oct</span></div><div class="dc"><b>68K</b><i data-h="100.0"></i><span>31 Oct</span></div><div class="dc"><b>41K</b><i data-h="60.2"></i><span>2 Nov</span></div><div class="dc"><b>23K</b><i data-h="33.7"></i><span>4 Nov</span></div><div class="dc"><b>7K</b><i data-h="10.1"></i><span>6 Nov</span></div><div class="dc"><b>12K</b><i data-h="18.0"></i><span>8 Nov</span></div><div class="dc"><b>5K</b><i data-h="7.7"></i><span>10 Nov</span></div><div class="dc"><b>2K</b><i data-h="3.3"></i><span>12 Nov</span></div><div class="dc"><b>7K</b><i data-h="10.4"></i><span>14 Nov</span></div><div class="dc"><b>4K</b><i data-h="5.4"></i><span>16 Nov</span></div><div class="dc"><b>3K</b><i data-h="4.1"></i><span>18 Nov</span></div></div>
-        <p class="body" style="margin-top:.9rem;font-size:.92rem">A strong first week, then a natural fade to around <b style="color:var(--ink)">3,000 a day</b>. One Short went up on 29 October, and nothing new has pointed people back to the song since.</p>
-        <p class="body" style="margin-top:.6rem;font-size:.92rem">During Fuse the channel posted <b style="color:var(--ink)">36 times across 15 weeks</b>. Blue Reservoir is on 2 in 3 weeks.</p>
-      </div>
-      <div>
-        <div class="kicker" style="color:var(--ink-2)">Ways into a song, and what they did during Fuse</div>
-        <div class="fmts">
-          <div class="fm"><span class="ic">01</span><div><h3>Official video</h3><p>The anchor. <b>Nothing Left To Lose 2.85M</b>; Young and Dumb 409K so far.</p></div><span class="ok">Confirmed · Y&amp;D</span></div>
-          <div class="fm"><span class="ic">02</span><div><h3>Performance Short</h3><p>The two of you playing it. <b>Maida Vale 125K</b> against a typical Short of 3.5K.</p></div><span class="ok">Confirmed · Y&amp;D</span></div>
-          <div class="fm"><span class="ic">03</span><div><h3>Lyric video or visualiser</h3><p>A second, quieter version to sit with. <b>Caution To The Wind 365K</b>, No One Knows We&rsquo;re Dancing 171K.</p></div><span class="mk">Not confirmed</span></div>
-          <div class="fm"><span class="ic">04</span><div><h3>Archive companion</h3><p>An old performance that rhymes with the new song, like Rollercoaster beside Forward.</p></div><span class="ok">Confirmed · 3 clips</span></div>
-          <div class="fm"><span class="ic">05</span><div><h3>Remix or alternate take</h3><p>Reaches a different listener. <b>Four Tet&rsquo;s Nothing Left To Lose 98K.</b></p></div><span class="mk">Not confirmed</span></div>
+        <div class="decay-wrap">
+          <span class="dw-top">68K a day<br><small>first week</small></span>
+          <div class="decay"><div class="dc first"><i data-h="93.8"></i></div><div class="dc"><i data-h="100.0"></i></div><div class="dc"><i data-h="60.2"></i></div><div class="dc"><i data-h="33.7"></i></div><div class="dc"><i data-h="10.1"></i></div><div class="dc"><i data-h="18.0"></i></div><div class="dc"><i data-h="7.7"></i></div><div class="dc"><i data-h="3.3"></i></div><div class="dc"><i data-h="10.4"></i></div><div class="dc"><i data-h="5.4"></i></div><div class="dc"><i data-h="4.1"></i></div></div>
+          <span class="dw-end">3K a day<br><small>now</small></span>
         </div>
+        <div class="dw-axis"><span>28 Oct</span><span>Young and Dumb, views per day</span><span>18 Nov</span></div>
+        <p class="lede" style="margin-top:1.2rem;font-size:clamp(1rem,1.4vw,1.2rem)">A big first week, then a natural fade. <b style="color:var(--ink)">Nothing new has pointed people back to the song since.</b></p>
+      </div>
+      <div class="three">
+        <div class="tw"><span class="n">1</span><div><h3>The video</h3><p>The main event, on release day.</p></div></div>
+        <div class="tw"><span class="n">2</span><div><h3>A performance Short</h3><p>The two of you playing it. On this channel, performance Shorts do best.</p></div></div>
+        <div class="tw"><span class="n">3</span><div><h3>An archive clip that fits</h3><p>An old performance that sits well beside the new song.</p></div></div>
       </div>
     </div>
-    <p class="body reveal" style="margin-top:1rem;font-size:.92rem;max-width:90ch"><b style="color:var(--ink)">For Scala and Forward:</b> a release moment, then one follow-up from footage that exists, a week or two later. We haven&rsquo;t assumed any visualisers, lyric videos or new live films; if any are planned, they slot in here.</p>
+    <p class="lede reveal" style="margin-top:1.6rem;font-size:clamp(1rem,1.4vw,1.2rem);max-width:70ch"><b style="color:var(--blue)">For Scala and Forward, the same idea:</b> the release, then a Short and an archive clip in the weeks after.</p>
   </div>
 </section>
 
