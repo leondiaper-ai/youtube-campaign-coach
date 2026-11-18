@@ -47,7 +47,7 @@ body.present .slide h2{font-size:clamp(40px,5vw,80px)!important}
 .slide.dark .photo figure{position:relative;overflow:hidden;background:#000}
 .slide.dark .photo img{transition:transform .6s ease,filter .6s ease;filter:saturate(.92) contrast(1.04)}
 .slide.dark .photo:hover img{transform:scale(1.04);filter:none}
-#leaders .photo img{aspect-ratio:4/5!important;object-fit:cover;height:auto}
+#leaders .photo img{aspect-ratio:1/1!important;object-fit:cover;height:auto}
 #leaders .photo figcaption{position:absolute;inset:auto 0 0 0;padding:60px 18px 16px;background:linear-gradient(transparent,rgba(10,9,7,.92))}
 #leaders .photo .value{font-size:clamp(40px,4.4vw,68px)!important;line-height:.95;color:var(--cream)}
 #leaders .photo:nth-child(2) .value{color:var(--chart)}
@@ -140,7 +140,7 @@ body.present .slide h2{font-size:clamp(40px,5vw,80px)!important}
  .pnl{height:clamp(300px,50vh,460px)}
  .pnl-big{font-size:clamp(70px,7.5vw,120px)}
  .ch-stats b{font-size:clamp(46px,5vw,76px)}
- #leaders .photo img{aspect-ratio:1/1!important}
+ #leaders .photo img{aspect-ratio:5/4!important}
 }
 /* tablet / phone */
 @media(max-width:950px){
@@ -159,3 +159,6 @@ body.present .slide h2{font-size:clamp(40px,5vw,80px)!important}
  .slide h2{font-size:clamp(34px,10vw,52px)!important}
  .wall{grid-template-columns:repeat(4,minmax(0,1fr))}
 }
+
+img[src*="7M9A_sVI4BI"]{object-position:80% 50%!important}
+.ch-grid{grid-template-columns:.62fr 1.5fr}
