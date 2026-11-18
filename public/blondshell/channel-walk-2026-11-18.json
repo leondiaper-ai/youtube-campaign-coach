@@ -1,0 +1,217 @@
+{
+  "observedAt": "2026-11-18T13:50Z",
+  "method": "Signed-out public walk of youtube.com/@Blondshell (Home, Playlists, Live) from the UK, plus public playlist and watch pages. Studio-only settings (Shorts Related Video, end screens, cards) are not visible and are not assessed.",
+  "home": [
+    {
+      "pos": 0,
+      "shelf": "Featured video",
+      "content": "7M9A_sVI4BI Stone Fruit (Official Music Video)",
+      "read": "keep"
+    },
+    {
+      "pos": 1,
+      "shelf": "Violins",
+      "playlist": "PLZ4ukSm3tH9g",
+      "read": "fix"
+    },
+    {
+      "pos": 2,
+      "shelf": "If You Asked For A Picture + Another Picture",
+      "playlist": "PLBjWEEA-YVqv9tArvbfRqui67vJNI7iLB",
+      "read": "fix"
+    },
+    {
+      "pos": 3,
+      "shelf": "Blondshell (S/T)",
+      "playlist": "PLBjWEEA-YVqsozwofCFDDifcmfEt4Gz-q",
+      "read": "keep"
+    },
+    {
+      "pos": 4,
+      "shelf": "Shorts",
+      "read": "auto"
+    },
+    {
+      "pos": 5,
+      "shelf": "Music videos",
+      "playlist": "OLAK5uy_ko7rYRGqeIKEEnEJyp4rr621f6wDHnk_w",
+      "firstSix": [
+        "m_ebNdyNlpQ",
+        "9AykYm1Dh8c",
+        "dkjUFrdivYg",
+        "zb0qW0gPOak",
+        "UihOOlmTMXU",
+        "dk44JuEaTmc"
+      ],
+      "read": "YouTube-generated shelf; first six tiles are official audios"
+    },
+    {
+      "pos": 6,
+      "shelf": "Releases",
+      "playlist": "OLAK5uy_ksWDQsswyQEfKpT0CFswwir9rbVC39LYE",
+      "read": "auto"
+    },
+    {
+      "pos": 7,
+      "shelf": "Posts",
+      "read": "auto"
+    },
+    {
+      "pos": 8,
+      "shelf": "Collaborations",
+      "read": "keep"
+    }
+  ],
+  "playlists": {
+    "PLZ4ukSm3tH9g": {
+      "title": "Violins",
+      "items": [
+        "ytdwKm-dJyg",
+        "m_ebNdyNlpQ",
+        "9AykYm1Dh8c",
+        "dkjUFrdivYg",
+        "zb0qW0gPOak",
+        "UihOOlmTMXU",
+        "pCJ76bmI-io",
+        "qGj15z-9Rig",
+        "J8gf5qRYpbQ",
+        "m1pJ3WNwlCo",
+        "5qX3xsr5zlQ"
+      ],
+      "playlistViews": 1857
+    },
+    "OLAK5uy_ksWDQsswyQEfKpT0CFswwir9rbVC39LYE": {
+      "title": "Violins (YouTube-generated release)",
+      "items": [
+        "ytdwKm-dJyg",
+        "5qX3xsr5zlQ",
+        "m_ebNdyNlpQ",
+        "9AykYm1Dh8c",
+        "dkjUFrdivYg",
+        "7M9A_sVI4BI",
+        "qGj15z-9Rig",
+        "UihOOlmTMXU",
+        "pCJ76bmI-io",
+        "zb0qW0gPOak",
+        "m1pJ3WNwlCo"
+      ]
+    },
+    "PLBjWEEA-YVqv9tArvbfRqui67vJNI7iLB": {
+      "title": "If You Asked For A Picture + Another Picture",
+      "items": [
+        "A4iYGsFF194",
+        "0Zy1_ZbBbJg",
+        "CSJF-hjQWOM",
+        "pvXT8BjqhUs",
+        "QCFzjXhVQJU",
+        "P0agRfByknA",
+        "pxwZl7_xIm4",
+        "Gfv2jhVZIQo",
+        "3y5QcrOGfMA",
+        "DxkPktrOiwE",
+        "uB-TfwbcH_Y",
+        "q113Iv_YN3o",
+        "pAiV7uQpZMA",
+        "zkaLvuyMlY4",
+        "1iE2RY1KtN8",
+        "v42NfgSoIuE",
+        "gg7_6KjBw_8",
+        "RSr8aV17T4Q",
+        "IN9t2rlQnM0"
+      ]
+    },
+    "PLBjWEEA-YVqtj6FsHGD1qYms100r9zCFR": {
+      "title": "Official Videos",
+      "items": [
+        "P0agRfByknA",
+        "pxwZl7_xIm4",
+        "MbaRp6LqVsQ",
+        "0Zy1_ZbBbJg",
+        "pvXT8BjqhUs",
+        "tbCXx0bPx-Q",
+        "m-AolGenrfg",
+        "mO2GZ_j-6uY",
+        "hb3ZlYG1cKA",
+        "6TAPFUrk-nw",
+        "ZE20gz-0XEI"
+      ],
+      "newestItem": "2025-04-30"
+    },
+    "PLBjWEEA-YVqu_Np3vOlzXqWkCFUG7-Xqw": {
+      "title": "Official Audio",
+      "items": [
+        "vC4ywcAOCM8",
+        "pvXT8BjqhUs",
+        "bziyln8NbDM",
+        "ScLq-MshPYc",
+        "71y4IS2dMa4",
+        "wbu4mZmdAFY",
+        "mO2GZ_j-6uY",
+        "hb3ZlYG1cKA",
+        "ZE20gz-0XEI",
+        "n0icWlgfryY",
+        "dk44JuEaTmc"
+      ],
+      "newestItem": "2025-06-12",
+      "note": "Includes lyric and music videos; no If You Asked For A Picture or Violins audios"
+    },
+    "PLBjWEEA-YVqsozwofCFDDifcmfEt4Gz-q": {
+      "title": "Blondshell (S/T)",
+      "items": [
+        "dk44JuEaTmc",
+        "n0icWlgfryY",
+        "6TAPFUrk-nw",
+        "m-AolGenrfg",
+        "bziyln8NbDM",
+        "ScLq-MshPYc",
+        "71y4IS2dMa4",
+        "hb3ZlYG1cKA",
+        "ZE20gz-0XEI"
+      ]
+    }
+  },
+  "unlistedInPublicPlaylists": [
+    {
+      "id": "J8gf5qRYpbQ",
+      "title": "Blondshell - Stone Fruit",
+      "description": "For pitching purposes",
+      "published": "2026-09-21",
+      "views": 220,
+      "durationSec": 215,
+      "inPlaylist": "PLZ4ukSm3tH9g",
+      "publicEquivalent": "7M9A_sVI4BI"
+    },
+    {
+      "id": "QCFzjXhVQJU",
+      "title": "Blondshell - Two Times",
+      "description": "For pitching only",
+      "published": "2025-02-18",
+      "views": 77,
+      "durationSec": 236,
+      "inPlaylist": "PLBjWEEA-YVqv9tArvbfRqui67vJNI7iLB",
+      "publicEquivalent": "MbaRp6LqVsQ"
+    }
+  ],
+  "shortsAfterRelease": {
+    "window": "2026-09-26..2026-11-17",
+    "count": 24,
+    "titleNamesViolinsSong": 8,
+    "misspelt": [
+      "r_HUhUgPpXE 'Nee Age Trojan Horse'"
+    ],
+    "repeatedTitles": {
+      "November 3, 2026": 2,
+      "See you there x": 2
+    },
+    "twoFriedTitleVariants": [
+      "Two Fried",
+      "Two Fried 🐟",
+      "Two fried 🥲"
+    ],
+    "descriptionsSampled": 8,
+    "descriptionsEmpty": 8
+  },
+  "liveTab": [
+    "Blondshell and Producer Yves Rothman in Conversation (streamed 2023)"
+  ]
+}

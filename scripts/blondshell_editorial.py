@@ -74,5 +74,33 @@ def edit(orig,by,make,head,fmt):
  assert orig['song-plan'].count('class="st ')==3
  orig['roadmap']=orig['roadmap'].replace('<em>Week commencing · illustrative slots</em>','<em>Week commencing · every slot is a proposal</em>')
 
- order=['intro','channel','verdict','rollout','release','leaders','followthrough','last-album','catalogue','versions','premieres','formats','priorities','song-plan','roadmap','method']
+ # Channel housekeeping, from the public channel walk on 18 Nov (channel-walk-2026-11-18.json).
+ assert by['7M9A_sVI4BI']['views']==97490 and by['MbaRp6LqVsQ']['views']==40892
+ shelves=[('00','Featured · Stone Fruit music video','keep',''),('01','Violins','fix','Pitch copy in the Stone Fruit slot. Not in album order.'),('02','If You Asked For A Picture + Another Picture','fix','Pitch copy in the Two Times slot.'),('03','Blondshell (S/T)','keep',''),('04','Shorts','keep',''),('05','Music videos · YouTube-generated','move','Opens on five official audios.'),('06','Releases','keep',''),('07','Posts','keep',''),('08','Collaborations','keep',''),('+','Live & sessions','add','Docket, Toy, Thumbtack, Diet Pepsi · and the XMU take.')]
+ rows=''.join(f'<li class="sh sh-{k}"><b>{n}</b><span>{E(t)}{f"<i>{E(x)}</i>" if x else ""}</span><em>{k}</em></li>' for n,t,k,x in shelves)
+ fixes=[('Swap the pitch copies for the real videos.','The Violins playlist plays an unlisted Stone Fruit marked “For pitching purposes” (220 views), not the official video (97.5k). The last album’s playlist does the same with Two Times (77 views vs 40.9k).'),
+  ('Put Violins in album order.','YouTube’s own Violins release already has the tracklist order. The channel playlist doesn’t.'),
+  ('Retire or refresh the old playlists.','“Official Videos” stops at Event of a Fire, April 2025. “Official Audio” stops at Diet Pepsi, June 2025, and mixes in videos.'),
+  ('Give live a shelf.','Her performances are scattered. One Live &amp; sessions playlist on Home gives the XMU take somewhere to land.'),
+  ('Name the song in song Shorts.','8 of 24 Shorts since release name a Violins song. One reads “Nee Age Trojan Horse”; two are titled “November 3, 2026”. Keep the personality, add the song.')]
+ fx=''.join(f'<li><b>{i:02d}</b><div><h3>{a}</h3><p>{b}</p></div></li>' for i,(a,b) in enumerate(fixes,1))
+ orig['fixes']=make('fixes','Fix the shop window first',head('Channel housekeeping · public channel walk, 18 November','Fix the shop window first.<br><span class="serif">The album playlist plays a pitch copy.</span>')+f'<div class="ed-fixes mt"><div class="ed-home"><span class="label">Her Home page, top to bottom</span><ol>{rows}</ol></div><ol class="ed-fixlist">{fx}</ol></div>'+note('OBSERVED','Signed-out walk of Home, Playlists and Live. Unlisted status read from public watch pages. Shorts Related Video and end screens are Studio-only, not assessed.'))
+ old_prep='Label + management confirm the full XMU take, permissions and edit delivery.'
+ assert old_prep in orig['roadmap'];orig['roadmap']=orig['roadmap'].replace(old_prep,'Swap the pitch copies in the album playlists. Label + management confirm the full XMU take, permissions and edit delivery.')
+
+ order=['intro','channel','verdict','rollout','release','leaders','followthrough','last-album','catalogue','versions','premieres','formats','fixes','priorities','song-plan','roadmap','method']
  return order
+
+
+def walk_section(section,E):
+ W=__import__('json').load(open(__import__('pathlib').Path(__file__).resolve().parent.parent/'public/blondshell/channel-walk-2026-11-18.json'))
+ def a(id,t):return f'<a href="https://www.youtube.com/watch?v={id}" target="_blank" rel="noopener">{E(t)} ↗</a>'
+ rows=[('Violins playlist','Stone Fruit slot is '+a('J8gf5qRYpbQ','an unlisted copy')+' (“For pitching purposes”, 220 views, 21 Sep). Order differs from the album and YouTube’s own release.','Replace with '+a('7M9A_sVI4BI','the official video')+'; match the tracklist.'),
+  ('If You Asked For A Picture + Another Picture','Two Times slot is '+a('QCFzjXhVQJU','an unlisted copy')+' (“For pitching only”, 77 views).','Replace with '+a('MbaRp6LqVsQ','the lyric video')+'.'),
+  ('Official Videos','11 items; newest is Event of a Fire (Apr 2025). No Violins-era video.','Refresh or remove from public view.'),
+  ('Official Audio','11 items; newest is Diet Pepsi (Jun 2025). Includes lyric and music videos; no audio from the last two albums.','Refresh or remove from public view.'),
+  ('Home · Music videos shelf','YouTube-generated. First six tiles are official audios.','Consider replacing with a curated video or Live &amp; sessions playlist.'),
+  ('Home · live performances','No live shelf. Live tab holds one 2023 producer conversation.','Add a Live &amp; sessions playlist.'),
+  ('Shorts since release (24)','8 titles name a Violins song; one misspelt (Nee Age Trojan Horse); two titled “November 3, 2026”; three spellings of Two Fried. 8 of 8 sampled have no description.','Song name in song Shorts. Related Video needs a Studio check.')]
+ body='<div class="table-wrap"><table class="audit-table"><thead><tr><th>Where</th><th>What the public page shows</th><th>Fix</th></tr></thead><tbody>'+''.join(f'<tr><th scope="row">{x}</th><td>{y}</td><td>{z}</td></tr>' for x,y,z in rows)+'</tbody></table></div><p class="audit-note">'+E(W['method'])+' <a href="/blondshell/channel-walk-2026-11-18.json" target="_blank">Walk evidence ↗</a></p>'
+ return section('channel-walk','Channel housekeeping · public walk, 18 Nov',body)
