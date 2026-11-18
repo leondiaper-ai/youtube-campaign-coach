@@ -54,14 +54,14 @@ retained in evidence, excluded from playable upload counts. This does not
 prove a completed stream or Premiere.
 
 The upstream endpoint's isShort field means duration >0 and ≤62 seconds.
-Deck calls these short clips and discloses the proxy. It cannot establish
+Deck calls these Shorts and discloses the proxy. It cannot establish
 Shorts-feed status and can miss longer native Shorts.
 
 ## Findings
 
 **API — current rollout:** 110 playable uploads: 11 album full songs,
-99 surrounding clips. Window uploads have 675,544 current lifetime views:
-396,051 full-song (58.62697%) and 279,493 clip views. Median clip 2,321.
+99 surrounding Shorts. Window uploads have 675,544 current lifetime views:
+396,051 full-song (58.62697%) and 279,493 Short views. Median Short 2,321.
 The 99 include personality, covers, touring and catalogue, not only album
 promotional assets. Never label the aggregate as 110 confirmed album assets
 or views generated in the campaign.
@@ -77,18 +77,18 @@ Fur Elise 18 August; Stone Fruit 25 September. Between-full-song gaps
 71 uploads before release day; 15 on release day; 24 afterwards.
 
 **API — album day:** eight full songs (Stone Fruit and seven audios)
-plus seven clips. Together with three preceding songs, all 11 album tracks
+plus seven Shorts. Together with three preceding songs, all 11 album tracks
 had a full-song destination by release day. No duplicate delivery needed.
 Release-week window 25 September–1 October: 18 playable uploads.
 
 **API — post-release gap:** 26 September–17 November: 24 uploads, all
-short clips, no further full-song album version in retrieved owned-channel
+Shorts, no further full-song album version in retrieved owned-channel
 uploads. November Sirius XMU excerpts of Heart Has To Work and Stone Fruit
 exist. Full-take availability, broadcaster rights and filming inventory
 are unknown. Partner channels are not exhaustive here.
 
 **API — earlier album:** two MVs, three lyrics, seven album-day audios;
-12 primary album songs available by release. At days +1–53, 24 clips
+12 primary album songs available by release. At days +1–53, 24 Shorts
 and one Diet Pepsi cover, no new album-song full version. Toy/Thumbtack
 Vevo DSCVR at +129 days; Arms/Gigi Perez +159; Another Picture +196.
 These later resources are precedents, not part of equivalent early windows.
@@ -96,7 +96,7 @@ These later resources are precedents, not part of equivalent early windows.
 | Structural measure | Previous | Violins |
 |---|---:|---:|
 | Uploads in D−130…+53 | 110 | 108 |
-| Short clips | 98 | 97 |
+| Shorts | 98 | 97 |
 | Full-length uploads | 12 (includes cover) | 11 |
 | Active seven-day bins | 25/27 | 23/27 |
 | Maximum between-upload gap | 14d | 16d |
@@ -147,7 +147,7 @@ full-song album version in the first 53 days after release.
 
 Prioritise clearance of full XMU takes before a new shoot; start with Stone
 Fruit or Heart Has To Work. Catalogue-to-current curation and Studio routing
-review use existing assets. Artist stories and performance clips need edits
+review use existing assets. Artist stories and performance Shorts need edits
 and approvals. New filming/session production requires additional resources.
 
 The six-week roadmap is proposed, conditional, and owner-led. The official
@@ -198,9 +198,9 @@ commenter identities or a full comment export.
 
 - 2,076 relevance-ranked top-level comments sampled across 62 selected uploads:
   all 54 playable full-length entries and eight highest-viewed duration-proxy
-  clips, up to 100 comments each. This is not a representative audience sample.
+  Shorts, up to 100 comments each. This is not a representative audience sample.
 - 55 of 100 sampled Olympus comments mention Invincible. An existing artist
-  clip explicitly references that discovery route. This is not a traffic share.
+  Short explicitly references that discovery route. This is not a traffic share.
 - Individual Arms comments request an acoustic version and recognise the later
   Gigi Perez alternate. Arrangement credits confirm acoustic instrumentation.
   Acoustic content already exists; a stripped Violins performance is a proposed
