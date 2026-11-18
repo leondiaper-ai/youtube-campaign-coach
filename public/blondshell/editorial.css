@@ -110,3 +110,8 @@
 .ed-fixlist h3{font-size:clamp(19px,1.6vw,23px)}
 .ed-fixlist p{font-size:13.5px;line-height:1.45;margin-top:4px;max-width:62ch}
 @media(max-width:950px){.ed-fixes{grid-template-columns:1fr;gap:28px}}
+@media(max-height:820px) and (min-width:951px){
+ body.present .ed-home .sh{padding:4px 0}
+ body.present .ed-fixlist li{padding:8px 0}
+ body.present .ed-fixlist p{font-size:12.5px}
+}
