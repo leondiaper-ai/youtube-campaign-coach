@@ -31,7 +31,7 @@ def cinema(orig,by,make,head,fmt,note,tag,E):
   return f'<i class="{k}" style="height:{max(5,round(100*(a+b)/mx))}%" title="Week of {wk}: {a} full-song, {b} Shorts"></i>'
  cells=''.join(cell(n,a,b) for n,(a,b) in enumerate(bins))
  orig['intro']=('<section class="slide cover dark night-cover" id="intro" data-title="Violins · a channel and campaign review">'
-  '<img class="cover-bg" src="/blondshell/images/portrait.jpg" alt="Blondshell portrait by Reese Layton" fetchpriority="high">'
+  '<img class="cover-bg" src="/blondshell/images/portrait.jpg" alt="Blondshell portrait by Reese Layton" fetchpriority="high"><div class="cover-shade"></div>'
   '<div class="inner"><span class="mono">Virgin Music Group × Partisan Records · YouTube deep dive · 18 Nov 2026</span>'
   '<p class="cover-artist">blondshell</p><h1 class="cover-record">violins</h1>'
   '<p class="cover-line">The songs are there.<br><span>Give them a second life.</span></p>'

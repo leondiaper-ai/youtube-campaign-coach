@@ -59,9 +59,9 @@ body.present .slide h2{font-size:clamp(40px,5vw,80px)!important}
 
 /* cover */
 .night-cover{background:var(--night)!important;color:var(--cream);padding-bottom:40px!important}
-.night-cover .cover-bg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:62% 28%;filter:saturate(.85) contrast(1.05) brightness(.82)}
-.night-cover::before{content:'';position:absolute;inset:0;z-index:1;background:linear-gradient(90deg,rgba(13,11,8,.92) 0%,rgba(13,11,8,.62) 38%,rgba(13,11,8,.08) 72%),linear-gradient(0deg,rgba(13,11,8,.95) 0%,transparent 42%)}
-.night-cover .inner{z-index:2;align-self:stretch;display:flex;flex-direction:column;justify-content:flex-end;padding:0!important}
+.night-cover .cover-bg{position:absolute;top:0;right:0;bottom:0;left:auto;width:66%;height:100%;object-fit:cover;object-position:50% 30%;filter:saturate(.85) contrast(1.05) brightness(.85);z-index:0}
+.night-cover .cover-shade{position:absolute;inset:0;z-index:1;background:linear-gradient(90deg,var(--night) 0%,var(--night) 34%,rgba(19,17,13,.7) 48%,rgba(19,17,13,.05) 70%),linear-gradient(0deg,rgba(19,17,13,.9) 0%,transparent 30%);pointer-events:none}
+.night-cover .inner{z-index:2;text-align:left!important;align-items:flex-start;display:flex;flex-direction:column;justify-content:center;padding:0!important}
 .night-cover .mono{color:var(--chart);margin-bottom:22px}
 .cover-artist{font-family:var(--heading);font-size:clamp(26px,2.6vw,40px);letter-spacing:-.04em;margin:0;color:var(--cream)}
 .cover-record{font-family:var(--heading)!important;font-weight:400!important;font-size:clamp(120px,17vw,270px)!important;line-height:.78!important;letter-spacing:-.075em!important;margin:4px 0 0 -.06em!important;color:var(--cream)!important;text-transform:lowercase;max-width:none!important}
@@ -152,7 +152,8 @@ body.present .slide h2{font-size:clamp(40px,5vw,80px)!important}
 @media(max-width:650px){
  .cover-record{font-size:31vw!important}
  .night-cover .cover-bg{object-position:70% 20%}
- .night-cover::before{background:linear-gradient(0deg,rgba(13,11,8,.96) 0%,rgba(13,11,8,.55) 55%,rgba(13,11,8,.15) 100%)}
+ .night-cover .cover-bg{width:100%}
+ .night-cover .cover-shade{background:linear-gradient(0deg,var(--night) 0%,rgba(19,17,13,.75) 50%,rgba(19,17,13,.1) 100%)}
  .night-cover .inner{padding-top:40vh!important}
  .cad-bars{gap:2px;height:36px}
  .slide h2{font-size:clamp(34px,10vw,52px)!important}
