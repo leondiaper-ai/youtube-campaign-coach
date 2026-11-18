@@ -398,8 +398,13 @@ h3{font-family:'Inter',sans-serif;font-weight:700;font-size:1.02rem;line-height:
 .tw p{font-size:.92rem;color:var(--ink-2);margin-top:.15rem}
 
 .newb{position:absolute;left:1rem;top:.8rem;z-index:4;font-size:.6rem;font-weight:800;letter-spacing:.14em;text-transform:uppercase;background:var(--gold);color:var(--deep);padding:.25rem .55rem;border-radius:99px}
+.asset .face.img > .newb{position:absolute}
 .asset .face .rank,.asset .face .vert{top:2.4rem!important}
 .asset .face .vert{background:transparent;border:1px solid var(--gold-lt);color:var(--gold-lt)}
+
+.pitch{display:inline-flex;align-items:center;gap:1rem;margin-top:1rem;padding:.65rem 1rem .65rem .7rem;border:1.5px solid var(--gold);border-radius:99px;background:rgba(196,154,62,.12);font-size:.92rem;color:var(--paper)}
+.pitch .pt{background:var(--gold);color:var(--deep);font-size:.66rem;font-weight:800;letter-spacing:.14em;text-transform:uppercase;padding:.35rem .7rem;border-radius:99px;white-space:nowrap}
+@media(max-width:640px){.pitch{border-radius:14px;flex-direction:column;align-items:flex-start;gap:.5rem}}
 
 /* reveal */
 .reveal{opacity:0;transform:translateY(14px);transition:opacity .7s ease,transform .7s ease}
@@ -440,6 +445,7 @@ body.present .reveal{opacity:1;transform:none}
   body.present .fm p{font-size:.78rem}
   body.present .cad{margin-top:.9rem;padding:.6rem .9rem}
   body.present .station{margin-top:.9rem}
+  body.present .pitch{margin-top:.6rem;padding:.45rem .9rem .45rem .55rem;font-size:.84rem}
   body.present [data-t="Station"] .lede{font-size:.98rem}
   body.present .steps{margin-top:.8rem;font-size:.84rem}
   body.present .tape{aspect-ratio:2.3/1}
@@ -807,9 +813,10 @@ body.present .reveal{opacity:1;transform:none}
 <!-- ═══ 10b · A STATION ═══ -->
 <section class="slide dark grain" data-t="Station">
   <div class="inner">
-    <div class="kicker reveal">YouTube Stations · we&rsquo;ll pitch this for you</div>
+    <div class="kicker reveal">YouTube Stations</div>
     <h2 class="reveal" style="margin-top:.7rem;max-width:35ch">Let the catalogue play <em>into the new record.</em></h2>
     <p class="lede reveal" style="margin-top:.9rem;max-width:64ch"><b style="color:var(--paper)">What&rsquo;s a Station?</b> A continuous, programmed stream of your videos on YouTube. It mixes the songs people already love with Blue Reservoir and the archive as each piece arrives.</p>
+    <div class="pitch reveal"><span class="pt">We&rsquo;ll pitch this</span><span>We&rsquo;ll take a Station for the channel to YouTube and ask for access. Nothing for you to do.</span></div>
     <div class="station reveal"><div class="st cat"><img class="vhs" src="https://i.ytimg.com/vi/IAkY5m00rpY/maxresdefault.jpg" alt="Missing" loading="lazy"><span class="nm">Missing<small>Todd Terry Remix</small></span><span class="lb">Catalogue</span></div><div class="st new"><img class="" src="https://i.ytimg.com/vi/Zs-N7b3e6P4/maxresdefault.jpg" alt="Young and Dumb" loading="lazy"><span class="nm">Young and Dumb</span><span class="lb">Blue Reservoir</span></div><div class="st cat"><img class="vhs" src="https://i.ytimg.com/vi/qsRnVtIeLyg/hqdefault.jpg" alt="Driving" loading="lazy"><span class="nm">Driving</span><span class="lb">Catalogue</span></div><div class="st arch ph"><span class="nm">Missing<small>Italian TV · 1995</small></span><span class="lb">New to the channel</span></div><div class="st cat"><img class="vhs" src="https://i.ytimg.com/vi/mVi78cWhFmE/hqdefault.jpg" alt="Wrong" loading="lazy"><span class="nm">Wrong</span><span class="lb">Catalogue</span></div><div class="st cat"><img class="vhs" src="https://i.ytimg.com/vi/ARkGvp4NJ9U/maxresdefault.jpg" alt="Rollercoaster" loading="lazy"><span class="nm">Rollercoaster</span><span class="lb">Catalogue</span></div><div class="st arch ph"><span class="nm">Get Me<small>with Danny Thompson</small></span><span class="lb">New to the channel</span></div><div class="st cat"><img class="vhs" src="https://i.ytimg.com/vi/M6QKZJeK-5w/maxresdefault.jpg" alt="Nothing Left To Lose" loading="lazy"><span class="nm">Nothing Left To Lose</span><span class="lb">Catalogue</span></div><div class="st cat"><img class="vhs" src="https://i.ytimg.com/vi/5fMNDi3uisw/hqdefault.jpg" alt="Missing · Live" loading="lazy"><span class="nm">Missing · Live<small>The White Room, 1996</small></span><span class="lb">Catalogue</span></div><div class="st next ph"><span class="nm">Scala · Forward<small>4 Dec · 20 Jan</small></span><span class="lb">Coming</span></div></div>
     <div class="steps reveal">
       <div><b>01 · Arrive</b>Fans come for the songs they know</div>
