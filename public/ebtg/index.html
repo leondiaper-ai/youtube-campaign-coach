@@ -318,6 +318,11 @@ body.present .reveal{opacity:1;transform:none}
   body.present .asset .txt p{font-size:.82rem}
 }
 
+@media(max-height:740px){
+  body.present h2{font-size:clamp(1.7rem,3.5vw,2.7rem)}
+  body.present .yt .thumb{display:none}
+  body.present .kicker{font-size:.64rem}
+}
 /* analysis sheet */
 .sheet{position:fixed;inset:0;z-index:80;background:var(--paper);overflow-y:auto;display:none;padding:4.5rem var(--pad) 4rem}
 .sheet.open{display:block}
