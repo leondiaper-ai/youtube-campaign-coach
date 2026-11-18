@@ -32,7 +32,7 @@ def edit(orig,by,make,head,fmt):
 
  # 02 — the readout: conclusion first, three states, one move.
  assert by['ytdwKm-dJyg']['views']==138554 and by['7M9A_sVI4BI']['views']==97490
- orig['verdict']=make('verdict','The readout',head('The readout · day 53','Violins arrived complete.<br><span class="serif">The second chapter hasn’t started.</span>')+'''<div class="ed-readout mt"><article>'''+frame('7M9A_sVI4BI','Stone Fruit · music video','Album day · 53 days old',tag('on'))+'''<h3>What landed</h3><p><b>11 / 11</b> songs live by release day. The two music videos hold <b>59.6%</b> of album-video viewing.</p></article><article>'''+frame('R_1iHTmZ90k','Two Fried · Short','4 Nov · one of 24 Shorts since release',tag('on','On the channel · Short'),False)+'''<h3>What’s missing</h3><p><b>24</b> Shorts since release. <b>0</b> new full-song versions. Last album, the second versions came <b>4–6 months</b> later.</p></article><article class="ed-move">'''+frame('h0bN0GGLJSQ','Stone Fruit on XMU','7 Nov · 27-second excerpt',tag('prop','Proposed · full take to clear'),False)+'''<h3>The move</h3><p>One full <b>Stone Fruit</b> performance, then <b>two Shorts a week</b> to 17 January.</p></article></div><div class="ed-key"><span>'''+ON+'''exists publicly</span><span>'''+GAP+'''not found on her channel</span><span>'''+PROP+'''needs approval or production</span></div>'''+note('API → INFERENCE','Lifetime counters at 17 Nov capture. The XMU full take, its rights and edit are unconfirmed.'))
+ orig['verdict']=make('verdict','The readout',head('The readout · day 53','Violins arrived complete.<br><span class="serif">The second chapter hasn’t started.</span>')+'''<div class="ed-readout mt"><article>'''+frame('7M9A_sVI4BI','Stone Fruit · music video','Album day · 53 days old',tag('on'))+'''<h3>What works</h3><p><b>11 / 11</b> songs live by release day. The two music videos hold <b>59.6%</b> of album-video viewing.</p></article><article>'''+frame('R_1iHTmZ90k','Two Fried · Short','4 Nov · one of 24 Shorts since release',tag('on','On the channel · Short'),False)+'''<h3>What needs fixing</h3><p><b>24</b> Shorts since release, <b>0</b> new full-song versions. And the album playlist plays a pitch copy of Stone Fruit.</p></article><article class="ed-move">'''+frame('h0bN0GGLJSQ','Stone Fruit on XMU','7 Nov · 27-second excerpt',tag('prop','Proposed · full take to clear'),False)+'''<h3>What to do first</h3><p>Fix the album playlists. Then one full <b>Stone Fruit</b> performance and <b>two Shorts a week</b> to 17 January.</p></article></div><div class="ed-key"><span>'''+ON+'''exists publicly</span><span>'''+GAP+'''not found on her channel</span><span>'''+PROP+'''needs approval or production</span></div>'''+note('API → INFERENCE','Lifetime counters at 17 Nov capture. The XMU full take, its rights and edit are unconfirmed.'))
 
  # Tighter headlines and one evidence line per slide.
  renote('channel','API + WATCHER','30-day window 19 Oct–17 Nov. Watcher history is short and repeats counters, so no growth rate is claimed.')
@@ -88,7 +88,17 @@ def edit(orig,by,make,head,fmt):
  old_prep='Label + management confirm the full XMU take, permissions and edit delivery.'
  assert old_prep in orig['roadmap'];orig['roadmap']=orig['roadmap'].replace(old_prep,'Swap the pitch copies in the album playlists. Label + management confirm the full XMU take, permissions and edit delivery.')
 
- order=['intro','channel','verdict','rollout','release','leaders','followthrough','last-album','catalogue','versions','premieres','formats','fixes','priorities','song-plan','roadmap','method']
+ # Next steps: first, next, then (mirrors the EBTG close).
+ def step(when,dates,items):
+  li=''.join(f'<li>{x}</li>' for x in items)
+  return f'<article class="ed-step"><span class="ed-when">{when}</span><span class="ed-dates">{dates}</span><ul>{li}</ul></article>'
+ orig['next-steps']=make('next-steps','Next steps',head('Next steps · every item is a proposal','Fix the shop window.<br><span class="serif">Then give Stone Fruit its second life.</span>')+'<div class="ed-steps mt">'+step('First','This week · 18–22 Nov',['Swap the pitch copies in both album playlists for the real videos.','Put the Violins playlist in album order.','Ask whether the full XMU takes are cleared for her channel.'])+step('Next','23 Nov → December',['Upload the full Stone Fruit performance, if cleared.','Two Shorts a week, each naming its song.','Build a Live &amp; sessions playlist and put it on Home.','Refresh or retire Official Videos and Official Audio.'])+step('Then','January',['Read the response at day 28 and choose the next song.','Pick its second version: a stripped take or a lyric video.','If a new video lands, premiere it with her in the room.'])+'</div><div class="ed-close"><span>'+PROP+'needs approval or production</span><a class="button" href="#analysis">Full evidence in Analysis →</a></div>')
+
+ order=['intro','channel','verdict','rollout','release','leaders','catalogue','versions','premieres','followthrough','last-album','fixes','formats','priorities','song-plan','roadmap','next-steps']
+ SEC={**{k:('works','What works') for k in ['rollout','release','leaders','catalogue','versions','premieres']},**{k:('fix','What needs fixing') for k in ['followthrough','last-album','fixes','formats']},**{k:('do','What to do') for k in ['priorities','song-plan','roadmap','next-steps']}}
+ for k,(c,t) in SEC.items():
+  orig[k]=orig[k].replace('<div class="inner">',f'<div class="inner"><span class="sec sec-{c}">{t}</span>',1)
+  assert f'sec-{c}' in orig[k],k
  return order
 
 

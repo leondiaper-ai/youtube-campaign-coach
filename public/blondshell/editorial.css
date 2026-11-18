@@ -115,3 +115,32 @@
  body.present .ed-fixlist li{padding:8px 0}
  body.present .ed-fixlist p{font-size:12.5px}
 }
+
+/* section tags: what works / what needs fixing / what to do */
+.sec{display:inline-flex;align-items:center;gap:7px;font:600 10.5px/1 var(--body);letter-spacing:.06em;text-transform:uppercase;margin-bottom:14px;padding:6px 10px;border-radius:2px}
+.sec::before{content:'';width:8px;height:8px;border-radius:50%;background:currentColor}
+.sec-works{background:#817819;color:#f4f0e2}.sec-works::before{background:#f4f0e2}
+.sec-fix{background:#a8584a;color:#fbf2ec}.sec-fix::before{background:#fbf2ec}
+.sec-do{background:#3b352b;color:#f2eade}.sec-do::before{background:#e3a291}
+#followthrough .sec-fix,#priorities .sec-do{background:#f2eade;color:#2f2a21}
+.sec{margin-right:12px;vertical-align:middle}.sec+.label{display:inline-block;vertical-align:middle;margin-bottom:14px}
+
+/* next steps */
+#next-steps{background:#3b352b;color:#f2eade}#next-steps .sec-do{background:#f2eade;color:#2f2a21}
+#next-steps h2 .serif{color:#dbd49a}
+.ed-steps{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:26px}
+.ed-step{border-top:3px solid #e3a291;padding-top:16px}
+.ed-step:nth-child(2){border-color:#dbd49a}.ed-step:nth-child(3){border-color:rgba(242,234,222,.5)}
+.ed-when{display:block;font:400 clamp(38px,4vw,56px)/1 var(--heading);letter-spacing:-.04em}
+.ed-dates{display:block;font-size:12px;letter-spacing:.04em;opacity:.7;margin-top:8px}
+.ed-step ul{list-style:none;margin:18px 0 0;padding:0}
+.ed-step li{font-size:15px;line-height:1.45;padding:10px 0 10px 18px;border-top:1px solid rgba(242,234,222,.18);position:relative}
+.ed-step li::before{content:'';position:absolute;left:0;top:18px;width:7px;height:7px;border-radius:50%;background:#e3a291}
+.ed-close{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;margin-top:28px;font-size:12px;opacity:.9}
+.ed-close span{display:flex;gap:9px;align-items:center}
+#next-steps .st-prop{background:#e3a291;color:#2f2a21}#next-steps .st-prop::before{background:#2f2a21}
+#next-steps .button{color:#f2eade;border:1px solid rgba(242,234,222,.6);padding:10px 14px;text-decoration:none;font-size:13px}
+@media(max-width:650px){.ed-steps{grid-template-columns:1fr;gap:30px}}
+.ed-readout article:nth-child(1) h3{color:#817819}.ed-readout article:nth-child(2) h3{color:#a8584a}
+.ed-readout article:nth-child(2){border-top:3px solid #a8584a}.ed-readout article:nth-child(1){border-top:3px solid #817819}.ed-readout .ed-move{border-top-color:#3b352b}
+#next-steps .label{color:#dbd49a}
