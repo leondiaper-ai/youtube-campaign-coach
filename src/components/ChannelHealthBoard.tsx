@@ -262,15 +262,29 @@ function computeInsights(rows: RowData[]): Insight[] {
       insights.push({ category, text: `${r.name}: ${text}`, action, slug: r.slug, score });
     };
 
+    // Release-level window: a known multiformat song with no identifiable
+    // Shorts support is actionable only when the release is recent and the
+    // channel has meaningful activity. A channel-wide Shorts count is not
+    // evidence that a particular song was supported.
+    const stack = r.formatStack;
+    const stackAge = stack ? (Date.now() - Date.parse(stack.firstAt)) / 86_400_000 : null;
+    const timelyStack = stack && stackAge != null && Number.isFinite(stackAge)
+      && stackAge >= 7 && stackAge <= 14 && stack.shorts === 0
+      && stack.formats.length >= 2 && goodViews && views >= 10000;
+
     // A single strongest story per channel, with its related facts folded in.
-    if (goodViews && views >= 50000 && r.uploads30d === 0) {
+    if (timelyStack) {
+      add('formats', `“${stack.song}” is in its 7–14 day follow-up window, with no matching Shorts found`,
+        `Support “${stack.song}” with a Short drawn from the existing ${stack.formats.join(' + ')} assets, and link viewers to the main release. Confirm title matching before publishing.`,
+        90);
+    } else if (goodViews && views >= 50000 && r.uploads30d === 0) {
       const growth = subs != null && subs > 0 ? ` and ${fmtDelta(subs)} subscribers` : '';
       add('catalogue', `${fmtDelta(views)} views${growth} in 7 days, no recent uploads`,
-        'Audience demand is continuing without new posts. Identify the videos gaining views and, where newer music exists and rights permit, connect viewers to it.',
+        'No recent uploads despite sustained audience activity. Where newer music is available, connect catalogue viewers through playlists, descriptions and eligible end screens.',
         70 + Math.log10(views + 1) * 5);
     } else if (goodViews && views >= 5000 && subs != null && subs <= 0) {
       add('conversion', `${fmtNum(views)} weekly views, subscriber count flat`,
-        'Find the videos gaining attention and connect viewers to a relevant next watch. Flat subscribers alone do not prove a conversion problem.',
+        'Give viewers a clear next watch: feature a relevant release in channel playlists and eligible video end screens.',
         62 + Math.log10(views + 1) * 4);
     } else if (reliableWoW && r.viewsWoW! <= -30) {
       add('cadence', `views down ${fmtPct(r.viewsWoW!)} week on week`,
@@ -282,7 +296,9 @@ function computeInsights(rows: RowData[]): Insight[] {
       const viewsNote = goodViews && views >= 10000 ? ` alongside ${fmtNum(views)} views` : '';
       add('growth', `${fmtDelta(subs)} subscribers this week${viewsNote}`,
         r.uploads30d > 0
-          ? 'Compare the recent uploads with this growth window and build on the best-supported format. Subscriber attribution to individual videos is not available here.'
+          ? r.shorts30d === 0 && r.uploads30d >= 2
+            ? 'Recent uploads are attracting an audience, but no Shorts were published this month. Prioritise a cut-down from the strongest current release.'
+            : 'Keep the current release active with a relevant follow-up asset, using the formats already published on this channel.'
           : 'Subscriber growth without new uploads: review which existing videos are gaining views before deciding on follow-up content.',
         52 + Math.log10(subs + 1) * 5);
     } else if (reliableWoW && r.viewsWoW! >= 35 && views! >= 10000) {
