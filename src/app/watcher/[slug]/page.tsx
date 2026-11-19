@@ -1,3 +1,4 @@
+import { normalizeArtistIdentity } from '@/lib/artistIdentity';
 import { deepDiveFor } from '@/lib/deepDiveLink';
 import { listPartnerSlugs, listHiddenPartnerSlugs } from '@/lib/youtubeUkPartnerStore';
 import { YOUTUBE_UK_ROSTER } from '@/lib/youtubeUkRoster';
@@ -40,7 +41,7 @@ export default async function WatcherPage({
   const sp = (await searchParams) ?? {};
   const partner = sp.partner === 'youtube-uk';
   const roster = partner ? await getAllArtists() : [];
-  const normalize = (name: string) => name.normalize('NFKD').replace(/[\\u0300-\\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]/g, '');
+  const normalize = normalizeArtistIdentity;
   const allowedNames = new Set(YOUTUBE_UK_ROSTER.map(a => normalize(a.name)));
   const partisan = getLabelWorkspace('partisan');
   const [extraSlugs, hiddenSlugs] = partner ? await Promise.all([

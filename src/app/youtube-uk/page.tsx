@@ -1,3 +1,4 @@
+import { normalizeArtistIdentity } from '@/lib/artistIdentity';
 import { listPartnerSlugs, listHiddenPartnerSlugs } from '@/lib/youtubeUkPartnerStore';
 import PartnerAddChannelButton from '@/components/PartnerAddChannelButton';
 import { getLabelWorkspace, isLabelArtist } from '@/lib/labels';
@@ -64,7 +65,7 @@ export default async function ControlPage({
   // The shared UK list is a view over all existing Watcher channels, regardless
   // of which regional workspace originally registered the channel.
   const availableArtists = await getAllArtists();
-  const normalize = (name: string) => name.normalize('NFKD').replace(/[\\u0300-\\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]/g, '');
+  const normalize = normalizeArtistIdentity;
   const rosterNames = new Set(YOUTUBE_UK_ROSTER.map(r => normalize(r.name)));
   const partisan = getLabelWorkspace('partisan');
   const partnerSlugs = await listPartnerSlugs().catch(() => [] as string[]);

@@ -1,3 +1,4 @@
+import { resolveArtistIdentity } from '@/lib/artistIdentity';
 import { palayeLabelUploads } from '@/lib/coach/palayeSources';
 import { YOUTUBE_UK_ROSTER } from '@/lib/youtubeUkRoster';
 import { listPartnerSlugs } from '@/lib/youtubeUkPartnerStore';
@@ -6,7 +7,7 @@ import { notFound } from 'next/navigation';
 import { loadPlan, savePlan, type CampaignDataCoverage, type HistoricalSource } from '@/lib/planStore';
 import { readLiveSnapByHandle, readChannelMapping } from '@/lib/kvCache';
 import { readHistory } from '@/lib/snapshots';
-import { ARTISTS } from '@/lib/artists';
+import { ARTISTS, mergeArtistLists } from '@/lib/artists';
 import { listCustomArtists } from '@/lib/artistStore';
 import { normalizeChannelData, rawDelta } from '@/lib/youtube/normalizeChannelData';
 import { matchPlanToUploads } from '@/lib/coach/matchEngine';
@@ -81,14 +82,10 @@ export default async function CampaignPage({ params, searchParams }: PageProps) 
 
   // Find the artist's channel handle
   const custom = await listCustomArtists();
-  const allArtists = [...ARTISTS, ...custom];
+  const allArtists = mergeArtistLists(ARTISTS, custom);
   // Campaign slugs are not artist slugs (e.g. tom-a-smith-the-golden-gates).
   // Resolve punctuation and spacing consistently with the Watcher roster.
-  const normalizeArtist = (value: string) => value.normalize('NFKD').replace(/[\\u0300-\\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]/g, '');
-  const artistConfig = allArtists.find(a =>
-    normalizeArtist(a.name) === normalizeArtist(saved.artist) ||
-    normalizeArtist(a.slug) === normalizeArtist(saved.artist)
-  );
+  const artistConfig = resolveArtistIdentity(allArtists, saved.artist);
 
   // Auto-regenerate plan when:
   // 1. campaignStartDate is earlier than plan's first week, OR
