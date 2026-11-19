@@ -1,47 +1,14 @@
 'use client';
 
-/* ═══════════════════════════════════════════════════════════════════
-   THE TEAM BOARD'S THREE TABS
-   ═══════════════════════════════════════════════════════════════════
-
-   ALL ARTISTS — everything the team is watching.
-
-   PRIORITY — the pinned ones. This was a section below the full
-   roster, which put what a team had decided was urgent underneath
-   everything they had not. A pin is a statement of priority, so it
-   earns a tab. The pill toggle is the Watcher's own, so there is no
-   second control to learn.
-
-   CHANNEL BEHAVIOUR — what a pinned channel has actually been
-   publishing. This used to expand inside a campaign card: a
-   full-width chart folded into a card column above a note box. It has
-   the tab to itself now, with a rail of the team's other pinned
-   artists so you can move between them without going back.
-
-   ── HOW THE PIECES REACH EACH OTHER ────────────────────────────────
-   The first two tabs hold server-rendered children, so their props
-   were fixed before this component existed and a callback cannot be
-   passed down to them. A campaign card's Behaviour button reaches the
-   third tab through context instead. Children passed into a client
-   component still render inside its tree, so the provider wraps them.
-
-   ?behaviour=<slug> opens the tab directly on one artist. That is how
-   the artist page links here, the same way our own artist page links
-   to /campaigns?behaviour=<slug>.
-
-   The behaviour tab is a tab you click and a page you land on: the
-   board's header, tab bar and centred column all step aside, because
-   this is the same view our own campaigns board gives a channel and it
-   should look the same here. It also means the chart, which is the
-   heavy part of this page, is never mounted for a reader who does not
-   open it.
-   ═══════════════════════════════════════════════════════════════════ */
+/* One workspace navigation controls every board view. View URLs are
+   shareable, preserve the team's key and follow browser back/forward. */
 
 import {
   createContext, useContext, useState, useEffect, type ReactNode,
 } from 'react';
 import dynamic from 'next/dynamic';
 import { AppHeader } from '@/components/ui/AppHeader';
+import { regionalWorkspaceNav, readTeamBoardView, type TeamBoardView } from '@/lib/workspaceNavigation';
 
 const CampaignBehaviour = dynamic(() => import('./CampaignBehaviour'), {
   ssr: false,
@@ -54,7 +21,6 @@ const CampaignBehaviour = dynamic(() => import('./CampaignBehaviour'), {
 
 const PAPER = '#FAF7F2';
 const INK = '#0E0E0E';
-const SOFT = '#F6F1E7';
 
 /** One pinned artist, as the behaviour rail needs them. */
 export type BehaviourRailArtist = {
@@ -72,15 +38,7 @@ export function useOpenBehaviour() {
   return useContext(OpenBehaviourContext);
 }
 
-type Tab = 'all' | 'priority' | 'behaviour' | 'tools';
-const TABS: Tab[] = ['all', 'priority', 'behaviour', 'tools'];
-
-const TAB_LABEL: Record<Tab, (n: { all: number; priority: number }) => string> = {
-  all:       (n) => `Artists (${n.all})`,
-  priority:  (n) => `Priority (${n.priority})`,
-  behaviour: () => 'Activity',
-  tools:     () => 'Tools',
-};
+type Tab = TeamBoardView;
 
 const TAB_BLURB: Record<Tab, string> = {
   all:       'Every channel this team is watching',
@@ -118,79 +76,64 @@ export default function TeamBoardShell({
   const [tab, setTab] = useState<Tab>('all');
   const [behaviourSlug, setBehaviourSlug] = useState<string | null>(null);
 
-  /* Read on mount rather than from useSearchParams, which would force
-     this subtree into a Suspense boundary for a value that never
-     changes after load. */
   useEffect(() => {
-    const s = new URLSearchParams(window.location.search).get('behaviour');
-    if (s) {
-      setBehaviourSlug(s);
-      setTab('behaviour');
-    }
+    const syncView = () => {
+      const params = new URLSearchParams(window.location.search);
+      setTab(readTeamBoardView(params));
+      setBehaviourSlug(params.get('behaviour'));
+    };
+    syncView();
+    window.addEventListener('popstate', syncView);
+    return () => window.removeEventListener('popstate', syncView);
   }, []);
 
-  const open = (slug: string) => {
-    setBehaviourSlug(slug);
-    setTab('behaviour');
-    /* So a reload, or a link the reader copies, lands back here. */
-    const u = new URL(window.location.href);
-    u.searchParams.set('behaviour', slug);
-    window.history.replaceState(null, '', u.toString());
-  };
-
-  /* Leaving the behaviour tab clears the parameter, so a reload does
-     not drop the reader straight back into a chart they navigated away
-     from. */
-  const leaveBehaviour = (next: Tab) => {
+  const navigate = (next: Tab, slug?: string) => {
+    const url = new URL(window.location.href);
+    url.searchParams.delete('behaviour');
+    url.searchParams.delete('view');
+    if (next !== 'all') url.searchParams.set('view', next);
+    if (next === 'behaviour' && slug) url.searchParams.set('behaviour', slug);
+    if (url.href !== window.location.href) window.history.pushState(null, '', url.href);
+    setBehaviourSlug(next === 'behaviour' ? slug ?? null : null);
     setTab(next);
-    const u = new URL(window.location.href);
-    u.searchParams.delete('behaviour');
-    window.history.replaceState(null, '', u.toString());
   };
+  const open = (slug: string) => navigate('behaviour', slug);
+  const leaveBehaviour = (next: Tab) => navigate(next);
+
+  const navigation = (regionalWorkspaceNav(marketId) ?? []).map(item => ({
+    ...item,
+    ...(item.view ? {
+      active: tab === item.view,
+      label: item.view === 'all' ? `Artists (${allCount})`
+        : item.view === 'priority' ? `Priority (${priorityCount})` : item.label,
+      onNavigate: () => navigate(item.view!),
+    } : {}),
+  }));
+  const appHeader = <AppHeader
+    workspace={marketId === 'au' ? 'Virgin Music Australia' : teamName.replace(/ — Campaign Board$/, '')}
+    nav={navigation}
+  />;
 
   /* Default to the first pinned artist, so opening the tab shows
      something rather than asking the reader to pick before they know
      what is in there. */
   const current = rail.find(a => a.slug === behaviourSlug) ?? rail[0] ?? null;
 
-  /* ─── CHANNEL BEHAVIOUR ─────────────────────────────────────────────
-     Reached by a tab, but it is a page. The board's header, tab bar and
-     centred column all step aside, because this is the same view our
-     own campaigns board gives a channel and it should be the same view
-     here — the logo strip, the dark rail of pinned artists, the chart
-     with the window to itself. Nothing above it, nothing beside it.
-
-     "← Board" is how you come back, which is also what the arrow at the
-     top of the rail does and what the chart's own "← Summary" does.
-     Three ways out of one room, all going to the same place. */
+  /* Activity keeps the workspace navigation above the full-width chart. */
   if (tab === 'behaviour' && current) {
     return (
       <div style={{
         display: 'flex', flexDirection: 'column', minHeight: '100vh',
         background: PAPER, color: INK,
       }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12,
-                      padding: '12px 20px', background: PAPER }}>
-          <button
-            onClick={() => leaveBehaviour('priority')}
-            className="text-[11px] uppercase tracking-[0.18em] text-ink/55 hover:text-ink"
-            style={{ background: 'none', border: 'none', cursor: 'pointer',
-                     padding: 0, marginRight: 8 }}
-          >
-            &larr; Board
-          </button>
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/virgin-music-group.svg" alt="Virgin Music Group" style={{ height: 24 }} />
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/youtube-logo.svg" alt="YouTube" style={{ height: 16, opacity: 0.7 }} />
-        </div>
+        {appHeader}
 
         <div style={{ display: 'flex', flex: 1 }}>
           <div style={{
             width: 72, minWidth: 72, background: '#1A1A1A', display: 'flex',
             flexDirection: 'column', alignItems: 'center', paddingTop: 16,
             paddingBottom: 16, gap: 6, overflowY: 'auto', position: 'sticky',
-            top: 0, height: 'calc(100vh - 52px)',
+            top: 0, height: 'calc(100dvh - 104px)',
             borderRight: '1px solid rgba(255,255,255,0.06)',
           }}>
             <button
@@ -263,6 +206,7 @@ export default function TeamBoardShell({
   if (tab === 'behaviour' && !current) {
     return (
       <main className="min-h-screen" style={{ background: PAPER, color: INK }}>
+        {appHeader}
         <div className="max-w-[1080px] mx-auto px-6 py-10 text-center">
           <p className="text-[13px] text-ink/45 max-w-[420px] mx-auto mb-4 mt-16">
             Behaviour follows the pins. Pin an artist and their upload
@@ -283,27 +227,11 @@ export default function TeamBoardShell({
   /* ─── THE BOARD ─────────────────────────────────────────────────── */
   return (
     <main className="min-h-screen bg-paper text-ink">
-    <AppHeader workspace={marketId === 'au' ? 'Virgin Music Australia' : teamName.replace(/ — Campaign Board$/, '')} nav={[
-      { href: `/growth?market=${marketId}`, label: 'Channel Health' },
-      { href: `/campaigns?market=${marketId}`, label: 'Active Campaigns' },
-      { href: `/coach?market=${marketId}`, label: 'Coach' },
-      { href: `/teams?market=${marketId}`, label: 'Workspaces' },
-      { href: `/labels?market=${marketId}`, label: 'Labels' },
-      { href: `/resources?market=${marketId}`, label: 'Resources' },
-    ]} />
+    {appHeader}
     <div className="max-w-[1180px] mx-auto px-6 py-8">
     <OpenBehaviourContext.Provider value={open}>
       {header}
-      <div role="group" aria-label="Campaign board views" className="flex flex-wrap gap-2 mb-4">
-        {TABS.map(t => (
-          <button key={t} onClick={() => t === 'behaviour' ? setTab(t) : leaveBehaviour(t)}
-            aria-pressed={tab === t}
-            className={`rounded-md border px-4 py-2 text-sm font-semibold transition-colors ${tab === t ? 'border-ink bg-ink text-white' : 'border-line bg-surface text-muted hover:text-ink'}`}>
-            {TAB_LABEL[t]({ all: allCount, priority: priorityCount })}
-          </button>
-        ))}
-      </div>
-      <div className="text-[10px] text-ink/35 mb-5 pl-1">
+      <div className="text-sm text-muted mb-5">
         {TAB_BLURB[tab]}
       </div>
 

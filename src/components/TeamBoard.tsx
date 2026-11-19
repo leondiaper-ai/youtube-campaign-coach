@@ -23,7 +23,6 @@ import { listEntries, type TeamWatcherEntry } from '@/lib/teamWatcherStore';
 import ChannelHealthBoard, { type RowData } from '@/components/ChannelHealthBoard';
 import TeamCampaignCards from '@/components/TeamCampaignCards';
 import TeamBoardShell from '@/components/TeamBoardShell';
-import { AppHeader } from '@/components/ui/AppHeader';
 import type { CardData } from '@/components/CampaignDecisionCard';
 import type { TeamCardData } from '@/components/TeamCampaignCards';
 import { computeWeeklyWindows } from '@/lib/campaignWeeks';
@@ -433,32 +432,6 @@ export default async function TeamBoard({ team, linkPrefix, linkSuffix = '' }: {
     </div>
   );
 
-  if (!hasEntries) {
-    return (
-      <main className="min-h-screen bg-paper text-ink">
-        <AppHeader workspace={team.name} nav={[
-          { href: `/growth?market=${boardMarket?.id ?? 'uk'}`, label: 'Channel Health' },
-          { href: `/campaigns?market=${boardMarket?.id ?? 'uk'}`, label: 'Active Campaigns' },
-          { href: `/coach?market=${boardMarket?.id ?? 'uk'}`, label: 'Coach' },
-          { href: '/teams', label: 'Workspaces' },
-          { href: '/labels', label: 'Labels' },
-          { href: '/resources', label: 'Resources' },
-        ]} />
-        <div className="max-w-[1180px] mx-auto px-6 py-8">
-          {header}
-          <div className="text-center py-20">
-            <h2 className="text-[24px] font-black mb-2">No artists yet</h2>
-            <p className="text-[13px] text-ink/45 mb-6 max-w-[380px] mx-auto">
-              Add your first artist to start monitoring channel health and
-              campaign progress across the team.
-            </p>
-            <AddArtistModalInline team={team.slug} regionTag={team.regionTag} />
-          </div>
-        </div>
-      </main>
-    );
-  }
-
   /* ── TWO TABS, AND THE BEHAVIOUR VIEW BEHIND THEM ──────────────────
      The shell owns the page from here down, including the header —
      opening a channel's behaviour replaces the whole board, the way it
@@ -515,7 +488,7 @@ export default async function TeamBoard({ team, linkPrefix, linkSuffix = '' }: {
         thumbnail: c.thumbnail,
         status: c.boardStatus,
       }))}
-      allTab={
+      allTab={hasEntries ? (
         <ChannelHealthBoard behaviourBase={`${linkPrefix}${linkSuffix}`}
           rows={rows}
           linkPrefix={linkPrefix}
@@ -525,7 +498,16 @@ export default async function TeamBoard({ team, linkPrefix, linkSuffix = '' }: {
           team={team.slug}
           pinnedChannelIds={pinnedEntries.map((e) => e.channelId)}
         />
-      }
+      ) : (
+        <div className="text-center py-20">
+          <h2 className="text-[24px] font-black mb-2">No artists yet</h2>
+          <p className="text-[13px] text-ink/45 mb-6 max-w-[380px] mx-auto">
+            Add your first artist to start monitoring channel health and
+            campaign progress across the team.
+          </p>
+          <AddArtistModalInline team={team.slug} regionTag={team.regionTag} />
+        </div>
+      )}
       priorityTab={
         <TeamCampaignCards cards={campaignCards} team={team.slug} />
       }

@@ -23,7 +23,7 @@ import {
 } from '@/lib/planEngine';
 import { type PlanIndexEntry } from '@/lib/planStore';
 import { getMarket } from '@/lib/market';
-import { getTeam, teamUrl } from '@/lib/teams';
+import { regionalWorkspaceNav } from '@/lib/workspaceNavigation';
 import CampaignPlanOutput from './CampaignPlanOutput';
 
 // ── Design tokens ────────────────────────────────────────────────────────
@@ -652,21 +652,7 @@ function deriveMomentum(data: ChannelData): 'rising' | 'flat' | 'falling' {
 
 // ── Sub-components ───────────────────────────────────────────────────────
 
-/**
- * Every destination carries the market, and a market with its own board
- * navigates to THAT board — not to a generic equivalent.
- *
- * Two mistakes are corrected here. The first was leaving these links
- * unscoped, which dropped an Australian user into the UK workspace. The
- * second was worse: a "Campaign Board" link pointing at a second dashboard
- * I had built, when Australia already had one at /team/australia with
- * fourteen artists on it. Two dashboards for one team is not a nav bug, it
- * is a product mistake — so the duplicate is deleted and this points at the
- * board the team actually uses, token and all.
- *
- * Markets without a board (the UK) get neither link, so the UK nav is
- * exactly what it was.
- */
+/** Regional planners share the board's navigation and destinations. */
 function Nav({ market = 'uk' }: { market?: string }) {
   const labelWorkspace = getLabelWorkspace(market);
   if (labelWorkspace) return <AppHeader workspace={labelWorkspace.name} nav={[
@@ -674,15 +660,10 @@ function Nav({ market = 'uk' }: { market?: string }) {
     { href: `/campaigns?market=${market}`, label: 'Active Campaigns' },
     { href: `/coach?market=${market}`, label: 'Coach' },
   ]} />;
-  const m = getMarket(market);
-  const q = !m || m.id === 'uk' ? '' : `?market=${m.id}`;
-  const team = m?.teamSlug ? getTeam(m.teamSlug) : null;
-  /* The board the team actually works from. A market with its own board goes
-     to THAT board, token and all; the UK has never had one, so its nearest
-     equivalent is the campaign list — labelled for what it is rather than
-     borrowing the board's name. */
-  const href = team ? teamUrl(team) : `/campaigns${q}`;
-  const label = team ? 'Campaign Board' : 'Active Campaigns';
+  const regionalNav = regionalWorkspaceNav(market);
+  if (regionalNav) return <AppHeader workspace={getMarket(market)?.orgName} nav={regionalNav} />;
+  const href = '/campaigns';
+  const label = 'Active Campaigns';
   return (
     <div
       className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.22em]"

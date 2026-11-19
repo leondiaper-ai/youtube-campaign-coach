@@ -1,3 +1,4 @@
+import { regionalWorkspaceNav } from '@/lib/workspaceNavigation';
 import { listPartnerSlugs } from '@/lib/youtubeUkPartnerStore';
 import { redirect, notFound } from 'next/navigation';
 import { YOUTUBE_UK_ROSTER } from '@/lib/youtubeUkRoster';
@@ -553,6 +554,8 @@ export default async function CampaignsPage({
   const labelWorkspace = getLabelWorkspace(market.id);
   const requested = (await searchParams)?.behaviour;
   const partner = (await searchParams)?.partner === 'youtube-uk';
+  const regionalNav = regionalWorkspaceNav(market.id);
+  if (regionalNav && !partner && !requested) redirect(regionalNav[1].href);
   const rosterNames = new Set(YOUTUBE_UK_ROSTER.map(a => a.name.toLowerCase().replace(/[^a-z0-9]/g, '')));
   const extraSlugs = partner ? await listPartnerSlugs().catch(() => [] as string[]) : [];
   if (partner && typeof requested === 'string' && !(await getAllArtists()).some(a => a.slug === requested && (rosterNames.has(a.name.toLowerCase().replace(/[^a-z0-9]/g, '')) || extraSlugs.includes(a.slug)))) notFound();
