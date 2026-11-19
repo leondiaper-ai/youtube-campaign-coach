@@ -220,11 +220,21 @@ export default async function ArtistOverview({
             : flatSubs
               ? 'Connect the most-viewed content to the wider channel and a relevant next watch, where you have editing access.'
               : 'Build on the formats already attracting attention. Video-level subscriber attribution is not available from public channel data.';
+        // Keep the artist explanation visually consistent with the weekly
+        // finding that led here: blue = quiet catalogue demand, amber = views
+        // without subscriber growth, green = subscriber growth.
+        const theme = quietDemand && (views7 ?? 0) >= 50000
+          ? { fg: '#315D9D', bg: 'rgba(72,127,202,0.07)', border: 'rgba(72,127,202,0.23)' }
+          : flatSubs
+            ? { fg: '#985319', bg: 'rgba(233,154,59,0.07)', border: 'rgba(233,154,59,0.24)' }
+            : growth
+              ? { fg: '#0C6A3F', bg: 'rgba(31,190,122,0.06)', border: 'rgba(31,190,122,0.22)' }
+              : { fg: '#985319', bg: 'rgba(233,154,59,0.07)', border: 'rgba(233,154,59,0.24)' };
         return (
-          <div className="mt-7 rounded-lg px-4 py-3" style={{ background: 'rgba(12,106,63,0.06)', border: '1px solid rgba(12,106,63,0.18)' }}>
-            <div className="text-[13px] font-bold text-ink">{headline}</div>
+          <div className="mt-7 rounded-lg px-4 py-3" style={{ background: theme.bg, border: `1px solid ${theme.border}` }}>
+            <div className="text-[13px] font-bold" style={{ color: theme.fg }}>{headline}</div>
             <div className="text-[12px] text-ink/65 mt-1 leading-relaxed">{context}</div>
-            <div className="text-[12px] font-semibold mt-2 leading-relaxed" style={{ color: GAIN }}>Worth a look: {action}</div>
+            <div className="text-[12px] font-semibold mt-2 leading-relaxed" style={{ color: theme.fg }}>Worth a look: {action}</div>
           </div>
         );
       })()}
