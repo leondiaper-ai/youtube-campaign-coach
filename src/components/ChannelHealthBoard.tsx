@@ -238,89 +238,80 @@ function computeMarketBenchmarks(rows: RowData[]): MarketBenchmarks {
 
 type Insight = {
   text: string;
+  action: string;
   tone: 'positive' | 'warning' | 'neutral';
-  /* The artist the signal is ABOUT, so the row can be opened rather than
-     read and then hunted for in the list below. Deliberately optional:
-     the cadence-risk signal counts dozens of channels and has no single
-     subject, and giving it a link would promise a destination that does
-     not exist. */
-  slug?: string;
+  slug: string;
+  category: 'growth' | 'conversion' | 'catalogue' | 'momentum' | 'cadence' | 'formats';
+  score: number;
 };
 
+/** A channel can have more than one finding. Avoid unverified causal claims:
+ * channel-level subscriber growth cannot be attributed to an individual video.
+ * Detailed video/track attribution belongs to the artist's per-video history. */
 function computeInsights(rows: RowData[]): Insight[] {
   const insights: Insight[] = [];
-  // Filter to artists with reliable movement data for insight generation
-  const reliable = rows.filter(r => r.movementConfidence !== 'stale');
-  const withViews = reliable.filter((r) => r.views7Delta != null && r.views7Delta > 0);
-  const withSubs = reliable.filter((r) => r.subs7Delta != null);
+  const reliable = rows.filter(r =>
+    r.slug && r.movementConfidence !== 'stale' &&
+    r.dataStatus !== 'STALE' && r.dataStatus !== 'UNAVAILABLE'
+  );
+  for (const r of reliable) {
+    const views = r.views7Delta;
+    const subs = r.subs7Delta;
+    const goodViews = views != null && views > 0 && r.viewDataFreshness !== 'stale';
+    const hasSubs = subs != null;
+    const add = (category: Insight['category'], text: string, action: string, tone: Insight['tone'], score: number) =>
+      insights.push({ category, text: `${r.name}: ${text}`, action, tone, slug: r.slug, score });
 
-  // Biggest positive mover (subs growth)
-  const topSubGainer = [...withSubs].sort((a, b) => (b.subs7Delta ?? 0) - (a.subs7Delta ?? 0))[0];
-  if (topSubGainer && (topSubGainer.subs7Delta ?? 0) > 0) {
-    const s = topSubGainer.subs7Delta ?? 0;
-    const hasViews = (topSubGainer.views7Delta ?? 0) > 10000;
-    insights.push({
-      text: `${topSubGainer.name}: ${fmtDelta(s)} subs this week${hasViews ? ' — conversion improving' : ''}`,
-      tone: 'positive',
-      slug: topSubGainer.slug,
-    });
-  }
-
-  // Conversion leak: high views but flat/zero subs
-  // GUARD: skip artists with stale movement — null subs7Delta means data gap, not leak
-  const convLeak = withViews
-    .filter((r) => (r.views7Delta ?? 0) > 5000 && (r.subs7Delta ?? 0) <= 0 && r.movementConfidence !== 'stale')
-    .sort((a, b) => (b.views7Delta ?? 0) - (a.views7Delta ?? 0))[0];
-  if (convLeak) {
-    insights.push({
-      text: `${convLeak.name}: ${fmtNum(convLeak.views7Delta ?? 0)} views but subs flat — conversion leak`,
-      tone: 'warning',
-      slug: convLeak.slug,
-    });
-  }
-
-  // Latent demand: views but no recent uploads
-  const latent = withViews
-    .filter((r) => (r.views7Delta ?? 0) > 50000 && r.uploads30d === 0 && r.movementConfidence !== 'stale')
-    .sort((a, b) => (b.views7Delta ?? 0) - (a.views7Delta ?? 0))[0];
-  if (latent && latent.slug !== convLeak?.slug) {
-    insights.push({
-      text: `${latent.name}: ${fmtDelta(latent.views7Delta ?? 0)} views but no recent uploads — latent demand`,
-      tone: 'neutral',
-      slug: latent.slug,
-    });
-  }
-
-  // Cadence risk
-  const dormant = rows.filter((r) => r.uploads30d === 0 && (r.subs ?? 0) > 0);
-  if (dormant.length > 0) {
-    insights.push({
-      text: `${dormant.length} channel${dormant.length !== 1 ? 's' : ''} inactive 60+ days — cadence risk`,
-      tone: 'warning',
-    });
-  }
-
-  // Biggest WoW decline — exclude LOW confidence / stale / UNAVAILABLE data / stale view data
-  if (insights.length < 4) {
-    const bigDrop = [...rows]
-      .filter((r) => r.viewsWoW != null && r.viewsWoW < -30 && r.confidence !== 'LOW' && r.dataStatus !== 'STALE' && r.dataStatus !== 'UNAVAILABLE' && r.viewDataFreshness !== 'stale')
-      .sort((a, b) => (a.viewsWoW ?? 0) - (b.viewsWoW ?? 0))[0];
-    if (bigDrop && bigDrop.slug !== convLeak?.slug && bigDrop.slug !== latent?.slug) {
-      insights.push({
-        text: `${bigDrop.name}: views ${fmtPct(bigDrop.viewsWoW ?? 0)} week-on-week — attention dropping`,
-        tone: 'warning',
-        slug: bigDrop.slug,
-      });
+    if (hasSubs && subs >= 100) {
+      add('growth', `${fmtDelta(subs)} subscribers in 7 days`,
+        r.uploads30d > 0
+          ? 'Review the strongest recent uploads and build on the formats already working.'
+          : 'Growth without new uploads. Look for catalogue demand and connect it to current music.',
+        'positive', 30 + Math.log10(subs + 1) * 10);
+    }
+    if (goodViews && views >= 5000 && hasSubs && subs <= 0) {
+      add('conversion', `${fmtNum(views)} views in 7 days, but subscriber growth is flat`,
+        'Use the leading viewing assets to guide viewers towards the artist channel and relevant releases.',
+        'warning', 28 + Math.log10(views + 1) * 7);
+    }
+    if (goodViews && views >= 50000 && r.uploads30d === 0) {
+      add('catalogue', `${fmtDelta(views)} views in 7 days with no uploads in 30 days`,
+        'Check whether an older track is driving demand. If newer music exists, connect catalogue viewers to it through descriptions, playlists and channel placement.',
+        'positive', 32 + Math.log10(views + 1) * 7);
+    }
+    if (goodViews && r.viewsWoW != null && r.viewsWoW >= 35 && views >= 10000 && r.confidence !== 'LOW') {
+      add('momentum', `views up ${fmtPct(r.viewsWoW)} week on week (${fmtNum(views)} this week)`,
+        r.uploads30d > 0
+          ? 'Build on the content and formats already active rather than changing direction mid-campaign.'
+          : 'Momentum is coming without new uploads. Check catalogue performance before planning a response.',
+        'positive', 25 + Math.min(r.viewsWoW, 300) / 12);
+    }
+    if (r.viewsWoW != null && r.viewsWoW <= -30 && r.confidence !== 'LOW' && r.viewDataFreshness === 'fresh' && goodViews) {
+      add('momentum', `views down ${fmtPct(r.viewsWoW)} week on week`,
+        r.uploads30d > 0
+          ? 'Compare the latest uploads with the previous week and consider supporting the strongest release.'
+          : 'Review the recent publishing gap and whether the current release needs follow-up content.',
+        'warning', 25 + Math.min(Math.abs(r.viewsWoW), 100) / 8);
+    }
+    if (r.uploads30d === 0 && goodViews && views >= 10000 && r.shorts30d === 0) {
+      add('cadence', `no uploads in 30 days despite ${fmtNum(views)} weekly views`,
+        'Audience activity is continuing. Prioritise a relevant follow-up to the content already attracting views.',
+        'warning', 22 + Math.log10(views + 1) * 4);
+    }
+    if (r.uploads30d >= 4 && r.shorts30d === 0 && goodViews && views >= 10000) {
+      add('formats', `${r.uploads30d} uploads in 30 days, none Shorts`,
+        'Review whether the strongest current long-form release has a suitable short-form cut-down.',
+        'neutral', 20);
     }
   }
-
-  return insights.slice(0, 4);
+  // Most useful first, with multiple signals available per artist.
+  return insights.sort((a, b) => b.score - a.score || a.text.localeCompare(b.text));
 }
 
 const INSIGHT_ICON: Record<Insight['tone'], { dot: string; color: string }> = {
   positive: { dot: '#1FBE7A', color: '#0C6A3F' },
   warning:  { dot: '#F08A3C', color: '#8A4A1A' },
-  neutral:  { dot: '#B0A68E', color: 'rgba(14,14,14,0.55)' },
+  neutral:  { dot: '#6689B4', color: '#355D87' },
 };
 
 // ─── Top Movers ──────────────────────────────────────────────────────────────
@@ -612,6 +603,7 @@ export default function ChannelHealthBoard({
      filters precisely because the next question is always "which ones?".
      So each card can open to its full list. */
   const [showAllLatent, setShowAllLatent] = useState(false);
+  const [showAllInsights, setShowAllInsights] = useState(false);
   const [showAllStacks, setShowAllStacks] = useState(false);
   /* A 120-row table is a long scroll to reach anything underneath it.
      Twenty is roughly a screen and a half, which is enough to scan a
@@ -1338,12 +1330,12 @@ export default function ChannelHealthBoard({
               board read as one undifferentiated column — the card is what
               tells you where one answer ends and the next begins. */}
           <div className="bg-surface border border-line rounded-card shadow-card divide-y divide-line-faint">
-            {insights.map((ins, i) => {
+            {(showAllInsights ? insights : insights.slice(0, 6)).map((ins, i) => {
               const ic = INSIGHT_ICON[ins.tone];
               const body = (
                 <>
                   <span className="w-1.5 h-1.5 rounded-full mt-[7px] shrink-0" style={{ background: ic.dot }} />
-                  <span>{ins.text}</span>
+                  <span className="min-w-0"><span className="block font-semibold">{ins.text}</span><span className="block text-micro mt-1 opacity-80">Worth a look: {ins.action}</span></span>
                 </>
               );
               const cls = 'flex items-start gap-2.5 px-5 py-3 text-body leading-snug';
@@ -1366,6 +1358,12 @@ export default function ChannelHealthBoard({
                 </div>
               );
             })}
+            {insights.length > 6 && (
+              <button type="button" onClick={() => setShowAllInsights(!showAllInsights)}
+                className="w-full px-5 py-2.5 border-t border-line text-micro font-semibold text-secondary hover:text-ink hover:bg-raised transition-colors text-left">
+                {showAllInsights ? 'Show fewer' : `Show all ${insights.length} signals →`}
+              </button>
+            )}
           </div>
         </div>
       )}
