@@ -186,6 +186,49 @@ export default async function ArtistOverview({
         <AudienceLine slug={slug} />
       </header>
 
+      {/* Weekly intelligence: compact explanation on the destination artist page.
+          Only name a video when the grid has measured recent movement. */}
+      {(() => {
+        const reliable = nc.movementConfidence !== 'stale' && nc.movementConfidence !== 'limited';
+        if (!reliable) return null;
+        const noUploads = nc.cadence.uploads30d === 0;
+        const leader = [...topLongform.items, ...topShorts.items]
+          .filter(v => v.recentGain != null && v.recentGain > 0 && v.spanDays != null && v.spanDays >= 5 && v.spanDays <= 9)
+          .sort((a, b) => (b.recentGain ?? 0) - (a.recentGain ?? 0))[0];
+        const strongViews = views7 != null && views7 >= 10000;
+        const growth = subs7 != null && subs7 >= 100;
+        const quietDemand = noUploads && strongViews;
+        const flatSubs = strongViews && subs7 != null && subs7 <= 0;
+        if (!quietDemand && !growth && !flatSubs) return null;
+        const isCatalogue = quietDemand && leader && Date.now() - Date.parse(leader.publishedAt) > 365 * 86400000;
+        const newer = isCatalogue
+          ? uploads.filter(u => Date.parse(u.publishedAt) > Date.parse(leader.publishedAt) && Date.now() - Date.parse(u.publishedAt) < 365 * 86400000)
+          : [];
+        const leadText = leader
+          ? `“${leader.title}” added ${fmtNum(leader.recentGain ?? 0)} views over ${leader.spanDays} days.`
+          : 'We do not yet have enough comparable video history to identify the track responsible.';
+        const headline = quietDemand ? 'Audience active, channel quiet' : flatSubs ? 'Views growing, subscribers flat' : 'Subscriber growth picking up';
+        const context = quietDemand
+          ? `${fmtNum(views7 ?? 0)} views added in seven days with no uploads in 30 days. ${leadText}`
+          : flatSubs
+            ? `${fmtNum(views7 ?? 0)} views in seven days without subscriber growth. ${leadText}`
+            : `+${fmtNum(subs7 ?? 0)} subscribers in seven days. ${leadText}`;
+        const action = isCatalogue && newer.length
+          ? 'An older video is attracting attention while newer uploads exist. Where you control the video, connect viewers to the newer music through playlists, descriptions or end screens.'
+          : quietDemand
+            ? 'Use the current viewing activity to plan a relevant follow-up. Check rights and ownership before changing catalogue video links.'
+            : flatSubs
+              ? 'Connect the most-viewed content to the wider channel and a relevant next watch, where you have editing access.'
+              : 'Build on the formats already attracting attention. Video-level subscriber attribution is not available from public channel data.';
+        return (
+          <div className="mt-7 rounded-lg px-4 py-3" style={{ background: 'rgba(12,106,63,0.06)', border: '1px solid rgba(12,106,63,0.18)' }}>
+            <div className="text-[13px] font-bold text-ink">{headline}</div>
+            <div className="text-[12px] text-ink/65 mt-1 leading-relaxed">{context}</div>
+            <div className="text-[12px] font-semibold mt-2 leading-relaxed" style={{ color: GAIN }}>Worth a look: {action}</div>
+          </div>
+        );
+      })()}
+
       {/* ═══ NEXT ACTION — removed for now ══════════════════════
           The "Next action" / "Then" block used to sit here, printing
           whatToDoNow's primary and secondary moves.
