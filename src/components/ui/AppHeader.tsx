@@ -1,36 +1,22 @@
 'use client';
 
-/* ═══════════════════════════════════════════════════════════════════════
-   APP HEADER — THE PRODUCT SHELL
-
-   Eleven pages were drawing their own header, each with its own copy of
-   the "YOUTUBE CAMPAIGN SYSTEM" eyebrow and its own pill row, which is
-   why the navigation read as a row of loose buttons rather than part of
-   a product. This is that header, once.
-
-   WHAT IT DOES NOT DO
-   It introduces no destinations and changes no routing. The caller
-   passes the links it already had, including the market query string it
-   was already threading by hand. If a page had three links before, it
-   has the same three now.
-
-   THE WORKSPACE CHIP
-   A regional team needs to know at a glance which board they are on —
-   the US and Nordics boards are the same product with different
-   rosters, and the fastest way to erode trust is for someone to read
-   Australia's numbers thinking they are their own. The chip is not
-   decoration; it is the answer to "whose data am I looking at".
-   ═══════════════════════════════════════════════════════════════════════ */
+/* Shared workspace header. Regional pages use one canonical team board
+   for Artists, Priority, Activity and Tools, with the market carried to
+   every other destination. Board controllers keep their views in place. */
 
 import Link from 'next/link';
 import { getLabelWorkspace } from '@/lib/labels';
 import { usePathname } from 'next/navigation';
+import { regionalWorkspaceNav } from '@/lib/workspaceNavigation';
 
 export interface NavItem {
   href: string;
   label: string;
   /** Matched against the pathname when the href carries a query string. */
   match?: string;
+  /** Board views share a path; their controller supplies the active view. */
+  active?: boolean;
+  onNavigate?: () => void;
 }
 
 export function AppHeader({
@@ -48,15 +34,18 @@ export function AppHeader({
   // Derive regional context from the caller's existing market-scoped links.
   // Do not persist globally: switching territories must not leak into another workspace.
   const scopedMarket = nav.map(item => item.href.match(/[?&]market=([^&]+)/)?.[1]).find(Boolean);
+  const regionalItems = scopedMarket && nav.some(item => item.href.split('?')[0] === '/growth')
+    ? regionalWorkspaceNav(scopedMarket) : null;
+  const workspaceNav = regionalItems ?? nav;
   const withMarket = (href: string) => scopedMarket && ['/labels', '/teams', '/resources'].includes(href.split('?')[0]) && !href.includes('market=')
     ? `${href}${href.includes('?') ? '&' : '?'}market=${scopedMarket}` : href;
   const label = getLabelWorkspace(workspace);
   const ownedNav = workspace === 'Virgin Music UK' || workspace === 'VMG · Owned network';
-  const resourcesIndex = nav.findIndex(item => item.href.split('?')[0] === '/resources');
-  const ownedIndex = resourcesIndex < 0 ? nav.length : resourcesIndex;
-  const baseItems = ownedNav && !nav.some(item => item.href.split('?')[0] === '/growth/owned')
-    ? [...nav.slice(0, ownedIndex), { href: '/growth/owned', label: 'Owned Channels', match: '/growth/owned' }, ...nav.slice(ownedIndex)]
-    : nav;
+  const resourcesIndex = workspaceNav.findIndex(item => item.href.split('?')[0] === '/resources');
+  const ownedIndex = resourcesIndex < 0 ? workspaceNav.length : resourcesIndex;
+  const baseItems: NavItem[] = ownedNav && !workspaceNav.some(item => item.href.split('?')[0] === '/growth/owned')
+    ? [...workspaceNav.slice(0, ownedIndex), { href: '/growth/owned', label: 'Owned Channels', match: '/growth/owned' }, ...workspaceNav.slice(ownedIndex)]
+    : workspaceNav;
   const items = label ? [
     ...baseItems.filter(item => ['/growth', '/campaigns', '/coach'].includes(item.href.split('?')[0]))
       .map(item => item.href.split('?')[0] === '/growth' ? { ...item, href: `/labels/${label.slug}`, match: `/labels/${label.slug}` } : item),
@@ -106,14 +95,19 @@ export function AppHeader({
         {/* Navigation rail. Active state is a weight and an underline that
             meets the header's bottom edge — a filled pill competes with
             the page's own cards for attention. */}
-        <nav className="flex flex-wrap items-center gap-1 -mb-px">
+        <nav aria-label="Workspace navigation" className="flex items-center gap-1 -mb-px overflow-x-auto whitespace-nowrap">
           {items.map((item) => {
             const target = item.match ?? item.href.split('?')[0];
-            const isActive = pathname === target || (label && pathname === '/growth' && target === `/labels/${label.slug}`) || (target === '/growth/owned' && pathname.startsWith('/growth/owned/'));
+            const isActive = item.active ?? (pathname === target || (label && pathname === '/growth' && target === `/labels/${label.slug}`) || (target === '/growth/owned' && pathname.startsWith('/growth/owned/')));
             return (
               <Link
                 key={item.href}
                 href={withMarket(item.href)}
+                onClick={(event) => {
+                  if (!item.onNavigate || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button !== 0) return;
+                  event.preventDefault();
+                  item.onNavigate();
+                }}
                 aria-current={isActive ? 'page' : undefined}
                 className={[
                   'relative px-3 py-3 text-body no-underline transition-colors',

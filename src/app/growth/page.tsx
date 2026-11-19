@@ -1,5 +1,7 @@
 import { getLabelWorkspace } from '@/lib/labels';
 import Link from 'next/link';
+import { redirect } from 'next/navigation';
+import { regionalWorkspaceNav } from '@/lib/workspaceNavigation';
 import {
   ARTISTS, mergeArtistLists, daysSince, deriveFromLive,
   STATUS_RANK, classifyArtist, isVirginOwned,
@@ -38,6 +40,8 @@ export default async function ControlPage({
     | Promise<Record<string, string | string[] | undefined>>;
 }) {
   const market = await getMarketFromRequest(searchParams);
+  const regionalNav = regionalWorkspaceNav(market.id);
+  if (regionalNav) redirect(regionalNav[0].href);
   const label = getLabelWorkspace(market.id);
   /* Every internal link on this page carries the market. The page resolved it
      and then discarded it, which is the most common way a workspace leaks. */
