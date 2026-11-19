@@ -239,15 +239,14 @@ function computeMarketBenchmarks(rows: RowData[]): MarketBenchmarks {
 type Insight = {
   text: string;
   action: string;
-  tone: 'positive' | 'warning' | 'neutral';
   slug: string;
   category: 'growth' | 'conversion' | 'catalogue' | 'momentum' | 'cadence' | 'formats';
   score: number;
 };
 
-/** A channel can have more than one finding. Avoid unverified causal claims:
- * channel-level subscriber growth cannot be attributed to an individual video.
- * Detailed video/track attribution belongs to the artist's per-video history. */
+/** One editorial finding per artist. Related changes belong in the same story,
+ * not as multiple rows competing for attention. A quiet channel with views
+ * signals unexplained demand, not proven catalogue attribution. */
 function computeInsights(rows: RowData[]): Insight[] {
   const insights: Insight[] = [];
   const reliable = rows.filter(r =>
@@ -258,60 +257,61 @@ function computeInsights(rows: RowData[]): Insight[] {
     const views = r.views7Delta;
     const subs = r.subs7Delta;
     const goodViews = views != null && views > 0 && r.viewDataFreshness !== 'stale';
-    const hasSubs = subs != null;
-    const add = (category: Insight['category'], text: string, action: string, tone: Insight['tone'], score: number) =>
-      insights.push({ category, text: `${r.name}: ${text}`, action, tone, slug: r.slug, score });
+    const reliableWoW = goodViews && r.confidence !== 'LOW' && r.viewsWoW != null;
+    const add = (category: Insight['category'], text: string, action: string, score: number) => {
+      insights.push({ category, text: `${r.name}: ${text}`, action, slug: r.slug, score });
+    };
 
-    if (hasSubs && subs >= 100) {
-      add('growth', `${fmtDelta(subs)} subscribers in 7 days`,
-        r.uploads30d > 0
-          ? 'Review the strongest recent uploads and build on the formats already working.'
-          : 'Growth without new uploads. Look for catalogue demand and connect it to current music.',
-        'positive', 30 + Math.log10(subs + 1) * 10);
-    }
-    if (goodViews && views >= 5000 && hasSubs && subs <= 0) {
-      add('conversion', `${fmtNum(views)} views in 7 days, but subscriber growth is flat`,
-        'Use the leading viewing assets to guide viewers towards the artist channel and relevant releases.',
-        'warning', 28 + Math.log10(views + 1) * 7);
-    }
+    // A single strongest story per channel, with its related facts folded in.
     if (goodViews && views >= 50000 && r.uploads30d === 0) {
-      add('catalogue', `${fmtDelta(views)} views in 7 days with no uploads in 30 days`,
-        'Check whether an older track is driving demand. If newer music exists, connect catalogue viewers to it through descriptions, playlists and channel placement.',
-        'positive', 32 + Math.log10(views + 1) * 7);
-    }
-    if (goodViews && r.viewsWoW != null && r.viewsWoW >= 35 && views >= 10000 && r.confidence !== 'LOW') {
-      add('momentum', `views up ${fmtPct(r.viewsWoW)} week on week (${fmtNum(views)} this week)`,
+      const growth = subs != null && subs > 0 ? ` and ${fmtDelta(subs)} subscribers` : '';
+      add('catalogue', `${fmtDelta(views)} views${growth} in 7 days, no recent uploads`,
+        'Audience demand is continuing without new posts. Identify the videos gaining views and, where newer music exists and rights permit, connect viewers to it.',
+        70 + Math.log10(views + 1) * 5);
+    } else if (goodViews && views >= 5000 && subs != null && subs <= 0) {
+      add('conversion', `${fmtNum(views)} weekly views, subscriber count flat`,
+        'Find the videos gaining attention and connect viewers to a relevant next watch. Flat subscribers alone do not prove a conversion problem.',
+        62 + Math.log10(views + 1) * 4);
+    } else if (reliableWoW && r.viewsWoW! <= -30) {
+      add('cadence', `views down ${fmtPct(r.viewsWoW!)} week on week`,
         r.uploads30d > 0
-          ? 'Build on the content and formats already active rather than changing direction mid-campaign.'
-          : 'Momentum is coming without new uploads. Check catalogue performance before planning a response.',
-        'positive', 25 + Math.min(r.viewsWoW, 300) / 12);
-    }
-    if (r.viewsWoW != null && r.viewsWoW <= -30 && r.confidence !== 'LOW' && r.viewDataFreshness === 'fresh' && goodViews) {
-      add('momentum', `views down ${fmtPct(r.viewsWoW)} week on week`,
+          ? 'Compare the latest uploads with the previous week and prioritise follow-up for the strongest current release.'
+          : 'Check whether the publishing gap or an earlier release spike explains the decline before planning new content.',
+        58 + Math.min(Math.abs(r.viewsWoW!), 100) / 8);
+    } else if (subs != null && subs >= 100) {
+      const viewsNote = goodViews && views >= 10000 ? ` alongside ${fmtNum(views)} views` : '';
+      add('growth', `${fmtDelta(subs)} subscribers this week${viewsNote}`,
         r.uploads30d > 0
-          ? 'Compare the latest uploads with the previous week and consider supporting the strongest release.'
-          : 'Review the recent publishing gap and whether the current release needs follow-up content.',
-        'warning', 25 + Math.min(Math.abs(r.viewsWoW), 100) / 8);
-    }
-    if (r.uploads30d === 0 && goodViews && views >= 10000 && r.shorts30d === 0) {
-      add('cadence', `no uploads in 30 days despite ${fmtNum(views)} weekly views`,
-        'Audience activity is continuing. Prioritise a relevant follow-up to the content already attracting views.',
-        'warning', 22 + Math.log10(views + 1) * 4);
-    }
-    if (r.uploads30d >= 4 && r.shorts30d === 0 && goodViews && views >= 10000) {
-      add('formats', `${r.uploads30d} uploads in 30 days, none Shorts`,
-        'Review whether the strongest current long-form release has a suitable short-form cut-down.',
-        'neutral', 20);
+          ? 'Compare the recent uploads with this growth window and build on the best-supported format. Subscriber attribution to individual videos is not available here.'
+          : 'Subscriber growth without new uploads: review which existing videos are gaining views before deciding on follow-up content.',
+        52 + Math.log10(subs + 1) * 5);
+    } else if (reliableWoW && r.viewsWoW! >= 35 && views! >= 10000) {
+      add('momentum', `views up ${fmtPct(r.viewsWoW!)} week on week (${fmtNum(views!)} this week)`,
+        r.uploads30d > 0
+          ? 'Check which recent uploads account for the rise and build on the format with the strongest evidence.'
+          : 'The channel is growing without new uploads. Check which older videos are moving before recommending a release connection.',
+        45 + Math.min(r.viewsWoW!, 300) / 15);
+    } else if (goodViews && views >= 10000 && r.uploads30d === 0) {
+      add('cadence', `${fmtNum(views)} weekly views despite no uploads in 30 days`,
+        'Identify the videos behind current demand and consider a relevant follow-up if there is an active release.',
+        40);
+    } else if (r.uploads30d >= 4 && r.shorts30d === 0 && goodViews && views >= 10000) {
+      add('formats', `${r.uploads30d} uploads this month, no Shorts`,
+        'Check whether a strong current long-form upload has a suitable short-form cut-down.',
+        35);
     }
   }
-  // Most useful first, with multiple signals available per artist.
   return insights.sort((a, b) => b.score - a.score || a.text.localeCompare(b.text));
 }
 
-const INSIGHT_ICON: Record<Insight['tone'], { dot: string; color: string }> = {
-  positive: { dot: '#1FBE7A', color: '#0C6A3F' },
-  warning:  { dot: '#F08A3C', color: '#8A4A1A' },
-  neutral:  { dot: '#6689B4', color: '#355D87' },
+// Colour indicates the kind of finding, not simply a positive or negative number.
+const INSIGHT_ICON: Record<Insight['category'], { dot: string; color: string }> = {
+  growth:     { dot: '#1FBE7A', color: '#0C6A3F' },
+  catalogue:  { dot: '#487FCA', color: '#315D9D' },
+  conversion: { dot: '#E99A3B', color: '#985319' },
+  cadence:    { dot: '#E99A3B', color: '#985319' },
+  momentum:   { dot: '#398A8B', color: '#226C6D' },
+  formats:    { dot: '#8C72C6', color: '#684D9C' },
 };
 
 // ─── Top Movers ──────────────────────────────────────────────────────────────
@@ -1331,7 +1331,7 @@ export default function ChannelHealthBoard({
               tells you where one answer ends and the next begins. */}
           <div className="bg-surface border border-line rounded-card shadow-card divide-y divide-line-faint">
             {(showAllInsights ? insights : insights.slice(0, 6)).map((ins, i) => {
-              const ic = INSIGHT_ICON[ins.tone];
+              const ic = INSIGHT_ICON[ins.category];
               const body = (
                 <>
                   <span className="w-1.5 h-1.5 rounded-full mt-[7px] shrink-0" style={{ background: ic.dot }} />
