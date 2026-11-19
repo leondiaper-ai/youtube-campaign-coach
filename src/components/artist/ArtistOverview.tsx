@@ -219,7 +219,7 @@ export default async function ArtistOverview({
             ? 'Use the current viewing activity to plan a relevant follow-up. Check rights and ownership before changing catalogue video links.'
             : flatSubs
               ? 'Connect the most-viewed content to the wider channel and a relevant next watch, where you have editing access.'
-              : 'Build on the formats already attracting attention. Video-level subscriber attribution is not available from public channel data.';
+              : 'Keep the release active with a relevant follow-up. Use the strongest recent video and its existing supporting formats to choose the next asset.';
         // Keep the artist explanation visually consistent with the weekly
         // finding that led here: blue = quiet catalogue demand, amber = views
         // without subscriber growth, green = subscriber growth.
