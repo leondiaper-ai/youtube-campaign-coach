@@ -104,7 +104,7 @@ slide('working','What is working',head('Owned-channel results · lifetime views 
 fixes=[('The full show is hidden.','Unlisted since 27 Oct. 4 views, no chapters.','Add chapters. Make it public on 8 Dec.','ztvoyjwp2gQ'),
  ('A broken video is still on the channel.','The Goddamn, Lizard Man! visualiser says “Video unavailable”. Views stuck at 10,551.','Restore it or take it down.','s5qH_WbW35w'),
  ('Live is hard to find.','The live playlist is the last shelf on Home, misses the BBC Radio 1 session, and four of its seven videos are other channels’.','A “Live at Electric Ballroom” playlist, second on Home.','68xngpq0mwo'),
- ('Shorts don’t name the song.','Only 8 of 21 do. Titles like “🫧” give a new viewer nowhere to go.','Song name in every song Short, linked to its performance.','KxJXwrQEdkE')]
+ ('Shorts don’t name the song.','Only 8 of 21 do. Titles like “Let me go, let me go” give a new viewer nowhere to go.','Song name in every song Short, linked to its performance.','KxJXwrQEdkE')]
 fx=''.join(f'<li><b>{i:02d}</b><div class="fx-img">{img(t[3],t[0])}</div><div class="fx-p"><h3>{t[0]}</h3><p>{t[1]}</p></div><div class="fx-f"><span class="mono">Fix</span><p>{t[2]}</p></div></li>' for i,t in enumerate(fixes,1))
 slide('attention','What needs attention',head('Public channel · 20 Nov','Four things to sort<br><span class="serif">before the show goes out.</span>',FIX)+f'<ol class="fxlist mt">{fx}</ol>','light')
 
@@ -118,7 +118,7 @@ songs=[('Nosedive','5J3nZT--jBc',WV['5J3nZT--jBc']['gain30'],nose+by['UFuaAn_LEB
 others=sum(x[2] for x in songs[1:]);top=songs[0][2]
 assert top>2.5*others
 mxg=max(x[2] for x in songs)
-rows=''.join(f'''<li class="{"lead" if i<2 else ""}"><b class="rk">{i+1}</b><a class="sg-img" href="{yt(id)}" target="_blank" rel="noopener">{img(id,n)}</a><div class="sg-n"><h3>{n}</h3><small>{k(life)} views across its videos</small></div><div class="sg-bar"><span style="width:{max(2,round(100*g/mxg))}%"></span><b>+{g:,}</b></div><div class="sg-role"><span class="role role-{"on" if i<2 else "opt"}">{wkn}</span><span class="role-t">{role}</span><p>{why}</p></div></li>''' for i,(n,id,g,life,wkn,role,why) in enumerate(songs))
+rows=''.join(f'''<li class="{"top" if i<2 else ""}"><b class="rk">{i+1}</b><a class="sg-img" href="{yt(id)}" target="_blank" rel="noopener">{img(id,n)}</a><div class="sg-n"><h3>{n}</h3><small>{k(life)} views across its videos</small></div><div class="sg-bar"><span style="width:{max(2,round(100*g/mxg))}%"></span><b>+{g:,}</b></div><div class="sg-role"><span class="role role-{"on" if i<2 else "opt"}">{wkn}</span><span class="role-t">{role}</span><p>{why}</p></div></li>''' for i,(n,id,g,life,wkn,role,why) in enumerate(songs))
 slide('songs','Which songs lead the live rollout',head('Song demand · views gained in the last 30 days on their own channel','Lead with Nosedive.<br><span class="serif">Follow with Only Girl.</span>',DO)+f'<p class="why mt">Before cutting anything: which songs do people already want? Nosedive gained <b>{top:,}</b> views in the last 30 days, more than the next four songs together (<b>{others:,}</b>). So it goes first, and Only Girl follows.</p><div class="sg-head"><span></span><span></span><span class="mono">Song</span><span class="mono">Demand now · last 30 days</span><span class="mono">In the rollout</span></div><ol class="sglist mt">{rows}</ol><p class="fine-print">Check against the Electric Ballroom setlist before cutting.</p>')
 
 # 07 · the rollout ───────────────────────────────────────────────────
