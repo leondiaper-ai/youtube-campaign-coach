@@ -27,7 +27,7 @@ assert (len(camp),len(campL),len(campS))==(33,14,19)
 totL=sum(v['views'] for v in campL)
 nose=by['5J3nZT--jBc']['views'];nose_share=round(100*nose/totL)
 live_s=[v['views'] for v in campS if v['type']=='liveshort'];oth_s=[v['views'] for v in campS if v['type']=='short']
-med_live,med_oth=st.median(live_s),st.median(oth_s);ratio=med_live/med_oth
+med_live,med_oth=int(st.median(live_s)),int(st.median(oth_s));ratio=med_live/med_oth
 assert (len(live_s),len(oth_s),med_live,med_oth)==(6,13,2685,972)
 W=D['watcherChannel'];g7=W['latest'][1]-W['d7'][1];g30=W['latest'][1]-W['d30'][1];g90=W['latest'][1]-W['d90'][1]
 assert (g7,g30,g90)==(20200,65777,239603)
@@ -79,8 +79,8 @@ slide('opportunity','The opportunity',head('The opportunity','Nosedive opened th
 def pos(d):return round(100*(day(d)-START).days/(END-START).days,2)
 plan=[('2026-04-20','Nosedive + album announced'),('2026-05-25','Goddamn, Lizard Man!'),('2026-06-22','Get Up and Dance'),('2026-07-27','“IG single” TBC'),('2026-08-07','Cannonball out'),('2026-10-07','UK headline tour')]
 actual=[('5J3nZT--jBc','Nosedive video'),('s5qH_WbW35w','Goddamn visualiser'),('N9xUTqsKENQ','Get Up and Dance'),('Ntc1efcKcR8','Something Else to Give'),('c0UQqT4q4KM','8 album tracks · audio'),('XQEpEF2O3VI','Still Angry · live'),('p6MYhf0BGbM','BBC Radio 1 session')]
-pl=''.join(f'<span class="tl-plan" style="left:{pos(d)}%"><i></i><em>{E(t)}</em><small>{day(d).strftime("%-d %b")}</small></span>' for d,t in plan)
-ac=''.join(f'<a class="tl-up" style="left:{pos(by[i]["date"] if i!="c0UQqT4q4KM" else "2026-08-07")}%" href="{yt(i)}" target="_blank" rel="noopener">{img(i,t)}<em>{E(t)}</em><small>{day(by[i]["date"] if i!="c0UQqT4q4KM" else "2026-08-07").strftime("%-d %b")}</small></a>' for i,t in actual)
+pl=''.join(f'<span class="tl-plan{" alt" if n%2 else ""}" style="left:{pos(d)}%"><i></i><em>{E(t)}</em><small>{day(d).strftime("%-d %b")}</small></span>' for n,(d,t) in enumerate(plan))
+ac=''.join(f'<a class="tl-up{" lo" if n%2 else ""}" style="left:{pos(by[i]["date"] if i!="c0UQqT4q4KM" else "2026-08-07")}%" href="{yt(i)}" target="_blank" rel="noopener">{img(i,t)}<em>{E(t)}</em><small>{day(by[i]["date"] if i!="c0UQqT4q4KM" else "2026-08-07").strftime("%-d %b")}</small></a>' for n,(i,t) in enumerate(actual))
 ticks=''.join(f'<i style="left:{pos(v["date"])}%"></i>' for v in campS)
 months=''.join(f'<span style="left:{pos(f"2026-{m:02d}-01")}%">{dt.date(2026,m,1).strftime("%b")}</span>' for m in range(5,12))
 slide('delivered','What the campaign delivered',head('Original Coach plan → album → now','The plan landed up to album day.<br><span class="serif">After it, long-form went quiet.</span>')+f'''
@@ -91,7 +91,7 @@ slide('delivered','What the campaign delivered',head('Original Coach plan → al
 def panel(cls,id,alt,status,mono,big,unit,text,action):
  return f'<a class="pnl {cls}" href="{yt(id)}" target="_blank" rel="noopener">{img(id,alt)}{status}<div class="pnl-txt"><span class="mono">{mono}</span><b class="pnl-big">{big}</b><span class="pnl-unit">{unit}</span><p>{text}</p><p class="pnl-act">→ {action}</p></div></a>'
 sa,sa_audio=by['XQEpEF2O3VI'],by['dp7QE7uCgzI']
-slide('working','What is working',head('Owned-channel results · lifetime views at 20 Nov','Nosedive brings people in.<br><span class="serif">Live is what they stay for.</span>',WORK)+'<div class="pnls four mt">'
+slide('working','What is working',head('Owned-channel results · lifetime views at 20 Nov','Nosedive is the door.<br><span class="serif">Live is the strongest format after it.</span>',WORK)+'<div class="pnls four mt">'
  +panel('p1','5J3nZT--jBc','Nosedive official video','<span class="st st-on">Official video · 20 Apr</span>','The door',k(nose),f'views · {nose_share}% of campaign long-form',f'Still adding {k(nose30)} a month, seven months in.','Open the live chapter with Nosedive.')
  +panel('p2','UFuaAn_LEBA','Nosedive live at Rock Werchter Short','<span class="st st-on">Short · 30 Jul</span>','Best Short',k(by['UFuaAn_LEBA']['views']),'Nosedive, live at Rock Werchter','Live Shorts: median 2,685 views. Other Shorts: 972.','Cut the Shorts from the show.')
  +panel('p3','p6MYhf0BGbM','Cannonball BBC Radio 1 session','<span class="st st-on">Live session · 29 Oct</span>','Still travelling',k(by['p6MYhf0BGbM']['views']),'in 22 days · Breeders cover, BBC Radio 1','The strongest long-form start since album day.','A live performance can still reach people now.')
@@ -148,7 +148,7 @@ slide('measuring','Measuring the next chapter',head('Benchmarks from their own l
 <div class="ms-split mt"><p><span class="mono">Public · we can track</span>Views, likes, comments, daily growth in Watcher.</p><p><span class="mono">Studio · the team needs to check</span>Impressions and click-through, average view duration, Shorts related-video clicks, traffic sources.</p></div>''')
 
 # 10 · next actions ──────────────────────────────────────────────────
-slide('actions','The next actions',head('Production brief · every item is a proposal','Five days of prep.<br><span class="serif">Then press go on 1 December.</span>',DO)+'''
+slide('actions','The next actions',head('Production brief','Five days of prep.<br><span class="serif">Then press go on 1 December.</span>',DO)+'''
 <div class="na mt"><article><span class="who">Edit · Eddie Suthers (cut the show)</span><ul><li>Log the setlist with timestamps.</li><li>Trim Nosedive and Only Girl from the master. Canyons optional.</li><li>Five verticals: two Nosedive, one confetti or crowd moment, two Only Girl.</li><li>Pick thumbnail frames for each.</li></ul></article>
 <article><span class="who">Channel · label team</span><ul><li>Chapters and description on the full show.</li><li>Fix the broken Goddamn, Lizard Man! visualiser: restore it or take it down.</li><li>New “Live at Electric Ballroom” playlist, second on Home. Add the BBC Radio 1 session to Live Performances.</li><li>Put the Cannonball playlist in album order.</li><li>End screens, pinned comments, Shorts related video.</li></ul></article>
 <article><span class="who">Socials · band + Ash (PACT)</span><ul><li>Agree the posting days: 1, 4, 8, 15 and 18 Dec.</li><li>Same vertical on Instagram and TikTok, pointing to YouTube.</li><li>Story on full-show day.</li></ul></article></div>
