@@ -1102,5 +1102,69 @@
   ],
   "eutsPlaylist": "25 items mixing videos, visualisers, BTS, audio, lyric videos and a 37-min interview; not in album order",
   "tour": "Everything Under The Sun tour with Don Broco; first stop Pittsburgh, 86 days after 11 Nov (5 Feb 2027)"
+ },
+ "compare": {
+  "windows": {
+   "getRollin": [
+    "2022-09-07",
+    "2022-11-18",
+    "2022-12-09",
+    94
+   ],
+   "euts": [
+    "2026-07-14",
+    "2026-10-30",
+    "2026-11-20",
+    130
+   ]
+  },
+  "rows": [
+   [
+    "Singles with a music video",
+    "2 (San Quentin, Those Days)",
+    "3 (Rattle The Cage, Leave Me Behind, Make Me Love You)"
+   ],
+   [
+    "Around each single",
+    "Lyric video + music video",
+    "Music video + visualiser + behind the scenes"
+   ],
+   [
+    "Behind-the-scenes films",
+    "0",
+    "3"
+   ],
+   [
+    "Album day",
+    "8 visualisers (the other 3 songs already had videos)",
+    "8 audio uploads + 1 lyric video"
+   ],
+   [
+    "Long-form in the 3 weeks after the album",
+    "0",
+    "5 lyric videos"
+   ],
+   [
+    "Shorts",
+    "44 in 94 days (3.3 a week)",
+    "55 in 130 days (3.0 a week)"
+   ],
+   [
+    "Weeks with an upload",
+    "14 of 14",
+    "19 of 19"
+   ]
+  ],
+  "nextLongFormAfterGetRollin": [
+   "ZlOh79yJoOA",
+   "2023-02-27",
+   101
+  ],
+  "thoseDays": [
+   "6exsPMM3SR8",
+   "2022-10-26",
+   9686376
+  ],
+  "note": "Matched by phase: first single to three weeks after the album. Lifetime views are not compared across albums because the 2022 videos have had four years longer."
  }
 }
