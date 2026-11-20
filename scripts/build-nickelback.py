@@ -85,8 +85,7 @@ crow=''.join(f'<tr><td>{a}</td><td>{b}</td><td>{c}</td></tr>' for a,b,c in C['ro
 slide('compare','Last album vs this one',head('Get Rollin’ (2022) vs Everything Under The Sun · first single → 3 weeks after the album','More around every single.<br><span class="serif">And the album didn’t go quiet.</span>',WORK)+f'''
 <div class="cmp mt"><div class="table-wrap cmp-t"><table><thead><tr><th></th><th>Get Rollin’ · 2022</th><th>Everything Under The Sun · 2026</th></tr></thead><tbody>{crow}</tbody></table></div>
 <div class="cmp-hi"><div class="cmp-big"><b>0 → 5</b><span>long-form uploads in the three weeks after the album. Last time the next one came {nl[2]} days later.</span></div>
-<a class="cmp-tile" href="{yt('5l5OKWE3rbA')}" target="_blank" rel="noopener">{img('5l5OKWE3rbA','Make Me Love You')}<div><b>{k(mm['views'])}</b><span>Make Me Love You, in eight weeks. Those Days, the last album’s second single, has {k(td[2])} after four years.</span></div></a>
-<div class="cmp-back"><span class="st st-gap">One step back</span><p>Last time every album track got a visualiser on release day. This time they went up as audio, with lyric videos following one by one.</p></div></div></div>''')
+<a class="cmp-tile" href="{yt('5l5OKWE3rbA')}" target="_blank" rel="noopener">{img('5l5OKWE3rbA','Make Me Love You')}<div><b>{k(mm['views'])}</b><span>Make Me Love You, in eight weeks. Those Days, the last album’s second single, has {k(td[2])} after four years.</span></div></a></div></div>''')
 
 # 04 · what is working ──────────────────────────────────────────────
 def panel(cls,id,alt,status,mono,big,unit,text,action):
