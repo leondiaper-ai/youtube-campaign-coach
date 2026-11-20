@@ -96,7 +96,7 @@ slide('working','What is working',head('Views at 20 Nov · 7- and 30-day gains f
  +panel('p1','5l5OKWE3rbA','Make Me Love You video','<span class="st st-on">Official video · 24 Sep</span>','The hit',k(mm['views']),f'views · {k(WV["5l5OKWE3rbA"]["d7"])} in its first week',f'Still adding {k(WV["5l5OKWE3rbA"]["g7"])} a week, eight weeks in.','Give it a second version.')
  +panel('p2','qki8O42Ct1w','Rattle The Cage video','<span class="st st-on">Official video · 14 Jul</span>','The rock single',k(rc['views']),'views · the first single','The heavier lead single landed too.','Keep both sides of the band in the plan.')
  +panel('p3','X4NJO6mkeuA','If I Don’t Go lyric video','<span class="st st-on">Lyric video · 30 Oct</span>','Best album-day upload',k(iidg['views']),f'views · {k(WV["X4NJO6mkeuA"]["d7"])} in week one','The focus track, with only a lyric video so far.','Make it the next music video.')
- +panel('p4','jC7jXZ3iA4k','Make Me Love You Short','<span class="st st-on">Short · 29 Sep</span>','Best campaign Short',k(sh['views']),'“If you’re only gonna break my heart…”','A lyric line from the hit, over the video.','Cut more lyric-line Shorts from the hit.')
+ +panel('p4','eSeczB9ZnzA','Leave Me Behind behind the scenes','<span class="st st-on">BTS · 18 Sep</span>','Behind the scenes',k(by['eSeczB9ZnzA']['views']),'views · out 4 days after its video','Both tracked BTS films beat three of five lyric videos in week one, and 2–3% of viewers hit like.','Shoot BTS for If I Don’t Go; release it within a week.')
  +'</div><div class="elsewhere"><span class="mono">The catalogue · lifetime</span>'+''.join(f'<a href="{yt(i)}" target="_blank" rel="noopener"><b>{k(n)}</b> {E(t)}</a>' for i,d,n,t in D['catalogueTop'][:4])+f'<a href="{yt(D["bestOf"][0])}" target="_blank" rel="noopener"><b>{k(D["bestOf"][3])}</b> The Best of Nickelback (Jun 2026)</a><span class="el-note">The channel gained {g30/1e6:.1f}M views in 30 days. Even counting every view the new uploads have ever had, at least {older_min}% came from older videos.</span></div>')
 
 # 04b · what fans are saying ─────────────────────────────────────
@@ -105,16 +105,18 @@ cards=''.join(f'<a class="fan" href="{yt(t["video"])}" target="_blank" rel="noop
 ex=''.join(f'<a class="fx2" href="{yt(i)}" target="_blank" rel="noopener">{img(i,n)}<div><span class="mono">{E(n)}</span><p>“{E(q)}” <small>{l:,} likes</small></p><small>{E(note)}</small></div></a>' for i,n,note,q,l in SN['extra'])
 slide('fans','What fans are saying',head('800 top comments across 8 new-album videos · read 20 Nov','“They’re back.”<br><span class="serif">And fans are emotional about it.</span>',WORK)+f'<div class="fans mt">{cards}</div><div class="fx2s mt">{ex}</div>')
 
-# 05 · lyric run fading, second life works ──────────────────────────
-mxl=max(WV[i]['d7'] for i,_,kk in lyr if kk=='d7')
-btsbars=''.join(f'<li class="lf-bts"><span class="lf-n">{E(n)} BTS</span><span class="lf-bar"><i style="width:{max(3,round(100*w1/mxl))}%"></i></span><b>{k(w1)}</b><small>{dd} days after its video</small></li>' for i,n,dt_,dd,v,l,w1 in D['bts'] if w1)
-bars=''.join(f'<li><span class="lf-n">{E(n)}</span><span class="lf-bar"><i style="width:{max(3,round(100*WV[i][kk]/mxl))}%"></i></span><b>{k(WV[i][kk])}</b><small>{"3 days so far" if kk=="d3" else day(by[i]["date"]).strftime("%-d %b")}</small></li>' for i,n,kk in lyr)
+# 05 · lyric run fading, music videos work ─────────────────────────
+five=[x for x in lyr if x[2]=='d7']
+mxl=max(WV[i]['d7'] for i,_,_ in five)
+bars=''.join(f'<li><span class="lf-n">{E(n)}</span><span class="lf-bar"><i style="width:{max(3,round(100*WV[i]["d7"]/mxl))}%"></i></span><b>{k(WV[i]["d7"])}</b><small>{day(by[i]["date"]).strftime("%-d %b")}</small></li>' for i,n,_ in five)
 gr=D['getRollin'];ga=day(gr['album'])
 def months(d):x=day(d);return (x.year-ga.year)*12+x.month-ga.month
-tiles=''.join(f'<a class="gr" href="{yt(i)}" target="_blank" rel="noopener">{img(i,t)}<b>{k(n)}</b><span>{E(t.replace(" (Official Music Video)"," · music video").replace(" (Official Lyric Video)"," · lyric video"))}</span><small>{months(d)} months after the album</small></a>' for i,d,t,n in gr['later'])
-slide('formats','Change the format',head('First-week views · Watcher','Lyric videos are fading.<br><span class="serif">Music videos and BTS films still work.</span>',FIX)+f'''
-<div class="lf-grid mt"><div><span class="mono">Everything Under The Sun · lyric videos, week one</span><ol class="lf">{bars}</ol><span class="mono lf-sub">Behind-the-scenes films, week one</span><ol class="lf">{btsbars}</ol><p class="lf-note">Both tracked BTS films beat three of the five lyric videos in week one, and fans like them more: 2–3% of viewers hit like, against under 1% on the Make Me Love You video. Leave Me Behind’s came 4 days after its video and is the biggest ({k(by['eSeczB9ZnzA']['views'])}); the other two came a month later. Last Night Was Fun is off to a better start than the lyric run: {k(WV['_CAz7Cckq24']['d3'])} in three days.</p></div>
-<div><span class="mono">Last album · Get Rollin’ (Nov 2022) · videos made months, even years, later</span><div class="grs">{tiles}</div></div></div>''')
+mvs=[x for x in gr['later'] if 'Music Video' in x[2]]
+tiles=''.join(f'<a class="gr" href="{yt(i)}" target="_blank" rel="noopener">{img(i,t)}<b>{k(n)}</b><span>{E(t.replace(" (Official Music Video)",""))}</span><small>{months(d)} months after the album</small></a>' for i,d,t,n in mvs)
+slide('formats','Change the format',head('What to change','Each lyric video is doing less.<br><span class="serif">A new music video is the next step.</span>',FIX)+f'''
+<div class="lf-grid mt"><div><span class="mono">This album · views in each lyric video’s first week</span><ol class="lf">{bars}</ol></div>
+<div><span class="mono">Last album · songs that got a music video later</span><div class="grs grs3">{tiles}</div></div></div>
+<p class="so mt"><b>So:</b> the next big moment should be a music video for If I Don’t Go, not another lyric video.</p>''')
 
 # 06 · which songs lead ─────────────────────────────────────────────
 songs=[('If I Don’t Go','X4NJO6mkeuA',['X4NJO6mkeuA','dJcskN9tRWQ'],'Music video','January','The focus track and the album’s biggest song after the singles.'),
