@@ -103,7 +103,7 @@ slide('working','What is working',head('Views at 20 Nov · 7- and 30-day gains f
 SN=D['sentiment']
 cards=''.join(f'<a class="fan" href="{yt(t["video"])}" target="_blank" rel="noopener"><span class="mono">{t["label"]}</span><b>{t["count"]}<small>/{t["of"]}</small></b><span class="fan-n">comments {t["note"]}</span><blockquote>“{E(t["quote"])}”<cite>{t["likes"]:,} likes</cite></blockquote></a>' for t in SN['themes'])
 ex=''.join(f'<a class="fx2" href="{yt(i)}" target="_blank" rel="noopener">{img(i,n)}<div><span class="mono">{E(n)}</span><p>“{E(q)}” <small>{l:,} likes</small></p><small>{E(note)}</small></div></a>' for i,n,note,q,l in SN['extra'])
-slide('fans','What fans are saying',head('800 top comments across 8 new-album videos · read 20 Nov','The fans think the old Nickelback is back.<br><span class="serif">And they’re emotional about it.</span>',WORK)+f'<div class="fans mt">{cards}</div><div class="fx2s mt">{ex}</div>')
+slide('fans','What fans are saying',head('800 top comments across 8 new-album videos · read 20 Nov','“They’re back.”<br><span class="serif">And fans are emotional about it.</span>',WORK)+f'<div class="fans mt">{cards}</div><div class="fx2s mt">{ex}</div>')
 
 # 05 · lyric run fading, second life works ──────────────────────────
 mxl=max(WV[i]['d7'] for i,_,kk in lyr if kk=='d7')
