@@ -91,7 +91,7 @@ slide('compare','Last album vs this one',head('Get Rollin’ (2022) vs Everythin
 def panel(cls,id,alt,status,mono,big,unit,text,action):
  return f'<a class="pnl {cls}" href="{yt(id)}" target="_blank" rel="noopener">{img(id,alt)}{status}<div class="pnl-txt"><span class="mono">{mono}</span><b class="pnl-big">{big}</b><span class="pnl-unit">{unit}</span><p>{text}</p><p class="pnl-act">→ {action}</p></div></a>'
 iidg=by['X4NJO6mkeuA'];sh=by['jC7jXZ3iA4k'];rc=by['qki8O42Ct1w']
-slide('working','What is working',head('Views at 20 Nov · 7- and 30-day gains from Watcher','A ballad broke through.<br><span class="serif">The catalogue keeps the lights on.</span>',WORK)+'<div class="pnls three mt">'
+slide('working','What is working',head('Views at 20 Nov · 7- and 30-day gains from Watcher','A ballad broke through.<br><span class="serif">And the classics are still busy.</span>',WORK)+'<div class="pnls three mt">'
  +panel('p1','5l5OKWE3rbA','Make Me Love You video','<span class="st st-on">Official video · 24 Sep</span>','The hit',k(mm['views']),f'views · {k(WV["5l5OKWE3rbA"]["d7"])} in its first week',f'Still adding {k(WV["5l5OKWE3rbA"]["g7"])} a week, eight weeks in.','Give it a second version.')
  +panel('p2','qki8O42Ct1w','Rattle The Cage video','<span class="st st-on">Official video · 14 Jul</span>','The rock single',k(rc['views']),'views · the first single','The heavier lead single landed too.','Keep both sides of the band in the plan.')
  +panel('p3','X4NJO6mkeuA','If I Don’t Go lyric video','<span class="st st-on">Lyric video · 30 Oct</span>','Best album-day upload',k(iidg['views']),f'views · {k(WV["X4NJO6mkeuA"]["d7"])} in week one','The focus track, with only a lyric video so far.','Make it the next music video.')
