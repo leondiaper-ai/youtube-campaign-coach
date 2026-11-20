@@ -141,7 +141,7 @@ slide('run','Running it',head('Production brief','Five days of prep.<br><span cl
 <article><span class="who">The edit</span><ul><li>Note which song starts when in the full show.</li><li>Cut Nosedive and Only Girl out as their own videos.</li><li>Cut five vertical Shorts.</li></ul></article>
 <article><span class="who">The channel</span><ul><li>Add song chapters to the full show.</li><li>Point each Short at its full performance.</li><li>Move the live playlist near the top of the homepage.</li><li>Fix the broken Goddamn, Lizard Man! video.</li></ul></article>
 <article><span class="who">Socials · band + Ash (PACT)</span><ul><li>Post the same clips on Instagram and TikTok on 1, 4, 8, 15 and 18 Dec.</li><li>Every post points to YouTube.</li></ul></article></div>
-<div class="know"><span class="mono">How we’ll know it’s working</span><p class="kn-range">about <b>3,000–5,000</b> views in the first week<small>what their last two live videos did</small></p><ul><li><b>Hit it?</b> Release the next song.</li><li><b>A Short beats its full video?</b> Make that song next.</li><li><b>All three miss?</b> Stop new edits. Keep cutting Shorts from the full show.</li></ul></div></div>""")
+<div class="know"><span class="mono">How we’ll know it’s working</span><p class="kn-range">about <b>3,000–5,000</b> views in the first week<small>what their last two live videos did</small></p><ul><li>If a performance gets there, put out the next one.</li><li>If a song’s Shorts do better than its full performance, lead with that song next.</li><li>If none of the first three get there, hold off on more performances and keep posting Shorts from the full show.</li></ul></div></div>""")
 
 # ── analysis sheet ─────────────────────────────────────────────────
 def table(headers,rows):
