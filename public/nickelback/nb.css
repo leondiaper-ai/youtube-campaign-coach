@@ -370,3 +370,5 @@ h3{font-weight:600}
 .cmp-back{border-top:1px solid var(--line);padding-top:12px}
 .cmp-back p{font-size:13px;line-height:1.45;margin-top:8px;color:rgba(246,236,223,.8)}
 @media(max-width:950px){.cmp{grid-template-columns:1fr}}
+@media(max-width:650px){.cover-record{font-size:15vw!important}}
+@media(max-height:820px) and (min-width:951px){.sg-img img{width:96px}.sglist li,.sg-head{grid-template-columns:36px 96px minmax(0,1fr) minmax(0,1.5fr) minmax(0,1.3fr)}.sglist h3{font-size:19px}.why{font-size:13.5px}}
