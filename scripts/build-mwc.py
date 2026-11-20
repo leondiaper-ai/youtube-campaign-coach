@@ -109,13 +109,17 @@ fx=''.join(f'<li><b>{i:02d}</b><div class="fx-img">{img(t[3],t[0])}</div><div cl
 slide('attention','What needs attention',head('Public channel · 20 Nov','Four things to sort<br><span class="serif">before the show goes out.</span>',FIX)+f'<ol class="fxlist mt">{fx}</ol>','light')
 
 # 06 · which songs lead ─────────────────────────────────────────────
-songs=[('Nosedive','5J3nZT--jBc',f'{k(nose)} video · +{k(nose30)} in 30 days. Best Short: live at Werchter, 6.2k. Fans film it live: two fan videos at 5.5k each on other channels.','The song people already come for. The obvious way into the show.'),
- ('Only Girl','6CGR08BdwHA','35.4k single version · +2.5k in 30 days. The album version has 1.7k.','Opened the Birmingham show the night before, per a review. Strong on its own.'),
- ('Get Up and Dance','N9xUTqsKENQ','29.8k visualiser · +2.2k in 30 days. Live at Werchter Short, 3.2k.','A big singalong chorus: a ready-made vertical moment.'),
- ('Canyons','g3cNb695QmU','12.6k as audio only · the most-viewed album track without a video · +800 in 30 days.','Gives the strongest album-only song its first visual.'),
- ('Something Else to Give','Ntc1efcKcR8','21.8k audio · +1.7k in 30 days.','Reserve, if Canyons isn’t in the set or doesn’t land on film.')]
-rows=''.join(f'<li class="{"lead" if i<2 else ""}"><b class="rk">{i+1}</b><a class="sg-img" href="{yt(id)}" target="_blank" rel="noopener">{img(id,n)}</a><div><h3>{n}</h3></div><p class="sg-m"><span class="mono">Measured</span>{m}</p><p class="sg-j"><span class="mono">Our judgement</span>{j}</p></li>' for i,(n,id,m,j) in enumerate(songs))
-slide('songs','Which songs lead the live rollout',head('Song demand on their own channel · views at 20 Nov · 30-day gains from Watcher','Lead with Nosedive.<br><span class="serif">Follow with Only Girl.</span>',DO)+f'<ol class="sglist mt">{rows}</ol><p class="fine-print">Check the order against the Electric Ballroom setlist before cutting.</p>')
+WV=D['watcherVideo']
+songs=[('Nosedive','5J3nZT--jBc',WV['5J3nZT--jBc']['gain30'],nose+by['UFuaAn_LEBA']['views'],'Week 1','Lead performance','The song people already come for. Fans film it at shows too.'),
+ ('Only Girl','6CGR08BdwHA',WV['6CGR08BdwHA']['gain30'],by['6CGR08BdwHA']['views']+by['G-g2lz1IvPA']['views'],'Week 3','Second performance','Second-strongest single. It opened the Birmingham show the night before.'),
+ ('Get Up and Dance','N9xUTqsKENQ',WV['N9xUTqsKENQ']['gain30'],by['N9xUTqsKENQ']['views']+by['280up2PwGhk']['views'],'Optional','Week 5, or a Short','A big chorus. Its live Short already has 3.2k.'),
+ ('Something Else to Give','Ntc1efcKcR8',WV['Ntc1efcKcR8']['gain30'],by['Ntc1efcKcR8']['views'],'Reserve','If needed','Solid, but no live version on the channel yet.'),
+ ('Canyons','g3cNb695QmU',WV['g3cNb695QmU']['gain30'],by['g3cNb695QmU']['views'],'Optional','Week 5','The most-viewed album track with no video. A live take would be its first.')]
+others=sum(x[2] for x in songs[1:]);top=songs[0][2]
+assert top>2.5*others
+mxg=max(x[2] for x in songs)
+rows=''.join(f'''<li class="{"lead" if i<2 else ""}"><b class="rk">{i+1}</b><a class="sg-img" href="{yt(id)}" target="_blank" rel="noopener">{img(id,n)}</a><div class="sg-n"><h3>{n}</h3><small>{k(life)} views across its videos</small></div><div class="sg-bar"><span style="width:{max(2,round(100*g/mxg))}%"></span><b>+{g:,}</b></div><div class="sg-role"><span class="role role-{"on" if i<2 else "opt"}">{wkn}</span><span class="role-t">{role}</span><p>{why}</p></div></li>''' for i,(n,id,g,life,wkn,role,why) in enumerate(songs))
+slide('songs','Which songs lead the live rollout',head('Song demand · views gained in the last 30 days on their own channel','Lead with Nosedive.<br><span class="serif">Follow with Only Girl.</span>',DO)+f'<p class="why mt">Before cutting anything: which songs do people already want? Nosedive gained <b>{top:,}</b> views in the last 30 days, more than the next four songs together (<b>{others:,}</b>). So it goes first, and Only Girl follows.</p><div class="sg-head"><span></span><span></span><span class="mono">Song</span><span class="mono">Demand now · last 30 days</span><span class="mono">In the rollout</span></div><ol class="sglist mt">{rows}</ol><p class="fine-print">Check against the Electric Ballroom setlist before cutting.</p>')
 
 # 07 · the rollout ───────────────────────────────────────────────────
 def wk(n,date,title,fmt,purpose,support,dest,prod,review,kind='ess'):
