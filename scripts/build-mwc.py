@@ -187,9 +187,9 @@ walk=table(['Where','What the public page shows','Fix'],[
  ['Goddamn, Lizard Man! visualiser','“Video unavailable” signed out in the UK; still in uploads; views frozen at 10,551','Restore or remove from public view.'],
  ['Shorts','8 of 21 name a song; 14 have no description','Song name in every song Short; set Related Video in Studio.'],
  ['Electric Ballroom full show','Unlisted, 27 Oct, 4 views, no chapters, no captions','Chapters, then public on 8 Dec.']])
-method=f'''<p>Catalogue: {D['sources']['api']}, retrieved {D['retrieved']}. Format: a Short is a video on the channel’s Shorts tab (21). Maegan (Visualizer) is 53 seconds but horizontal, so it counts as long-form.</p>
-<p>Watcher: {D['sources']['watcher']}. The channel counter updates every 1–4 days, so windows use the nearest stored day. Per-video series start 15 Sep, so earlier first-week figures are not available.</p>
-<p>Coach: {D['sources']['coach']}. {D['coachNote']}</p>
+method=f'''<p>Catalogue: every public upload from the YouTube Data API through our Watcher integration (46 rows, uncapped), read 20 Nov 2026 at 10:35 UTC. Format: a Short is a video on the channel’s Shorts tab (21). Maegan (Visualizer) is 53 seconds but horizontal, so it counts as long-form.</p>
+<p>Watcher: 180 daily channel snapshots (25 May–20 Nov 2026) and per-video daily series. The channel counter updates every 1–4 days, so windows use the nearest stored day. Per-video series start 15 Sep, so earlier first-week figures are not available.</p>
+<p>Coach: the original campaign record, created 18 May 2026 and last edited 29 May 2026. No earlier version is stored, so the plan shown is the 29 May version. {D['coachNote']}</p>
 <p>Campaign window: Coach 20 Apr → 20 Nov. The cycle began earlier: Only Girl (Single Version), the album’s opening track, came out on 17 Nov 2025. Album day follows Bandcamp (7 Aug 2026); the album tracks went up at 23:00 UTC on 6 Aug, midnight UK time.</p>
 <p>Lifetime views are totals at 20 Nov, not views earned inside the campaign. Window gains come from Watcher only.</p>
 <p>The live show: {E(D['liveShow']['note'])}</p>
