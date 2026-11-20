@@ -101,13 +101,12 @@ slide('working','What is working',head('Owned-channel results · lifetime views 
  +'</div><div class="elsewhere"><span class="mono">On other channels · not owned results</span><a href="'+yt('FYWaJTOyUp0')+'" target="_blank" rel="noopener"><b>70.0k</b> KEXP full set</a><a href="'+yt('oNEYcO80r7g')+'" target="_blank" rel="noopener"><b>49.1k</b> Yala! TV</a><a href="'+yt('dMuWt0CH-ns')+'" target="_blank" rel="noopener"><b>22.5k</b> Close Encounter Club</a><a href="'+yt('QRyikZqmUjk')+'" target="_blank" rel="noopener"><b>5.5k</b> fan-filmed Nosedive</a><span class="el-note">Full sets find an audience. On their own channel, the Electric Ballroom show is a test.</span></div>')
 
 # 05 · what needs attention ─────────────────────────────────────────
-fixes=[('The full show is hidden.','Uploaded unlisted on 27 Oct. 4 views, no chapters. The show was 7 Oct, so it gets older every week.','ztvoyjwp2gQ'),
- ('Three long-form uploads since album day.',f'In {days_since_album} days: Still Angry live, a Goddamn audio re-upload and the BBC Radio 1 cover. Nosedive alone brought in {nose_ch_share}% of the channel’s views in the last 30 days.','p6MYhf0BGbM'),
- ('The Goddamn, Lizard Man! visualiser is broken.','It shows “Video unavailable” but still sits in Videos. Views stopped at 10,551 in late September. The replacement is audio only.','s5qH_WbW35w'),
- ('Live is hard to find.','The Live Performances playlist is the last section on Home, misses the BBC Radio 1 session, and four of its seven videos are other channels’. The Cannonball playlist isn’t in album order.','68xngpq0mwo'),
- ('Shorts don’t say what song they are.','8 of 21 name a song. 14 have no description. Titles like “🫧” or “Baby get me back over you.” give a new viewer nowhere to go.','KxJXwrQEdkE')]
-fx=''.join(f'<li><b>{i:02d}</b><div class="fx-img">{img(t[2],t[0])}</div><div><h3>{t[0]}</h3><p>{t[1]}</p></div></li>' for i,t in enumerate(fixes,1))
-slide('attention','What needs attention',head('Prioritised · public channel, 20 Nov','Five fixes<br><span class="serif">before the show goes out.</span>',FIX)+f'<ol class="fxlist mt">{fx}</ol>','light')
+fixes=[('The full show is hidden.','Unlisted since 27 Oct. 4 views, no chapters.','Add chapters. Make it public on 8 Dec.','ztvoyjwp2gQ'),
+ ('A broken video is still on the channel.','The Goddamn, Lizard Man! visualiser says “Video unavailable”. Views stuck at 10,551.','Restore it or take it down.','s5qH_WbW35w'),
+ ('Live is hard to find.','The live playlist is the last shelf on Home, misses the BBC Radio 1 session, and four of its seven videos are other channels’.','A “Live at Electric Ballroom” playlist, second on Home.','68xngpq0mwo'),
+ ('Shorts don’t name the song.','Only 8 of 21 do. Titles like “🫧” give a new viewer nowhere to go.','Song name in every song Short, linked to its performance.','KxJXwrQEdkE')]
+fx=''.join(f'<li><b>{i:02d}</b><div class="fx-img">{img(t[3],t[0])}</div><div class="fx-p"><h3>{t[0]}</h3><p>{t[1]}</p></div><div class="fx-f"><span class="mono">Fix</span><p>{t[2]}</p></div></li>' for i,t in enumerate(fixes,1))
+slide('attention','What needs attention',head('Public channel · 20 Nov','Four things to sort<br><span class="serif">before the show goes out.</span>',FIX)+f'<ol class="fxlist mt">{fx}</ol>','light')
 
 # 06 · which songs lead ─────────────────────────────────────────────
 songs=[('Nosedive','5J3nZT--jBc',f'{k(nose)} video · +{k(nose30)} in 30 days. Best Short: live at Werchter, 6.2k. Fans film it live: two fan videos at 5.5k each on other channels.','The song people already come for. The obvious way into the show.'),
