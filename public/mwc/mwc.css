@@ -259,3 +259,5 @@ h3{font-weight:600}
  .fxlist li{grid-template-columns:36px 1fr}.fx-img{display:none}
  .sglist li{grid-template-columns:32px 1fr}.sg-img{display:none}.sg-m,.sg-j{grid-column:2}
 }
+
+.tl-film img{border:1px dashed var(--cream)!important;opacity:.85}.tl-film em{color:var(--amber)}
