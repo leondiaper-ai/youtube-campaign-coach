@@ -113,7 +113,7 @@ fm=[('Music videos','3','5l5OKWE3rbA','Make Me Love You',k(WV['5l5OKWE3rbA']['d7
  ('Lyric videos','6','X4NJO6mkeuA','If I Don’t Go',k(WV['X4NJO6mkeuA']['d7']),'in its first week','A strong start with the focus track. Quieter for the deeper cuts.'),
  ('Shorts',str(len(shorts)),'jC7jXZ3iA4k','A lyric line from Make Me Love You',k(by['jC7jXZ3iA4k']['views']),'views so far',f'The most reaction: about {shr:.0f} likes per 100 views, twice the long-form.')]
 cards=''.join(f'<a class="fmt" href="{yt(i)}" target="_blank" rel="noopener"><div class="fmt-img">{img(i,ex)}</div><div class="fmt-t"><span class="mono">{n} · {c} so far</span><b>{v}</b><span class="fmt-u">{u} · {E(ex)}</span><p>{t}</p></div></a>' for n,c,i,ex,v,u,t in fm)
-slide('formats','What’s landing',head('Every campaign upload by format · views at 20 Nov','What fans are reacting to.<br><span class="serif">Big videos for reach. BTS and Shorts for the fans.</span>',WORK)+f'''
+slide('formats','What’s landing',head('Every campaign upload by format · views at 20 Nov','What fans are reacting to.<br><span class="serif">Videos reach. BTS and Shorts connect.</span>',WORK)+f'''
 <div class="fmts mt">{cards}</div>
 <p class="so mt"><b>So:</b> more of what’s landing. A music video and a BTS film for If I Don’t Go, with Shorts cut from both.</p>''')
 
