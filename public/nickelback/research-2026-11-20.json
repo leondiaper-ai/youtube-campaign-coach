@@ -1166,5 +1166,105 @@
    9686376
   ],
   "note": "Matched by phase: first single to three weeks after the album. Lifetime views are not compared across albums because the 2022 videos have had four years longer."
+ },
+ "bts": [
+  [
+   "fF6t1ntwEVc",
+   "Rattle The Cage",
+   "2026-08-14",
+   31,
+   128543,
+   4024,
+   null
+  ],
+  [
+   "eSeczB9ZnzA",
+   "Leave Me Behind",
+   "2026-09-18",
+   4,
+   379750,
+   8541,
+   202296
+  ],
+  [
+   "WsorAk6HH3Y",
+   "Make Me Love You",
+   "2026-10-23",
+   29,
+   183966,
+   3879,
+   141756
+  ]
+ ],
+ "btsNote": "Days after the matching music video. Like rate = likes / views at 20 Nov. Music videos: Make Me Love You 0.77%, Leave Me Behind 2.05%, Rattle The Cage 1.80%.",
+ "sentiment": {
+  "read": "2026-11-20",
+  "sample": "100 relevance-ranked comments on each of 8 videos (800): Make Me Love You video and BTS, Leave Me Behind video and BTS, Rattle The Cage video, If I Don't Go and I Already Know lyric videos, Technicolor Steamboat audio. A sample of engaged fans, not all viewers; themes by keyword.",
+  "themes": [
+   {
+    "key": "back",
+    "label": "They’re back",
+    "count": 98,
+    "of": 800,
+    "note": "in all eight videos",
+    "quote": "Oh we are so Nickel-BACK",
+    "likes": 4281,
+    "video": "qki8O42Ct1w"
+   },
+   {
+    "key": "emotion",
+    "label": "The hit made them cry",
+    "count": 14,
+    "of": 100,
+    "note": "on the Make Me Love You video, plus 12 about the dog",
+    "quote": "Who would have thought I’d be bawling my eyes out to a Nickelback song in 2026.",
+    "likes": 1315,
+    "video": "5l5OKWE3rbA"
+   },
+   {
+    "key": "haters",
+    "label": "The tide has turned",
+    "count": 19,
+    "of": 800,
+    "note": "say the hate was never deserved",
+    "quote": "People only hated on Nickelback because the internet told them to.",
+    "likes": 3539,
+    "video": "qki8O42Ct1w"
+   },
+   {
+    "key": "best",
+    "label": "I Already Know should be a single",
+    "count": 9,
+    "of": 100,
+    "note": "on its lyric video call it the best song",
+    "quote": "Best song on the album! Deserves to be a single.",
+    "likes": 25,
+    "video": "M58G75GoOpI"
+   }
+  ],
+  "extra": [
+   [
+    "qki8O42Ct1w",
+    "Rattle The Cage",
+    "23 of 100 comments about it going heavier",
+    "Back to the heavy roots, perfect",
+    2522
+   ],
+   [
+    "oMpMkM-NEJc",
+    "Technicolor Steamboat",
+    "fans hear something new",
+    "This song needs a trippy music video.",
+    14
+   ],
+   [
+    "WsorAk6HH3Y",
+    "Make Me Love You BTS",
+    "fans want more of the story",
+    "Good to see how it was made only makes me love the song more",
+    13
+   ]
+  ],
+  "watch": "Several If I Don’t Go comments compare it to Sam Fender’s “Dead Boys” (top one 71 likes)."
  }
 }
