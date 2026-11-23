@@ -681,6 +681,14 @@ export default function ChannelHealthBoard({
      answer to "which", which is the next question every time. */
   const [classFilter, setClassFilter] = useState<'ACTIVE' | 'OCCASIONAL' | 'INACTIVE' | null>(null);
   const [quietDemandOnly, setQuietDemandOnly] = useState(false);
+  const scrollToRoster = () => {
+    requestAnimationFrame(() => {
+      document.getElementById('channel-health-roster')?.scrollIntoView({
+        behavior: 'smooth', block: 'start',
+      });
+    });
+  };
+
   /* The multiformat counts were a read-only footnote under four figures
      that are all filters. Same question gets asked of them — "which 22?" —
      so they answer it the same way.
@@ -923,6 +931,7 @@ export default function ChannelHealthBoard({
                 aria-pressed={isOn}
                 onClick={() => {
                   setClassFilter(isOn ? null : key);
+                  scrollToRoster();
                   setQuietDemandOnly(false);
                   /* Clears the other cut, so the banner's single sentence
                      is always the whole truth about what is listed. */
@@ -964,6 +973,7 @@ export default function ChannelHealthBoard({
           aria-pressed={quietDemandOnly}
           onClick={() => {
             setQuietDemandOnly(!quietDemandOnly);
+            scrollToRoster();
             setClassFilter(null);
             setMfFilter(null);
             setExpandedRow(null);
@@ -999,6 +1009,8 @@ export default function ChannelHealthBoard({
                   disabled={count === 0}
                   onClick={() => {
                     setMfFilter(isOn ? null : band);
+                    setQuietDemandOnly(false);
+                    scrollToRoster();
                     setClassFilter(null);
                     setPage(1);
                   }}
@@ -1064,7 +1076,7 @@ export default function ChannelHealthBoard({
         </div>
       )}
 
-      <div className="mb-3 relative max-w-[280px]">
+      <div id="channel-health-roster" className="mb-3 relative max-w-[280px] scroll-mt-24">
         <input
           type="text"
           value={search}
