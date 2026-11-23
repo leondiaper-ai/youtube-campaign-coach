@@ -107,6 +107,40 @@ export default function ChannelAuditButton({ slug, name }: { slug: string; name:
         {(!audit.catalogue?.complete || scanning) && <div className="rounded-lg border border-line p-4 text-xs flex flex-wrap items-center justify-between gap-3"><div className="flex-1 min-w-[220px]"><p className="font-bold">{audit.catalogue?.complete?'Full playlist scanned':audit.catalogue?'Catalogue scan in progress':'Recent-upload sample'}</p><p className="text-muted mt-1 leading-relaxed">{audit.coverage}</p><p aria-live="polite" className="mt-1 text-muted">{scanStatus}</p></div>{(!audit.catalogue?.complete || scanning) && <button disabled={scanning} onClick={scan} className="border border-line rounded px-3 py-2 font-bold disabled:opacity-50">{scanning?'Scanning…':audit.catalogue?.complete?'Check catalogue cache':audit.catalogue?'Continue scan':'Scan full catalogue'}</button>}<p className="w-full text-[10px] text-muted">Opening an audit collects the full public uploads playlist if needed. Completed scans are reused for 7 days.</p></div>}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 border-b border-line pb-5">{[['Subscribers',audit.stats.subs],['Lifetime channel views',audit.stats.lifetimeViews],['Channel views · 30d',audit.stats.views30d],['Channel views · 7d',audit.stats.views7d]].map(([label,value])=><div key={String(label)}><div className="text-2xl font-black">{auditNumber(value as number|null)}</div><p className="text-[10px] text-muted mt-1">{label}</p></div>)}</div>
         <ChannelAuditIntel audit={audit}/>
+        {audit.catalogue?.complete && (
+          <section className="rounded-xl border border-line bg-white p-5 sm:p-6" aria-label="Asset format performance">
+            <div className="flex flex-wrap items-start justify-between gap-3">
+              <div>
+                <div className="text-[10px] font-extrabold uppercase tracking-widest text-signal">Full asset audit</div>
+                <h3 className="mt-1 text-xl font-black">Which video formats work?</h3>
+                <p className="mt-1 text-xs text-muted">All scanned public uploads · lifetime views · compare typical results, not just totals.</p>
+              </div>
+              <span className="rounded-full bg-black/5 px-3 py-1.5 text-[11px] font-bold">{audit.catalogue.scannedIds} video IDs scanned</span>
+            </div>
+            <div className="mt-5 grid grid-cols-2 lg:grid-cols-4 gap-3">
+              {[...audit.visuals.formats]
+                .filter(f => f.key !== 'longform' && f.key !== 'short' && f.count > 0)
+                .sort((a,b) => b.median-a.median)
+                .slice(0,8)
+                .map(f => (
+                  <article key={f.key} className="min-w-0 rounded-lg border border-line bg-paper p-3.5">
+                    <div className="text-xs font-bold text-ink">{f.name}</div>
+                    <div className="mt-2 text-2xl font-black">{auditNumber(f.median)}</div>
+                    <div className="text-[11px] text-muted">median views per upload</div>
+                    <div className="mt-2 text-[11px] text-muted">{f.count} upload{f.count===1?'':'s'} · {auditNumber(f.views)} total views</div>
+                    {f.examples[0] && <a href={`https://www.youtube.com/watch?v=${encodeURIComponent(f.examples[0].id)}`} target="_blank" rel="noopener noreferrer" className="mt-3 block text-[11px] font-semibold text-ink underline underline-offset-2 line-clamp-2" title={f.examples[0].title}>Watch example ↗ {f.examples[0].title}</a>}
+                  </article>
+                ))}
+            </div>
+            <div className="mt-4 border-t border-line pt-4 flex flex-wrap gap-x-5 gap-y-2 text-xs">
+              {audit.visuals.formats.filter(f=>['live','bts','omv','lyric','visualiser','acoustic','short'].includes(f.key) && f.count===0).map(f=>(
+                <span key={f.key} className="text-muted">{f.name}: no examples identified</span>
+              ))}
+            </div>
+            <p className="mt-3 text-[11px] text-muted leading-relaxed">Formats are detected from upload metadata and may need review. Medians are lifetime views, not age-matched performance. A format with one upload is an example, not a proven pattern.</p>
+          </section>
+        )}
+
         {audit.catalogue?.complete ? <details className="border-t border-line pt-4"><summary className="text-sm font-bold cursor-pointer">Full channel analysis · formats, cadence & markets</summary><div className="mt-5"><ChannelAuditVisuals audit={audit} onReview={()=>{if(reviewPanel.current){reviewPanel.current.open=true;reviewPanel.current.scrollIntoView({behavior:'smooth',block:'start'});}}}/></div></details> : <section className="border border-line rounded-lg p-6"><h3 className="font-black text-lg">Building the full-channel read</h3><p className="text-sm text-muted mt-2">Recent uploads alone can miss the videos that built this channel. Format verdicts and exports appear once the playlist scan finishes.</p><p role="status" className="text-xs font-semibold mt-3">{scanStatus||'Preparing catalogue scan…'}</p></section>}
         {!!audit.formatReview?.total && <details ref={reviewPanel} className="border border-line rounded-lg p-4"><summary className="text-sm font-bold cursor-pointer">Review video formats · {audit.formatReview.total}</summary><p className="text-xs text-muted mt-2">Highest-viewed first. Confirm the format to get a suggested title. Audit corrections are saved in this browser.</p>{reviewError && <p role="alert" className="text-xs text-red-700 mt-2">{reviewError}</p>}<div className="mt-3 divide-y divide-line">{audit.formatReview.videos.map(v=><div key={v.id} className="py-3 flex flex-wrap gap-3 items-center justify-between"><div className="min-w-0 flex-1"><a className="text-xs font-bold underline" href={'https://www.youtube.com/watch?v='+v.id} target="_blank" rel="noreferrer">{v.title} ↗</a><p className="text-[11px] text-muted mt-1">{auditNumber(v.views)} views · {v.reason}</p>{v.reason==='Saved in this browser' && auditTitleSuggestion(v.title,v.key) && <div className="mt-2 text-xs"><span className="text-muted">Suggested title: </span><span className="font-semibold">{auditTitleSuggestion(v.title,v.key)}</span><button type="button" className="ml-2 underline font-bold" onClick={async()=>{try{await navigator.clipboard.writeText(auditTitleSuggestion(v.title,v.key)!);setCopied('Suggested title copied');}catch{setReviewError('Could not copy the title.');}}}>Copy</button><a href={'https://studio.youtube.com/video/'+v.id+'/edit'} target="_blank" rel="noreferrer" className="ml-2 underline">Open Studio ↗</a></div>}</div><label className="text-xs text-muted">Format <select aria-label={'Format for '+v.title} disabled={reviewBusy} value={v.reason==='Saved in this browser'?v.key:'auto'} onChange={e=>void updateFormat(v.id,e.target.value)} className="ml-2 border border-line rounded p-2 bg-white"><option value="auto">Automatic · {v.format}</option><option value="omv">Official music video</option><option value="live">Live performance</option><option value="lyric">Lyric video</option><option value="visualiser">Visualiser</option><option value="audio">Audio</option><option value="acoustic">Acoustic</option><option value="bts">Behind the scenes</option><option value="documentary">Documentary</option><option value="interview">Interview</option><option value="tour">Tour / festival</option><option value="short">Short</option><option value="longform">Other long-form</option></select></label></div>)}</div><p aria-live="polite" className="text-xs text-muted mt-2">{copied === 'Suggested title copied' ? copied : ''}</p>{audit.formatReview.total>audit.formatReview.videos.length && <p className="text-xs text-muted mt-2">Showing the {audit.formatReview.videos.length} highest-viewed videos needing review.</p>}</details>}
         <details className="border-t border-line pt-4"><summary className="text-sm font-bold cursor-pointer">Video evidence, asset checks & past campaigns</summary><div className="space-y-6 mt-5">
