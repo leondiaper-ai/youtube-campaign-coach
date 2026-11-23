@@ -623,6 +623,7 @@ export default function ChannelHealthBoard({
      So each card can open to its full list. */
   const [showAllLatent, setShowAllLatent] = useState(false);
   const [showAllInsights, setShowAllInsights] = useState(false);
+  const [videoLimit, setVideoLimit] = useState(5);
   const [showAllStacks, setShowAllStacks] = useState(false);
   /* A 120-row table is a long scroll to reach anything underneath it.
      Twenty is roughly a screen and a half, which is enough to scan a
@@ -1395,12 +1396,22 @@ export default function ChannelHealthBoard({
 
       {/* ─── MANAGED VIEW: Top Performing Videos (split) ──────────────── */}
       {view === 'managed' && topVideos && topVideos.length > 0 && (() => {
-        const topShorts = topVideos.filter((v) => v.isShort).slice(0, 5);
-        const topLongform = topVideos.filter((v) => !v.isShort).slice(0, 5);
+        const topShorts = topVideos.filter((v) => v.isShort).slice(0, videoLimit);
+        const topLongform = topVideos.filter((v) => !v.isShort).slice(0, videoLimit);
         if (topShorts.length === 0 && topLongform.length === 0) return null;
         return (
           <div className="mb-8">
             <SectionHead title="Top performing videos" meta="Most views gained in the last 7 days" />
+            <div className="flex flex-wrap items-center justify-between gap-3 mb-3">
+              <span className="text-micro text-muted">Ranked across this workspace's artists · measured 7-day gains</span>
+              <label className="flex items-center gap-2 text-micro text-muted">
+                Show per format
+                <select aria-label="Videos to show per format" value={videoLimit} onChange={e => setVideoLimit(Number(e.target.value))}
+                  className="rounded border border-line bg-surface px-2 py-1.5 text-ink">
+                  {[5, 10, 25, 50, 100].map(n => <option key={n} value={n}>{n}</option>)}
+                </select>
+              </label>
+            </div>
             {/* Stacked, not two columns. Side by side, a long-form row and a
                 Shorts row sat at the same height and read as one ranking of
                 ten — and with thumbnails the formats are different shapes,
