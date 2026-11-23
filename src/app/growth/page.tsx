@@ -181,14 +181,21 @@ export default async function ControlPage({
     const videos: TopVideo[] = [];
 
     for (const a of allArtists) {
+      // Label boards must only rank artists in that label's monitored roster.
+      // Never silently mix in the whole VMG/market roster.
       if (!label && !isVirginOwned(a)) continue;
       const snap = a.channelHandle ? (snapMap.get(a.channelHandle) ?? null) : null;
-      if (!snap?.recentUploads) continue;
+      if (!snap?.recentUploads || snap.error) continue;
+      // A cached lifetime total is not current performance if the source
+      // hasn't refreshed. Hide stale rankings instead of implying live data.
+      const fetchedAt = Date.parse((snap as typeof snap & { cachedAt?: string }).cachedAt ?? '');
+      if (!Number.isFinite(fetchedAt) || now - fetchedAt > 48 * 3600000) continue;
 
       for (const u of snap.recentUploads) {
         const ageMs = now - new Date(u.publishedAt).getTime();
         if (ageMs > cutoff || ageMs < 0) continue; // only last 14 days
         const daysAgo = Math.max(1, Math.floor(ageMs / 86400000));
+        // Average views/day since upload, not a measured last-14-day velocity.
         const velocity = Math.round(u.viewCount / daysAgo);
         if (velocity < 100) continue; // skip negligible
 
