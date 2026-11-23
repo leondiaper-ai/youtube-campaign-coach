@@ -1943,13 +1943,30 @@ function MultiformatCell({
     .filter((f) => (multiformat as Record<string, unknown>)[f.key])
     .map((f) => labels[f.key] ?? f.label);
 
+  const activeDots = FORMAT_DOTS.filter((f) => (multiformat as Record<string, unknown>)[f.key]);
+  const summary = active.length > 2
+    ? `${active.slice(0, 2).join(' · ')} +${active.length - 2}`
+    : active.join(' · ');
+
   return (
-    <span
-      className="text-[11px] leading-snug text-ink/75"
-      title={active.length ? `Detected upload types: ${active.join(', ')}. Not a quality score.` : 'No recognised upload types detected in the available data'}
+    <div
+      className="flex flex-col gap-1.5"
+      title={active.length ? `Detected types: ${active.join(', ')}. This is not a score or a requirement to use every format.` : 'No recognised content types in the available uploads'}
     >
-      {active.length ? active.join(' · ') : 'None identified'}
-    </span>
+      <div className="flex items-center gap-2">
+        <span className="rounded-md bg-ink/[0.06] px-2 py-0.5 text-[10px] font-bold text-ink/75 whitespace-nowrap">
+          {active.length} {active.length === 1 ? 'type' : 'types'}
+        </span>
+        <div className="flex items-center gap-1" aria-hidden="true">
+          {activeDots.map((f) => (
+            <span key={f.key} className="h-2 w-2 rounded-full" style={{ backgroundColor: f.color }} />
+          ))}
+        </div>
+      </div>
+      <span className="text-[10px] leading-tight text-ink/55">
+        {active.length ? summary : 'None identified'}
+      </span>
+    </div>
   );
 }
 
