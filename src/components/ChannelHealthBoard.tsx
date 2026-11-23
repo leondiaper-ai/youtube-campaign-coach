@@ -1619,8 +1619,8 @@ export default function ChannelHealthBoard({
                described the channel and left the fans implied, so the
                card read as a status rather than an opportunity — and the
                opportunity is the whole point. */
-            title="Active fans, quiet channel"
-            meta={`${latentDemand.length} channel${latentDemand.length === 1 ? '' : 's'} · vs our average channel`}
+            title="Audience engagement despite low activity"
+            meta={`${latentDemand.length} channel${latentDemand.length === 1 ? '' : 's'} · low uploads, above-average comments per view`}
           />
           <div className="bg-surface border border-line rounded-card shadow-card overflow-hidden">
             <div className="divide-y divide-line-faint">
@@ -1638,7 +1638,7 @@ export default function ChannelHealthBoard({
                       {cd.uploads90 === 0
                         ? 'No uploads in 90 days'
                         : `${cd.uploads90} upload${cd.uploads90 === 1 ? '' : 's'} in 90 days`}
-                      {' · '}{fmtNum(cd.comments)} comments
+                      {' · '}{fmtNum(cd.comments)} comments on tracked uploads
                     </div>
                   </div>
                   <div className="text-right shrink-0">
@@ -1646,7 +1646,7 @@ export default function ChannelHealthBoard({
                       {cd.vsRoster.toFixed(1)}×
                     </div>
                     <div className="text-micro text-muted tabular-nums">
-                      more comments
+                      roster comment rate
                     </div>
                   </div>
                 </Link>
@@ -1673,7 +1673,7 @@ export default function ChannelHealthBoard({
               className="px-5 py-2.5 border-t border-line bg-raised/50 text-micro text-muted"
               title={`Comments per 1,000 views against an average channel on this roster, which gets ${ROSTER_COMMENTS_PER_1K}. A rate, so a big catalogue cannot win it by being big. A comment count cannot tell praise from a pile-on — only reading them can.`}
             >
-              Counts how much they are talking, not whether they are being nice.
+              Compares comments per 1,000 views, not total comments. Counts are cumulative, not necessarily recent.
             </div>
           </div>
         </div>
