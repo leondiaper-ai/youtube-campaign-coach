@@ -27,6 +27,7 @@
 import { formatPerformance, ROSTER_SUPPORT_BENCHMARK, FORMAT_LABEL, FORMAT_PLURAL, PROVISIONAL_AT } from '@/lib/formatPerformance';
 import { readCatalogue, catalogueAsUploads } from '@/lib/catalogueStore';
 import { commentDemand, ROSTER_COMMENTS_PER_1K } from '@/lib/commentDemand';
+import WeeklyVideoFocus from './WeeklyVideoFocus';
 import {
   fmtNum, daysSince, STATUS_COLOR,
   type ChannelState, type RecentUpload, type Artist,
@@ -314,6 +315,7 @@ export default async function ArtistOverview({
             Says "talked about", never "positive". A comment count cannot
             tell praise from a pile-on — that needs the text, which is
             what the per-artist comment scan is for. */}
+        <div id="channel-momentum"><WeeklyVideoFocus uploads={uploads} /></div>
         {demand?.isLatent && (
           <div
             className="mt-7 rounded-lg px-4 py-3"
