@@ -283,7 +283,7 @@ function computeInsights(rows: RowData[], topVideos: TopVideo[] = []): Insight[]
       && stackAge >= 7 && stackAge <= 14 && stack.shorts === 0
       && stack.formats.length >= 2 && r.recentUploadFresh;
 
-    // A single strongest story per channel, with its related facts folded in.
+    // Evaluate independent evidence for distinct editorial stories.
     if (timelyStack) {
       add('formats', `“${stack.song}” is in its 7–14 day follow-up window, with no matching Shorts found`,
         `Support “${stack.song}” with a Short drawn from the existing ${stack.formats.join(' + ')} assets, and link viewers to the main release. Confirm title matching before publishing.`,
@@ -331,6 +331,25 @@ function computeInsights(rows: RowData[], topVideos: TopVideo[] = []): Insight[]
         'Check whether a strong current long-form upload has a suitable short-form cut-down.',
         35);
     }
+    // Coverage gaps can be actionable even without reliable week-on-week
+    // movement. Require a meaningful current audience and fresh upload data.
+    if (r.recentUploadFresh && r.uploads30d >= 3 && r.shorts30d === 0
+        && goodViews && views >= 3000) {
+      add('formats', `${r.uploads30d} uploads in 30 days, but no Shorts`,
+        'Review recent long-form assets for one relevant vertical cut-down. This is a channel-level gap, not proof that an individual song lacks Shorts.',
+        43);
+    }
+    if (r.recentUploadFresh && r.uploads30d === 0 && goodViews && views >= 3000) {
+      add('cadence', `no uploads in 30 days despite ${fmtNum(views)} weekly views`,
+        'Identify the videos driving current listening before choosing a relevant next upload.',
+        44);
+    }
+    if (goodViews && views >= 3000 && subs != null && subs <= 0 && r.subs != null && r.subs >= 1000) {
+      add('conversion', `${fmtNum(views)} weekly views without measured subscriber growth`,
+        'Check the featured release, playlists and end screens to make the next watch easier. Public subscriber counts are rounded.',
+        48);
+    }
+
   }
   // Supplement channel-level changes with independently measurable video activity.
   // The supplied velocity is average views/day since upload, NOT a measured
@@ -367,6 +386,15 @@ function computeInsights(rows: RowData[], topVideos: TopVideo[] = []): Insight[]
 }
 
 // Colour indicates the kind of finding, not simply a positive or negative number.
+const INSIGHT_LABEL: Record<Insight['category'], string> = {
+  growth: 'Subscriber growth',
+  catalogue: 'Catalogue opportunity',
+  conversion: 'Audience conversion',
+  cadence: 'Publishing cadence',
+  momentum: 'Video momentum',
+  formats: 'Format gap',
+};
+
 const INSIGHT_ICON: Record<Insight['category'], { dot: string; color: string }> = {
   growth:     { dot: '#1FBE7A', color: '#0C6A3F' },
   catalogue:  { dot: '#487FCA', color: '#315D9D' },
@@ -1426,7 +1454,7 @@ export default function ChannelHealthBoard({
               const body = (
                 <>
                   <span className="w-1.5 h-1.5 rounded-full mt-[7px] shrink-0" style={{ background: ic.dot }} />
-                  <span className="min-w-0"><span className="block font-semibold">{ins.text}</span><span className="block text-micro mt-1 opacity-80">{ins.action}</span></span>
+                  <span className="min-w-0"><span className="inline-flex items-center rounded px-1.5 py-0.5 mr-2 text-[10px] font-bold uppercase tracking-wide border align-middle" style={{ borderColor: ic.dot, color: ic.color }}>{INSIGHT_LABEL[ins.category]}</span><span className="font-semibold">{ins.text}</span><span className="block text-micro mt-1 opacity-80">{ins.action}</span></span>
                 </>
               );
               const cls = 'flex items-start gap-2.5 px-5 py-3 text-body leading-snug border-l-[3px]';
