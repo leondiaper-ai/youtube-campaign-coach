@@ -1434,7 +1434,7 @@ export default function ChannelHealthBoard({
               return ins.slug ? (
                 <Link
                   key={i}
-                  href={`${linkPrefix}/${ins.slug}${linkSuffix}${ins.videoId ? `${ins.videoTitle ? `?weeklyTitle=${encodeURIComponent(ins.videoTitle)}` : ''}#weekly-video-${ins.videoId}` : '#channel-momentum'}`}
+                  href={`${linkPrefix}/${ins.slug}${linkSuffix}${ins.videoId ? `${linkSuffix.includes('?') ? '&' : '?'}weeklyTitle=${encodeURIComponent(ins.videoTitle ?? '')}&weeklyAction=${encodeURIComponent(ins.action)}#weekly-video-${ins.videoId}` : `${linkSuffix.includes('?') ? '&' : '?'}weeklySignal=${encodeURIComponent(ins.text)}&weeklyAction=${encodeURIComponent(ins.action)}#channel-momentum`}`}
                   className={`${cls} transition-colors hover:bg-raised`}
                   style={{ color: ic.color, textDecoration: 'none' }}
                 >
