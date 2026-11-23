@@ -814,7 +814,7 @@ export function DecisionCard({
               className="px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-[0.1em]"
               style={{ background: dStyle.bg, color: dStyle.fg, border: `1px solid ${dStyle.border}` }}
             >
-              {read.decision === 'PUSH' ? 'Performing well' : read.decision}
+              {read.decision === 'PUSH' ? 'Performing well' : read.decision === 'HOLD' ? 'Review' : read.decision}
             </span>
           )}
           {read.showConfidence && (
@@ -1369,7 +1369,7 @@ export function DecisionSectionHeader({
         className="px-2.5 py-1 rounded-md text-[11px] font-black uppercase tracking-[0.12em]"
         style={{ background: dStyle.bg, color: dStyle.fg, border: `1px solid ${dStyle.border}` }}
       >
-        {decision === 'PUSH' ? 'Performing well' : decision}
+        {decision === 'PUSH' ? 'Performing well' : decision === 'HOLD' ? 'Review' : decision}
       </span>
       <span className="text-[12px] text-ink/40">{subtitle}</span>
       <span className="text-[10px] text-ink/20 tabular-nums">({count})</span>
