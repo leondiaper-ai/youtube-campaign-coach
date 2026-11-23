@@ -943,7 +943,7 @@ export default function ChannelHealthBoard({
         {mfRows.length > 0 && (
           <div className="flex flex-wrap items-center gap-x-5 gap-y-1 px-5 py-3 border-t border-line bg-raised/50 rounded-b-card">
             <span className="text-[11px] font-bold uppercase tracking-label text-muted">
-              Upload variety
+              Formats (90d)
             </span>
             {([
               ['strong',  mfStrong,  '#0C6A3F', 'Artists with 3 or more detected upload types; this is not a quality score'],
