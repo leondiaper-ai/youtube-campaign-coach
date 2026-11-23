@@ -40,10 +40,10 @@ type CardData = {
 type AvailableArtist = { slug: string; name: string };
 
 const STATE_LABEL: Record<string, string> = {
-  HEALTHY: 'Healthy',
-  BUILDING: 'Building',
-  'AT RISK': 'At Risk',
-  COLD: 'Cold',
+  HEALTHY: 'Active',
+  BUILDING: 'Developing',
+  'AT RISK': 'Slowing',
+  COLD: 'Quiet',
 };
 
 function fmtDate(iso: string) {
