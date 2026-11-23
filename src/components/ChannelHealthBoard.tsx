@@ -106,11 +106,11 @@ const MUTED = '#E9E2D3';
 const INK = '#0E0E0E';
 
 const STATE_LABEL: Record<ChannelState, string> = {
-  HEALTHY:           'Active',
-  'WEAK CONVERSION': 'Weak Conversion',
-  BUILDING:          'Developing',
-  'AT RISK':         'Slowing',
-  COLD:              'Quiet',
+  HEALTHY: 'Hot',
+  'WEAK CONVERSION': 'Warm',
+  BUILDING: 'Warm',
+  'AT RISK': 'Cool',
+  COLD: 'Cold',
 };
 
 const STATUS_STYLE: Record<ChannelState, { bg: string; fg: string; dot: string; rowBg: string }> = {
@@ -848,10 +848,10 @@ export default function ChannelHealthBoard({
       <div className="bg-surface border border-line rounded-card shadow-card mb-8">
         <div className="grid grid-cols-2 lg:grid-cols-4 divide-y lg:divide-y-0 divide-x-0 lg:divide-x divide-line">
           {([
-            ['GROWING', growingCount, 'Growing', CLASSIFICATION_STYLE.GROWING.fg, 'Consistent uploads and positive momentum'],
-            ['WEAK_CONVERSION', weakConvCount, 'Lagging', CLASSIFICATION_STYLE.WEAK_CONVERSION.fg, 'Views are increasing, but subscriber growth is not keeping pace'],
-            ['UNDERFED', underfedCount, 'Sparse', CLASSIFICATION_STYLE.UNDERFED.fg, 'Fewer recent uploads than the channel needs to sustain activity'],
-            ['COLD', coldCount, 'Quiet', CLASSIFICATION_STYLE.COLD.fg, 'Little recent activity or momentum'],
+            ['GROWING', growingCount, 'Hot', CLASSIFICATION_STYLE.GROWING.fg, 'Consistent uploads and positive momentum'],
+            ['WEAK_CONVERSION', weakConvCount, 'Warm', CLASSIFICATION_STYLE.WEAK_CONVERSION.fg, 'Subscriber conversion needs attention; not a temperature score'],
+            ['UNDERFED', underfedCount, 'Cool', CLASSIFICATION_STYLE.UNDERFED.fg, 'Limited recent publishing; not a measure of audience health'],
+            ['COLD', coldCount, 'Cold', CLASSIFICATION_STYLE.COLD.fg, 'Little recent activity or momentum'],
           ] as const).map(([key, count, label, fg, hint]) => {
             const isOn = classFilter === key;
             /* A figure of zero is not a filter worth offering — it would
