@@ -373,7 +373,6 @@ export default function CampaignStatusBoard({
           {/* ─── PUSH — Strong performance, ready to scale ──────────── */}
           {pushCards.length > 0 && (
             <div>
-              <DecisionSectionHeader decision="PUSH" subtitle="Strong performance — ready to scale" count={pushCards.length} />
               <SectionIssueNote cards={pushCards} />
               <div className="space-y-4">
                 {pushCards.map((card) => (
