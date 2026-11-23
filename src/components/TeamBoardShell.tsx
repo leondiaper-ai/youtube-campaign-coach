@@ -294,28 +294,9 @@ export default function TeamBoardShell({
     <div className="max-w-[1180px] mx-auto px-6 py-8">
     <OpenBehaviourContext.Provider value={open}>
       {header}
-      <div role="group" aria-label="Campaign board views" className="flex flex-wrap gap-2 mb-4">
-        {TABS.map(t => (
-          <button key={t} onClick={() => t === 'behaviour' ? setTab(t) : leaveBehaviour(t)}
-            aria-pressed={tab === t}
-            className={`rounded-md border px-4 py-2 text-sm font-semibold transition-colors ${tab === t ? 'border-ink bg-ink text-white' : 'border-line bg-surface text-muted hover:text-ink'}`}>
-            {TAB_LABEL[t]({ all: allCount, priority: priorityCount })}
-          </button>
-        ))}
-      </div>
-      <div className="text-[10px] text-ink/35 mb-5 pl-1">
-        {TAB_BLURB[tab]}
-      </div>
-
-      {/* The first two stay mounted. Switching tabs should not re-run the
-          table's sort and search, or lose a half-typed note on a card. */}
-      <div hidden={tab !== 'all'}>{allTab}</div>
-      <div hidden={tab !== 'priority'}>
-        {priorityCount > 0 ? priorityTab : emptyPriority}
-      </div>
-      {/* Rendered only when open. Unlike the two boards above it holds no
-          typed-in state to lose, and nothing in it needs to be warm. */}
-      {tab === 'tools' && toolsTab}
+      {/* Workspace opens directly on the artist roster. Behaviour remains
+          accessible from each artist card and direct ?behaviour= links. */}
+      {allTab}
 
     </OpenBehaviourContext.Provider>
     </div>
