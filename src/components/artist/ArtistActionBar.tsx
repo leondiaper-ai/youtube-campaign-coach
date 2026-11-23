@@ -39,6 +39,7 @@ const PIN_ON = '#2C25FF';
  */
 export interface ActionBarContext {
   backHref: string;
+  hideBack?: boolean;
   backLabel: string;
   behaviourHref: string;
   /** Team boards pin to their own board, never to our campaign store. */
@@ -124,8 +125,7 @@ export default function ArtistActionBar({
 
   const chip = 'px-2 py-2 rounded text-xs font-semibold no-underline transition-colors whitespace-nowrap';
   return <div className="flex flex-wrap items-center gap-3 mb-8 pb-4 border-b" style={{borderColor:RULE}}>
-    <Link href={ctx.backHref} className={chip+' text-ink/45 hover:text-ink'}>{ctx.backLabel}</Link>
-    <span className="h-4 w-px bg-black/10" aria-hidden />
+    {!ctx.hideBack && <><Link href={ctx.backHref} className={chip+' text-ink/45 hover:text-ink'}>{ctx.backLabel}</Link><span className="h-4 w-px bg-black/10" aria-hidden /></>}
     <Link href={ctx.behaviourHref} className={chip+' text-ink hover:underline'}>Channel behaviour ↗</Link>
     {deepDive && <Link href={deepDive.href} title={deepDive.title+(deepDive.updated?' · '+deepDive.updated:'')} className={chip+' text-ink/60 hover:text-ink hover:underline'}>Deep dive ↗</Link>}
     <div className="ml-auto flex items-center gap-3">
