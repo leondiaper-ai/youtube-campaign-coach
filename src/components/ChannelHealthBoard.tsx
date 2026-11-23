@@ -735,7 +735,14 @@ export default function ChannelHealthBoard({
 
   const activeRows = view === 'managed' ? managedRows : marketRows;
   const sorted = [...activeRows]
-    .sort((a, b) => STATUS_RANK[b.status] - STATUS_RANK[a.status])
+    .sort((a, b) => {
+      const order = { ACTIVE: 0, OCCASIONAL: 1, INACTIVE: 2 };
+      const aGroup = publishingActivity(a.uploads30d);
+      const bGroup = publishingActivity(b.uploads30d);
+      return order[aGroup] - order[bGroup]
+        || b.uploads30d - a.uploads30d
+        || a.name.localeCompare(b.name);
+    })
     .filter((r) => (classFilter ? publishingActivity(r.uploads30d) === classFilter : true))
     .filter((r) => !quietDemandOnly || (r.uploads30d <= 2 && r.views7Delta != null && r.views7Delta >= 100000))
     .filter((r) => (mfFilter ? mfBand(r) === mfFilter : true));
