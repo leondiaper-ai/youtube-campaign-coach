@@ -644,6 +644,8 @@ export default function ChannelHealthBoard({
      So each card can open to its full list. */
   const [showAllLatent, setShowAllLatent] = useState(false);
   const [showAllInsights, setShowAllInsights] = useState(false);
+  const [videoPageLong, setVideoPageLong] = useState(1);
+  const [videoPageShort, setVideoPageShort] = useState(1);
   const [showAllStacks, setShowAllStacks] = useState(false);
   /* A 120-row table is a long scroll to reach anything underneath it.
      Twenty is roughly a screen and a half, which is enough to scan a
@@ -1433,20 +1435,22 @@ export default function ChannelHealthBoard({
                 <div>
                   <div className="text-[11px] font-bold uppercase tracking-eyebrow text-muted mb-2.5">Long-form</div>
                   <div className="space-y-2">
-                    {topLongform.slice(0, 5).map((v, i) => (
-                      <VideoRow key={v.videoId} v={v} rank={i + 1} linkPrefix={linkPrefix} linkSuffix={linkSuffix} />
+                    {topLongform.slice((videoPageLong - 1) * 5, videoPageLong * 5).map((v, i) => (
+                      <VideoRow key={v.videoId} v={v} rank={(videoPageLong - 1) * 5 + i + 1} linkPrefix={linkPrefix} linkSuffix={linkSuffix} />
                     ))}
                   </div>
+                  <VideoPager count={topLongform.length} page={videoPageLong} onPage={setVideoPageLong} pageSize={5} />
                 </div>
               )}
               {topShorts.length > 0 && (
                 <div className={topLongform.length > 0 ? 'pt-5 border-t border-line' : undefined}>
                   <div className="text-[11px] font-bold uppercase tracking-eyebrow text-muted mb-2.5">Shorts</div>
                   <div className="space-y-2">
-                    {topShorts.slice(0, 5).map((v, i) => (
-                      <VideoRow key={v.videoId} v={v} rank={i + 1} linkPrefix={linkPrefix} linkSuffix={linkSuffix} />
+                    {topShorts.slice((videoPageShort - 1) * 5, videoPageShort * 5).map((v, i) => (
+                      <VideoRow key={v.videoId} v={v} rank={(videoPageShort - 1) * 5 + i + 1} linkPrefix={linkPrefix} linkSuffix={linkSuffix} />
                     ))}
                   </div>
+                  <VideoPager count={topShorts.length} page={videoPageShort} onPage={setVideoPageShort} pageSize={5} />
                 </div>
               )}
             </div>
@@ -2277,11 +2281,11 @@ function ChannelAvatar({ src, name, size = 30 }: { src?: string; name: string; s
   );
 }
 
-function VideoPager({ count, page, onPage }: { count: number; page: number; onPage: (n: number) => void }) {
-  const total = Math.ceil(count / 20);
+function VideoPager({ count, page, onPage, pageSize = 20 }: { count: number; page: number; onPage: (n: number) => void; pageSize?: number }) {
+  const total = Math.ceil(count / pageSize);
   if (total <= 1) return null;
   return <div className="mt-4 pt-3 border-t border-line flex flex-wrap items-center justify-between gap-3 text-micro">
-    <span className="text-muted">Showing <strong className="text-ink">{(page - 1) * 20 + 1}–{Math.min(page * 20, count)}</strong> of <strong className="text-ink">{count}</strong></span>
+    <span className="text-muted">Showing <strong className="text-ink">{(page - 1) * pageSize + 1}–{Math.min(page * pageSize, count)}</strong> of <strong className="text-ink">{count}</strong></span>
     <div className="flex items-center gap-1">
       <PagerButton disabled={page === 1} onClick={() => onPage(page - 1)}>← Previous</PagerButton>
       {pageWindow(page, total).map((n, i) => n === null ? <span key={`gap-${i}`} className="px-1 text-faint">…</span> :
