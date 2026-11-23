@@ -317,52 +317,59 @@ export default async function ArtistOverview({
             what the per-artist comment scan is for. */}
         <div id="channel-momentum"><WeeklyVideoFocus uploads={uploads} /></div>
         {demand?.isLatent && (
-          <div
-            className="mt-7 rounded-lg px-4 py-3"
-            style={{ background: 'rgba(12,106,63,0.06)', border: '1px solid rgba(12,106,63,0.18)' }}
+          <section
+            className="mt-7 overflow-hidden rounded-xl border"
+            style={{ background: 'rgba(12,106,63,0.035)', borderColor: 'rgba(12,106,63,0.18)' }}
+            aria-label="Audience activity opportunity"
           >
-            {/* "2.4x the roster's comment rate" asks the reader to hold
-                two abstractions — what a roster is, and what a comment
-                rate is — before the sentence means anything. "Our average
-                channel" is the same fact with nothing to decode, and the
-                multiple reads instantly against it. */}
-            <div className="text-[13px] font-bold text-ink leading-snug">
-              The audience is still here
-              <span className="font-normal text-ink/60">
-                {' '}— they comment {demand.vsRoster.toFixed(1)}× more than on our average channel
-                {demand.uploads90 === 0
-                  ? ', and nothing has been posted in 90 days'
-                  : `, on just ${demand.uploads90} upload${demand.uploads90 === 1 ? '' : 's'} in 90 days`}
-              </span>
-            </div>
-            <div className="text-[11px] text-ink/45 mt-1 tabular-nums">
-              {fmtNum(demand.comments)} comments · {demand.perThousand.toFixed(2)} comments per 1,000 views
-              <span className="text-ink/35">, against {ROSTER_COMMENTS_PER_1K} on an average channel</span>
-            </div>
-            {/* The finding is only half of it. A card that says an audience
-                is waiting and then stops is an observation; the reason to
-                surface this at all is that somebody should go and post.
-
-                Two moves, because they are different jobs: something new to
-                watch, and a reply to the people already there. The second
-                costs nothing and is the one that gets skipped. */}
-            <div className="text-[12px] font-semibold mt-2.5 leading-snug" style={{ color: GAIN }}>
-              Worth feeding — put something up, and reply to the people already talking.
+            <div className="px-5 py-5 sm:px-6">
+              <div className="flex flex-wrap items-start justify-between gap-4">
+                <div className="min-w-0 flex-1">
+                  <div className="text-[10px] font-extrabold uppercase tracking-[0.13em]" style={{ color: GAIN }}>
+                    Audience opportunity
+                  </div>
+                  <h3 className="mt-1.5 text-[19px] sm:text-[21px] font-extrabold tracking-tight text-ink">
+                    The audience is still here
+                  </h3>
+                  <p className="mt-1 text-[13px] leading-relaxed text-ink/65">
+                    {demand.vsRoster.toFixed(1)}× the average comment rate
+                    {demand.uploads90 === 0
+                      ? ' despite no uploads in 90 days.'
+                      : ` with just ${demand.uploads90} upload${demand.uploads90 === 1 ? '' : 's'} in 90 days.`}
+                  </p>
+                </div>
+                <div className="shrink-0 rounded-lg bg-white/75 border px-3 py-2 text-right tabular-nums" style={{ borderColor: 'rgba(12,106,63,0.14)' }}>
+                  <div className="text-[22px] leading-none font-black" style={{ color: GAIN }}>{demand.vsRoster.toFixed(1)}×</div>
+                  <div className="mt-1 text-[10px] font-semibold text-ink/50">comment rate vs average</div>
+                </div>
+              </div>
+              <div className="mt-4 flex flex-wrap gap-x-4 gap-y-1 text-[11px] text-ink/50 tabular-nums">
+                <span><strong className="text-ink/75">{fmtNum(demand.comments)}</strong> comments</span>
+                <span><strong className="text-ink/75">{demand.perThousand.toFixed(2)}</strong> per 1,000 views</span>
+                <span>Channel average: {ROSTER_COMMENTS_PER_1K} per 1,000 views</span>
+              </div>
+              <div className="mt-4 rounded-md bg-white/60 px-3.5 py-3 border-l-[3px]" style={{ borderLeftColor: GAIN }}>
+                <span className="text-[10px] font-extrabold uppercase tracking-wide" style={{ color: GAIN }}>Next step</span>
+                <p className="mt-0.5 text-[13px] font-semibold text-ink/85">Post something new and respond to existing comments.</p>
+              </div>
             </div>
             {discussionVideos.length > 0 && (
-              <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2 text-[12px]">
-                <span className="font-semibold text-ink/60">Videos with the most comments:</span>
-                {discussionVideos.map(u => (
-                  <a key={u.id} href={`https://www.youtube.com/watch?v=${encodeURIComponent(u.id)}`}
-                    target="_blank" rel="noopener noreferrer"
-                    className="font-semibold underline underline-offset-2"
-                    title={u.title}>
-                    {u.title.length > 48 ? `${u.title.slice(0, 45)}…` : u.title} · {fmtNum(u.commentCount ?? 0)} comments ↗
-                  </a>
-                ))}
+              <div className="border-t px-5 py-4 sm:px-6" style={{ borderColor: 'rgba(12,106,63,0.14)', background: 'rgba(255,255,255,0.4)' }}>
+                <div className="text-[11px] font-bold text-ink/60 mb-2.5">Most commented videos</div>
+                <div className="grid gap-2 sm:grid-cols-3">
+                  {discussionVideos.map(u => (
+                    <a key={u.id} href={`https://www.youtube.com/watch?v=${encodeURIComponent(u.id)}`}
+                      target="_blank" rel="noopener noreferrer"
+                      className="group min-w-0 rounded-lg border border-black/10 bg-white/70 px-3 py-2.5 no-underline hover:border-black/25 hover:bg-white transition-colors"
+                      title={u.title}>
+                      <span className="block text-[12px] font-semibold text-ink/85 leading-snug line-clamp-2 group-hover:underline">{u.title}</span>
+                      <span className="mt-1.5 block text-[11px] font-semibold tabular-nums" style={{ color: GAIN }}>{fmtNum(u.commentCount ?? 0)} comments ↗</span>
+                    </a>
+                  ))}
+                </div>
               </div>
             )}
-          </div>
+          </section>
         )}
 
         {/* Lifetime split and the format read share a row. The split was
