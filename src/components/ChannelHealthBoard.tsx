@@ -635,6 +635,7 @@ export default function ChannelHealthBoard({
      count was already the answer to "how many" — this makes it the
      answer to "which", which is the next question every time. */
   const [classFilter, setClassFilter] = useState<'HOT' | 'WARM' | 'COOL' | 'COLD' | null>(null);
+  const [quietDemandOnly, setQuietDemandOnly] = useState(false);
   /* The multiformat counts were a read-only footnote under four figures
      that are all filters. Same question gets asked of them — "which 22?" —
      so they answer it the same way.
@@ -730,6 +731,7 @@ export default function ChannelHealthBoard({
   const sorted = [...activeRows]
     .sort((a, b) => STATUS_RANK[b.status] - STATUS_RANK[a.status])
     .filter((r) => (classFilter ? channelTemperature(r.status) === classFilter : true))
+    .filter((r) => !quietDemandOnly || (r.uploads30d <= 2 && r.views7Delta != null && r.views7Delta >= 100000))
     .filter((r) => (mfFilter ? mfBand(r) === mfFilter : true));
   const filtered = search.trim()
     ? sorted.filter((r) => r.name.toLowerCase().includes(search.toLowerCase()))
@@ -749,6 +751,7 @@ export default function ChannelHealthBoard({
   const weakConvCount = activeRows.filter((r) => channelTemperature(r.status) === 'WARM').length;
   const underfedCount = activeRows.filter((r) => channelTemperature(r.status) === 'COOL').length;
   const coldCount = activeRows.filter((r) => channelTemperature(r.status) === 'COLD').length;
+  const quietDemandCount = activeRows.filter((r) => r.uploads30d <= 2 && r.views7Delta != null && r.views7Delta >= 100000).length;
 
   // Multiformat strategy counts
   /* ── ORDER: CAMPAIGNS FIRST ───────────────────────────────────────
@@ -870,6 +873,7 @@ export default function ChannelHealthBoard({
                 aria-pressed={isOn}
                 onClick={() => {
                   setClassFilter(isOn ? null : key);
+                  setQuietDemandOnly(false);
                   /* Clears the other cut, so the banner's single sentence
                      is always the whole truth about what is listed. */
                   setMfFilter(null);
@@ -904,6 +908,25 @@ export default function ChannelHealthBoard({
           })}
         </div>
 
+        <button
+          type="button"
+          disabled={quietDemandCount === 0}
+          aria-pressed={quietDemandOnly}
+          onClick={() => {
+            setQuietDemandOnly(!quietDemandOnly);
+            setClassFilter(null);
+            setMfFilter(null);
+            setExpandedRow(null);
+            setPage(1);
+          }}
+          className={`w-full flex flex-wrap items-center gap-x-4 gap-y-1 border-t border-line px-5 py-4 text-left transition-colors ${quietDemandCount ? 'hover:bg-raised/70 cursor-pointer' : 'cursor-default'} ${quietDemandOnly ? 'bg-raised' : ''}`}
+          title="Channels with no more than 2 uploads in 30 days and at least 100,000 verified views gained in 7 days"
+        >
+          <span className="text-3xl font-black tabular-nums text-[#477BA7]">{quietDemandCount}</span>
+          <span className="text-xs font-bold uppercase tracking-label text-secondary">Quiet publishing, high views</span>
+          <span className="text-xs text-muted">≤2 uploads in 30 days · ≥100K views in 7 days</span>
+          <span className="ml-auto text-xs font-semibold text-[#477BA7]">{quietDemandOnly ? 'Show all' : 'View artists →'}</span>
+        </button>
         {/* Multiformat belonged with the health read, not floating under it
             as an unattached strip. Same component, quieter register. */}
         {mfRows.length > 0 && (
