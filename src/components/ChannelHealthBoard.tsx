@@ -5,7 +5,7 @@ import { ROSTER_COMMENTS_PER_1K, type CommentDemand } from '@/lib/commentDemand'
 import { useState, useMemo, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { fmtNum, trustedViewDelta, type ChannelState, type ArtistClassification, CLASSIFICATION_STYLE, CLASSIFICATION_LABEL } from '@/lib/artists';
+import { fmtNum, trustedViewDelta, type ChannelState, type ArtistClassification } from '@/lib/artists';
 import Sparkline from './Sparkline';
 import ChannelAuditButton from './ChannelAuditButton';
 import { SectionHead } from './ui';
@@ -128,6 +128,11 @@ const SPARK_COLOR: Record<ChannelState, { stroke: string; fill: string }> = {
   'AT RISK':         { stroke: '#FF4A1C', fill: 'rgba(255,74,28,0.06)' },
   COLD:              { stroke: '#FF4A1C', fill: 'rgba(255,74,28,0.06)' },
 };
+
+const channelTemperature = (status: ChannelState): 'HOT' | 'WARM' | 'COOL' | 'COLD' =>
+  status === 'HEALTHY' ? 'HOT'
+    : status === 'BUILDING' || status === 'WEAK CONVERSION' ? 'WARM'
+    : status === 'AT RISK' ? 'COOL' : 'COLD';
 
 const STATUS_RANK: Record<ChannelState, number> = {
   COLD: 0, 'AT RISK': 1, 'WEAK CONVERSION': 2, BUILDING: 3, HEALTHY: 4,
@@ -629,7 +634,7 @@ export default function ChannelHealthBoard({
   /* Clicking a health figure filters the table to those channels. The
      count was already the answer to "how many" — this makes it the
      answer to "which", which is the next question every time. */
-  const [classFilter, setClassFilter] = useState<ArtistClassification | null>(null);
+  const [classFilter, setClassFilter] = useState<'HOT' | 'WARM' | 'COOL' | 'COLD' | null>(null);
   /* The multiformat counts were a read-only footnote under four figures
      that are all filters. Same question gets asked of them — "which 22?" —
      so they answer it the same way.
@@ -724,7 +729,7 @@ export default function ChannelHealthBoard({
   const activeRows = view === 'managed' ? managedRows : marketRows;
   const sorted = [...activeRows]
     .sort((a, b) => STATUS_RANK[b.status] - STATUS_RANK[a.status])
-    .filter((r) => (classFilter ? r.classification === classFilter : true))
+    .filter((r) => (classFilter ? channelTemperature(r.status) === classFilter : true))
     .filter((r) => (mfFilter ? mfBand(r) === mfFilter : true));
   const filtered = search.trim()
     ? sorted.filter((r) => r.name.toLowerCase().includes(search.toLowerCase()))
@@ -740,10 +745,10 @@ export default function ChannelHealthBoard({
   const paged = filtered.slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE);
 
   // Classification counts
-  const growingCount = activeRows.filter((r) => r.classification === 'GROWING').length;
-  const weakConvCount = activeRows.filter((r) => r.classification === 'WEAK_CONVERSION').length;
-  const underfedCount = activeRows.filter((r) => r.classification === 'UNDERFED').length;
-  const coldCount = activeRows.filter((r) => r.classification === 'COLD').length;
+  const growingCount = activeRows.filter((r) => channelTemperature(r.status) === 'HOT').length;
+  const weakConvCount = activeRows.filter((r) => channelTemperature(r.status) === 'WARM').length;
+  const underfedCount = activeRows.filter((r) => channelTemperature(r.status) === 'COOL').length;
+  const coldCount = activeRows.filter((r) => channelTemperature(r.status) === 'COLD').length;
 
   // Multiformat strategy counts
   /* ── ORDER: CAMPAIGNS FIRST ───────────────────────────────────────
@@ -848,10 +853,10 @@ export default function ChannelHealthBoard({
       <div className="bg-surface border border-line rounded-card shadow-card mb-8">
         <div className="grid grid-cols-2 lg:grid-cols-4 divide-y lg:divide-y-0 divide-x-0 lg:divide-x divide-line">
           {([
-            ['GROWING', growingCount, 'Hot', CLASSIFICATION_STYLE.GROWING.fg, 'Consistent uploads and positive momentum'],
-            ['WEAK_CONVERSION', weakConvCount, 'Warm', CLASSIFICATION_STYLE.WEAK_CONVERSION.fg, 'Subscriber conversion needs attention; not a temperature score'],
-            ['UNDERFED', underfedCount, 'Cool', CLASSIFICATION_STYLE.UNDERFED.fg, 'Limited recent publishing; not a measure of audience health'],
-            ['COLD', coldCount, 'Cold', CLASSIFICATION_STYLE.COLD.fg, 'Little recent activity or momentum'],
+            ['HOT', growingCount, 'Hot', '#0C6A3F', 'Consistent recent uploads and positive activity'],
+            ['WARM', weakConvCount, 'Warm', '#946500', 'Some activity, with room to build'],
+            ['COOL', underfedCount, 'Cool', '#477BA7', 'Lower recent momentum or longer upload gaps'],
+            ['COLD', coldCount, 'Cold', '#A33121', 'Little recent activity or momentum'],
           ] as const).map(([key, count, label, fg, hint]) => {
             const isOn = classFilter === key;
             /* A figure of zero is not a filter worth offering — it would
@@ -978,7 +983,7 @@ export default function ChannelHealthBoard({
           <span className="text-meta text-secondary">
             Showing <strong className="text-ink">{filtered.length}</strong>{' '}
             {classFilter
-              ? CLASSIFICATION_LABEL[classFilter].toLowerCase()
+              ? classFilter.toLowerCase()
               : MF_LABEL[mfFilter!]}{' '}
             channel{filtered.length === 1 ? '' : 's'}
           </span>
