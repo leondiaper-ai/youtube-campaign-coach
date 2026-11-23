@@ -1338,7 +1338,7 @@ export default function ChannelHealthBoard({
       <div className="mt-12 mb-8 border-t border-line" />
 
       {/* ─── MANAGED VIEW: What Changed This Week ──────────────────────── */}
-      {view === 'managed' && insights.length > 0 && (
+      {view === 'managed' && (
         <div className="mb-8">
           <SectionHead title="What changed this week" meta={`${insights.length} signals`} />
           {/* Same surface as the health figures. These sections were sitting
@@ -1346,6 +1346,12 @@ export default function ChannelHealthBoard({
               board read as one undifferentiated column — the card is what
               tells you where one answer ends and the next begins. */}
           <div className="bg-surface border border-line rounded-card shadow-card divide-y divide-line-faint">
+            {insights.length === 0 && (
+              <div className="px-5 py-5 text-body text-muted">
+                <div className="font-semibold text-ink">No verified weekly changes to highlight yet</div>
+                <div className="mt-1 text-micro">This is not a clean bill of health. Only meaningful changes backed by recent data appear here; channels without comparable snapshots cannot be assessed reliably.</div>
+              </div>
+            )}
             {(showAllInsights ? insights : insights.slice(0, 6)).map((ins, i) => {
               const ic = INSIGHT_ICON[ins.category];
               const body = (
