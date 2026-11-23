@@ -1,3 +1,4 @@
+import { rankWeeklyVideoGains } from '@/lib/weeklyVideoRanking';
 import { normalizeArtistIdentity } from '@/lib/artistIdentity';
 import { listPartnerSlugs, listHiddenPartnerSlugs } from '@/lib/youtubeUkPartnerStore';
 import PartnerAddChannelButton from '@/components/PartnerAddChannelButton';
@@ -188,9 +189,9 @@ export default async function ControlPage({
   );
 
   // ── Top Performing Videos (managed artists, last 14d, ranked by velocity) ──
-  const topVideos: TopVideo[] = (() => {
+  const topVideos: TopVideo[] = await (async () => {
     const now = Date.now();
-    const cutoff = 14 * 86400000; // 14 days
+    const cutoff = 90 * 86400000; // include established catalogue within cached upload history
     const videos: TopVideo[] = [];
 
     for (const a of allArtists) {
@@ -204,8 +205,7 @@ export default async function ControlPage({
         const ageMs = now - new Date(u.publishedAt).getTime();
         if (ageMs > cutoff || ageMs < 0) continue; // only last 14 days
         const daysAgo = Math.max(1, Math.floor(ageMs / 86400000));
-        const velocity = Math.round(u.viewCount / daysAgo);
-        if (velocity < 100) continue; // skip negligible
+        const velocity = 0; // replaced by measured seven-day change below
 
         videos.push({
           videoId: u.id,
@@ -222,7 +222,7 @@ export default async function ControlPage({
     }
 
     // Return all qualifying videos — component splits into Shorts vs Long-form
-    return videos.sort((a, b) => b.velocity - a.velocity);
+    return rankWeeklyVideoGains(videos);
   })();
 
   // ── Market Format Stats (long-form vs Shorts across market artists, 30d) ──
