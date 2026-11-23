@@ -1022,13 +1022,13 @@ export default function ChannelHealthBoard({
           a figure belongs to is otherwise a guess by the time you scroll.
           Header labels move off 9px — they were the smallest type on the
           page and they are the key to everything under them. */}
-      <div className="bg-surface border border-line rounded-card shadow-card overflow-hidden">
+      <div className="bg-surface border border-line rounded-card shadow-card overflow-x-auto">
         <div
-          className={`grid ${partnerRemovable ? 'grid-cols-[1.75fr_0.6fr_0.65fr_0.55fr_0.7fr_0.7fr_0.5fr_0.7fr_0.5fr_20px]' : 'grid-cols-[1.75fr_0.6fr_0.65fr_0.55fr_0.7fr_0.7fr_0.5fr_0.7fr_0.5fr]'} gap-2 px-5 py-3 text-[11px] font-bold uppercase tracking-label text-muted border-b border-line bg-raised/60 sticky top-0 z-10`}
+          className={`grid ${partnerRemovable ? 'grid-cols-[minmax(190px,1.75fr)_minmax(85px,0.6fr)_minmax(145px,0.8fr)_minmax(100px,0.55fr)_minmax(75px,0.7fr)_minmax(80px,0.7fr)_minmax(65px,0.5fr)_minmax(85px,0.7fr)_minmax(65px,0.5fr)_20px]' : 'grid-cols-[minmax(190px,1.75fr)_minmax(85px,0.6fr)_minmax(145px,0.8fr)_minmax(100px,0.55fr)_minmax(75px,0.7fr)_minmax(80px,0.7fr)_minmax(65px,0.5fr)_minmax(85px,0.7fr)_minmax(65px,0.5fr)]'} gap-2 min-w-[1110px] px-5 py-3 text-[11px] font-bold uppercase tracking-label text-muted border-b border-line bg-raised/60 sticky top-0 z-10`}
         >
           <div>Artist</div>
           <div title="Subscriber trend over the last 30 days">30d trend</div>
-          <div title="Based on recent uploads, views and subscriber movement, not overall channel health">Channel activity</div>
+          <div title="Based on recent uploads, views and subscriber movement, not overall channel health" className="whitespace-nowrap">Channel activity</div>
           <div title="Multiformat strategy — Shorts, Official Video, Lyric Video, Visualizer, BTS, Live Session">Formats</div>
           <div className="text-right" title="Total subscriber count">Subs</div>
           <div className="text-right" title="Subscribers gained in the last 7 days">Subs (7d)</div>
@@ -1084,7 +1084,7 @@ export default function ChannelHealthBoard({
                 /* hover:brightness dimmed the text along with the row, which
                    made the thing you were pointing at the hardest to read.
                    A background change leaves the content alone. */
-                className={`group/row grid ${partnerRemovable ? 'grid-cols-[1.75fr_0.6fr_0.65fr_0.55fr_0.7fr_0.7fr_0.5fr_0.7fr_0.5fr_20px]' : 'grid-cols-[1.75fr_0.6fr_0.65fr_0.55fr_0.7fr_0.7fr_0.5fr_0.7fr_0.5fr]'} gap-2 px-5 py-3.5 items-center transition-colors cursor-pointer hover:bg-raised ${
+                className={`group/row grid ${partnerRemovable ? 'grid-cols-[minmax(190px,1.75fr)_minmax(85px,0.6fr)_minmax(145px,0.8fr)_minmax(100px,0.55fr)_minmax(75px,0.7fr)_minmax(80px,0.7fr)_minmax(65px,0.5fr)_minmax(85px,0.7fr)_minmax(65px,0.5fr)_20px]' : 'grid-cols-[minmax(190px,1.75fr)_minmax(85px,0.6fr)_minmax(145px,0.8fr)_minmax(100px,0.55fr)_minmax(75px,0.7fr)_minmax(80px,0.7fr)_minmax(65px,0.5fr)_minmax(85px,0.7fr)_minmax(65px,0.5fr)]'} gap-2 min-w-[1110px] px-5 py-3.5 items-center transition-colors cursor-pointer hover:bg-raised ${
                   i === paged.length - 1 && !isExpanded ? '' : 'border-b border-line-faint'
                 }`}
                 style={{ background: st.rowBg }}
