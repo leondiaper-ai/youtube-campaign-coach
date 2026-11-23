@@ -187,7 +187,7 @@ export default function CampaignStatusBoard({
           {/* The product mark, not two vendor logos. Matches the global
               header so the behaviour view reads as the same product
               rather than a document that arrived from elsewhere. */}
-          <Link href={searchParams.get("partner") === "youtube-uk" ? "/youtube-uk" : `/growth${mq}`} className="no-underline shrink-0">
+          <Link href={searchParams.get("partner") === "youtube-uk" ? "/youtube-uk" : labelWorkspace ? `/labels/${labelWorkspace.slug}` : `/growth${mq}`} className="no-underline shrink-0">
             {labelWorkspace ? <span className="flex items-center gap-3">
               <img src={labelWorkspace.logo} width={32} height={32} alt="" />
               <span className="text-[13px] font-black">{labelWorkspace.name}</span>
