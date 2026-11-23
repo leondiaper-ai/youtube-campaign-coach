@@ -415,16 +415,7 @@ export default function CoachLanding({ model, slug, classicHref, timelineEditor,
 
       {!readOnly && timelineEditor}
 
-      <div className="mt-7 pt-3 border-t border-line text-micro text-muted leading-relaxed">
-        {model.caveats.map(c => <p key={c} className="m-0 mb-1.5 last:mb-0">{c}</p>)}
-        {!readOnly && classicHref && (
-          <p className="m-0 mt-2">
-            <a href={classicHref} className="text-electric font-semibold no-underline hover:underline">
-              Open the previous timeline view
-            </a>
-          </p>
-        )}
-      </div>
+
     </div>
   );
 }
