@@ -28,6 +28,11 @@ export default function WeeklyVideoFocus({ uploads }: { uploads: Video[] }) {
       window.removeEventListener('popstate', sync);
     };
   }, []);
+  useEffect(() => {
+    if (!focus) return;
+    const target = document.getElementById(focus.videoId ? `weekly-video-${focus.videoId}` : 'weekly-signal');
+    target?.scrollIntoView({ block: 'center', behavior: 'instant' });
+  }, [focus?.videoId, focus?.signal]);
   if (!focus) return null;
   const video = focus.videoId ? uploads.find(u => u.id === focus.videoId) : null;
   const url = focus.videoId ? `https://www.youtube.com/watch?v=${encodeURIComponent(focus.videoId)}` : null;
