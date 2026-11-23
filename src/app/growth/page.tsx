@@ -1,3 +1,4 @@
+import { rankWeeklyVideoGains } from '@/lib/weeklyVideoRanking';
 import { getLabelWorkspace } from '@/lib/labels';
 import { deepDiveFor } from '@/lib/deepDiveLink';
 import Link from 'next/link';
@@ -175,9 +176,9 @@ export default async function ControlPage({
   );
 
   // ── Top Performing Videos (managed artists, last 14d, ranked by velocity) ──
-  const topVideos: TopVideo[] = (() => {
+  const topVideos: TopVideo[] = await (async () => {
     const now = Date.now();
-    const cutoff = 14 * 86400000; // 14 days
+    const cutoff = 90 * 86400000; // include established catalogue within cached upload history
     const videos: TopVideo[] = [];
 
     for (const a of allArtists) {
@@ -196,8 +197,7 @@ export default async function ControlPage({
         if (ageMs > cutoff || ageMs < 0) continue; // only last 14 days
         const daysAgo = Math.max(1, Math.floor(ageMs / 86400000));
         // Average views/day since upload, not a measured last-14-day velocity.
-        const velocity = Math.round(u.viewCount / daysAgo);
-        if (velocity < 100) continue; // skip negligible
+        const velocity = 0; // replaced by measured seven-day change below
 
         videos.push({
           videoId: u.id,
@@ -214,7 +214,7 @@ export default async function ControlPage({
     }
 
     // Return all qualifying videos — component splits into Shorts vs Long-form
-    return videos.sort((a, b) => b.velocity - a.velocity);
+    return rankWeeklyVideoGains(videos);
   })();
 
   // ── Market Format Stats (long-form vs Shorts across market artists, 30d) ──
