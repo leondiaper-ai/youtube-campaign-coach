@@ -61,6 +61,9 @@ export function AppHeader({
   // control their own links; the shell must not inject a Labels directory.
   const items = label ? [
     { href: `/labels/${label.slug}`, label: 'Channel Health', match: `/labels/${label.slug}` },
+    { href: `/campaigns?market=${label.workspaceId}`, label: 'Active Campaigns', match: '/campaigns' },
+    { href: `/coach?market=${label.workspaceId}`, label: 'Coach', match: '/coach' },
+    { href: `/labels/${label.slug}/behaviour`, label: 'Channel Behaviour', match: `/labels/${label.slug}/behaviour` },
     { href: `/labels/${label.slug}/deep-dives`, label: 'Deep Dives', match: `/labels/${label.slug}/deep-dives` },
   ] : baseItems;
 
