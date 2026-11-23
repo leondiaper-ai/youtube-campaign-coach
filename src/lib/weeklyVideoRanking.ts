@@ -17,7 +17,7 @@ export async function rankWeeklyVideoGains(candidates: TopVideo[]): Promise<TopV
     if (!latest || now - latest.time > 2.5 * day) continue;
     const baseline = readings
       .filter(o => latest.time - o.time >= 6 * day && latest.time - o.time <= 8 * day)
-      .sort((a, b) => Math.abs(latest.time - o.time - 7 * day) - Math.abs(latest.time - b.time - 7 * day))[0];
+      .sort((a, b) => Math.abs(latest.time - a.time - 7 * day) - Math.abs(latest.time - b.time - 7 * day))[0];
     if (!baseline) continue;
     const gain = latest.views - baseline.views;
     if (!Number.isFinite(gain) || gain < 100) continue;
