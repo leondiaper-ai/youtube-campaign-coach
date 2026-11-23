@@ -846,9 +846,9 @@ export default function ChannelHealthBoard({
       <div className="bg-surface border border-line rounded-card shadow-card mb-8">
         <div className="grid grid-cols-2 lg:grid-cols-4 divide-y lg:divide-y-0 divide-x-0 lg:divide-x divide-line">
           {([
-            ['GROWING', growingCount, 'Active & growing', CLASSIFICATION_STYLE.GROWING.fg, 'Consistent uploads and positive momentum'],
-            ['WEAK_CONVERSION', weakConvCount, 'Views, fewer subscribers', CLASSIFICATION_STYLE.WEAK_CONVERSION.fg, 'Views growing faster than subscribers'],
-            ['UNDERFED', underfedCount, 'Needs more content', CLASSIFICATION_STYLE.UNDERFED.fg, 'Limited recent publishing'],
+            ['GROWING', growingCount, 'Growing', CLASSIFICATION_STYLE.GROWING.fg, 'Consistent uploads and positive momentum'],
+            ['WEAK_CONVERSION', weakConvCount, 'Conversion', CLASSIFICATION_STYLE.WEAK_CONVERSION.fg, 'Views are increasing, but subscriber growth is not keeping pace'],
+            ['UNDERFED', underfedCount, 'Infrequent', CLASSIFICATION_STYLE.UNDERFED.fg, 'Fewer recent uploads than the channel needs to sustain activity'],
             ['COLD', coldCount, 'Quiet', CLASSIFICATION_STYLE.COLD.fg, 'Little recent activity or momentum'],
           ] as const).map(([key, count, label, fg, hint]) => {
             const isOn = classFilter === key;
