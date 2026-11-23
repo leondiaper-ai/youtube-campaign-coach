@@ -141,15 +141,32 @@ slide('station','A Nickelback YouTube Station',head('Idea · a Nickelback YouTub
 <div class="stn-steps"><span><b>01</b> Fans tune in for the hits</span><span class="ar">→</span><span><b>02</b> The new songs play next to them</span><span class="ar">→</span><span><b>03</b> The album stays in the mix</span><span class="st st-diff">Proposed · confirm with YouTube</span></div>
 <div class="hw mt"><div><span class="mono">Why</span><p>Older uploads dominate channel viewing. How You Remind Me alone has {k(D['catalogueTop'][0][2])} lifetime views.</p></div><div><span class="mono">The mix</span><p>Alternate familiar hits with selected album songs, including the rollout singles.</p></div><div><span class="mono">Keep it fresh</span><p>Add new formats if made: a Chasin Famous lyric video, an acoustic take, a new music video.</p></div><div><span class="mono">Tour mode</span><p>Into February, mix in Red Rocks and Live From Nashville; add new live footage if captured and cleared.</p></div></div>''')
 
-# 08 · ideas across the campaign ─────────────────────────────────────
-def idea(n,when,title,fmt,why,prep,support):
- return f'<article class="wk"><div class="wk-h"><span class="wk-n">{n}</span><span class="wk-d">{when}</span></div><h3>{title}</h3><span class="wk-f">{fmt}</span><dl><dt>Why</dt><dd>{why}</dd><dt>To develop</dt><dd>{prep}</dd><dt>Around it</dt><dd>{support}</dd></dl></article>'
-slide('rollout','Post-album ideas',head('Proposed ideas · December → February · tour starts 5 Feb','Give the album its next moments.<br><span class="serif">With time to make them.</span>',DO)+'<p class="why mt">Choose the ideas that fit the team’s plans. Use late November and December to check footage, agree budgets and book production; these are suggested windows.</p><div class="wks ideas mt">'
- +idea('01','December','Album tracks','Chasin Famous · lyric video','The leading audio-only album track in the snapshot. Simple Song’s lyric video is now live.','Check artwork and lyric assets. A full-album video is another option if assets and rights are ready.','Lyric-line Shorts and catalogue-to-album clips through the holidays.')
- +idea('02','January','Make Me Love You','Acoustic version','Give the hit another way in while it continues to attract viewing.','Look for an existing take first; otherwise agree a session date and recording setup in December.','Performance Shorts linking to the full take. Let it run before the next major upload.')
- +idea('03','Late Jan','If I Don’t Go','Music video + BTS','A new visual moment for the album’s focus track, ahead of the tour.','Develop the concept and budget in December. Capture BTS on the same shoot if the video goes ahead.','Teaser and video clips; test the BTS follow-up within 7–14 days.')
- +idea('04','Feb / tour','I Already Know','Live or acoustic take','The strongest measured week among the selected album tracks.','Check rehearsals or tour capture for a suitable performance; release when the take is ready and cleared.','Live cuts, rehearsal moments and tour Shorts around the full performance.')
- +f'</div><div class="ess-opt"><span><b>Keep the rhythm</b> · aim for 3–5 purposeful Shorts a week using available footage; the campaign averaged {spw:.1f}.</span><span><b>Build around each release</b> · where assets allow, test a second format within 7–14 days.</span></div><p class="fine-print">Illustrative ideas, subject to footage, budget, band availability and approval. Select and space the releases with the team.</p>')
+# 08 · an illustrative calendar, with time to prepare each moment ─────
+def period(when,title,fmt,support,anchor=3,optional=False,tour=False):
+ bars=[]
+ for i in range(12):
+  kind=('optional' if optional else 'anchor') if i==anchor else ('short' if i in (0,2,4,5,7,9,10,11) else 'quiet')
+  label={'anchor':'Proposed long-form moment','optional':'Optional long-form moment','short':'Illustrative supporting Short','quiet':'Space between uploads'}[kind]
+  bars.append(f'<i class="cal-bar {kind}" aria-label="{label}"></i>')
+ milestone='<span class="cal-tour">Tour starts · 5 Feb</span>' if tour else ''
+ return f'<article class="cal-period"><div class="cal-date">{when}</div><div class="cal-rhythm">{"".join(bars)}</div><h3>{title}</h3><span class="cal-format">{fmt}</span><p>{support}</p>{milestone}</article>'
+calendar=(period('1–15 Dec','Chasin Famous','Lyric video · proposed','Lyric-line clips; keep Simple Song in the mix.')
+ +period('16–31 Dec','Holiday listening','Full-album video · optional','If assets are ready; catalogue-to-album Shorts.',optional=True)
+ +period('1–15 Jan','Make Me Love You','Acoustic take · proposed','A new version of the hit, with performance clips.',anchor=8)
+ +period('16–31 Jan','If I Don’t Go','Music video · proposed','Tease the film; cut Shorts from the video.',anchor=8)
+ +period('1–14 Feb','If I Don’t Go','Behind the scenes · proposed','Follow the video within 7–14 days if ready.',anchor=3,tour=True)
+ +period('15–28 Feb','I Already Know','Live or acoustic · proposed','Use rehearsals or tour capture if cleared.',anchor=3))
+slide('rollout','Post-album timeline',head('Illustrative programming · December → February','Keep the album moving.<br><span class="serif">Into January and the tour.</span>',DO)+f'''
+<p class="why mt">Space the new formats across the months ahead. Use December to agree the ideas, find footage and arrange production.</p>
+<div class="cal-scroll mt" role="region" aria-label="December to February campaign timeline" tabindex="0"><div class="cal-board">
+<div class="cal-top"><span>Proposed release windows</span><div class="cal-key"><span><i class="anchor"></i>Long-form idea</span><span><i class="short"></i>Supporting Shorts</span><span><i class="optional"></i>Optional</span></div></div>
+<div class="cal-months"><b>December <small>2026</small></b><b>January <small>2027</small></b><b>February <small>2027</small></b></div>
+<div class="cal-prep"><div><b>Prepare</b> Footage, budget, session dates + video shoot</div><div><b>Produce</b> Record, edit + capture BTS alongside the video</div><div><b>Tour</b> Rehearsals, live capture + cleared performances</div></div>
+<div class="cal-periods">{calendar}</div>
+<div class="cal-station"><b>YouTube Station · proposed always-on</b><span class="cal-station-line" aria-hidden="true"></span><span>Catalogue ↔ new album</span></div>
+</div></div>
+<div class="ess-opt"><span><b>Weekly rhythm</b> · aim for 3–5 purposeful Shorts from available footage.</span><span><b>Follow-through</b> · a second format within 7–14 days where assets allow.</span></div>
+<p class="fine-print">Suggested windows; bars show an illustrative rhythm. Release timing depends on footage, budget, band availability and approval. Confirm Station availability with YouTube.</p>''')
 
 # 09 · running it ───────────────────────────────────────────────────
 slide('run','Running it',head('Agree the ideas · prepare the assets · review the response','Keep the album moving<br><span class="serif">into the tour.</span>',DO)+f'''
