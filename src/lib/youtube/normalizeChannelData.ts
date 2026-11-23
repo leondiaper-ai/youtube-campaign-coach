@@ -786,8 +786,10 @@ export function computeWoW(
 
   const wow = ((current7d.delta - prevDelta) / Math.abs(prevDelta)) * 100;
 
-  // Cap extreme values — anything beyond ±500% is almost certainly noise
-  if (Math.abs(wow) > 500) return null;
+  // A large percentage is not inherently invalid: +700% can be a real
+  // comparison when the previous week had a small but nonzero baseline.
+  // Keep the observed value; reliability is assessed separately below.
+  if (!Number.isFinite(wow)) return null;
 
   // Reliability check: is the current 7d confidence at least MEDIUM?
   const reliable = current7d.confidence !== 'LOW' && days14Covered >= 12;
