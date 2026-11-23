@@ -1391,7 +1391,7 @@ export default function ChannelHealthBoard({
         if (topShorts.length === 0 && topLongform.length === 0) return null;
         return (
           <div className="mb-8">
-            <SectionHead title="Top performing videos" meta="Last 14 days, by daily velocity" />
+            <SectionHead title="Top performing videos" meta="Uploaded in last 14 days · average views/day since release · refreshed cache only" />
             {/* Stacked, not two columns. Side by side, a long-form row and a
                 Shorts row sat at the same height and read as one ranking of
                 ten — and with thumbnails the formats are different shapes,
