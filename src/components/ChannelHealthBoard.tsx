@@ -243,6 +243,7 @@ type Insight = {
   slug: string;
   category: 'growth' | 'conversion' | 'catalogue' | 'momentum' | 'cadence' | 'formats';
   score: number;
+  videoId?: string;
 };
 
 /** One editorial finding per artist. Related changes belong in the same story,
@@ -327,9 +328,10 @@ function computeInsights(rows: RowData[], topVideos: TopVideo[] = []): Insight[]
   const roster = new Set(rows.map(r => r.slug));
   for (const video of [...topVideos].sort((a, b) => b.velocity - a.velocity)) {
     if (!roster.has(video.artistSlug) || existing.has(video.artistSlug)) continue;
-    if (!Number.isFinite(video.velocity) || video.velocity < 5000) continue;
+    if (!Number.isFinite(video.velocity) || video.velocity < 1500) continue;
     insights.push({
       slug: video.artistSlug,
+      videoId: video.videoId,
       category: 'catalogue',
       text: `${video.artistName}: “${video.title}” gained ${fmtNum(video.velocity)} views in 7 days`,
       action: video.daysAgo > 30
@@ -1390,7 +1392,7 @@ export default function ChannelHealthBoard({
               return ins.slug ? (
                 <Link
                   key={i}
-                  href={`${linkPrefix}/${ins.slug}${linkSuffix}`}
+                  href={`${linkPrefix}/${ins.slug}${linkSuffix}${ins.videoId ? `#weekly-video-${ins.videoId}` : '#channel-momentum'}`}
                   className={`${cls} transition-colors hover:bg-raised`}
                   style={{ color: ic.color, textDecoration: 'none' }}
                 >
