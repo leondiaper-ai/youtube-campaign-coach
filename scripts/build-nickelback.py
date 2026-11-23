@@ -172,7 +172,7 @@ slide('rollout','Post-album timeline',head('Illustrative programming · December
 slide('run','Next steps',head('After the album · three practical next steps','What to focus on<br><span class="serif">next.</span>',DO)+'''
 <div class="next-actions mt">
 <article><span class="next-num">01</span><h3>Start with a YouTube Station.</h3><p>Explore a mix of catalogue hits and new album songs with YouTube; confirm availability and programming. Alongside it, feature Make Me Love You and put the album playlist in track order.</p></article>
-<article><span class="next-num">02</span><h3>Agree the next asset.</h3><p>Check existing footage and band availability. Choose the first idea from the timeline, then confirm the budget and production.</p></article>
+<article><span class="next-num">02</span><h3>Prepare Chasin Famous.</h3><p>Check the artwork and lyric assets for a December lyric video, then agree the edit and release window. Cut lyric-line Shorts to support it.</p></article>
 <article><span class="next-num">03</span><h3>Review the response.</h3><p>Check back in mid-January. Compare videos and Shorts with the same formats at the same age, then choose the next song to support.</p></article>
 </div>''')
 
