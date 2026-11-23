@@ -1569,3 +1569,28 @@ function buildMissingReasons(
 
   return reasons;
 }
+
+/** Compare adjacent observed intervals, normalised to daily rates. */
+export function observedViewsWoW(history: ChannelSnapshot[]): number | null {
+  const valid = history.filter(h => h.views != null && Number.isFinite(h.views) && Number.isFinite(Date.parse(h.ts)))
+    .sort((a,b) => Date.parse(a.ts)-Date.parse(b.ts));
+  const latest = valid[valid.length-1];
+  if (!latest || Date.now()-Date.parse(latest.ts)>3*86400000) return null;
+  const day = 86400000;
+  let best: {score:number; value:number} | null = null;
+  for (const mid of valid) {
+    const a = (Date.parse(latest.ts)-Date.parse(mid.ts))/day;
+    if (a<3 || a>11) continue;
+    for (const old of valid) {
+      const b = (Date.parse(mid.ts)-Date.parse(old.ts))/day;
+      if (b<3 || b>11) continue;
+      const current = (latest.views!-mid.views!)/a;
+      const previous = (mid.views!-old.views!)/b;
+      if (current<0 || previous<=0) continue;
+      const value = (current/previous-1)*100;
+      const score = Math.abs(a-7)+Math.abs(b-7);
+      if (Number.isFinite(value) && (!best || score<best.score)) best={score,value};
+    }
+  }
+  return best?.value ?? null;
+}
