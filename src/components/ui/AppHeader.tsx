@@ -57,16 +57,12 @@ export function AppHeader({
   const baseItems = ownedNav && !nav.some(item => item.href.split('?')[0] === '/growth/owned')
     ? [...nav.slice(0, ownedIndex), { href: '/growth/owned', label: 'Owned Channels', match: '/growth/owned' }, ...nav.slice(ownedIndex)]
     : nav;
+  // Label workspaces stay within their own navigation. Main Watcher callers
+  // control their own links; the shell must not inject a Labels directory.
   const items = label ? [
-    ...baseItems.filter(item => ['/growth', '/campaigns', '/coach'].includes(item.href.split('?')[0]))
-      .map(item => item.href.split('?')[0] === '/growth' ? { ...item, href: `/labels/${label.slug}`, match: `/labels/${label.slug}` } : item),
+    { href: `/labels/${label.slug}`, label: 'Channel Health', match: `/labels/${label.slug}` },
     { href: `/labels/${label.slug}/deep-dives`, label: 'Deep Dives', match: `/labels/${label.slug}/deep-dives` },
-
-  ] : hideAutoLabels || baseItems.some(item => item.href.split('?')[0] === '/labels') ? baseItems : [
-    ...baseItems.slice(0, baseItems.findIndex(item => item.href.split('?')[0] === '/resources') >= 0 ? baseItems.findIndex(item => item.href.split('?')[0] === '/resources') : baseItems.length),
-    { href: '/labels', label: 'Labels', match: '/labels' },
-    ...baseItems.slice(baseItems.findIndex(item => item.href.split('?')[0] === '/resources') >= 0 ? baseItems.findIndex(item => item.href.split('?')[0] === '/resources') : baseItems.length),
-  ];
+  ] : baseItems;
 
   return (
     <header className="border-b border-line bg-surface">
