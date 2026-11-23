@@ -147,7 +147,7 @@ def period(when,title,fmt,support,anchor=3,optional=False,tour=False):
  for i in range(12):
   kind=('optional' if optional else 'anchor') if i==anchor else ('short' if i in (0,2,4,5,7,9,10,11) else 'quiet')
   label={'anchor':'Proposed long-form moment','optional':'Optional long-form moment','short':'Illustrative supporting Short','quiet':'Space between uploads'}[kind]
-  bars.append(f'<i class="cal-bar {kind}" aria-label="{label}"></i>')
+  bars.append(f'<i class="cal-bar cal-{kind}" aria-label="{label}"></i>')
  milestone='<span class="cal-tour">Tour starts · 5 Feb</span>' if tour else ''
  return f'<article class="cal-period"><div class="cal-date">{when}</div><div class="cal-rhythm">{"".join(bars)}</div><h3>{title}</h3><span class="cal-format">{fmt}</span><p>{support}</p>{milestone}</article>'
 calendar=(period('1–15 Dec','Chasin Famous','Lyric video · proposed','Lyric-line clips; keep Simple Song in the mix.')

@@ -360,9 +360,9 @@ h3{font-weight:600}
 .cal-period:first-child{border-left:0}.cal-period:nth-child(odd){border-left-color:var(--line)}
 .cal-date{font:500 10px var(--mono);letter-spacing:.06em;text-transform:uppercase;color:rgba(246,236,223,.65)}
 .cal-rhythm{display:flex;align-items:flex-end;gap:3px;height:74px;margin:12px 0 16px;border-bottom:1px solid rgba(246,236,223,.3)}
-.cal-bar{display:block;flex:1;min-width:0;height:8px;background:rgba(246,236,223,.13);border-radius:1px 1px 0 0}
-.cal-bar.anchor{height:72px;background:var(--amber);box-shadow:0 0 0 1px rgba(243,154,43,.3)}
-.cal-bar.short{height:31px;background:#b96824}.cal-bar.optional{height:72px;background:transparent;border:1px dashed rgba(246,236,223,.75)}
+.cal-bar{display:block;flex:1;min-width:0;height:8px;padding:0;border:0;background:rgba(246,236,223,.13);border-radius:1px 1px 0 0}
+.cal-bar.cal-anchor{height:72px;background:var(--amber);box-shadow:0 0 0 1px rgba(243,154,43,.3)}
+.cal-bar.cal-short{height:31px;background:#b96824}.cal-bar.cal-optional{height:72px;background:transparent;border:1px dashed rgba(246,236,223,.75)}
 .cal-period h3{font-size:clamp(18px,1.65vw,24px);line-height:1.1}
 .cal-format{display:block;color:var(--amber);font-size:11px;line-height:1.4;margin-top:7px}
 .cal-period p{font-size:12px;line-height:1.45;color:rgba(246,236,223,.7);margin-top:7px}
