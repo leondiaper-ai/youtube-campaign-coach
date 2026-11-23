@@ -936,13 +936,12 @@ export default function ChannelHealthBoard({
         {mfRows.length > 0 && (
           <div className="flex flex-wrap items-center gap-x-5 gap-y-1 px-5 py-3 border-t border-line bg-raised/50 rounded-b-card">
             <span className="text-[11px] font-bold uppercase tracking-label text-muted">
-              Video formats
+              Upload variety
             </span>
-            <span className="text-[11px] text-muted">Different upload types used across each channel</span>
             {([
-              ['strong',  mfStrong,  '#0C6A3F', 'Channels using 3+ YouTube formats (Shorts, Official Video, Lyric Video, Visualizer, BTS, Live Session)'],
-              ['partial', mfPartial, '#7A5A00', 'Channels using 2 formats'],
-              ['weak',    mfWeak,    '#8A1F0C', 'Channels using 0–1 formats — multiformat strategy not active'],
+              ['strong',  mfStrong,  '#0C6A3F', 'Artists with 3 or more detected upload types; this is not a quality score'],
+              ['partial', mfPartial, '#7A5A00', 'Artists with 2 detected upload types'],
+              ['weak',    mfWeak,    '#625E56', 'Artists with 0 or 1 detected upload types; not necessarily a problem'],
             ] as const).map(([band, count, colour, hint]) => {
               const isOn = mfFilter === band;
               return (
@@ -965,7 +964,7 @@ export default function ChannelHealthBoard({
                       : 'hover:bg-surface cursor-pointer'
                   } ${isOn ? 'bg-surface ring-1 ring-line-strong' : ''}`}
                 >
-                  <span className="font-black tabular-nums" style={{ color: colour }}>{count}</span> {band === 'strong' ? '3+ formats' : band === 'partial' ? '2 formats' : '0–1 formats'}
+                  <span className="font-black tabular-nums" style={{ color: colour }}>{count}</span> {band === 'strong' ? 'artists · 3+ types' : band === 'partial' ? 'artists · 2 types' : 'artists · 0–1 types'}
                 </button>
               );
             })}
