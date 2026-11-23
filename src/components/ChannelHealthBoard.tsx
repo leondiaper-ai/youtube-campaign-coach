@@ -26,6 +26,7 @@ export type RowData = {
   views7Delta: number | null;
   subsWoW: number | null;
   viewsWoW: number | null;
+  viewsWoWApprox?: boolean;
   uploads30d: number;
   shorts30d: number;
   status: ChannelState;
@@ -1064,7 +1065,7 @@ export default function ChannelHealthBoard({
           page and they are the key to everything under them. */}
       <div className="bg-surface border border-line rounded-card shadow-card overflow-x-auto">
         <div
-          className={`grid ${partnerRemovable ? 'grid-cols-[minmax(190px,1.75fr)_minmax(85px,0.6fr)_minmax(145px,0.8fr)_minmax(100px,0.55fr)_minmax(75px,0.7fr)_minmax(80px,0.7fr)_minmax(65px,0.5fr)_minmax(85px,0.7fr)_minmax(65px,0.5fr)_20px]' : 'grid-cols-[minmax(190px,1.75fr)_minmax(85px,0.6fr)_minmax(145px,0.8fr)_minmax(100px,0.55fr)_minmax(75px,0.7fr)_minmax(80px,0.7fr)_minmax(65px,0.5fr)_minmax(85px,0.7fr)_minmax(65px,0.5fr)]'} gap-2 min-w-[1110px] px-5 py-3 text-[11px] font-bold uppercase tracking-label text-muted border-b border-line bg-raised/60 sticky top-0 z-10`}
+          className={`grid ${partnerRemovable ? 'grid-cols-[minmax(190px,1.75fr)_minmax(85px,0.6fr)_minmax(145px,0.8fr)_minmax(100px,0.55fr)_minmax(75px,0.7fr)_minmax(80px,0.7fr)_minmax(85px,0.7fr)_minmax(75px,0.6fr)_20px]' : 'grid-cols-[minmax(190px,1.75fr)_minmax(85px,0.6fr)_minmax(145px,0.8fr)_minmax(100px,0.55fr)_minmax(75px,0.7fr)_minmax(80px,0.7fr)_minmax(85px,0.7fr)_minmax(75px,0.6fr)]'} gap-2 min-w-[1110px] px-5 py-3 text-[11px] font-bold uppercase tracking-label text-muted border-b border-line bg-raised/60 sticky top-0 z-10`}
         >
           <div>Artist</div>
           <div title="Subscriber trend over the last 30 days">30d trend</div>
@@ -1072,9 +1073,8 @@ export default function ChannelHealthBoard({
           <div title="Video types identified in uploads from the last 90 days; based on available data, not a quality score">Formats (90d)</div>
           <div className="text-right" title="Total subscriber count">Subs</div>
           <div className="text-right" title="Subscribers gained in the last 7 days">Subs (7d)</div>
-          <div className="text-right" title="Week-over-week change — compares this week vs last week">WoW</div>
           <div className="text-right" title="Views gained in the last 7 days">Views (7d)</div>
-          <div className="text-right" title="Week-over-week change — compares this week vs last week">WoW</div>
+          <div className="text-right" title="Views week on week; ~ indicates a directional comparison from nearby recorded snapshots">Views WoW</div>
         </div>
 
         {paged.map((r, i) => {
@@ -1125,7 +1125,7 @@ export default function ChannelHealthBoard({
                 /* hover:brightness dimmed the text along with the row, which
                    made the thing you were pointing at the hardest to read.
                    A background change leaves the content alone. */
-                className={`group/row grid ${partnerRemovable ? 'grid-cols-[minmax(190px,1.75fr)_minmax(85px,0.6fr)_minmax(145px,0.8fr)_minmax(100px,0.55fr)_minmax(75px,0.7fr)_minmax(80px,0.7fr)_minmax(65px,0.5fr)_minmax(85px,0.7fr)_minmax(65px,0.5fr)_20px]' : 'grid-cols-[minmax(190px,1.75fr)_minmax(85px,0.6fr)_minmax(145px,0.8fr)_minmax(100px,0.55fr)_minmax(75px,0.7fr)_minmax(80px,0.7fr)_minmax(65px,0.5fr)_minmax(85px,0.7fr)_minmax(65px,0.5fr)]'} gap-2 min-w-[1110px] px-5 py-3.5 items-center transition-colors cursor-pointer hover:bg-raised ${
+                className={`group/row grid ${partnerRemovable ? 'grid-cols-[minmax(190px,1.75fr)_minmax(85px,0.6fr)_minmax(145px,0.8fr)_minmax(100px,0.55fr)_minmax(75px,0.7fr)_minmax(80px,0.7fr)_minmax(85px,0.7fr)_minmax(75px,0.6fr)_20px]' : 'grid-cols-[minmax(190px,1.75fr)_minmax(85px,0.6fr)_minmax(145px,0.8fr)_minmax(100px,0.55fr)_minmax(75px,0.7fr)_minmax(80px,0.7fr)_minmax(85px,0.7fr)_minmax(75px,0.6fr)]'} gap-2 min-w-[1110px] px-5 py-3.5 items-center transition-colors cursor-pointer hover:bg-raised ${
                   i === paged.length - 1 && !isExpanded ? '' : 'border-b border-line-faint'
                 }`}
                 style={{ background: st.rowBg }}
@@ -1219,14 +1219,11 @@ export default function ChannelHealthBoard({
                 <div className="text-right text-[13px] tabular-nums font-bold" style={subsColor ? { color: subsColor } : { color: 'rgba(14,14,14,0.35)' }}>
                   {fmtSubs7Label}
                 </div>
-                <div className="text-right text-[11px] tabular-nums font-bold" style={{ color: wowColor(r.subsWoW) }}>
-                  {r.subsWoW != null ? fmtPct(r.subsWoW) : '—'}
-                </div>
                 <div className="text-right text-[13px] tabular-nums font-bold" style={viewsColor ? { color: viewsColor } : { color: 'rgba(14,14,14,0.35)' }}>
                   {fmtViews7}
                 </div>
                 <div className="text-right text-[11px] tabular-nums font-bold" style={{ color: wowColor(r.viewsWoW) }}>
-                  {r.viewsWoW != null ? fmtPct(r.viewsWoW) : '—'}
+                  {r.viewsWoW != null ? `${r.viewsWoWApprox ? '~' : ''}${fmtPct(r.viewsWoW)}` : '—'}
                 </div>
                 {partnerRemovable && (
                     <button type="button" aria-label={`Remove ${r.name} from shared Watcher`}
