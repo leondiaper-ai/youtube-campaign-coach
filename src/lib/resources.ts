@@ -68,6 +68,16 @@ export const RESOURCE_GROUPS: ResourceGroup[] = [
         external: true,
       },
       {
+        title: 'Blondshell — Violins',
+        blurb:
+          'Channel and album campaign review, including the previous album, fan signals, '
+          + 'live and acoustic precedents, and a proposed post-album programming plan.',
+        href: '/blondshell',
+        kind: 'Deck',
+        updated: 'November 2026',
+        external: true,
+      },
+      {
         title: 'D-Block Europe',
         blurb:
           'Channel deep dive for the management conversation — the release-day playbook they already run, the Worldwide Wave window that is still open, and the catalogue sitting on other people’s channels. Public API data only, with the method under Analysis.',

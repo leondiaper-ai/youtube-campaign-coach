@@ -1,4 +1,5 @@
 import { getLabelWorkspace } from '@/lib/labels';
+import { deepDiveFor } from '@/lib/deepDiveLink';
 import Link from 'next/link';
 import {
   ARTISTS, mergeArtistLists, daysSince, deriveFromLive,
@@ -60,6 +61,10 @@ export default async function ControlPage({
   /* Scoped to the market so the Watcher shows this team's roster. Markets
      with a team board get everyone on that board — see marketScope. */
   const allArtists = await getArtistsForMarket(market.id);
+  const labelReports = label ? allArtists.flatMap(artist => {
+    const report = deepDiveFor(artist.name);
+    return report ? [{ artist, report }] : [];
+  }).sort((a, b) => a.artist.name.localeCompare(b.artist.name)) : [];
   const syncMeta = await readSyncMeta();
   const pinned = await listPinned(market.id);
   const pinnedSlugs = pinned.map((p) => p.slug);
@@ -282,6 +287,19 @@ export default async function ControlPage({
           title="Channel Health"
           lede="Which channels are growing, which are converting attention into audience, and which need feeding."
         />
+
+        {label && labelReports.length > 0 && (
+          <section aria-label="Completed artist deep dives" className="mb-6 rounded-lg border border-line bg-surface px-5 py-4 flex flex-wrap items-center gap-3">
+            <Link href={`/labels/${label.slug}/deep-dives`} className="text-sm font-semibold text-ink no-underline hover:underline mr-1">
+              Deep Dives
+            </Link>
+            {labelReports.map(({ artist, report }) => (
+              <Link key={artist.slug} href={report.href} title={report.title} className="rounded border border-line px-3 py-2 text-sm text-signal no-underline hover:border-ink/40 transition-colors">
+                {artist.name}
+              </Link>
+            ))}
+          </section>
+        )}
 
         {/* Client-side board with toggle */}
         <ChannelHealthBoard singleTab={!!label} labelRoster={!!label} linkSuffix={mq} behaviourBase={label ? `/labels/${label.slug}/behaviour` : `/campaigns${mq}`} rows={rows} topVideos={topVideos} marketFormatStats={marketFormatStats} pinnedSlugs={pinnedSlugs} />
