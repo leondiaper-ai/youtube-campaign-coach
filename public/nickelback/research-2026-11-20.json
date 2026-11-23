@@ -991,7 +991,7 @@
    "2026-11-20",
    4614638164
   ],
-  "subs": "4.16M throughout (rounded public count)"
+  "subs": "4.09M on 14 Jul; 4.15M on 30 Oct; 4.16M on 20 Nov (rounded public counts)"
  },
  "watcherVideo": {
   "5l5OKWE3rbA": {
@@ -1266,5 +1266,39 @@
    ]
   ],
   "watch": "Several If I Don’t Go comments compare it to Sam Fender’s “Dead Boys” (top one 71 likes)."
+ },
+ "subscriberGrowth": {
+  "source": "https://youtube-campaign-coach.vercel.app/api/campaign-behaviour/nickelback?days=max",
+  "checked": "2026-11-23",
+  "sourceUpdated": "2026-11-23T06:21:14.632Z",
+  "method": "Historical counts reconstructed from the latest count minus subsequent daily subscriber gains. Each listed date is present in the series; no missing daily gains. Public counts are rounded; growth is approximate and channel-wide.",
+  "snapshots": [
+   {
+    "date": "2026-07-14",
+    "subscribers": 4090000
+   },
+   {
+    "date": "2026-10-21",
+    "subscribers": 4150000
+   },
+   {
+    "date": "2026-10-30",
+    "subscribers": 4150000
+   },
+   {
+    "date": "2026-11-13",
+    "subscribers": 4160000
+   },
+   {
+    "date": "2026-11-20",
+    "subscribers": 4160000
+   },
+   {
+    "date": "2026-11-23",
+    "subscribers": 4160000
+   }
+  ],
+  "rolloutGain": 70000,
+  "postAlbumGain": 10000
  }
 }
