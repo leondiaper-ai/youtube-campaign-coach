@@ -168,13 +168,13 @@ slide('rollout','Post-album timeline',head('Illustrative programming · December
 <div class="ess-opt"><span><b>Weekly rhythm</b> · aim for 3–5 purposeful Shorts from available footage.</span><span><b>Follow-through</b> · a second format within 7–14 days where assets allow.</span></div>
 <p class="fine-print">Suggested windows; bars show an illustrative rhythm. Release timing depends on footage, budget, band availability and approval. Confirm Station availability with YouTube.</p>''')
 
-# 09 · running it ───────────────────────────────────────────────────
-slide('run','Running it',head('Agree the ideas · prepare the assets · review the response','Keep the album moving<br><span class="serif">into the tour.</span>',DO)+f'''
-<div class="run2 mt"><div class="na">
-<article><span class="who">Channel team</span><ul><li>Feature Make Me Love You; put the album playlist in track order.</li><li>Explore the Station with YouTube.</li><li>Scope Chasin Famous lyrics and the full-album option.</li><li>Connect new uploads through playlists and end screens.</li></ul></article>
-<article><span class="who">Creative + production</span><ul><li>December: check existing footage, budget and band availability.</li><li>Develop the January acoustic and video ideas; capture BTS alongside shoots.</li><li>Explore I Already Know at rehearsals or on tour.</li></ul></article>
-<article><span class="who">Band + socials</span><ul><li>Aim for 3–5 purposeful Shorts a week from available footage.</li><li>Build clips around each agreed release.</li><li>Tour countdown from mid-January; rehearsal and live moments as available.</li></ul></article></div>
-<div class="know"><span class="mono">Reference points · first 7 days</span><p class="kn-range"><b>110k+</b> lyric-video reference<small>4 of the 5 with a complete first week reached this; song demand varies.</small></p><p class="kn-range"><b>142k–202k</b> observed BTS first weeks<small>Only 2 films measured. Set separate baselines for acoustic and live.</small></p><ul><li>Compare new uploads with the same format at the same age; check paid support with the team.</li><li>Compare Shorts with other Shorts over their first 7 days. Use repeat response across clips to shortlist songs.</li><li>Review in mid-January before choosing the next tour-phase release.</li></ul></div></div>''')
+# 09 · next steps, following the illustrative timeline ────────────────
+slide('run','Next steps',head('After the album · three practical next steps','What to focus on<br><span class="serif">next.</span>',DO)+'''
+<div class="next-actions mt">
+<article><span class="next-num">01</span><h3>Connect the channel.</h3><p>Feature Make Me Love You, put the album playlist in track order, and link the new uploads through playlists and end screens.</p></article>
+<article><span class="next-num">02</span><h3>Agree the next asset.</h3><p>Check existing footage and band availability. Choose the first idea from the timeline, then confirm the budget and production.</p></article>
+<article><span class="next-num">03</span><h3>Review the response.</h3><p>Check back in mid-January. Compare videos and Shorts with the same formats at the same age, then choose the next song to support.</p></article>
+</div>''')
 
 # ── analysis ───────────────────────────────────────────────────────
 def table(h,rows):return '<div class="table-wrap"><table class="audit-table"><thead><tr>'+''.join(f'<th>{x}</th>' for x in h)+'</tr></thead><tbody>'+''.join('<tr>'+''.join(f'<td>{c}</td>' for c in r)+'</tr>' for r in rows)+'</tbody></table></div>'
@@ -192,6 +192,7 @@ wat=table(['Window','Channel views gained','Read'],[
  ['21 May → 13 Jul (before album announcement)',f'+{W["preSingle"][1]-W["first"][1]:,}',f'About {pace_pre/1e6:.2f}M a day.'],
  ['29 Oct → 20 Nov (album onwards)',f'+{W["latest"][1]-W["albumEve"][1]:,}',f'About {pace_post/1e6:.2f}M a day.']])
 fw=table(['Upload','Day 1','Day 7','Last 7 days'],[[E(by[i]['title']),f'{WV[i].get("d1",0):,}' if WV[i].get('d1') else '—',f'{WV[i].get("d7",0):,}' if WV[i].get('d7') else (f'{WV[i]["d3"]:,} at day 3' if WV[i].get('d3') else '—'),f'+{WV[i]["g7"]:,}' if WV[i].get('g7') else '—'] for i in ['5l5OKWE3rbA','eSeczB9ZnzA','WsorAk6HH3Y','X4NJO6mkeuA','M58G75GoOpI','C8_F0AtqDNE','Ab4SSLrLt-Y','wpa65K2rTe4','_CAz7Cckq24']])
+fw+='''<h4>Reference points for the next uploads</h4><p>Four of the five lyric videos with a complete first week reached 110k views. The two measured BTS first weeks were 141,756 and 202,296 views. These are small-sample reference points, not targets or forecasts; song demand varies. Establish separate baselines for acoustic and live uploads.</p><p>Compare each new upload with the same format at the same age, and confirm any paid support with the team. Compare Shorts with other Shorts over their first seven days; repeated response across clips can help shortlist songs.</p>'''
 cat=table(['Video','Published','Views'],[[f'<a href="{yt(i)}" target="_blank" rel="noopener">{E(t)}</a>',d,f'{n:,}'] for i,d,n,t in D['catalogueTop']]+[[f'<a href="{yt(i)}" target="_blank" rel="noopener">{E(t)}</a>',d,f'{n:,}'] for i,d,t,n in D['live']])
 grt=table(['Get Rollin’ video','Published','Views'],[[f'<a href="{yt(i)}" target="_blank" rel="noopener">{E(t)}</a>',d,f'{n:,}'] for i,d,t,n in D['getRollin']['singles']+D['getRollin']['later']])
 walk=table(['Where','What the public page shows','Change'],[[a,b,c] for a,b,c in [
