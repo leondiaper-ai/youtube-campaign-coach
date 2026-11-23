@@ -1391,7 +1391,7 @@ export default function ChannelHealthBoard({
         if (topShorts.length === 0 && topLongform.length === 0) return null;
         return (
           <div className="mb-8">
-            <SectionHead title="Top performing videos" meta="Uploaded in last 14 days · average views/day since release · refreshed cache only" />
+            <SectionHead title="Top performing videos" meta="Most views gained in the last 7 days" />
             {/* Stacked, not two columns. Side by side, a long-form row and a
                 Shorts row sat at the same height and read as one ranking of
                 ten — and with thumbnails the formats are different shapes,
@@ -1996,7 +1996,7 @@ function VideoRow({ v, rank, linkPrefix, linkSuffix = '' }:
       </div>
       <div className="text-right shrink-0">
         <div className="text-[14px] font-black tabular-nums" style={{ color: '#0C6A3F' }}>
-          {fmtNum(v.velocity)}<span className="text-[9px] font-bold text-ink/30">/day</span>
+          {fmtNum(v.velocity)}<span className="text-[9px] font-bold text-ink/30"> in 7d</span>
         </div>
         <div className="text-[9px] text-ink/30 tabular-nums">
           {fmtNum(v.views)} total
