@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useCallback } from 'react';
 import { useSearchParams, useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { getLabelWorkspace, labelRecordKey } from '@/lib/labels';
@@ -54,27 +54,16 @@ export default function CampaignStatusBoard({
   const searchParams = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
-  const [behaviourSlug, setBehaviourSlug] = useState<string | null>(
-    searchParams.get('behaviour')
-  );
+  // Derive the view from the URL on every render. Next preserves this client
+  // component when only the query changes; a useState initializer would keep
+  // the old artist open after the user returns to the campaigns board.
+  const behaviourSlug = searchParams.get('behaviour');
 
-  /* ── THE URL HAS TO FOLLOW ─────────────────────────────────────────
-     Opening Channel Behaviour was pure React state, so the address bar
-     still said /campaigns. That left the page thinking no behaviour view
-     was open — and the page is what suppresses its own header and title
-     when one is. The result was the duplicate chrome that was supposedly
-     fixed: it WAS fixed for /campaigns?behaviour=x, and clicking a card
-     never produced that URL.
-
-     Syncing the URL fixes the chrome, and makes the view linkable and
-     the back button work, which it never was. State is still set
-     immediately so opening stays instant; the replace rides behind it. */
   const openBehaviour = useCallback((slug: string | null) => {
     if (!slug && searchParams.get('partner') === 'youtube-uk') {
       router.push('/youtube-uk');
       return;
     }
-    setBehaviourSlug(slug);
     const sp = new URLSearchParams(Array.from(searchParams.entries()));
     if (slug) sp.set('behaviour', slug);
     else sp.delete('behaviour');
