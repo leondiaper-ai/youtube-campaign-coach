@@ -4,6 +4,7 @@ import { YOUTUBE_UK_ROSTER } from '@/lib/youtubeUkRoster';
 import { listPartnerSlugs } from '@/lib/youtubeUkPartnerStore';
 import { getAllArtists } from '@/lib/marketScope';
 import { notFound } from 'next/navigation';
+import { getLabelWorkspace, normaliseLabelArtist } from '@/lib/labels';
 import { loadPlan, savePlan, type CampaignDataCoverage, type HistoricalSource } from '@/lib/planStore';
 import { readLiveSnapByHandle, readChannelMapping } from '@/lib/kvCache';
 import { readHistory } from '@/lib/snapshots';
@@ -56,6 +57,16 @@ export default async function CampaignPage({ params, searchParams }: PageProps) 
   const classic = !partner && (Array.isArray(sp.view) ? sp.view[0] : sp.view) === 'classic';
   const saved = await loadPlan(slug);
   if (!saved) notFound();
+  const requestedMarket = Array.isArray(sp.market) ? sp.market[0] : sp.market;
+  const labelWorkspace = getLabelWorkspace(requestedMarket);
+  // A label campaign must never silently fall back to an internal workspace.
+  if (slug.includes('--label-') && (!labelWorkspace || !slug.endsWith(`--${labelWorkspace.workspaceId}`))) notFound();
+  if (labelWorkspace && !labelWorkspace.roster.some(name => normaliseLabelArtist(name) === normaliseLabelArtist(saved.artist))) {
+    // Dynamic label roster membership is handled separately; never treat an unknown campaign as public.
+    const { getAllArtists } = await import('@/lib/marketScope');
+    const artists = await getAllArtists();
+    if (!artists.some(a => normaliseLabelArtist(a.name) === normaliseLabelArtist(saved.artist) && a.markets?.includes(labelWorkspace.workspaceId))) notFound();
+  }
   if (partner) {
     const [artists, extras] = await Promise.all([getAllArtists(), listPartnerSlugs().catch(() => [] as string[])]);
     const norm = (name: string) => name.toLowerCase().replace(/[^a-z0-9]/g, '');
@@ -343,7 +354,7 @@ export default async function CampaignPage({ params, searchParams }: PageProps) 
     const multiChannelWarning = saved.artist.toLowerCase() === 'palaye royale' && palayeLabelVideos.length === 0;
     return <>
       {multiChannelWarning && <div className="max-w-[1060px] mx-auto px-5 pt-5"><div className="border border-amber-300 bg-amber-50 text-amber-950 rounded-xl p-3 text-sm"><strong>Partial video coverage:</strong> Sumerian uploads could not be retrieved. Missing-video conclusions may be incomplete. <a className="underline" href="/palaye">View deep dive</a></div></div>}
-      <CoachLanding model={model} slug={saved.slug} readOnly={partner} timelineEditor={
+      <CoachLanding model={model} slug={saved.slug} readOnly={partner} market={labelWorkspace?.workspaceId} timelineEditor={
       <CoachTimelineEditor slug={saved.slug} artist={saved.artist} campaignName={saved.campaignName}
         timeline={saved.timelineText || saved.plan.events.map(e => `${e.dateISO} - ${e.title}`).join('\n')}
         channelCtx={saved.channelCtx} campaignStartDate={artistConfig?.campaignStartDate} market={saved.market} />
