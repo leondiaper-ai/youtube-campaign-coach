@@ -196,7 +196,9 @@ export default async function ControlPage({
     for (const a of allArtists) {
       if (!label && !isVirginOwned(a)) continue;
       const snap = a.channelHandle ? (snapMap.get(a.channelHandle) ?? null) : null;
-      if (!snap?.recentUploads) continue;
+      if (!snap?.recentUploads || snap.error) continue;
+      const fetchedAt = Date.parse((snap as typeof snap & { cachedAt?: string }).cachedAt ?? '');
+      if (!Number.isFinite(fetchedAt) || now - fetchedAt > 48 * 3600000) continue;
 
       for (const u of snap.recentUploads) {
         const ageMs = now - new Date(u.publishedAt).getTime();
