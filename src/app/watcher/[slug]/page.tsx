@@ -65,10 +65,10 @@ export default async function WatcherPage({
   const q = market.id === 'uk' ? '' : `?market=${market.id}`;
   return <>
     {label && <AppHeader workspace={label.name} nav={[
-      { href: `/growth${q}`, label: 'Channel Health' },
+      { href: `/labels/${label.slug}`, label: 'Channel Health' },
       { href: `/campaigns${q}`, label: 'Active Campaigns' },
       { href: `/coach${q}`, label: 'Coach' },
     ]} />}
-    {partner ? <PartnerLinkGuard allowedSlugs={allowed.map(a => a.slug)} allowedDeepDiveHrefs={partnerDeck ? [partnerDeck.href] : []}><WatcherArtistView slug={slug} market="uk" actionContext={{ backHref: '/youtube-uk', backLabel: '← Dashboard', behaviourHref: `/campaigns?behaviour=${encodeURIComponent(slug)}&partner=youtube-uk`, pin: { mode: 'watcher' } }} signature="YouTube UK · Shared Watcher" /></PartnerLinkGuard> : <WatcherArtistView slug={slug} market={market.id} signature="Watcher watches · Coach plans · You decide" />}
+    {partner ? <PartnerLinkGuard allowedSlugs={allowed.map(a => a.slug)} allowedDeepDiveHrefs={partnerDeck ? [partnerDeck.href] : []}><WatcherArtistView slug={slug} market="uk" actionContext={{ backHref: '/youtube-uk', backLabel: '← Dashboard', behaviourHref: `/campaigns?behaviour=${encodeURIComponent(slug)}&partner=youtube-uk`, pin: { mode: 'watcher' } }} signature="YouTube UK · Shared Watcher" /></PartnerLinkGuard> : <WatcherArtistView slug={slug} market={market.id} actionContext={label ? { backHref: `/labels/${label.slug}`, backLabel: `← ${label.name} Watcher`, behaviourHref: `/labels/${label.slug}/behaviour/${slug}`, pin: { mode: 'watcher' } } : undefined} signature="Watcher watches · Coach plans · You decide" />}
   </>;
 }
