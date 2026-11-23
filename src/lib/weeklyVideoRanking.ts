@@ -3,7 +3,7 @@ import { readVideoSeriesMany } from '@/lib/videoSnapshots';
 
 /** Only rank measured weekly changes. Never substitute lifetime averages. */
 export async function rankWeeklyVideoGains(candidates: TopVideo[]): Promise<TopVideo[]> {
-  const series = await readVideoSeriesMany([...new Set(candidates.map(v => v.videoId))]);
+  const series = await readVideoSeriesMany(Array.from(new Set(candidates.map(v => v.videoId))));
   const now = Date.now();
   const day = 86_400_000;
   const ranked: TopVideo[] = [];
