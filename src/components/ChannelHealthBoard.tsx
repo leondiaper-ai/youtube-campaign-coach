@@ -1951,7 +1951,7 @@ function MultiformatCell({
   return (
     <div
       className="flex flex-col gap-1.5"
-      title={active.length ? `Types detected in the last 90 days: ${active.join(', ')}. Not a quality score or a requirement to use every format.` : 'No recognised types detected in available uploads from the last 90 days'}
+      title={active.length ? `Last 90 days: ${active.join(', ')}` : 'No matching video types found in the last 90 days'}
     >
       <div className="flex items-center gap-2">
         <span className="rounded-md bg-ink/[0.06] px-2 py-0.5 text-[10px] font-bold text-ink/75 whitespace-nowrap">
