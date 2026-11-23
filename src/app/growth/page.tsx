@@ -15,7 +15,7 @@ import { TEAMS, TEAM_SLUGS } from '@/lib/teams';
 import { readAllLiveSnaps, readSyncMeta } from '@/lib/kvCache';
 import { listPinned } from '@/lib/campaignStore';
 import { readHistory } from '@/lib/snapshots';
-import { normalizeChannelData, rawDelta, computeWoW } from '@/lib/youtube/normalizeChannelData';
+import { normalizeChannelData, rawDelta, computeWoW, observedViewsWoW } from '@/lib/youtube/normalizeChannelData';
 import ChannelHealthBoard, { type RowData, type TopVideo, type MarketFormatStats } from '@/components/ChannelHealthBoard';
 import { computeMultiformat } from '@/lib/contentStructure';
 import { bestFormatStack } from '@/lib/formatStack';
@@ -109,36 +109,7 @@ export default async function ControlPage({
       const viewsWoWResult = computeWoW(nc.views7d, views14Raw);
       const subsWoW = subsWoWResult?.value ?? null;
       const viewsWoW = viewsWoWResult?.value ?? null;
-      // Directional fallback: use nearby *observed* channel totals when exact
-      // weekly anchors are missing. Normalise by elapsed days so an 8-day
-      // snapshot interval is not treated as a 7-day interval.
-      // Never extrapolate lifetime views or invent a missing baseline.
-      let directionalViewsWoW: number | null = null;
-      if (viewsWoW == null && history.length >= 3) {
-        const valid = history.filter(h => h.views != null && Number.isFinite(h.views));
-        const latest = valid[valid.length - 1];
-        if (latest) {
-          const latestMs = Date.parse(latest.ts);
-          const nearest = (days: number) => valid
-            .filter(h => h.ts !== latest.ts)
-            .map(h => ({ h, gap: Math.abs((latestMs - Date.parse(h.ts)) / 86400000 - days) }))
-            .filter(x => x.gap <= 2)
-            .sort((a, b) => a.gap - b.gap)[0]?.h;
-          const w1 = nearest(7);
-          const w2 = nearest(14);
-          if (w1 && w2 && w1.ts !== w2.ts) {
-            const d1 = (latestMs - Date.parse(w1.ts)) / 86400000;
-            const d2 = (Date.parse(w1.ts) - Date.parse(w2.ts)) / 86400000;
-            if (d1 >= 5 && d1 <= 9 && d2 >= 5 && d2 <= 9) {
-              const currentRate = (latest.views! - w1.views!) / d1;
-              const previousRate = (w1.views! - w2.views!) / d2;
-              if (currentRate >= 0 && previousRate > 0) {
-                directionalViewsWoW = (currentRate / previousRate - 1) * 100;
-              }
-            }
-          }
-        }
-      }
+      const directionalViewsWoW = viewsWoW == null ? observedViewsWoW(history) : null;
       const displayedViewsWoW = viewsWoW ?? directionalViewsWoW;
 
       const derived = snap ? deriveFromLive(snap, {
@@ -159,7 +130,7 @@ export default async function ControlPage({
         views7Delta: views7Val,
         subsWoW,
         viewsWoW: displayedViewsWoW,
-        viewsWoWApprox: viewsWoW == null && directionalViewsWoW != null,
+        viewsWoWApprox: displayedViewsWoW != null && !viewsWoWResult?.reliable,
         uploads30d: nc.cadence.uploads30d,
         shorts30d: nc.cadence.shorts30d,
         status,
