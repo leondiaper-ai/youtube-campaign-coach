@@ -7,6 +7,49 @@ import { auditTitleSuggestion } from '@/lib/auditTitleSuggestion';
 import { useEffect, useRef, useState } from 'react';
 import { auditNumber, channelAuditText, auditNeedsCatalogue, type ChannelAudit, type AuditFinding } from '@/lib/channelAudit';
 
+
+/** A print-ready, three-page editorial summary. The browser's print dialog saves it as PDF. */
+function printThreePageAudit(a: ChannelAudit) {
+  const esc=(v:unknown)=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]||c));
+  const n=(v:number|null)=>auditNumber(v);
+  const formats=a.visuals.formats.filter(f=>f.count>0 && !['longform','short'].includes(f.key)).sort((x,y)=>y.median-x.median).slice(0,6);
+  const maxMedian=Math.max(1,...formats.map(f=>f.median));
+  const weeklyMax=Math.max(1,...a.visuals.weeks.map(w=>w.longform+w.shorts));
+  const months=a.intel.months;
+  const monthlyMax=Math.max(1,...months.map(m=>m.videos+m.shorts+m.audio));
+  const formatRows=formats.map(f=>`<div class="format"><div class="formatname"><b>${esc(f.name)}</b><span>${f.count} uploads · ${n(f.median)} median views</span></div><div class="track"><i style="width:${Math.max(2,f.median/maxMedian*100)}%"></i></div></div>`).join('');
+  const monthBars=months.map(m=>`<div class="barcol"><div class="barstack" style="height:${Math.max(2,(m.videos+m.shorts+m.audio)/monthlyMax*100)}%"><i style="flex:${m.shorts};background:#3027e8"></i><i style="flex:${m.videos};background:#ff4a1c"></i><i style="flex:${m.audio};background:#99928a"></i></div><small>${esc(m.label)}${m.partial?'*':''}</small></div>`).join('');
+  const weekBars=a.visuals.weeks.map(w=>`<div class="barcol"><div class="barstack" style="height:${Math.max(2,(w.longform+w.shorts)/weeklyMax*100)}%;opacity:${w.covered?1:.35}"><i style="flex:${w.shorts};background:#3027e8"></i><i style="flex:${w.longform};background:#ff4a1c"></i></div><small>${esc(w.date.slice(8))}/${esc(w.date.slice(5,7))}</small></div>`).join('');
+  const exampleVideos=[...a.findings.flatMap(f=>f.videos||[]),...a.leaders].filter((v,i,arr)=>arr.findIndex(x=>x.id===v.id)===i).slice(0,3);
+  const examples=exampleVideos.map(v=>`<div class="video"><img src="https://i.ytimg.com/vi/${encodeURIComponent(v.id)}/mqdefault.jpg" /><div><b>${esc(v.title)}</b><small>${n(v.views)} lifetime views · ${esc(v.publishedAt.slice(0,10))}</small><a href="https://www.youtube.com/watch?v=${encodeURIComponent(v.id)}">Watch video ↗</a></div></div>`).join('');
+  const actions=(a.visuals.actions.length?a.visuals.actions:a.priorities).slice(0,3).map((p,i)=>`<div class="action"><strong>0${i+1}</strong><p>${esc(p)}</p></div>`).join('');
+  const markets=a.territories.slice(0,5).map(t=>`<div><b>${n(t.views)}</b><small>${esc(t.name)}${t.estimated?' (est.)':''}</small></div>`).join('');
+  const split=a.visuals.split;const share=split.longform+split.shorts?split.longform/(split.longform+split.shorts)*100:0;
+  const html=`<!doctype html><html lang="en"><head><meta charset="utf-8"/><title>${esc(a.name)} · YouTube Channel Audit</title><style>
+    @page{size:A4;margin:0}*{box-sizing:border-box}body{font-family:Arial,Helvetica,sans-serif;margin:0;color:#171717;background:#fff} .page{height:297mm;width:210mm;padding:17mm 17mm 15mm;break-after:page;page-break-after:always;position:relative;overflow:hidden}.page:last-child{break-after:auto;page-break-after:auto}
+    .eyebrow{color:#f04b24;font-weight:800;letter-spacing:2px;font-size:10px;text-transform:uppercase}.page h1{font-size:35px;line-height:1.1;margin:13px 0 10px}.page h2{font-size:24px;margin:10px 0 15px}.page h3{font-size:16px;margin:21px 0 10px}.muted{color:#716f6a}.intro{font-size:14px;line-height:1.55;color:#555;max-width:95%;margin:12px 0 20px}.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:23px 0}.metric{background:#f6f3ee;border-radius:9px;padding:13px 10px}.metric b{display:block;font-size:22px}.metric small,.foot,small{font-size:10px;color:#777}.metric small{display:block;margin-top:5px}.panel{background:#f6f3ee;border-radius:12px;padding:18px;margin:16px 0}.panel h3{margin:0 0 9px}.headline{font-size:22px;font-weight:800;line-height:1.25;margin:0 0 10px}.chart{display:flex;gap:7px;align-items:end;height:106px;border-bottom:1px solid #d7d2c9;padding-top:10px}.barcol{flex:1;height:100%;display:flex;align-items:center;flex-direction:column;justify-content:end;min-width:0}.barstack{width:100%;display:flex;flex-direction:column;overflow:hidden;min-height:2px}.barstack i{display:block;min-height:0}.barcol small{font-size:9px;margin-top:7px;white-space:nowrap}.legend{font-size:10px;color:#666;margin:13px 0}.legend em{font-style:normal;color:#3027e8}.legend strong{color:#ff4a1c}.split{height:14px;display:flex;border-radius:5px;overflow:hidden;background:#eee}.split span:first-child{background:#ff4a1c}.split span:last-child{background:#3027e8}.twocol{display:flex;justify-content:space-between;gap:20px;margin:12px 0}.twocol b{font-size:24px;display:block}.format{margin:13px 0}.formatname{display:flex;justify-content:space-between;align-items:baseline;font-size:12px}.formatname span{font-size:10px;color:#777}.track{height:7px;background:#eee;border-radius:10px;margin-top:7px;overflow:hidden}.track i{display:block;background:#ff4a1c;height:100%;border-radius:10px}.video{display:flex;gap:12px;padding:10px 0;border-top:1px solid #e6e0d7;align-items:center}.video img{width:100px;height:56px;object-fit:cover;border-radius:5px}.video b{display:block;font-size:11px;line-height:1.3}.video small{display:block;margin-top:4px}.video a{font-size:10px;color:#2620b4;display:block;margin-top:5px}.action{display:flex;gap:15px;border-bottom:1px solid #e9e3d9;padding:16px 0}.action strong{color:#ff4a1c;font-size:19px}.action p{font-size:13px;line-height:1.5;margin:0}.markets{display:flex;justify-content:space-between;gap:10px;margin-top:12px}.markets b{font-size:19px;display:block}.markets small{display:block;margin-top:4px}.foot{position:absolute;bottom:12mm;left:17mm;right:17mm;border-top:1px solid #e8e2d9;padding-top:8px;line-height:1.4}.foot span{float:right}a{color:inherit}@media screen{body{background:#e6e6e6}.page{background:#fff;margin:15px auto;box-shadow:0 4px 20px #0002}}@media print{.page{margin:0;box-shadow:none}print-color-adjust:exact;-webkit-print-color-adjust:exact}
+  </style></head><body>
+  <section class="page"><div class="eyebrow">YouTube / Channel audit · ${esc(a.generatedAt.slice(0,10))}</div><h1>${esc(a.name)}</h1><p class="muted">Channel performance, publishing and next steps</p><div class="metrics"><div class="metric"><b>${n(a.stats.subs)}</b><small>Subscribers</small></div><div class="metric"><b>${n(a.stats.views30d)}</b><small>Channel views · 30d</small></div><div class="metric"><b>${n(a.stats.views7d)}</b><small>Channel views · 7d</small></div><div class="metric"><b>${a.intel.activity.uploads}</b><small>Uploads · six-month sample</small></div></div>
+  <div class="panel"><div class="eyebrow">The main finding</div><p class="headline">${esc(a.intel.headline)}</p><p class="intro">${esc(a.intel.read)}</p></div>
+  <h3>Publishing rhythm · monthly</h3><div class="chart">${monthBars}</div><div class="legend"><strong>■ Videos</strong> · <em>■ Shorts</em> · ■ Release audio · *Partial month</div>
+  <h3>Weekly publishing · last 13 weeks</h3><div class="chart">${weekBars}</div><div class="legend"><strong>■ Long-form</strong> · <em>■ Shorts</em> · Faded bars indicate incomplete coverage</div>
+  <div class="foot">Monthly figures: six-month upload sample. Weekly figures: analysed upload inventory. Publishing volume is not proof of view growth.<span>01 / 03</span></div></section>
+  <section class="page"><div class="eyebrow">02 / Content performance</div><h2>What content is working?</h2><p class="intro">Compare typical lifetime views per upload. Different upload ages mean these are directional clues, not a like-for-like ranking.</p>
+  <h3>Where recorded viewing sits</h3><div class="twocol"><div><b>${n(split.longform)}</b><small>Long-form · ${split.longformCount} uploads</small></div><div style="text-align:right"><b>${n(split.shorts)}</b><small>Shorts · ${split.shortsCount} uploads</small></div></div><div class="split"><span style="width:${share}%"></span><span style="width:${100-share}%"></span></div><p class="muted" style="font-size:10px">Analysed upload lifetime views only; not the full channel lifetime counter.</p>
+  <h3>Formats with recorded examples</h3>${formatRows||'<p class="muted">Not enough classified examples yet.</p>'}
+  <h3>Videos worth reviewing</h3>${examples||'<p class="muted">No named examples available.</p>'}
+  <div class="foot">${esc(a.coverage)}<span>02 / 03</span></div></section>
+  <section class="page"><div class="eyebrow">03 / Recommended next steps</div><h2>Where to focus next</h2><p class="intro">Three practical actions based on the tracked evidence. Confirm creative fit and available assets before committing production or spend.</p>${actions}
+  <h3>Priority markets</h3><div class="markets">${markets||'<p class="muted">No cached market data available.</p>'}</div><p class="muted" style="font-size:10px;margin-top:12px">${esc(a.territoryNote)}</p>
+  <div class="panel" style="margin-top:28px"><h3>Before acting on this report</h3><p style="font-size:12px;line-height:1.6;margin:0">Format classifications are inferred from upload metadata and may need review. Lifetime views are not age-matched. The scanned playlist may not include every release or third-party appearance. YouTube Studio is needed for retention, traffic sources and paid impact.</p></div>
+  <div class="foot">Prepared from the shared Watcher channel audit · ${esc(a.generatedAt.slice(0,10))}. Data reading: ${esc(a.dataAt?.slice(0,10)||'date unavailable')}.<span>03 / 03</span></div></section></body></html>`;
+  const win=window.open('','_blank');
+  if(!win) { alert('Please allow pop-ups to open the printable audit.');return; }
+  win.document.open();win.document.write(html);win.document.close();win.focus();
+  // The user can select Save as PDF in the native print dialog.
+  win.onload=()=>win.print();
+}
+
 export default function ChannelAuditButton({ slug, name }: { slug: string; name: string }) {
   const dialog = useRef<HTMLDialogElement>(null);
   const reviewPanel = useRef<HTMLDetailsElement>(null);
@@ -95,6 +138,7 @@ export default function ChannelAuditButton({ slug, name }: { slug: string; name:
       {error && <div role="alert" className="p-8"><p>{error}</p><button className="underline mt-4" onClick={()=>setOpen(false)}>Close</button></div>}
       {audit && <div className="px-6 sm:px-8 py-6 space-y-7">
         <div className="flex flex-wrap gap-2 items-center">
+          <button disabled={!ready} onClick={()=>printThreePageAudit(audit!)} className="disabled:opacity-40 bg-ink text-white rounded px-4 py-2 text-xs font-bold">Print / save 3-page PDF</button>
           <button disabled={!ready} onClick={()=>copy(true)} className="disabled:opacity-40 bg-ink text-white rounded px-4 py-2 text-xs font-bold">Copy quick intel</button>
           {ready && <details className="relative"><summary className="border border-line rounded px-4 py-2 text-xs font-bold cursor-pointer list-none">Export ▾</summary><div className="absolute left-0 top-full mt-2 z-20 bg-white border border-line rounded-lg shadow-lg p-1 min-w-[180px]">
             <button onClick={()=>png(true)} className="block w-full text-left px-3 py-2 text-xs hover:bg-black/5 rounded">Download intel PNG</button>
@@ -108,7 +152,7 @@ export default function ChannelAuditButton({ slug, name }: { slug: string; name:
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 border-b border-line pb-5">{[['Subscribers',audit.stats.subs],['Lifetime channel views',audit.stats.lifetimeViews],['Channel views · 30d',audit.stats.views30d],['Channel views · 7d',audit.stats.views7d]].map(([label,value])=><div key={String(label)}><div className="text-2xl font-black">{auditNumber(value as number|null)}</div><p className="text-[10px] text-muted mt-1">{label}</p></div>)}</div>
         <ChannelAuditIntel audit={audit}/>
         {audit.catalogue?.complete && (
-          <section className="rounded-xl border border-line bg-white p-5 sm:p-6" aria-label="Asset format performance">
+          <details className="rounded-xl border border-line bg-white p-5 sm:p-6" aria-label="Asset format performance"><summary className="text-sm font-bold cursor-pointer mb-2">Explore all formats · full inventory</summary>
             <div className="flex flex-wrap items-start justify-between gap-3">
               <div>
                 <div className="text-[10px] font-extrabold uppercase tracking-widest text-signal">Full asset audit</div>
@@ -138,7 +182,7 @@ export default function ChannelAuditButton({ slug, name }: { slug: string; name:
               ))}
             </div>
             <p className="mt-3 text-[11px] text-muted leading-relaxed">Formats are detected from upload metadata and may need review. Medians are lifetime views, not age-matched performance. A format with one upload is an example, not a proven pattern.</p>
-          </section>
+          </details>
         )}
 
         {audit.catalogue?.complete ? <details className="border-t border-line pt-4"><summary className="text-sm font-bold cursor-pointer">Full channel analysis · formats, cadence & markets</summary><div className="mt-5"><ChannelAuditVisuals audit={audit} onReview={()=>{if(reviewPanel.current){reviewPanel.current.open=true;reviewPanel.current.scrollIntoView({behavior:'smooth',block:'start'});}}}/></div></details> : <section className="border border-line rounded-lg p-6"><h3 className="font-black text-lg">Building the full-channel read</h3><p className="text-sm text-muted mt-2">Recent uploads alone can miss the videos that built this channel. Format verdicts and exports appear once the playlist scan finishes.</p><p role="status" className="text-xs font-semibold mt-3">{scanStatus||'Preparing catalogue scan…'}</p></section>}
