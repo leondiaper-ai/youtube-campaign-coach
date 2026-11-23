@@ -846,10 +846,10 @@ export default function ChannelHealthBoard({
       <div className="bg-surface border border-line rounded-card shadow-card mb-8">
         <div className="grid grid-cols-2 lg:grid-cols-4 divide-y lg:divide-y-0 divide-x-0 lg:divide-x divide-line">
           {([
-            ['GROWING', growingCount, 'Growing', CLASSIFICATION_STYLE.GROWING.fg, 'Strong cadence, positive momentum'],
-            ['WEAK_CONVERSION', weakConvCount, 'Weak conversion', CLASSIFICATION_STYLE.WEAK_CONVERSION.fg, 'Views outpacing subscriber conversion'],
-            ['UNDERFED', underfedCount, 'Underfed', CLASSIFICATION_STYLE.UNDERFED.fg, 'Upload activity limiting discovery'],
-            ['COLD', coldCount, 'Cold', CLASSIFICATION_STYLE.COLD.fg, 'Inactive or declining momentum'],
+            ['GROWING', growingCount, 'Active & growing', CLASSIFICATION_STYLE.GROWING.fg, 'Consistent uploads and positive momentum'],
+            ['WEAK_CONVERSION', weakConvCount, 'Views, fewer subscribers', CLASSIFICATION_STYLE.WEAK_CONVERSION.fg, 'Views growing faster than subscribers'],
+            ['UNDERFED', underfedCount, 'Needs more content', CLASSIFICATION_STYLE.UNDERFED.fg, 'Limited recent publishing'],
+            ['COLD', coldCount, 'Quiet', CLASSIFICATION_STYLE.COLD.fg, 'Little recent activity or momentum'],
           ] as const).map(([key, count, label, fg, hint]) => {
             const isOn = classFilter === key;
             /* A figure of zero is not a filter worth offering — it would
@@ -902,8 +902,9 @@ export default function ChannelHealthBoard({
         {mfRows.length > 0 && (
           <div className="flex flex-wrap items-center gap-x-5 gap-y-1 px-5 py-3 border-t border-line bg-raised/50 rounded-b-card">
             <span className="text-[11px] font-bold uppercase tracking-label text-muted">
-              Multiformat
+              Video formats
             </span>
+            <span className="text-[11px] text-muted">Different upload types used across each channel</span>
             {([
               ['strong',  mfStrong,  '#0C6A3F', 'Channels using 3+ YouTube formats (Shorts, Official Video, Lyric Video, Visualizer, BTS, Live Session)'],
               ['partial', mfPartial, '#7A5A00', 'Channels using 2 formats'],
@@ -930,7 +931,7 @@ export default function ChannelHealthBoard({
                       : 'hover:bg-surface cursor-pointer'
                   } ${isOn ? 'bg-surface ring-1 ring-line-strong' : ''}`}
                 >
-                  <span className="font-black tabular-nums" style={{ color: colour }}>{count}</span> {band}
+                  <span className="font-black tabular-nums" style={{ color: colour }}>{count}</span> {band === 'strong' ? '3+ formats' : band === 'partial' ? '2 formats' : '0–1 formats'}
                 </button>
               );
             })}
