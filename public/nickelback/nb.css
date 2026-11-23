@@ -342,6 +342,15 @@ h3{font-weight:600}
 
 /* 8-week rollout */
 .wks.w8{grid-template-columns:repeat(8,minmax(0,1fr))}
+.wks.ideas{grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}
+.ideas .wk{padding:16px}
+.ideas .wk h3{font-size:clamp(21px,2vw,29px);margin-top:14px}
+.ideas .wk-f{font-size:13px;line-height:1.4;margin-top:6px;color:rgba(244,233,214,.8)}
+.ideas .wk dl{font-size:13px;line-height:1.45}
+.ideas .wk dt{margin-top:12px;font-size:9px}
+.ideas .wk-h{font-size:10px}
+@media(max-width:950px){.wks.ideas{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:560px){.wks.ideas{grid-template-columns:1fr}}
 .wk-s{display:inline-block;margin-top:8px;font:600 9px/1 var(--body);text-transform:uppercase;letter-spacing:.06em;padding:4px 6px;border-radius:2px}
 .wk-s-r{background:var(--amber);color:var(--night)}.wk-s-p{background:var(--red);color:#fff4ea}.wk-s-h{border:1px dashed rgba(246,236,223,.55);color:var(--cream)}
 .w8 .wk h3{font-size:clamp(16px,1.35vw,21px)}

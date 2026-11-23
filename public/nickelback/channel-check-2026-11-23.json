@@ -1,0 +1,59 @@
+{
+  "purpose": "Follow-up channel check; main deck metrics remain the 20 Nov 14:10Z snapshot.",
+  "fetchedAt": "2026-11-23T09:59:18.923Z",
+  "channelId": "UCz8FPpkJMwayyReSDLTX8IQ",
+  "videos": [
+    {
+      "id": "RbyrCHo4Njs",
+      "title": "From one lost soul to another, the Simple Song\" lyric video is out NOW on YouTube.",
+      "publishedAt": "2026-11-20T17:17:54Z",
+      "durationSec": 27,
+      "isShort": true,
+      "views": 5308,
+      "likes": 380,
+      "comments": 30,
+      "wasLive": false,
+      "scheduledStart": null,
+      "actualStart": null
+    },
+    {
+      "id": "nRPQ_GzLeHY",
+      "title": "Nickelback - Simple Song (Official Lyric Video)",
+      "publishedAt": "2026-11-20T17:00:03Z",
+      "durationSec": 256,
+      "isShort": false,
+      "views": 48600,
+      "likes": 1685,
+      "comments": 80,
+      "wasLive": false,
+      "scheduledStart": null,
+      "actualStart": null
+    },
+    {
+      "id": "PhlbZFdlHC0",
+      "title": "Nickelback - Bones For The Crows (Official Lyric Video)",
+      "publishedAt": "2026-04-23T17:03:50Z",
+      "durationSec": 245,
+      "isShort": false,
+      "views": 910750,
+      "likes": 18291,
+      "comments": 744,
+      "wasLive": false,
+      "scheduledStart": null,
+      "actualStart": null
+    },
+    {
+      "id": "sGD3w3GI8_A",
+      "title": "Nickelback - Bones For The Crows (Official Visualizer)",
+      "publishedAt": "2026-03-20T04:01:00Z",
+      "durationSec": 245,
+      "isShort": false,
+      "views": 1815127,
+      "likes": 42652,
+      "comments": 2529,
+      "wasLive": false,
+      "scheduledStart": null,
+      "actualStart": null
+    }
+  ]
+}
