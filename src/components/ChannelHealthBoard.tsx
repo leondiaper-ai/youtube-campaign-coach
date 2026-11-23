@@ -1062,7 +1062,7 @@ export default function ChannelHealthBoard({
           <div>Artist</div>
           <div title="Subscriber trend over the last 30 days">30d trend</div>
           <div title="Based on recent uploads, views and subscriber movement, not overall channel health" className="whitespace-nowrap">Channel activity</div>
-          <div title="Multiformat strategy — Shorts, Official Video, Lyric Video, Visualizer, BTS, Live Session">Formats</div>
+          <div title="Types of video identified in available uploads; not a quality score">Content types</div>
           <div className="text-right" title="Total subscriber count">Subs</div>
           <div className="text-right" title="Subscribers gained in the last 7 days">Subs (7d)</div>
           <div className="text-right" title="Week-over-week change — compares this week vs last week">WoW</div>
@@ -1924,37 +1924,25 @@ function MultiformatCell({
     );
   }
 
-  const st = MF_SCORE_STYLE[multiformat.score] ?? MF_SCORE_STYLE.None;
-  const activeFormats = FORMAT_DOTS.filter((f) => (multiformat as Record<string, unknown>)[f.key]);
-  const tooltipParts = FORMAT_DOTS.map(
-    (f) => `${(multiformat as Record<string, unknown>)[f.key] ? '●' : '○'} ${f.label === 'S' ? 'Shorts' : f.label === 'V' ? 'Official Video' : f.label === 'L' ? 'Lyric Video' : f.label === 'Vz' ? 'Visualizer' : f.label === 'B' ? 'BTS' : 'Live Session'}`
-  );
-  const tooltip = `${multiformat.score} multiformat (${multiformat.formatCount}/6)\n${tooltipParts.join('\n')}`;
+  const labels: Record<string, string> = {
+    hasShorts: 'Shorts',
+    hasOfficialVideo: 'Official video',
+    hasLyricVideo: 'Lyric',
+    hasVisualizer: 'Visualiser',
+    hasBTS: 'Behind the scenes',
+    hasLiveSession: 'Live',
+  };
+  const active = FORMAT_DOTS
+    .filter((f) => (multiformat as Record<string, unknown>)[f.key])
+    .map((f) => labels[f.key] ?? f.label);
 
   return (
-    <div>
-      {/* Publishing mix — unchanged: the score chip and the coloured
-          per-format dots stay exactly as they were. */}
-      <div className="flex items-center gap-1.5" title={tooltip}>
-        <span
-          className="text-[8px] font-bold uppercase tracking-[0.06em] px-1.5 py-0.5 rounded whitespace-nowrap"
-          style={{ background: st.bg, color: st.fg }}
-        >
-          {multiformat.formatCount}/6
-        </span>
-        <div className="flex gap-0.5">
-          {activeFormats.map((f) => (
-            <span
-              key={f.key}
-              className="w-1.5 h-1.5 rounded-full"
-              style={{ background: f.color }}
-            />
-          ))}
-        </div>
-      </div>
-      {/* Viewing mix — what those formats actually earn. */}
-      {formatSplit && <ViewSplitLine split={formatSplit} />}
-    </div>
+    <span
+      className="text-[11px] leading-snug text-ink/75"
+      title={active.length ? `Detected upload types: ${active.join(', ')}. Not a quality score.` : 'No recognised upload types detected in the available data'}
+    >
+      {active.length ? active.join(' · ') : 'None identified'}
+    </span>
   );
 }
 
