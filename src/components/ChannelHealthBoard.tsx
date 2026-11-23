@@ -253,6 +253,7 @@ type Insight = {
   category: 'growth' | 'conversion' | 'catalogue' | 'momentum' | 'cadence' | 'formats';
   score: number;
   videoId?: string;
+  videoTitle?: string;
 };
 
 /** One editorial finding per artist. Related changes belong in the same story,
@@ -341,6 +342,7 @@ function computeInsights(rows: RowData[], topVideos: TopVideo[] = []): Insight[]
     insights.push({
       slug: video.artistSlug,
       videoId: video.videoId,
+      videoTitle: video.title,
       category: 'catalogue',
       text: `${video.artistName}: “${video.title}” gained ${fmtNum(video.velocity)} views in 7 days`,
       action: video.daysAgo > 30
@@ -1426,7 +1428,7 @@ export default function ChannelHealthBoard({
               return ins.slug ? (
                 <Link
                   key={i}
-                  href={`${linkPrefix}/${ins.slug}${linkSuffix}${ins.videoId ? `#weekly-video-${ins.videoId}` : '#channel-momentum'}`}
+                  href={`${linkPrefix}/${ins.slug}${linkSuffix}${ins.videoId ? `${ins.videoTitle ? `?weeklyTitle=${encodeURIComponent(ins.videoTitle)}` : ''}#weekly-video-${ins.videoId}` : '#channel-momentum'}`}
                   className={`${cls} transition-colors hover:bg-raised`}
                   style={{ color: ic.color, textDecoration: 'none' }}
                 >
