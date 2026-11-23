@@ -40,7 +40,7 @@ export default function WeeklyVideoFocus({ uploads }: { uploads: Video[] }) {
       {!focus.action && url && <p className="mt-1 text-ink/70">This video is attracting attention. Check its comments and links, then consider how to direct viewers to more music.</p>}
       {url && <div className="mt-3 flex flex-wrap gap-4 font-semibold">
         <a href={url} target="_blank" rel="noopener noreferrer" className="underline">Watch video ↗</a>
-        <a href={url + '&lc=0'} target="_blank" rel="noopener noreferrer" className="underline">View comments on YouTube ↗</a>
+        <a href={url} target="_blank" rel="noopener noreferrer" className="underline">View comments on YouTube ↗</a>
       </div>}
     </section>
   );
