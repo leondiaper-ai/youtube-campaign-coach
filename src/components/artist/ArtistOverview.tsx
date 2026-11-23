@@ -127,6 +127,11 @@ export default async function ArtistOverview({
     ? (FORMAT_PLURAL[perf.support[1].type] ?? perf.support[1].label).toLowerCase() : null;
   /* Free — commentCount is already on every cached upload. */
   const demand = commentDemand(uploads);
+  // Show the actual videos behind the comment signal, not a generic channel link.
+  const discussionVideos = uploads
+    .filter(u => u.id && typeof u.commentCount === 'number' && u.commentCount > 0)
+    .sort((a, b) => (b.commentCount ?? 0) - (a.commentCount ?? 0))
+    .slice(0, 3);
 
   const shorts = uploads.filter(u => classifyUploadFormat(u) === 'short');
   const longform = uploads.filter(u => classifyUploadFormat(u) !== 'short');
@@ -342,6 +347,19 @@ export default async function ArtistOverview({
             <div className="text-[12px] font-semibold mt-2.5 leading-snug" style={{ color: GAIN }}>
               Worth feeding — put something up, and reply to the people already talking.
             </div>
+            {discussionVideos.length > 0 && (
+              <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2 text-[12px]">
+                <span className="font-semibold text-ink/60">Videos with the most comments:</span>
+                {discussionVideos.map(u => (
+                  <a key={u.id} href={`https://www.youtube.com/watch?v=${encodeURIComponent(u.id)}`}
+                    target="_blank" rel="noopener noreferrer"
+                    className="font-semibold underline underline-offset-2"
+                    title={u.title}>
+                    {u.title.length > 48 ? `${u.title.slice(0, 45)}…` : u.title} · {fmtNum(u.commentCount ?? 0)} comments ↗
+                  </a>
+                ))}
+              </div>
+            )}
           </div>
         )}
 
