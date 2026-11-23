@@ -40,7 +40,7 @@ type CardData = {
 type AvailableArtist = { slug: string; name: string };
 
 const STATE_LABEL: Record<string, string> = {
-  HEALTHY: 'Hot',
+  HEALTHY: 'Active',
   BUILDING: 'Warm',
   'AT RISK': 'Cool',
   COLD: 'Cold',
