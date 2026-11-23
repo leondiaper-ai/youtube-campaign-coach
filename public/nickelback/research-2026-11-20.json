@@ -1300,5 +1300,20 @@
   ],
   "rolloutGain": 70000,
   "postAlbumGain": 10000
+ },
+ "rolloutChannelViews": {
+  "source": "https://youtube-campaign-coach.vercel.app/api/debug/snapshots?handle=%40nickelback",
+  "checked": "2026-11-23",
+  "snapshots": [
+   {
+    "date": "2026-07-14",
+    "views": 4398283473
+   },
+   {
+    "date": "2026-11-20",
+    "views": 4614638164
+   }
+  ],
+  "gain": 216354691
  }
 }
