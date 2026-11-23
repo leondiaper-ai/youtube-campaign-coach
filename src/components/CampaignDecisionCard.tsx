@@ -746,6 +746,15 @@ export function DecisionCard({
   const [snapshot, setSnapshot] = useState<string | null>(null);
 
   const gs = gsFor(card.boardStatus);
+  const activityTemperature = card.boardStatus === 'HEALTHY' ? 'Hot'
+    : card.boardStatus === 'BUILDING' || card.boardStatus === 'WEAK CONVERSION' ? 'Warm'
+    : card.boardStatus === 'AT RISK' ? 'Cool' : 'Cold';
+  const temperatureStyle = {
+    Hot: { bg: '#E6F8EE', fg: '#0C6A3F' },
+    Warm: { bg: '#FFF5D6', fg: '#7A5A00' },
+    Cool: { bg: '#E8F2FA', fg: '#477BA7' },
+    Cold: { bg: '#FFE2D8', fg: '#8A1F0C' },
+  }[activityTemperature];
   const read = getGrowthRead(card);
   const dStyle = DECISION_STYLE[read.decision];
   const spk = subsPerKViews(card);
@@ -851,9 +860,10 @@ export function DecisionCard({
         <div className="flex items-center gap-1.5 mt-1.5 flex-wrap">
           <span
             className="px-2 py-0.5 rounded text-[11px] font-bold uppercase tracking-label"
-            style={{ background: dStyle.bg, color: dStyle.fg }}
+            style={{ background: temperatureStyle.bg, color: temperatureStyle.fg }}
+            title="Channel activity, using the same classification as Watcher"
           >
-            {card.channelHealth}
+            {activityTemperature}
           </span>
           {card.campaignSignal !== 'NO_CAMPAIGN' && (
             <span
