@@ -642,8 +642,6 @@ export default function ChannelHealthBoard({
      So each card can open to its full list. */
   const [showAllLatent, setShowAllLatent] = useState(false);
   const [showAllInsights, setShowAllInsights] = useState(false);
-  const [videoPageLong, setVideoPageLong] = useState(1);
-  const [videoPageShort, setVideoPageShort] = useState(1);
   const [showAllStacks, setShowAllStacks] = useState(false);
   /* A 120-row table is a long scroll to reach anything underneath it.
      Twenty is roughly a screen and a half, which is enough to scan a
@@ -1432,22 +1430,20 @@ export default function ChannelHealthBoard({
                 <div>
                   <div className="text-[11px] font-bold uppercase tracking-eyebrow text-muted mb-2.5">Long-form</div>
                   <div className="space-y-2">
-                    {topLongform.slice((videoPageLong - 1) * 20, videoPageLong * 20).map((v, i) => (
-                      <VideoRow key={v.videoId} v={v} rank={(videoPageLong - 1) * 20 + i + 1} linkPrefix={linkPrefix} linkSuffix={linkSuffix} />
+                    {topLongform.slice(0, 5).map((v, i) => (
+                      <VideoRow key={v.videoId} v={v} rank={i + 1} linkPrefix={linkPrefix} linkSuffix={linkSuffix} />
                     ))}
                   </div>
-                  <VideoPager count={topLongform.length} page={videoPageLong} onPage={setVideoPageLong} />
                 </div>
               )}
               {topShorts.length > 0 && (
                 <div className={topLongform.length > 0 ? 'pt-5 border-t border-line' : undefined}>
                   <div className="text-[11px] font-bold uppercase tracking-eyebrow text-muted mb-2.5">Shorts</div>
                   <div className="space-y-2">
-                    {topShorts.slice((videoPageShort - 1) * 20, videoPageShort * 20).map((v, i) => (
+                    {topShorts.slice(0, 5).map((v, i) => (
                       <VideoRow key={v.videoId} v={v} rank={i + 1} linkPrefix={linkPrefix} linkSuffix={linkSuffix} />
                     ))}
                   </div>
-                  <VideoPager count={topShorts.length} page={videoPageShort} onPage={setVideoPageShort} />
                 </div>
               )}
             </div>
