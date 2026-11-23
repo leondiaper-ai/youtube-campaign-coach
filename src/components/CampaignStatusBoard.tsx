@@ -433,7 +433,7 @@ export default function CampaignStatusBoard({
           {/* ─── HOLD — No clear signal or inactive ─────────────────── */}
           {holdCards.length > 0 && (
             <div>
-              <DecisionSectionHeader decision="HOLD" subtitle="Planning, quiet channels or no clear signal yet" count={holdCards.length} />
+              <DecisionSectionHeader decision="HOLD" subtitle="Check recent activity and decide what to do next" count={holdCards.length} />
               <div className="space-y-4">
                 {holdCards.map((card) => (
                   <DecisionCard
