@@ -29,7 +29,7 @@ import { readCatalogue, catalogueAsUploads } from '@/lib/catalogueStore';
 import { commentDemand, ROSTER_COMMENTS_PER_1K } from '@/lib/commentDemand';
 import WeeklyVideoFocus from './WeeklyVideoFocus';
 import {
-  fmtNum, daysSince, STATUS_COLOR,
+  fmtNum, daysSince,
   type ChannelState, type RecentUpload, type Artist,
 } from '@/lib/artists';
 import { resolveRowFormatSplit } from '@/lib/formatSplit';
@@ -139,9 +139,6 @@ export default async function ArtistOverview({
 
   const lastUpDays = snap?.lastUploadAt ? daysSince(snap.lastUploadAt) : null;
 
-  /* STATUS_COLOR carries three values per state: a dot for the marker, a
-     darker fg that stays legible as text on paper, and a bg. Using the
-     dot colour for text would fail contrast on the lighter states. */
   // Match the shared Watcher table: these labels describe publishing activity, not overall channel health.
   const uploads30d = nc.cadence.uploads30d;
   const activityLabel = uploads30d >= 4 ? 'ACTIVE' : uploads30d >= 1 ? 'OCCASIONAL' : 'INACTIVE';
