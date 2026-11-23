@@ -966,11 +966,7 @@ export default function ChannelHealthBoard({
                   }}
                   title={hint}
                   aria-pressed={isOn}
-                  className={`text-micro text-secondary rounded px-1.5 py-0.5 -mx-1.5 transition-colors ${
-                    count === 0
-                      ? 'opacity-45 cursor-default'
-                      : 'hover:bg-surface cursor-pointer'
-                  } ${isOn ? 'bg-surface ring-1 ring-line-strong' : ''}`}
+                  className={`inline-flex items-center gap-1.5 rounded-lg border px-3 py-2 text-micro font-semibold shadow-sm transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 ${count === 0 ? 'opacity-45 cursor-not-allowed border-line bg-raised' : 'cursor-pointer border-line-strong bg-surface hover:border-ink hover:bg-raised hover:shadow-md active:scale-[0.98]'} ${isOn ? 'border-ink bg-raised ring-2 ring-ink/20 shadow-md' : ''}`}
                 >
                   <span className="font-black tabular-nums" style={{ color: colour }}>{count}</span> {band === 'strong' ? 'artists · 3+ types' : band === 'partial' ? 'artists · 2 types' : 'artists · 0–1 types'}
                 </button>
