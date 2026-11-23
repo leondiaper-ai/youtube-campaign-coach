@@ -106,7 +106,7 @@ const MUTED = '#E9E2D3';
 const INK = '#0E0E0E';
 
 const STATE_LABEL: Record<ChannelState, string> = {
-  HEALTHY: 'Hot',
+  HEALTHY: 'Active',
   'WEAK CONVERSION': 'Warm',
   BUILDING: 'Warm',
   'AT RISK': 'Cool',
