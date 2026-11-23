@@ -106,11 +106,11 @@ const MUTED = '#E9E2D3';
 const INK = '#0E0E0E';
 
 const STATE_LABEL: Record<ChannelState, string> = {
-  HEALTHY:           'Healthy',
+  HEALTHY:           'Active',
   'WEAK CONVERSION': 'Weak Conversion',
-  BUILDING:          'Building',
-  'AT RISK':         'At Risk',
-  COLD:              'Cold',
+  BUILDING:          'Developing',
+  'AT RISK':         'Slowing',
+  COLD:              'Quiet',
 };
 
 const STATUS_STYLE: Record<ChannelState, { bg: string; fg: string; dot: string; rowBg: string }> = {
@@ -134,11 +134,11 @@ const STATUS_RANK: Record<ChannelState, number> = {
 };
 
 const STATUS_HELP: Record<ChannelState, string> = {
-  HEALTHY:           'Strong cadence and positive momentum',
+  HEALTHY:           'Consistent recent uploads and positive activity signals; not an overall health assessment',
   'WEAK CONVERSION': 'Views are growing faster than subscriber conversion',
-  BUILDING:          'Upload activity present but momentum not yet compounding',
-  'AT RISK':         'Declining momentum or extended gaps between uploads',
-  COLD:              'Long periods of inactivity or declining momentum',
+  BUILDING:          'Some recent upload activity, but not yet meeting the stronger activity threshold',
+  'AT RISK':         'Lower recent momentum or longer gaps between uploads; review the underlying figures',
+  COLD:              'Little recent publishing activity or limited observable momentum',
 };
 
 const DATA_STATUS_BADGE: Record<string, { background: string; color: string }> = {
@@ -955,7 +955,7 @@ export default function ChannelHealthBoard({
                 This board helps teams quickly monitor YouTube channel health, upload activity, and campaign momentum. Use it to spot channels needing attention, monitor active campaigns, identify strong upload cadence, and track momentum week-to-week. For deeper audience analytics and traffic source analysis, use YouTube Studio.
               </p>
             )}
-            <p><strong style={{ color: INK }}>Status</strong> — Each channel gets a health status based on upload cadence, subscriber conversion, and recent activity. Healthy channels are sorted first.</p>
+            <p><strong style={{ color: INK }}>Channel activity</strong> — Based on recent uploads, views and subscriber movement. This is not an overall assessment of channel performance. More active channels are sorted first.</p>
             <p><strong style={{ color: INK }}>Deltas &amp; WoW</strong> — 7-day subscriber and view changes, plus week-on-week momentum. A "—" means data is still building or totals are updating; hover for context.</p>
             <p><strong style={{ color: INK }}>Data quality</strong> — Badges like "Building" or "Totals updating" indicate tracking maturity. When totals haven't changed between snapshots, deltas show "—" instead of misleading numbers. Accuracy improves as daily snapshots accumulate.</p>
           </div>
@@ -1027,7 +1027,7 @@ export default function ChannelHealthBoard({
         >
           <div>Artist</div>
           <div title="Subscriber trend over the last 30 days">30d trend</div>
-          <div title="Channel health based on cadence, conversion, and activity">Status</div>
+          <div title="Based on recent uploads, views and subscriber movement, not overall channel health">Channel activity</div>
           <div title="Multiformat strategy — Shorts, Official Video, Lyric Video, Visualizer, BTS, Live Session">Formats</div>
           <div className="text-right" title="Total subscriber count">Subs</div>
           <div className="text-right" title="Subscribers gained in the last 7 days">Subs (7d)</div>
