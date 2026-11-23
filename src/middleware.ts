@@ -20,9 +20,24 @@ async function sameSecret(a: string, b: string): Promise<boolean> {
   return diff === 0;
 }
 
+
+async function sessionToken(label: string, secret: string): Promise<string> {
+  const key = await crypto.subtle.importKey('raw', new TextEncoder().encode(secret), { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']);
+  const bytes = new Uint8Array(await crypto.subtle.sign('HMAC', key, new TextEncoder().encode(label)));
+  return label + '.' + Array.from(bytes, x => x.toString(16).padStart(2, '0')).join('');
+}
+
 export async function middleware(request: NextRequest) {
   const parts = request.nextUrl.pathname.split('/').filter(Boolean);
   const label = parts[1];
+  if (parts[0] === 'coach' && parts[1]?.includes('--label-')) {
+    const slugLabel = parts[1].split('--label-').at(-1) ?? '';
+    if (request.nextUrl.searchParams.get('market') !== 'label-' + slugLabel || !(slugLabel in LABEL_PASSWORDS)) return new NextResponse('Workspace mismatch', { status: 403 });
+    const secret = LABEL_PASSWORDS[slugLabel];
+    const cookie = request.cookies.get('label_workspace')?.value ?? '';
+    if (!secret || !await sameSecret(cookie, await sessionToken(slugLabel, secret))) return new NextResponse('Label session required', { status: 401 });
+    return NextResponse.next();
+  }
   if (!label || !(label in LABEL_PASSWORDS)) return NextResponse.next();
 
   const secret = LABEL_PASSWORDS[label];
@@ -39,6 +54,7 @@ export async function middleware(request: NextRequest) {
         if (username === label && await sameSecret(password, secret)) {
           const response = NextResponse.next();
           response.headers.set('Cache-Control', 'private, no-store');
+          response.cookies.set('label_workspace', await sessionToken(label, secret), { httpOnly: true, secure: request.nextUrl.protocol === 'https:', sameSite: 'lax', path: '/', maxAge: 28800 });
           return response;
         }
       }
@@ -56,5 +72,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/labels/:path*'],
+  matcher: ['/labels/:path*', '/coach/:path*'],
 };
