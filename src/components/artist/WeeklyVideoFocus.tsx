@@ -6,10 +6,12 @@ type Video = { id: string; title: string; commentCount?: number | null; viewCoun
 
 export default function WeeklyVideoFocus({ uploads }: { uploads: Video[] }) {
   const [selected, setSelected] = useState<string | null>(null);
+  const [linkedTitle, setLinkedTitle] = useState<string | null>(null);
   useEffect(() => {
     const sync = () => {
       const match = window.location.hash.match(/^#weekly-video-([A-Za-z0-9_-]{11})$/);
       setSelected(match?.[1] ?? null);
+      setLinkedTitle(new URLSearchParams(window.location.search).get('weeklyTitle'));
     };
     sync();
     window.addEventListener('hashchange', sync);
@@ -21,9 +23,9 @@ export default function WeeklyVideoFocus({ uploads }: { uploads: Video[] }) {
   return (
     <section id={`weekly-video-${selected}`} className="mt-5 rounded-xl border border-blue-200 bg-blue-50 p-4 text-sm text-ink">
       <div className="font-bold text-base">From What changed this week</div>
-      {video ? (
+      {(video || linkedTitle) ? (
         <>
-          <p className="mt-1 font-semibold">{video.title}</p>
+          <p className="mt-1 font-semibold">{video?.title || linkedTitle}</p>
           <p className="mt-1 text-ink/70">This video is attracting attention. Review its comments and existing links, then decide whether a playlist, end screen or related release would help viewers discover more.</p>
           <div className="mt-3 flex flex-wrap gap-4 font-semibold">
             <a href={url} target="_blank" rel="noopener noreferrer" className="underline">Watch video ↗</a>
