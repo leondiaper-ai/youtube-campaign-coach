@@ -158,6 +158,7 @@ export default async function ControlPage({
         commentDemand: snap?.recentUploads
           ? commentDemand(snap.recentUploads) ?? undefined
           : undefined,
+        recentUploadFresh: !!snap && !snap.error && Number.isFinite(Date.parse((snap as typeof snap & { cachedAt?: string }).cachedAt ?? '')) && Date.now() - Date.parse((snap as typeof snap & { cachedAt?: string }).cachedAt ?? '') <= 48 * 3600000,
         formatStack: snap?.recentUploads
           ? bestFormatStack(snap.recentUploads, a.name) ?? undefined
           : undefined,
