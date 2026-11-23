@@ -746,14 +746,13 @@ export function DecisionCard({
   const [snapshot, setSnapshot] = useState<string | null>(null);
 
   const gs = gsFor(card.boardStatus);
-  const activityTemperature = card.boardStatus === 'HEALTHY' ? 'Active'
-    : card.boardStatus === 'BUILDING' || card.boardStatus === 'WEAK CONVERSION' ? 'Warm'
-    : card.boardStatus === 'AT RISK' ? 'Cool' : 'Cold';
+  // Match the Watcher roster: publishing frequency, not an overall health score.
+  const activityTemperature = card.uploads30d >= 4 ? 'Active'
+    : card.uploads30d >= 1 ? 'Occasional' : 'Inactive';
   const temperatureStyle = {
     Active: { bg: '#E6F8EE', fg: '#0C6A3F' },
-    Warm: { bg: '#FFF5D6', fg: '#7A5A00' },
-    Cool: { bg: '#E8F2FA', fg: '#477BA7' },
-    Cold: { bg: '#FFE2D8', fg: '#8A1F0C' },
+    Occasional: { bg: '#FFF5D6', fg: '#7A5A00' },
+    Inactive: { bg: '#F0EFEC', fg: '#625E56' },
   }[activityTemperature];
   const read = getGrowthRead(card);
   const dStyle = DECISION_STYLE[read.decision];
@@ -1364,7 +1363,7 @@ export function DecisionSectionHeader({
         className="px-2.5 py-1 rounded-md text-[11px] font-black uppercase tracking-[0.12em]"
         style={{ background: dStyle.bg, color: dStyle.fg, border: `1px solid ${dStyle.border}` }}
       >
-        {decision === 'PUSH' ? 'Performing well' : decision === 'HOLD' ? 'Review' : decision}
+        {decision === 'PUSH' ? 'Build on this' : decision === 'HOLD' ? 'Review' : decision}
       </span>
       <span className="text-[12px] text-ink/40">{subtitle}</span>
       <span className="text-[10px] text-ink/20 tabular-nums">({count})</span>
