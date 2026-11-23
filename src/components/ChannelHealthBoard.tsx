@@ -623,7 +623,8 @@ export default function ChannelHealthBoard({
      So each card can open to its full list. */
   const [showAllLatent, setShowAllLatent] = useState(false);
   const [showAllInsights, setShowAllInsights] = useState(false);
-  const [videoLimit, setVideoLimit] = useState(5);
+  const [videoPageLong, setVideoPageLong] = useState(1);
+  const [videoPageShort, setVideoPageShort] = useState(1);
   const [showAllStacks, setShowAllStacks] = useState(false);
   /* A 120-row table is a long scroll to reach anything underneath it.
      Twenty is roughly a screen and a half, which is enough to scan a
@@ -1396,22 +1397,12 @@ export default function ChannelHealthBoard({
 
       {/* ─── MANAGED VIEW: Top Performing Videos (split) ──────────────── */}
       {view === 'managed' && topVideos && topVideos.length > 0 && (() => {
-        const topShorts = topVideos.filter((v) => v.isShort).slice(0, videoLimit);
-        const topLongform = topVideos.filter((v) => !v.isShort).slice(0, videoLimit);
+        const topShorts = topVideos.filter((v) => v.isShort);
+        const topLongform = topVideos.filter((v) => !v.isShort);
         if (topShorts.length === 0 && topLongform.length === 0) return null;
         return (
           <div className="mb-8">
             <SectionHead title="Top performing videos" meta="Most views gained in the last 7 days" />
-            <div className="flex flex-wrap items-center justify-between gap-3 mb-3">
-              <span className="text-micro text-muted">Ranked across this workspace's artists · measured 7-day gains</span>
-              <label className="flex items-center gap-2 text-micro text-muted">
-                Show per format
-                <select aria-label="Videos to show per format" value={videoLimit} onChange={e => setVideoLimit(Number(e.target.value))}
-                  className="rounded border border-line bg-surface px-2 py-1.5 text-ink">
-                  {[5, 10, 25, 50, 100].map(n => <option key={n} value={n}>{n}</option>)}
-                </select>
-              </label>
-            </div>
             {/* Stacked, not two columns. Side by side, a long-form row and a
                 Shorts row sat at the same height and read as one ranking of
                 ten — and with thumbnails the formats are different shapes,
@@ -1422,20 +1413,22 @@ export default function ChannelHealthBoard({
                 <div>
                   <div className="text-[11px] font-bold uppercase tracking-eyebrow text-muted mb-2.5">Long-form</div>
                   <div className="space-y-2">
-                    {topLongform.map((v, i) => (
-                      <VideoRow key={v.videoId} v={v} rank={i + 1} linkPrefix={linkPrefix} linkSuffix={linkSuffix} />
+                    {topLongform.slice((videoPageLong - 1) * 20, videoPageLong * 20).map((v, i) => (
+                      <VideoRow key={v.videoId} v={v} rank={(videoPageLong - 1) * 20 + i + 1} linkPrefix={linkPrefix} linkSuffix={linkSuffix} />
                     ))}
                   </div>
+                  <VideoPager count={topLongform.length} page={videoPageLong} onPage={setVideoPageLong} />
                 </div>
               )}
               {topShorts.length > 0 && (
                 <div className={topLongform.length > 0 ? 'pt-5 border-t border-line' : undefined}>
                   <div className="text-[11px] font-bold uppercase tracking-eyebrow text-muted mb-2.5">Shorts</div>
                   <div className="space-y-2">
-                    {topShorts.map((v, i) => (
+                    {topShorts.slice((videoPageShort - 1) * 20, videoPageShort * 20).map((v, i) => (
                       <VideoRow key={v.videoId} v={v} rank={i + 1} linkPrefix={linkPrefix} linkSuffix={linkSuffix} />
                     ))}
                   </div>
+                  <VideoPager count={topShorts.length} page={videoPageShort} onPage={setVideoPageShort} />
                 </div>
               )}
             </div>
@@ -2264,4 +2257,18 @@ function ChannelAvatar({ src, name, size = 30 }: { src?: string; name: string; s
       )}
     </span>
   );
+}
+
+function VideoPager({ count, page, onPage }: { count: number; page: number; onPage: (n: number) => void }) {
+  const total = Math.ceil(count / 20);
+  if (total <= 1) return null;
+  return <div className="mt-4 pt-3 border-t border-line flex flex-wrap items-center justify-between gap-3 text-micro">
+    <span className="text-muted">Showing <strong className="text-ink">{(page - 1) * 20 + 1}–{Math.min(page * 20, count)}</strong> of <strong className="text-ink">{count}</strong></span>
+    <div className="flex items-center gap-1">
+      <PagerButton disabled={page === 1} onClick={() => onPage(page - 1)}>← Previous</PagerButton>
+      {pageWindow(page, total).map((n, i) => n === null ? <span key={`gap-${i}`} className="px-1 text-faint">…</span> :
+        <button key={n} type="button" aria-current={n === page ? 'page' : undefined} onClick={() => onPage(n)} className={`min-w-[28px] px-1.5 py-1 rounded-control font-semibold tabular-nums ${n === page ? 'bg-ink text-paper' : 'text-secondary hover:text-ink hover:bg-line/60'}`}>{n}</button>)}
+      <PagerButton disabled={page === total} onClick={() => onPage(page + 1)}>Next →</PagerButton>
+    </div>
+  </div>;
 }
