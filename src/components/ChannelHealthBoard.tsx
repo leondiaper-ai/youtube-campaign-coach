@@ -261,7 +261,7 @@ type Insight = {
  * not as multiple rows competing for attention. A quiet channel with views
  * signals unexplained demand, not proven catalogue attribution. */
 function computeInsights(rows: RowData[], topVideos: TopVideo[] = []): Insight[] {
-  const insights: Insight[] = [];
+  const candidates: Insight[] = [];
   const reliable = rows.filter(r => r.slug);
   for (const r of reliable) {
     const views = r.views7Delta;
@@ -270,7 +270,7 @@ function computeInsights(rows: RowData[], topVideos: TopVideo[] = []): Insight[]
     const goodViews = goodMovement && views != null && views > 0 && r.viewDataFreshness !== 'stale';
     const reliableWoW = goodViews && r.confidence !== 'LOW' && r.viewsWoW != null;
     const add = (category: Insight['category'], text: string, action: string, score: number) => {
-      insights.push({ category, text: `${r.name}: ${text}`, action, slug: r.slug, score });
+      candidates.push({ category, text: `${r.name}: ${text}`, action, slug: r.slug, score });
     };
 
     // Release-level window: a known multiformat song with no identifiable
@@ -288,22 +288,22 @@ function computeInsights(rows: RowData[], topVideos: TopVideo[] = []): Insight[]
       add('formats', `“${stack.song}” is in its 7–14 day follow-up window, with no matching Shorts found`,
         `Support “${stack.song}” with a Short drawn from the existing ${stack.formats.join(' + ')} assets, and link viewers to the main release. Confirm title matching before publishing.`,
         90);
-    } else if (goodViews && views >= 50000 && r.uploads30d === 0) {
+    } if (goodViews && views >= 50000 && r.uploads30d === 0) {
       const growth = subs != null && subs > 0 ? ` and ${fmtDelta(subs)} subscribers` : '';
       add('catalogue', `${fmtDelta(views)} views${growth} in 7 days, no recent uploads`,
         'No recent uploads despite sustained audience activity. Where newer music is available, connect catalogue viewers through playlists, descriptions and eligible end screens.',
         70 + Math.log10(views + 1) * 5);
-    } else if (goodViews && views >= 5000 && subs != null && subs <= 0) {
+    } if (goodViews && views >= 5000 && subs != null && subs <= 0) {
       add('conversion', `${fmtNum(views)} weekly views, subscriber count flat`,
         'Give viewers a clear next watch: feature a relevant release in channel playlists and eligible video end screens.',
         62 + Math.log10(views + 1) * 4);
-    } else if (reliableWoW && r.viewsWoW! <= -30) {
+    } if (reliableWoW && r.viewsWoW! <= -30) {
       add('cadence', `views down ${fmtPct(r.viewsWoW!)} week on week`,
         r.uploads30d > 0
           ? 'Compare the latest uploads with the previous week and prioritise follow-up for the strongest current release.'
           : 'Check whether the publishing gap or an earlier release spike explains the decline before planning new content.',
         58 + Math.min(Math.abs(r.viewsWoW!), 100) / 8);
-    } else if (goodMovement && subs != null && subs >= 100) {
+    } if (goodMovement && subs != null && subs >= 100) {
       const viewsNote = goodViews && views >= 10000 ? ` alongside ${fmtNum(views)} views` : '';
       add('growth', `${fmtDelta(subs)} subscribers this week${viewsNote}`,
         r.uploads30d > 0
@@ -312,48 +312,58 @@ function computeInsights(rows: RowData[], topVideos: TopVideo[] = []): Insight[]
             : 'Keep the current release active with a relevant follow-up asset, using the formats already published on this channel.'
           : 'Subscriber growth without new uploads: review which existing videos are gaining views before deciding on follow-up content.',
         52 + Math.log10(subs + 1) * 5);
-    } else if (reliableWoW && r.viewsWoW! >= 35 && views! >= 10000) {
+    } if (reliableWoW && r.viewsWoW! >= 35 && views! >= 10000) {
       add('momentum', `views up ${fmtPct(r.viewsWoW!)} week on week (${fmtNum(views!)} this week)`,
         r.uploads30d > 0
           ? 'Check which recent uploads account for the rise and build on the format with the strongest evidence.'
           : 'The channel is growing without new uploads. Check which older videos are moving before recommending a release connection.',
         45 + Math.min(r.viewsWoW!, 300) / 15);
-    } else if (goodViews && views >= 10000 && r.uploads30d === 0) {
+    } if (goodViews && views >= 10000 && r.uploads30d === 0) {
       add('cadence', `${fmtNum(views)} weekly views despite no uploads in 30 days`,
         'Identify the videos behind current demand and consider a relevant follow-up if there is an active release.',
         40);
-    } else if (r.recentUploadFresh && stack && stackAge != null && stackAge >= 7 && stackAge <= 30 && stack.shorts === 0 && stack.formats.length >= 2) {
+    } if (r.recentUploadFresh && stack && stackAge != null && stackAge >= 7 && stackAge <= 30 && stack.shorts === 0 && stack.formats.length >= 2) {
       add('formats', `“${stack.song}” has ${stack.formats.length} release formats but no matching Shorts found`,
         `Review whether “${stack.song}” has a suitable Short and link it to the main release. Confirm the asset titles before publishing.`,
         38);
-    } else if (r.uploads30d >= 4 && r.shorts30d === 0 && goodViews && views >= 10000) {
+    } if (r.uploads30d >= 4 && r.shorts30d === 0 && goodViews && views >= 10000) {
       add('formats', `${r.uploads30d} uploads this month, no Shorts`,
         'Check whether a strong current long-form upload has a suitable short-form cut-down.',
         35);
     }
   }
-  // Video-level weekly observations remain valid even when channel-level
-  // movement snapshots are missing. Surface one strongest measured video per
-  // artist, without claiming it caused channel growth.
-  const existing = new Set(insights.map(i => i.slug));
+  // Supplement channel-level changes with independently measurable video activity.
+  // The supplied velocity is average views/day since upload, NOT a measured
+  // 7-day delta. Never describe it as views gained in the past week.
   const roster = new Set(rows.map(r => r.slug));
   for (const video of [...topVideos].sort((a, b) => b.velocity - a.velocity)) {
-    if (!roster.has(video.artistSlug) || existing.has(video.artistSlug)) continue;
-    if (!Number.isFinite(video.velocity) || video.velocity < 1500) continue;
-    insights.push({
+    if (!roster.has(video.artistSlug) || !Number.isFinite(video.velocity) || video.velocity < 500) continue;
+    candidates.push({
       slug: video.artistSlug,
       videoId: video.videoId,
       videoTitle: video.title,
-      category: 'catalogue',
-      text: `${video.artistName}: “${video.title}” gained ${fmtNum(video.velocity)} views in 7 days`,
+      category: video.daysAgo > 30 ? 'catalogue' : 'momentum',
+      text: `${video.artistName}: “${video.title}” averages ${fmtNum(video.velocity)} views/day since upload`,
       action: video.daysAgo > 30
-        ? 'An older video is still attracting viewers. Check whether its audience can be directed to a relevant current release through playlists or eligible end screens.'
-        : 'This video is attracting viewers now. Check whether a related Short, playlist or follow-up asset would help them discover more.',
-      score: 42 + Math.log10(video.velocity) * 3,
+        ? 'Existing catalogue demand is worth reviewing. Check relevant playlists and end screens before connecting it to a current release.'
+        : 'Review whether a related Short or follow-up asset could build on this video.',
+      score: 37 + Math.log10(video.velocity) * 3,
     });
-    existing.add(video.artistSlug);
   }
-  return insights.sort((a, b) => b.score - a.score || a.text.localeCompare(b.text));
+
+  // More than one finding can matter for an artist, but avoid turning a
+  // single channel into a wall of repetitive advice. Maximum two distinct
+  // categories per artist, with the highest-evidence stories first.
+  const perArtist = new Map<string, Set<Insight['category']>>();
+  const insights: Insight[] = [];
+  for (const item of candidates.sort((a, b) => b.score - a.score || a.text.localeCompare(b.text))) {
+    const seen = perArtist.get(item.slug) ?? new Set<Insight['category']>();
+    if (seen.size >= 2 || seen.has(item.category)) continue;
+    seen.add(item.category);
+    perArtist.set(item.slug, seen);
+    insights.push(item);
+  }
+  return insights;
 }
 
 // Colour indicates the kind of finding, not simply a positive or negative number.
@@ -1416,10 +1426,10 @@ export default function ChannelHealthBoard({
               const body = (
                 <>
                   <span className="w-1.5 h-1.5 rounded-full mt-[7px] shrink-0" style={{ background: ic.dot }} />
-                  <span className="min-w-0"><span className="block font-semibold">{ins.text}</span><span className="block text-micro mt-1 opacity-80">Worth a look: {ins.action}</span></span>
+                  <span className="min-w-0"><span className="block font-semibold">{ins.text}</span><span className="block text-micro mt-1 opacity-80">{ins.action}</span></span>
                 </>
               );
-              const cls = 'flex items-start gap-2.5 px-5 py-3 text-body leading-snug';
+              const cls = 'flex items-start gap-2.5 px-5 py-3 text-body leading-snug border-l-[3px]';
               /* A signal names an artist, and the next thing anybody does is
                  go and look at them. Only the ones WITH a subject become
                  links — the aggregate cadence row stays plain text rather
@@ -1429,12 +1439,12 @@ export default function ChannelHealthBoard({
                   key={i}
                   href={`${linkPrefix}/${ins.slug}${linkSuffix}${ins.videoId ? `${linkSuffix.includes('?') ? '&' : '?'}weeklyTitle=${encodeURIComponent(ins.videoTitle ?? '')}&weeklyAction=${encodeURIComponent(ins.action)}#weekly-video-${ins.videoId}` : `${linkSuffix.includes('?') ? '&' : '?'}weeklySignal=${encodeURIComponent(ins.text)}&weeklyAction=${encodeURIComponent(ins.action)}#channel-momentum`}`}
                   className={`${cls} transition-colors hover:bg-raised`}
-                  style={{ color: ic.color, textDecoration: 'none' }}
+                  style={{ color: ic.color, borderLeftColor: ic.dot, textDecoration: 'none' }}
                 >
                   {body}
                 </Link>
               ) : (
-                <div key={i} className={cls} style={{ color: ic.color }}>
+                <div key={i} className={cls} style={{ color: ic.color, borderLeftColor: ic.dot }}>
                   {body}
                 </div>
               );
