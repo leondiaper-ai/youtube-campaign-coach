@@ -108,6 +108,7 @@ export default async function ControlPage({
       const subsWoWResult = computeWoW(nc.subs7d, subs14Raw);
       const viewsWoWResult = computeWoW(nc.views7d, views14Raw);
       const subsWoW = subsWoWResult?.value ?? null;
+      const viewsWoW = viewsWoWResult?.value ?? null;
       // Directional fallback: use nearby *observed* channel totals when exact
       // weekly anchors are missing. Normalise by elapsed days so an 8-day
       // snapshot interval is not treated as a 7-day interval.
