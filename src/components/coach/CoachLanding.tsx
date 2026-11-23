@@ -19,6 +19,7 @@ import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { Badge, Card, Eyebrow, Kpi } from '@/components/ui';
 import { color } from '@/lib/design/tokens';
+import { getLabelWorkspace } from '@/lib/labels';
 import { compact, exact, shortDate, type LandingAction, type LandingModel, type ReleaseAsset, type UploadRef } from '@/lib/coach/landingModel';
 
 const TONE = {
@@ -197,9 +198,12 @@ const STATUS_MARK: Record<ReleaseAsset['status'], { icon: string; cls: string }>
   suggested: { icon: '○', cls: 'text-faint' },
 };
 
-export default function CoachLanding({ model, slug, classicHref, timelineEditor, readOnly = false }: { model: LandingModel; slug?: string; classicHref?: string; timelineEditor?: ReactNode; readOnly?: boolean }) {
+export default function CoachLanding({ model, slug, classicHref, timelineEditor, readOnly = false, market }: { model: LandingModel; slug?: string; classicHref?: string; timelineEditor?: ReactNode; readOnly?: boolean; market?: string }) {
   // The visual delivery map is the shared Coach experience, not an artist-only pilot.
   const visualPilot = false;
+  const labelWorkspace = getLabelWorkspace(market);
+  const watcherHref = labelWorkspace ? `/labels/${labelWorkspace.slug}` : readOnly ? "/youtube-uk" : "/growth";
+  const campaignsHref = labelWorkspace ? watcherHref : readOnly ? "/youtube-uk/coach" : "/coach";
   const uploads = [...model.assets.long, ...model.assets.shorts].filter(u => Number.isFinite(Date.parse(u.publishedAt))).sort((a,b) => Date.parse(a.publishedAt)-Date.parse(b.publishedAt));
   const last = uploads.at(-1);
   const first = uploads[0];
@@ -223,8 +227,8 @@ export default function CoachLanding({ model, slug, classicHref, timelineEditor,
     <div className="max-w-[1060px] mx-auto px-5 pb-16">
 
       <nav aria-label="Coach navigation" className="flex flex-wrap items-center gap-5 pt-5 pb-1 text-meta font-semibold">
-        <a href={readOnly ? "/youtube-uk" : "/growth"} className="text-secondary no-underline hover:text-electric hover:underline">← Back to Watcher</a>
-        <a href={readOnly ? "/youtube-uk/coach" : "/coach"} className="text-muted no-underline hover:text-electric hover:underline">All campaigns</a>
+        <a href={watcherHref} className="text-secondary no-underline hover:text-electric hover:underline">← Back to Watcher</a>
+        <a href={campaignsHref} className="text-muted no-underline hover:text-electric hover:underline">All campaigns</a>
       </nav>
 
       {/* 1 · header */}
