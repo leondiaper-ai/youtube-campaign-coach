@@ -129,10 +129,14 @@ const SPARK_COLOR: Record<ChannelState, { stroke: string; fill: string }> = {
   COLD:              { stroke: '#FF4A1C', fill: 'rgba(255,74,28,0.06)' },
 };
 
-const channelTemperature = (status: ChannelState): 'HOT' | 'WARM' | 'COOL' | 'COLD' =>
-  status === 'HEALTHY' ? 'HOT'
-    : status === 'BUILDING' || status === 'WEAK CONVERSION' ? 'WARM'
-    : status === 'AT RISK' ? 'COOL' : 'COLD';
+// Publishing frequency is separate from audience demand and channel health.
+const publishingActivity = (uploads30d: number): 'ACTIVE' | 'OCCASIONAL' | 'INACTIVE' =>
+  uploads30d >= 4 ? 'ACTIVE' : uploads30d >= 1 ? 'OCCASIONAL' : 'INACTIVE';
+const PUBLISHING_STYLE = {
+  ACTIVE: { bg: '#E6F8EE', fg: '#0C6A3F', dot: '#1FBE7A', rowBg: '#F8FDF9' },
+  OCCASIONAL: { bg: '#FFF5D6', fg: '#7A5A00', dot: '#F5C542', rowBg: '#FBF9F3' },
+  INACTIVE: { bg: '#F0EFEC', fg: '#625E56', dot: '#97938B', rowBg: '#FAF9F7' },
+};
 
 const STATUS_RANK: Record<ChannelState, number> = {
   COLD: 0, 'AT RISK': 1, 'WEAK CONVERSION': 2, BUILDING: 3, HEALTHY: 4,
@@ -634,7 +638,7 @@ export default function ChannelHealthBoard({
   /* Clicking a health figure filters the table to those channels. The
      count was already the answer to "how many" — this makes it the
      answer to "which", which is the next question every time. */
-  const [classFilter, setClassFilter] = useState<'HOT' | 'WARM' | 'COOL' | 'COLD' | null>(null);
+  const [classFilter, setClassFilter] = useState<'ACTIVE' | 'OCCASIONAL' | 'INACTIVE' | null>(null);
   const [quietDemandOnly, setQuietDemandOnly] = useState(false);
   /* The multiformat counts were a read-only footnote under four figures
      that are all filters. Same question gets asked of them — "which 22?" —
@@ -730,7 +734,7 @@ export default function ChannelHealthBoard({
   const activeRows = view === 'managed' ? managedRows : marketRows;
   const sorted = [...activeRows]
     .sort((a, b) => STATUS_RANK[b.status] - STATUS_RANK[a.status])
-    .filter((r) => (classFilter ? channelTemperature(r.status) === classFilter : true))
+    .filter((r) => (classFilter ? publishingActivity(r.uploads30d) === classFilter : true))
     .filter((r) => !quietDemandOnly || (r.uploads30d <= 2 && r.views7Delta != null && r.views7Delta >= 100000))
     .filter((r) => (mfFilter ? mfBand(r) === mfFilter : true));
   const filtered = search.trim()
@@ -747,10 +751,9 @@ export default function ChannelHealthBoard({
   const paged = filtered.slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE);
 
   // Classification counts
-  const growingCount = activeRows.filter((r) => channelTemperature(r.status) === 'HOT').length;
-  const weakConvCount = activeRows.filter((r) => channelTemperature(r.status) === 'WARM').length;
-  const underfedCount = activeRows.filter((r) => channelTemperature(r.status) === 'COOL').length;
-  const coldCount = activeRows.filter((r) => channelTemperature(r.status) === 'COLD').length;
+  const activeCount = activeRows.filter((r) => publishingActivity(r.uploads30d) === 'ACTIVE').length;
+  const occasionalCount = activeRows.filter((r) => publishingActivity(r.uploads30d) === 'OCCASIONAL').length;
+  const inactiveCount = activeRows.filter((r) => publishingActivity(r.uploads30d) === 'INACTIVE').length;
   const quietDemandCount = activeRows.filter((r) => r.uploads30d <= 2 && r.views7Delta != null && r.views7Delta >= 100000).length;
 
   // Multiformat strategy counts
@@ -854,12 +857,11 @@ export default function ChannelHealthBoard({
           product, and the definition is now visible rather than hidden in
           a title attribute nobody hovers. */}
       <div className="bg-surface border border-line rounded-card shadow-card mb-8">
-        <div className="grid grid-cols-2 lg:grid-cols-4 divide-y lg:divide-y-0 divide-x-0 lg:divide-x divide-line">
+        <div className="grid grid-cols-1 sm:grid-cols-3 divide-y sm:divide-y-0 divide-x-0 sm:divide-x divide-line">
           {([
-            ['HOT', growingCount, 'Hot', '#0C6A3F', 'Consistent recent uploads and positive activity'],
-            ['WARM', weakConvCount, 'Warm', '#946500', 'Some activity, with room to build'],
-            ['COOL', underfedCount, 'Cool', '#477BA7', 'Lower recent momentum or longer upload gaps'],
-            ['COLD', coldCount, 'Cold', '#A33121', 'Little recent activity or momentum'],
+            ['ACTIVE', activeCount, 'Active', '#0C6A3F', '4 or more uploads in the last 30 days'],
+            ['OCCASIONAL', occasionalCount, 'Occasional', '#946500', '1–3 uploads in the last 30 days'],
+            ['INACTIVE', inactiveCount, 'Inactive', '#625E56', 'No uploads in the last 30 days'],
           ] as const).map(([key, count, label, fg, hint]) => {
             const isOn = classFilter === key;
             /* A figure of zero is not a filter worth offering — it would
@@ -880,7 +882,7 @@ export default function ChannelHealthBoard({
                   setExpandedRow(null);
                   setPage(1);
                 }}
-                className={`text-left px-5 py-4 border-t border-line first:border-t-0 lg:border-t-0 transition-colors ${
+                className={`text-left px-5 py-4 border-t border-line first:border-t-0 sm:border-t-0 transition-colors ${
                   selectable ? 'cursor-pointer hover:bg-raised/70' : 'cursor-default'
                 } ${isOn ? 'bg-raised' : ''}`}
                 title={selectable ? (isOn ? 'Show all channels' : `Show only ${label.toLowerCase()} channels`) : undefined}
@@ -923,8 +925,8 @@ export default function ChannelHealthBoard({
           title="Channels with no more than 2 uploads in 30 days and at least 100,000 verified views gained in 7 days"
         >
           <span className="text-3xl font-black tabular-nums text-[#477BA7]">{quietDemandCount}</span>
-          <span className="text-xs font-bold uppercase tracking-label text-secondary">Quiet publishing, high views</span>
-          <span className="text-xs text-muted">≤2 uploads in 30 days · ≥100K views in 7 days</span>
+          <span className="text-xs font-bold uppercase tracking-label text-secondary">Audience still watching</span>
+          <span className="text-xs text-muted">Few uploads, but 100K+ views this week</span>
           <span className="ml-auto text-xs font-semibold text-[#477BA7]">{quietDemandOnly ? 'Show all' : 'View artists →'}</span>
         </button>
         {/* Multiformat belonged with the health read, not floating under it
@@ -1068,7 +1070,8 @@ export default function ChannelHealthBoard({
         </div>
 
         {paged.map((r, i) => {
-          const st = STATUS_STYLE[r.status];
+          const activity = publishingActivity(r.uploads30d);
+          const st = PUBLISHING_STYLE[activity];
           const sp = SPARK_COLOR[r.status];
           const subsTotal = r.subs != null ? fmtNum(r.subs) : '—';
           // fmtSubs7 now uses directional effective value (see fmtSubs7Label above)
@@ -1197,10 +1200,10 @@ export default function ChannelHealthBoard({
                   <span
                     className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[9px] font-black uppercase tracking-[0.1em] whitespace-nowrap"
                     style={{ background: st.bg, color: st.fg }}
-                    title={STATUS_HELP[r.status]}
+                    title={`${r.uploads30d} uploads in the last 30 days; publishing activity only`}
                   >
                     <span className="w-1.5 h-1.5 rounded-full" style={{ background: st.dot }} />
-                    {STATE_LABEL[r.status]}
+                    {activity.toLowerCase()}
                   </span>
                 </div>
                 <MultiformatCell multiformat={r.multiformat} formatSplit={r.formatSplit} />
