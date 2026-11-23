@@ -142,7 +142,14 @@ export default async function ArtistOverview({
   /* STATUS_COLOR carries three values per state: a dot for the marker, a
      darker fg that stays legible as text on paper, and a bg. Using the
      dot colour for text would fail contrast on the lighter states. */
-  const statusTheme = STATUS_COLOR[status] ?? { bg: RULE, fg: INK, dot: INK };
+  // Match the shared Watcher table: these labels describe publishing activity, not overall channel health.
+  const uploads30d = nc.cadence.uploads30d;
+  const activityLabel = uploads30d >= 4 ? 'ACTIVE' : uploads30d >= 1 ? 'OCCASIONAL' : 'INACTIVE';
+  const statusTheme = activityLabel === 'ACTIVE'
+    ? { fg: '#0C6A3F', dot: '#1FBE7A' }
+    : activityLabel === 'OCCASIONAL'
+      ? { fg: '#7A5A00', dot: '#F5C542' }
+      : { fg: '#625E56', dot: '#97938B' };
 
   return (
     <>
@@ -181,7 +188,7 @@ export default async function ArtistOverview({
         <div className="flex flex-wrap items-center gap-2.5 mt-4">
           <span className="inline-block w-2.5 h-2.5 rounded-full" style={{ background: statusTheme.dot }} />
           <span className="text-[13px] font-bold uppercase tracking-[0.1em]" style={{ color: statusTheme.fg }}>
-            {status}
+            {activityLabel}
           </span>
           {derived?.reason && (
             <span className="text-[13px] text-ink/50 max-w-[54ch]">— {derived.reason}</span>
