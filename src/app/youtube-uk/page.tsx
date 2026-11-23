@@ -17,7 +17,7 @@ import { TEAMS, TEAM_SLUGS } from '@/lib/teams';
 import { readAllLiveSnaps, readSyncMeta } from '@/lib/kvCache';
 import { listPinned } from '@/lib/campaignStore';
 import { readHistory } from '@/lib/snapshots';
-import { normalizeChannelData, rawDelta, computeWoW } from '@/lib/youtube/normalizeChannelData';
+import { normalizeChannelData, rawDelta, computeWoW, observedViewsWoW } from '@/lib/youtube/normalizeChannelData';
 import ChannelHealthBoard, { type RowData, type TopVideo, type MarketFormatStats } from '@/components/ChannelHealthBoard';
 import { computeMultiformat } from '@/lib/contentStructure';
 import { bestFormatStack } from '@/lib/formatStack';
@@ -140,7 +140,8 @@ export default async function ControlPage({
         subs7Delta: subs7Val,
         views7Delta: views7Val,
         subsWoW,
-        viewsWoW,
+        viewsWoW: viewsWoW ?? observedViewsWoW(history),
+        viewsWoWApprox: !viewsWoWResult?.reliable,
         uploads30d: nc.cadence.uploads30d,
         shorts30d: nc.cadence.shorts30d,
         status,
