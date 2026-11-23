@@ -1683,8 +1683,8 @@ export default function ChannelHealthBoard({
       {view === 'managed' && stacksShown.length > 0 && (
         <div className="mb-8">
           <SectionHead
-            title="Top multiformat strategy"
-            meta={`${formatStacks.length} release${formatStacks.length === 1 ? '' : 's'} · more than one format, last 120 days`}
+            title="Recent multiformat releases"
+            meta={`${formatStacks.length} release${formatStacks.length === 1 ? '' : 's'} · 2+ formats on one song · last 90 days`}
           />
           <div className="bg-surface border border-line rounded-card shadow-card overflow-hidden">
             <div className="divide-y divide-line-faint">
