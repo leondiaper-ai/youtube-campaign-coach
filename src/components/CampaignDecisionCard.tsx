@@ -818,14 +818,6 @@ export function DecisionCard({
               Partial
             </span>
           )}
-          {(
-            <span
-              className="px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-[0.1em]"
-              style={{ background: dStyle.bg, color: dStyle.fg, border: `1px solid ${dStyle.border}` }}
-            >
-              {read.decision === 'PUSH' ? 'Performing well' : read.decision === 'HOLD' ? 'Review' : read.decision}
-            </span>
-          )}
           {read.showConfidence && (
             <span className="text-[9px] font-bold uppercase tracking-[0.06em]" style={{ color: `${dStyle.fg}88` }}>
               {read.confidence}
@@ -853,29 +845,22 @@ export function DecisionCard({
             </button>
           </div>
         </div>
-        {/* Two states, as two chips. "CHANNEL: ACTIVE · CAMPAIGN: WEAK
-            CONVERSION" spent half its width on the words Channel and
-            Campaign — the chips say what they are. A campaign with no
-            signal prints nothing rather than the word None. */}
-        <div className="flex items-center gap-1.5 mt-1.5 flex-wrap">
+        {/* One channel status badge, with campaign findings expressed as context. */}
+        <div className="flex items-center gap-2 mt-1.5 flex-wrap">
           <span
             className="px-2 py-0.5 rounded text-[11px] font-bold uppercase tracking-label"
             style={{ background: temperatureStyle.bg, color: temperatureStyle.fg }}
-            title="Channel activity, using the same classification as Watcher"
+            title="Channel activity, matching the Watcher overview"
           >
             {activityTemperature}
           </span>
-          {card.campaignSignal !== 'NO_CAMPAIGN' && (
-            <span
-              className="px-2 py-0.5 rounded text-[11px] font-bold uppercase tracking-label"
-              style={{
-                background: CAMPAIGN_SIGNAL_STYLE[card.campaignSignal as CampaignSignal]?.bg ?? SOFT,
-                color: CAMPAIGN_SIGNAL_STYLE[card.campaignSignal as CampaignSignal]?.fg ?? INK,
-              }}
-            >
-              {card.campaignSignalLabel}
-            </span>
-          )}
+          <span className="text-[11px] text-ink/60">
+            {read.decision === 'PUSH' ? 'Keep building on what works'
+              : read.decision === 'HOLD' ? 'Review recent activity'
+              : 'Needs attention'}
+            {card.campaignSignal !== 'NO_CAMPAIGN' && card.campaignSignalLabel
+              ? ` · ${card.campaignSignalLabel.toLowerCase()}` : ''}
+          </span>
         </div>
       </div>
 
