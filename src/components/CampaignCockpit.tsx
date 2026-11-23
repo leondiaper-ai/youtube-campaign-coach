@@ -42,11 +42,11 @@ const LS_KEY = 'pih-campaign-coach-v4';
 // 4-STATE CARD SYSTEM — one state, one reason, one action. No ambiguity.
 // ─────────────────────────────────────────────────────────────────────────────
 const STATE_LABEL: Record<ChannelState, string> = {
-  'HEALTHY': 'Active',
-  'WEAK CONVERSION': 'Weak Conversion',
-  'BUILDING': 'Developing',
-  'AT RISK': 'Slowing',
-  'COLD': 'Quiet',
+  'HEALTHY': 'Hot',
+  'WEAK CONVERSION': 'Warm',
+  'BUILDING': 'Warm',
+  'AT RISK': 'Cool',
+  'COLD': 'Cold',
 };
 
 function fmtDate(iso: string) {
