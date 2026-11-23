@@ -9,6 +9,25 @@ import { resolveMarket, marketToday } from '@/lib/market';
 
 export const dynamic = 'force-dynamic';
 
+// Label-scoped writes must use the same signed session as label pages.
+// Internal market writes keep their existing access until internal SSO is added.
+async function labelWriteAllowed(req: NextRequest, market: string): Promise<boolean> {
+  const label = getLabelWorkspace(market);
+  if (!label) return true;
+  const envName = 'LABEL_PASSWORD_' + label.slug.toUpperCase();
+  const secret = process.env[envName];
+  if (!secret) return false;
+  const key = await crypto.subtle.importKey('raw', new TextEncoder().encode(secret), { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']);
+  const bytes = new Uint8Array(await crypto.subtle.sign('HMAC', key, new TextEncoder().encode(label.slug)));
+  const expected = label.slug + '.' + Array.from(bytes, x => x.toString(16).padStart(2, '0')).join('');
+  const actual = req.cookies.get('label_workspace')?.value ?? '';
+  const [a, b] = await Promise.all([actual, expected].map(async value =>
+    new Uint8Array(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(value)))));
+  let diff = 0;
+  for (let i = 0; i < a.length; i++) diff |= a[i] ^ b[i];
+  return diff === 0;
+}
+
 /**
  * Pins decide who appears on a market's Priority Campaigns page, so every
  * verb here is market-scoped. `?market=` or a `market` body field selects it;
@@ -40,6 +59,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Missing slug' }, { status: 400 });
   }
   const market = marketOf(req, body);
+  if (!await labelWriteAllowed(req, market)) return NextResponse.json({ error: 'Label session required' }, { status: 401 });
   const priority = body?.priority === 'high' ? 'high' : 'normal';
   const pinned = await pinCampaign(slug, priority, market);
 
@@ -98,6 +118,7 @@ export async function DELETE(req: NextRequest) {
   const slug = req.nextUrl.searchParams.get('slug');
   if (!slug) return NextResponse.json({ error: 'Missing slug' }, { status: 400 });
   const market = marketOf(req);
+  if (!await labelWriteAllowed(req, market)) return NextResponse.json({ error: 'Label session required' }, { status: 401 });
   const pinned = await unpinCampaign(slug, market);
   return NextResponse.json({ pinned });
 }
