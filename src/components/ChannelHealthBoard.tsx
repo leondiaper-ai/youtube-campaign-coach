@@ -61,6 +61,7 @@ export type RowData = {
   /** Multiformat strategy — which YouTube formats are active in the last 90d */
   /** Deepest set of formats built around one release. See formatStack.ts. */
   formatStack?: FormatStack;
+  recentUploadFresh?: boolean;
   /** How much the audience is talking. See commentDemand.ts. */
   commentDemand?: CommentDemand;
   /** Channel avatar from the cached snap. */
@@ -249,14 +250,12 @@ type Insight = {
  * signals unexplained demand, not proven catalogue attribution. */
 function computeInsights(rows: RowData[]): Insight[] {
   const insights: Insight[] = [];
-  const reliable = rows.filter(r =>
-    r.slug && r.movementConfidence !== 'stale' &&
-    r.dataStatus !== 'STALE' && r.dataStatus !== 'UNAVAILABLE'
-  );
+  const reliable = rows.filter(r => r.slug);
   for (const r of reliable) {
     const views = r.views7Delta;
     const subs = r.subs7Delta;
-    const goodViews = views != null && views > 0 && r.viewDataFreshness !== 'stale';
+    const goodMovement = r.movementConfidence !== 'stale' && r.dataStatus !== 'STALE' && r.dataStatus !== 'UNAVAILABLE';
+    const goodViews = goodMovement && views != null && views > 0 && r.viewDataFreshness !== 'stale';
     const reliableWoW = goodViews && r.confidence !== 'LOW' && r.viewsWoW != null;
     const add = (category: Insight['category'], text: string, action: string, score: number) => {
       insights.push({ category, text: `${r.name}: ${text}`, action, slug: r.slug, score });
@@ -270,7 +269,7 @@ function computeInsights(rows: RowData[]): Insight[] {
     const stackAge = stack ? (Date.now() - Date.parse(stack.firstAt)) / 86_400_000 : null;
     const timelyStack = stack && stackAge != null && Number.isFinite(stackAge)
       && stackAge >= 7 && stackAge <= 14 && stack.shorts === 0
-      && stack.formats.length >= 2 && goodViews && views >= 10000;
+      && stack.formats.length >= 2 && r.recentUploadFresh;
 
     // A single strongest story per channel, with its related facts folded in.
     if (timelyStack) {
@@ -292,7 +291,7 @@ function computeInsights(rows: RowData[]): Insight[] {
           ? 'Compare the latest uploads with the previous week and prioritise follow-up for the strongest current release.'
           : 'Check whether the publishing gap or an earlier release spike explains the decline before planning new content.',
         58 + Math.min(Math.abs(r.viewsWoW!), 100) / 8);
-    } else if (subs != null && subs >= 100) {
+    } else if (goodMovement && subs != null && subs >= 100) {
       const viewsNote = goodViews && views >= 10000 ? ` alongside ${fmtNum(views)} views` : '';
       add('growth', `${fmtDelta(subs)} subscribers this week${viewsNote}`,
         r.uploads30d > 0
@@ -311,6 +310,10 @@ function computeInsights(rows: RowData[]): Insight[] {
       add('cadence', `${fmtNum(views)} weekly views despite no uploads in 30 days`,
         'Identify the videos behind current demand and consider a relevant follow-up if there is an active release.',
         40);
+    } else if (r.recentUploadFresh && stack && stackAge != null && stackAge >= 7 && stackAge <= 30 && stack.shorts === 0 && stack.formats.length >= 2) {
+      add('formats', `“${stack.song}” has ${stack.formats.length} release formats but no matching Shorts found`,
+        `Review whether “${stack.song}” has a suitable Short and link it to the main release. Confirm the asset titles before publishing.`,
+        38);
     } else if (r.uploads30d >= 4 && r.shorts30d === 0 && goodViews && views >= 10000) {
       add('formats', `${r.uploads30d} uploads this month, no Shorts`,
         'Check whether a strong current long-form upload has a suitable short-form cut-down.',
