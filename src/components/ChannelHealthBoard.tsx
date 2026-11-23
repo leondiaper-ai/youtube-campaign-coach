@@ -1069,7 +1069,7 @@ export default function ChannelHealthBoard({
           <div>Artist</div>
           <div title="Subscriber trend over the last 30 days">30d trend</div>
           <div title="Based on recent uploads, views and subscriber movement, not overall channel health" className="whitespace-nowrap">Channel activity</div>
-          <div title="Types of video identified in available uploads; not a quality score">Content types</div>
+          <div title="Video types identified in uploads from the last 90 days; based on available data, not a quality score">Formats (90d)</div>
           <div className="text-right" title="Total subscriber count">Subs</div>
           <div className="text-right" title="Subscribers gained in the last 7 days">Subs (7d)</div>
           <div className="text-right" title="Week-over-week change — compares this week vs last week">WoW</div>
@@ -1951,7 +1951,7 @@ function MultiformatCell({
   return (
     <div
       className="flex flex-col gap-1.5"
-      title={active.length ? `Detected types: ${active.join(', ')}. This is not a score or a requirement to use every format.` : 'No recognised content types in the available uploads'}
+      title={active.length ? `Types detected in the last 90 days: ${active.join(', ')}. Not a quality score or a requirement to use every format.` : 'No recognised types detected in available uploads from the last 90 days'}
     >
       <div className="flex items-center gap-2">
         <span className="rounded-md bg-ink/[0.06] px-2 py-0.5 text-[10px] font-bold text-ink/75 whitespace-nowrap">
