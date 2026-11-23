@@ -23,8 +23,6 @@ export default async function LabelBehaviourPage({ params }: { params: { label: 
         <img src={label.logo} width={32} height={32} alt="" />
         <span className="text-[13px] font-black">{label.name}</span>
       </Link>
-      <span className="text-muted" aria-hidden>│</span>
-      <Link href={home} className="text-[11px] font-bold uppercase tracking-wide text-muted">← Channel Health</Link>
       <div className="ml-auto"><ChannelAuditButton slug={artist.slug} name={artist.name} /></div>
     </header>
     <div className="flex items-start">
