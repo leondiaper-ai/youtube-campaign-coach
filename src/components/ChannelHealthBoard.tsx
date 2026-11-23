@@ -1734,11 +1734,11 @@ export default function ChannelHealthBoard({
               board (Top multiformat strategy) an unqualified "Best in
               class" no longer says which class. The meta drops the
               repeat of the word now the title carries it. */}
-          <SectionHead title="Best in class cadence" meta="Last 30 days" />
+          <SectionHead title="Most uploads" meta="Last 30 days" />
           <div className="bg-surface border border-line rounded-card shadow-card overflow-hidden">
           <div className="divide-y divide-line-faint">
             {consistencyLeaders.map((c, i) => {
-              const st = STATUS_STYLE[c.status];
+              const st = PUBLISHING_STYLE[publishingActivity(c.uploads30d)];
               return (
                 <div key={c.slug} className="flex items-center gap-3 px-5 py-2.5 text-body">
                   <span className="text-faint text-micro font-bold tabular-nums w-4 shrink-0">{i + 1}.</span>
@@ -1753,7 +1753,7 @@ export default function ChannelHealthBoard({
                     className="px-1.5 py-0.5 rounded text-[11px] font-bold uppercase tracking-label shrink-0"
                     style={{ background: st.bg, color: st.fg }}
                   >
-                    {STATE_LABEL[c.status]}
+                    {publishingActivity(c.uploads30d).toLowerCase()}
                   </span>
                   <span className="text-micro shrink-0 ml-auto tabular-nums">
                     <span className="font-black text-ink">{c.uploads30d}</span>
@@ -1768,8 +1768,8 @@ export default function ChannelHealthBoard({
           </div>
           <div className="px-5 py-3 border-t border-line bg-raised/50 text-micro text-muted leading-snug">
             {view === 'managed'
-              ? 'Channels with the highest sustained upload cadence over the last 30 days.'
-              : 'Market artists leading on content consistency — benchmark for cadence targets.'}
+              ? 'Artists with the most uploads in the last 30 days.'
+              : 'Market artists with the most uploads in the last 30 days.'}
           </div>
           </div>
         </div>
