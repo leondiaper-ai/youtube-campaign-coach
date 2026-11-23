@@ -34,11 +34,11 @@ export async function buildMetadata(slug: string, teamSlug = 'nordics') {
 }
 
 const STATE_LABEL: Record<ChannelState, string> = {
-  HEALTHY: 'Active',
-  'WEAK CONVERSION': 'Weak Conversion',
-  BUILDING: 'Developing',
-  'AT RISK': 'Slowing',
-  COLD: 'Quiet',
+  HEALTHY: 'Hot',
+  'WEAK CONVERSION': 'Warm',
+  BUILDING: 'Warm',
+  'AT RISK': 'Cool',
+  COLD: 'Cold',
 };
 
 // ── Component ────────────────────────────────────────────────────────────────
