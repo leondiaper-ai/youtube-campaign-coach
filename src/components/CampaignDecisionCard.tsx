@@ -746,11 +746,11 @@ export function DecisionCard({
   const [snapshot, setSnapshot] = useState<string | null>(null);
 
   const gs = gsFor(card.boardStatus);
-  const activityTemperature = card.boardStatus === 'HEALTHY' ? 'Hot'
+  const activityTemperature = card.boardStatus === 'HEALTHY' ? 'Active'
     : card.boardStatus === 'BUILDING' || card.boardStatus === 'WEAK CONVERSION' ? 'Warm'
     : card.boardStatus === 'AT RISK' ? 'Cool' : 'Cold';
   const temperatureStyle = {
-    Hot: { bg: '#E6F8EE', fg: '#0C6A3F' },
+    Active: { bg: '#E6F8EE', fg: '#0C6A3F' },
     Warm: { bg: '#FFF5D6', fg: '#7A5A00' },
     Cool: { bg: '#E8F2FA', fg: '#477BA7' },
     Cold: { bg: '#FFE2D8', fg: '#8A1F0C' },
