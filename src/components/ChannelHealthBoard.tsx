@@ -248,7 +248,7 @@ type Insight = {
 /** One editorial finding per artist. Related changes belong in the same story,
  * not as multiple rows competing for attention. A quiet channel with views
  * signals unexplained demand, not proven catalogue attribution. */
-function computeInsights(rows: RowData[]): Insight[] {
+function computeInsights(rows: RowData[], topVideos: TopVideo[] = []): Insight[] {
   const insights: Insight[] = [];
   const reliable = rows.filter(r => r.slug);
   for (const r of reliable) {
@@ -319,6 +319,25 @@ function computeInsights(rows: RowData[]): Insight[] {
         'Check whether a strong current long-form upload has a suitable short-form cut-down.',
         35);
     }
+  }
+  // Video-level weekly observations remain valid even when channel-level
+  // movement snapshots are missing. Surface one strongest measured video per
+  // artist, without claiming it caused channel growth.
+  const existing = new Set(insights.map(i => i.slug));
+  const roster = new Set(rows.map(r => r.slug));
+  for (const video of [...topVideos].sort((a, b) => b.velocity - a.velocity)) {
+    if (!roster.has(video.artistSlug) || existing.has(video.artistSlug)) continue;
+    if (!Number.isFinite(video.velocity) || video.velocity < 5000) continue;
+    insights.push({
+      slug: video.artistSlug,
+      category: 'catalogue',
+      text: `${video.artistName}: “${video.title}” gained ${fmtNum(video.velocity)} views in 7 days`,
+      action: video.daysAgo > 30
+        ? 'An older video is still attracting viewers. Check whether its audience can be directed to a relevant current release through playlists or eligible end screens.'
+        : 'This video is attracting viewers now. Check whether a related Short, playlist or follow-up asset would help them discover more.',
+      score: 42 + Math.log10(video.velocity) * 3,
+    });
+    existing.add(video.artistSlug);
   }
   return insights.sort((a, b) => b.score - a.score || a.text.localeCompare(b.text));
 }
@@ -763,7 +782,7 @@ export default function ChannelHealthBoard({
   const mfWeak = mfRows.filter((r) => mfBand(r) === 'weak').length;
 
   // Insights & movers (managed view only)
-  const insights = view === 'managed' ? computeInsights(managedRows) : [];
+  const insights = view === 'managed' ? computeInsights(managedRows, topVideos ?? []) : [];
   const topMovers = view === 'managed' ? computeTopMovers(managedRows) : null;
 
   // Market benchmark read (market view)
