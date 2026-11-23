@@ -1281,14 +1281,14 @@ export default function ChannelHealthBoard({
                   )}
               </div>
 
-              {/* ── Expanded: Actions + Strategy Profile + Fix This Week ───────── */}
+              {/* ── Expanded: Actions ───────── */}
               {isExpanded && (
                 <div
                   className={`px-4 sm:px-5 py-4 ${i === paged.length - 1 ? '' : 'border-b'}`}
                   style={{ borderColor: MUTED, background: SOFT }}
                 >
                   {/* Action buttons row */}
-                  <div className="flex items-center gap-2 mb-3">
+                  <div className="flex flex-wrap items-center gap-2">
                     {(
                       <Link
                         href={behaviourBase.startsWith('/labels/') ? `${behaviourBase}/${r.slug}` : `${behaviourBase}${behaviourBase.includes('?') ? '&' : '?'}behaviour=${encodeURIComponent(r.slug)}`}
@@ -1318,60 +1318,7 @@ export default function ChannelHealthBoard({
                     )}
                   </div>
 
-                  <div className="flex flex-wrap items-center gap-4">
-                    {/* Strategy tags */}
-                    <div className="flex flex-wrap items-center gap-1.5">
-                      <ProfileTag label="Cadence" value={profile.cadence} />
-                      {/* "Upload mix", not "Format". computeProfile derives this
-                          from shorts30d / uploads30d — it counts what was
-                          PUBLISHED. Labelled "Format" next to a viewing split it
-                          reads as a statement about where views come from, which
-                          is a different metric that can point the other way: a
-                          Shorts-heavy publisher can still earn most of its
-                          viewing on long-form. */}
-                      <ProfileTag label="Upload mix" value={profile.formatMix} />
-                      <ProfileTag label="Conversion" value={profile.conversion} />
-                      <ProfileTag label="Momentum" value={profile.momentum} />
-                    </div>
 
-                    {/* Fix this week */}
-                    <div className="flex items-start gap-2 ml-auto text-[11px] leading-snug max-w-[360px]">
-                      <span className="text-[9px] font-black uppercase tracking-[0.12em] text-ink/30 shrink-0 mt-px">Fix</span>
-                      <span className="text-ink/60">{fix}</span>
-                    </div>
-                  </div>
-
-                  {/* ── VIEWING MIX — recent only ────────────────────────
-                      This strip answers "where is viewing coming from NOW".
-                      Lifetime totals and the coverage caveat used to sit
-                      here and have been removed: they are a different
-                      question, they were the longest thing in the strip,
-                      and a lifetime figure this close to the upload-mix
-                      badge invited averaging two unrelated measures into
-                      one impression. Lifetime now appears only in the
-                      expanded format analysis on the artist page and in
-                      Channel Behaviour, where there is room to qualify it.
-
-                      So there are exactly two states here: a real recent
-                      split, or a short line saying how far off one is. */}
-                  {r.formatSplit && (
-                    <div className="mt-3 pt-2 text-[10px] leading-relaxed text-ink/45" style={{ borderTop: '1px solid #EFE9DC' }}>
-                      {r.formatSplit.basis === 'recent' ? (
-                        <>
-                          <b className="text-ink/60">Viewing mix, last {r.formatSplit.windowDays} days:</b>{' '}
-                          {fmtNum(r.formatSplit.longformViews)} long-form · {fmtNum(r.formatSplit.shortsViews)} Shorts
-                          {' '}— view gains on videos we hold, matched across consecutive daily readings.
-                        </>
-                      ) : (
-                        <>
-                          <b className="text-ink/60">Viewing mix:</b>{' '}
-                          {r.formatSplit.collecting && r.formatSplit.collecting.total === 0
-                            ? 'not collecting yet — no daily readings stored for this channel.'
-                            : `collecting — ${r.formatSplit.collecting?.comparable ?? 0} of ${r.formatSplit.collecting?.required ?? 6} comparable daily readings.`}
-                        </>
-                      )}
-                    </div>
-                  )}
                 </div>
               )}
             </div>
