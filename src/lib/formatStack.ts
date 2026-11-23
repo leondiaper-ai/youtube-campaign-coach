@@ -128,7 +128,7 @@ function classifyUpload(u: RecentUpload): { format: StackFormat; tagged: boolean
 export function bestFormatStack(
   uploads: RecentUpload[],
   artistName: string,
-  windowDays = 120,
+  windowDays = 90,
 ): FormatStack | null {
   const cutoff = Date.now() - windowDays * 86_400_000;
   const recent = uploads.filter((u) => {
