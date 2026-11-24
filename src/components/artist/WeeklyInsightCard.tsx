@@ -26,16 +26,21 @@ export default function WeeklyInsightCard({artistName,fallbackInsight,assets=[],
  const normalize=(s:string)=>s.toLowerCase().replace(/[^a-z0-9]+/g,' ').trim();
  const quoted=finding.headline.match(/[“"]([^”"]+)[”"]/);
  const release=quoted?.[1];
- const matches=release ? assets.filter(v=>normalize(v.title).includes(normalize(release)) && v.format!=='short') : [];
+ const song=release ? normalize(release).replace(new RegExp('^'+normalize(artistName)+' '),'') : '';
+ const related=song.length>=3 ? assets.filter(v=>(' '+normalize(v.title)+' ').includes(' '+song+' ')) : [];
+ const matches=related.filter(v=>v.format!=='short');
+ const existingShorts=related.filter(v=>v.format==='short');
+ const formatHeadline=finding.category==='formats' && existingShorts.length ? 'Existing Shorts support identified for “'+release+'”' : finding.headline;
  const explicit=videoId && valid(videoId) ? [{id:videoId,title:finding.videoTitle || assets.find(v=>v.id===videoId)?.title || 'View video',detail:finding.videoDetail}] : [];
- const candidates=finding.category==='formats' ? [...explicit,...matches] : [...explicit,...movers];
+ const candidates=finding.category==='formats' ? [...explicit,...existingShorts,...matches] : [...explicit,...movers];
  const evidence=candidates.filter((v,i)=>valid(v.id)&&candidates.findIndex(x=>x.id===v.id)===i).slice(0,3);
  const leader=movers[0];
- const nextAction=finding.category==='formats' && matches.length ? 'Create a Short using the existing release footage or lyric assets below, and attach the main release as its related video.' : leader && ['growth','catalogue','momentum','conversion','cadence'].includes(finding.category) ? (finding.category==='conversion' ? 'Add a relevant next watch to “'+leader.title+'” through playlists or eligible end screens.' : 'Build on “'+leader.title+'” with '+(assets.find(v=>v.id===leader.id)?.format==='short' ? 'a follow-up Short linked to the relevant long-form release.' : 'a supporting Short using the same track or footage, linked to this video.')) : finding.action;
+ const nextAction=finding.category==='formats' && existingShorts.length ? 'Review the existing Shorts below and check their related-video links before planning any additional content.' : finding.category==='formats' && matches.length ? 'Check for existing Shorts using the track or sound. If none are suitable, create a Short from the existing release assets below and link it to the main release.' : leader && ['growth','catalogue','momentum','conversion','cadence'].includes(finding.category) ? (finding.category==='conversion' ? 'Add a relevant next watch to “'+leader.title+'” through playlists or eligible end screens.' : 'Build on “'+leader.title+'” with '+(assets.find(v=>v.id===leader.id)?.format==='short' ? 'a follow-up Short linked to the relevant long-form release.' : 'a supporting Short using the same track or footage, linked to this video.')) : finding.action;
  return <section className="mt-7 overflow-hidden rounded-xl border" style={{background:theme.color+'09',borderColor:theme.color+'30'}} aria-label={theme.label}>
  <div className="px-5 py-5 sm:px-6">
  <div className="text-[10px] font-extrabold uppercase tracking-[0.13em]" style={{color:theme.color}}>{theme.label}</div>
- <h3 className="mt-1.5 text-[19px] sm:text-[21px] font-extrabold tracking-tight text-ink">{finding.headline}</h3>
+ <h3 className="mt-1.5 text-[19px] sm:text-[21px] font-extrabold tracking-tight text-ink">{formatHeadline}</h3>
+ {finding.category==='formats' && related.length>0 && <p className="mt-1 text-[13px] text-ink/65">Already identified: {Array.from(new Set(related.map(v=>v.format || 'unclassified'))).join(' · ')}.</p>}
  {finding.context && <p className="mt-1 text-[13px] leading-relaxed text-ink/65">{finding.context}</p>}
  <div className="mt-4 rounded-md bg-white/60 px-3.5 py-3 border-l-[3px]" style={{borderLeftColor:theme.color}}>
  <span className="text-[10px] font-extrabold uppercase tracking-wide" style={{color:theme.color}}>Next step</span>
