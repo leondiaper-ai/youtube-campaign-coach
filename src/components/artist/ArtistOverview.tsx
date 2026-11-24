@@ -35,6 +35,8 @@ import { resolveRowFormatSplit } from '@/lib/formatSplit';
 import { readFormatDays } from '@/lib/formatHistory';
 import { classifyUploadFormat } from '@/lib/formatClassifier';
 import type { RankedGrid } from '@/lib/videoMomentum';
+import { Suspense } from 'react';
+import WeeklyInsightCard from './WeeklyInsightCard';
 import FormatBlock from './FormatBlock';
 import ArtistMarkets from './ArtistMarkets';
 import AudienceLine from './AudienceLine';
@@ -187,65 +189,7 @@ export default async function ArtistOverview({
         <AudienceLine slug={slug} />
       </header>
 
-      {/* Weekly intelligence: compact explanation on the destination artist page.
-          Only name a video when the grid has measured recent movement. */}
-      {(() => {
-        const reliable = nc.movementConfidence !== 'stale' && nc.movementConfidence !== 'limited';
-        const statusLine = (<div className="flex flex-wrap items-center gap-2.5">
-          <span className="inline-block w-2.5 h-2.5 rounded-full" style={{ background: statusTheme.dot }} />
-          <span className="text-[11px] font-bold uppercase tracking-[0.1em]" style={{ color: statusTheme.fg }}>
-            {activityLabel}
-          </span>
-          {<span className="text-[11px] text-ink/50">· {nc.cadence.uploads30d} {nc.cadence.uploads30d === 1 ? 'upload' : 'uploads'} in 30 days</span>}
-        </div>);
-        const fallback = () => {
-          if (fixSlot) return <section className="mt-5 rounded-xl border border-l-4 px-4 py-3" style={{ borderColor: RULE, borderLeftColor: '#FF4A1C' }}><div className="flex flex-wrap items-center justify-between gap-2 mb-2"><h2 className="text-[11px] font-bold uppercase tracking-wider" style={{ color: '#D94B29' }}>Fix now</h2>{statusLine}</div><div className="[&>article]:!border-0 [&>article]:!p-0 [&>div]:!border-0 [&>div]:!p-0">{fixSlot}</div></section>;
-          return <div className="mt-4">{statusLine}</div>;
-        };
-        if (!reliable) return fallback();
-        const noUploads = nc.cadence.uploads30d === 0;
-        const leader = [...topLongform.items, ...topShorts.items]
-          .filter(v => v.recentGain != null && v.recentGain > 0 && v.spanDays != null && v.spanDays >= 5 && v.spanDays <= 9)
-          .sort((a, b) => (b.recentGain ?? 0) - (a.recentGain ?? 0))[0];
-        const strongViews = views7 != null && views7 >= 10000;
-        const growth = subs7 != null && subs7 >= 100;
-        const quietDemand = noUploads && strongViews;
-        const flatSubs = strongViews && subs7 != null && subs7 <= 0;
-        const cadenceDrop = viewsWoW != null && viewsWoW <= -30;
-        const momentumRise = viewsWoW != null && viewsWoW >= 35 && strongViews;
-        if (!quietDemand && !growth && !flatSubs && !cadenceDrop && !momentumRise) return fallback();
-        const isCatalogue = quietDemand && leader && Date.now() - Date.parse(leader.publishedAt) > 365 * 86400000;
-        const newer = isCatalogue
-          ? uploads.filter(u => Date.parse(u.publishedAt) > Date.parse(leader.publishedAt) && Date.now() - Date.parse(u.publishedAt) < 365 * 86400000)
-          : [];
-        const leadText = leader ? <> <a href={`https://www.youtube.com/watch?v=${encodeURIComponent(leader.id)}`} target="_blank" rel="noopener noreferrer" className="text-blue-700 underline underline-offset-2 hover:text-blue-900">“{leader.title}”</a> added {fmtNum(leader.recentGain ?? 0)} views over {leader.spanDays} days.</> : null;
-        const headline = cadenceDrop ? 'Weekly views down ' + Math.round(Math.abs(viewsWoW!)) + '%' : momentumRise ? 'Weekly views up ' + Math.round(viewsWoW!) + '%' : quietDemand && growth ? 'Subscriber growth despite low activity' : quietDemand ? 'Audience active, channel quiet' : flatSubs ? 'Views growing, subscribers flat' : 'Build on subscriber growth';
-        const context = cadenceDrop || momentumRise ? `${fmtNum(views7 ?? 0)} views in seven days; ${uploads30d} uploads in 30 days.` : quietDemand
-          ? `${fmtNum(views7 ?? 0)} views${growth ? ` and +${fmtNum(subs7 ?? 0)} subscribers` : ""} in seven days with no uploads in 30 days.`
-          : flatSubs
-            ? `${fmtNum(views7 ?? 0)} views in seven days without subscriber growth.`
-            : `+${fmtNum(subs7 ?? 0)} subscribers in seven days.`;
-        const action = cadenceDrop ? 'Compare the latest uploads with the previous week and prioritise follow-up for the strongest current release.' : momentumRise ? 'Check which recent uploads account for the rise and build on the strongest format.' : isCatalogue && newer.length
-          ? 'Link the catalogue video to newer music through playlists or eligible end screens.'
-          : quietDemand
-            ? leader ? `Build a follow-up around “${leader.title}”, using a relevant Short or alternate format.` : 'Review which existing videos are gaining views before choosing a catalogue follow-up.'
-            : flatSubs
-              ? 'Give viewers a relevant next watch through playlists or eligible end screens.'
-              : leader ? `Follow up “${leader.title}” with a supporting Short or alternate format.` : 'Follow up the strongest recent upload with a supporting format.';
-        return (
-          <section className="mt-5 rounded-xl border border-l-4 px-4 py-3" style={{ borderColor: RULE, borderLeftColor: '#FF4A1C' }}>
-            <div className="flex flex-wrap items-center justify-between gap-2 mb-2">
-              <h2 className="text-[11px] font-black uppercase tracking-wider" style={{ color: '#D94B29' }}>Next action</h2>
-              {statusLine}
-            </div>
-            <article>
-              <div className="text-[14px] font-black leading-snug">{headline}</div>
-              <div className="text-[12px] text-ink/50 mt-1 leading-snug">{context}{leadText}</div>
-              <div className="mt-2 text-[13px] font-semibold text-ink/90 leading-snug">→ {action}</div>
-            </article>
-          </section>
-        );
-      })()}
+      <div className="mt-4 flex items-center gap-2 text-[11px]"><span className="font-bold uppercase tracking-wider" style={{color: statusTheme.fg}}>● {activityLabel}</span><span className="text-ink/50">· {uploads30d} {uploads30d === 1 ? "upload" : "uploads"} in 30 days</span></div>
 
       {/* ═══ NEXT ACTION — removed for now ══════════════════════
           The "Next action" / "Then" block used to sit here, printing
@@ -318,6 +262,40 @@ export default async function ArtistOverview({
             tell praise from a pile-on — that needs the text, which is
             what the per-artist comment scan is for. */}
         <div id="channel-momentum" />
+        <Suspense fallback={null}><WeeklyInsightCard artistName={artist.name} fallbackInsight={(() => {
+        const reliable = nc.movementConfidence !== 'stale' && nc.movementConfidence !== 'limited';
+        if (!reliable) return null;
+        const noUploads = nc.cadence.uploads30d === 0;
+        const leader = [...topLongform.items, ...topShorts.items]
+          .filter(v => v.recentGain != null && v.recentGain > 0 && v.spanDays != null && v.spanDays >= 5 && v.spanDays <= 9)
+          .sort((a, b) => (b.recentGain ?? 0) - (a.recentGain ?? 0))[0];
+        const strongViews = views7 != null && views7 >= 10000;
+        const growth = subs7 != null && subs7 >= 100;
+        const quietDemand = noUploads && strongViews;
+        const flatSubs = strongViews && subs7 != null && subs7 <= 0;
+        const cadenceDrop = viewsWoW != null && viewsWoW <= -30;
+        const momentumRise = viewsWoW != null && viewsWoW >= 35 && strongViews;
+        if (!quietDemand && !growth && !flatSubs && !cadenceDrop && !momentumRise) return null;
+        const isCatalogue = quietDemand && leader && Date.now() - Date.parse(leader.publishedAt) > 365 * 86400000;
+        const newer = isCatalogue
+          ? uploads.filter(u => Date.parse(u.publishedAt) > Date.parse(leader.publishedAt) && Date.now() - Date.parse(u.publishedAt) < 365 * 86400000)
+          : [];
+        const headline = cadenceDrop ? 'Weekly views down ' + Math.round(Math.abs(viewsWoW!)) + '%' : momentumRise ? 'Weekly views up ' + Math.round(viewsWoW!) + '%' : quietDemand && growth ? 'Subscriber growth despite low activity' : quietDemand ? 'Audience active, channel quiet' : flatSubs ? 'Views growing, subscribers flat' : 'Build on subscriber growth';
+        const context = cadenceDrop || momentumRise ? `${fmtNum(views7 ?? 0)} views in seven days; ${uploads30d} uploads in 30 days.` : quietDemand
+          ? `${fmtNum(views7 ?? 0)} views${growth ? ` and +${fmtNum(subs7 ?? 0)} subscribers` : ""} in seven days with no uploads in 30 days.`
+          : flatSubs
+            ? `${fmtNum(views7 ?? 0)} views in seven days without subscriber growth.`
+            : `+${fmtNum(subs7 ?? 0)} subscribers in seven days.`;
+        const action = cadenceDrop ? 'Compare the latest uploads with the previous week and prioritise follow-up for the strongest current release.' : momentumRise ? 'Check which recent uploads account for the rise and build on the strongest format.' : isCatalogue && newer.length
+          ? 'Link the catalogue video to newer music through playlists or eligible end screens.'
+          : quietDemand
+            ? leader ? `Build a follow-up around “${leader.title}”, using a relevant Short or alternate format.` : 'Review which existing videos are gaining views before choosing a catalogue follow-up.'
+            : flatSubs
+              ? 'Give viewers a relevant next watch through playlists or eligible end screens.'
+              : leader ? `Follow up “${leader.title}” with a supporting Short or alternate format.` : 'Follow up the strongest recent upload with a supporting format.';
+        const category = cadenceDrop ? 'cadence' : momentumRise ? 'momentum' : quietDemand ? 'catalogue' : flatSubs ? 'conversion' : 'growth';
+        return { category, headline, context, action, videoId: leader?.id, videoTitle: leader?.title, videoDetail: leader ? fmtNum(leader.recentGain ?? 0) + ' views in ' + leader.spanDays + ' days' : undefined };
+        })()} /></Suspense>
         {demand?.isLatent && (
           <section
             className="mt-7 overflow-hidden rounded-xl border"
