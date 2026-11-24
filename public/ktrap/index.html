@@ -58,6 +58,8 @@ body{background:var(--ink);color:var(--paper);
   padding:.5rem .9rem;border-radius:99px;border:1px solid var(--hair);
   background:transparent;color:var(--paper);cursor:pointer}
 .btn.on{background:var(--signal);border-color:var(--signal);color:#fff}
+.chrome-actions{display:flex;align-items:center;gap:.5rem}
+.chrome-actions .btn{white-space:nowrap}
 body.present .chrome{display:none}
 body.present{overflow:hidden}
 
@@ -294,6 +296,36 @@ body.present{overflow:hidden}
 .dec-a{font-size:.78rem;color:var(--smoke);margin-top:.35rem;line-height:1.5}
 .slide.light .dec-a{color:#5B5751}
 
+/* ── Asset appendix ────────────────────────────────────────────── */
+body:has(#asset-appendix[open]){overflow:hidden}
+#asset-appendix{width:min(900px,calc(100% - 2rem));max-height:calc(100dvh - 2rem);
+  padding:0;overscroll-behavior:contain;background:var(--coal);color:var(--paper);
+  border:1px solid var(--hair);border-radius:.75rem}
+#asset-appendix::backdrop{background:rgba(10,10,12,.82)}
+.appendix-toolbar{position:sticky;top:0;z-index:1;display:flex;justify-content:space-between;
+  align-items:center;gap:1rem;padding:.85rem clamp(1rem,4vw,2.5rem);
+  border-bottom:1px solid var(--hair);background:var(--coal)}
+.appendix-toolbar h2{font-size:1.4rem;line-height:1.1}
+.appendix-toolbar form{margin:0}
+.appendix-content{padding:1.25rem clamp(1rem,4vw,2.5rem) 2rem}
+.appendix-content h3{margin:1.65rem 0 .55rem;font-size:1.05rem}
+.appendix-content p,.appendix-content li{font-size:.875rem;line-height:1.55}
+.appendix-note,.asset-meta{color:#B4B1B7}
+.appendix-content a{color:var(--paper);text-underline-offset:.2em}
+.appendix-content a:hover,.appendix-content a:focus-visible{color:#FF8A75}
+.asset-table{width:100%;border-collapse:collapse;font-size:.875rem}
+.asset-table th,.asset-table td{text-align:left;padding:.6rem .65rem .6rem 0;
+  border-bottom:1px solid var(--hair);vertical-align:middle}
+.asset-table thead th{font-size:.75rem;color:#B4B1B7;font-weight:600}
+.asset-table th:last-child,.asset-table td:last-child{text-align:right;padding-right:0;white-space:nowrap;
+  font-variant-numeric:tabular-nums}
+.asset-table td:nth-child(2){white-space:nowrap}
+.asset-link{display:flex;align-items:center;gap:.75rem;font-weight:600}
+.asset-link img{width:76px;aspect-ratio:16/9;object-fit:cover;border-radius:4px;background:var(--ink)}
+.asset-meta{display:block;margin-top:.2rem;font-size:.75rem;font-weight:400}
+.asset-examples{margin:.6rem 0 0;padding-left:1.25rem}
+.asset-examples li+li{margin-top:.4rem}
+
 /* ── Reveal animation ──────────────────────────────────────────── */
 .reveal,.stagger>*{opacity:0;transform:translateY(14px);
   transition:opacity .6s cubic-bezier(.2,.7,.3,1),transform .6s cubic-bezier(.2,.7,.3,1)}
@@ -328,6 +360,9 @@ body.present .phint{display:block}
 @media(max-width:600px){
   .bleed img{height:64%}
   .bleed::after{background:linear-gradient(180deg,transparent 23%,rgba(10,10,12,.65) 44%,var(--ink) 63%)}
+  .chrome{padding:.7rem .85rem;gap:.65rem}
+  .chrome-t{letter-spacing:.09em}
+  .asset-link img{display:none}
 }
 </style>
 </head>
@@ -339,12 +374,21 @@ body.present .phint{display:block}
 
 <div class="chrome">
   <div class="chrome-t">K-Trap × YouTube · TRAPO 2 · Campaign case study</div>
-  <div style="display:flex;gap:.5rem">
+  <div class="chrome-actions">
+    <button class="btn" type="button" id="open-asset-appendix" aria-haspopup="dialog" aria-controls="asset-appendix">Asset appendix</button>
     <button class="btn on" onclick="startPresent()">Present</button>
   </div>
 </div>
 
 <div class="deck" id="deck"></div>
+
+<dialog id="asset-appendix" aria-labelledby="asset-appendix-title">
+  <header class="appendix-toolbar">
+    <h2 class="display" id="asset-appendix-title">Asset appendix</h2>
+    <form method="dialog"><button class="btn" autofocus>Close</button></form>
+  </header>
+  <div class="appendix-content" id="asset-appendix-content"></div>
+</dialog>
 
 <script>
 /* ═══════════════════════════════════════════════════════════════════
@@ -907,6 +951,45 @@ const slides = () => [
    RENDER
    ═══════════════════════════════════════════════════════════════════ */
 document.getElementById('deck').innerHTML = slides().join('');
+
+const assetViews = new Intl.NumberFormat('en-GB');
+const assetLink = ({ id, t, kind, prem }) => `
+  <a class="asset-link" href="https://www.youtube.com/watch?v=${id}" target="_blank" rel="noopener">
+    <img src="${thumb(id,'mqdefault')}" alt="" loading="lazy" width="76" height="43">
+    <span>${esc(t)}${kind ? `<small class="asset-meta">${esc(kind)}${prem ? ' · Premiere' : ''}</small>` : ''}</span>
+  </a>`;
+
+document.getElementById('asset-appendix-content').innerHTML = `
+  <p class="appendix-note">TRAPO 2 campaign · ${A.trapo.window} 2026. Lifetime views captured on 2 September 2026 using the YouTube Data API.</p>
+  <h3 id="trapo-assets-heading">TRAPO 2 long-form</h3>
+  <table class="asset-table" aria-labelledby="trapo-assets-heading">
+    <thead><tr><th scope="col">Video</th><th scope="col">Published</th><th scope="col">Views</th></tr></thead>
+    <tbody>${A.destinations.map(asset => `<tr><td>${assetLink(asset)}</td><td>${asset.d}</td><td>${assetViews.format(asset.v)}</td></tr>`).join('')}</tbody>
+  </table>
+  <h3>Trailer and Premium Afterparty</h3>
+  <ul class="asset-examples">
+    <li><a href="https://www.youtube.com/watch?v=PY4ZaQXtnms" target="_blank" rel="noopener">TRAPO 2 official album trailer</a></li>
+    <li><a href="https://www.youtube.com/watch?v=b5HcUBZ2TWU" target="_blank" rel="noopener">YouTube Premium Afterparty</a>
+      <span class="appendix-note"> · 6 Aug · Premium access, public views unavailable</span></li>
+  </ul>
+  <h3>Shorts from the rollout</h3>
+  <p class="appendix-note">${A.trapo.shorts} Shorts in the campaign window. Selected examples from K-Trap’s channel.</p>
+  <ul class="asset-examples">
+    <li><a href="https://www.youtube.com/shorts/FR13XGHHzIM" target="_blank" rel="noopener">Change · at YouTube</a></li>
+    <li><a href="https://www.youtube.com/shorts/unQIok3cohs" target="_blank" rel="noopener">Mystery Box · behind the scenes</a></li>
+    <li><a href="https://www.youtube.com/shorts/WjfT-PkOWho" target="_blank" rel="noopener">Pressure · release clip</a></li>
+    <li><a href="https://www.youtube.com/shorts/JvGeLSODTAo" target="_blank" rel="noopener">TRAPO 2 · ten-day countdown</a></li>
+    <li><a href="https://www.youtube.com/shorts/ycsEJ66NSsA" target="_blank" rel="noopener">On The Radar · album release reminder</a></li>
+    <li><a href="https://www.youtube.com/shorts/5VegxwhqNUI" target="_blank" rel="noopener">TRAPO 2 · store and tour presale</a></li>
+  </ul>
+  <h3 id="smile-assets-heading">SMILE? videos featured in the deck</h3>
+  <table class="asset-table" aria-labelledby="smile-assets-heading">
+    <thead><tr><th scope="col">Video</th><th scope="col">Views</th></tr></thead>
+    <tbody>${A.smileHeroes.map(asset => `<tr><td>${assetLink(asset)}</td><td>${assetViews.format(asset.v)}</td></tr>`).join('')}</tbody>
+  </table>`;
+
+const assetAppendix = document.getElementById('asset-appendix');
+document.getElementById('open-asset-appendix').addEventListener('click', () => assetAppendix.showModal());
 
 const io = new IntersectionObserver(es=>es.forEach(e=>{
   if(e.isIntersecting) e.target.classList.add('in');
