@@ -51,12 +51,12 @@ export function AppHeader({
   const withMarket = (href: string) => scopedMarket && ['/labels', '/teams', '/resources'].includes(href.split('?')[0]) && !href.includes('market=')
     ? `${href}${href.includes('?') ? '&' : '?'}market=${scopedMarket}` : href;
   const label = getLabelWorkspace(workspace);
-  const ownedNav = workspace === 'Virgin Music UK' || workspace === 'VMG · Owned network';
+  const ownedNav = workspace === 'VMG · Owned network';
   const resourcesIndex = nav.findIndex(item => item.href.split('?')[0] === '/resources');
   const ownedIndex = resourcesIndex < 0 ? nav.length : resourcesIndex;
   const baseItems = ownedNav && !nav.some(item => item.href.split('?')[0] === '/growth/owned')
     ? [...nav.slice(0, ownedIndex), { href: '/growth/owned', label: 'Owned Channels', match: '/growth/owned' }, ...nav.slice(ownedIndex)]
-    : nav;
+    : nav.filter(item => workspace !== 'Virgin Music UK' || item.href.split('?')[0] !== '/growth/owned');
   // Label workspaces stay within their own navigation. Main Watcher callers
   // control their own links; the shell must not inject a Labels directory.
   const items = label ? [
