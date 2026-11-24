@@ -212,15 +212,13 @@ export default async function ArtistOverview({
         const newer = isCatalogue
           ? uploads.filter(u => Date.parse(u.publishedAt) > Date.parse(leader.publishedAt) && Date.now() - Date.parse(u.publishedAt) < 365 * 86400000)
           : [];
-        const leadText = leader
-          ? `“${leader.title}” added ${fmtNum(leader.recentGain ?? 0)} views over ${leader.spanDays} days.`
-          : '';
+        const leadText = leader ? <> <a href={`https://www.youtube.com/watch?v=${encodeURIComponent(leader.id)}`} target="_blank" rel="noopener noreferrer" className="text-blue-700 underline underline-offset-2 hover:text-blue-900">“{leader.title}”</a> added {fmtNum(leader.recentGain ?? 0)} views over {leader.spanDays} days.</> : null;
         const headline = quietDemand ? 'Audience active, channel quiet' : flatSubs ? 'Views growing, subscribers flat' : 'Build on subscriber growth';
         const context = quietDemand
-          ? `${fmtNum(views7 ?? 0)} views added in seven days with no uploads in 30 days. ${leadText}`
+          ? `${fmtNum(views7 ?? 0)} views added in seven days with no uploads in 30 days.`
           : flatSubs
-            ? `${fmtNum(views7 ?? 0)} views in seven days without subscriber growth. ${leadText}`
-            : `+${fmtNum(subs7 ?? 0)} subscribers in seven days. ${leadText}`;
+            ? `${fmtNum(views7 ?? 0)} views in seven days without subscriber growth.`
+            : `+${fmtNum(subs7 ?? 0)} subscribers in seven days.`;
         const action = isCatalogue && newer.length
           ? 'Link the catalogue video to newer music through playlists or eligible end screens.'
           : quietDemand
@@ -236,7 +234,7 @@ export default async function ArtistOverview({
             </div>
             <article>
               <div className="text-[14px] font-black leading-snug">{headline}</div>
-              <div className="text-[12px] text-ink/50 mt-1 leading-snug">{context}</div>
+              <div className="text-[12px] text-ink/50 mt-1 leading-snug">{context}{leadText}</div>
               <div className="mt-2 text-[13px] font-semibold text-ink/90 leading-snug">→ {action}</div>
             </article>
           </section>
