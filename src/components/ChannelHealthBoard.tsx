@@ -704,7 +704,7 @@ export default function ChannelHealthBoard({
      filters precisely because the next question is always "which ones?".
      So each card can open to its full list. */
   const [latentPage, setLatentPage] = useState(1);
-  const [showAllInsights, setShowAllInsights] = useState(false);
+  const [insightsPage, setInsightsPage] = useState(1);
   const [videoPageLong, setVideoPageLong] = useState(1);
   const [videoPageShort, setVideoPageShort] = useState(1);
   const [stacksPage, setStacksPage] = useState(1);
@@ -838,6 +838,7 @@ export default function ChannelHealthBoard({
 
   // Insights & movers (managed view only)
   const insights = view === 'managed' ? computeInsights(managedRows, topVideos ?? []) : [];
+  const currentInsightsPage = Math.min(insightsPage, Math.max(1, Math.ceil(insights.length / 5)));
   const topMovers = view === 'managed' ? computeTopMovers(managedRows) : null;
 
   // Market benchmark read (market view)
@@ -1394,7 +1395,7 @@ export default function ChannelHealthBoard({
                 <div className="mt-1 text-micro">This is not a clean bill of health. Only meaningful changes backed by recent data appear here; channels without comparable snapshots cannot be assessed reliably.</div>
               </div>
             )}
-            {(showAllInsights ? insights : insights.slice(0, 6)).map((ins, i) => {
+            {insights.slice((currentInsightsPage - 1) * 5, currentInsightsPage * 5).map((ins, i) => {
               const ic = INSIGHT_ICON[ins.category];
               const body = (
                 <>
@@ -1423,12 +1424,7 @@ export default function ChannelHealthBoard({
                 </div>
               );
             })}
-            {insights.length > 6 && (
-              <button type="button" onClick={() => setShowAllInsights(!showAllInsights)}
-                className="w-full px-5 py-2.5 border-t border-line text-micro font-semibold text-secondary hover:text-ink hover:bg-raised transition-colors text-left">
-                {showAllInsights ? 'Show fewer' : `Show all ${insights.length} signals →`}
-              </button>
-            )}
+            <VideoPager count={insights.length} page={currentInsightsPage} onPage={setInsightsPage} pageSize={5} inset />
           </div>
         </div>
       )}
