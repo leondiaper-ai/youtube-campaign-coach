@@ -10,6 +10,7 @@
  */
 
 import type { RecentUpload } from './artists';
+import { classifyUploadFormat } from './formatClassifier';
 
 // ── Types ──────────────────────────────────────────────────────────────────
 
@@ -183,17 +184,13 @@ export function computeMultiformat(uploads: RecentUpload[]): MultiformatScore {
     (u) => new Date(u.publishedAt).getTime() >= cutoff
   );
 
-  const hasShorts = recent.some((u) => u.durationSec > 0 && u.durationSec <= 62);
-  const hasOfficialVideo = recent.some((u) =>
-    /\b(official\s*(music\s*)?video|official\s*vid)\b/i.test(u.title) ||
-    /\[\s*(music\s*video|official\s*video|official\s*music\s*video)\s*\]/i.test(u.title)
-  );
-  const hasLyricVideo = recent.some((u) => /\blyric\s*(video|vid)?\b/i.test(u.title));
-  const hasVisualizer = recent.some((u) => /\bvisualise?r\b/i.test(u.title));
-  const hasBTS = recent.some((u) => /\b(bts|behind\s*the\s*scenes|making\s*of)\b/i.test(u.title));
-  const hasLiveSession = recent.some((u) =>
-    /\b(live\s*session|acoustic|stripped\s*back|live\s*at|live\s*from)\b/i.test(u.title)
-  );
+  const types = new Set(recent.map(classifyUploadFormat));
+  const hasShorts = types.has('short');
+  const hasOfficialVideo = types.has('omv');
+  const hasLyricVideo = types.has('lyric');
+  const hasVisualizer = types.has('visualiser');
+  const hasBTS = types.has('bts');
+  const hasLiveSession = types.has('live') || types.has('acoustic');
 
   const formatCount = [hasShorts, hasOfficialVideo, hasLyricVideo, hasVisualizer, hasBTS, hasLiveSession]
     .filter(Boolean).length;
