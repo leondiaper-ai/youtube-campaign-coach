@@ -71,6 +71,7 @@ export interface ArtistOverviewProps {
   uploads: RecentUpload[];
   subs7: number | null;
   views7: number | null;
+  viewsWoW?: number | null;
   /** Watcher's own recommendation — not a second one invented here. */
   moves: {
     primary: { label: string; action: string };
@@ -99,7 +100,7 @@ export interface ArtistOverviewProps {
 }
 
 export default async function ArtistOverview({
-  slug, artist, snap, nc, derived, status, uploads, subs7, views7, moves: _moves, pinned: _pinned,
+  slug, artist, snap, nc, derived, status, uploads, subs7, views7, viewsWoW, moves: _moves, pinned: _pinned,
   topLongform, topShorts, launchSlot, fixSlot, workspaceName = 'Virgin Music Group',
 }: ArtistOverviewProps) {
   const days = snap?.channelId ? await readFormatDays(snap.channelId) : [];
@@ -210,19 +211,21 @@ export default async function ArtistOverview({
         const growth = subs7 != null && subs7 >= 100;
         const quietDemand = noUploads && strongViews;
         const flatSubs = strongViews && subs7 != null && subs7 <= 0;
-        if (!quietDemand && !growth && !flatSubs) return fallback();
+        const cadenceDrop = viewsWoW != null && viewsWoW <= -30;
+        const momentumRise = viewsWoW != null && viewsWoW >= 35 && strongViews;
+        if (!quietDemand && !growth && !flatSubs && !cadenceDrop && !momentumRise) return fallback();
         const isCatalogue = quietDemand && leader && Date.now() - Date.parse(leader.publishedAt) > 365 * 86400000;
         const newer = isCatalogue
           ? uploads.filter(u => Date.parse(u.publishedAt) > Date.parse(leader.publishedAt) && Date.now() - Date.parse(u.publishedAt) < 365 * 86400000)
           : [];
         const leadText = leader ? <> <a href={`https://www.youtube.com/watch?v=${encodeURIComponent(leader.id)}`} target="_blank" rel="noopener noreferrer" className="text-blue-700 underline underline-offset-2 hover:text-blue-900">“{leader.title}”</a> added {fmtNum(leader.recentGain ?? 0)} views over {leader.spanDays} days.</> : null;
-        const headline = quietDemand && growth ? 'Subscriber growth despite low activity' : quietDemand ? 'Audience active, channel quiet' : flatSubs ? 'Views growing, subscribers flat' : 'Build on subscriber growth';
-        const context = quietDemand
+        const headline = cadenceDrop ? 'Weekly views down ' + Math.round(Math.abs(viewsWoW!)) + '%' : momentumRise ? 'Weekly views up ' + Math.round(viewsWoW!) + '%' : quietDemand && growth ? 'Subscriber growth despite low activity' : quietDemand ? 'Audience active, channel quiet' : flatSubs ? 'Views growing, subscribers flat' : 'Build on subscriber growth';
+        const context = cadenceDrop || momentumRise ? `${fmtNum(views7 ?? 0)} views in seven days; ${uploads30d} uploads in 30 days.` : quietDemand
           ? `${fmtNum(views7 ?? 0)} views${growth ? ` and +${fmtNum(subs7 ?? 0)} subscribers` : ""} in seven days with no uploads in 30 days.`
           : flatSubs
             ? `${fmtNum(views7 ?? 0)} views in seven days without subscriber growth.`
             : `+${fmtNum(subs7 ?? 0)} subscribers in seven days.`;
-        const action = isCatalogue && newer.length
+        const action = cadenceDrop ? 'Compare the latest uploads with the previous week and prioritise follow-up for the strongest current release.' : momentumRise ? 'Check which recent uploads account for the rise and build on the strongest format.' : isCatalogue && newer.length
           ? 'Link the catalogue video to newer music through playlists or eligible end screens.'
           : quietDemand
             ? leader ? `Build a follow-up around “${leader.title}”, using a relevant Short or alternate format.` : 'Review which existing videos are gaining views before choosing a catalogue follow-up.'
