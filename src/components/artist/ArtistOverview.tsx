@@ -27,7 +27,6 @@
 import { formatPerformance, ROSTER_SUPPORT_BENCHMARK, FORMAT_LABEL, FORMAT_PLURAL, PROVISIONAL_AT } from '@/lib/formatPerformance';
 import { readCatalogue, catalogueAsUploads } from '@/lib/catalogueStore';
 import { commentDemand, ROSTER_COMMENTS_PER_1K } from '@/lib/commentDemand';
-import WeeklyVideoFocus from './WeeklyVideoFocus';
 import {
   fmtNum, daysSince,
   type ChannelState, type RecentUpload, type Artist,
@@ -183,26 +182,25 @@ export default async function ArtistOverview({
             </a>
           </div>;
         })()}
-        <div className="flex flex-wrap items-center gap-2.5 mt-4">
-          <span className="inline-block w-2.5 h-2.5 rounded-full" style={{ background: statusTheme.dot }} />
-          <span className="text-[13px] font-bold uppercase tracking-[0.1em]" style={{ color: statusTheme.fg }}>
-            {activityLabel}
-          </span>
-          {derived?.reason && (
-            <span className="text-[13px] text-ink/50 max-w-[54ch]">— {derived.reason}</span>
-          )}
-        </div>
-
         {/* ═══ 2. HOW PEOPLE ARE REACTING ════════════════════════ */}
         <AudienceLine slug={slug} />
       </header>
-      {fixSlot && <section className="mt-5"><h2 className="text-[11px] font-black uppercase tracking-wider mb-2" style={{ color: '#D94B29' }}>Fix now</h2>{fixSlot}</section>}
 
       {/* Weekly intelligence: compact explanation on the destination artist page.
           Only name a video when the grid has measured recent movement. */}
       {(() => {
         const reliable = nc.movementConfidence !== 'stale' && nc.movementConfidence !== 'limited';
-        if (!reliable) return null;
+        const statusLine = (<div className="flex flex-wrap items-center gap-2.5">
+          <span className="inline-block w-2.5 h-2.5 rounded-full" style={{ background: statusTheme.dot }} />
+          <span className="text-[13px] font-bold uppercase tracking-[0.1em]" style={{ color: statusTheme.fg }}>
+            {activityLabel}
+          </span>
+          {!fixSlot && derived?.reason && (
+            <span className="text-[13px] text-ink/50 max-w-[54ch]">— {derived.reason}</span>
+          )}
+        </div>);
+        if (fixSlot) return <section className="mt-5"><div className="flex flex-wrap items-center justify-between gap-2 mb-2"><h2 className="text-[11px] font-black uppercase tracking-wider" style={{ color: '#D94B29' }}>Fix now</h2>{statusLine}</div>{fixSlot}</section>;
+        if (!reliable) return <div className="mt-4">{statusLine}</div>;
         const noUploads = nc.cadence.uploads30d === 0;
         const leader = [...topLongform.items, ...topShorts.items]
           .filter(v => v.recentGain != null && v.recentGain > 0 && v.spanDays != null && v.spanDays >= 5 && v.spanDays <= 9)
@@ -211,7 +209,7 @@ export default async function ArtistOverview({
         const growth = subs7 != null && subs7 >= 100;
         const quietDemand = noUploads && strongViews;
         const flatSubs = strongViews && subs7 != null && subs7 <= 0;
-        if (!quietDemand && !growth && !flatSubs) return null;
+        if (!quietDemand && !growth && !flatSubs) return <div className="mt-4">{statusLine}</div>;
         const isCatalogue = quietDemand && leader && Date.now() - Date.parse(leader.publishedAt) > 365 * 86400000;
         const newer = isCatalogue
           ? uploads.filter(u => Date.parse(u.publishedAt) > Date.parse(leader.publishedAt) && Date.now() - Date.parse(u.publishedAt) < 365 * 86400000)
@@ -232,22 +230,18 @@ export default async function ArtistOverview({
             : flatSubs
               ? 'Connect the most-viewed content to the wider channel and a relevant next watch, where you have editing access.'
               : 'Keep the release active with a relevant follow-up. Use the strongest recent video and its existing supporting formats to choose the next asset.';
-        // Keep the artist explanation visually consistent with the weekly
-        // finding that led here: blue = quiet catalogue demand, amber = views
-        // without subscriber growth, green = subscriber growth.
-        const theme = quietDemand && (views7 ?? 0) >= 50000
-          ? { fg: '#315D9D', bg: 'rgba(72,127,202,0.07)', border: 'rgba(72,127,202,0.23)' }
-          : flatSubs
-            ? { fg: '#985319', bg: 'rgba(233,154,59,0.07)', border: 'rgba(233,154,59,0.24)' }
-            : growth
-              ? { fg: '#0C6A3F', bg: 'rgba(31,190,122,0.06)', border: 'rgba(31,190,122,0.22)' }
-              : { fg: '#985319', bg: 'rgba(233,154,59,0.07)', border: 'rgba(233,154,59,0.24)' };
         return (
-          <div className="mt-7 rounded-lg px-4 py-3" style={{ background: theme.bg, border: `1px solid ${theme.border}` }}>
-            <div className="text-[13px] font-bold" style={{ color: theme.fg }}>{headline}</div>
-            <div className="text-[12px] text-ink/65 mt-1 leading-relaxed">{context}</div>
-            <div className="text-[12px] font-semibold mt-2 leading-relaxed" style={{ color: theme.fg }}>Worth a look: {action}</div>
-          </div>
+          <section className="mt-5">
+            <div className="flex flex-wrap items-center justify-between gap-2 mb-2">
+              <h2 className="text-[11px] font-black uppercase tracking-wider" style={{ color: '#D94B29' }}>Next action</h2>
+              {statusLine}
+            </div>
+            <article className="rounded-xl border-l-4 border p-5" style={{ borderColor: RULE, borderLeftColor: '#FF4A1C' }}>
+              <div className="text-[14px] font-black leading-snug">{headline}</div>
+              <div className="text-[12px] text-ink/50 mt-1 leading-snug">{context}</div>
+              <div className="mt-3 text-[13px] font-black text-ink/90 leading-snug">→ {action}</div>
+            </article>
+          </section>
         );
       })()}
 
@@ -321,7 +315,7 @@ export default async function ArtistOverview({
             Says "talked about", never "positive". A comment count cannot
             tell praise from a pile-on — that needs the text, which is
             what the per-artist comment scan is for. */}
-        <div id="channel-momentum"><WeeklyVideoFocus uploads={uploads} /></div>
+        <div id="channel-momentum" />
         {demand?.isLatent && (
           <section
             className="mt-7 overflow-hidden rounded-xl border"
