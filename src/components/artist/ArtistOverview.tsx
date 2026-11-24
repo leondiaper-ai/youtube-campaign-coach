@@ -262,7 +262,7 @@ export default async function ArtistOverview({
             tell praise from a pile-on — that needs the text, which is
             what the per-artist comment scan is for. */}
         <div id="channel-momentum" />
-        <Suspense fallback={null}><WeeklyInsightCard artistName={artist.name} fallbackInsight={(() => {
+        <Suspense fallback={null}><WeeklyInsightCard artistName={artist.name} assets={uploads.map(u => ({id:u.id,title:u.title,format:classifyUploadFormat(u)}))} movers={[...topLongform.items, ...topShorts.items].filter(v => v.recentGain != null && v.recentGain > 0 && v.spanDays != null && v.spanDays >= 5 && v.spanDays <= 9).sort((a,b)=>(b.recentGain ?? 0)-(a.recentGain ?? 0)).slice(0,3).map(v=>({id:v.id,title:v.title,detail:fmtNum(v.recentGain ?? 0)+' views in '+v.spanDays+' days'}))} fallbackInsight={(() => {
         const reliable = nc.movementConfidence !== 'stale' && nc.movementConfidence !== 'limited';
         if (!reliable) return null;
         const noUploads = nc.cadence.uploads30d === 0;
