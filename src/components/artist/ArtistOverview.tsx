@@ -588,7 +588,7 @@ export default async function ArtistOverview({
           <VideoGrid
             items={topLongform.items}
             showGain={topLongform.basis === 'recent'}
-            emptyNote="No long-form videos in our cached inventory."
+            emptyNote={topLongform.basis === 'recent' ? 'No measured long-form view gains this week.' : 'No long-form videos in our cached inventory.'}
           />
         </div>
 
@@ -601,7 +601,7 @@ export default async function ArtistOverview({
             items={topShorts.items}
             showGain={topShorts.basis === 'recent'}
             format="short"
-            emptyNote="No Shorts in our cached inventory — none published, or none within the uploads we hold."
+            emptyNote={topShorts.basis === 'recent' ? 'No measured Shorts view gains this week.' : 'No Shorts in our cached inventory.'}
           />
         </div>
       </section>
