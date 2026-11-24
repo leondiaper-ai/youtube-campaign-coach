@@ -192,14 +192,12 @@ export default async function ArtistOverview({
         const reliable = nc.movementConfidence !== 'stale' && nc.movementConfidence !== 'limited';
         const statusLine = (<div className="flex flex-wrap items-center gap-2.5">
           <span className="inline-block w-2.5 h-2.5 rounded-full" style={{ background: statusTheme.dot }} />
-          <span className="text-[13px] font-bold uppercase tracking-[0.1em]" style={{ color: statusTheme.fg }}>
+          <span className="text-[11px] font-bold uppercase tracking-[0.1em]" style={{ color: statusTheme.fg }}>
             {activityLabel}
           </span>
-          {!fixSlot && derived?.reason && (
-            <span className="text-[13px] text-ink/50 max-w-[54ch]">— {derived.reason}</span>
-          )}
+          {!fixSlot && <span className="text-[11px] text-ink/50">· {nc.cadence.uploads30d} {nc.cadence.uploads30d === 1 ? 'upload' : 'uploads'} in 30 days</span>}
         </div>);
-        if (fixSlot) return <section className="mt-5"><div className="flex flex-wrap items-center justify-between gap-2 mb-2"><h2 className="text-[11px] font-black uppercase tracking-wider" style={{ color: '#D94B29' }}>Fix now</h2>{statusLine}</div>{fixSlot}</section>;
+        if (fixSlot) return <section className="mt-5 rounded-xl border border-l-4 px-4 py-3" style={{ borderColor: RULE, borderLeftColor: '#FF4A1C' }}><div className="flex flex-wrap items-center justify-between gap-2 mb-2"><h2 className="text-[11px] font-bold uppercase tracking-wider" style={{ color: '#D94B29' }}>Fix now</h2>{statusLine}</div><div className="[&>article]:!border-0 [&>article]:!p-0 [&>div]:!border-0 [&>div]:!p-0">{fixSlot}</div></section>;
         if (!reliable) return <div className="mt-4">{statusLine}</div>;
         const noUploads = nc.cadence.uploads30d === 0;
         const leader = [...topLongform.items, ...topShorts.items]
@@ -216,30 +214,30 @@ export default async function ArtistOverview({
           : [];
         const leadText = leader
           ? `“${leader.title}” added ${fmtNum(leader.recentGain ?? 0)} views over ${leader.spanDays} days.`
-          : 'We do not yet have enough comparable video history to identify the track responsible.';
-        const headline = quietDemand ? 'Audience active, channel quiet' : flatSubs ? 'Views growing, subscribers flat' : 'Subscriber growth picking up';
+          : '';
+        const headline = quietDemand ? 'Audience active, channel quiet' : flatSubs ? 'Views growing, subscribers flat' : 'Build on subscriber growth';
         const context = quietDemand
           ? `${fmtNum(views7 ?? 0)} views added in seven days with no uploads in 30 days. ${leadText}`
           : flatSubs
             ? `${fmtNum(views7 ?? 0)} views in seven days without subscriber growth. ${leadText}`
             : `+${fmtNum(subs7 ?? 0)} subscribers in seven days. ${leadText}`;
         const action = isCatalogue && newer.length
-          ? 'An older video is attracting attention while newer uploads exist. Where you control the video, connect viewers to the newer music through playlists, descriptions or end screens.'
+          ? 'Link the catalogue video to newer music through playlists or eligible end screens.'
           : quietDemand
-            ? 'Use the current viewing activity to plan a relevant follow-up. Check rights and ownership before changing catalogue video links.'
+            ? 'Plan a catalogue follow-up around the content attracting viewers.'
             : flatSubs
-              ? 'Connect the most-viewed content to the wider channel and a relevant next watch, where you have editing access.'
-              : 'Keep the release active with a relevant follow-up. Use the strongest recent video and its existing supporting formats to choose the next asset.';
+              ? 'Give viewers a relevant next watch through playlists or eligible end screens.'
+              : leader ? `Follow up “${leader.title}” with a supporting Short or alternate format.` : 'Follow up the strongest recent upload with a supporting format.';
         return (
-          <section className="mt-5">
+          <section className="mt-5 rounded-xl border border-l-4 px-4 py-3" style={{ borderColor: RULE, borderLeftColor: '#FF4A1C' }}>
             <div className="flex flex-wrap items-center justify-between gap-2 mb-2">
               <h2 className="text-[11px] font-black uppercase tracking-wider" style={{ color: '#D94B29' }}>Next action</h2>
               {statusLine}
             </div>
-            <article className="rounded-xl border-l-4 border p-5" style={{ borderColor: RULE, borderLeftColor: '#FF4A1C' }}>
+            <article>
               <div className="text-[14px] font-black leading-snug">{headline}</div>
               <div className="text-[12px] text-ink/50 mt-1 leading-snug">{context}</div>
-              <div className="mt-3 text-[13px] font-black text-ink/90 leading-snug">→ {action}</div>
+              <div className="mt-2 text-[13px] font-semibold text-ink/90 leading-snug">→ {action}</div>
             </article>
           </section>
         );
