@@ -815,28 +815,10 @@ export default function ChannelHealthBoard({
   const quietDemandCount = activeRows.filter((r) => r.uploads30d <= 2 && r.views7Delta != null && r.views7Delta >= 100000).length;
 
   // Multiformat strategy counts
-  /* ── ORDER: CAMPAIGNS FIRST ───────────────────────────────────────
-     A stack on a channel nobody is working is a nice pattern. A stack on
-     a campaign we are running right now is the thing to act on, and it
-     was being outranked by catalogue uploads that happened to carry two
-     formats. So a pinned campaign sorts above everything, and only then
-     by depth, then by most recently extended — a stack still being built
-     is the live example, an old one is history.
-
-     Pinned is the signal because it is the roster's own statement that a
-     campaign is being worked, it is already loaded for this board, and
-     it costs no extra call. It means TRACKED, not "uploaded recently" —
-     the chip says "in campaign" rather than "live" for that reason.
-
-     Capped at five: this is a card that says "here is the behaviour",
-     not a leaderboard of everyone who has ever done it. */
   const formatStacks = activeRows
-    .filter((r): r is RowData & { formatStack: FormatStack } => !!r.formatStack)
-    .map((row) => ({ row, stack: row.formatStack, inCampaign: pinnedSlugs.includes(row.slug) }))
-    .sort((a, b) =>
-      Number(b.inCampaign) - Number(a.inCampaign)
-      || b.stack.formats.length - a.stack.formats.length
-      || b.stack.latestAt.localeCompare(a.stack.latestAt));
+    .map(row => ({ row, formats: FORMAT_DOTS.filter(f => row.multiformat?.[f.key as keyof NonNullable<RowData['multiformat']>] === true), inCampaign: pinnedSlugs.includes(row.slug) }))
+    .filter(item => item.formats.length >= 2)
+    .sort((a, b) => b.formats.length - a.formats.length || Number(b.inCampaign) - Number(a.inCampaign) || a.row.name.localeCompare(b.row.name));
   const stacksShown = showAllStacks ? formatStacks : formatStacks.slice(0, 5);
 
   /* Quiet channels whose audience is still turning up. Ranked by how far
@@ -1644,12 +1626,12 @@ export default function ChannelHealthBoard({
       {view === 'managed' && stacksShown.length > 0 && (
         <div className="mb-8">
           <SectionHead
-            title="Recent multiformat releases"
-            meta={`${formatStacks.length} release${formatStacks.length === 1 ? '' : 's'} · 2+ formats on one song · last 90 days`}
+            title="Multiformat activity"
+            meta={`${formatStacks.length} artist${formatStacks.length === 1 ? '' : 's'} · 2+ format types · last 90 days`}
           />
           <div className="bg-surface border border-line rounded-card shadow-card overflow-hidden">
             <div className="divide-y divide-line-faint">
-              {stacksShown.map(({ row, stack, inCampaign }) => (
+              {stacksShown.map(({ row, formats, inCampaign }) => (
                 <Link
                   key={row.slug}
                   href={`${linkPrefix}/${row.slug}${linkSuffix}`}
@@ -1674,25 +1656,15 @@ export default function ChannelHealthBoard({
                         </span>
                       )}
                     </div>
-                    <div className="text-micro text-muted truncate">{stack.song}</div>
+                    <div className="text-micro text-muted truncate">{formats.length} format types in 90 days</div>
                   </div>
                   <div className="flex items-center gap-1.5 shrink-0">
-                    {stack.formats.map((f) => (
-                      <span
-                        key={f}
-                        className="text-[10px] font-bold uppercase tracking-label px-1.5 py-0.5 rounded bg-raised text-secondary"
-                      >
-                        {f}
+                    {formats.map(f => (
+                      <span key={f.key} className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-label px-1.5 py-0.5 rounded bg-raised text-secondary">
+                        <span className="h-2 w-2 rounded-full" style={{ backgroundColor: f.color }} />
+                        {f.label}
                       </span>
                     ))}
-                    {/* Shorts are support, not a destination — see
-                        formatStack.ts — so they are counted beside the
-                        stack rather than chipped into it. */}
-                    {stack.shorts > 0 && (
-                      <span className="text-micro text-faint tabular-nums ml-1">
-                        +{stack.shorts} Shorts
-                      </span>
-                    )}
                   </div>
                 </Link>
               ))}
@@ -1706,15 +1678,6 @@ export default function ChannelHealthBoard({
                 {showAllStacks ? 'Show fewer' : `Show all ${formatStacks.length} →`}
               </button>
             )}
-            {/* The one thing a reader cannot work out from the rows is why
-                this disagrees with the Multiformat figure above it. That
-                stays; the sort order is visible in the list itself. */}
-            <div
-              className="px-5 py-2.5 border-t border-line bg-raised/50 text-micro text-muted"
-              title="Tracked campaigns sort first, then by how deep the stack is. The Multiformat figure higher up counts formats across the whole channel, which is a different question — a channel can post four formats without ever building two around the same record."
-            >
-              Formats around one release — not the channel-wide figure above.
-            </div>
           </div>
         </div>
       )}
