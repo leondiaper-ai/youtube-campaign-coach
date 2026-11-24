@@ -1571,7 +1571,7 @@ function buildMissingReasons(
 }
 
 /** Compare adjacent observed intervals, normalised to daily rates. */
-export function observedViewsWoW(history: ChannelSnapshot[]): number | null {
+export function observedViewsWoW(history: ChannelSnapshot[], displayedViews7d?: number | null): number | null {
   const valid = history.filter(h => h.views != null && Number.isFinite(h.views) && Number.isFinite(Date.parse(h.ts)))
     .sort((a,b) => Date.parse(a.ts)-Date.parse(b.ts));
   const latest = valid[valid.length-1];
@@ -1586,8 +1586,11 @@ export function observedViewsWoW(history: ChannelSnapshot[]): number | null {
       if (b<3 || b>11) continue;
       const current = (latest.views!-mid.views!)/a;
       const previous = (mid.views!-old.views!)/b;
-      if (current<0 || previous<=0) continue;
-      const value = (current/previous-1)*100;
+      if (current<=0 || previous<=0) continue;
+      // Compare the displayed weekly movement to a non-overlapping observed baseline.
+      const rate = displayedViews7d === undefined ? current : (displayedViews7d ?? 0)/7;
+      if (rate <= 0 || Math.abs(rate-current)/Math.max(rate,current) > 0.25) continue;
+      const value = (rate/previous-1)*100;
       const score = Math.abs(a-7)+Math.abs(b-7);
       if (Number.isFinite(value) && (!best || score<best.score)) best={score,value};
     }
