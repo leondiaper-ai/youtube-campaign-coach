@@ -2,7 +2,6 @@
 import VideoCaptionActions from './VideoCaptionActions';
 import ChannelAuditVisuals from './ChannelAuditVisuals';
 import ChannelAuditIntel from './ChannelAuditIntel';
-import { auditIntelText } from '@/lib/channelAuditIntel';
 import { auditTitleSuggestion } from '@/lib/auditTitleSuggestion';
 import { useEffect, useRef, useState } from 'react';
 import { auditNumber, channelAuditText, auditNeedsCatalogue, type ChannelAudit, type AuditFinding } from '@/lib/channelAudit';
@@ -118,7 +117,19 @@ export default function ChannelAuditButton({ slug, name }: { slug: string; name:
   }
   async function copy(summary=false) {
     if (!audit) return;
-    const text = summary ? auditIntelText(audit.name,audit.intel) : channelAuditText(audit);
+    const i = audit.intel, a = i.activity;
+    const n = auditNumber;
+    const longViews = i.formats.filter(f=>f.key!=='short').reduce((sum,f)=>sum+f.views,0);
+    const concise = (s:string)=>s.replace(/ Links and end screens have not been inspected\./g,'').replace(/ Compare new uploads at the same age\./g,'');
+    const quick = [
+      audit.name+' | YouTube channel update',
+      ['Last 7 days',audit.stats.views7d!=null?'• '+n(audit.stats.views7d)+' channel views added':null,audit.stats.subs7d!=null?'• '+(audit.stats.subs7d>0?'+':'')+n(audit.stats.subs7d)+' subscribers':null].filter(Boolean).join('\n'),
+      ['Last 6 months ('+i.window.from+' to '+i.window.to+')','• '+a.uploads+' uploads, including '+a.shorts+' Shorts','• '+n(a.views)+' lifetime views on these uploads',a.views>0?'• Long-form accounts for '+Math.round(longViews/a.views*100)+'% of those views':null].filter(Boolean).join('\n'),
+      i.proof.length?['What’s working',...i.proof.slice(0,2).map(p=>'• '+p.title+' — '+n(p.views)+' views'+(p.older?' (older upload)':''))].join('\n'):null,
+      i.next.length?['Next steps',...i.next.slice(0,2).map(p=>'• '+concise(p.action))].join('\n'):null,
+      i.coverageWarning
+    ].filter(Boolean).join('\n\n');
+    const text = summary ? quick : channelAuditText(audit);
     try {await navigator.clipboard.writeText(text);setCopied(summary?'Summary copied':'Audit copied');} catch {setCopied('Clipboard unavailable — use Download text.');}
   }
   function download() {
@@ -139,7 +150,7 @@ export default function ChannelAuditButton({ slug, name }: { slug: string; name:
       {audit && <div className="px-6 sm:px-8 py-6 space-y-7">
         <div className="flex flex-wrap gap-2 items-center">
           <button disabled={!ready} onClick={()=>printThreePageAudit(audit!)} className="disabled:opacity-40 bg-ink text-white rounded px-4 py-2 text-xs font-bold">Print / save 3-page PDF</button>
-          <button disabled={!ready} onClick={()=>copy(true)} className="disabled:opacity-40 bg-ink text-white rounded px-4 py-2 text-xs font-bold">Copy quick intel</button>
+          <button disabled={!ready} onClick={()=>copy(true)} className="disabled:opacity-40 bg-ink text-white rounded px-4 py-2 text-xs font-bold">Copy channel summary</button>
           {ready && <details className="relative"><summary className="border border-line rounded px-4 py-2 text-xs font-bold cursor-pointer list-none">Export ▾</summary><div className="absolute left-0 top-full mt-2 z-20 bg-white border border-line rounded-lg shadow-lg p-1 min-w-[180px]">
             <button onClick={()=>png(true)} className="block w-full text-left px-3 py-2 text-xs hover:bg-black/5 rounded">Download intel PNG</button>
             <button onClick={()=>png()} className="block w-full text-left px-3 py-2 text-xs hover:bg-black/5 rounded">Download full audit PNG</button>
