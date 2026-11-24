@@ -6,9 +6,9 @@ import { ARTISTS, mergeArtistLists, deriveFromLive, fmtNum, daysSince, type Arti
 import { readLiveSnapByHandle } from '@/lib/kvCache';
 import { listCustomArtists } from '@/lib/artistStore';
 import { detectOpportunities, IMPACT_RANK, type Opportunity } from '@/lib/opportunities';
-import { readHistory, channelDeltaSince } from '@/lib/snapshots';
+import { readHistory, channelDeltaSince, deltaOver } from '@/lib/snapshots';
 import { campaignPerformanceFor } from '@/lib/intelligence/campaignWindow';
-import { normalizeChannelData, rawDelta } from '@/lib/youtube/normalizeChannelData';
+import { normalizeChannelData, rawDelta, computeWoW, observedViewsWoW } from '@/lib/youtube/normalizeChannelData';
 import { decideWatcher } from '@/lib/watcherDecision';
 import {
   computeConversion,
@@ -416,6 +416,12 @@ export default async function WatcherArtistView({
           uploads={live?.recentUploads ?? []}
           subs7={rawDelta(nc.subs7d)}
           views7={rawDelta(nc.views7d)}
+          viewsWoW={(() => {
+            const current = rawDelta(nc.views7d);
+            const result = computeWoW(nc.views7d, deltaOver(history, 14, 'views'));
+            if (current == null || current <= 0 || nc.confidence === 'LOW' || nc.viewDataFreshness === 'stale' || nc.dataStatus === 'STALE' || nc.dataStatus === 'UNAVAILABLE') return null;
+            return result && result.reliable && result.value > -100 ? result.value : observedViewsWoW(history, current);
+          })()}
           moves={moves}
           pinned={campaignPinned}
           topLongform={topLongform}
