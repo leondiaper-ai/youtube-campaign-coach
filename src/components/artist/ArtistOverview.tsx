@@ -195,10 +195,13 @@ export default async function ArtistOverview({
           <span className="text-[11px] font-bold uppercase tracking-[0.1em]" style={{ color: statusTheme.fg }}>
             {activityLabel}
           </span>
-          {!fixSlot && <span className="text-[11px] text-ink/50">· {nc.cadence.uploads30d} {nc.cadence.uploads30d === 1 ? 'upload' : 'uploads'} in 30 days</span>}
+          {<span className="text-[11px] text-ink/50">· {nc.cadence.uploads30d} {nc.cadence.uploads30d === 1 ? 'upload' : 'uploads'} in 30 days</span>}
         </div>);
-        if (fixSlot) return <section className="mt-5 rounded-xl border border-l-4 px-4 py-3" style={{ borderColor: RULE, borderLeftColor: '#FF4A1C' }}><div className="flex flex-wrap items-center justify-between gap-2 mb-2"><h2 className="text-[11px] font-bold uppercase tracking-wider" style={{ color: '#D94B29' }}>Fix now</h2>{statusLine}</div><div className="[&>article]:!border-0 [&>article]:!p-0 [&>div]:!border-0 [&>div]:!p-0">{fixSlot}</div></section>;
-        if (!reliable) return <div className="mt-4">{statusLine}</div>;
+        const fallback = () => {
+          if (fixSlot) return <section className="mt-5 rounded-xl border border-l-4 px-4 py-3" style={{ borderColor: RULE, borderLeftColor: '#FF4A1C' }}><div className="flex flex-wrap items-center justify-between gap-2 mb-2"><h2 className="text-[11px] font-bold uppercase tracking-wider" style={{ color: '#D94B29' }}>Fix now</h2>{statusLine}</div><div className="[&>article]:!border-0 [&>article]:!p-0 [&>div]:!border-0 [&>div]:!p-0">{fixSlot}</div></section>;
+          return <div className="mt-4">{statusLine}</div>;
+        };
+        if (!reliable) return fallback();
         const noUploads = nc.cadence.uploads30d === 0;
         const leader = [...topLongform.items, ...topShorts.items]
           .filter(v => v.recentGain != null && v.recentGain > 0 && v.spanDays != null && v.spanDays >= 5 && v.spanDays <= 9)
@@ -207,22 +210,22 @@ export default async function ArtistOverview({
         const growth = subs7 != null && subs7 >= 100;
         const quietDemand = noUploads && strongViews;
         const flatSubs = strongViews && subs7 != null && subs7 <= 0;
-        if (!quietDemand && !growth && !flatSubs) return <div className="mt-4">{statusLine}</div>;
+        if (!quietDemand && !growth && !flatSubs) return fallback();
         const isCatalogue = quietDemand && leader && Date.now() - Date.parse(leader.publishedAt) > 365 * 86400000;
         const newer = isCatalogue
           ? uploads.filter(u => Date.parse(u.publishedAt) > Date.parse(leader.publishedAt) && Date.now() - Date.parse(u.publishedAt) < 365 * 86400000)
           : [];
         const leadText = leader ? <> <a href={`https://www.youtube.com/watch?v=${encodeURIComponent(leader.id)}`} target="_blank" rel="noopener noreferrer" className="text-blue-700 underline underline-offset-2 hover:text-blue-900">“{leader.title}”</a> added {fmtNum(leader.recentGain ?? 0)} views over {leader.spanDays} days.</> : null;
-        const headline = quietDemand ? 'Audience active, channel quiet' : flatSubs ? 'Views growing, subscribers flat' : 'Build on subscriber growth';
+        const headline = quietDemand && growth ? 'Subscriber growth despite low activity' : quietDemand ? 'Audience active, channel quiet' : flatSubs ? 'Views growing, subscribers flat' : 'Build on subscriber growth';
         const context = quietDemand
-          ? `${fmtNum(views7 ?? 0)} views added in seven days with no uploads in 30 days.`
+          ? `${fmtNum(views7 ?? 0)} views${growth ? ` and +${fmtNum(subs7 ?? 0)} subscribers` : ""} in seven days with no uploads in 30 days.`
           : flatSubs
             ? `${fmtNum(views7 ?? 0)} views in seven days without subscriber growth.`
             : `+${fmtNum(subs7 ?? 0)} subscribers in seven days.`;
         const action = isCatalogue && newer.length
           ? 'Link the catalogue video to newer music through playlists or eligible end screens.'
           : quietDemand
-            ? 'Plan a catalogue follow-up around the content attracting viewers.'
+            ? leader ? `Build a follow-up around “${leader.title}”, using a relevant Short or alternate format.` : 'Review which existing videos are gaining views before choosing a catalogue follow-up.'
             : flatSubs
               ? 'Give viewers a relevant next watch through playlists or eligible end screens.'
               : leader ? `Follow up “${leader.title}” with a supporting Short or alternate format.` : 'Follow up the strongest recent upload with a supporting format.';
