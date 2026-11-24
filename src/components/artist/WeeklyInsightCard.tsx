@@ -10,7 +10,8 @@ const themes: Record<string, {label:string; color:string}> = {
  formats:{label:'Format gap',color:'#684D9C'},
 };
 type Finding = {category:string;headline:string;context:string;action:string;videoId?:string;videoTitle?:string;videoDetail?:string};
-export default function WeeklyInsightCard({artistName,fallbackInsight}:{artistName:string;fallbackInsight:Finding|null}) {
+type Asset = {id:string;title:string;format?:string;detail?:string};
+export default function WeeklyInsightCard({artistName,fallbackInsight,assets=[],movers=[]}:{artistName:string;fallbackInsight:Finding|null;assets?:Asset[];movers?:Asset[]}) {
  const params=useSearchParams();
  const category=params.get('weeklyCategory') ?? '';
  const signal=params.get('weeklySignal') ?? '';
@@ -21,7 +22,16 @@ export default function WeeklyInsightCard({artistName,fallbackInsight}:{artistNa
  const theme=themes[finding.category];
  if(!theme) return null;
  const videoId=finding.videoId;
- const linked=videoId && /^[A-Za-z0-9_-]{11}$/.test(videoId);
+ const valid=(id:string)=>/^[A-Za-z0-9_-]{11}$/.test(id);
+ const normalize=(s:string)=>s.toLowerCase().replace(/[^a-z0-9]+/g,' ').trim();
+ const quoted=finding.headline.match(/[“"]([^”"]+)[”"]/);
+ const release=quoted?.[1];
+ const matches=release ? assets.filter(v=>normalize(v.title).includes(normalize(release)) && v.format!=='short') : [];
+ const explicit=videoId && valid(videoId) ? [{id:videoId,title:finding.videoTitle || assets.find(v=>v.id===videoId)?.title || 'View video',detail:finding.videoDetail}] : [];
+ const candidates=finding.category==='formats' ? [...explicit,...matches] : [...explicit,...movers];
+ const evidence=candidates.filter((v,i)=>valid(v.id)&&candidates.findIndex(x=>x.id===v.id)===i).slice(0,3);
+ const leader=movers[0];
+ const nextAction=finding.category==='formats' && matches.length ? 'Create a Short using the existing release footage or lyric assets below, and attach the main release as its related video.' : leader && ['growth','catalogue','momentum','conversion','cadence'].includes(finding.category) ? (finding.category==='conversion' ? 'Add a relevant next watch to “'+leader.title+'” through playlists or eligible end screens.' : 'Build on “'+leader.title+'” with '+(assets.find(v=>v.id===leader.id)?.format==='short' ? 'a follow-up Short linked to the relevant long-form release.' : 'a supporting Short using the same track or footage, linked to this video.')) : finding.action;
  return <section className="mt-7 overflow-hidden rounded-xl border" style={{background:theme.color+'09',borderColor:theme.color+'30'}} aria-label={theme.label}>
  <div className="px-5 py-5 sm:px-6">
  <div className="text-[10px] font-extrabold uppercase tracking-[0.13em]" style={{color:theme.color}}>{theme.label}</div>
@@ -29,10 +39,10 @@ export default function WeeklyInsightCard({artistName,fallbackInsight}:{artistNa
  {finding.context && <p className="mt-1 text-[13px] leading-relaxed text-ink/65">{finding.context}</p>}
  <div className="mt-4 rounded-md bg-white/60 px-3.5 py-3 border-l-[3px]" style={{borderLeftColor:theme.color}}>
  <span className="text-[10px] font-extrabold uppercase tracking-wide" style={{color:theme.color}}>Next step</span>
- <p className="mt-0.5 text-[13px] font-semibold text-ink/85">{finding.action}</p>
+ <p className="mt-0.5 text-[13px] font-semibold text-ink/85">{nextAction}</p>
  </div></div>
- {linked && <div className="border-t px-5 py-4 sm:px-6" style={{borderColor:theme.color+'24',background:'rgba(255,255,255,0.4)'}}>
- <div className="text-[11px] font-bold text-ink/60 mb-2.5">Relevant video</div>
- <a href={'https://www.youtube.com/watch?v='+videoId} target="_blank" rel="noopener noreferrer" className="block rounded-lg border border-black/10 bg-white/70 px-3 py-2.5 hover:underline"><span className="block text-[12px] font-semibold">{finding.videoTitle || 'View video'}</span><span className="block mt-1 text-[11px] font-semibold" style={{color:theme.color}}>{finding.videoDetail || 'Watch on YouTube'} ↗</span></a></div>}
+ {evidence.length>0 && <div className="border-t px-5 py-4 sm:px-6" style={{borderColor:theme.color+'24',background:'rgba(255,255,255,0.4)'}}>
+ <div className="text-[11px] font-bold text-ink/60 mb-2.5">{finding.category==='formats'?'Existing release assets':'Relevant content · tracked videos'}</div>
+ <div className="grid gap-2 sm:grid-cols-3">{evidence.map(v=><a key={v.id} href={'https://www.youtube.com/watch?v='+v.id} target="_blank" rel="noopener noreferrer" className="flex gap-2 rounded-lg border border-black/10 bg-white/70 px-3 py-2.5 hover:underline"><img src={'https://i.ytimg.com/vi/'+v.id+'/mqdefault.jpg'} alt="" className="w-20 self-start rounded object-cover"/><span><span className="block text-[12px] font-semibold">{v.title}</span><span className="block mt-1 text-[11px] font-semibold" style={{color:theme.color}}>{'detail' in v && v.detail ? v.detail : 'Watch on YouTube'} ↗</span></span></a>)}</div></div>}
  </section>;
 }
