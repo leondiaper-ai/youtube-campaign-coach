@@ -462,47 +462,6 @@ export default async function WatcherArtistView({
           </div>
         )}
 
-        {/* ─── CAMPAIGN PERFORMANCE — since campaign start ────────────── */}
-        {campaignStart && (
-          <section className="mt-8">
-            <div className="flex items-center gap-2 mb-3">
-              <span className="w-2 h-2 rounded-full" style={{ background: '#2C6BFF' }} />
-              <h2 className="text-[11px] font-black uppercase tracking-[0.18em] text-ink/50">
-                Campaign · {artist.campaign ?? 'Active'} · Day {campaignDaysSinceStart}
-              </h2>
-            </div>
-            <div className="grid grid-cols-4 gap-3">
-              <MetricTile
-                label="Campaign views"
-                value={campaignContentViews != null ? fmtNum(campaignContentViews) : '—'}
-                sub={`${campaignContentCount} asset${campaignContentCount === 1 ? '' : 's'} since the campaign started`}
-              />
-              <MetricTile
-                label="Channel view delta"
-                value={campViews ? fmtDelta(campViews.delta) : '—'}
-                sub={campViews ? `${campViews.daysCovered}d tracked` : `tracking from ${new Date(campaignStart).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}`}
-                color={campViews ? (campViews.delta > 0 ? '#0C6A3F' : campViews.delta < 0 ? '#8A1F0C' : undefined) : undefined}
-              />
-              <MetricTile
-                label="Subs gained"
-                value={campSubs ? (campSubs.delta >= 0 ? '+' : '') + campSubs.delta.toLocaleString() : '—'}
-                sub={campSubs ? `${campSubs.daysCovered}d tracked` : `tracking from ${new Date(campaignStart).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}`}
-                color={campSubs ? (campSubs.delta > 0 ? '#0C6A3F' : campSubs.delta < 0 ? '#8A1F0C' : undefined) : undefined}
-              />
-              <MetricTile
-                label="Content mix"
-                value={`${campaignContentCount} uploads`}
-                sub={`${campaignShortsCount} Shorts · ${campaignContentCount - campaignShortsCount} videos`}
-              />
-            </div>
-            {(!campSubs || !campViews) && (
-              <div className="mt-2 text-[10px] text-ink/30 leading-snug">
-                Channel-level subs and views deltas require daily snapshots. Tracking started {history.length > 0 ? `${history.length}d ago` : 'today'} — campaign-period deltas will build over time.
-              </div>
-            )}
-          </section>
-        )}
-
         {/* The primary and secondary moves used to render here, halfway
             down the page. They now lead the overview at the top, which is
             where a reader looking for "what do I do" actually looks — so
