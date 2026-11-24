@@ -1315,5 +1315,14 @@
    }
   ],
   "gain": 216354691
+ },
+ "paidMediaContext": {
+  "received": "2026-11-24",
+  "source": "Paid Media team feedback, supplied by Leon",
+  "videoId": "X4NJO6mkeuA",
+  "title": "If I Don’t Go (Official Lyric Video)",
+  "approximatePaidViews": 369000,
+  "reportingPeriod": null,
+  "note": "YouTube campaigns drove approximately 369K paid views to the lyric video. Reporting dates and alignment with the 20 November public snapshot were not supplied. Do not subtract from public totals, calculate a paid share, or attribute paid views to the first week."
  }
 }
