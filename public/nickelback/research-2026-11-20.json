@@ -1324,5 +1324,16 @@
   "approximatePaidViews": 369000,
   "reportingPeriod": null,
   "note": "YouTube campaigns drove approximately 369K paid views to the lyric video. Reporting dates and alignment with the 20 November public snapshot were not supplied. Do not subtract from public totals, calculate a paid share, or attribute paid views to the first week."
+ },
+ "makeMeLoveYouPaidContext": {
+  "received": "2026-11-24",
+  "source": "YouTube Studio Reach screenshot supplied by Leon, Screenshot 2026-11-24 at 09.34.18.png",
+  "videoId": "5l5OKWE3rbA",
+  "title": "Make Me Love You (Official Music Video)",
+  "periodStart": "2026-10-26",
+  "periodEnd": "2026-11-22",
+  "periodDays": 28,
+  "youtubeAdvertisingShareOfViewsPercent": 38.5,
+  "note": "Share of views from YouTube advertising during the displayed 28-day period. Not a share of spend, lifetime views or first-week views. Do not apply to other periods or other videos."
  }
 }
