@@ -95,12 +95,13 @@ export interface ArtistOverviewProps {
      thing a reader asks about first, and it was sitting four sections
      below them. */
   launchSlot?: React.ReactNode;
+  fixSlot?: React.ReactNode;
   topShorts: RankedGrid;
 }
 
 export default async function ArtistOverview({
   slug, artist, snap, nc, derived, status, uploads, subs7, views7, moves: _moves, pinned: _pinned,
-  topLongform, topShorts, launchSlot, workspaceName = 'Virgin Music Group',
+  topLongform, topShorts, launchSlot, fixSlot, workspaceName = 'Virgin Music Group',
 }: ArtistOverviewProps) {
   const days = snap?.channelId ? await readFormatDays(snap.channelId) : [];
   const split = resolveRowFormatSplit(uploads, days, snap?.views ?? null);
@@ -195,6 +196,7 @@ export default async function ArtistOverview({
         {/* ═══ 2. HOW PEOPLE ARE REACTING ════════════════════════ */}
         <AudienceLine slug={slug} />
       </header>
+      {fixSlot && <section className="mt-5"><h2 className="text-[11px] font-black uppercase tracking-wider mb-2" style={{ color: '#D94B29' }}>Fix now</h2>{fixSlot}</section>}
 
       {/* Weekly intelligence: compact explanation on the destination artist page.
           Only name a video when the grid has measured recent movement. */}
