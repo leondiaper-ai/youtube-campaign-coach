@@ -108,8 +108,8 @@ export default async function ControlPage({
       const subsWoWResult = computeWoW(nc.subs7d, subs14Raw);
       const viewsWoWResult = computeWoW(nc.views7d, views14Raw);
       const subsWoW = subsWoWResult?.value ?? null;
-      const viewsWoW = viewsWoWResult?.value ?? null;
-      const directionalViewsWoW = viewsWoW == null ? observedViewsWoW(history) : null;
+      const viewsWoW = views7Val != null && views7Val > 0 && viewsWoWResult && viewsWoWResult.value > -100 && viewsWoWResult.reliable ? viewsWoWResult.value : null;
+      const directionalViewsWoW = viewsWoW == null ? observedViewsWoW(history, views7Val) : null;
       const displayedViewsWoW = viewsWoW ?? directionalViewsWoW;
 
       const derived = snap ? deriveFromLive(snap, {
@@ -130,7 +130,7 @@ export default async function ControlPage({
         views7Delta: views7Val,
         subsWoW,
         viewsWoW: displayedViewsWoW,
-        viewsWoWApprox: displayedViewsWoW != null && !viewsWoWResult?.reliable,
+        viewsWoWApprox: displayedViewsWoW != null && viewsWoW == null,
         uploads30d: nc.cadence.uploads30d,
         shorts30d: nc.cadence.shorts30d,
         status,
