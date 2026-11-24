@@ -1247,7 +1247,7 @@ export default function ChannelHealthBoard({
                     {activity.toLowerCase()}
                   </span>
                 </div>
-                <MultiformatCell multiformat={r.multiformat} formatSplit={r.formatSplit} />
+                <MultiformatCell multiformat={r.multiformat} formatSplit={r.formatSplit} uploads30d={r.uploads30d} />
                 <div className="text-right text-[13px] font-bold tabular-nums">{subsTotal}</div>
                 <div className="text-right text-[13px] tabular-nums font-bold" style={subsColor ? { color: subsColor } : { color: 'rgba(14,14,14,0.35)' }}>
                   {fmtSubs7Label}
@@ -1854,9 +1854,11 @@ function ViewSplitLine({ split }: { split: NonNullable<RowData['formatSplit']> }
 function MultiformatCell({
   multiformat,
   formatSplit,
+  uploads30d,
 }: {
   multiformat?: RowData['multiformat'];
   formatSplit?: RowData['formatSplit'];
+  uploads30d?: number;
 }) {
   if (!multiformat) {
     return (
@@ -1879,6 +1881,7 @@ function MultiformatCell({
     .filter((f) => (multiformat as Record<string, unknown>)[f.key])
     .map((f) => labels[f.key] ?? f.label);
 
+  if (!active.length && (uploads30d ?? 0) > 0) return <div className="text-[10px] text-ink/55" title="Uploads exist but none match the tracked format categories">Formats unclassified</div>;
   const activeDots = FORMAT_DOTS.filter((f) => (multiformat as Record<string, unknown>)[f.key]);
   const summary = active.length > 2
     ? `${active.slice(0, 2).join(' · ')} +${active.length - 2}`
