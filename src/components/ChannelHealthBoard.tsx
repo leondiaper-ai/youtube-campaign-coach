@@ -1597,7 +1597,7 @@ export default function ChannelHealthBoard({
                 </Link>
               ))}
             </div>
-            <VideoPager count={latentDemand.length} page={currentLatentPage} onPage={setLatentPage} pageSize={5} />
+            <VideoPager count={latentDemand.length} page={currentLatentPage} onPage={setLatentPage} pageSize={5} inset />
             {/* One line, and it is the one that stops a misread. Everything
                 else the old footer said — the rate, the denominator, why a
                 big catalogue cannot win — is derivable from the rows or
@@ -1661,7 +1661,7 @@ export default function ChannelHealthBoard({
                 </Link>
               ))}
             </div>
-            <VideoPager count={formatStacks.length} page={currentStacksPage} onPage={setStacksPage} pageSize={5} />
+            <VideoPager count={formatStacks.length} page={currentStacksPage} onPage={setStacksPage} pageSize={5} inset />
           </div>
         </div>
       )}
@@ -2267,10 +2267,10 @@ function ChannelAvatar({ src, name, size = 30 }: { src?: string; name: string; s
   );
 }
 
-function VideoPager({ count, page, onPage, pageSize = 20 }: { count: number; page: number; onPage: (n: number) => void; pageSize?: number }) {
+function VideoPager({ count, page, onPage, pageSize = 20, inset = false }: { count: number; page: number; onPage: (n: number) => void; pageSize?: number; inset?: boolean }) {
   const total = Math.ceil(count / pageSize);
   if (total <= 1) return null;
-  return <div className="mt-4 pt-3 border-t border-line flex flex-wrap items-center justify-between gap-3 text-micro">
+  return <div className={`${inset ? "px-5 py-3" : "mt-4 pt-3 pb-1"} border-t border-line flex flex-wrap items-center justify-between gap-3 text-micro`}>
     <span className="text-muted">Showing <strong className="text-ink">{(page - 1) * pageSize + 1}–{Math.min(page * pageSize, count)}</strong> of <strong className="text-ink">{count}</strong></span>
     <div className="flex items-center gap-1">
       <PagerButton disabled={page === 1} onClick={() => onPage(page - 1)}>← Previous</PagerButton>
