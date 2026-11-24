@@ -420,6 +420,11 @@ export default async function WatcherArtistView({
           pinned={campaignPinned}
           topLongform={topLongform}
           topShorts={topShorts}
+          fixSlot={isColdMode && lastUpDays != null && lastUpDays >= 30 ? (
+            <ColdFixCard lastUpDays={lastUpDays} />
+          ) : fixNow[0] ? (
+            <FixCard o={fixNow[0]} daysToNextMoment={daysToNextMoment} momentLabel={artist.nextMomentLabel ?? null} />
+          ) : null}
           launchSlot={
             <LaunchModule
               recentUploads={launchUploads}
@@ -432,16 +437,6 @@ export default async function WatcherArtistView({
             />
           }
         />
-
-        {/* The decision headline and its consequence. The overview carries
-            the state and the action; this is the reasoning behind them,
-            and it only earns space when something is actually wrong. */}
-        {(decision.type === 'FIX' || decision.type === 'CORRECT') && decision.ifIgnored && (
-          <div className="mt-10 pt-6 text-[12px] text-ink/55 leading-snug max-w-[70ch]"
-               style={{ borderTop: `1px solid ${MUTED}` }}>
-            <span className="font-bold text-ink/70">If nothing changes:</span> {decision.ifIgnored}
-          </div>
-        )}
 
         {/* ─── METRICS SLOT — for callers that supply their own ──────── */}
         {metrics}
@@ -507,31 +502,6 @@ export default async function WatcherArtistView({
             )}
           </section>
         )}
-
-        {/* ─── FIX NOW ────────────────────────────────────────────────────── */}
-        {(fixNow.length > 0 || isColdMode) && (
-          <section className="mt-10">
-            <div className="flex items-center gap-2 mb-4">
-              <span className="w-2.5 h-2.5 rounded-full" style={{ background: '#FF4A1C' }} />
-              <h2 className="font-black text-lg">Fix now</h2>
-            </div>
-            <div className="space-y-3">
-              {isColdMode && fixNow.length === 0 ? (
-                <ColdFixCard lastUpDays={lastUpDays} uploads30d={uploads30d} />
-              ) : (
-                fixNow.map((o) => (
-                  <FixCard
-                    key={o.id}
-                    o={o}
-                    daysToNextMoment={daysToNextMoment}
-                    momentLabel={artist.nextMomentLabel ?? null}
-                  />
-                ))
-              )}
-            </div>
-          </section>
-        )}
-
 
         {/* The primary and secondary moves used to render here, halfway
             down the page. They now lead the overview at the top, which is
@@ -989,19 +959,19 @@ function FixCard({
   );
 }
 
-function ColdFixCard({ lastUpDays, uploads30d }: { lastUpDays: number | null; uploads30d: number }) {
+function ColdFixCard({ lastUpDays }: { lastUpDays: number | null }) {
   const reason = lastUpDays != null
-    ? `No uploads in ${lastUpDays} days. YouTube has stopped pushing the channel.`
-    : 'No upload data. The channel is invisible.';
+    ? `No uploads in ${lastUpDays} days.`
+    : 'Upload history unavailable.';
   return (
     <article
       className="rounded-xl border-l-4 border p-5"
       style={{ borderColor: MUTED, borderLeftColor: '#FF4A1C', background: PAPER }}
     >
-      <div className="text-[14px] font-black leading-snug">Channel is cold</div>
+      <div className="text-[14px] font-black leading-snug">Restart channel activity</div>
       <div className="text-[12px] text-ink/50 mt-1 leading-snug max-w-[60ch]">{reason}</div>
       <div className="mt-3 text-[13px] font-black text-ink/90 leading-snug">
-        → Post one Short this week. Anything from catalogue — break the silence and restart subscriber notifications.
+        → Post a catalogue Short this week to re-engage the audience.
       </div>
     </article>
   );
