@@ -1412,7 +1412,7 @@ export default function ChannelHealthBoard({
                 <Link
                   key={i}
                   scroll={true}
-                  href={`${linkPrefix}/${ins.slug}${linkSuffix}${ins.videoId ? `${linkSuffix.includes('?') ? '&' : '?'}weeklyTitle=${encodeURIComponent(ins.videoTitle ?? '')}&weeklyAction=${encodeURIComponent(ins.action)}` : `${linkSuffix.includes('?') ? '&' : '?'}weeklySignal=${encodeURIComponent(ins.text)}&weeklyAction=${encodeURIComponent(ins.action)}`}`}
+                  href={`${linkPrefix}/${ins.slug}${linkSuffix}${linkSuffix.includes('?') ? '&' : '?'}${new URLSearchParams({weeklyCategory: ins.category, weeklySignal: ins.text, weeklyAction: ins.action, ...(ins.videoId ? {weeklyVideoId: ins.videoId, weeklyTitle: ins.videoTitle ?? ''} : {})}).toString()}`}
                   className={`${cls} transition-colors hover:bg-raised`}
                   style={{ color: ic.color, borderLeftColor: ic.dot, textDecoration: 'none' }}
                 >
