@@ -152,9 +152,7 @@ export interface RankedGrid {
  *
  * So the floor is now a small absolute count. Enough that the order is
  * not decided by one or two videos, low enough that a channel with real
- * recent history gets a real recent ranking. Anything without a series
- * still appears, below everything that has one, and the note says how
- * many were ranked on what.
+ * recent history gets a real recent ranking. Only videos with positive measured gains appear in recent rankings.
  */
 const MIN_RANKED = 3;
 
@@ -248,14 +246,7 @@ export async function rankByMomentum(
 
   const items =
     basis === 'recent'
-      ? /* Videos without a series still appear, but below everything that
-           has one — they are unranked on this basis, not zero-performing. */
-        [...scored].sort((a, b) => {
-          if (a.recentGain == null && b.recentGain == null) return b.views - a.views;
-          if (a.recentGain == null) return 1;
-          if (b.recentGain == null) return -1;
-          return b.recentGain - a.recentGain;
-        })
+      ? withGain.filter(v => (v.recentGain ?? 0) > 0).sort((a,b) => (b.recentGain ?? 0) - (a.recentGain ?? 0))
       : [...scored].sort((a, b) => b.views - a.views);
 
   return {
@@ -272,7 +263,7 @@ function describeBasis(
   basis: RankBasis, windowDays: number, covered: number, total: number,
 ): string {
   if (basis === 'recent') {
-    const caveat = covered < total ? ` · ${total - covered} without daily history, shown last` : '';
+    const caveat = covered < total ? ` · ${total - covered} without daily history, excluded` : '';
     return `Ranked by views added in the last ${windowDays} days${caveat}`;
   }
   if (covered > 0) {
