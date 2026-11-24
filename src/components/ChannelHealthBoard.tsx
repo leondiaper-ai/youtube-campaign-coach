@@ -608,7 +608,9 @@ export type TopVideo = {
   artistName: string;
   artistSlug: string;
   views: number;
-  velocity: number;       // views per day since publish
+  velocity: number;       // measured views gained in the latest week
+  previousRank?: number;
+  newEntry?: boolean;
   publishedAt: string;
   daysAgo: number;
   isShort: boolean;
@@ -2036,6 +2038,9 @@ function VideoRow({ v, rank, linkPrefix, linkSuffix = '' }:
   return (
     <div className="flex items-center gap-3 text-[12px]">
       <span className="text-ink/25 text-[11px] font-bold tabular-nums w-4 shrink-0">{rank}.</span>
+      <span className="w-9 shrink-0 text-center text-[10px] font-bold tabular-nums" title={v.previousRank != null ? `Previous week: #${v.previousRank}` : v.newEntry ? 'Published this week' : 'No comparable previous ranking'} style={{ color: v.previousRank != null ? v.previousRank > rank ? '#0C6A3F' : v.previousRank < rank ? '#B42318' : '#999' : '#3466A8' }}>
+        {v.previousRank != null ? v.previousRank > rank ? `↑${v.previousRank - rank}` : v.previousRank < rank ? `↓${rank - v.previousRank}` : '–' : v.newEntry ? 'NEW' : ''}
+      </span>
       <a
         href={`https://youtube.com/watch?v=${v.videoId}`}
         target="_blank"
