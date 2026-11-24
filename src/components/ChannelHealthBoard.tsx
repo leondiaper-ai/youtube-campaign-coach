@@ -1410,7 +1410,8 @@ export default function ChannelHealthBoard({
               return ins.slug ? (
                 <Link
                   key={i}
-                  href={`${linkPrefix}/${ins.slug}${linkSuffix}${ins.videoId ? `${linkSuffix.includes('?') ? '&' : '?'}weeklyTitle=${encodeURIComponent(ins.videoTitle ?? '')}&weeklyAction=${encodeURIComponent(ins.action)}#weekly-video-${ins.videoId}` : `${linkSuffix.includes('?') ? '&' : '?'}weeklySignal=${encodeURIComponent(ins.text)}&weeklyAction=${encodeURIComponent(ins.action)}#channel-momentum`}`}
+                  scroll={true}
+                  href={`${linkPrefix}/${ins.slug}${linkSuffix}${ins.videoId ? `${linkSuffix.includes('?') ? '&' : '?'}weeklyTitle=${encodeURIComponent(ins.videoTitle ?? '')}&weeklyAction=${encodeURIComponent(ins.action)}` : `${linkSuffix.includes('?') ? '&' : '?'}weeklySignal=${encodeURIComponent(ins.text)}&weeklyAction=${encodeURIComponent(ins.action)}`}`}
                   className={`${cls} transition-colors hover:bg-raised`}
                   style={{ color: ic.color, borderLeftColor: ic.dot, textDecoration: 'none' }}
                 >
