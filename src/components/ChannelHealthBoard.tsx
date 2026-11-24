@@ -703,11 +703,11 @@ export default function ChannelHealthBoard({
      for a glance and wrong as a dead end — the figures on this board are
      filters precisely because the next question is always "which ones?".
      So each card can open to its full list. */
-  const [showAllLatent, setShowAllLatent] = useState(false);
+  const [latentPage, setLatentPage] = useState(1);
   const [showAllInsights, setShowAllInsights] = useState(false);
   const [videoPageLong, setVideoPageLong] = useState(1);
   const [videoPageShort, setVideoPageShort] = useState(1);
-  const [showAllStacks, setShowAllStacks] = useState(false);
+  const [stacksPage, setStacksPage] = useState(1);
   /* A 120-row table is a long scroll to reach anything underneath it.
      Twenty is roughly a screen and a half, which is enough to scan a
      group without the page becoming a corridor. */
@@ -819,7 +819,8 @@ export default function ChannelHealthBoard({
     .map(row => ({ row, formats: FORMAT_DOTS.filter(f => row.multiformat?.[f.key as keyof NonNullable<RowData['multiformat']>] === true), inCampaign: pinnedSlugs.includes(row.slug) }))
     .filter(item => item.formats.length >= 2)
     .sort((a, b) => b.formats.length - a.formats.length || Number(b.inCampaign) - Number(a.inCampaign) || a.row.name.localeCompare(b.row.name));
-  const stacksShown = showAllStacks ? formatStacks : formatStacks.slice(0, 5);
+  const currentStacksPage = Math.min(stacksPage, Math.max(1, Math.ceil(formatStacks.length / 5)));
+  const stacksShown = formatStacks.slice((currentStacksPage - 1) * 5, currentStacksPage * 5);
 
   /* Quiet channels whose audience is still turning up. Ranked by how far
      above the roster norm they are, not by raw comments — otherwise this
@@ -827,7 +828,8 @@ export default function ChannelHealthBoard({
   const latentDemand = activeRows
     .filter((r): r is RowData & { commentDemand: CommentDemand } => !!r.commentDemand?.isLatent)
     .sort((a, b) => b.commentDemand.vsRoster - a.commentDemand.vsRoster);
-  const latentShown = showAllLatent ? latentDemand : latentDemand.slice(0, 6);
+  const currentLatentPage = Math.min(latentPage, Math.max(1, Math.ceil(latentDemand.length / 5)));
+  const latentShown = latentDemand.slice((currentLatentPage - 1) * 5, currentLatentPage * 5);
 
   const mfRows = activeRows.filter((r) => r.multiformat);
   const mfStrong = mfRows.filter((r) => mfBand(r) === 'strong').length;
@@ -1595,17 +1597,7 @@ export default function ChannelHealthBoard({
                 </Link>
               ))}
             </div>
-            {latentDemand.length > 6 && (
-              <button
-                type="button"
-                onClick={() => setShowAllLatent(!showAllLatent)}
-                className="w-full px-5 py-2.5 border-t border-line text-micro font-semibold text-secondary hover:text-ink hover:bg-raised transition-colors text-left"
-              >
-                {showAllLatent
-                  ? 'Show fewer'
-                  : `Show all ${latentDemand.length} →`}
-              </button>
-            )}
+            <VideoPager count={latentDemand.length} page={currentLatentPage} onPage={setLatentPage} pageSize={5} />
             {/* One line, and it is the one that stops a misread. Everything
                 else the old footer said — the rate, the denominator, why a
                 big catalogue cannot win — is derivable from the rows or
@@ -1669,15 +1661,7 @@ export default function ChannelHealthBoard({
                 </Link>
               ))}
             </div>
-            {formatStacks.length > 5 && (
-              <button
-                type="button"
-                onClick={() => setShowAllStacks(!showAllStacks)}
-                className="w-full px-5 py-2.5 border-t border-line text-micro font-semibold text-secondary hover:text-ink hover:bg-raised transition-colors text-left"
-              >
-                {showAllStacks ? 'Show fewer' : `Show all ${formatStacks.length} →`}
-              </button>
-            )}
+            <VideoPager count={formatStacks.length} page={currentStacksPage} onPage={setStacksPage} pageSize={5} />
           </div>
         </div>
       )}
