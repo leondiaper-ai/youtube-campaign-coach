@@ -18,7 +18,7 @@ const BASE_TABS = [
  * back into the UK workspace — the kind of bug that is invisible until
  * someone shares the wrong page.
  *
- * ONLY the two external-facing views live here. Priority Campaigns and
+ * Only external-facing views live here, including the UK shared Watcher. Priority Campaigns and
  * Channel Spotlight are what gets shared with YouTube, so the tab bar must
  * not advertise internal tooling next to them — a partner following a
  * "Campaign Board" tab lands in our roster, health classifications and
@@ -34,7 +34,8 @@ export default function PulseNav({ market }: { market?: string } = {}) {
   const isDefault = !m || m.id === 'uk';
   const suffix = isDefault ? '' : `?market=${m.id}`;
 
-  const tabs = BASE_TABS.map((t) => ({
+  const visibleTabs = isDefault ? [...BASE_TABS, { href: '/youtube-uk', label: 'Channel Health' }] : BASE_TABS;
+  const tabs = visibleTabs.map((t) => ({
     href: `${t.href}${suffix}`,
     label: t.label,
     exact: t.href,
@@ -46,6 +47,7 @@ export default function PulseNav({ market }: { market?: string } = {}) {
         display: 'flex',
         alignItems: 'center',
         gap: 2,
+        flexWrap: 'wrap',
         padding: 3,
         borderRadius: 8,
         background: BONE,
