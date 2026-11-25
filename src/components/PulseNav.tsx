@@ -34,7 +34,7 @@ export default function PulseNav({ market }: { market?: string } = {}) {
   const isDefault = !m || m.id === 'uk';
   const suffix = isDefault ? '' : `?market=${m.id}`;
 
-  const visibleTabs = isDefault ? [...BASE_TABS, { href: '/youtube-uk', label: 'Channel Health' }] : BASE_TABS;
+  const visibleTabs = isDefault ? [...BASE_TABS, { href: '/weekly-pulse/channel-health', label: 'Channel Health' }] : BASE_TABS;
   const tabs = visibleTabs.map((t) => ({
     href: `${t.href}${suffix}`,
     label: t.label,
