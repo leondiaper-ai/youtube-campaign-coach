@@ -24,7 +24,6 @@ import { bestFormatStack } from '@/lib/formatStack';
 import { commentDemand } from '@/lib/commentDemand';
 import { resolveRowFormatSplit } from '@/lib/formatSplit';
 import { readFormatDaysBatch } from '@/lib/formatHistory';
-import PulseNav from '@/components/PulseNav';
 import PartnerLinkGuard from '@/components/PartnerLinkGuard';
 import { AppHeader, PageTitle } from '@/components/ui/AppHeader';
 
@@ -300,8 +299,6 @@ export default async function ControlPage({
           title="YouTube UK · Channel Health"
           lede="Agreed UK priority artists · Same Watcher metrics and format intelligence · Roster reviewed every six months."
         />
-
-        {market.id === 'uk' && <PulseNav market="uk" />}
 
         {/* Client-side board with toggle */}
         <PartnerLinkGuard allowedSlugs={rows.map(r => r.slug)}><ChannelHealthBoard singleTab={true} labelRoster={true} partnerRemovable={true} linkSuffix={mq} behaviourBase={label ? `/labels/${label.slug}/behaviour` : `/campaigns${mq}`} rows={rows} topVideos={topVideos} marketFormatStats={marketFormatStats} pinnedSlugs={[]} /></PartnerLinkGuard>
